@@ -35,7 +35,7 @@ public class MHUtilityOperation {
     
     private String mhKeyName;
     //private String mhJarLocation = ConfigProperties.getProperty(Constants.MH_JAR_LOCATION);
-    private String mhJarLocation = "./resources/client-0.1-SNAPSHOT-with-dependencies.jar";
+    private String mhJarLocation = "/opt/trustdirector/resources/client-0.1-SNAPSHOT-with-dependencies.jar";
     private String keystorePasswd = ConfigProperties.getProperty(Constants.MH_KEYSTORE_PASSWD);
     private String keystoreLocation = ConfigProperties.getProperty(Constants.MH_KEYSTORE_LOCATION);
     private String tlsSSLPasswd = ConfigProperties.getProperty(Constants.MH_TLS_SSL_PASSWD);
@@ -45,7 +45,7 @@ public class MHUtilityOperation {
     public String startMHProcess(String fileLocation, String mhKeyName) {
         this.mhKeyName = mhKeyName;
 	 System.out.println("MH Keystore Location : " + keystoreLocation);
-        String expScriptName = "./resources/login";
+        String expScriptName = "/opt/trustdirector/resources/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
         int exitCode;
@@ -54,7 +54,7 @@ public class MHUtilityOperation {
         if(encLocation == null) {
             return null;
         }
-        File passFileLocation = new File("./vmpass.txt");
+        File passFileLocation = new File("/opt/trustdirector/vmpass.txt");
         fileOpt.writeToFile(passFileLocation, randomPassword, false);
         
         //String mhJarLocation = "/root/mhagent/client-0.1-SNAPSHOT-with-dependencies.jar";
@@ -62,7 +62,7 @@ public class MHUtilityOperation {
         
         // Encrypt the VM password and send it to the key management service with a label”
         String command = "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + passFileLocation;
-        File tempCommandFile = new File("./runme");
+        File tempCommandFile = new File("/opt/trustdirector/runme");
         fileOpt.writeToFile(tempCommandFile, command, false);
         
         String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;

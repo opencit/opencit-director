@@ -51,7 +51,7 @@ public class Constants {
     
     public static final String MH_JAR_LOCATION = "MH_Jar_Location";
     
-    public static final String EXEC_OUTPUT_FILE = "./log/exec_output";
+    public static final String EXEC_OUTPUT_FILE = "/opt/trustdirector/log/exec_output";
     
     public static final String KMS_SERVER_IP = "KMS_Server_IP";
     
@@ -63,7 +63,7 @@ public class Constants {
     
     public static final String Mt_WILSON_USER_NAME = "Mt_Wilson_User_Name";
     public static final String Mt_WILSON_PASSWORD = "Mt_Wilson_Password";
-    public static final String EXCLUDE_FILE_NAME = "./resources/exclude-file-list";
+    public static final String EXCLUDE_FILE_NAME = "/opt/trustdirector/resources/exclude-file-list";
     public static final String HOST_MANIFEST = "Host_Manifest";
     public static final String MH_KEYSTORE_PASSWD = "MH_Keystore_Password";
     public static final String MH_KEYSTORE_LOCATION = "MH_Keystore_Location";
