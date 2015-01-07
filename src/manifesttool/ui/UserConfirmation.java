@@ -159,7 +159,7 @@ public class UserConfirmation {
                     //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
                     String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
                     if(encryptedImageLocation == null) {
-                        new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
                         System.exit(1);
                     }
                     confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
@@ -172,7 +172,7 @@ public class UserConfirmation {
                         //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
                         String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
                         if(encryptedKernelPath == null) {
-                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
                             System.exit(1);
                         }
                         
@@ -183,7 +183,7 @@ public class UserConfirmation {
                         //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
                         String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
                         if(encryptedInitrdPath == null) {
-                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
                             System.exit(1);
                         }
                         confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
@@ -200,7 +200,7 @@ public class UserConfirmation {
                     String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
                     showUploadSuccessMessage(primaryStage, message);
                 } else {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Plese select an option");
+//                    new ConfigurationInformation(primaryStage).showWarningPopup("Plese select an option");
                 }
             }
         });
@@ -217,7 +217,7 @@ public class UserConfirmation {
                 //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
                 String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
                 if(encryptedImageLocation == null) {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+//                    new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                     System.exit(1);
                 }
                 String message = "VM Image Encrypted \n\n Encrypted Image Path : " + encryptedImageLocation + "\n\n"
@@ -230,7 +230,7 @@ public class UserConfirmation {
                     //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
                     String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
                     if(encryptedKernelPath == null) {
-                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
                     }
                     
@@ -240,7 +240,7 @@ public class UserConfirmation {
                     //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
                     String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
                     if(encryptedInitrdPath == null) {
-                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
                     }
                     message = message + "Encrypted Kernel Path : " + encryptedKernelPath + "\n\n"
@@ -291,8 +291,8 @@ public class UserConfirmation {
             @Override
             public void handle(ActionEvent arg0) {
                 primaryStage.close();
-                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
+//                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+//                window.launch();
             }
         });
         
@@ -341,7 +341,7 @@ public class UserConfirmation {
                 UploadToGlance glanceObject = new UploadToGlance();
                 
                 if(!new FileUtilityOperation().validateUUID(imageIDTField.getText())) {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
+//                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
                 } else {
                     // Upload manifest to Glance
                     String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
