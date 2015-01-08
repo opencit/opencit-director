@@ -48,13 +48,15 @@ import manifesttool.utils.MountVMImage;
 public class ConfigurationInformation {    
 
     private final Stage primaryStage;
+//    private final Stage secondStage;
     String hostManifest;
     
     private static final Logger logger; 
     
     private HBox togBoxTrustPolicyType;
     private HBox togBoxBareMetalType;
-    // Set FileHandler for logger
+    
+	// Set FileHandler for logger
     static {
         logger = Logger.getLogger(ConfigurationInformation.class.getName());
         LoggerUtility.setHandler(logger);
@@ -64,6 +66,10 @@ public class ConfigurationInformation {
         this.primaryStage = primaryStage;
     }
     
+	// Return the Stage
+    public Stage getStage() {
+    return this.primaryStage;
+    }
     public void launch() {
                 
         // Check for the Host Manifest
@@ -85,15 +91,18 @@ public class ConfigurationInformation {
 		ToggleButton tb_none = new ToggleButton("None");
 		tb_none.setToggleGroup(imageGroup);
 		tb_none.setSelected(true);
+		
 		final ToggleButton tb_vm = new ToggleButton("VM");
 		tb_vm.setToggleGroup(imageGroup);
-                tb_vm.setUserData(trustPolicy);
-                tb_vm.setUserData(togBoxTrustPolicyType);
+        tb_vm.setUserData(trustPolicy);
+        tb_vm.setUserData(togBoxTrustPolicyType);
+		
 		ToggleButton tb_bareMetal = new ToggleButton("Bare Metal");
 		tb_bareMetal.setToggleGroup(imageGroup);
-                tb_bareMetal.setUserData(manifestSource);
-                tb_bareMetal.setUserData(togBoxBareMetalType);
-                ToggleButton tb_docker = new ToggleButton("Docker");
+        tb_bareMetal.setUserData(manifestSource);
+        tb_bareMetal.setUserData(togBoxBareMetalType);
+		
+        ToggleButton tb_docker = new ToggleButton("Docker");
 		tb_docker.setToggleGroup(imageGroup);
 		        
         //PS: Toggle Button to choose the Trust Policy Type
@@ -103,12 +112,11 @@ public class ConfigurationInformation {
 		ToggleButton tb_uploadExisting = new ToggleButton("Upload Existing");
 		tb_uploadExisting.setToggleGroup(trustPolicyGroup);
 				
-                
-            //PS: Toggle Button to choose the Bare Metal types
+        //PS: Toggle Button to choose the Bare Metal types
 		final ToggleGroup bareMetalGroup=new ToggleGroup();
 		ToggleButton tb_localSystem= new ToggleButton("Local System");
 		tb_localSystem.setToggleGroup(bareMetalGroup);
-                ToggleButton tb_remoteSystem = new ToggleButton("Remote System");
+        ToggleButton tb_remoteSystem = new ToggleButton("Remote System");
 		tb_remoteSystem.setToggleGroup(bareMetalGroup);
                 
                 
@@ -151,10 +159,25 @@ public class ConfigurationInformation {
         grid.add(togBoxTrustPolicyType, 1, 2);
         grid.add(togBoxBareMetalType, 1, 2);
         
-	VBox vBox = new VBox();
+	    VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
         
-                    
+        
+        //PS: When NONE button is clicked
+		tb_none.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) 
+            {
+                //Execute some code here for the event.. 
+                manifestSource.setVisible(false);
+                togBoxBareMetalType.setVisible(false);
+                trustPolicy.setVisible(false);
+                togBoxTrustPolicyType.setVisible(false);
+                
+                
+               
+            } });
+                
+        //PS: When VM button is chosen        
         tb_vm.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) 
             {
@@ -169,6 +192,7 @@ public class ConfigurationInformation {
                
             } });
         
+        //PS: When Bare Metal option is chosen
         tb_bareMetal.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) 
             {
@@ -180,45 +204,44 @@ public class ConfigurationInformation {
                 togBoxBareMetalType.setVisible(true);
             } });
         
-        //Action listener for first toggle
-        //Create labels to highlight the selected items from the option controls 
-//        final String toggleText = "The toggle selected is: \n"; 
-//        final String changedtoggleText = "The ToggleButton has changed from: \n";
-//        
-//        final Label toggleLabel = new Label(toggleText); 
-//        final Label changedtogLabel = new Label(changedtoggleText);
-//        //Create a changelistener to handle the switching between togglebuttons 
-//		imageGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>()
-//		{ 
-//		public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) 
-//		{ 
-//		toggleLabel.setText(toggleText + new_toggle.getUserData().toString()); 
-//			if (new_toggle ==null) 
-//			{
-//				changedtogLabel.setText(changedtoggleText + old_toggle.getUserData().toString()); 
-//                            System.out.println("Toggle is changed");
-//                            
-//			}
-//        
-//		switch (new_toggle.getUserData().toString())
-//		{
-//		case "None":
-//		break; 
-//
-//		case "VM": 
-//                trustPolicy.setVisible(true);
-//                togBoxTrustPolicyType.setVisible(true);
-//		break; 
-//
-//		case "Bare Metal":  
-//		manifestSource.setVisible(false);
-//                togBoxBareMetalType.setVisible(false);
-//		break; 
-//		}
-//		 }
-//
-//		 });
+        //PS: DOCKER button is selected
+        tb_docker.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) 
+            {
+                //Execute some code here for the event.. 
+                manifestSource.setVisible(false);
+                togBoxBareMetalType.setVisible(false);
+                trustPolicy.setVisible(false);
+                togBoxTrustPolicyType.setVisible(false);
+                
+                
+               
+            } });
         
+        //Open a new window for CREATE IMAGE button
+        tb_createImage.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {
+                
+                try{
+                    Stage createImageStage=new Stage();
+                    CreateImage createImageObj=new CreateImage(createImageStage);
+                    createImageObj.launch();
+//                
+                }catch(Exception ex)
+                {
+                    
+                    System.out.println("Exception occurred here");
+                    ex.printStackTrace();
+                }
+//                Stage stage = new Stage();
+                //Fill stage with content
+//                stage.show();
+            }});
+        
+        
+        
+        // Load the stack pane: This is the primary window for TD
         StackPane root = new StackPane();
         root.getChildren().add(vBox);
         Scene scene = new Scene(root);
@@ -227,9 +250,34 @@ public class ConfigurationInformation {
         
     }
     
-    // Return the Stage
-    public Stage getStage() {
-        return this.primaryStage;
+    
+    // Show the warning messages
+    public void showWarningPopup(String warnMessage) {
+        
+        Text message = new Text(warnMessage);
+        message.setFont(new Font("Arial", 14));
+        Button okButton = new Button("Ok");
+        okButton.setPrefSize(80, 15);
+        VBox vbox = new VBox();
+        vbox.setPadding(new Insets(12, 10, 12, 10));
+        vbox.setSpacing(20);
+        vbox.setStyle("-fx-background-color: #336699;");
+        vbox.getChildren().addAll(message, okButton);
+        final Popup popup = new Popup();
+        popup.setX(400);
+        popup.setY(250);
+        Stage stage = new Stage();
+        popup.getContent().addAll(vbox);
+        
+        popup.show(primaryStage);
+        
+        okButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                popup.hide();
+            }
+        }); 
     }
  }
     
