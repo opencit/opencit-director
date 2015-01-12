@@ -6,11 +6,15 @@ vhdMountPath="/tmp/vhdmnt"
 function unmount_vm_image() {
         echo "################ Unmounting the mount path"
         mountPathCheck=$(mount | grep -o "$mountPath")
+        echo "Print MountPathCheck $mountPathCheck"
         if [ ! -z $mountPathCheck ]
         then
+                echo"Print the umount status"
+                echo"Print var mountPath $mountPath"
                 umount $mountPath 2>/dev/null
 		if [ ! $? ]
 		then
+                      echo "Unmount unsuccessful"
 			exit 1
 		fi	
         fi
@@ -37,19 +41,24 @@ function unmount_vm_image() {
         mkdir -p $mountPath
         rm -rf $vhdMountPath
         mkdir $vhdMountPath
+		
+		echo "unmount result $?"
 }
 
 function mount_qcow2_image() {
         modprobe nbd
         qemu-nbd -d /dev/nbd0
 	#echo "############ Image file path is $imagePath"
+	echo "PSDebug: mount_qcow2_image"
         qemu-nbd -c /dev/nbd0 $imagePath
 	sleep 2
         if [ -b /dev/nbd0p1 ]
         then
                 mount /dev/nbd0p1 $mountPath
+				echo "mount result if condition $?"
         else
                 mount /dev/nbd0 $mountPath
+				echo "mount else condition result $?"
         fi
 }
 

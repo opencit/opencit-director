@@ -252,33 +252,33 @@ public class ConfigurationInformation {
     
     
     // Show the warning messages
-    public void showWarningPopup(String warnMessage) {
-        
-        Text message = new Text(warnMessage);
-        message.setFont(new Font("Arial", 14));
-        Button okButton = new Button("Ok");
-        okButton.setPrefSize(80, 15);
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(12, 10, 12, 10));
-        vbox.setSpacing(20);
-        vbox.setStyle("-fx-background-color: #336699;");
-        vbox.getChildren().addAll(message, okButton);
-        final Popup popup = new Popup();
-        popup.setX(400);
-        popup.setY(250);
-        Stage stage = new Stage();
-        popup.getContent().addAll(vbox);
-        
-        popup.show(primaryStage);
-        
-        okButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                popup.hide();
-            }
-        }); 
-    }
+//    public void showWarningPopup(String warnMessage) {
+//        
+//        Text message = new Text(warnMessage);
+//        message.setFont(new Font("Arial", 14));
+//        Button okButton = new Button("Ok");
+//        okButton.setPrefSize(80, 15);
+//        VBox vbox = new VBox();
+//        vbox.setPadding(new Insets(12, 10, 12, 10));
+//        vbox.setSpacing(20);
+//        vbox.setStyle("-fx-background-color: #336699;");
+//        vbox.getChildren().addAll(message, okButton);
+//        final Popup popup = new Popup();
+//        popup.setX(400);
+//        popup.setY(250);
+//        Stage stage = new Stage();
+//        popup.getContent().addAll(vbox);
+//        
+//        popup.show(primaryStage);
+//        
+//        okButton.setOnAction(new EventHandler<ActionEvent>() {
+//
+//            @Override
+//            public void handle(ActionEvent arg0) {
+//                popup.hide();
+//            }
+//        }); 
+//    }
  }
     
    

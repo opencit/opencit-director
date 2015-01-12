@@ -6,6 +6,7 @@ package manifesttool.ui;
 
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
+import static java.awt.Color.red;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -110,7 +112,11 @@ public class CreateImage {
         toolTip.setText("For ami and vhd image format, provide the tar bundled image");
         browseImage.setTooltip(toolTip);
         
-        Button browseManifest = new Button("Browse");
+        final Button browseManifest = new Button("Browse");
+        browseManifest.setPrefSize(80, 15);
+        Tooltip toolTipManifest = new Tooltip();
+        toolTipManifest.setText("Browse the manifest files");
+        browseImage.setTooltip(toolTipManifest);
         
         Button saveButton=new Button("Save");
         Button uploadButton=new Button("Upload");
@@ -201,54 +207,74 @@ public class CreateImage {
             public void handle(ActionEvent arg0) {
                 boolean includeImageHash = false;
                 
+                browseManifest.setTextFill(Color.AQUA);
+                System.out.println("PSDebug: Place one");
+                
                 // Write configuration values to map
                 Map<String, String> customerInfo;
+                
+                System.out.println("PSDebug: Place one-one");
                 if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
                     customerInfo = hostWriteToMap();
+                    System.out.println("PSDebug: cust info" + customerInfo.keySet().toString());
+                    System.out.println("PSDebug: Placefinished hostwrite blah");
                 } else {
                     customerInfo = writeToMap();
+                    System.out.println("PSDebug: Place write to map la la");
                 }
                 if (customerInfo != null) {
                     
+                    System.out.println("PSDebug: Place inside customer info ");
                     Iterator it = customerInfo.entrySet().iterator();
                     logger.info("Configuration Values Are ");
                     while (it.hasNext()) {
                         Map.Entry pairs = (Map.Entry) it.next();
+                        System.out.println("PSDebug Iteratore for cust info:" + pairs.getKey().toString() + " : " + pairs.getValue().toString());
                         logger.info(pairs.getKey().toString() + " : " + pairs.getValue().toString());
                     }
                     
+                    
+                    
                     // Check for the "Host_Manifest" property in the property file, if present, manifest generation will be for host
-                    if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-                        // Extract the compressed HOST image tgz file
-                        String extractCommand = "tar zxf " + customerInfo.get(Constants.IMAGE_LOCATION) + " -C " + Constants.MOUNT_PATH;
-                        int extractExitCode = MountVMImage.callExec(extractCommand);
-                        if(extractExitCode != 0) {
-//                           ConfigurationInformation.showWarningPopup("Error while extracting .... Exiting .....");
-                            System.exit(1);
-                        } else {
-                            BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
-                            secondWindow.launch(customerInfo);                                                    
-                        }                        
-                    } else {
-                        int exitCode = 21
-                                ;
+//                    System.out.println("PSDebug hostmanifest valu is" + hostManifest.toString());
+//                    if ((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
+//                        System.out.println("PSDebug: Place two check manifest null");
+//                        // Extract the compressed HOST image tgz file
+//                        String extractCommand = "tar zxf " + customerInfo.get(Constants.IMAGE_LOCATION) + " -C " + Constants.MOUNT_PATH;
+//                        int extractExitCode = MountVMImage.callExec(extractCommand);
+//                        System.out.println("Extract code:" + extractExitCode);
+//                        if(extractExitCode != 0) {
+//                            browseManifest.setTextFill(Color.YELLOW);
+//                           showWarningPopup("Error while extracting .... Exiting .....");
+//                            System.exit(1);
+//                        } else {
+//                            System.out.println("PSDebug: Place there BrowseDirectory next");
+//                            BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
+//                            secondWindow.launch(customerInfo);  
+//                            browseManifest.setTextFill(Color.BROWN);
+//                        }                        
+//                    } else {
+                        System.out.println("PSDebug: Place exiting");
+                        int exitCode = 0;
                         // Check for ami Image
-                        if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
-                            
-                            // Extract the compressed VM AMI Image
-                            String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
-                            boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
-                            if(!isExtracted) {
+//                        if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
+//                            
+//                            // Extract the compressed VM AMI Image
+//                            String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
+//                            boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
+//                            if(!isExtracted) {
 //                                showWarningPopup("Error while extracting .... Exiting .....");
-                                System.exit(1);
-                            } else {
-                                createImageStage.close();
-                                // Get the AMI Image Information
-                                new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);   
-                            }
-                        } else {
+//                                System.exit(1);
+//                            } else {
+//                                createImageStage.close();
+//                                // Get the AMI Image Information
+//                                new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);   
+//                            }
+//                        } else {
                             // Mount the VM disk image
+                        System.out.println("mount image:" + imagePathTField.getText());
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
+                            System.out.println("exit code in mount image:" + exitCode) ;
                             if( exitCode == 0) {
                                 if(new File(Constants.MOUNT_PATH + "/Windows/System32/ntoskrnl.exe").exists()) {
                                     customerInfo.put(Constants.IS_WINDOWS, "true");
@@ -263,8 +289,8 @@ public class CreateImage {
 //                                showWarningPopup(warningMessage);
                                 System.exit(exitCode);
                             }
-                        }
-                    }
+//                        }
+//                    }
                 }    
             }
         });
@@ -353,34 +379,34 @@ public class CreateImage {
     
     
     
-//    // Show the warning messages
-//    public void showWarningPopup(String warnMessage) {
-//        
-//        Text message = new Text(warnMessage);
-//        message.setFont(new Font("Arial", 14));
-//        Button okButton = new Button("Ok");
-//        okButton.setPrefSize(80, 15);
-//        VBox vbox = new VBox();
-//        vbox.setPadding(new Insets(12, 10, 12, 10));
-//        vbox.setSpacing(20);
-//        vbox.setStyle("-fx-background-color: #336699;");
-//        vbox.getChildren().addAll(message, okButton);
-//        final Popup popup = new Popup();
-//        popup.setX(400);
-//        popup.setY(250);
-//        Stage stage = new Stage();
-//        popup.getContent().addAll(vbox);
-//        
-//        popup.show(createImageStage);
-//        
-//        okButton.setOnAction(new EventHandler<ActionEvent>() {
-//
-//            @Override
-//            public void handle(ActionEvent arg0) {
-//                popup.hide();
-//            }
-//        }); 
-//    }
+    // Show the warning messages
+    public void showWarningPopup(String warnMessage) {
+        
+        Text message = new Text(warnMessage);
+        message.setFont(new Font("Arial", 14));
+        Button okButton = new Button("Ok");
+        okButton.setPrefSize(80, 15);
+        VBox vbox = new VBox();
+        vbox.setPadding(new Insets(12, 10, 12, 10));
+        vbox.setSpacing(20);
+        vbox.setStyle("-fx-background-color: #336699;");
+        vbox.getChildren().addAll(message, okButton);
+        final Popup popup = new Popup();
+        popup.setX(400);
+        popup.setY(250);
+        Stage stage = new Stage();
+        popup.getContent().addAll(vbox);
+        
+        popup.show(createImageStage);
+        
+        okButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                popup.hide();
+            }
+        }); 
+    }
     
     // Store configuration values in hash map
     private Map<String, String> writeToMap() {
@@ -389,6 +415,7 @@ public class CreateImage {
         FileUtilityOperation opt = new FileUtilityOperation();
         if(("".equals(imageIDTField.getText())) || ("".equals(imagePathTField.getText())) || ("".equals(imageNameTField.getText()))) {
 //            showWarningPopup("Some fields are Empty .. Please fill the Values");
+            System.out.println("PSDebug: Place write if -1");
             isProper = false;
         } else if(!opt.validateUUID(imageIDTField.getText())){
 //            showWarningPopup("Please provide the valid image ID");
@@ -416,13 +443,16 @@ public class CreateImage {
         if(("".equals(imagePathTField.getText()))) {
 //            showWarningPopup("Some fields are Empty .. Please fill the Values");
             isProper = false;
+            System.out.println("PSDebug: Place hostWrite if-1");
         } 
         if(isProper) {
             customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
             customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
             customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
-            customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());                    
+            customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());
+            System.out.println("PSDebug: Place if-2");
         } else {
+            System.out.println("PSDebug: Place returning NULL");
             return null;
         }
         return customerInfo;
