@@ -49,6 +49,7 @@ public class MountVMImage {
         int exitCode = 12345;
         Process p;
         try {
+            System.out.println("PSDebug: command is" + command);
             p = Runtime.getRuntime().exec(command);
             exitCode = p.waitFor();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -59,7 +60,7 @@ public class MountVMImage {
         } catch (InterruptedException | IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        //System.out.println(output.toString());
+        System.out.println("PSDebug: output String is" + output.toString());
         logger.info(output.toString());
         new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
         logger.info("Exec command output : " + output.toString());

@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -51,10 +53,13 @@ public class CreateImage {
     private TextField imagePathTField;
     private TextField imageNameTField;
     private TextField imageIDTField;
-    
-   private ChoiceBox imageFormatChoiceBox;
+    private CheckBox encryptImage;
+    private ChoiceBox imageFormatChoiceBox;
+    private ChoiceBox hashTypeChoiceBox;
+    private final ToggleGroup togBoxMeasure=new ToggleGroup();
     
     String hostManifest;
+    
     
     private static final Logger logger; 
     // Set FileHandler for logger
@@ -76,6 +81,7 @@ public class CreateImage {
         return this.createImageStage;
     }
     
+    
     public void launch() {
                 
         // Check for the Host Manifest
@@ -88,12 +94,19 @@ public class CreateImage {
         
         final FileUtilityOperation op = new FileUtilityOperation();
         
+        ObservableList<String> hashTypeList = FXCollections.observableArrayList(
+            "SHA-256", "SHA1"
+        );
+        
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(
             "qcow2", "raw", "vhd", "ami"
         );
         
+        
+        
         //PS: New label for Create Image window
         Label imageFormat=new Label("Image Format");
+        Label hashType=new Label ("Hash Type");
         Label imagePath=new Label("Image Path");
         Label chooseManifest=new Label("Choose Manifest");
         Label launchPolicy=new Label("Launch Control Policy");
@@ -105,6 +118,8 @@ public class CreateImage {
         imageIDTField = new TextField();
         imageFormatChoiceBox = new ChoiceBox(imageFormatList);
         imageFormatChoiceBox.setValue("qcow2");
+        hashTypeChoiceBox=new ChoiceBox(hashTypeList);
+        hashTypeChoiceBox.setValue("SHA-256");
 
         Button browseImage = new Button("Browse");
         browseImage.setPrefSize(80, 15);
@@ -123,14 +138,18 @@ public class CreateImage {
         Button cancelButton = new Button("Cancel");
         cancelButton.setPrefSize(80, 15);
         
-        final ToggleGroup togBoxMeasure=new ToggleGroup();
+//        final ToggleGroup togBoxMeasure=new ToggleGroup();
         
         RadioButton rbMeasure=new RadioButton("Measure Only");
         rbMeasure.setToggleGroup(togBoxMeasure);
+        rbMeasure.setUserData("MeasureOnly");
+        rbMeasure.setSelected(true);
         RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
+        rbMeasureEnforce.setUserData("MeasureEnforce");
         rbMeasureEnforce.setToggleGroup(togBoxMeasure);
         
-        CheckBox encryptImage=new CheckBox("Encrypt VM Image");
+        encryptImage=new CheckBox("Encrypt VM Image");
+        encryptImage.setSelected(true);
         
         VBox vBox = new VBox();
         
@@ -142,11 +161,14 @@ public class CreateImage {
         grid.add(imageFormat, 0, 1);
         grid.add(imageFormatChoiceBox, 1, 1);   
               
-        grid.add(imageID, 0, 2);
-        grid.add(imageIDTField, 1,2);
+        grid.add(hashType, 0, 2);
+        grid.add(hashTypeChoiceBox, 1, 2);
         
-        grid.add(imageName, 0, 3);
-        grid.add(imageNameTField, 1, 3);
+        grid.add(imageID, 0, 3);
+        grid.add(imageIDTField, 1,3);
+        
+        grid.add(imageName, 0, 4);
+        grid.add(imageNameTField, 1, 4);
         
         
         final HBox imagePathHBox = new HBox();
@@ -154,14 +176,10 @@ public class CreateImage {
         imagePathHBox.setSpacing(10);
         imagePathHBox.getChildren().addAll(imagePathTField, browseImage);
         
-        grid.add(imagePath,0,4);
-        grid.add(imagePathHBox, 1, 4);
+        grid.add(imagePath,0,5);
+        grid.add(imagePathHBox, 1, 5);
 //        grid.add(imagePathTField,1,4);
 //        grid.add(browseImage,2,4);
-        
-        
-        grid.add(chooseManifest,0,5);
-        grid.add(browseManifest,1,5);
         
         final HBox launchPolicyHBox = new HBox();
         launchPolicyHBox.setPadding(new Insets(3, 0, 5, 0));
@@ -172,6 +190,10 @@ public class CreateImage {
         grid.add(launchPolicyHBox, 1, 6);
 
         grid.add(encryptImage,0,7);
+        
+        grid.add(chooseManifest,0,8);
+        grid.add(browseManifest,1,8);
+        
         
         // Set the Image ID
         String uuid = new UserConfirmation().getUUID();
@@ -352,6 +374,22 @@ public class CreateImage {
 //            }
 //        });
         
+        //PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
+        // Calculates the hash of image, do not try to mount
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                boolean includeImageHash = true;
+                
+                String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
+                
+                System.out.println("PSDebug Manifest Location is returned and:" + manifestFileLocation);
+//                
+            }
+        });
+        
+        //==========
         // Handler for 'Browse' for Image Path button, browse the vm image
         browseImage.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -423,12 +461,22 @@ public class CreateImage {
         }  else if((imageFormatChoiceBox.getValue().toString().equals("ami") || imageFormatChoiceBox.getValue().toString().equals("vhd")) && !imagePathTField.getText().endsWith(".tgz") && !imagePathTField.getText().endsWith("tar.gz") && !imagePathTField.getText().endsWith(".gz")) {
 //            showWarningPopup("Please provide the tar bundled image ");
             isProper = false;
-        }
+        }         
         if(isProper) {
             customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
             customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
             customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
-            customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());                    
+            customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString()); 
+            customerInfo.put(Constants.HASH_TYPE, hashTypeChoiceBox.getValue().toString());
+            customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
+            //PS: is encryption selected?
+            if(encryptImage.isSelected()){
+            customerInfo.put(Constants.IS_ENCRYPTED,"true");
+            }else{
+             customerInfo.put(Constants.IS_ENCRYPTED,"false");
+            }
+            
+            //PS: Policy type selected?
         } else {
             return null;
         }

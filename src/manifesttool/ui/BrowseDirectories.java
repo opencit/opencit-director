@@ -71,6 +71,12 @@ public class BrowseDirectories {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
     }
+
+    BrowseDirectories() {
+        System.out.println("Default Constructor");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+    }
     
     public void launch(final Map<String, String> confInfo) {
         
@@ -78,7 +84,7 @@ public class BrowseDirectories {
         // Depending upon mounted image(Windows or Linux)
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
         
-        System.out.println("############# : " + "On the second window");
+        System.out.println("############# : " + "On the Browse directory  window");
         
        //By default disable the text field from table
         for(Directories listComp : list) {
@@ -254,59 +260,18 @@ public class BrowseDirectories {
                     int exitCode = MountVMImage.unmountImage(mountPath);
                     //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
 
-                    if (manifestFileLocation != null) {
-                        // Show the manifest file location
-                        new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
-                    } else {
-                        //System.out.println("Error in creating the manifest file");
-                        logger.log(Level.SEVERE, "Error in creating the manifest file");
-			new CreateImage(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-                    }
+//                    if (manifestFileLocation != null) {
+//                        // Show the manifest file location
+//                        new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
+//                    } else {
+//                        //System.out.println("Error in creating the manifest file");
+//                        logger.log(Level.SEVERE, "Error in creating the manifest file");
+//			new CreateImage(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
+//                    }
+                    primaryStage.setScene(firstWindowScene);
+                    
                 }
             }
-            
-            //================================
-//             @Override
-//            public void handle(ActionEvent t) {
-//                boolean includeImageHash = true;
-//                Map<String, String> customerInfo = writeToMap();
-//                if (customerInfo != null) {
-//                    Iterator it = customerInfo.entrySet().iterator();
-//                    logger.info("Configuration Values Are ");
-//                    while (it.hasNext()) {
-//                        Map.Entry pairs = (Map.Entry) it.next();
-//                        logger.info(pairs.getKey().toString() + " : " + pairs.getValue().toString());
-//                    }
-//                    
-//                    int exitCode = 21;
-//                    // Check for ami Image
-//                    if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
-//                        // Extract the compressed VM AMI Image
-//                        String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
-//                        boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
-//                        
-//                        if(!isExtracted) {
-//                            showWarningPopup("Error while extracting .... Exiting .....");
-//                            System.exit(1);
-//                        } else {
-//                            createImageStage.close();
-//                            // Get the AMI Image Information
-//                            new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);                            
-//                        }
-//                    } else {
-//                        customerInfo.put(Constants.HIDDEN_FILES, "true");
-//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(customerInfo);
-//                        if (manifestFileLocation != null) {
-//                            // Show the manifest file location
-//                            new UserConfirmation().showLocation(createImageStage, manifestFileLocation, customerInfo);
-//                        } else {
-//                            logger.log(Level.SEVERE, "Error in creating the manifest file...");
-//                            showWarningPopup("Error in creating the manifest file...");
-//                            System.exit(1);
-//                        }
-//                    }
-//                }   
-//            }
         });
         
         // Handler for "Back" button

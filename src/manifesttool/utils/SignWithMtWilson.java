@@ -38,9 +38,13 @@ import org.json.XML;
  */
 public class SignWithMtWilson {
     private static final Logger logger = Logger.getLogger(SignWithMtWilson.class.getName());
-    private String mtWilsonIP;
-    private String mtWilsonPort;
+//    private String mtWilsonIP;
+//    private String mtWilsonPort;
     
+    private String mtWilsonIP = ConfigProperties.getProperty(Constants.Mt_WILSON_IP);
+    
+    private String mtWilsonPort = ConfigProperties.getProperty(Constants.Mt_WILSON_PORT);
+   
     private String mtWilsonUserName = ConfigProperties.getProperty(Constants.Mt_WILSON_USER_NAME);
     private String mtWilsonPassword = ConfigProperties.getProperty(Constants.Mt_WILSON_PASSWORD);
     
@@ -48,9 +52,11 @@ public class SignWithMtWilson {
     static {
         LoggerUtility.setHandler(logger);
     }
-    public String signManifest(String ip, String port, String imageID, String fileHash) {
-        this.mtWilsonIP = ip;
-        this.mtWilsonPort = port;
+    public String signManifest(String imageID, String fileHash) { //public String signManifest(String ip, String port, String imageID, String fileHash)
+//        this.mtWilsonIP = ip;
+//        this.mtWilsonPort = port;
+        System.out.println("PSDebug IP is" + mtWilsonIP);
+        System.out.println("PSDebug port is" + mtWilsonPort); 
         String response = getMtWilsonResponse(imageID, fileHash);
         logger.info("Signed the manifest with Mt. Wilson\n" + "Mt. Wilson response is :\n" + response);
         
@@ -63,8 +69,8 @@ public class SignWithMtWilson {
         try {
             System.out.println("Manifest File Hash is : " + fileHash);
             
-            String url = "https://" + this.mtWilsonIP + ":" + this.mtWilsonPort + "/mtwilson/v2/manifest-signature";
-            
+            String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
+            System.out.println("MTwilson URL is" + url);
             ManifestSignatureInput input = new ManifestSignatureInput();
             input.setManifestHash(fileHash);
             input.setVmImageId(imageID);
@@ -79,11 +85,12 @@ public class SignWithMtWilson {
             String xml = "<manifest_signature_input>"+XML.toString(jsonObj)+"</manifest_signature_input>";
             logger.info("Manifest signature request to MtW \n Request Body is : " + xml);
             
-                
+            System.out.println("PSDebug: check one MtWilson");
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);
             HttpEntity entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
                 
+            System.out.println("PSDebug: check 2 MtWilson http entity" + entity);
             postRequest.setEntity(entity);
             postRequest.setHeader("Content-Type", "application/xml");
             postRequest.setHeader("Accept", "application/xml");
@@ -91,14 +98,18 @@ public class SignWithMtWilson {
                 logger.warning("Mt Wilson credentials are not present in property file");
                 return null;
             }
+            System.out.println("PSDebug: check three MtWilson http entity" );
             String encryptedUserNameAndPassword = new FileUtilityOperation().base64Encode(mtWilsonUserName + ":" + mtWilsonPassword);
+            System.out.println("PSDebug encryptedUserNameAndPassword" + encryptedUserNameAndPassword);
+            
             postRequest.setHeader("Authorization", "Basic " + encryptedUserNameAndPassword);
             HttpResponse response = httpClient.execute(postRequest);
+            System.out.println("HTTP Response is" + response);
             if (response.getStatusLine().getStatusCode() != 200) {
                 logger.log(Level.SEVERE, null, new RuntimeException(response.getStatusLine().toString()));
                 return null;
             }
-
+            System.out.println("PSDebug Did I pass 200??");
             BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
             String output = null;
             StringBuffer sb = new StringBuffer();
