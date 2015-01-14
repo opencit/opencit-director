@@ -72,4 +72,6 @@ public class Constants {
     public static final String MH_KEYSTORE_PASSWD = "MH_Keystore_Password";
     public static final String MH_KEYSTORE_LOCATION = "MH_Keystore_Location";
     public static final String MH_TLS_SSL_PASSWD = "MH_TLS_SSL_Passwd";
+    
+    public static final String imagePathDelimiter="/";
 }

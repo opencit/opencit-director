@@ -68,8 +68,15 @@ public class GenerateManifest {
         
         // Target location of the manifest file
         String targetLocation = "/root/manifest_files/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+       
+        int beginIndex=0;
+        int endIndex;
         String manifestStorage=configInfo.get(Constants.IMAGE_LOCATION);
-        System.out.println("Image location is" + manifestStorage);
+        System.out.println("Image location is including Image is" + manifestStorage);
+        endIndex=manifestStorage.lastIndexOf(Constants.imagePathDelimiter);
+        String manifestTarget=manifestStorage.substring(beginIndex, endIndex);
+        System.out.println("Image location is" + manifestTarget);
+        
         // Create the "/root/manifest_files" directory if not present
         File manifestDir = new File("/root/manifest_files");
         if(!manifestDir.exists()) {
@@ -107,7 +114,7 @@ public class GenerateManifest {
             rootElement.setAttributeNode(manifestVersion);
             
             System.out.println("PSDebug check version Manifest xml func");
-            Element imageEncryption = doc.createElement("Image Encryption");
+            Element imageEncryption = doc.createElement("Image_Encryption");
             imageEncryption.appendChild(doc.createTextNode(configInfo.get(Constants.IS_ENCRYPTED)));
             headers.appendChild(imageEncryption);
             
@@ -117,7 +124,7 @@ public class GenerateManifest {
             
             System.out.println("PSDebug check image ID Manifest xml func");
             
-            Element launchPolicy = doc.createElement("Launch COntrol Policy");
+            Element launchPolicy = doc.createElement("Launch_Control_Policy");
             launchPolicy.appendChild(doc.createTextNode(configInfo.get(Constants.POLICY_TYPE)));
             headers.appendChild(launchPolicy);
             
