@@ -50,32 +50,29 @@ public class GenerateManifest {
     public static Map<String, String> configInfo=new HashMap<>();
 
 // Write the hash value to xml file
-    public String writeToXMLManifest() { //(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo) {
-        if(Boolean.valueOf(configInfo.get(Constants.IS_WINDOWS))) {
+    public String writeToXMLManifest() { 
+    String manifestTargetLocation="/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+    String imagePathDelimiter="/";
+    int beginIndex=0;
+    int endIndex;
+    
+    if(Boolean.valueOf(configInfo.get(Constants.IS_WINDOWS))) {
             mountPath = mountPath + "/";
         }
         
         if(dirFilesHashMapping != null) {
-//            Iterator it = dirFilesHashMapping.entrySet().iterator();
-//                    System.out.println("PSDebug WriteToXML Values Are ");
-//                    while (it.hasNext()) {
-//                        System.out.println("PSDebug inside the iteratore xml func");
-//                        Map.Entry pairs = (Map.Entry) it.next();
-//                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
-//                    }
             logger.info("Calculated hash of : " + dirFilesHashMapping.size() + " directories");
         }
         
-        // Target location of the manifest file
-        String targetLocation = "/root/manifest_files/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-       
-        int beginIndex=0;
-        int endIndex;
         String manifestStorage=configInfo.get(Constants.IMAGE_LOCATION);
-        System.out.println("Image location is including Image is" + manifestStorage);
-        endIndex=manifestStorage.lastIndexOf(Constants.imagePathDelimiter);
-        String manifestTarget=manifestStorage.substring(beginIndex, endIndex);
-        System.out.println("Image location is" + manifestTarget);
+        endIndex=manifestStorage.lastIndexOf(imagePathDelimiter);
+        manifestStorage=manifestStorage.substring(beginIndex, endIndex);
+                
+        // Target location of the manifest file
+        String targetLocation= manifestStorage + manifestTargetLocation;
+//        System.out.println("Target location is:" + targetLocation);
+       
+        
         
         // Create the "/root/manifest_files" directory if not present
         File manifestDir = new File("/root/manifest_files");
@@ -83,7 +80,7 @@ public class GenerateManifest {
             manifestDir.mkdir();
         }
         
-        System.out.println("PSDebug check one Manifest xml func");
+        
         // This map is used to calculate the Image Hash
         Map<String, String> dirAndAggregateHash = new LinkedHashMap<>();
         String imageHash = "";
@@ -92,11 +89,10 @@ public class GenerateManifest {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance(configInfo.get(Constants.HASH_TYPE));
-            System.out.println("PSDebug What is md?" + md);
-        } catch (NoSuchAlgorithmException ex) {
+          } catch (NoSuchAlgorithmException ex) {
             logger.log(Level.SEVERE, null, md);
         }
-        System.out.println("PSDebug check 2 Manifest xml func");
+        
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -113,7 +109,7 @@ public class GenerateManifest {
             manifestVersion.setValue("1.1");
             rootElement.setAttributeNode(manifestVersion);
             
-            System.out.println("PSDebug check version Manifest xml func");
+            
             Element imageEncryption = doc.createElement("Image_Encryption");
             imageEncryption.appendChild(doc.createTextNode(configInfo.get(Constants.IS_ENCRYPTED)));
             headers.appendChild(imageEncryption);
@@ -122,8 +118,6 @@ public class GenerateManifest {
             imageId.appendChild(doc.createTextNode(configInfo.get(Constants.IMAGE_ID)));
             headers.appendChild(imageId);
             
-            System.out.println("PSDebug check image ID Manifest xml func");
-            
             Element launchPolicy = doc.createElement("Launch_Control_Policy");
             launchPolicy.appendChild(doc.createTextNode(configInfo.get(Constants.POLICY_TYPE)));
             headers.appendChild(launchPolicy);
@@ -131,9 +125,7 @@ public class GenerateManifest {
             Element hashType = doc.createElement("Hash_Type");
             hashType.appendChild(doc.createTextNode(configInfo.get(Constants.HASH_TYPE)));
             headers.appendChild(hashType);
-            
-            System.out.println("PSDebug check hash TYPE xml func");
-            
+                      
             Element hiddenFiles = doc.createElement("Hidden_Files");
             hiddenFiles.appendChild(doc.createTextNode(configInfo.get(Constants.HIDDEN_FILES)));
             headers.appendChild(hiddenFiles);
@@ -256,8 +248,7 @@ public class GenerateManifest {
             StreamResult result = new StreamResult(new File(targetLocation));
             
             transformer.transform(source, result);
-            
-            System.out.println("File saved at : " + targetLocation);
+                       
             logger.info("Manifest file saved at " + targetLocation);
             
         } catch (ParserConfigurationException pce) {
@@ -280,12 +271,10 @@ public class GenerateManifest {
         String fileHash = getFileHash(new File(targetLocation), md);
         
         String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-        System.out.println("PSDebug check file hash for mt wilson sign"  + fileHash);
-        System.out.println("PSDebug Base64 is"  + base64Hash);
         String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
         if(signature == null) {
             logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
-	    System.out.println("Deleting the manifest file " + targetLocation);
+//	    System.out.println("Deleting the manifest file " + targetLocation);
 	    new File(targetLocation).delete();
             return null;
         }
@@ -293,7 +282,7 @@ public class GenerateManifest {
         
         configInfo.clear();
         dirFilesHashMapping.clear();
-        System.out.println("PSDebug Signed by MtWilson");
+        
         return targetLocation;
     }
     
@@ -304,22 +293,22 @@ public class GenerateManifest {
         if(dirAndFilesMapping!=null)
         {
             dirFilesHashMapping.putAll(dirAndFilesMapping);
-            Iterator it = dirFilesHashMapping.entrySet().iterator();
-                    System.out.println("PSDebug Retrieve function: DirFile Hash Values Are ");
-                    while (it.hasNext()) {
-                        Map.Entry pairs = (Map.Entry) it.next();
-                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
-                    }
+//            Iterator it = dirFilesHashMapping.entrySet().iterator();
+//                    System.out.println("PSDebug Retrieve function: DirFile Hash Values Are ");
+//                    while (it.hasNext()) {
+//                        Map.Entry pairs = (Map.Entry) it.next();
+//                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
+//                    }
         }
         if(confInfo!=null)
         {
             configInfo.putAll(confInfo);
-            Iterator it = configInfo.entrySet().iterator();
-                    System.out.println("PSDebug Retrieve func configInfo Values Are ");
-                    while (it.hasNext()) {
-                        Map.Entry pairs = (Map.Entry) it.next();
-                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
-                    }
+//            Iterator it = configInfo.entrySet().iterator();
+//                    System.out.println("PSDebug Retrieve func configInfo Values Are ");
+//                    while (it.hasNext()) {
+//                        Map.Entry pairs = (Map.Entry) it.next();
+//                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
+//                    }
         }
     }
 

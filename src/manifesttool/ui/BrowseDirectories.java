@@ -260,15 +260,7 @@ public class BrowseDirectories {
                     int exitCode = MountVMImage.unmountImage(mountPath);
                     //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
 
-//                    if (manifestFileLocation != null) {
-//                        // Show the manifest file location
-//                        new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
-//                    } else {
-//                        //System.out.println("Error in creating the manifest file");
-//                        logger.log(Level.SEVERE, "Error in creating the manifest file");
-//			new CreateImage(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-//                    }
-                    primaryStage.setScene(firstWindowScene);
+                  primaryStage.setScene(firstWindowScene);
                     
                 }
             }

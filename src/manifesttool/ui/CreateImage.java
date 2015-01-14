@@ -328,51 +328,7 @@ public class CreateImage {
             }
         });
         
-//        // Calculates the hash of image, do not try to mount
-//        calculateImageHash.setOnAction(new EventHandler<ActionEvent>() {
-//
-//            @Override
-//            public void handle(ActionEvent t) {
-//                boolean includeImageHash = true;
-//                Map<String, String> customerInfo = writeToMap();
-//                if (customerInfo != null) {
-//                    Iterator it = customerInfo.entrySet().iterator();
-//                    logger.info("Configuration Values Are ");
-//                    while (it.hasNext()) {
-//                        Map.Entry pairs = (Map.Entry) it.next();
-//                        logger.info(pairs.getKey().toString() + " : " + pairs.getValue().toString());
-//                    }
-//                    
-//                    int exitCode = 21;
-//                    // Check for ami Image
-//                    if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
-//                        // Extract the compressed VM AMI Image
-//                        String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
-//                        boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
-//                        
-//                        if(!isExtracted) {
-//                            showWarningPopup("Error while extracting .... Exiting .....");
-//                            System.exit(1);
-//                        } else {
-//                            createImageStage.close();
-//                            // Get the AMI Image Information
-//                            new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);                            
-//                        }
-//                    } else {
-//                        customerInfo.put(Constants.HIDDEN_FILES, "true");
-//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(customerInfo);
-//                        if (manifestFileLocation != null) {
-//                            // Show the manifest file location
-//                            new UserConfirmation().showLocation(createImageStage, manifestFileLocation, customerInfo);
-//                        } else {
-//                            logger.log(Level.SEVERE, "Error in creating the manifest file...");
-//                            showWarningPopup("Error in creating the manifest file...");
-//                            System.exit(1);
-//                        }
-//                    }
-//                }   
-//            }
-//        });
+
         
         //PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
         // Calculates the hash of image, do not try to mount
@@ -389,7 +345,16 @@ public class CreateImage {
             }
         });
         
-        //==========
+        //PS: Upload image
+        uploadButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
+                System.out.println("PSDebug Manifest Location is returned and:" + manifestFileLocation);
+            }
+        });
+        
         // Handler for 'Browse' for Image Path button, browse the vm image
         browseImage.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -469,15 +434,12 @@ public class CreateImage {
             customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString()); 
             customerInfo.put(Constants.HASH_TYPE, hashTypeChoiceBox.getValue().toString());
             customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
-            //PS: is encryption selected?
             if(encryptImage.isSelected()){
             customerInfo.put(Constants.IS_ENCRYPTED,"true");
             }else{
              customerInfo.put(Constants.IS_ENCRYPTED,"false");
             }
-            
-            //PS: Policy type selected?
-        } else {
+          } else {
             return null;
         }
         return customerInfo;
