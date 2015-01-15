@@ -84,7 +84,7 @@ public class GenerateManifest {
             Document doc = docBuilder.newDocument();
             
             // Root Element
-            Element rootElement = doc.createElement("Manifest");
+            Element rootElement = doc.createElement("TrustPolicy");
             doc.appendChild(rootElement);
             
             Element headers = doc.createElement("Headers");
