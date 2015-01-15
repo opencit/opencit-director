@@ -236,32 +236,34 @@ public class GenerateManifest {
             trustPolicy = writter.toString();
             System.out.println("File saved at : " + targetLocation);
             logger.info("Manifest file saved at " + targetLocation);
+
+            md = MessageDigest.getInstance("SHA-256");
+            // Sign manifest with Mt. Wilson
+            // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
+
+            String fileHash = getFileHash(new File(targetLocation), md);
+            String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+            String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.Mt_WILSON_IP), confInfo.get(Constants.Mt_WILSON_PORT), confInfo.get(Constants.IMAGE_ID), trustPolicy);
+            if(signedTrustPolicy == null) {
+                logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
+                System.out.println("Deleting the trustPolicy file " + targetLocation);
+                new File(targetLocation).delete();
+                return null;
+            }
+            
+            //writting signed trustpolicy to a file
+            BufferedWriter out = new BufferedWriter(new FileWriter(targetLocation));
+            out.write(signedTrustPolicy);
+            out.close();
             
         } catch (ParserConfigurationException pce) {
 		logger.log(Level.SEVERE, null, pce);
 	} catch (TransformerException tfe) {
 		logger.log(Level.SEVERE, null, tfe);
-	}
-        
-        // Sign the manifest with Mt. Wilson
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
-        
-        
-        // Sign manifest with Mt. Wilson
-        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
-
-        String fileHash = getFileHash(new File(targetLocation), md);
-        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-        String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.Mt_WILSON_IP), confInfo.get(Constants.Mt_WILSON_PORT), confInfo.get(Constants.IMAGE_ID), trustPolicy);
-        if(signedTrustPolicy == null) {
-            logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
-	    System.out.println("Deleting the trustPolicy file " + targetLocation);
-	    new File(targetLocation).delete();
-            return null;
+	} catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(GenerateManifest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GenerateManifest.class.getName()).log(Level.SEVERE, null, ex);
         }
    
         return targetLocation;
