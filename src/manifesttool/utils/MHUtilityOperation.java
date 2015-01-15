@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import manifesttool.ui.Constants;
 import manifesttool.utils.MountVMImage;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -43,8 +45,9 @@ public class MHUtilityOperation {
     
     
     public String startMHProcess(String fileLocation, String mhKeyName) {
-        this.mhKeyName = mhKeyName;
-	 System.out.println("MH Keystore Location : " + keystoreLocation);
+        mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+	this.mhKeyName = mhKeyName;
+	System.out.println("MH Keystore Location : " + keystoreLocation);
         String expScriptName = "./resources/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
