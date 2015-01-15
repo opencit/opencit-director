@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -47,6 +48,7 @@ public class GenerateManifest {
     
     // Write the hash value to xml file
     public String writeToXMLManifest(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo) {
+        String trustPolicy = null;
         if(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS))) {
             mountPath = mountPath + "/";
         }
@@ -229,7 +231,9 @@ public class GenerateManifest {
             StreamResult result = new StreamResult(new File(targetLocation));
             
             transformer.transform(source, result);
-            
+            StringWriter writter = new StringWriter();
+            transformer.transform(source, new StreamResult(writter));
+            trustPolicy = writter.toString();
             System.out.println("File saved at : " + targetLocation);
             logger.info("Manifest file saved at " + targetLocation);
             
@@ -252,15 +256,14 @@ public class GenerateManifest {
 
         String fileHash = getFileHash(new File(targetLocation), md);
         String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-        String signature = new SignWithMtWilson().signManifest(confInfo.get(Constants.Mt_WILSON_IP), confInfo.get(Constants.Mt_WILSON_PORT), confInfo.get(Constants.IMAGE_ID), base64Hash);
-        if(signature == null) {
-            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
-	    System.out.println("Deleting the manifest file " + targetLocation);
+        String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.Mt_WILSON_IP), confInfo.get(Constants.Mt_WILSON_PORT), confInfo.get(Constants.IMAGE_ID), trustPolicy);
+        if(signedTrustPolicy == null) {
+            logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
+	    System.out.println("Deleting the trustPolicy file " + targetLocation);
 	    new File(targetLocation).delete();
             return null;
         }
-        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
-        
+   
         return targetLocation;
     }
     
