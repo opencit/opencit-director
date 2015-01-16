@@ -29,6 +29,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import manifesttool.ui.Constants;
+import manifesttool.ui.CreateImage;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,6 +49,7 @@ public class GenerateManifest {
     }    
     public static Map<String, LinkedHashMap<String, String>> dirFilesHashMapping = new HashMap<>();
     public static Map<String, String> configInfo=new HashMap<>();
+    public static boolean manifestFlag=false;
 
 // Write the hash value to xml file
     public String writeToXMLManifest() { 
@@ -146,7 +148,6 @@ public class GenerateManifest {
 
                 initrdHash.appendChild(doc.createTextNode(initrdHashValue));
                 fileHashes.appendChild(initrdHash);
-                System.out.println("PSDebug check file hash Manifest xml func"  + fileHashes);
 
                 // write to map
                 //dirAndAggregateHash.put(confInfo.get(Constants.KERNEL_PATH), kernelHashValue);
@@ -280,8 +281,8 @@ public class GenerateManifest {
         }
         new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
         
-        configInfo.clear();
-        dirFilesHashMapping.clear();
+//        configInfo.clear();
+//        dirFilesHashMapping.clear();
         
         return targetLocation;
     }
@@ -310,6 +311,7 @@ public class GenerateManifest {
 //                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
 //                    }
         }
+        manifestFlag=true;
     }
 
     // Calculates the aggregate hash

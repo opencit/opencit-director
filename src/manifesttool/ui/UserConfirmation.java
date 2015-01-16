@@ -405,8 +405,8 @@ public class UserConfirmation {
         
     }
     
-    private String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) {
-        
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) {
+        System.out.println("PSDebug Came to set image prop");
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -462,7 +462,8 @@ public class UserConfirmation {
             String kernelGlanceID = null;
             
             if(isEncrypted) {
-                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH), imageProperties);
+                System.out.println("PSDebug Came to set image prop 22222");
+                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH), manifestLocation,imageProperties);
                 if(kernelGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -487,7 +488,7 @@ public class UserConfirmation {
                     System.exit(1);                
                 }
             } else {
-                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.KERNEL_PATH), imageProperties);
+                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.KERNEL_PATH), manifestLocation,imageProperties);
                 if(kernelGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -506,7 +507,8 @@ public class UserConfirmation {
             String initrdGlanceID = null;
             
             if(isEncrypted) {
-                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_INITRD_PATH), imageProperties);
+                System.out.println("PSDebug Came to set image prop 3333333333");
+                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_INITRD_PATH), manifestLocation,imageProperties);
                 if(initrdGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -531,7 +533,7 @@ public class UserConfirmation {
                     System.exit(1);                
                 }
             } else {
-                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.INITRD_PATH), imageProperties);
+                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.INITRD_PATH), manifestLocation,imageProperties);
                 if(initrdGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -553,7 +555,8 @@ public class UserConfirmation {
         //Upload image to glance
         String imageGlanceID = null;
         if(isEncrypted) {
-            imageGlanceID = glanceObject.uploadImage(confInfo.get("EncImage Location"), imageProperties);
+            System.out.println("PSDebug Came to set image prop 4444444444");
+            imageGlanceID = glanceObject.uploadImage(confInfo.get("EncImage Location"), manifestLocation,imageProperties);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
@@ -579,7 +582,7 @@ public class UserConfirmation {
                 System.exit(1);                
             }
         } else {
-            imageGlanceID = glanceObject.uploadImage(confInfo.get("Image Location"), imageProperties);
+            imageGlanceID = glanceObject.uploadImage(confInfo.get("Image Location"), manifestLocation,imageProperties);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);

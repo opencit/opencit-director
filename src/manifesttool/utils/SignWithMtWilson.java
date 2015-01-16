@@ -55,8 +55,6 @@ public class SignWithMtWilson {
     public String signManifest(String imageID, String fileHash) { //public String signManifest(String ip, String port, String imageID, String fileHash)
 //        this.mtWilsonIP = ip;
 //        this.mtWilsonPort = port;
-        System.out.println("PSDebug IP is" + mtWilsonIP);
-        System.out.println("PSDebug port is" + mtWilsonPort); 
         String response = getMtWilsonResponse(imageID, fileHash);
         logger.info("Signed the manifest with Mt. Wilson\n" + "Mt. Wilson response is :\n" + response);
         
@@ -85,12 +83,10 @@ public class SignWithMtWilson {
             String xml = "<manifest_signature_input>"+XML.toString(jsonObj)+"</manifest_signature_input>";
             logger.info("Manifest signature request to MtW \n Request Body is : " + xml);
             
-            System.out.println("PSDebug: check one MtWilson");
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);
             HttpEntity entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
                 
-            System.out.println("PSDebug: check 2 MtWilson http entity" + entity);
             postRequest.setEntity(entity);
             postRequest.setHeader("Content-Type", "application/xml");
             postRequest.setHeader("Accept", "application/xml");
@@ -98,9 +94,7 @@ public class SignWithMtWilson {
                 logger.warning("Mt Wilson credentials are not present in property file");
                 return null;
             }
-            System.out.println("PSDebug: check three MtWilson http entity" );
             String encryptedUserNameAndPassword = new FileUtilityOperation().base64Encode(mtWilsonUserName + ":" + mtWilsonPassword);
-            System.out.println("PSDebug encryptedUserNameAndPassword" + encryptedUserNameAndPassword);
             
             postRequest.setHeader("Authorization", "Basic " + encryptedUserNameAndPassword);
             HttpResponse response = httpClient.execute(postRequest);
@@ -109,7 +103,6 @@ public class SignWithMtWilson {
                 logger.log(Level.SEVERE, null, new RuntimeException(response.getStatusLine().toString()));
                 return null;
             }
-            System.out.println("PSDebug Did I pass 200??");
             BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
             String output = null;
             StringBuffer sb = new StringBuffer();

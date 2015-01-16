@@ -86,24 +86,29 @@ public class ConfigurationInformation {
         final Label trustPolicy=new Label("Trust Policy");
         final Label manifestSource=new Label (" Manifest Source");
         
+        
+        
         //PS: Toggle Button to choose the Image Type
-		final ToggleGroup imageGroup=new ToggleGroup();
-		ToggleButton tb_none = new ToggleButton("None");
-		tb_none.setToggleGroup(imageGroup);
-		tb_none.setSelected(true);
+	final ToggleGroup imageGroup=new ToggleGroup();
+	ToggleButton tb_none = new ToggleButton("None");
+	tb_none.setToggleGroup(imageGroup);
+	tb_none.setSelected(true);
 		
-		final ToggleButton tb_vm = new ToggleButton("VM");
-		tb_vm.setToggleGroup(imageGroup);
+	final ToggleButton tb_vm = new ToggleButton("VM");
+	tb_vm.setToggleGroup(imageGroup);
         tb_vm.setUserData(trustPolicy);
         tb_vm.setUserData(togBoxTrustPolicyType);
 		
-		ToggleButton tb_bareMetal = new ToggleButton("Bare Metal");
-		tb_bareMetal.setToggleGroup(imageGroup);
+	ToggleButton tb_bareMetal = new ToggleButton("Bare Metal");
+	tb_bareMetal.setToggleGroup(imageGroup);
         tb_bareMetal.setUserData(manifestSource);
         tb_bareMetal.setUserData(togBoxBareMetalType);
 		
         ToggleButton tb_docker = new ToggleButton("Docker");
-		tb_docker.setToggleGroup(imageGroup);
+	tb_docker.setToggleGroup(imageGroup);
+        
+        
+        Button closeButton=new Button("Close");
 		        
         //PS: Toggle Button to choose the Trust Policy Type
 		final ToggleGroup trustPolicyGroup=new ToggleGroup();
@@ -159,7 +164,9 @@ public class ConfigurationInformation {
         grid.add(togBoxTrustPolicyType, 1, 2);
         grid.add(togBoxBareMetalType, 1, 2);
         
-	    VBox vBox = new VBox();
+        grid.add(closeButton, 1, 3);
+	
+        VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
         
         
@@ -239,7 +246,22 @@ public class ConfigurationInformation {
 //                stage.show();
             }});
         
-        
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {
+                
+                try{
+                    primaryStage.close();
+                }catch(Exception ex)
+                {
+                    
+                    System.out.println("Exception occurred here");
+                    ex.printStackTrace();
+                }
+//                Stage stage = new Stage();
+                //Fill stage with content
+//                stage.show();
+            }});
         
         // Load the stack pane: This is the primary window for TD
         StackPane root = new StackPane();

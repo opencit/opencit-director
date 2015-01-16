@@ -32,7 +32,6 @@ public class ConfigProperties {
         try {
             input = new FileInputStream("./resources/config.properties");
             prop.load(input);  
-            System.out.println("PSDebug input config is" + input);
         } catch (FileNotFoundException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -75,8 +74,6 @@ public class ConfigProperties {
     }
 */    
     public static String getProperty(String name) {
-        System.out.println("PSDebug Print the String Name" + name);
-        System.out.println("PSDebug Print o/p" + prop.getProperty(name));
         return prop.getProperty(name);
     }
     

@@ -40,6 +40,7 @@ import manifesttool.utils.ConfigProperties;
 import manifesttool.utils.FileUtilityOperation;
 import manifesttool.utils.GenerateManifest;
 import manifesttool.utils.LoggerUtility;
+import manifesttool.utils.MHUtilityOperation;
 import manifesttool.utils.MountVMImage;
 
 /**
@@ -72,9 +73,9 @@ public class CreateImage {
         this.createImageStage = createImageStage;
     }
 
-//    CreateImage() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
+    public CreateImage() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     // Return the Stage
     public Stage getStage() {
@@ -133,7 +134,7 @@ public class CreateImage {
         toolTipManifest.setText("Browse the manifest files");
         browseImage.setTooltip(toolTipManifest);
         
-        Button saveButton=new Button("Save");
+        Button saveButton=new Button("Upload Later");
         Button uploadButton=new Button("Upload");
         Button cancelButton = new Button("Cancel");
         cancelButton.setPrefSize(80, 15);
@@ -228,71 +229,27 @@ public class CreateImage {
             @Override
             public void handle(ActionEvent arg0) {
                 boolean includeImageHash = false;
-                
-                browseManifest.setTextFill(Color.AQUA);
-                System.out.println("PSDebug: Place one");
-                
                 // Write configuration values to map
                 Map<String, String> customerInfo;
                 
-                System.out.println("PSDebug: Place one-one");
                 if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
                     customerInfo = hostWriteToMap();
-                    System.out.println("PSDebug: cust info" + customerInfo.keySet().toString());
-                    System.out.println("PSDebug: Placefinished hostwrite blah");
+                    
                 } else {
                     customerInfo = writeToMap();
-                    System.out.println("PSDebug: Place write to map la la");
+                    
                 }
                 if (customerInfo != null) {
                     
-                    System.out.println("PSDebug: Place inside customer info ");
+                    
                     Iterator it = customerInfo.entrySet().iterator();
                     logger.info("Configuration Values Are ");
                     while (it.hasNext()) {
                         Map.Entry pairs = (Map.Entry) it.next();
-                        System.out.println("PSDebug Iteratore for cust info:" + pairs.getKey().toString() + " : " + pairs.getValue().toString());
                         logger.info(pairs.getKey().toString() + " : " + pairs.getValue().toString());
                     }
                     
-                    
-                    
-                    // Check for the "Host_Manifest" property in the property file, if present, manifest generation will be for host
-//                    System.out.println("PSDebug hostmanifest valu is" + hostManifest.toString());
-//                    if ((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-//                        System.out.println("PSDebug: Place two check manifest null");
-//                        // Extract the compressed HOST image tgz file
-//                        String extractCommand = "tar zxf " + customerInfo.get(Constants.IMAGE_LOCATION) + " -C " + Constants.MOUNT_PATH;
-//                        int extractExitCode = MountVMImage.callExec(extractCommand);
-//                        System.out.println("Extract code:" + extractExitCode);
-//                        if(extractExitCode != 0) {
-//                            browseManifest.setTextFill(Color.YELLOW);
-//                           showWarningPopup("Error while extracting .... Exiting .....");
-//                            System.exit(1);
-//                        } else {
-//                            System.out.println("PSDebug: Place there BrowseDirectory next");
-//                            BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
-//                            secondWindow.launch(customerInfo);  
-//                            browseManifest.setTextFill(Color.BROWN);
-//                        }                        
-//                    } else {
-                        System.out.println("PSDebug: Place exiting");
                         int exitCode = 0;
-                        // Check for ami Image
-//                        if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
-//                            
-//                            // Extract the compressed VM AMI Image
-//                            String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
-//                            boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
-//                            if(!isExtracted) {
-//                                showWarningPopup("Error while extracting .... Exiting .....");
-//                                System.exit(1);
-//                            } else {
-//                                createImageStage.close();
-//                                // Get the AMI Image Information
-//                                new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);   
-//                            }
-//                        } else {
                             // Mount the VM disk image
                         System.out.println("mount image:" + imagePathTField.getText());
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
@@ -331,17 +288,15 @@ public class CreateImage {
 
         
         //PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
-        // Calculates the hash of image, do not try to mount
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent t) {
-                boolean includeImageHash = true;
+//                boolean includeImageHash = true;
                 
                 String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
-                
-                System.out.println("PSDebug Manifest Location is returned and:" + manifestFileLocation);
-//                
+                String message=EncryptImage(manifestFileLocation);
+                showUploadSuccessMessage(createImageStage, message);
             }
         });
         
@@ -350,8 +305,15 @@ public class CreateImage {
 
             @Override
             public void handle(ActionEvent t) {
+                //Generate the Manifest, encrypt the image
                 String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
-                System.out.println("PSDebug Manifest Location is returned and:" + manifestFileLocation);
+//                String message=EncryptImage(manifestFileLocation);
+//                showUploadSuccessMessage(createImageStage, message);
+                
+                //Upload to the Glance
+                String message =UploadNow(manifestFileLocation);
+                showUploadSuccessMessage(createImageStage, message);
+                
             }
         });
         
@@ -380,6 +342,156 @@ public class CreateImage {
         
     }
     
+    private String EncryptImage(String manifestFileLocation){
+        Map<String, String> customerInfo = writeToMap();
+                String message="";
+                
+                if (customerInfo != null) { 
+                    if(customerInfo.get(Constants.IS_ENCRYPTED)=="true"){
+                String opensslPassword = ConfigProperties.getProperty(Constants.PASSWORD);
+                MHUtilityOperation mhOptImage = new MHUtilityOperation();
+                
+		// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                //String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
+                //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+                String encryptedImageLocation = mhOptImage.encryptFile(customerInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+                if(encryptedImageLocation == null) {
+//                    new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                    System.exit(1);
+                }
+                message = "VM Image Encrypted \n\n Encrypted Image Path : " + encryptedImageLocation + "\n\n"
+                        + "Trusted Policy Location : " + manifestFileLocation + "\n\n";
+                if(customerInfo.containsKey(Constants.KERNEL_PATH) && customerInfo.containsKey(Constants.INITRD_PATH)) { 
+                    MHUtilityOperation mhOptKernel = new MHUtilityOperation();
+
+		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+                    //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+                    String encryptedKernelPath = mhOptImage.encryptFile(customerInfo.get(Constants.KERNEL_PATH), opensslPassword);
+                    if(encryptedKernelPath == null) {
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                        System.exit(1);
+                    }
+                    
+		    MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
+		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+                    //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+                    String encryptedInitrdPath = mhOptImage.encryptFile(customerInfo.get(Constants.INITRD_PATH), opensslPassword);
+                    if(encryptedInitrdPath == null) {
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                        System.exit(1);
+                    }
+                    message = message + "Encrypted Kernel Path : " + encryptedKernelPath + "\n\n"
+                            + "mh_dek_url for Kernel : " + mhOptKernel.getDekURL() + "\n\n" + "Encrypted Initrd Path : "
+                                + encryptedInitrdPath + "\n\n" + "mh_dek_url for Initrd : " + mhOptInitrd.getDekURL() + "\n\n";
+                       }
+                    }else{
+                       logger.info("Encryption of the image is not selected");
+                       message=message = "Image encryption was not chosen" + "\n\n"
+                        + "Trusted Policy Location : " + manifestFileLocation + "\n\n";
+                    }    
+                 
+                }
+                return message;
+    }
+    
+    
+    private String UploadNow(String manifestFileLocation){
+        Map<String, String> customerInfo = writeToMap();
+                String message="";
+                UserConfirmation userObj=new UserConfirmation();
+                if (customerInfo != null) { 
+                    if(customerInfo.get(Constants.IS_ENCRYPTED)=="true"){
+                        boolean isEncrypted = true;
+                        String opensslPassword = ConfigProperties.getProperty(Constants.PASSWORD);
+                        MHUtilityOperation mhOptImage = new MHUtilityOperation();
+
+		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                    //String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
+                    //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+                    String encryptedImageLocation = mhOptImage.encryptFile(customerInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+                    if(encryptedImageLocation == null) {
+//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                        System.exit(1);
+                    }
+                    customerInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
+                    customerInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
+                    if(customerInfo.containsKey(Constants.KERNEL_PATH) && customerInfo.containsKey(Constants.INITRD_PATH)) { 
+                        MHUtilityOperation mhOptKernel = new MHUtilityOperation();
+	
+			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                        //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+                        //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+                        String encryptedKernelPath = mhOptImage.encryptFile(customerInfo.get(Constants.KERNEL_PATH), opensslPassword);
+                        if(encryptedKernelPath == null) {
+//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                            System.exit(1);
+                        }
+                        
+			MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
+                        
+
+			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                        //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+                        //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+                        String encryptedInitrdPath = mhOptImage.encryptFile(customerInfo.get(Constants.INITRD_PATH), opensslPassword);
+                        if(encryptedInitrdPath == null) {
+//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                            System.exit(1);
+                        }
+                        customerInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
+                        customerInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
+                        customerInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
+                        customerInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
+                    }
+                    System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
+                     message =userObj.setImagePropertiesAndUploadToGlance(customerInfo, manifestFileLocation, isEncrypted,createImageStage);
+                     
+                     System.out.println("PSDebug Upload done");
+                    showUploadSuccessMessage(createImageStage, message);
+                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
+                    }else if(customerInfo.get(Constants.IS_ENCRYPTED)=="false") {
+                    boolean isEncrypted = false;
+                    message = userObj.setImagePropertiesAndUploadToGlance(customerInfo, manifestFileLocation, isEncrypted, createImageStage);
+                    showUploadSuccessMessage(createImageStage, message);
+                }
+            }
+            return message;
+    }
+    
+    //Show the Target location and Manifest location
+    private void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
+        //primaryStage.setTitle("Upload Success Message");
+        //String info = "Manifest Uploaded on glance " + "\n" + "Manifest Glance ID is : " + manifestGlanceID;;
+        Label message = new Label(messageInfo);
+        message.setFont(new Font("Arial", 14));
+        
+        Button okButton = new Button("Ok");
+        okButton.setPrefSize(80, 20);
+        
+        VBox vbox = new VBox();
+        vbox.setSpacing(30);
+        vbox.setPadding(new Insets(15, 12, 15, 12));
+        
+        vbox.getChildren().addAll(message, okButton);
+        
+        okButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                primaryStage.close();
+//                createImageStage.close();
+            }
+        });
+
+        StackPane root = new StackPane();
+        root.getChildren().add(vbox);
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();         
+        
+    }
     
     
     // Show the warning messages
@@ -418,7 +530,6 @@ public class CreateImage {
         FileUtilityOperation opt = new FileUtilityOperation();
         if(("".equals(imageIDTField.getText())) || ("".equals(imagePathTField.getText())) || ("".equals(imageNameTField.getText()))) {
 //            showWarningPopup("Some fields are Empty .. Please fill the Values");
-            System.out.println("PSDebug: Place write if -1");
             isProper = false;
         } else if(!opt.validateUUID(imageIDTField.getText())){
 //            showWarningPopup("Please provide the valid image ID");
@@ -453,16 +564,13 @@ public class CreateImage {
         if(("".equals(imagePathTField.getText()))) {
 //            showWarningPopup("Some fields are Empty .. Please fill the Values");
             isProper = false;
-            System.out.println("PSDebug: Place hostWrite if-1");
         } 
         if(isProper) {
             customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
             customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
             customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
             customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());
-            System.out.println("PSDebug: Place if-2");
         } else {
-            System.out.println("PSDebug: Place returning NULL");
             return null;
         }
         return customerInfo;
