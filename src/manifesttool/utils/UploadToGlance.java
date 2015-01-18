@@ -59,7 +59,7 @@ public class UploadToGlance {
     }
     
     public String uploadImage(String imageLocation, String manifestLocation, Map<String, String> imageProperties) {
-        
+        System.out.println("PSDebug Image location is:" + imageLocation);
         String glanceID;
         glanceID = uploadFileToGlance(imageLocation,manifestLocation,imageProperties);
         return glanceID;
@@ -91,7 +91,6 @@ public class UploadToGlance {
             postRequest = setHeaders(postRequest, fileProperties);
             String authToken = getAuthToken();
             postRequest.setHeader("X-Auth-Token", authToken);
-            fileLocation.concat(manifestLocation);
             InputStream is = new FileInputStream(new File(fileLocation));
                         
             HttpEntity input = new InputStreamEntity(is);

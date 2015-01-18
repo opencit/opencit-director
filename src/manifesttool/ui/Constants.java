@@ -18,10 +18,12 @@ public class Constants {
     public static final String CUSTOMER_ID = "Customer ID";
     public static final String IMAGE_NAME = "Image Name";
     public static final String IMAGE_ID = "Image ID";
+    public static final String TRUST_POLICY_PATH="Trust Policy Path";
     public static final String HASH_TYPE = "Hash Type";
     public static final String Mt_WILSON_IP = "Mt_Wilson_IP";
     public static final String Mt_WILSON_PORT = "Mt_Wilson_Port";
     public static final String IMAGE_LOCATION = "Image Location";
+    public static final String TRUST_POLICY_LOCATION = "Trust Policy Location";
     public static final String POLICY_TYPE = "Policy Type";
     public static final String IMAGE_TYPE = "Image Type";
     public static final String KERNEL_PATH = "Kernel Path";

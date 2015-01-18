@@ -171,7 +171,7 @@ public class ConfigurationInformation {
         
         
         //PS: When NONE button is clicked
-		tb_none.setOnAction(new EventHandler<ActionEvent>() {
+	tb_none.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) 
             {
                 //Execute some code here for the event.. 
@@ -241,10 +241,34 @@ public class ConfigurationInformation {
                     System.out.println("Exception occurred here");
                     ex.printStackTrace();
                 }
+                
 //                Stage stage = new Stage();
                 //Fill stage with content
 //                stage.show();
             }});
+        
+        //Open a new window to upload existing image
+        tb_uploadExisting.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {
+                
+                try{
+                    System.out.println("PSDebug: selected Upload existing");
+                    Stage uploadExistingStage=new Stage();
+                    UploadExisting uploadExistingObj=new UploadExisting(uploadExistingStage);
+                    uploadExistingObj.launch();
+                    System.out.println("PSDebug: launched app");
+                 }catch(Exception ex){
+                    
+                    System.out.println("Exception occurred here");
+                    ex.printStackTrace();
+                }
+                
+//                Stage stage = new Stage();
+                //Fill stage with content
+//                stage.show();
+            }});
+        
         
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e)
