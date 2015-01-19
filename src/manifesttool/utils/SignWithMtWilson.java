@@ -42,9 +42,7 @@ public class SignWithMtWilson {
 //    private String mtWilsonPort;
     
     private String mtWilsonIP = ConfigProperties.getProperty(Constants.Mt_WILSON_IP);
-    
     private String mtWilsonPort = ConfigProperties.getProperty(Constants.Mt_WILSON_PORT);
-   
     private String mtWilsonUserName = ConfigProperties.getProperty(Constants.Mt_WILSON_USER_NAME);
     private String mtWilsonPassword = ConfigProperties.getProperty(Constants.Mt_WILSON_PASSWORD);
     
