@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -57,7 +58,7 @@ public class GenerateManifest {
     String imagePathDelimiter="/";
     int beginIndex=0;
     int endIndex;
-    
+    String trustPolicy=null;
     if(Boolean.valueOf(configInfo.get(Constants.IS_WINDOWS))) {
             mountPath = mountPath + "/";
         }
@@ -101,7 +102,7 @@ public class GenerateManifest {
             Document doc = docBuilder.newDocument();
             
             // Root Element
-            Element rootElement = doc.createElement("Manifest");
+            Element rootElement = doc.createElement("TrustPolicy");
             doc.appendChild(rootElement);
             
             Element headers = doc.createElement("Headers");
@@ -179,8 +180,8 @@ public class GenerateManifest {
                 for (Map.Entry pairs : dirFilesHashMapping.entrySet()) {
                     logger.info("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
                     logger.info("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
-                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
-                    System.out.println("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
+//                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
+//                    System.out.println("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
                     
                     // Exclude the files from measurement
                     LinkedHashMap<String, String> modifiedFileAndHashMap = (LinkedHashMap)excludeFilesFromMeasurement(dirFilesHashMapping.get(pairs.getKey()));
@@ -249,37 +250,59 @@ public class GenerateManifest {
             StreamResult result = new StreamResult(new File(targetLocation));
             
             transformer.transform(source, result);
-                       
+            StringWriter writter = new StringWriter();
+            transformer.transform(source, new StreamResult(writter));
+            trustPolicy = writter.toString();
+            System.out.println("Trust Policy is" + trustPolicy.toString());
+            System.out.println("File saved at : " + targetLocation);
             logger.info("Manifest file saved at " + targetLocation);
+
+            md = MessageDigest.getInstance("SHA-256");
+            // Sign manifest with Mt. Wilson
+            // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
+
+            String fileHash = getFileHash(new File(targetLocation), md);
+            String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+            System.out.println("Signing Mt wilson image ID" + configInfo.get(Constants.IMAGE_ID));
+            System.out.println("Trust Policy is"+ trustPolicy);
+            String signedTrustPolicy = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), trustPolicy);
+            if(signedTrustPolicy == null) {
+                logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
+                System.out.println("Deleting the trustPolicy file " + targetLocation);
+                new File(targetLocation).delete();
+                return null;
+            }
+            
+            //writting signed trustpolicy to a file
+            BufferedWriter out = new BufferedWriter(new FileWriter(targetLocation));
+            out.write(signedTrustPolicy);
+            out.close();
             
         } catch (ParserConfigurationException pce) {
 		logger.log(Level.SEVERE, null, pce);
 	} catch (TransformerException tfe) {
 		logger.log(Level.SEVERE, null, tfe);
-	}
-        
-        // Sign the manifest with Mt. Wilson
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException ex) {
-            logger.log(Level.SEVERE, null, ex);
+	} catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(GenerateManifest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(GenerateManifest.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
-        // Sign manifest with Mt. Wilson
-        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
-
-        String fileHash = getFileHash(new File(targetLocation), md);
-        
-        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-        String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
-        if(signature == null) {
-            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
-//	    System.out.println("Deleting the manifest file " + targetLocation);
-	    new File(targetLocation).delete();
-            return null;
-        }
-        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
+//        // Sign manifest with Mt. Wilson
+//        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
+//
+//        String fileHash = getFileHash(new File(targetLocation), md);
+//        
+//        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+//        String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
+//        if(signature == null) {
+//            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
+////	    System.out.println("Deleting the manifest file " + targetLocation);
+//	    new File(targetLocation).delete();
+//            return null;
+//        }
+//        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
         
 //        configInfo.clear();
 //        dirFilesHashMapping.clear();
