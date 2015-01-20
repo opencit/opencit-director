@@ -50,41 +50,27 @@ public class SignWithMtWilson {
     static {
         LoggerUtility.setHandler(logger);
     }
-    public String signManifest(String imageID, String fileHash) { //public String signManifest(String ip, String port, String imageID, String fileHash)
+    public String signManifest(String ip, String port, String imageID, String trustPolicy) {
 //        this.mtWilsonIP = ip;
 //        this.mtWilsonPort = port;
-        String response = getMtWilsonResponse(imageID, fileHash);
+        String response = getMtWilsonResponse(trustPolicy);
         logger.info("Signed the manifest with Mt. Wilson\n" + "Mt. Wilson response is :\n" + response);
         
         return response;
         
     }
 
-    private String getMtWilsonResponse(String imageID, String fileHash) {
+    private String getMtWilsonResponse(String trustPolicy) {
         String mtWisontResponse = null;
         try {
-            System.out.println("Manifest File Hash is : " + fileHash);
+            System.out.println("Trust Policy is : " + trustPolicy);
             
             String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
             System.out.println("MTwilson URL is" + url);
-            ManifestSignatureInput input = new ManifestSignatureInput();
-            input.setManifestHash(fileHash);
-            input.setVmImageId(imageID);
-            
-            ObjectMapper mapper = new ObjectMapper();
-            // System.out.println("\n" + mapper.writeValueAsString(input) + "\n");
-            logger.info("Mt Wilson input : " + mapper.writeValueAsString(input));
-            
-            String json = mapper.writeValueAsString(input);
-            JSONObject jsonObj = new JSONObject(json);
-            
-            String xml = "<manifest_signature_input>"+XML.toString(jsonObj)+"</manifest_signature_input>";
-            logger.info("Manifest signature request to MtW \n Request Body is : " + xml);
-            
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);
-            HttpEntity entity = new ByteArrayEntity(xml.getBytes("UTF-8"));
-                
+            HttpEntity entity = new ByteArrayEntity(trustPolicy.getBytes("UTF-8"));
+            
             postRequest.setEntity(entity);
             postRequest.setHeader("Content-Type", "application/xml");
             postRequest.setHeader("Accept", "application/xml");
@@ -121,9 +107,6 @@ public class SignWithMtWilson {
             return null;
         } catch (IOException e) {
             logger.log(Level.SEVERE, null, e);
-            return null;
-        } catch (JSONException ex) {
-            logger.log(Level.SEVERE, null, ex);
             return null;
         }
             
