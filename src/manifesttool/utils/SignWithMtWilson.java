@@ -50,7 +50,7 @@ public class SignWithMtWilson {
     static {
         LoggerUtility.setHandler(logger);
     }
-    public String signManifest(String ip, String port, String imageID, String trustPolicy) {
+    public String signManifest(String imageID, String trustPolicy) {
 //        this.mtWilsonIP = ip;
 //        this.mtWilsonPort = port;
         String response = getMtWilsonResponse(trustPolicy);
@@ -64,6 +64,8 @@ public class SignWithMtWilson {
         String mtWisontResponse = null;
         try {
             System.out.println("Trust Policy is : " + trustPolicy);
+            logger.info("Trust Policy is");
+            logger.info(trustPolicy);
             
             String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
             System.out.println("MTwilson URL is" + url);

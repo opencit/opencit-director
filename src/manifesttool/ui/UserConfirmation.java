@@ -583,12 +583,14 @@ public class UserConfirmation {
             }
         } else {
             imageGlanceID = glanceObject.uploadImage(confInfo.get("Image Location"), manifestLocation,imageProperties);
+            System.out.println("PSDebug glance ID" + imageGlanceID);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);
             }            
         }
+        System.out.println("PSDebug manifestLoca is" + manifestLocation);
         String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
         if(manifestGlanceID == null) {
             String message = "Failed to upload the Manifest to Glance .... Exiting";

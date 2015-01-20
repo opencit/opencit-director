@@ -180,8 +180,8 @@ public class GenerateManifest {
                 for (Map.Entry pairs : dirFilesHashMapping.entrySet()) {
                     logger.info("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
                     logger.info("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
-                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
-                    System.out.println("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
+//                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
+//                    System.out.println("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
                     
                     // Exclude the files from measurement
                     LinkedHashMap<String, String> modifiedFileAndHashMap = (LinkedHashMap)excludeFilesFromMeasurement(dirFilesHashMapping.get(pairs.getKey()));
@@ -253,6 +253,7 @@ public class GenerateManifest {
             StringWriter writter = new StringWriter();
             transformer.transform(source, new StreamResult(writter));
             trustPolicy = writter.toString();
+            System.out.println("Trust Policy is" + trustPolicy.toString());
             System.out.println("File saved at : " + targetLocation);
             logger.info("Manifest file saved at " + targetLocation);
 
@@ -262,6 +263,8 @@ public class GenerateManifest {
 
             String fileHash = getFileHash(new File(targetLocation), md);
             String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+            System.out.println("Signing Mt wilson image ID" + configInfo.get(Constants.IMAGE_ID));
+            System.out.println("Trust Policy is"+ trustPolicy);
             String signedTrustPolicy = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), trustPolicy);
             if(signedTrustPolicy == null) {
                 logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
@@ -286,20 +289,20 @@ public class GenerateManifest {
         }
         
         
-        // Sign manifest with Mt. Wilson
-        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
-
-        String fileHash = getFileHash(new File(targetLocation), md);
-        
-        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-        String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
-        if(signature == null) {
-            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
-//	    System.out.println("Deleting the manifest file " + targetLocation);
-	    new File(targetLocation).delete();
-            return null;
-        }
-        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
+//        // Sign manifest with Mt. Wilson
+//        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
+//
+//        String fileHash = getFileHash(new File(targetLocation), md);
+//        
+//        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+//        String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
+//        if(signature == null) {
+//            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
+////	    System.out.println("Deleting the manifest file " + targetLocation);
+//	    new File(targetLocation).delete();
+//            return null;
+//        }
+//        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
         
 //        configInfo.clear();
 //        dirFilesHashMapping.clear();
