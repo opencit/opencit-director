@@ -31,7 +31,7 @@ public class ConfigProperties {
         InputStream input = null;
         try {
             input = new FileInputStream("./resources/config.properties");
-            prop.load(input);           
+            prop.load(input);  
         } catch (FileNotFoundException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

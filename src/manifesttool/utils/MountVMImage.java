@@ -59,7 +59,6 @@ public class MountVMImage {
         } catch (InterruptedException | IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        //System.out.println(output.toString());
         logger.info(output.toString());
         new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
         logger.info("Exec command output : " + output.toString());

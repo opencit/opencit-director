@@ -10,6 +10,7 @@ import manifesttool.ui.ConfigurationInformation;
 import manifesttool.ui.Directories;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -35,6 +36,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import static manifesttool.ui.AMIImageInformation.logger;
+import manifesttool.utils.GenerateManifest;
 import manifesttool.utils.LoggerUtility;
 
 /**
@@ -69,13 +71,20 @@ public class BrowseDirectories {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
     }
+
+    BrowseDirectories() {
+        System.out.println("Default Constructor");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+    }
     
     public void launch(final Map<String, String> confInfo) {
         
+         
         // Depending upon mounted image(Windows or Linux)
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
         
-        //System.out.println("############# : " + "On the second window");
+        System.out.println("############# : " + "On the Browse directory  window");
         
        //By default disable the text field from table
         for(Directories listComp : list) {
@@ -197,13 +206,13 @@ public class BrowseDirectories {
                                     list.add(dir);                                
                                 }
                             } else {
-                                new ConfigurationInformation(primaryStage).showWarningPopup("Directory Already Selected !!");
+                                new CreateImage(primaryStage).showWarningPopup("Directory Already Selected !!");
                             }   
                         } else {
-                            new ConfigurationInformation(primaryStage).showWarningPopup("Please select a valid directory");
+                            new CreateImage(primaryStage).showWarningPopup("Please select a valid directory");
                         }
                     } else {
-                        new ConfigurationInformation(primaryStage).showWarningPopup("Directory does not belong to VM image");
+                        new CreateImage(primaryStage).showWarningPopup("Directory does not belong to VM image");
                     }                
                 } catch(Exception ex) {
                     //System.out.println("Not selected anything");
@@ -233,11 +242,11 @@ public class BrowseDirectories {
                     }
                 }
                 if(!isDirExist) {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Directory does not exist !!");
+                    new CreateImage(primaryStage).showWarningPopup("Directory does not exist !!");
                 //} else if(dirList.isEmpty()) {
                     //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
                 } else if(!isProper) {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Please enter the custom file formats !!");
+                    new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                 } else {
                     // Add entry in confInfo for hidden file check
                     confInfo.put(Constants.HIDDEN_FILES, String.valueOf(includeHiddenFiles.isSelected()));
@@ -251,14 +260,8 @@ public class BrowseDirectories {
                     int exitCode = MountVMImage.unmountImage(mountPath);
                     //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
 
-                    if (manifestFileLocation != null) {
-                        // Show the manifest file location
-                        new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
-                    } else {
-                        //System.out.println("Error in creating the manifest file");
-                        logger.log(Level.SEVERE, "Error in creating the manifest file");
-			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-                    }
+                  primaryStage.setScene(firstWindowScene);
+                    
                 }
             }
         });
