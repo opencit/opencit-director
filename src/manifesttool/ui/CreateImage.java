@@ -42,7 +42,8 @@ import manifesttool.utils.GenerateManifest;
 import manifesttool.utils.LoggerUtility;
 import manifesttool.utils.MHUtilityOperation;
 import manifesttool.utils.MountVMImage;
-import manifesttool.utils.UploadToGlance;
+import manifesttool.utils.GlanceImageStoreImpl;
+import manifesttool.utils.ImageStoreException;
 
 /**
  *
@@ -306,14 +307,18 @@ public class CreateImage {
 
             @Override
             public void handle(ActionEvent t) {
-                //Generate the Manifest, encrypt the image
-                String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
+                try {
+                    //Generate the Manifest, encrypt the image
+                    String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
 //                String message=EncryptImage(manifestFileLocation);
 //                showUploadSuccessMessage(createImageStage, message);
-                
-                //Upload to the Glance
-                String message =UploadNow(manifestFileLocation);
-                showUploadSuccessMessage(createImageStage, message);
+                    
+                    //Upload to the Glance
+                    String message =UploadNow(manifestFileLocation);
+                    showUploadSuccessMessage(createImageStage, message);
+                } catch (ImageStoreException ex) {
+                    Logger.getLogger(CreateImage.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
         });
@@ -398,11 +403,10 @@ public class CreateImage {
     }
     
     
-    private String UploadNow(String manifestFileLocation){
+    private String UploadNow(String manifestFileLocation) throws ImageStoreException{
         Map<String, String> customerInfo = writeToMap();
                 String message="";
                 UserConfirmation userObj=new UserConfirmation();
-                UploadToGlance uploadGlanceObj=new UploadToGlance();
                 if (customerInfo != null) { 
                     if(customerInfo.get(Constants.IS_ENCRYPTED)=="true"){
                         boolean isEncrypted = true;
@@ -448,7 +452,7 @@ public class CreateImage {
                         customerInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
                     }
                     System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
-//                     message=uploadGlanceObj.uploadManifest(manifestFileLocation);
+//                     message=uploadGlanceObj.uploadTrustPolicy(manifestFileLocation);
 //                     System.out.println("PSDebug message from Upload Glance Manifest:" + message);
                      message=userObj.setImagePropertiesAndUploadToGlance(customerInfo, manifestFileLocation, isEncrypted,createImageStage);
                      System.out.println("PSDebug message from Upload Glance:" + message);
