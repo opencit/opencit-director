@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.intel.mtwilson.trust.director.ui;
+package manifesttool.ui;
 
 import java.io.File;
 import java.util.Map;
@@ -23,9 +23,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import com.intel.mtwilson.trust.director.utils.GenerateManifest;
-import com.intel.mtwilson.trust.director.utils.LoggerUtility;
-import com.intel.mtwilson.trust.director.utils.MountVMImage;
+import manifesttool.utils.GenerateManifest;
+import manifesttool.utils.LoggerUtility;
+import manifesttool.utils.MountVMImage;
 
 /**
  *
@@ -182,10 +182,11 @@ public class AMIImageInformation {
                     }
                     
                     if(includeImageHash) {
-                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
+                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
+//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
                         if (manifestFileLocation != null) {
                             // Show the manifest file location
-                            new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
+//                            new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
                         } else {
                             //System.out.println("Error in creating the manifest file");
                             logger.log(Level.SEVERE, "Error in creating the manifest file");
@@ -193,19 +194,19 @@ public class AMIImageInformation {
                     } else {
                         int exitCode = MountVMImage.mountImage(imageLocationTField.getText());
                         if( exitCode == 0) {
-                            BrowseDirectories secondWindow = new BrowseDirectories(primaryStage);
-                            secondWindow.launch(confInfo);                        
+//                            BrowseDirectories secondWindow = new BrowseDirectories(primaryStage);
+//                            secondWindow.launch(confInfo);                        
                         } else {
                             //System.out.println("Exiting ....");
                             //System.exit(exitCode);
                             logger.log(Level.SEVERE, "Error while mounting the image .. Exiting ....");
                             String warningMessage = "Error while mounting the image .. Exiting ....";
-                            new ConfigurationInformation(primaryStage).showWarningPopup(warningMessage);
+//                            new ConfigurationInformation(primaryStage).showWarningPopup(warningMessage);
                             System.exit(exitCode);
                         }  
                     }                 
                 } else {
-                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the VM Disk Image Location !!!");
+//                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the VM Disk Image Location !!!");
                 }
             }
         });  

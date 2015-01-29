@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.trust.director.utils;
+package manifesttool.utils;
 
-import com.intel.mtwilson.trust.director.ui.Directories;
+import manifesttool.ui.Directories;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.intel.mtwilson.trust.director.ui.Constants;
+import manifesttool.ui.Constants;
 
 /**
  *
@@ -91,9 +91,9 @@ public class GenerateHash {
         }     
         
         // Write to the manifest file
-        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
-
-        return fileLocation;
+//        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
+           new GenerateManifest().RetrieveFileHash(dirAndFilesMapping, confInfo);
+          return "Success"; //fileLocation;
     }
     
     // Set the file filter value - * = All_Files, binary = Executables, extensions = Custom Extensions

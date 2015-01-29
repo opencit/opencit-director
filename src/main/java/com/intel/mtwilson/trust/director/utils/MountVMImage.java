@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.intel.mtwilson.trust.director.utils;
+package manifesttool.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.intel.mtwilson.trust.director.ui.Constants;
-import com.intel.mtwilson.trust.director.ui.UserConfirmation;
+import manifesttool.ui.Constants;
+import manifesttool.ui.UserConfirmation;
 
 /**
  *
@@ -23,7 +23,7 @@ public class MountVMImage {
     static {
         LoggerUtility.setHandler(logger);
     }
-    private static final String mountScript = "/opt/trustdirector/resources/mount_vm_image.sh";
+    private static final String mountScript = "./resources/mount_vm_image.sh";
     
     public static int mountImage(String imagePath) {
         
@@ -59,7 +59,6 @@ public class MountVMImage {
         } catch (InterruptedException | IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        //System.out.println(output.toString());
         logger.info(output.toString());
         new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
         logger.info("Exec command output : " + output.toString());

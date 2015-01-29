@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.intel.mtwilson.trust.director.utils;
+package manifesttool.utils;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -25,7 +25,7 @@ public class LoggerUtility {
     
     public static void initializeHandler() {
         try {
-            fileHandler = new FileHandler("/opt/trustdirector/log/manifest-tool.log",true);
+            fileHandler = new FileHandler("./log/manifest-tool.log",true);
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
         } catch (IOException ex) {
