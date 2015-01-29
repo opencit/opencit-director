@@ -15,6 +15,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,6 +30,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import manifesttool.ui.Constants;
+import manifesttool.ui.CreateImage;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,26 +48,41 @@ public class GenerateManifest {
     static {
         LoggerUtility.setHandler(logger);
     }    
-    
-    // Write the hash value to xml file
-    public String writeToXMLManifest(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo) {
-        String trustPolicy = null;
-        if(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS))) {
+    public static Map<String, LinkedHashMap<String, String>> dirFilesHashMapping = new HashMap<>();
+    public static Map<String, String> configInfo=new HashMap<>();
+    public static boolean manifestFlag=false;
+
+// Write the hash value to xml file
+    public String writeToXMLManifest() { 
+    String manifestTargetLocation="/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+    String imagePathDelimiter="/";
+    int beginIndex=0;
+    int endIndex;
+    String trustPolicy=null;
+    if(Boolean.valueOf(configInfo.get(Constants.IS_WINDOWS))) {
             mountPath = mountPath + "/";
         }
         
-        if(dirAndFilesMapping != null) {
-            logger.info("Calculated hash of : " + dirAndFilesMapping.size() + " directories");
+        if(dirFilesHashMapping != null) {
+            logger.info("Calculated hash of : " + dirFilesHashMapping.size() + " directories");
         }
         
+        String manifestStorage=configInfo.get(Constants.IMAGE_LOCATION);
+        endIndex=manifestStorage.lastIndexOf(imagePathDelimiter);
+        manifestStorage=manifestStorage.substring(beginIndex, endIndex);
+                
         // Target location of the manifest file
-        String targetLocation = "/root/manifest_files/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-
+        String targetLocation= manifestStorage + manifestTargetLocation;
+//        System.out.println("Target location is:" + targetLocation);
+       
+        
+        
         // Create the "/root/manifest_files" directory if not present
         File manifestDir = new File("/root/manifest_files");
         if(!manifestDir.exists()) {
             manifestDir.mkdir();
         }
+        
         
         // This map is used to calculate the Image Hash
         Map<String, String> dirAndAggregateHash = new LinkedHashMap<>();
@@ -73,8 +91,8 @@ public class GenerateManifest {
         // Initialize MessageDigest
         MessageDigest md = null;
         try {
-            md = MessageDigest.getInstance(confInfo.get(Constants.HASH_TYPE));
-        } catch (NoSuchAlgorithmException ex) {
+            md = MessageDigest.getInstance(configInfo.get(Constants.HASH_TYPE));
+          } catch (NoSuchAlgorithmException ex) {
             logger.log(Level.SEVERE, null, md);
         }
         
@@ -94,24 +112,33 @@ public class GenerateManifest {
             manifestVersion.setValue("1.1");
             rootElement.setAttributeNode(manifestVersion);
             
-            Element custId = doc.createElement("Customer_ID");
-            custId.appendChild(doc.createTextNode(confInfo.get(Constants.CUSTOMER_ID)));
-            headers.appendChild(custId);
+            
+            Element imageEncryption = doc.createElement("Image_Encryption");
+            imageEncryption.appendChild(doc.createTextNode(configInfo.get(Constants.IS_ENCRYPTED)));
+            headers.appendChild(imageEncryption);
             
             Element imageId = doc.createElement("Image_ID");
-            imageId.appendChild(doc.createTextNode(confInfo.get(Constants.IMAGE_ID)));
+            imageId.appendChild(doc.createTextNode(configInfo.get(Constants.IMAGE_ID)));
             headers.appendChild(imageId);
             
             Element launchPolicy = doc.createElement("Launch_Policy");
-            launchPolicy.appendChild(doc.createTextNode(confInfo.get(Constants.POLICY_TYPE)));
+            //TODO Remove temporary hack
+            String policy = configInfo.get(Constants.POLICY_TYPE);
+            if(policy.equalsIgnoreCase("MeasureOnly")){
+                policy = "Audit";
+            }
+            else{
+                policy = "Enforce";
+            }
+            launchPolicy.appendChild(doc.createTextNode(policy));
             headers.appendChild(launchPolicy);
             
             Element hashType = doc.createElement("Hash_Type");
-            hashType.appendChild(doc.createTextNode(confInfo.get(Constants.HASH_TYPE)));
+            hashType.appendChild(doc.createTextNode(configInfo.get(Constants.HASH_TYPE)));
             headers.appendChild(hashType);
-            
+                      
             Element hiddenFiles = doc.createElement("Hidden_Files");
-            hiddenFiles.appendChild(doc.createTextNode(confInfo.get(Constants.HIDDEN_FILES)));
+            hiddenFiles.appendChild(doc.createTextNode(configInfo.get(Constants.HIDDEN_FILES)));
             headers.appendChild(hiddenFiles);
             
             Element fileHashes = doc.createElement("File_Hashes");
@@ -119,14 +146,14 @@ public class GenerateManifest {
             // Hash of kernel and initrd (Only for ami images)
             String kernelHashValue = null;
             String initrdHashValue = null;
-            if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) {
+            if(configInfo.containsKey(Constants.KERNEL_PATH) && configInfo.containsKey(Constants.INITRD_PATH)) {
                 Element kernelHash = doc.createElement("Kernel_Hash");
-                kernelHashValue = getFileHash(new File(confInfo.get(Constants.KERNEL_PATH)), md);
+                kernelHashValue = getFileHash(new File(configInfo.get(Constants.KERNEL_PATH)), md);
                 kernelHash.appendChild(doc.createTextNode(kernelHashValue));
                 fileHashes.appendChild(kernelHash);
 
                 Element initrdHash = doc.createElement("Initrd_Hash");
-                initrdHashValue = getFileHash(new File(confInfo.get(Constants.INITRD_PATH)), md);
+                initrdHashValue = getFileHash(new File(configInfo.get(Constants.INITRD_PATH)), md);
 
                 initrdHash.appendChild(doc.createTextNode(initrdHashValue));
                 fileHashes.appendChild(initrdHash);
@@ -136,7 +163,7 @@ public class GenerateManifest {
                 //dirAndAggregateHash.put(confInfo.get(Constants.INITRD_PATH), initrdHashValue);
             }
             
-            if(dirAndFilesMapping != null) {
+            if(dirFilesHashMapping != null) {
                 // Add the "Measurement_Exclude_Files" tag in the manifest
                 Element excludeFiles = doc.createElement("Measurement_Exclude_Files");
                 try {
@@ -158,14 +185,14 @@ public class GenerateManifest {
                 fileHashes.appendChild(excludeFiles);
                 
                 // Iterate through all directories and add the "Dir" tag in the manifest
-                for (Map.Entry pairs : dirAndFilesMapping.entrySet()) {
+                for (Map.Entry pairs : dirFilesHashMapping.entrySet()) {
                     logger.info("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
-                    logger.info("Size before excluding files : " + dirAndFilesMapping.get(pairs.getKey()).size());
-                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
-                    System.out.println("Size before excluding files : " + dirAndFilesMapping.get(pairs.getKey()).size());
+                    logger.info("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
+//                    System.out.println("Dir Name : " + pairs.getKey().toString().split("::")[0].replace(mountPath, ""));
+//                    System.out.println("Size before excluding files : " + dirFilesHashMapping.get(pairs.getKey()).size());
                     
                     // Exclude the files from measurement
-                    LinkedHashMap<String, String> modifiedFileAndHashMap = (LinkedHashMap)excludeFilesFromMeasurement(dirAndFilesMapping.get(pairs.getKey()));
+                    LinkedHashMap<String, String> modifiedFileAndHashMap = (LinkedHashMap)excludeFilesFromMeasurement(dirFilesHashMapping.get(pairs.getKey()));
                     logger.info("Size after excluding files : " + modifiedFileAndHashMap.size());
                     System.out.println("Size after excluding files : " + modifiedFileAndHashMap.size());
                     
@@ -207,15 +234,15 @@ public class GenerateManifest {
                 }
 		// Add kernel and initrd hash to map for final image hash
                 if((initrdHashValue != null) && (kernelHashValue != null)) {
-                    dirAndAggregateHash.put(confInfo.get(Constants.KERNEL_PATH), kernelHashValue);
-                    dirAndAggregateHash.put(confInfo.get(Constants.INITRD_PATH), initrdHashValue);
+                    dirAndAggregateHash.put(configInfo.get(Constants.KERNEL_PATH), kernelHashValue);
+                    dirAndAggregateHash.put(configInfo.get(Constants.INITRD_PATH), initrdHashValue);
                 }
                 
                 imageHash = getCumulativeHash((LinkedHashMap<String, String>) dirAndAggregateHash, md);
                 
             } else {
                 
-                imageHash = getFileHash(new File(confInfo.get(Constants.IMAGE_LOCATION)), md);
+                imageHash = getFileHash(new File(configInfo.get(Constants.IMAGE_LOCATION)), md);
             }
 
             Element imageHashTag = doc.createElement("Image_Hash");
@@ -234,6 +261,7 @@ public class GenerateManifest {
             StringWriter writter = new StringWriter();
             transformer.transform(source, new StreamResult(writter));
             trustPolicy = writter.toString();
+            System.out.println("Trust Policy is" + trustPolicy.toString());
             System.out.println("File saved at : " + targetLocation);
             logger.info("Manifest file saved at " + targetLocation);
 
@@ -243,7 +271,9 @@ public class GenerateManifest {
 
             String fileHash = getFileHash(new File(targetLocation), md);
             String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
-            String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.Mt_WILSON_IP), confInfo.get(Constants.Mt_WILSON_PORT), confInfo.get(Constants.IMAGE_ID), trustPolicy);
+            System.out.println("Signing Mt wilson image ID" + configInfo.get(Constants.IMAGE_ID));
+            System.out.println("Trust Policy is"+ trustPolicy);
+            String signedTrustPolicy = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), trustPolicy);
             if(signedTrustPolicy == null) {
                 logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");
                 System.out.println("Deleting the trustPolicy file " + targetLocation);
@@ -265,13 +295,54 @@ public class GenerateManifest {
         } catch (IOException ex) {
             Logger.getLogger(GenerateManifest.class.getName()).log(Level.SEVERE, null, ex);
         }
-   
+        
+        
+//        // Sign manifest with Mt. Wilson
+//        // This part is commented because as of now IMVM doesn't verify the Mt. Wilson signature
+//
+//        String fileHash = getFileHash(new File(targetLocation), md);
+//        
+//        String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
+//        String signature = new SignWithMtWilson().signManifest(configInfo.get(Constants.IMAGE_ID), base64Hash);
+//        if(signature == null) {
+//            logger.log(Level.SEVERE, "Failed in signing the manifest with Mt Wilson");
+////	    System.out.println("Deleting the manifest file " + targetLocation);
+//	    new File(targetLocation).delete();
+//            return null;
+//        }
+//        new FileUtilityOperation().writeToFile(new File(targetLocation), signature, true);
+        
+//        configInfo.clear();
+//        dirFilesHashMapping.clear();
+        
         return targetLocation;
     }
     
-    public String writeToXMLManifest(Map<String, String> confInfo) {
-        String targetLocation = writeToXMLManifest(null, confInfo);
-        return targetLocation;       
+    //PS:Helper Method
+    public void RetrieveFileHash(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo){
+        
+        
+        if(dirAndFilesMapping!=null)
+        {
+            dirFilesHashMapping.putAll(dirAndFilesMapping);
+//            Iterator it = dirFilesHashMapping.entrySet().iterator();
+//                    System.out.println("PSDebug Retrieve function: DirFile Hash Values Are ");
+//                    while (it.hasNext()) {
+//                        Map.Entry pairs = (Map.Entry) it.next();
+//                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
+//                    }
+        }
+        if(confInfo!=null)
+        {
+            configInfo.putAll(confInfo);
+//            Iterator it = configInfo.entrySet().iterator();
+//                    System.out.println("PSDebug Retrieve func configInfo Values Are ");
+//                    while (it.hasNext()) {
+//                        Map.Entry pairs = (Map.Entry) it.next();
+//                        System.out.println(pairs.getKey().toString() + " : " + pairs.getValue().toString());
+//                    }
+        }
+        manifestFlag=true;
     }
 
     // Calculates the aggregate hash

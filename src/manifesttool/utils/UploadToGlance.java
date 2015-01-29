@@ -54,14 +54,14 @@ public class UploadToGlance {
         manifestProperties.put(Constants.CONTAINER_FORMAT, "ari");
         manifestProperties.put(Constants.IS_PUBLIC, "true");
         
-        glanceID = uploadFileToGlance(manifestLocation, manifestProperties);
+        glanceID = uploadFileToGlance(manifestLocation,manifestLocation,manifestProperties);
         return glanceID;
     }
     
-    public String uploadImage(String imageLocation, Map<String, String> imageProperties) {
-        
+    public String uploadImage(String imageLocation, String manifestLocation, Map<String, String> imageProperties) {
+        System.out.println("PSDebug Image location is:" + imageLocation);
         String glanceID;
-        glanceID = uploadFileToGlance(imageLocation, imageProperties);
+        glanceID = uploadFileToGlance(imageLocation,manifestLocation,imageProperties);
         return glanceID;
     }
     
@@ -83,7 +83,7 @@ public class UploadToGlance {
         return postRequest;
     }
     
-    private String uploadFileToGlance(String fileLocation, Map<String, String> fileProperties) {
+    private String uploadFileToGlance(String fileLocation, String manifestLocation, Map<String, String> fileProperties) {
         String id = null;
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -92,10 +92,14 @@ public class UploadToGlance {
             String authToken = getAuthToken();
             postRequest.setHeader("X-Auth-Token", authToken);
             InputStream is = new FileInputStream(new File(fileLocation));
-
+                        
             HttpEntity input = new InputStreamEntity(is);
-            
             postRequest.setEntity(input);
+            System.out.println("PostRequest is:" + postRequest.toString().trim());
+//            MultipartEntity reqEntity;            
+//            reqEntity = new MultipartEntity();
+            
+            
             HttpResponse response = httpClient.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != 201) {
                 logger.log(Level.SEVERE, null, new RuntimeException("Failed : HTTP error code : "
@@ -105,12 +109,14 @@ public class UploadToGlance {
                         new InputStreamReader((response.getEntity().getContent())));
  
             String output;
+            
             StringBuffer sb = new StringBuffer();
             logger.info("Output from Server ....");
             while ((output = br.readLine()) != null) {
                 sb.append(output);
                 logger.info(output);
             }
+            System.out.println("PSDebug Output from Glance is:" + output);
             
             JSONObject obj = new JSONObject(sb.toString());
             JSONObject property = obj.getJSONObject("image");

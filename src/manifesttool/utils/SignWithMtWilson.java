@@ -38,9 +38,11 @@ import org.json.XML;
  */
 public class SignWithMtWilson {
     private static final Logger logger = Logger.getLogger(SignWithMtWilson.class.getName());
-    private String mtWilsonIP;
-    private String mtWilsonPort;
+//    private String mtWilsonIP;
+//    private String mtWilsonPort;
     
+    private String mtWilsonIP = ConfigProperties.getProperty(Constants.Mt_WILSON_IP);
+    private String mtWilsonPort = ConfigProperties.getProperty(Constants.Mt_WILSON_PORT);
     private String mtWilsonUserName = ConfigProperties.getProperty(Constants.Mt_WILSON_USER_NAME);
     private String mtWilsonPassword = ConfigProperties.getProperty(Constants.Mt_WILSON_PASSWORD);
     
@@ -48,9 +50,9 @@ public class SignWithMtWilson {
     static {
         LoggerUtility.setHandler(logger);
     }
-    public String signManifest(String ip, String port, String imageID, String trustPolicy) {
-        this.mtWilsonIP = ip;
-        this.mtWilsonPort = port;
+    public String signManifest(String imageID, String trustPolicy) {
+//        this.mtWilsonIP = ip;
+//        this.mtWilsonPort = port;
         String response = getMtWilsonResponse(trustPolicy);
         logger.info("Signed the manifest with Mt. Wilson\n" + "Mt. Wilson response is :\n" + response);
         
@@ -62,9 +64,11 @@ public class SignWithMtWilson {
         String mtWisontResponse = null;
         try {
             System.out.println("Trust Policy is : " + trustPolicy);
+            logger.info("Trust Policy is");
+            logger.info(trustPolicy);
             
-            String url = "https://" + this.mtWilsonIP + ":" + this.mtWilsonPort + "/mtwilson/v2/manifest-signature";
-            
+            String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
+            System.out.println("MTwilson URL is" + url);
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);
             HttpEntity entity = new ByteArrayEntity(trustPolicy.getBytes("UTF-8"));
@@ -77,13 +81,14 @@ public class SignWithMtWilson {
                 return null;
             }
             String encryptedUserNameAndPassword = new FileUtilityOperation().base64Encode(mtWilsonUserName + ":" + mtWilsonPassword);
+            
             postRequest.setHeader("Authorization", "Basic " + encryptedUserNameAndPassword);
             HttpResponse response = httpClient.execute(postRequest);
+            System.out.println("HTTP Response is" + response);
             if (response.getStatusLine().getStatusCode() != 200) {
                 logger.log(Level.SEVERE, null, new RuntimeException(response.getStatusLine().toString()));
                 return null;
             }
-
             BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
             String output = null;
             StringBuffer sb = new StringBuffer();
