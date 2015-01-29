@@ -91,9 +91,9 @@ public class GenerateHash {
         }     
         
         // Write to the manifest file
-        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
-
-        return fileLocation;
+//        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
+           new GenerateManifest().RetrieveFileHash(dirAndFilesMapping, confInfo);
+          return "Success"; //fileLocation;
     }
     
     // Set the file filter value - * = All_Files, binary = Executables, extensions = Custom Extensions

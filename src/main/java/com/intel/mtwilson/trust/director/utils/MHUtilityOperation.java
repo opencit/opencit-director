@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
@@ -15,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.intel.mtwilson.trust.director.ui.Constants;
 import com.intel.mtwilson.trust.director.utils.MountVMImage;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,7 +38,7 @@ public class MHUtilityOperation {
     
     private String mhKeyName;
     //private String mhJarLocation = ConfigProperties.getProperty(Constants.MH_JAR_LOCATION);
-    private String mhJarLocation = "/opt/trustdirector/resources/client-0.1-SNAPSHOT-with-dependencies.jar";
+    private String mhJarLocation = "./resources/client-0.1-SNAPSHOT-with-dependencies.jar";
     private String keystorePasswd = ConfigProperties.getProperty(Constants.MH_KEYSTORE_PASSWD);
     private String keystoreLocation = ConfigProperties.getProperty(Constants.MH_KEYSTORE_LOCATION);
     private String tlsSSLPasswd = ConfigProperties.getProperty(Constants.MH_TLS_SSL_PASSWD);
@@ -43,9 +46,10 @@ public class MHUtilityOperation {
     
     
     public String startMHProcess(String fileLocation, String mhKeyName) {
-        this.mhKeyName = mhKeyName;
-	 System.out.println("MH Keystore Location : " + keystoreLocation);
-        String expScriptName = "/opt/trustdirector/resources/login";
+        mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+	this.mhKeyName = mhKeyName;
+	System.out.println("MH Keystore Location : " + keystoreLocation);
+        String expScriptName = "./resources/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
         int exitCode;
@@ -54,7 +58,7 @@ public class MHUtilityOperation {
         if(encLocation == null) {
             return null;
         }
-        File passFileLocation = new File("/opt/trustdirector/vmpass.txt");
+        File passFileLocation = new File("./vmpass.txt");
         fileOpt.writeToFile(passFileLocation, randomPassword, false);
         
         //String mhJarLocation = "/root/mhagent/client-0.1-SNAPSHOT-with-dependencies.jar";
@@ -62,7 +66,7 @@ public class MHUtilityOperation {
         
         // Encrypt the VM password and send it to the key management service with a label”
         String command = "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + passFileLocation;
-        File tempCommandFile = new File("/opt/trustdirector/runme");
+        File tempCommandFile = new File("./runme");
         fileOpt.writeToFile(tempCommandFile, command, false);
         
         String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;
@@ -169,4 +173,6 @@ public class MHUtilityOperation {
         }
         return id;
     }
+    
+    
 }
