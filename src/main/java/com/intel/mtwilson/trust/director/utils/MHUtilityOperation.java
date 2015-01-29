@@ -1,4 +1,4 @@
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,8 +14,8 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import manifesttool.ui.Constants;
-import manifesttool.utils.MountVMImage;
+import com.intel.mtwilson.trust.director.ui.Constants;
+import com.intel.mtwilson.trust.director.utils.MountVMImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

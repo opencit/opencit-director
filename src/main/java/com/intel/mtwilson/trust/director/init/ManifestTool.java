@@ -2,13 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.init;
+package com.intel.mtwilson.trust.director.init;
 
-import manifesttool.ui.ConfigurationInformation;
+import com.intel.mtwilson.trust.director.ui.ConfigurationInformation;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import manifesttool.utils.ConfigProperties;
-import manifesttool.utils.LoggerUtility;
+import com.intel.mtwilson.trust.director.utils.ConfigProperties;
+import com.intel.mtwilson.trust.director.utils.LoggerUtility;
 
 /**
  *

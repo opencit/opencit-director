@@ -1,7 +1,7 @@
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
-import manifesttool.utils.UploadToGlance;
-import manifesttool.utils.GenerateHash;
+import com.intel.mtwilson.trust.director.utils.UploadToGlance;
+import com.intel.mtwilson.trust.director.utils.GenerateHash;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,10 +26,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import manifesttool.utils.ConfigProperties;
-import manifesttool.utils.FileUtilityOperation;
-import manifesttool.utils.LoggerUtility;
-import manifesttool.utils.MHUtilityOperation;
+import com.intel.mtwilson.trust.director.utils.ConfigProperties;
+import com.intel.mtwilson.trust.director.utils.FileUtilityOperation;
+import com.intel.mtwilson.trust.director.utils.LoggerUtility;
+import com.intel.mtwilson.trust.director.utils.MHUtilityOperation;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

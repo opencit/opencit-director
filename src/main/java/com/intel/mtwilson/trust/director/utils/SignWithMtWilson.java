@@ -1,10 +1,10 @@
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import java.io.BufferedReader;
-import manifesttool.utils.GenerateHash;
+import com.intel.mtwilson.trust.director.utils.GenerateHash;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,8 +15,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import manifesttool.ui.Constants;
-import manifesttool.ui.UserConfirmation;
+import com.intel.mtwilson.trust.director.ui.Constants;
+import com.intel.mtwilson.trust.director.ui.UserConfirmation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -29,8 +29,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import manifesttool.ui.Constants;
-import manifesttool.ui.CreateImage;
+import com.intel.mtwilson.trust.director.ui.Constants;
+import com.intel.mtwilson.trust.director.ui.CreateImage;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

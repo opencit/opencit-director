@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;

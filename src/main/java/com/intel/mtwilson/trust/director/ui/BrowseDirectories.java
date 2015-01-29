@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
-import manifesttool.utils.GenerateHash;
-import manifesttool.utils.MountVMImage;
-import manifesttool.ui.ConfigurationInformation;
-import manifesttool.ui.Directories;
+import com.intel.mtwilson.trust.director.utils.GenerateHash;
+import com.intel.mtwilson.trust.director.utils.MountVMImage;
+import com.intel.mtwilson.trust.director.ui.ConfigurationInformation;
+import com.intel.mtwilson.trust.director.ui.Directories;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,9 +35,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import static manifesttool.ui.AMIImageInformation.logger;
-import manifesttool.utils.GenerateManifest;
-import manifesttool.utils.LoggerUtility;
+import static com.intel.mtwilson.trust.director.ui.AMIImageInformation.logger;
+import com.intel.mtwilson.trust.director.utils.GenerateManifest;
+import com.intel.mtwilson.trust.director.utils.LoggerUtility;
 
 /**
  *

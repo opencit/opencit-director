@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
-import manifesttool.ui.Directories;
+import com.intel.mtwilson.trust.director.ui.Directories;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import manifesttool.ui.Constants;
+import com.intel.mtwilson.trust.director.ui.Constants;
 
 /**
  *

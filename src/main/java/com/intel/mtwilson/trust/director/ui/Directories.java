@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
 
 import javafx.scene.control.CheckBox;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
@@ -35,14 +35,14 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import static manifesttool.ui.AMIImageInformation.logger;
-import manifesttool.utils.ConfigProperties;
-import manifesttool.utils.FileUtilityOperation;
-import manifesttool.utils.GenerateManifest;
-import manifesttool.utils.LoggerUtility;
-import manifesttool.utils.MHUtilityOperation;
-import manifesttool.utils.MountVMImage;
-import manifesttool.utils.UploadToGlance;
+import static com.intel.mtwilson.trust.director.ui.AMIImageInformation.logger;
+import com.intel.mtwilson.trust.director.utils.ConfigProperties;
+import com.intel.mtwilson.trust.director.utils.FileUtilityOperation;
+import com.intel.mtwilson.trust.director.utils.GenerateManifest;
+import com.intel.mtwilson.trust.director.utils.LoggerUtility;
+import com.intel.mtwilson.trust.director.utils.MHUtilityOperation;
+import com.intel.mtwilson.trust.director.utils.MountVMImage;
+import com.intel.mtwilson.trust.director.utils.UploadToGlance;
 
 /**
  *

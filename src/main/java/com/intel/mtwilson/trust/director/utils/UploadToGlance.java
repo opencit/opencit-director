@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package manifesttool.utils;
+package com.intel.mtwilson.trust.director.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import manifesttool.ui.Constants;
-import manifesttool.ui.UserConfirmation;
+import com.intel.mtwilson.trust.director.ui.Constants;
+import com.intel.mtwilson.trust.director.ui.UserConfirmation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;

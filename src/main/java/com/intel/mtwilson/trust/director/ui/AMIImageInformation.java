@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
 import java.io.File;
 import java.util.Map;
@@ -23,9 +23,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import manifesttool.utils.GenerateManifest;
-import manifesttool.utils.LoggerUtility;
-import manifesttool.utils.MountVMImage;
+import com.intel.mtwilson.trust.director.utils.GenerateManifest;
+import com.intel.mtwilson.trust.director.utils.LoggerUtility;
+import com.intel.mtwilson.trust.director.utils.MountVMImage;
 
 /**
  *

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package manifesttool.ui;
+package com.intel.mtwilson.trust.director.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
