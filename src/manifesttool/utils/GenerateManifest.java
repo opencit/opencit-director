@@ -136,8 +136,16 @@ public class GenerateManifest {
             imageId.appendChild(doc.createTextNode(confInfo.get(Constants.IMAGE_ID)));
             headers.appendChild(imageId);
             
-            Element launchPolicy = doc.createElement("Launch_Control_Policy");
-            launchPolicy.appendChild(doc.createTextNode(confInfo.get(Constants.POLICY_TYPE)));
+            Element launchPolicy = doc.createElement("Launch_Policy");
+            //TODO Remove temporary hack
+            String policy = configInfo.get(Constants.POLICY_TYPE);
+            if(policy.equalsIgnoreCase("MeasureOnly")){
+                policy = "Audit";
+            }
+            else{
+                policy = "Enforce";
+            }
+            launchPolicy.appendChild(doc.createTextNode(policy));
             headers.appendChild(launchPolicy);
             
             Element hashType = doc.createElement("Hash_Type");
