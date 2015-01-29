@@ -95,9 +95,9 @@ public class CreateImage {
         
         final FileUtilityOperation op = new FileUtilityOperation();
         
-        ObservableList<String> hashTypeList = FXCollections.observableArrayList(
-            "SHA-256", "SHA1"
-        );
+//        ObservableList<String> hashTypeList = FXCollections.observableArrayList(
+//            "SHA-256", "SHA1"
+//        );
         
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(
             "qcow2", "raw", "vhd", "ami"
@@ -105,7 +105,7 @@ public class CreateImage {
        
         //PS: New label for Create Image window
         Label imageFormat=new Label("Image Format");
-        Label hashType=new Label ("Hash Type");
+//        Label hashType=new Label ("Hash Type");
         Label imagePath=new Label("Image Path");
         Label chooseManifest=new Label("Choose Manifest");
         Label launchPolicy=new Label("Launch Control Policy");
@@ -117,7 +117,7 @@ public class CreateImage {
         imageIDTField = new TextField();
         imageFormatChoiceBox = new ChoiceBox(imageFormatList);
         imageFormatChoiceBox.setValue("qcow2");
-        hashTypeChoiceBox=new ChoiceBox(hashTypeList);
+//        hashTypeChoiceBox=new ChoiceBox(hashTypeList);
         hashTypeChoiceBox.setValue("SHA-256");
 
         Button browseImage = new Button("Browse");
@@ -156,8 +156,8 @@ public class CreateImage {
         grid.add(imageFormat, 0, 1);
         grid.add(imageFormatChoiceBox, 1, 1);   
               
-        grid.add(hashType, 0, 2);
-        grid.add(hashTypeChoiceBox, 1, 2);
+//        grid.add(hashType, 0, 2);
+//        grid.add(hashTypeChoiceBox, 1, 2);
         
         grid.add(imageID, 0, 3);
         grid.add(imageIDTField, 1,3);
