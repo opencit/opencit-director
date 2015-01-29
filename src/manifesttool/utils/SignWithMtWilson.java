@@ -63,12 +63,8 @@ public class SignWithMtWilson {
     private String getMtWilsonResponse(String trustPolicy) {
         String mtWisontResponse = null;
         try {
-            System.out.println("Trust Policy is : " + trustPolicy);
-            logger.info("Trust Policy is");
-            logger.info(trustPolicy);
-            
             String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
-            System.out.println("MTwilson URL is" + url);
+            logger.info("MTwilson URL is" + url);
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);
             HttpEntity entity = new ByteArrayEntity(trustPolicy.getBytes("UTF-8"));
@@ -84,7 +80,6 @@ public class SignWithMtWilson {
             
             postRequest.setHeader("Authorization", "Basic " + encryptedUserNameAndPassword);
             HttpResponse response = httpClient.execute(postRequest);
-            System.out.println("HTTP Response is" + response);
             if (response.getStatusLine().getStatusCode() != 200) {
                 logger.log(Level.SEVERE, null, new RuntimeException(response.getStatusLine().toString()));
                 return null;
@@ -97,12 +92,8 @@ public class SignWithMtWilson {
                 sb.append(output);
             }
                 
-            //mapper = new ObjectMapper();
-            //mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
-            //jsonObj = new JSONObject(sb.toString());
-            //mtWisontResponse = XML.toString(jsonObj);
+
             mtWisontResponse = sb.toString();
-            System.out.println(mtWisontResponse);
                 
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, null, e);

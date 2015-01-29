@@ -26,6 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import static manifesttool.ui.CreateImage.manifestFlag;
 import manifesttool.utils.ConfigProperties;
 import manifesttool.utils.FileUtilityOperation;
 import manifesttool.utils.LoggerUtility;
@@ -49,6 +50,7 @@ public class UserConfirmation {
     static {
         LoggerUtility.setHandler(logger);
     }
+    
 //    public void showLocation(final Stage primaryStage, final String fileLocation, final Map<String, String> confInfo) {
 //        
 //        primaryStage.setTitle("Manifest Location");
@@ -65,180 +67,68 @@ public class UserConfirmation {
 //            info = "Host Manifest File Location : \"" + fileLocation + "\"" + "\n\n" + "Rootfs Location : \"" + confInfo.get(Constants.IMAGE_LOCATION) + "\"";
 //        }
 //        
-//        Label message = new Label(info);
-//        message.setFont(new Font("Arial", 14));
-//        Button okButton = new Button("Ok");
-//        okButton.setPrefSize(100, 20);
+//        if(!((hostManifest != null) && (hostManifest.equalsIgnoreCase("true")))) {
+//             glanceUploadConfirmation(primaryStage, fileLocation, confInfo);
+//            } else {
+//	       generateManifesConfirmation(primaryStage,fileLocation);
+//	}
+//           
+//       
 //        
-//        VBox vbox = new VBox();
-//        vbox.setPadding(new Insets(15, 12, 15, 12));
-//        vbox.setSpacing(30);
 //        
-//        vbox.getChildren().add(message);
-//        vbox.getChildren().add(okButton);
-//        
-//        StackPane root = new StackPane();
-//        root.getChildren().add(vbox);
-//        Scene scene = new Scene(root);
-//        primaryStage.setScene(scene);
-//        primaryStage.show();
-//        
-//        okButton.setOnAction(new EventHandler<ActionEvent>() {
-//
-//            @Override
-//            public void handle(ActionEvent arg0) {
-//                primaryStage.close();
-//                if(!((hostManifest != null) && (hostManifest.equalsIgnoreCase("true")))) {
-//                    glanceUploadConfirmation(primaryStage, fileLocation, confInfo);
-//                } else {
-//		    generateManifesConfirmation(primaryStage);
-//		}
-//            }
-//        });
-//   }
+//    }
     
-    private void glanceUploadConfirmation(final Stage primaryStage, final String manifestLocation, final Map<String, String> confInfo) {
+    
+    public void glanceUploadConfirmation(final Stage primaryStage, final String manifestLocation, final Map<String, String> confInfo) {
         primaryStage.setTitle("Upload to Glance");
         String info = "Continue Uploading to Glance . . .";
         Label confirm = new Label(info);
         confirm.setFont(new Font("Arial", 14));
         
-        final RadioButton manifestRB = new RadioButton("Upload Manifest Only");
-        //manifestRB.setSelected(true);
-        final RadioButton encryptImageRB = new RadioButton("Upload Encrypted Image with Manifest");
-        final RadioButton plainImageRB = new RadioButton("Upload Plain Image with Manifest");
-        final ToggleGroup group = new ToggleGroup();
-        manifestRB.setToggleGroup(group);
-        encryptImageRB.setToggleGroup(group);
-        plainImageRB.setToggleGroup(group);  
+        Button saveButton=new Button("Upload Later");
+        Button uploadButton=new Button("Upload");
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setPrefSize(80, 15);
         
-        Button continueButton = new Button("Continue");
-        continueButton.setPrefSize(100, 20);
         
-        Button cancelButton = new Button("I will upload");
-        cancelButton.setPrefSize(100, 20);        
         
-        VBox radioVBox = new VBox();
-        radioVBox.setPadding(new Insets(0, 12, 0, 10));
-        radioVBox.setSpacing(20);
-        //radioVBox.setStyle("-fx-background-color: #336699;");
-        
-        radioVBox.getChildren().add(manifestRB);
-        radioVBox.getChildren().add(encryptImageRB);
-        radioVBox.getChildren().add(plainImageRB);
-        
-        VBox vbox = new VBox();
-        vbox.setSpacing(20);
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        
-        HBox hbox = new HBox();
-        hbox.setPadding(new Insets(15, 12, 15, 12));
-        hbox.setSpacing(35);
-        hbox.setStyle("-fx-background-color: #336699;");
-        
-        hbox.getChildren().addAll(cancelButton, continueButton);
-        
-        vbox.getChildren().add(confirm);
-        vbox.getChildren().add(radioVBox);
-        vbox.getChildren().add(hbox);
-        
-        continueButton.setOnAction(new EventHandler<ActionEvent>() {
-
+//        PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+            
             @Override
             public void handle(ActionEvent t) {
-                if(manifestRB.isSelected()) {
-                    logger.info("Uploading Manifest to glance");
-                    manifestUploadConfirmation(primaryStage, manifestLocation);
-                } else if(encryptImageRB.isSelected()) {
-                    MHUtilityOperation mhOptImage = new MHUtilityOperation();
-
-		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
-                    String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
-                    //String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
-                    if(encryptedImageLocation == null) {
-//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                        System.exit(1);
-                    }
-                    confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
-                    confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
-                    if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) { 
-                        MHUtilityOperation mhOptKernel = new MHUtilityOperation();
-	
-			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                        mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
-                        String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
-                        //String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
-                        if(encryptedKernelPath == null) {
-//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                            System.exit(1);
-                        }
-                        
-			MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
-
-			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                        mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
-                        String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
-                        //String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
-                        if(encryptedInitrdPath == null) {
-//                            new ConfigurationInformation(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                            System.exit(1);
-                        }
-                        confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
-                        confInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
-                        confInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
-                        confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
-                    }
-                    boolean isEncrypted = true;
-                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
-                    showUploadSuccessMessage(primaryStage, message);
-                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
-                } else if(plainImageRB.isSelected()) {
-                    boolean isEncrypted = false;
-                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
-                    showUploadSuccessMessage(primaryStage, message);
-                } else {
-//                    new ConfigurationInformation(primaryStage).showWarningPopup("Plese select an option");
-                }
-            }
-        });
-        
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                MHUtilityOperation mhOptImage = new MHUtilityOperation();
+            MHUtilityOperation mhOptImage = new MHUtilityOperation();
                 primaryStage.close();
 
 		// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
-                String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
-                //String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+                //String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
+                //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+                String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
                 if(encryptedImageLocation == null) {
-//                    new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                    new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                     System.exit(1);
                 }
                 String message = "VM Image Encrypted \n\n Encrypted Image Path : " + encryptedImageLocation + "\n\n"
-                        + "mh_dek_url for image : " + mhOptImage.getDekURL() + "\n\n";
+                        + "Trust Policy Location : " + manifestLocation + "\n\n";
                 if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) { 
                     MHUtilityOperation mhOptKernel = new MHUtilityOperation();
 
 		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
-                    String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
-                    //String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
+                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+                    //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+                    String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
                     if(encryptedKernelPath == null) {
-//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                        new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
                     }
                     
 		    MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
 		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
-                    String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
-                    //String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
+                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+                    //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+                    String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
                     if(encryptedInitrdPath == null) {
-//                        new ConfigurationInformation(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
+                        new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
                     }
                     message = message + "Encrypted Kernel Path : " + encryptedKernelPath + "\n\n"
@@ -249,48 +139,63 @@ public class UserConfirmation {
             }
         });
         
-        StackPane root = new StackPane();
-        root.getChildren().add(vbox);
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-    
-    // Generate the new manifest file for Image
-    private void generateManifesConfirmation(final Stage primaryStage) {
-        primaryStage.setTitle("Generate the New Manifest");
-        String info = "Generate Manifest of New Image ?";
-        Label confirm = new Label(info);
-        confirm.setFont(new Font("Arial", 14));        
-
-        Button continueButton = new Button("Continue");
-        //continueButton.setPrefSize(80, 20);
-        Button cancelButton = new Button("Close");
-        cancelButton.setPrefSize(80, 20);        
-        
-        HBox hbox = new HBox();
-        hbox.setPadding(new Insets(15, 12, 15, 10));
-        hbox.setSpacing(75);
-        hbox.setStyle("-fx-background-color: #336699;");
-        
-        hbox.getChildren().add(continueButton);
-        hbox.getChildren().add(cancelButton);
-        
-        VBox vbox = new VBox();
-        vbox.setSpacing(20);
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        
-        vbox.getChildren().add(confirm);
-        vbox.getChildren().add(hbox);
-        
-        // Handler for "Continue" button
-        continueButton.setOnAction(new EventHandler<ActionEvent>() {
+        //PS: Upload image
+        uploadButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
-            public void handle(ActionEvent arg0) {
-                primaryStage.close();
-//                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-//                window.launch();
+            public void handle(ActionEvent t) {
+                if(confInfo.get(Constants.IS_ENCRYPTED)=="true") {
+                    boolean isEncrypted = true;
+                    String opensslPassword = ConfigProperties.getProperty(Constants.PASSWORD);
+                    MHUtilityOperation mhOptImage = new MHUtilityOperation();
+
+		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                    String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
+                    String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+//                    String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+                    if(encryptedImageLocation == null) {
+                        new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                        System.exit(1);
+                    }
+                    confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
+                    confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
+                    if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) { 
+                        MHUtilityOperation mhOptKernel = new MHUtilityOperation();
+	
+			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                        mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+                        String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+//                        String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
+                        if(encryptedKernelPath == null) {
+                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                            System.exit(1);
+                        }
+                        
+			MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
+
+			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+                        mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+                        String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+//                        String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
+                        if(encryptedInitrdPath == null) {
+                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                            System.exit(1);
+                        }
+                        confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
+                        confInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
+                        confInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
+                        confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
+                    }
+                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
+                    showUploadSuccessMessage(primaryStage, message);
+                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
+                } else if(confInfo.get(Constants.IS_ENCRYPTED)=="false") {
+                    boolean isEncrypted = false;
+                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
+                    showUploadSuccessMessage(primaryStage, message);
+                } else {
+                    new CreateImage(primaryStage).showWarningPopup("Plese select an option");
+                }
             }
         });
         
@@ -300,77 +205,134 @@ public class UserConfirmation {
             @Override
             public void handle(ActionEvent arg0) {
                 primaryStage.close();
+                 ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                window.launch();
+            }
+        });
+        
+        HBox hbox = new HBox();
+        hbox.setPadding(new Insets(15, 12, 15, 12));
+        hbox.setSpacing(35);
+        hbox.setStyle("-fx-background-color: #336699;");
+        
+        hbox.getChildren().addAll(cancelButton, uploadButton,saveButton);
+
+
+        
+        StackPane root = new StackPane();
+        root.getChildren().add(hbox);
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+    
+    // Generate the new manifest file for Image
+    public void generateManifesConfirmation(final Stage primaryStage, final String manifestFileLocation) {
+        primaryStage.setTitle("Save Trust Policy");
+      
+        Button saveButton=new Button("Save");
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setPrefSize(80, 15);
+        
+        
+        HBox hbox = new HBox();
+        hbox.setPadding(new Insets(15, 12, 15, 12));
+        hbox.setSpacing(35);
+        hbox.setStyle("-fx-background-color: #336699;");
+        
+        hbox.getChildren().addAll(cancelButton,saveButton);
+        
+
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+               String message = "Trust Policy Location : " + manifestFileLocation + "\n\n";
+               showUploadSuccessMessage(primaryStage, message); 
+                
+            }
+        });
+        
+        
+        // Handler for "I will Upload" button
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                primaryStage.close();
+                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                window.launch();
             }
         });
         
         StackPane root = new StackPane();
-        root.getChildren().add(vbox);
+        root.getChildren().add(hbox);
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show(); 
     }
     
-    // Upload the manifest file to glance and update the glance image property
-    private void manifestUploadConfirmation(final Stage primaryStage, final String manifestLocation) {
-        primaryStage.setTitle("Upload Manifest to Glance");
-        String info = "Image ID";
-        Label imageIDLabel = new Label(info);
-        
-        final TextField imageIDTField = new TextField();
-        
-        HBox hbox = new HBox();
-        hbox.setPadding(new Insets(15, 12, 15, 10));
-        hbox.setSpacing(10);        
-        
-        hbox.getChildren().addAll(imageIDLabel, imageIDTField);
-        
-        Button continueButton = new Button("Upload Manifest");
-        
-        VBox vbox = new VBox();
-        vbox.setSpacing(10);
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        
-        vbox.getChildren().addAll(hbox, continueButton);
-        
-        continueButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                UploadToGlance glanceObject = new UploadToGlance();
-                
-                if(!new FileUtilityOperation().validateUUID(imageIDTField.getText())) {
-//                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
-                } else {
-                    // Upload manifest to Glance
-                    String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
-                
-                    if(manifestGlanceID == null) {
-                        String message = "Failed to upload the Manifest to Glance .... Exiting";
-                        showUploadSuccessMessage(primaryStage, message);
-                        System.exit(1);
-                    }
-                
-                    // Update Image property
-                    boolean isSuccess = glanceObject.updateImageProperty(imageIDTField.getText(), "x-image-meta-property-manifest_uuid" , manifestGlanceID);
-                
-                    if(!isSuccess) {
-                        String message = "Failed to update the glance image property.....Exiting";
-                        showUploadSuccessMessage(primaryStage, message);
-                        System.exit(1);
-                    }
-                    String message = "Manifest Uploaded to glance " + "\n\n" + "Glance ID is : " + manifestGlanceID;
-                    showUploadSuccessMessage(primaryStage, message);
-                }
-            }
-        });
-        
-        StackPane root = new StackPane();
-        root.getChildren().add(vbox);
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
-        primaryStage.show(); 
-        
-    }
+//    // Upload the manifest file to glance and update the glance image property
+//    private void manifestUploadConfirmation(final Stage primaryStage, final String manifestLocation) {
+//        primaryStage.setTitle("Upload Manifest to Glance");
+//        String info = "Image ID";
+//        Label imageIDLabel = new Label(info);
+//        
+//        final TextField imageIDTField = new TextField();
+//        
+//        HBox hbox = new HBox();
+//        hbox.setPadding(new Insets(15, 12, 15, 10));
+//        hbox.setSpacing(10);        
+//        
+//        hbox.getChildren().addAll(imageIDLabel, imageIDTField);
+//        
+//        Button continueButton = new Button("Upload Manifest");
+//        
+//        VBox vbox = new VBox();
+//        vbox.setSpacing(10);
+//        vbox.setPadding(new Insets(15, 12, 15, 12));
+//        
+//        vbox.getChildren().addAll(hbox, continueButton);
+//        
+//        continueButton.setOnAction(new EventHandler<ActionEvent>() {
+//
+//            @Override
+//            public void handle(ActionEvent t) {
+//                UploadToGlance glanceObject = new UploadToGlance();
+//                
+//                if(!new FileUtilityOperation().validateUUID(imageIDTField.getText())) {
+////                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
+//                } else {
+//                    // Upload manifest to Glance
+//                    String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
+//                
+//                    if(manifestGlanceID == null) {
+//                        String message = "Failed to upload the Manifest to Glance .... Exiting";
+//                        showUploadSuccessMessage(primaryStage, message);
+//                        System.exit(1);
+//                    }
+//                
+//                    // Update Image property
+//                    boolean isSuccess = glanceObject.updateImageProperty(imageIDTField.getText(), "x-image-meta-property-manifest_uuid" , manifestGlanceID);
+//                
+//                    if(!isSuccess) {
+//                        String message = "Failed to update the glance image property.....Exiting";
+//                        showUploadSuccessMessage(primaryStage, message);
+//                        System.exit(1);
+//                    }
+//                    String message = "Manifest Uploaded to glance " + "\n\n" + "Glance ID is : " + manifestGlanceID;
+//                    showUploadSuccessMessage(primaryStage, message);
+//                }
+//            }
+//        });
+//        
+//        StackPane root = new StackPane();
+//        root.getChildren().add(vbox);
+//        Scene scene = new Scene(root);
+//        primaryStage.setScene(scene);
+//        primaryStage.show(); 
+//        
+//    }
     
     // Show the vm image and manifest glance ID
     private void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
@@ -393,7 +355,8 @@ public class UserConfirmation {
             @Override
             public void handle(ActionEvent t) {
                 primaryStage.close();
-                generateManifesConfirmation(primaryStage);
+                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                window.launch();
             }
         });
 
@@ -462,7 +425,6 @@ public class UserConfirmation {
             String kernelGlanceID = null;
             
             if(isEncrypted) {
-                System.out.println("PSDebug Came to set image prop 22222");
                 kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH), manifestLocation,imageProperties);
                 if(kernelGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
@@ -507,7 +469,6 @@ public class UserConfirmation {
             String initrdGlanceID = null;
             
             if(isEncrypted) {
-                System.out.println("PSDebug Came to set image prop 3333333333");
                 initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_INITRD_PATH), manifestLocation,imageProperties);
                 if(initrdGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";

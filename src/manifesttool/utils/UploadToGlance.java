@@ -59,7 +59,6 @@ public class UploadToGlance {
     }
     
     public String uploadImage(String imageLocation, String manifestLocation, Map<String, String> imageProperties) {
-        System.out.println("PSDebug Image location is:" + imageLocation);
         String glanceID;
         glanceID = uploadFileToGlance(imageLocation,manifestLocation,imageProperties);
         return glanceID;
@@ -95,7 +94,6 @@ public class UploadToGlance {
                         
             HttpEntity input = new InputStreamEntity(is);
             postRequest.setEntity(input);
-            System.out.println("PostRequest is:" + postRequest.toString().trim());
 //            MultipartEntity reqEntity;            
 //            reqEntity = new MultipartEntity();
             
@@ -116,7 +114,6 @@ public class UploadToGlance {
                 sb.append(output);
                 logger.info(output);
             }
-            System.out.println("PSDebug Output from Glance is:" + output);
             
             JSONObject obj = new JSONObject(sb.toString());
             JSONObject property = obj.getJSONObject("image");
