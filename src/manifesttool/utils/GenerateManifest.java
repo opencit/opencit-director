@@ -55,12 +55,15 @@ public class GenerateManifest {
 
 // Write the hash value to xml file
     public String writeToXMLManifest(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo) { 
-    String manifestTargetLocation="/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+    String trustPolicyLocation="/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+    String trustDirectorLocation="/opt/trustdirector";
+    String trustPolicyDirLocation="/opt/trustdirector/trustpolicy";
     String imagePathDelimiter="/";
     int beginIndex=0;
     int endIndex;
     String trustPolicy=null;
     String targetLocation="";
+    
     if(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS))) {
             mountPath = mountPath + "/";
         }
@@ -80,20 +83,29 @@ public class GenerateManifest {
         manifestStorage=manifestStorage.substring(beginIndex, endIndex);
             
         // Target location of the manifest file
-         targetLocation= manifestStorage + manifestTargetLocation;
+         targetLocation= manifestStorage + trustPolicyLocation;
 //        System.out.println("Target location is:" + targetLocation);
-        }else{
+        }else if(isBareMetalLocal){
             
-             targetLocation = "/opt/TrustDirector/Trust_Policy/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+             targetLocation = trustPolicyDirLocation + trustPolicyLocation;
+             
+          
+        }else if(isBareMetalRemote){
+            trustDirectorLocation=mountPath+trustDirectorLocation;
+            trustPolicyDirLocation=mountPath+trustPolicyDirLocation;
+            
+            targetLocation = trustPolicyDirLocation + trustPolicyLocation;
+            
+            
         }
         
         
         // Create the "/root/manifest_files" directory if not present
-        File trustDir = new File("/opt/TrustDirector");
+        File trustDir = new File(trustDirectorLocation);
         if(!trustDir.exists()) {
             trustDir.mkdir();
         }
-        File manifestDir = new File("/opt/TrustDirector/Trust_Policy");
+        File manifestDir = new File(trustPolicyDirLocation);
         if(!manifestDir.exists()) {
             manifestDir.mkdir();
         }
@@ -138,7 +150,7 @@ public class GenerateManifest {
             
             Element launchPolicy = doc.createElement("Launch_Policy");
             //TODO Remove temporary hack
-            String policy = configInfo.get(Constants.POLICY_TYPE);
+            String policy = confInfo.get(Constants.POLICY_TYPE);
             if(policy.equalsIgnoreCase("MeasureOnly")){
                 policy = "Audit";
             }

@@ -369,7 +369,7 @@ public class UserConfirmation {
     }
     
     public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) {
-        System.out.println("PSDebug Came to set image prop");
+//        System.out.println("PSDebug Came to set image prop");
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -516,7 +516,7 @@ public class UserConfirmation {
         //Upload image to glance
         String imageGlanceID = null;
         if(isEncrypted) {
-            System.out.println("PSDebug Came to set image prop 4444444444");
+//            System.out.println("PSDebug Came to set image prop 4444444444");
             imageGlanceID = glanceObject.uploadImage(confInfo.get("EncImage Location"), manifestLocation,imageProperties);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
@@ -544,14 +544,14 @@ public class UserConfirmation {
             }
         } else {
             imageGlanceID = glanceObject.uploadImage(confInfo.get("Image Location"), manifestLocation,imageProperties);
-            System.out.println("PSDebug glance ID" + imageGlanceID);
+//            System.out.println("PSDebug glance ID" + imageGlanceID);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);
             }            
         }
-        System.out.println("PSDebug manifestLoca is" + manifestLocation);
+//        System.out.println("PSDebug manifestLoca is" + manifestLocation);
         String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
         if(manifestGlanceID == null) {
             String message = "Failed to upload the Manifest to Glance .... Exiting";

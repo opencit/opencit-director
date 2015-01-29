@@ -148,7 +148,7 @@ public class RemoteSystem {
                 customerInfo = hostWriteToMap();
                 
                 int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(),userNameTField.getText(),passwordTField.getText());
-                System.out.println("Remote system mounted");
+//                System.out.println("Remote system mounted");
                 BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
                 secondWindow.launch(customerInfo);                                                    
             }
