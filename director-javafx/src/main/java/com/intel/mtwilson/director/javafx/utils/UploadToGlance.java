@@ -26,10 +26,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.wicket.ajax.json.JSONException;
-import org.apache.wicket.ajax.json.JSONObject;
-//import org.json.JSONException;
-//import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
