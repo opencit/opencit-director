@@ -56,8 +56,8 @@ public class GenerateManifest {
 // Write the hash value to xml file
     public String writeToXMLManifest(Map<String, LinkedHashMap<String, String>> dirAndFilesMapping, Map<String, String> confInfo) { 
     String trustPolicyLocation="/manifest-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-    String trustDirectorLocation="/opt/trustdirector";
-    String trustPolicyDirLocation="/opt/trustdirector/trustpolicy";
+    String trustDirectorLocation="/etc/trustdirector";
+    String trustPolicyDirLocation="/etc/trustdirector/trustpolicy";
     String imagePathDelimiter="/";
     int beginIndex=0;
     int endIndex;

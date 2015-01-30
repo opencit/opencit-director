@@ -95,9 +95,9 @@ public class CreateImage {
         
         final FileUtilityOperation op = new FileUtilityOperation();
         
-//        ObservableList<String> hashTypeList = FXCollections.observableArrayList(
-//            "SHA-256", "SHA1"
-//        );
+        ObservableList<String> hashTypeList = FXCollections.observableArrayList(
+            "SHA-256", "SHA1"
+        );
         
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(
             "qcow2", "raw", "vhd", "ami"
@@ -105,7 +105,7 @@ public class CreateImage {
        
         //PS: New label for Create Image window
         Label imageFormat=new Label("Image Format");
-//        Label hashType=new Label ("Hash Type");
+        Label hashType=new Label ("Hash Type");
         Label imagePath=new Label("Image Path");
         Label chooseManifest=new Label("Choose Manifest");
         Label launchPolicy=new Label("Launch Control Policy");
@@ -117,7 +117,7 @@ public class CreateImage {
         imageIDTField = new TextField();
         imageFormatChoiceBox = new ChoiceBox(imageFormatList);
         imageFormatChoiceBox.setValue("qcow2");
-//        hashTypeChoiceBox=new ChoiceBox(hashTypeList);
+        hashTypeChoiceBox=new ChoiceBox(hashTypeList);
         hashTypeChoiceBox.setValue("SHA-256");
 
         Button browseImage = new Button("Browse");
@@ -156,8 +156,10 @@ public class CreateImage {
         grid.add(imageFormat, 0, 1);
         grid.add(imageFormatChoiceBox, 1, 1);   
               
-//        grid.add(hashType, 0, 2);
-//        grid.add(hashTypeChoiceBox, 1, 2);
+        grid.add(hashType, 0, 2);
+        grid.add(hashTypeChoiceBox, 1, 2);
+        hashType.setVisible(false);
+        hashTypeChoiceBox.setVisible(false);
         
         grid.add(imageID, 0, 3);
         grid.add(imageIDTField, 1,3);
@@ -292,7 +294,7 @@ public class CreateImage {
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
                             // Mount the VM disk image
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
-
+                            logger.info("Exit Code" + exitCode);
                             if( exitCode == 0) {
                                 if(new File(Constants.MOUNT_PATH + "/Windows/System32/ntoskrnl.exe").exists()) {
                                     customerInfo.put(Constants.IS_WINDOWS, "true");
@@ -408,10 +410,11 @@ public class CreateImage {
         } else if(!opt.validateUUID(imageIDTField.getText())){
 //            showWarningPopup("Please provide the valid image ID");
             isProper = false;
-        }  else if((imageFormatChoiceBox.getValue().toString().equals("ami") || imageFormatChoiceBox.getValue().toString().equals("vhd")) && !imagePathTField.getText().endsWith(".tgz") && !imagePathTField.getText().endsWith("tar.gz") && !imagePathTField.getText().endsWith(".gz")) {
-//            showWarningPopup("Please provide the tar bundled image ");
-            isProper = false;
-        }         
+        }
+//        }  else if((imageFormatChoiceBox.getValue().toString().equals("ami") || imageFormatChoiceBox.getValue().toString().equals("vhd")) && !imagePathTField.getText().endsWith(".tgz") && !imagePathTField.getText().endsWith("tar.gz") && !imagePathTField.getText().endsWith(".gz")) {
+////            showWarningPopup("Please provide the tar bundled image ");
+//            isProper = false;
+//        }         
         if(isProper) {
             customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
             customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());

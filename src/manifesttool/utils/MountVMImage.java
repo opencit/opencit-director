@@ -24,13 +24,13 @@ public class MountVMImage {
         LoggerUtility.setHandler(logger);
     }
     private static final String mountScript = "./resources/mount_vm_image.sh";
-    private static final String mountRemoteFileSystemScript="./resources/mount_sshfs.sh";
+    private static final String mountRemoteFileSystemScript="./resources/mount_remote_system.sh";
     
     public static int mountImage(String imagePath) {
         
         String command = mountScript + " " + imagePath;
         logger.info("\n" + "Mounting the vm image : " + imagePath);
-        
+        logger.info("Command:" + command);
         int exitCode = callExec(command);
         logger.info("\n Exit code is : " + exitCode);
         return exitCode;
