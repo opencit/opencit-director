@@ -45,6 +45,8 @@ public class Constants {
     public static final String KERNEL_ID = "Kernel ID";
     public static final String INITRD_ID = "Initrd ID";
     
+    public static final String IMAGE_STORE_TYPE = "Image_Store_Type";
+    public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
     public static final String GLANCE_IP = "Glance_IP";
     public static final String USER_NAME = "User_Name";
     public static final String PASSWORD = "Password";

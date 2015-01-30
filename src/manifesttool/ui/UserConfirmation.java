@@ -1,6 +1,6 @@
 package manifesttool.ui;
 
-import manifesttool.utils.UploadToGlance;
+import manifesttool.utils.GlanceImageStoreImpl;
 import manifesttool.utils.GenerateHash;
 import java.io.File;
 import java.security.MessageDigest;
@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -28,6 +29,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import manifesttool.utils.ConfigProperties;
 import manifesttool.utils.FileUtilityOperation;
+import manifesttool.utils.IImageStore;
+import manifesttool.utils.ImageStoreException;
+import manifesttool.utils.ImageStoreUtil;
 import manifesttool.utils.LoggerUtility;
 import manifesttool.utils.MHUtilityOperation;
 
@@ -190,12 +194,22 @@ public class UserConfirmation {
                         confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
                     }
                     boolean isEncrypted = true;
-                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
+                    String message=null;
+                    try {
+                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
+                    } catch (ImageStoreException ex) {
+                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     showUploadSuccessMessage(primaryStage, message);
                     //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
                 } else if(plainImageRB.isSelected()) {
                     boolean isEncrypted = false;
-                    String message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
+                    String message=null;
+                    try {
+                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
+                    } catch (ImageStoreException ex) {
+                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     showUploadSuccessMessage(primaryStage, message);
                 } else {
 //                    new ConfigurationInformation(primaryStage).showWarningPopup("Plese select an option");
@@ -336,31 +350,35 @@ public class UserConfirmation {
 
             @Override
             public void handle(ActionEvent t) {
-                UploadToGlance glanceObject = new UploadToGlance();
-                
-                if(!new FileUtilityOperation().validateUUID(imageIDTField.getText())) {
-//                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
-                } else {
-                    // Upload manifest to Glance
-                    String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
-                
-                    if(manifestGlanceID == null) {
-                        String message = "Failed to upload the Manifest to Glance .... Exiting";
+                IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+                try{
+                    if(!new FileUtilityOperation().validateUUID(imageIDTField.getText())) {
+    //                    new ConfigurationInformation(primaryStage).showWarningPopup("Please provide the valid image id ....");
+                    } else {
+                        // Upload manifest to Glance
+                        String manifestGlanceID = imageStoreObj.uploadTrustPolicy(manifestLocation);
+
+                        if(manifestGlanceID == null) {
+                            String message = "Failed to upload the Manifest to Glance .... Exiting";
+                            showUploadSuccessMessage(primaryStage, message);
+                            System.exit(1);
+                        }
+
+                        // Update Image property
+                        boolean isSuccess = imageStoreObj.updateImageProperty(imageIDTField.getText(), "x-image-meta-property-manifest_uuid" , manifestGlanceID);
+
+                        if(!isSuccess) {
+                            String message = "Failed to update the glance image property.....Exiting";
+                            showUploadSuccessMessage(primaryStage, message);
+                            System.exit(1);
+                        }
+                        String message = "Manifest Uploaded to glance " + "\n\n" + "Glance ID is : " + manifestGlanceID;
                         showUploadSuccessMessage(primaryStage, message);
-                        System.exit(1);
-                    }
-                
-                    // Update Image property
-                    boolean isSuccess = glanceObject.updateImageProperty(imageIDTField.getText(), "x-image-meta-property-manifest_uuid" , manifestGlanceID);
-                
-                    if(!isSuccess) {
-                        String message = "Failed to update the glance image property.....Exiting";
-                        showUploadSuccessMessage(primaryStage, message);
-                        System.exit(1);
-                    }
-                    String message = "Manifest Uploaded to glance " + "\n\n" + "Glance ID is : " + manifestGlanceID;
-                    showUploadSuccessMessage(primaryStage, message);
+                    }                
+                }catch(NullPointerException e){
+                    logger.info(e.getMessage());
                 }
+                
             }
         });
         
@@ -405,7 +423,7 @@ public class UserConfirmation {
         
     }
     
-    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) {
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) throws ImageStoreException {
         System.out.println("PSDebug Came to set image prop");
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
@@ -413,7 +431,7 @@ public class UserConfirmation {
         boolean isSuccess = true;
         String isPublic = "true";
         String imageId = confInfo.get(Constants.IMAGE_ID);
-        UploadToGlance glanceObject = new UploadToGlance();
+        IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
         switch(confInfo.get(Constants.IMAGE_TYPE)) {
             case "ami":
                 diskFormat = "ami";
@@ -460,40 +478,43 @@ public class UserConfirmation {
             imageProperties.put(Constants.IS_PUBLIC, isPublic);
             imageProperties.put(Constants.IMAGE_ID, getUUID());
             String kernelGlanceID = null;
-            
-            if(isEncrypted) {
-                System.out.println("PSDebug Came to set image prop 22222");
-                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH), manifestLocation,imageProperties);
-                if(kernelGlanceID == null) {
-                    String message = "Failed to upload the Image to Glance .... Exiting";
-                    showUploadSuccessMessage(primaryStage, message);
-                    System.exit(1);
+            try{
+                if(isEncrypted) {
+                    System.out.println("PSDebug Came to set image prop 22222");
+                    kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH),imageProperties);
+                    if(kernelGlanceID == null) {
+                        String message = "Failed to upload the Image to Glance .... Exiting";
+                        showUploadSuccessMessage(primaryStage, message);
+                        System.exit(1);
+                    }
+                    isSuccess = imageStoreObj.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_encrypted", "true");
+                    if(!isSuccess) {
+                        String message = "Failed to update the Glance Image property .... Exiting";
+                        showUploadSuccessMessage(primaryStage, message);
+                        System.exit(1);                
+                    }
+                    isSuccess = imageStoreObj.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.KERNEL_PATH))));
+                    if(!isSuccess) {
+                        String message = "Failed to update the Glance Image property .... Exiting";
+                        showUploadSuccessMessage(primaryStage, message);
+                        System.exit(1);                
+                    }
+                    isSuccess = imageStoreObj.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_KERNEL));
+                    if(!isSuccess) {
+                        String message = "Failed to update the Glance Image property .... Exiting";
+                        showUploadSuccessMessage(primaryStage, message);
+                        System.exit(1);                
+                    }
+                } else {
+                    kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.KERNEL_PATH),imageProperties);
+                    if(kernelGlanceID == null) {
+                        String message = "Failed to upload the Image to Glance .... Exiting";
+                        showUploadSuccessMessage(primaryStage, message);
+                        System.exit(1);
+                    }
                 }
-                isSuccess = glanceObject.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_encrypted", "true");
-                if(!isSuccess) {
-                    String message = "Failed to update the Glance Image property .... Exiting";
-                    showUploadSuccessMessage(primaryStage, message);
-                    System.exit(1);                
-                }
-                isSuccess = glanceObject.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.KERNEL_PATH))));
-                if(!isSuccess) {
-                    String message = "Failed to update the Glance Image property .... Exiting";
-                    showUploadSuccessMessage(primaryStage, message);
-                    System.exit(1);                
-                }
-                isSuccess = glanceObject.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_KERNEL));
-                if(!isSuccess) {
-                    String message = "Failed to update the Glance Image property .... Exiting";
-                    showUploadSuccessMessage(primaryStage, message);
-                    System.exit(1);                
-                }
-            } else {
-                kernelGlanceID = glanceObject.uploadImage(confInfo.get(Constants.KERNEL_PATH), manifestLocation,imageProperties);
-                if(kernelGlanceID == null) {
-                    String message = "Failed to upload the Image to Glance .... Exiting";
-                    showUploadSuccessMessage(primaryStage, message);
-                    System.exit(1);
-                }
+            }catch(NullPointerException e){
+                throw new ImageStoreException(e);
             }
             
             
@@ -508,32 +529,32 @@ public class UserConfirmation {
             
             if(isEncrypted) {
                 System.out.println("PSDebug Came to set image prop 3333333333");
-                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.Enc_INITRD_PATH), manifestLocation,imageProperties);
+                initrdGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_INITRD_PATH), imageProperties);
                 if(initrdGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
                     System.exit(1);
                 }
-                isSuccess = glanceObject.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_encrypted", "true");
+                isSuccess = imageStoreObj.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_encrypted", "true");
                 if(!isSuccess) {
                     String message = "Failed to update the Glance Image property .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
                     System.exit(1);                
                 }
-                isSuccess = glanceObject.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.INITRD_PATH))));
+                isSuccess = imageStoreObj.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.INITRD_PATH))));
                 if(!isSuccess) {
                     String message = "Failed to update the Glance Image property .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
                     System.exit(1);                
                 }
-                isSuccess = glanceObject.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_INITRD));
+                isSuccess = imageStoreObj.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_INITRD));
                 if(!isSuccess) {
                     String message = "Failed to update the Glance Image property .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
                     System.exit(1);                
                 }
             } else {
-                initrdGlanceID = glanceObject.uploadImage(confInfo.get(Constants.INITRD_PATH), manifestLocation,imageProperties);
+                initrdGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.INITRD_PATH), imageProperties);
                 if(initrdGlanceID == null) {
                     String message = "Failed to upload the Image to Glance .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -556,33 +577,33 @@ public class UserConfirmation {
         String imageGlanceID = null;
         if(isEncrypted) {
             System.out.println("PSDebug Came to set image prop 4444444444");
-            imageGlanceID = glanceObject.uploadImage(confInfo.get("EncImage Location"), manifestLocation,imageProperties);
+            imageGlanceID = imageStoreObj.uploadImage(confInfo.get("EncImage Location"), imageProperties);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);
             }
             
-            isSuccess = glanceObject.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_encrypted", "true");            
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_encrypted", "true");            
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
-            isSuccess = glanceObject.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get("Image Location"))));
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get("Image Location"))));
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
-            isSuccess = glanceObject.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_IMG));
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_IMG));
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
         } else {
-            imageGlanceID = glanceObject.uploadImage(confInfo.get("Image Location"), manifestLocation,imageProperties);
+            imageGlanceID = imageStoreObj.uploadImage(confInfo.get("Image Location"), imageProperties);
             System.out.println("PSDebug glance ID" + imageGlanceID);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
@@ -591,13 +612,13 @@ public class UserConfirmation {
             }            
         }
         System.out.println("PSDebug manifestLoca is" + manifestLocation);
-        String manifestGlanceID = glanceObject.uploadManifest(manifestLocation);
+        String manifestGlanceID = imageStoreObj.uploadTrustPolicy(manifestLocation);
         if(manifestGlanceID == null) {
             String message = "Failed to upload the Manifest to Glance .... Exiting";
             showUploadSuccessMessage(primaryStage, message);
             System.exit(1);
         }
-        isSuccess = glanceObject.updateImageProperty(imageGlanceID, "x-image-meta-property-manifest_uuid", manifestGlanceID);
+        isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-manifest_uuid", manifestGlanceID);
         if(!isSuccess) {
             String message = "Failed to update the Glance Image property .... Exiting";
             showUploadSuccessMessage(primaryStage, message);

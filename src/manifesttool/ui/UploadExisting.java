@@ -40,9 +40,9 @@ import manifesttool.utils.ConfigProperties;
 import manifesttool.utils.FileUtilityOperation;
 import manifesttool.utils.GenerateManifest;
 import manifesttool.utils.LoggerUtility;
-import manifesttool.utils.MHUtilityOperation;
-import manifesttool.utils.MountVMImage;
-import manifesttool.utils.UploadToGlance;
+import manifesttool.utils.IImageStore;
+import manifesttool.utils.ImageStoreException;
+import manifesttool.utils.ImageStoreUtil;
 
 /**
  *
@@ -197,15 +197,18 @@ public class UploadExisting {
 
             @Override
             public void handle(ActionEvent t) {
-                //Generate the Manifest, encrypt the image
-                String manifestFileLocation = manifestPathTField.getText();
-                String imagePathLocation=imagePathTField.getText();
-//                String message=EncryptImage(manifestFileLocation);
-//                showUploadSuccessMessage(createImageStage, message);
+                try {
+                    //Generate the Manifest, encrypt the image
+                    String manifestFileLocation = manifestPathTField.getText();
+                    String imagePathLocation=imagePathTField.getText();
                 
-                //Upload to the Glance
-                String message =UploadNow(manifestFileLocation);
-                showUploadSuccessMessage(uploadExistingStage, message);
+                    //Upload to the Glance
+                    String message;
+                    message = UploadNow(manifestFileLocation);
+                    showUploadSuccessMessage(uploadExistingStage, message);
+                } catch (ImageStoreException ex) {
+                    Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
         });
@@ -230,21 +233,23 @@ public class UploadExisting {
       }
     
     
-    private String UploadNow(String manifestFileLocation){
+    private String UploadNow(String manifestFileLocation) throws ImageStoreException{
         Map<String, String> customerInfo = writeToMap();
-                String message="";
-                UserConfirmation userObj=new UserConfirmation();
-                UploadToGlance uploadObj;
-        uploadObj = new UploadToGlance();
-                      boolean isEncrypted = (Boolean)null;
-                     System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
-                     System.out.println("PSDebug Image Loc is" + imagePathTField.getText());
-                     message=uploadObj.uploadImage(imagePathTField.getText() , manifestFileLocation, null);
-                    System.out.println("PSDebug Upload done");
-                    showUploadSuccessMessage(uploadExistingStage, message);
-                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
+        String message="";
+            try{
+            UserConfirmation userObj=new UserConfirmation();
+            IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+            boolean isEncrypted = (Boolean)null;
+            System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
+            System.out.println("PSDebug Image Loc is" + imagePathTField.getText());
+            message=imageStoreObj.uploadImage(imagePathTField.getText(), null);
+            System.out.println("PSDebug Upload done");
+            showUploadSuccessMessage(uploadExistingStage, message);
             
-            return message;
+        }catch(NullPointerException e){
+            throw new ImageStoreException(e);
+        }
+        return message;
     }
     
     //Show the Target location and Manifest location
