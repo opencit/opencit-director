@@ -22,7 +22,7 @@ public class MountVMImage {
     static {
         LoggerUtility.setHandler(logger);
     }
-    private static final String mountScript = "./resources/mount_vm_image.sh";
+    private static final String mountScript = "/opt/trustdirector/bin/mount_vm_image.sh";
     
     public static int mountImage(String imagePath) {
         

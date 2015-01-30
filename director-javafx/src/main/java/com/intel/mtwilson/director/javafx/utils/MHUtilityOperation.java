@@ -57,7 +57,7 @@ public class MHUtilityOperation {
         mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 	this.mhKeyName = mhKeyName;
 	System.out.println("MH Keystore Location : " + keystoreLocation);
-        String expScriptName = "./resources/login";
+        String expScriptName = "/opt/trustdirector/bin/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
         int exitCode;
@@ -66,7 +66,8 @@ public class MHUtilityOperation {
         if(encLocation == null) {
             return null;
         }
-        File passFileLocation = new File("./vmpass.txt");
+        //TODO look at vmpass
+        File passFileLocation = new File("/opt/trustdirector/vmpass.txt");
         fileOpt.writeToFile(passFileLocation, randomPassword, false);
         
         //String mhJarLocation = "/root/mhagent/client-0.1-SNAPSHOT-with-dependencies.jar";
@@ -74,7 +75,7 @@ public class MHUtilityOperation {
         
         // Encrypt the VM password and send it to the key management service with a label�?
         String command = "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + passFileLocation;
-        File tempCommandFile = new File("./runme");
+        File tempCommandFile = new File("/opt/trustdirector/runme");
         fileOpt.writeToFile(tempCommandFile, command, false);
         
         String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;

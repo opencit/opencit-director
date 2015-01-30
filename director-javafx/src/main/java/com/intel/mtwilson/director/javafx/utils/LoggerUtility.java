@@ -27,7 +27,7 @@ public class LoggerUtility {
     
     public static void initializeHandler() {
         try {
-            fileHandler = new FileHandler("./log/manifest-tool.log",true);
+            fileHandler = new FileHandler("/opt/trustdirector/log/manifest-tool.log",true);
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
         } catch (IOException ex) {
