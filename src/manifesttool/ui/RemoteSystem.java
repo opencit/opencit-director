@@ -43,7 +43,7 @@ import manifesttool.utils.GenerateManifest;
 import manifesttool.utils.LoggerUtility;
 import manifesttool.utils.MHUtilityOperation;
 import manifesttool.utils.MountVMImage;
-import manifesttool.utils.UploadToGlance;
+import manifesttool.utils.GlanceImageStoreImpl;
 
 /**
  *
