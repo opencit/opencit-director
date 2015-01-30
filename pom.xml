@@ -1,256 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.intel.mtwilson</groupId>
-  <artifactId>trust.director</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-maven-build</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <name>trust.director</name>
-  
-  <description>
-  </description>
-  
-  <!--
-      Version number of this "parent" module should only change when this POM is changed, for example with 
-      new settings that will apply to all components.
-      
-      If you have updated this POM and need to update its version number, use the command below to automatically
-      update the corresponding parent version number in all components (otherwise they will continue to use
-      rules from the previous version):
-
-      mvn release:update-versions
-      
-      Do NOT use -DautoVersionSubmodules=true  as in the following command, unless you want to set the version of all
-      submodules/components to the same version you specify for this POM, for example if you are releasing a 2.0 or 2.1
-      release and want all components to match, for the sake of making it easy to identify components that "go together".
-      
-      mvn release:update-versions -DautoVersionSubmodules=true
-      
-      This re-version command will NOT modify the version number of any components that specify their own version
-      explicitly.  It would only modify the version number of components that inherit the parent's version by
-      omitting their own version tag.
-      
-      How to build javadocs:
-      
-      Builds code, tests, and sources jars (the source jars for all modules are required when generating aggregate
-      javadocs for dependents):
-      mvn -DskipTests=true -Drelease install
-      
-      In target folders for local browsing (does NOT include javadocs from dependencies):
-      mvn -DskipTests=true -Drelease javadoc:javadoc
-      
-      In jar files for distribution (includes javadocs from dependencies):
-      mvn -DskipTests=true -Drelease javadoc:jar
-      
-      How to build the website (if it looks like changes aren't effective, try mvn clean and then site:site or site:jar again):
-      
-      Local files which can be deployed to web server:
-      mvn -DskipTests=true -Drelease site:site
-      
-      Jar file for distribution:
-      mvn -DskipTests=true -Drelease site:jar
-      
-      
-      Other useful information:
-      
-      The maven-aggregator-plugin can help to execute multiple plugins in a specific order 
-      https://code.google.com/p/maven-aggregate-plugin/wiki/Usage
-      
-	  Java compatibility: 
-	  com.intel.dcsg.cpg:cpg:0.1-SNAPSHOT configures maven-compiler-plugin for Java 6
-	  com.intel.dcsg.cpg:cpg:0.2-SNAPSHOT configures maven-compiler-plugin for Java 6
-	  com.intel.dcsg.cpg:cpg:0.3-SNAPSHOT configures maven-compiler-plugin for Java 7
-    -->
-  
-    <organization>
-        <name>Cloud Platform Group</name>
-        <url>http://10.1.71.63/drupal</url>
-    </organization>
-
-    <scm>
-        <connection>scm:git:ssh://git@10.1.71.63/var/git/cpg</connection>
-        <developerConnection>scm:git:ssh://git@10.1.71.63/var/git/cpg</developerConnection>
-        <!-- <url>http://cloudsecurityportal.intel.com/redmine/projects/myh/files</url> -->
-    </scm>
-  
-    <licenses>
-        <license>
-            <name>Copyright 2014 Intel Corporation. All rights reserved.</name>
-            <!-- fill this in when we have a URL for the project license <url>http://intel.com</url> -->
-            <distribution>manual</distribution>
-            <comments>Currently available only by agreement.</comments>
-        </license>
-    </licenses>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jersey-version>1.9-ea04</jersey-version>
-        <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>cpg-maven-repository</id>
-            <url>dav://10.1.71.63/maven/repository</url>
-            <name>Cloud Platform Group's Maven Repository</name>
-        </repository>
-        <site>
-            <id>cpg-website</id>
-            <url>dav://10.1.71.63/maven/site/cpg</url>
-            <name>Cloud Platform Group Documentation Site</name>
-        </site>
-    </distributionManagement>
-
-    <repositories>
-
-        <repository>
-            <id>maven-central</id>
-            <name>Maven Central Repository</name>
-            <url>http://central.maven.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-		
-        <repository>
-            <id>glassfish.java.net</id>
-            <name>GlassFish Maven Repository</name>
-            <url>http://download.java.net/maven/glassfish</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>m2.java.net</id>
-            <name>Java.net Maven 2 Repository</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>       
-        <repository>
-            <id>apache</id>
-            <name>apache repository</name>
-            <url>http://repository.apache.org/snapshots</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>EclipseLink Repo</id>
-            <name>EclipseLink Repository</name>
-            <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>Sonatype-public</id>
-            <name>SnakeYAML repository</name>
-            <url>http://oss.sonatype.org/content/groups/public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-
-    </repositories>
-    
+    <description>
+    </description>
     <build>
-        <finalName>Trust-Director</finalName>
         <plugins>
-            
             <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                        <skip>false</skip>
-                        <showDeprecation>true</showDeprecation>
-                    </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
-                
             <plugin>
-                    <groupId>com.zenjava</groupId>
-                    <artifactId>javafx-maven-plugin</artifactId>
-                    <version>2.0</version>
-                    <configuration>
-                            <mainClass>com.intel.mtwilson.trust.director.init.ManifestTool</mainClass>
-                    </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-  
-    <dependencies>
-                    <dependency>
-                            <groupId>org.rauschig</groupId>
-                            <artifactId>jarchivelib</artifactId>
-                            <version>0.6.2</version>
-                            <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>commons-codec</groupId>
-                            <artifactId>commons-codec</artifactId>
-                            <version>1.8</version>
-                    </dependency>
-                    <dependency>
-                            <groupId>commons-io</groupId>
-                            <artifactId>commons-io</artifactId>
-                            <version>2.4</version>
-                    </dependency>
-                    <dependency>
-                            <groupId>commons-logging</groupId>
-                            <artifactId>commons-logging</artifactId>
-                            <version>1.1.3</version>
-                    </dependency>
-                    <dependency>
-                            <groupId>org.apache.httpcomponents</groupId>
-                            <artifactId>httpcore</artifactId>
-                            <version>4.3.2</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>org.apache.httpcomponents</groupId>
-                            <artifactId>httpclient</artifactId>
-                            <version>4.0.1</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-core</artifactId>
-                        <version>2.3.2</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-annotations</artifactId>
-                        <version>2.3.2</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-databind</artifactId>
-                        <version>2.3.2</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>com.fasterxml.jackson.dataformat</groupId>
-                            <artifactId>jackson-dataformat-xml</artifactId>
-                        <version>2.3.2</version>
-                        <type>jar</type>
-                    </dependency>
-                    <dependency>
-                            <groupId>com.googlecode.json-simple</groupId>
-                            <artifactId>json-simple</artifactId>
-                            <version>1.1.1</version>
-                    </dependency>
-                    		            
-    </dependencies>
+    <modules>
+        <module>director-maven-root</module>
+        <module>director-javafx</module>
+    </modules>
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 </project>
-
