@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="kms" default="build" basedir=".">
+<project name="director" default="build" basedir=".">
 	<description>
 	Run "ant ready" to ensure you have all pre-requisites to build
 	Run "ant" or "ant build" to build the entire project
@@ -29,7 +29,7 @@
 			<arg value="install"/>
 		</exec>
 		<!-- the maven archetypes depend on root pom -->
-		<exec executable="${cmd.maven}" dir="kms-maven-root">
+		<exec executable="${cmd.maven}" dir="director-maven-root">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
