@@ -182,7 +182,7 @@ public class AMIImageInformation {
                     }
                     
                     if(includeImageHash) {
-                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
+                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
 //                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
                         if (manifestFileLocation != null) {
                             // Show the manifest file location

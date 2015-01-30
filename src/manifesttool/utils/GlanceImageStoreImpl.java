@@ -72,7 +72,6 @@ public class GlanceImageStoreImpl implements IImageStore {
                         
             HttpEntity input = new InputStreamEntity(is);
             postRequest.setEntity(input);
-            System.out.println("PostRequest is:" + postRequest.toString().trim());
 //            MultipartEntity reqEntity;            
 //            reqEntity = new MultipartEntity();
             
@@ -93,7 +92,6 @@ public class GlanceImageStoreImpl implements IImageStore {
                 sb.append(output);
                 logger.info(output);
             }
-            System.out.println("PSDebug Output from Glance is:" + output);
             
             JSONObject obj = new JSONObject(sb.toString());
             JSONObject property = obj.getJSONObject("image");

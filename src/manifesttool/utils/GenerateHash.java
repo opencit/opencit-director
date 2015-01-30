@@ -31,10 +31,18 @@ public class GenerateHash {
         LoggerUtility.setHandler(logger);
     }
     private String mountPath = Constants.MOUNT_PATH;
+    private boolean isBareMetal;
     private String value = null;
-
+    
+    private String hashType = ConfigProperties.getProperty(Constants.HASH_TYPE);
+    
     public String calculateHash(List<Directories> list, Map<String, String> confInfo) {
-        
+//        System.out.println("PSDebug  Calculate HASh");
+        isBareMetal=Boolean.valueOf(confInfo.get(Constants.BARE_METAL));
+        if(isBareMetal)
+        {
+            mountPath="/";
+        }
         logger.info("Calculating hash of " + list.size() + " directories");
         
         Map<String, LinkedHashMap<String, String>> dirAndFilesMapping = new HashMap<>();
@@ -47,27 +55,36 @@ public class GenerateHash {
         // Initialize MessageDigest
         MessageDigest md = null;
         try {
-            md = MessageDigest.getInstance(confInfo.get(Constants.HASH_TYPE));
-        } catch (NoSuchAlgorithmException ex) {
+            md = MessageDigest.getInstance(hashType);
+         } catch (NoSuchAlgorithmException ex) {
             logger.log(Level.SEVERE, null, md);
         }
         
         // Iterate through each directory
         for (Directories dirObject : list) {
-            
-            String dirPath = mountPath + dirObject.getCbox().getText();
+            String dirPath="";
+           if(isBareMetal)
+        {
+             dirPath = dirObject.getCbox().getText();
+        }else{
+               dirPath = mountPath + dirObject.getCbox().getText(); 
+           }
+//             dirPath = mountPath + dirObject.getCbox().getText();
+//            System.out.println("PSDebug Directory Path:" + dirPath);
             File dir = new File(dirPath);
             String fileFormat = dirObject.getChoice().getValue().toString();
             
             // Initialize the filter property
             String filter = initializeFilter(dirObject);
-            
+//            System.out.println("PSDebug Filter is" + filter);
             //Check for hidden files to include or not
             boolean includeHiddenFiles = Boolean.valueOf(confInfo.get(Constants.HIDDEN_FILES));
+//            System.out.println("PSDebug includeHiddenFiles" + includeHiddenFiles);
+//            System.out.println("The param are" + ":" + dir + ":" + (filter.replace(".", "").split(";")) + ":" + includeHiddenFiles + ":" + isWindows);
             
             // Get the files from a directory recursively, this list will containg the files with its actual file appended with "###"(in case of symbolic links)
             allFiles = getFilesFromDir(dir, filter.replace(".", "").split(";"), includeHiddenFiles, isWindows);
-            
+//            System.out.println("PSDebug Dir List All files:" +" "+ allFiles.toString());
             // Sort the list of files alphabetically
             Collections.sort(allFiles);
             
@@ -91,9 +108,10 @@ public class GenerateHash {
         }     
         
         // Write to the manifest file
-//        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
-           new GenerateManifest().RetrieveFileHash(dirAndFilesMapping, confInfo);
-          return "Success"; //fileLocation;
+        String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
+        logger.info("String fileLocation val in Calculate HASh" + fileLocation);
+//          new GenerateManifest().RetrieveFileHash(dirAndFilesMapping, confInfo);
+          return fileLocation; //fileLocation;
     }
     
     // Set the file filter value - * = All_Files, binary = Executables, extensions = Custom Extensions
@@ -116,7 +134,9 @@ public class GenerateHash {
 
     // Traverse through directory iteratively and returns list of 'file###actualfile'
     private List<String> getFilesFromDir(File dir, String[] extensions, boolean includeHiddenFiles, boolean isWindows) {
-        
+//        System.out.println("PSDebug getFilesfromDir Function");
+//        System.out.println("PSDebug dir path:" + dir.getAbsolutePath());
+//        System.out.println("PSDebug includeHiddenFiles:" + includeHiddenFiles);
         iterateRecursively(dir.getAbsolutePath(), dir.getAbsolutePath(), includeHiddenFiles);
         
         // Select the files depending on the filter value
@@ -126,6 +146,7 @@ public class GenerateHash {
             case "binary":
                 List<String> deleteMe = new ArrayList<>();
                 for(String str : allFiles) {
+//                    System.out.println("PSDebug Str all Files:" + str);
                     File file = new File(str.split(splitChar)[1]);
                     if(isWindows) {
                         if(!isExecutable(file)) {
@@ -143,7 +164,7 @@ public class GenerateHash {
                 allFiles = getFilesWithSpecifiedExtension(allFiles, extensions);
                 break;
         }
-        
+//        System.out.println("PSDebug all Files val is:" + allFiles.toString());
         return allFiles;
     }
     
@@ -189,6 +210,7 @@ public class GenerateHash {
     // Calculate hash and return hash value
     public String computeHash(MessageDigest md, File file) {
         
+                
         Map<String, String> fileAndHash = new LinkedHashMap<>();
         StringBuffer sb = null;
         try {
@@ -209,33 +231,44 @@ public class GenerateHash {
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
+        
         return sb.toString();
     }    
     
     // This function will iterate recursively through a directory and will add the file###actualFile to list
     public void iterateRecursively(String origPath, String newPath, boolean includeHiddenFiles) {
+       
         File [] files = new File(newPath).listFiles();
         for(File file : files) {
             if(!file.isDirectory()) {
                 try {
                     String path = file.getAbsolutePath();
+//                    System.out.println("PSDebug path is:" + path);
                     if(!path.startsWith(mountPath)) {
+//                        System.out.println("PSDebug !!!!!!!!!!!!!!!!!");
                         path = mountPath + path;
                     }
                     if(Files.isSymbolicLink(Paths.get(path))) {
+//                        System.out.println("PSDebug @@@@@@@@@@");
+//                        System.out.println("PSDebug getSymPath" + path);
                         getSymlinkValue(path);
                         value = new File(value).getCanonicalPath();
                     } else {
+//                        System.out.println("PSDebug ##############");
                         value = new File(path).getCanonicalPath();                        
                     }
                     if(!value.startsWith(mountPath)) {
+//                        System.out.println("PSDebug $$$$$$$$$$$$");
                         value = mountPath + value;
                     }
                     File tempFile;
                     if(value != null) {
+//                        System.out.println("PSDebug %%%%%%%%%%%%%%%%%");
                         tempFile = new File(value);
                         if(tempFile.exists() && tempFile.isFile()) {
+//                            System.out.println("PSDebug ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                             if(includeHiddenFiles) {
+//                                System.out.println("PSDebug &&&&&&&&&&&&&&");
                                 path = path.replace(newPath, origPath);  
                                 allFiles.add(path + splitChar + tempFile.getAbsolutePath());  
                             } else if(!tempFile.isHidden()) {
@@ -250,15 +283,21 @@ public class GenerateHash {
                 
             } else {
                 String dirPath = file.getAbsolutePath();
+                logger.info("Entry is a directory : " + dirPath);
                 if(Files.isSymbolicLink(Paths.get(dirPath))) {
                     try {
+                        logger.info("SYMLINK : " + dirPath);
                         String symPath = Files.readSymbolicLink(Paths.get(dirPath)).toString();
-                        String origSymPath = Files.readSymbolicLink(Paths.get(origPath)).toString();
-                        if(!symPath.equals(origSymPath)) {
-                            if(symPath.startsWith("/") && !symPath.startsWith(mountPath)) {
+                        logger.info("SYMPATH : " + symPath);
+                        logger.info("ORIGPATH : " + origPath);
+                        //String origSymPath = Files.readSymbolicLink(Paths.get(origPath)).toString();
+                        if(!symPath.equals(dirPath)) {
+                            logger.info("SYMPATH != DIRPATH" + dirPath);
+                            if(symPath.startsWith("/") && ((isBareMetal) || !symPath.startsWith(mountPath))) {
+                                logger.info("PSDebug Came in here 333" + dirPath);
                                 symPath = mountPath + symPath;
                             } else {
-                                symPath = file.getParent() + "/" + symPath;
+                                    symPath = file.getParent() + "/" + symPath;
                             }
                             dirPath = dirPath.replace(newPath, origPath);
                             iterateRecursively(dirPath, symPath, includeHiddenFiles);                                                    
@@ -281,7 +320,7 @@ public class GenerateHash {
         if(Files.isSymbolicLink(path)) {
             try {
                 filePath = (Files.readSymbolicLink(path)).toString();
-                if(filePath.startsWith("/") && !filePath.startsWith(mountPath)) {
+                if(filePath.startsWith("/") && (isBareMetal || !filePath.startsWith(mountPath))) {
                     filePath = mountPath + filePath;
                     getSymlinkValue(filePath);
                 } else if(filePath.startsWith(".") || filePath.startsWith("..") || !filePath.startsWith("/")){
@@ -291,6 +330,7 @@ public class GenerateHash {
                     value = null;
                 }
             } catch (IOException ex) {
+                ex.printStackTrace();
                 logger.log(Level.SEVERE, null, ex);
                 value = null;
             }
