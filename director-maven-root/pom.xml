@@ -8,12 +8,6 @@
     <packaging>pom</packaging>
     <description>Mystery Hill Trust Director</description>
     
-    <parent>
-        <groupId>com.intel.mtwilson.director</groupId>
-        <artifactId>director-maven-build</artifactId>
-        <version>0.1-SNAPSHOT</version>
-    </parent>
-    
     <build>
         <plugins>
             <plugin>
