@@ -3,17 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package manifesttool.utils;
+package com.intel.mtwilson.director.javafx.utils;
 
-import manifesttool.ui.Constants;
+import com.intel.mtwilson.director.javafx.ui.Constants;
 
 /**
  *
  * @author boskisha
  */
 public class ImageStoreUtil {
+
     public static IImageStore getImageStore(){
-        String imageStore = ConfigProperties.getProperty(Constants.IMAGE_STORE_TYPE);
+        ConfigProperties configProperties=new ConfigProperties();
+        String imageStore = configProperties.getProperty(Constants.IMAGE_STORE_TYPE);
         switch(imageStore){
             case(Constants.GLANCE_IMAGE_STORE):
                 return new GlanceImageStoreImpl();    

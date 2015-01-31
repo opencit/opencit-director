@@ -7,7 +7,11 @@ package com.intel.mtwilson.director.javafx.ui;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-import com.intel.mtwilson.director.javafx.utils.UploadToGlance;
+import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
+import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
+import com.intel.mtwilson.director.javafx.utils.IImageStore;
+import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
+import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 import static java.awt.Color.red;
@@ -199,15 +203,18 @@ public class UploadExisting {
 
             @Override
             public void handle(ActionEvent t) {
+                try {
                 //Generate the Manifest, encrypt the image
                 String manifestFileLocation = manifestPathTField.getText();
                 String imagePathLocation=imagePathTField.getText();
-//                String message=EncryptImage(manifestFileLocation);
-//                showUploadSuccessMessage(createImageStage, message);
                 
                 //Upload to the Glance
-                String message =UploadNow(manifestFileLocation);
+                    String message;
+                    message = UploadNow(manifestFileLocation);
                 showUploadSuccessMessage(uploadExistingStage, message);
+                } catch (ImageStoreException ex) {
+                    Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
         });
@@ -232,20 +239,22 @@ public class UploadExisting {
       }
     
     
-    private String UploadNow(String manifestFileLocation){
+    private String UploadNow(String manifestFileLocation) throws ImageStoreException{
         Map<String, String> customerInfo = writeToMap();
                 String message="";
+            try{
                 UserConfirmation userObj=new UserConfirmation();
-                UploadToGlance uploadObj;
-        uploadObj = new UploadToGlance();
+            IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
                       boolean isEncrypted = (Boolean)null;
                      System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
                      System.out.println("PSDebug Image Loc is" + imagePathTField.getText());
-                     message=uploadObj.uploadImage(imagePathTField.getText() , manifestFileLocation, null);
+            message=imageStoreObj.uploadImage(imagePathTField.getText(), null);
                     System.out.println("PSDebug Upload done");
                     showUploadSuccessMessage(uploadExistingStage, message);
-                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
             
+        }catch(NullPointerException e){
+            throw new ImageStoreException(e);
+        }
             return message;
     }
     

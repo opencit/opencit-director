@@ -23,18 +23,27 @@ import com.intel.mtwilson.director.javafx.ui.Directories;
  * @author admkrushnakant
  */
 public class GenerateHash {
+    private ConfigProperties configProperties;
     private static final Logger logger = Logger.getLogger(GenerateHash.class.getName());
     private List<String> allFiles = new ArrayList<String>();
     private static final String splitChar = "###";
+    private String hashType;
     // Set FileHandler for logger
     static {
         LoggerUtility.setHandler(logger);
     }
+    
+    public GenerateHash(){
+       configProperties = new ConfigProperties();
+       hashType=configProperties.getProperty(Constants.HASH_TYPE);
+    }
+    
     private String mountPath = Constants.MOUNT_PATH;
     private boolean isBareMetal;
     private String value = null;
     
-    private String hashType = ConfigProperties.getProperty(Constants.HASH_TYPE);
+    
+    
     
     public String calculateHash(List<Directories> list, Map<String, String> confInfo) {
 //        System.out.println("PSDebug  Calculate HASh");

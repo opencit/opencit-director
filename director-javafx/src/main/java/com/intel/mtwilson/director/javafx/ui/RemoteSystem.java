@@ -4,9 +4,12 @@
  * and open the template in the editor.
  */
 
-package manifesttool.ui;
+package com.intel.mtwilson.director.javafx.ui;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
+import com.intel.mtwilson.director.javafx.ui.BrowseDirectories;
+import com.intel.mtwilson.director.javafx.ui.ConfigurationInformation;
+import com.intel.mtwilson.director.javafx.ui.Constants;
 import static java.awt.Color.red;
 import java.io.File;
 import java.io.IOException;
@@ -36,21 +39,25 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import static manifesttool.ui.AMIImageInformation.logger;
-import manifesttool.utils.ConfigProperties;
-import manifesttool.utils.FileUtilityOperation;
-import manifesttool.utils.GenerateManifest;
-import manifesttool.utils.LoggerUtility;
-import manifesttool.utils.MHUtilityOperation;
-import manifesttool.utils.MountVMImage;
-import manifesttool.utils.GlanceImageStoreImpl;
-
+import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
+import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
+import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
+import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
+import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
+import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
 /**
  *
  * @author preetisr
  */
-public class LocalSystem {
-    private final Stage localSystemStage;
+public class RemoteSystem {
+    private final Stage remoteSystemStage;
+    
+    private ConfigProperties configProperties;
+    
+    private TextField ipAddressTField;
+    private TextField userNameTField;
+    private PasswordField passwordTField;
     
    private final ToggleGroup togBoxMeasure=new ToggleGroup();    
    String hostManifest;
@@ -58,35 +65,35 @@ public class LocalSystem {
     private static final Logger logger; 
     // Set FileHandler for logger
     static {
-        logger = Logger.getLogger(ConfigurationInformation.class.getName());
+        logger = Logger.getLogger(RemoteSystem.class.getName());
         LoggerUtility.setHandler(logger);
     }
     
     
-    public LocalSystem(Stage localSystemStage) {
-        this.localSystemStage = localSystemStage;
+    public RemoteSystem(Stage remoteSystemStage) {
+        this.remoteSystemStage = remoteSystemStage;
+        configProperties = new ConfigProperties();
     }
     
     public void launch() {
      
         // Check for the Host Manifest
-        hostManifest = ConfigProperties.getProperty(Constants.HOST_MANIFEST);
+        hostManifest = configProperties.getProperty(Constants.HOST_MANIFEST);
         if(hostManifest != null) {
             hostManifest = hostManifest.trim();
         }
 
-        localSystemStage.setTitle("Bare Metal Host System");
+        remoteSystemStage.setTitle("Bare Metal Remote System");
         
-        //PS: New label for Create Image window
-//        Label chooseManifest=new Label("Choose Manifest");
-        Label launchPolicy=new Label("Launch Control Policy");
-                
-//        final Button browseManifest = new Button("Browse");
-//        browseManifest.setPrefSize(80, 15);
-//        Tooltip toolTipManifest = new Tooltip();
-//        toolTipManifest.setText("Browse the manifest files");
-//        browseManifest.setTooltip(toolTipManifest);
-
+        
+        Label ipAddress=new Label("IP Address");
+        Label userName=new Label("User Name");
+        Label password=new Label("Password");
+        Label launchPolicy=new Label("Launch Control Policy");       
+        ipAddressTField=new TextField();
+        userNameTField=new TextField();
+        passwordTField=new PasswordField();
+        
         RadioButton rbMeasure=new RadioButton("Measure Only");
         rbMeasure.setToggleGroup(togBoxMeasure);
         rbMeasure.setUserData("MeasureOnly");
@@ -105,18 +112,21 @@ public class LocalSystem {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(30, 15,30, 15));
-          
         
+        grid.add(ipAddress, 0, 1);
+        grid.add(ipAddressTField, 1, 1);
+        grid.add(userName, 0, 2);
+        grid.add(userNameTField, 1, 2);
+        grid.add(password, 0, 3);
+        grid.add(passwordTField, 1, 3);
         final HBox launchPolicyHBox = new HBox();
         launchPolicyHBox.setPadding(new Insets(3, 0, 5, 0));
         launchPolicyHBox.setSpacing(10);
         launchPolicyHBox.getChildren().add(rbMeasure);
         launchPolicyHBox.getChildren().add(rbMeasureEnforce);
-        grid.add(launchPolicy,0,1);
-        grid.add(launchPolicyHBox, 1,1);
-        
-//        grid.add(chooseManifest,0,2);
-//        grid.add(browseManifest,1,2);
+        grid.add(launchPolicy,0,4);
+        grid.add(launchPolicyHBox, 1,4);
+
   
         HBox hBox4 = new HBox();
         hBox4.setPadding(new Insets(20, 12, 20, 12));
@@ -139,18 +149,11 @@ public class LocalSystem {
 //                 Write configuration values to map
                 Map<String, String> customerInfo;
                 customerInfo = hostWriteToMap();
-                int exitCode = 0;
-//                if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-//                 Extract the compressed HOST image tgz file
-//                String extractCommand = "mount /"; 
-//                int extractExitCode = MountVMImage.callExec(extractCommand);
-//                if(extractExitCode != 0) {
-////               showWarningPopup("Error while extracting .... Exiting .....");
-//                 System.exit(1);
-//                } else {
-                        BrowseDirectories secondWindow = new BrowseDirectories(localSystemStage);
-                         secondWindow.launch(customerInfo);                                                    
-//                }                         
+                
+                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(),userNameTField.getText(),passwordTField.getText());
+//                System.out.println("Remote system mounted");
+                BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
+                secondWindow.launch(customerInfo);                                                    
             }
         });
         
@@ -160,7 +163,7 @@ public class LocalSystem {
             @Override
             public void handle(ActionEvent arg0) {
                 // Will close the window
-                localSystemStage.close();
+                remoteSystemStage.close();
                 
             }
         });
@@ -169,8 +172,8 @@ public class LocalSystem {
         root.getChildren().add(vBox);
         Scene scene = new Scene(root);
         //scene.setFill(Color.AQUA);
-        localSystemStage.setScene(scene);
-        localSystemStage.show(); 
+        remoteSystemStage.setScene(scene);
+        remoteSystemStage.show(); 
       }
     
     // Store configuration values in hash map for host manifest generation
@@ -180,8 +183,13 @@ public class LocalSystem {
         FileUtilityOperation opt = new FileUtilityOperation();
          
         if(isProper) {
+          customerInfo.put(Constants.remoteSystemIpAddress,ipAddressTField.getText().toString());
+          customerInfo.put(Constants.remoteSystemuserName,userNameTField.getText().toString());
+          customerInfo.put(Constants.remoteSystemPassword,passwordTField.getText().toString());
           customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
-          customerInfo.put((Constants.BARE_METAL),"true");
+          customerInfo.put((Constants.BARE_METAL_REMOTE),"true");
+          customerInfo.put((Constants.BARE_METAL),"false");
+
 
         } else {
             return null;

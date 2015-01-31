@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package manifesttool.utils;
+package com.intel.mtwilson.director.javafx.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import manifesttool.ui.Constants;
-import manifesttool.ui.UserConfirmation;
+import com.intel.mtwilson.director.javafx.ui.Constants;
+import com.intel.mtwilson.director.javafx.ui.UserConfirmation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -35,15 +35,28 @@ import org.json.JSONObject;
  */
 public class GlanceImageStoreImpl implements IImageStore {
     private static final Logger logger = Logger.getLogger(UserConfirmation.class.getName());
-    // Set FileHandler for logger
+    private ConfigProperties configProperties;
+    
+    private String glanceIP;
+    private String userName;
+    private String password;
+    private String tenantName;
+
+
+// Set FileHandler for logger
     static {
         LoggerUtility.setHandler(logger);
     }
     
-    private String glanceIP = ConfigProperties.getProperty(Constants.GLANCE_IP);
-    private String userName = ConfigProperties.getProperty(Constants.USER_NAME);
-    private String password = ConfigProperties.getProperty(Constants.PASSWORD);
-    private String tenantName = ConfigProperties.getProperty(Constants.TENANT_NAME);
+    public GlanceImageStoreImpl(){
+        configProperties=new ConfigProperties();
+    glanceIP = configProperties.getProperty(Constants.GLANCE_IP);
+    userName = configProperties.getProperty(Constants.USER_NAME);
+    password = configProperties.getProperty(Constants.PASSWORD);
+    tenantName = configProperties.getProperty(Constants.TENANT_NAME);
+    
+    }
+    
     
     @Override
     public String uploadTrustPolicy(String manifestLocation) {

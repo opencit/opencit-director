@@ -6,9 +6,9 @@ import com.intel.mtwilson.director.javafx.utils.GenerateHash;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
-import manifesttool.utils.IImageStore;
-import manifesttool.utils.ImageStoreException;
-import manifesttool.utils.ImageStoreUtil;
+import com.intel.mtwilson.director.javafx.utils.IImageStore;
+import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
+import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -58,80 +58,6 @@ public class UserConfirmation {
     public UserConfirmation() {
         configProperties = new ConfigProperties();
     }
-//    public void showLocation(final Stage primaryStage, final String fileLocation, final Map<String, String> confInfo) {
-//        
-//        primaryStage.setTitle("Manifest Location");
-//        String info = "Manifest File Saved at : \n\"" + fileLocation + "\"";
-//        
-//        // Check for the "Host_Manifest" property in the property file, if present, manifest generation will be for host
-//        String tempHostManifest = ConfigProperties.getProperty(Constants.HOST_MANIFEST);
-//        if( tempHostManifest != null) {
-//            tempHostManifest = tempHostManifest.trim();
-//        }
-//
-//        final String hostManifest = tempHostManifest;
-//        if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-//            info = "Host Manifest File Location : \"" + fileLocation + "\"" + "\n\n" + "Rootfs Location : \"" + confInfo.get(Constants.IMAGE_LOCATION) + "\"";
-//        }
-//        
-//        Label message = new Label(info);
-//        message.setFont(new Font("Arial", 14));
-//        Button okButton = new Button("Ok");
-//        okButton.setPrefSize(100, 20);
-//        
-//        VBox vbox = new VBox();
-//        vbox.setPadding(new Insets(15, 12, 15, 12));
-//        vbox.setSpacing(30);
-//        
-//        vbox.getChildren().add(message);
-//        vbox.getChildren().add(okButton);
-//        
-//        StackPane root = new StackPane();
-//        root.getChildren().add(vbox);
-//        Scene scene = new Scene(root);
-//        primaryStage.setScene(scene);
-//        primaryStage.show();
-//        
-//        okButton.setOnAction(new EventHandler<ActionEvent>() {
-//
-//            @Override
-//            public void handle(ActionEvent arg0) {
-//                primaryStage.close();
-//                if(!((hostManifest != null) && (hostManifest.equalsIgnoreCase("true")))) {
-//                    glanceUploadConfirmation(primaryStage, fileLocation, confInfo);
-//                } else {
-//		    generateManifesConfirmation(primaryStage);
-//		}
-//            }
-//        });
-//   }
-    
-//    public void showLocation(final Stage primaryStage, final String fileLocation, final Map<String, String> confInfo) {
-//        
-//        primaryStage.setTitle("Manifest Location");
-//        String info = "Manifest File Saved at : \n\"" + fileLocation + "\"";
-//        
-//        // Check for the "Host_Manifest" property in the property file, if present, manifest generation will be for host
-//        String tempHostManifest = ConfigProperties.getProperty(Constants.HOST_MANIFEST);
-//        if( tempHostManifest != null) {
-//            tempHostManifest = tempHostManifest.trim();
-//        }
-//
-//        final String hostManifest = tempHostManifest;
-//        if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-//            info = "Host Manifest File Location : \"" + fileLocation + "\"" + "\n\n" + "Rootfs Location : \"" + confInfo.get(Constants.IMAGE_LOCATION) + "\"";
-//        }
-//        
-//        if(!((hostManifest != null) && (hostManifest.equalsIgnoreCase("true")))) {
-//             glanceUploadConfirmation(primaryStage, fileLocation, confInfo);
-//            } else {
-//	       generateManifesConfirmation(primaryStage,fileLocation);
-//	}
-//           
-//       
-//        
-//        
-//    }
     
     
     public void glanceUploadConfirmation(final Stage primaryStage, final String manifestLocation, final Map<String, String> confInfo) {
@@ -201,7 +127,7 @@ public class UserConfirmation {
             public void handle(ActionEvent t) {
                 if(confInfo.get(Constants.IS_ENCRYPTED)=="true") {
                     boolean isEncrypted = true;
-                    String opensslPassword = ConfigProperties.getProperty(Constants.PASSWORD);
+                    String opensslPassword = configProperties.getProperty(Constants.PASSWORD);
                     MHUtilityOperation mhOptImage = new MHUtilityOperation();
 
 		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)

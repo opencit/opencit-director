@@ -233,7 +233,7 @@
     </issueManagement>
     
     <repositories>
-        <repository>
+<!--        <repository>
             <id>cpg-x</id>
             <name>Cloud Platform Group</name>
             <url>http://10.1.71.63/maven/repository</url>
@@ -241,7 +241,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository>-->
         <repository>
             <id>cloudsecurityportal.intel.com</id>
             <name>Cloud Security - Intel Architecture Systems Integration</name>
