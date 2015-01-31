@@ -90,7 +90,6 @@ public class FileUtilityOperation {
     
     // Encode with Base64
     public String base64Encode(String value) {
-        System.out.println("256 hash value is : " + value);
         byte [] result = Base64.encodeBase64(value.getBytes());
         return new String(result);
     }
