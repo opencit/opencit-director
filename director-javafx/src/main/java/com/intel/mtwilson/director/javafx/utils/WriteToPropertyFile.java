@@ -21,7 +21,7 @@ import com.intel.mtwilson.director.javafx.ui.Constants;
  * @author root
  */
 public class WriteToPropertyFile {
-    private String propertyFile = "config.properties";
+    private String propertyFile = "director.properties";
     public void write() {
         Properties prop = new Properties();
         OutputStream output = null;

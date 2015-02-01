@@ -34,7 +34,7 @@ public class ConfigProperties {
         prop = new Properties();
         InputStream input = null;
         try {
-            input = new FileInputStream("/opt/trustdirector/configuration/config.properties");
+            input = new FileInputStream("/opt/trustdirector/configuration/director.properties");
             prop.load(input);
         } catch (FileNotFoundException ex) {
             logger.log(Level.SEVERE, null, ex);
