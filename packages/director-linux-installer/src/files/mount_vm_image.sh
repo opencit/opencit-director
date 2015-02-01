@@ -6,11 +6,16 @@ vhdMountPath="/tmp/vhdmnt"
 function unmount_vm_image() {
         echo "################ Unmounting the mount path"
         mountPathCheck=$(mount | grep -o "$mountPath")
+        echo "Print MountPathCheck $mountPathCheck"
         if [ ! -z $mountPathCheck ]
         then
+                echo "Print the umount status"
+                echo "Print var mountPath $mountPath"
                 umount $mountPath 2>/dev/null
+                echo "umount op result $/"
 		if [ ! $? ]
 		then
+                      echo "Unmount unsuccessful"
 			exit 1
 		fi	
         fi
@@ -42,14 +47,17 @@ function unmount_vm_image() {
 function mount_qcow2_image() {
         modprobe nbd
         qemu-nbd -d /dev/nbd0
-	#echo "############ Image file path is $imagePath"
+	echo "############ Image file path is $imagePath"
+	echo "PSDebug: mount_qcow2_image"
         qemu-nbd -c /dev/nbd0 $imagePath
 	sleep 2
         if [ -b /dev/nbd0p1 ]
         then
                 mount /dev/nbd0p1 $mountPath
+				echo "mount result if condition $?"
         else
                 mount /dev/nbd0 $mountPath
+				echo "mount else condition result $?"
         fi
 }
 
@@ -65,13 +73,13 @@ function mount_raw_image() {
         else
                 #Check for value of 'boot' field in the output to decide the value of 'start' field whether $2 or $3
                 temp=$(fdisk -l $imagePath | grep $imagePath*'1' | grep -v ":" | awk '{ print $7 }')
-                #echo "Value of temp is $temp"
+                echo "Value of temp is $temp"
                 if [ -z $temp ];
                 then
-                        #echo "################ In the nested if"
+                        echo "################ In the nested if"
                         sector=$(fdisk -l $imagePath | grep $imagePath*'1' | grep -v ":" | awk '{ print $2 }')
                 else
-                        #echo "######################### in the nested else"
+                        echo "######################### in the nested else"
                         sector=$(fdisk -l $imagePath | grep $imagePath*'1' | grep -v ":" | awk '{ print $3 }')
                 fi
         fi
@@ -82,11 +90,11 @@ function mount_raw_image() {
 function mount_raw_image_duplicate() {
 	#loopDevice=$(losetup -f)
 	loopDevice="/dev/loop0"
-	kpartx -d $loopDevice
-	losetup -d $loopDevice
-	losetup $loopDevice $imagePath
-	out=$(kpartx -av $loopDevice | grep -o "$loopDevice")
-	#echo "#####%%%%%%%#######__________$out___________################"
+	/sbin/kpartx -d $loopDevice
+	/sbin/losetup -d $loopDevice
+	/sbin/losetup $loopDevice $imagePath
+	out=$(/sbin/kpartx -av $loopDevice | grep -o "$loopDevice")
+	echo "#####%%%%%%%#######__________$out___________################"
 	if [ -z $out ]
 	then
 		mount $loopDevice $mountPath
@@ -107,6 +115,7 @@ function mount_vhd_image() {
 		imagePath="$vhdMountPath/EntireDisk"
 		#mount_raw_image
 		mount_raw_image_duplicate
+                echo "##########%%%%%%%%%%%%%%% Mounted VHD***********"
         else
                 #mount $vhdMountPath/Partition1 $mountPath
 		imagePath="$vhdMountPath/Partition1"
@@ -140,17 +149,17 @@ fi
 
 imagePath=$1
 
-checkVhd=$(tar tf $imagePath 2>/dev/null | grep 0.vhd)
-if [ ! -z $checkVhd ]
-then
-        parentDir=$(dirname $imagePath)
-	#echo "---------------- In the vhd check"
-        cd $parentDir
-        tar zxf $imagePath
-        imagePath=$(readlink -f 0.vhd)	
-else
-	echo ""
-fi
+#checkVhd=$(tar tf $imagePath 2>/dev/null | grep 0.vhd)
+#if [ ! -z $checkVhd ]
+#then
+#        parentDir=$(dirname $imagePath)
+#	#echo "---------------- In the vhd check"
+#        cd $parentDir
+#        tar zxf $imagePath
+#        imagePath=$(readlink -f 0.vhd)	
+#else
+#	echo ""
+#fi
 
 imageFormat=$(qemu-img info $imagePath  | grep "file format" | awk -F ':' '{ print $2 }' | sed -e 's/ //g')
 
@@ -161,8 +170,10 @@ case "$imageFormat" in
 	echo "Mounting the raw Image."
 	#check_unmount_status
 	unmount_vm_image
+        echo "Unmount was done for Raw"
 	#mount_raw_image
 	mount_raw_image_duplicate
+        echo "Mount the Raw now done"
    ;;
    "vpc")
 	echo "########### Mounting vhd Image" 
