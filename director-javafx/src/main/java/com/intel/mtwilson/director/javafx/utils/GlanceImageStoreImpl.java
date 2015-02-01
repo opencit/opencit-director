@@ -26,37 +26,40 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.wicket.ajax.json.JSONException;
-import org.apache.wicket.ajax.json.JSONObject;
-//import org.json.JSONException;
-//import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
  * @author root
  */
-public class UploadToGlance {
+public class GlanceImageStoreImpl implements IImageStore {
     private static final Logger logger = Logger.getLogger(UserConfirmation.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
+    private ConfigProperties configProperties;
     
-    ConfigProperties configProperties;
     private String glanceIP;
     private String userName;
     private String password;
     private String tenantName;
-    
-    public UploadToGlance() {
-        configProperties = new ConfigProperties();
-        glanceIP = configProperties.getProperty(Constants.GLANCE_IP);
-        userName = configProperties.getProperty(Constants.USER_NAME);
-        password = configProperties.getProperty(Constants.PASSWORD);
-        tenantName = configProperties.getProperty(Constants.TENANT_NAME);
+
+
+// Set FileHandler for logger
+    static {
+        LoggerUtility.setHandler(logger);
     }
     
-    public String uploadManifest(String manifestLocation) {
+    public GlanceImageStoreImpl(){
+        configProperties=new ConfigProperties();
+    glanceIP = configProperties.getProperty(Constants.GLANCE_IP);
+    userName = configProperties.getProperty(Constants.USER_NAME);
+    password = configProperties.getProperty(Constants.PASSWORD);
+    tenantName = configProperties.getProperty(Constants.TENANT_NAME);
+    
+    }
+    
+    
+    @Override
+    public String uploadTrustPolicy(String manifestLocation) {
         
         String glanceID = null;
         Map<String, String> manifestProperties = new HashMap<>();
@@ -65,48 +68,23 @@ public class UploadToGlance {
         manifestProperties.put(Constants.CONTAINER_FORMAT, "ari");
         manifestProperties.put(Constants.IS_PUBLIC, "true");
         
-        glanceID = uploadFileToGlance(manifestLocation,manifestLocation,manifestProperties);
+        glanceID = uploadImage(manifestLocation,manifestProperties);
         return glanceID;
     }
     
-    public String uploadImage(String imageLocation, String manifestLocation, Map<String, String> imageProperties) {
-        System.out.println("PSDebug Image location is:" + imageLocation);
-        String glanceID;
-        glanceID = uploadFileToGlance(imageLocation,manifestLocation,imageProperties);
-        return glanceID;
-    }
-    
-    
-    
-    private HttpPost setHeaders(HttpPost postRequest, Map<String, String> fileProperties) {
-        
-        postRequest.setHeader("x-image-meta-container_format", fileProperties.get(Constants.CONTAINER_FORMAT));
-        postRequest.setHeader("x-image-meta-is_public", fileProperties.get(Constants.IS_PUBLIC));
-        postRequest.setHeader("x-image-meta-disk_format", fileProperties.get(Constants.DISK_FORMAT));
-        postRequest.setHeader("x-image-meta-name", fileProperties.get(Constants.NAME));
-        postRequest.setHeader("x-image-meta-id", fileProperties.get(Constants.IMAGE_ID));
-        if(fileProperties.containsKey(Constants.KERNEL_ID) && fileProperties.containsKey(Constants.INITRD_ID)) {
-            postRequest.setHeader("x-image-meta-property-kernel_id", fileProperties.get(Constants.KERNEL_ID));
-            postRequest.setHeader("x-image-meta-property-ramdisk_id",fileProperties.get(Constants.INITRD_ID));            
-        }
-        postRequest.setHeader("Content-Type", "application/octet-stream");
-        
-        return postRequest;
-    }
-    
-    private String uploadFileToGlance(String fileLocation, String manifestLocation, Map<String, String> fileProperties) {
+    @Override
+    public String uploadImage(String imageLocation, Map<String, String> imageProperties) {
         String id = null;
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost("http://" + glanceIP + ":9292/v1/images");
-            postRequest = setHeaders(postRequest, fileProperties);
+            postRequest = setHeaders(postRequest, imageProperties);
             String authToken = getAuthToken();
             postRequest.setHeader("X-Auth-Token", authToken);
-            InputStream is = new FileInputStream(new File(fileLocation));
+            InputStream is = new FileInputStream(new File(imageLocation));
                         
             HttpEntity input = new InputStreamEntity(is);
             postRequest.setEntity(input);
-            System.out.println("PostRequest is:" + postRequest.toString().trim());
 //            MultipartEntity reqEntity;            
 //            reqEntity = new MultipartEntity();
             
@@ -127,7 +105,6 @@ public class UploadToGlance {
                 sb.append(output);
                 logger.info(output);
             }
-            System.out.println("PSDebug Output from Glance is:" + output);
             
             JSONObject obj = new JSONObject(sb.toString());
             JSONObject property = obj.getJSONObject("image");
@@ -145,8 +122,27 @@ public class UploadToGlance {
             logger.log(Level.SEVERE, null, ex);
         }    
         return id;
-    }   
-
+    }
+    
+    
+    
+    private HttpPost setHeaders(HttpPost postRequest, Map<String, String> fileProperties) {
+        
+        postRequest.setHeader("x-image-meta-container_format", fileProperties.get(Constants.CONTAINER_FORMAT));
+        postRequest.setHeader("x-image-meta-is_public", fileProperties.get(Constants.IS_PUBLIC));
+        postRequest.setHeader("x-image-meta-disk_format", fileProperties.get(Constants.DISK_FORMAT));
+        postRequest.setHeader("x-image-meta-name", fileProperties.get(Constants.NAME));
+        postRequest.setHeader("x-image-meta-id", fileProperties.get(Constants.IMAGE_ID));
+        if(fileProperties.containsKey(Constants.KERNEL_ID) && fileProperties.containsKey(Constants.INITRD_ID)) {
+            postRequest.setHeader("x-image-meta-property-kernel_id", fileProperties.get(Constants.KERNEL_ID));
+            postRequest.setHeader("x-image-meta-property-ramdisk_id",fileProperties.get(Constants.INITRD_ID));            
+        }
+        postRequest.setHeader("Content-Type", "application/octet-stream");
+        
+        return postRequest;
+    }
+    
+    @Override
     public boolean updateImageProperty(String imageID, String propName, String propValue) {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -226,5 +222,5 @@ public class UploadToGlance {
         }       
         return authToken;
     }
-    
+ 
 }

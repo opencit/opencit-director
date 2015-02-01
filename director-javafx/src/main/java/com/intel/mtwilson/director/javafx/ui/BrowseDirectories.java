@@ -7,6 +7,7 @@ package com.intel.mtwilson.director.javafx.ui;
 import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.GenerateHash;
+import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -47,7 +48,8 @@ public class BrowseDirectories {
     private Scene firstWindowScene;
 
     private String mountPath = Constants.MOUNT_PATH;
-    
+    private boolean isBareMetalLocal;
+    private boolean isBareMetalRemote;
     private ObservableList<String> choices = FXCollections.observableArrayList(
             "Binaries", "All Files", "Custom Formats");
     ObservableList<Directories> list = null;
@@ -70,25 +72,31 @@ public class BrowseDirectories {
         this.firstWindowScene = primaryStage.getScene();
     }
 
-    BrowseDirectories() {
-        System.out.println("Default Constructor");
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-    }
+//    BrowseDirectories() {
+//        System.out.println("Default Constructor");
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        
+//    }
     
     public void launch(final Map<String, String> confInfo) {
         
          
         // Depending upon mounted image(Windows or Linux)
-        initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
         
-        System.out.println("############# : " + "On the Browse directory  window");
+        initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
+        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL)));
+        isBareMetalRemote=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
+        
+        if(isBareMetalLocal){
+            mountPath="/";
+        }
+       
+//        System.out.println("############# : " + "On the Browse directory  window");
         
        //By default disable the text field from table
         for(Directories listComp : list) {
             initializeTableComponents(listComp);
         }
-        
         primaryStage.setTitle("Generate Manifest!");
         
         VBox vBox = new VBox();
@@ -165,7 +173,7 @@ public class BrowseDirectories {
         hBox2.setStyle("-fx-background-color: #336699;");
         Button browse = new Button("Add more");
         browse.setPrefSize(100, 20);
-        Button hash = new Button("Calculate Hash");
+        Button hash = new Button("Next");
         //hash.setPrefSize(100, 20);
         hBox2.getChildren().add(browse);
         hBox2.getChildren().add(hash);
@@ -183,21 +191,13 @@ public class BrowseDirectories {
                         if(!file.getAbsolutePath().equals(mountPath)) {
                             if(!isDirectoryAlreadySelected(file)) {
                                 if(isDirectoryAlreadyPresent(file)) {
-                                    System.out.println("Selected the directory checkbox");
                                 } else {
+                                    if(mountPath!="/"){
                                     checkBox = new CheckBox(file.getAbsolutePath().replace(mountPath, ""));
-                                    
-/*                                    // Add listener to checkbox: deselect the 'Select All' checkbox if any directory is unselected  
-                                    checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                                        @Override
-                                        public void changed(ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) {
-                                            System.out.println(old_val + " -- " + new_val);
-                                            if(!new_val) {
-                                                selectAllCBox.setSelected(false);
-                                            }
-                                        }
-                                    });
-*/
+                                    } else {
+                                        checkBox = new CheckBox(file.getAbsolutePath());
+                                    }
+
                                     checkBox.setSelected(true);
                                     Directories dir = new Directories(checkBox, new ChoiceBox(choices), new TextField());
                                     initializeTableComponents(dir);
@@ -223,15 +223,26 @@ public class BrowseDirectories {
         hash.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
+//                CreateImage.manifestFlag=true;
                 boolean isProper = true;
                 boolean isDirExist = true;
                 List<Directories> dirList = new ArrayList<>();
                 for (Directories dir : list) {
-                    if(dir.getCbox().isSelected()) {
+                    if(dir.getCbox().isSelected() && (mountPath!="/")) {
                         if(!new File(mountPath + dir.getCbox().getText()).exists()) {
                             isDirExist = false;
                             break;
+                        } 
+                        dirList.add(dir);
+                        if(dir.getChoice().getValue().toString().equals("Custom Formats") && dir.getTfield().getText().equals("")) {
+                            isProper = false;
+                            break;
                         }
+                    } else if(dir.getCbox().isSelected() && (mountPath=="/")) {
+                        if(!new File(dir.getCbox().getText()).exists()) {
+                            isDirExist = false;
+                            break;
+                        } 
                         dirList.add(dir);
                         if(dir.getChoice().getValue().toString().equals("Custom Formats") && dir.getTfield().getText().equals("")) {
                             isProper = false;
@@ -245,20 +256,31 @@ public class BrowseDirectories {
                     //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
                 } else if(!isProper) {
                     new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
-                } else {
+                } else if (confInfo!=null){
                     // Add entry in confInfo for hidden file check
                     confInfo.put(Constants.HIDDEN_FILES, String.valueOf(includeHiddenFiles.isSelected()));
                     
                     // Calculate Hash and generate manifest 
                     String manifestFileLocation = new GenerateHash().calculateHash(dirList, confInfo);
-
                     // Unmount the VM Image
                     //MountVMImage.unmountImage(mountPath);
+                    if(!isBareMetalLocal){
                     logger.info("Unmounting the VM Image");
                     int exitCode = MountVMImage.unmountImage(mountPath);
                     //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
-
-                  primaryStage.setScene(firstWindowScene);
+                    }
+                    if (manifestFileLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
+                        // Show the manifest file location
+                        new UserConfirmation().glanceUploadConfirmation(primaryStage, manifestFileLocation, confInfo);
+                    } else if(isBareMetalLocal || isBareMetalRemote) {
+                        new UserConfirmation().generateManifesConfirmation(primaryStage, manifestFileLocation);
+                        
+                    }else {
+                        logger.log(Level.SEVERE, "Error in creating the manifest file");
+//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
+                    }
+                    
+//                  primaryStage.setScene(firstWindowScene);
                     
                 }
             }
@@ -287,7 +309,6 @@ public class BrowseDirectories {
     
     // Initialize the table components i.e disable the textfield etc
     private void initializeTableComponents(final Directories dir) {
-        
         dir.getTfield().setEditable(false);
         dir.getCbox().setSelected(true);
         dir.getChoice().setValue("All Files");

@@ -235,6 +235,7 @@ public class ConfigurationInformation {
             {
                 
                 try{
+                    primaryStage.close();
                     Stage createImageStage=new Stage();
                     CreateImage createImageObj=new CreateImage(createImageStage);
                     createImageObj.launch();
@@ -257,11 +258,10 @@ public class ConfigurationInformation {
             {
                 
                 try{
-                    System.out.println("PSDebug: selected Upload existing");
+                    primaryStage.close();
                     Stage uploadExistingStage=new Stage();
                     UploadExisting uploadExistingObj=new UploadExisting(uploadExistingStage);
                     uploadExistingObj.launch();
-                    System.out.println("PSDebug: launched app");
                  }catch(Exception ex){
                     
                     System.out.println("Exception occurred here");
@@ -273,6 +273,42 @@ public class ConfigurationInformation {
 //                stage.show();
             }});
         
+        //        Open a new window to upload image from local system
+        tb_localSystem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {
+                
+                try{
+                    primaryStage.close();
+                    Stage localSystemStage=new Stage();
+                    LocalSystem localSystemObj=new LocalSystem(localSystemStage);
+                    localSystemObj.launch();
+//                
+                }catch(Exception ex)
+                {
+                    
+                    System.out.println("Exception occurred here");
+                    ex.printStackTrace();
+                }
+             }});
+        
+        tb_remoteSystem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {
+                
+                try{
+                    primaryStage.close();
+                    Stage remoteSystemStage=new Stage();
+                    RemoteSystem remoteSystemObj=new RemoteSystem(remoteSystemStage);
+                    remoteSystemObj.launch();
+//                
+                }catch(Exception ex)
+                {
+                    
+                    System.out.println("Exception occurred here");
+                    ex.printStackTrace();
+                }
+             }});
         
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e)

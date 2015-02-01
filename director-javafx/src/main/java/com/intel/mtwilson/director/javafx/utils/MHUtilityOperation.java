@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import com.intel.mtwilson.director.javafx.ui.Constants;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -56,7 +58,7 @@ public class MHUtilityOperation {
     public String startMHProcess(String fileLocation, String mhKeyName) {
         mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 	this.mhKeyName = mhKeyName;
-	System.out.println("MH Keystore Location : " + keystoreLocation);
+//	System.out.println("MH Keystore Location : " + keystoreLocation);
         String expScriptName = "/opt/trustdirector/bin/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
@@ -80,12 +82,11 @@ public class MHUtilityOperation {
         
         String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;
         logger.info(expScriptCommand);
-        System.out.println(command);
-        System.out.println(expScriptCommand);
+//        System.out.println(expScriptCommand);
         //String command = "cd /root/mhagent/.mhclient;java -jar" + jarLocation + " import-data-encryption-key " + keyName + passFileLocation;
         //callExec(expCommand);
         exitCode = obj.callExec(expScriptCommand);
-        System.out.println("Exit code is : " + exitCode);
+//        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //System.out.println("Exit code is : " + exitCode);
             //return null;
@@ -95,9 +96,9 @@ public class MHUtilityOperation {
 //        String keystore = "/root/mhagent/.mhclient/dek-recipients.jks";
 //	String keystore = "./dek-recipients.jks";
         command = "keytool -keystore " + keystoreLocation + " -storepass " + keystorePasswd + " -list";
-        System.out.println("---- " + command + "----");
+//        System.out.println("---- " + command + "----");
         exitCode = obj.callExec(command);
-        System.out.println("Exit code is : " + exitCode);
+//        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}
@@ -106,16 +107,16 @@ public class MHUtilityOperation {
         //String id = parseFile(keytoolOutput.getAbsolutePath());
         String id = parseFile(Constants.EXEC_OUTPUT_FILE);
 
-        System.out.println(id);
+//        System.out.println(id);
         //id = "d18b96c4b3e01728aa79621f20ceba67";
         
         command = "java -jar " + mhJarLocation + " wrap-data-encryption-key " + mhKeyName + " " + id;
         fileOpt.writeToFile(tempCommandFile, command, false);
         expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword + " " + tlsSSLPasswd;
-        System.out.println(command);
-        System.out.println(expScriptCommand);
+//        System.out.println(command);
+//        System.out.println(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
-        System.out.println("Exit code is : " + exitCode);
+//        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}
@@ -123,10 +124,10 @@ public class MHUtilityOperation {
         command = "java -jar " + mhJarLocation + " post-data-encryption-key " + mhKeyName + " " + id + " https://" + KMSServerIP + ":8443";
         fileOpt.writeToFile(tempCommandFile, command, false);
         expScriptCommand = expScriptName + " "+ tempCommandFile + " " + keystorePasswd;
-        System.out.println(command);
-        System.out.println(expScriptCommand);
+//        System.out.println(command);
+//        System.out.println(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
-        System.out.println("Exit code is : " + exitCode);
+//        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}

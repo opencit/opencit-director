@@ -19,7 +19,7 @@ public class Constants {
     public static final String IMAGE_NAME = "Image Name";
     public static final String IMAGE_ID = "Image ID";
     public static final String TRUST_POLICY_PATH="Trust Policy Path";
-    public static final String HASH_TYPE = "Hash Type";
+    public static final String HASH_TYPE = "Hash_Type";
     public static final String Mt_WILSON_IP = "Mt_Wilson_IP";
     public static final String Mt_WILSON_PORT = "Mt_Wilson_Port";
     public static final String IMAGE_LOCATION = "Image Location";
@@ -33,8 +33,13 @@ public class Constants {
     public static final String Enc_KERNEL_PATH = "EncKernel Path";
     public static final String Enc_INITRD_PATH = "EncInitrd Path";
     
-    //PS added two new fields for the new UI
+    public static final String remoteSystemIpAddress="IP Address";
+    public static final String remoteSystemuserName="User Name";
+    public static final String remoteSystemPassword="Password";
+    
     public static final String IS_ENCRYPTED="Is_Encrypted";
+    public static final String BARE_METAL="Bare_Metal";
+    public static final String BARE_METAL_REMOTE="Bare_Metal_Remote";
     
     
     public static final String CONTAINER_FORMAT = "Container Format";
@@ -45,6 +50,8 @@ public class Constants {
     public static final String KERNEL_ID = "Kernel ID";
     public static final String INITRD_ID = "Initrd ID";
     
+    public static final String IMAGE_STORE_TYPE = "Image_Store_Type";
+    public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
     public static final String GLANCE_IP = "Glance_IP";
     public static final String USER_NAME = "User_Name";
     public static final String PASSWORD = "Password";

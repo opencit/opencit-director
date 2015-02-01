@@ -158,8 +158,8 @@
             <artifactId>jarchivelib</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.rauschig</groupId>
-            <artifactId>wicket-js</artifactId>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>                
         </dependency>
     </dependencies>
 </project>
