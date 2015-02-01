@@ -8,6 +8,6 @@
     <packaging>pom</packaging>
   
     <modules>
-        
+        <module>director-linux-installer</module>
     </modules>
 </project>
