@@ -19,9 +19,9 @@ public class Constants {
     public static final String IMAGE_NAME = "Image Name";
     public static final String IMAGE_ID = "Image ID";
     public static final String TRUST_POLICY_PATH="Trust Policy Path";
-    public static final String HASH_TYPE = "Hash_Type";
-    public static final String Mt_WILSON_IP = "Mt_Wilson_IP";
-    public static final String Mt_WILSON_PORT = "Mt_Wilson_Port";
+    public static final String HASH_TYPE = "hash.type";
+    public static final String Mt_WILSON_IP = "mtwilson.server.ip";
+    public static final String Mt_WILSON_PORT = "mtwilson.server.port";
     public static final String IMAGE_LOCATION = "Image Location";
     public static final String TRUST_POLICY_LOCATION = "Trust Policy Location";
     public static final String POLICY_TYPE = "Policy Type";
@@ -50,12 +50,12 @@ public class Constants {
     public static final String KERNEL_ID = "Kernel ID";
     public static final String INITRD_ID = "Initrd ID";
     
-    public static final String IMAGE_STORE_TYPE = "Image_Store_Type";
+    public static final String IMAGE_STORE_TYPE = "image.store.type";
     public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
-    public static final String GLANCE_IP = "Glance_IP";
-    public static final String USER_NAME = "User_Name";
-    public static final String PASSWORD = "Password";
-    public static final String TENANT_NAME = "Tenant_Name";
+    public static final String GLANCE_IP = "glance.ip";
+    public static final String USER_NAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String TENANT_NAME = "tenant.name";
     
     public static final String MOUNT_PATH = "/tmp/mount";
     
@@ -63,13 +63,13 @@ public class Constants {
     
     public static final String IS_WINDOWS = "Is Windows";
     
-    public static final String MH_KEY_NAME = "MH_Key_Name";
+    public static final String MH_KEY_NAME = "mysteryhill.key.name";
     
     public static final String MH_JAR_LOCATION = "MH_Jar_Location";
     
     public static final String EXEC_OUTPUT_FILE = "/opt/trustdirector/log/exec_output";
     
-    public static final String KMS_SERVER_IP = "KMS_Server_IP";
+    public static final String KMS_SERVER_IP = "kms.server.ip";
     
     public static final String MH_DEK_URL_IMG = "MH Dek Url Image";
     
@@ -77,11 +77,11 @@ public class Constants {
     
     public static final String MH_DEK_URL_INITRD = "MH Dek Url Initrd";
     
-    public static final String Mt_WILSON_USER_NAME = "Mt_Wilson_User_Name";
-    public static final String Mt_WILSON_PASSWORD = "Mt_Wilson_Password";
+    public static final String Mt_WILSON_USER_NAME = "mtwilson.username";
+    public static final String Mt_WILSON_PASSWORD = "mtwilson.password";
     public static final String EXCLUDE_FILE_NAME = "/opt/trustdirector/configuration/exclude-file-list";
     public static final String HOST_MANIFEST = "Host_Manifest";
-    public static final String MH_KEYSTORE_PASSWD = "MH_Keystore_Password";
-    public static final String MH_KEYSTORE_LOCATION = "MH_Keystore_Location";
-    public static final String MH_TLS_SSL_PASSWD = "MH_TLS_SSL_Passwd";
+    public static final String MH_KEYSTORE_PASSWD = "mysteryhill.keystore.password";
+    public static final String MH_KEYSTORE_LOCATION = "mysteryhill.keystore";
+    public static final String MH_TLS_SSL_PASSWD = "mysteryhill.tls.ssl.password";
 }
