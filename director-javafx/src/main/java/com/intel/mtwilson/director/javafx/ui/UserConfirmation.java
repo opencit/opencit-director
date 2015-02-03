@@ -82,9 +82,9 @@ public class UserConfirmation {
                 primaryStage.close();
 
 		// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                //String mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME);
-                //String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
-                String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+                String mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME);
+                String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+//                String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
                 if(encryptedImageLocation == null) {
                     new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                     System.exit(1);
@@ -95,9 +95,9 @@ public class UserConfirmation {
                     MHUtilityOperation mhOptKernel = new MHUtilityOperation();
 
 		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
-                    //String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
-                    String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
+                    mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+                    String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+//                    String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
                     if(encryptedKernelPath == null) {
                         new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
@@ -105,9 +105,9 @@ public class UserConfirmation {
                     
 		    MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
 		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    //mhKeyName = ConfigProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
-                    //String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
-                    String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
+                    mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+                    String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+//                    String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
                     if(encryptedInitrdPath == null) {
                         new CreateImage(primaryStage).showWarningPopup("Error In Image Encryption ..... Exiting.....");
                         System.exit(1);
