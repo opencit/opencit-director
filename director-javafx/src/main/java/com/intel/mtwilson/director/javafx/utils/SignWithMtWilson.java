@@ -89,7 +89,7 @@ public class SignWithMtWilson {
             
             postRequest.setHeader("Authorization", "Basic " + encryptedUserNameAndPassword);
             HttpResponse response = httpClient.execute(postRequest);
-            System.out.println("HTTP Response is" + response);
+//            System.out.println("HTTP Response is" + response);
             if (response.getStatusLine().getStatusCode() != 200) {
                 logger.log(Level.SEVERE, null, new RuntimeException(response.getStatusLine().toString()));
                 return null;
