@@ -118,6 +118,7 @@ public class GenerateHash {
         
         // Write to the manifest file
         String fileLocation = new GenerateManifest().writeToXMLManifest(dirAndFilesMapping, confInfo);
+//        System.out.println("Target file was Created at " + fileLocation);
         logger.info("String fileLocation val in Calculate HASh" + fileLocation);
 //          new GenerateManifest().RetrieveFileHash(dirAndFilesMapping, confInfo);
           return fileLocation; //fileLocation;

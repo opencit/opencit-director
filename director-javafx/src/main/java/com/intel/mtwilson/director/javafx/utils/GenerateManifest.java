@@ -305,8 +305,10 @@ public class GenerateManifest {
             String base64Hash = new FileUtilityOperation().base64Encode(fileHash);
 //            System.out.println("Signing Mt wilson image ID" + confInfo.get(Constants.IMAGE_ID));
             logger.info("Trust Policy before Mt Wilson signature is"+ trustPolicy);
+//            System.out.println("Trust Policy before Mt Wilson signature is"+ trustPolicy);
              String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
             logger.info("@@@@@@@SIGNED Trust Policy is"+ signedTrustPolicy);
+//            System.out.println("@@@@@@@SIGNED Trust Policy is"+ signedTrustPolicy);
 //            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
             if(signedTrustPolicy == null) {
                 logger.log(Level.SEVERE, "Failed in signing the trustPolicy with Mt Wilson");

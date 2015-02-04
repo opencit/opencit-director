@@ -48,7 +48,7 @@ public class MHUtilityOperation {
 
     public MHUtilityOperation() {
         configProperties = new ConfigProperties();
-        mhJarLocation = "./resources/client-0.1-SNAPSHOT-with-dependencies.jar";
+        mhJarLocation = "/opt/trustdirector/java/client-0.1-SNAPSHOT-with-dependencies.jar";
         keystorePasswd = configProperties.getProperty(Constants.MH_KEYSTORE_PASSWD);
         keystoreLocation = configProperties.getProperty(Constants.MH_KEYSTORE_LOCATION);
         tlsSSLPasswd = configProperties.getProperty(Constants.MH_TLS_SSL_PASSWD);
