@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.intel.mtwilson.director.javafx.utils.SetupException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -86,6 +87,9 @@ public class MHUtilityOperation {
         //String command = "cd /root/mhagent/.mhclient;java -jar" + jarLocation + " import-data-encryption-key " + keyName + passFileLocation;
         //callExec(expCommand);
         exitCode = obj.callExec(expScriptCommand);
+        if(exitCode != 0){
+            throw new SetupException("KMS setup is not done properly. Error while executing this command: "+"java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " +randomPassword + " Exit code: "+exitCode);
+        }
 //        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //System.out.println("Exit code is : " + exitCode);
@@ -98,6 +102,9 @@ public class MHUtilityOperation {
         command = "keytool -keystore " + keystoreLocation + " -storepass " + keystorePasswd + " -list";
 //        System.out.println("---- " + command + "----");
         exitCode = obj.callExec(command);
+        if(exitCode != 0){
+            throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
+        }
 //        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
@@ -116,6 +123,9 @@ public class MHUtilityOperation {
 //        System.out.println(command);
 //        System.out.println(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
+        if(exitCode != 0){
+            throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
+        }
 //        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
@@ -127,6 +137,9 @@ public class MHUtilityOperation {
 //        System.out.println(command);
 //        System.out.println(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
+        if(exitCode != 0){
+            throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
+        }
 //        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
