@@ -179,6 +179,7 @@ cp tdirector.sh /opt/trustdirector/bin/tdirector
 cp client-0.1-SNAPSHOT-with-dependencies.jar /opt/trustdirector/java/
 cp director-javafx-*.jar /opt/trustdirector/java/
 chmod 700 /opt/trustdirector/bin/exclude-file-list
+chmod 700 /opt/trustdirector/bin/login
 chmod 700 /opt/trustdirector/bin/mount_remote_system.sh
 chmod 700 /opt/trustdirector/bin/mount_vm_image.sh
 chmod 700 /opt/trustdirector/bin/tdirector
