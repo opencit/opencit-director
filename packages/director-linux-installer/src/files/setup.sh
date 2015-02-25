@@ -119,22 +119,22 @@ DIRECTOR_ZYPPER_PACKAGES=""
 auto_install "Installer requirements" "DIRECTOR"
 
 ### INSTALL JAVA
-java_clear; java_detect >> $INSTALL_LOG_FILE
-JAVA_PACKAGE=$(ls -1d jdk* jre*)
+java_clear; java_detect 2>&1 >> $INSTALL_LOG_FILE
+JAVA_PACKAGE=$(ls -1d jdk*)
 if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
   echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
   return 1
 fi
 javafile=$JAVA_PACKAGE
-echo "Installing $javafile"  >> $INSTALL_LOG_FILE
-is_targz=`echo $javafile | grep -E ".tar.gz$|.tgz$"`
-is_gzip=`echo $javafile | grep ".gz$"`
-is_bin=`echo $javafile | grep ".bin$"`
-javaname=`echo $javafile | awk -F . '{ print $1 }'`
+echo "Installing $javafile" >> $INSTALL_LOG_FILE
+is_targz=$(echo $javafile | grep -E ".tar.gz$|.tgz$")
+is_gzip=$(echo $javafile | grep ".gz$")
+is_bin=$(echo $javafile | grep ".bin$")
+javaname=$(echo $javafile | awk -F . '{ print $1 }')
 if [ -n "$is_targz" ]; then
   tar xzvf $javafile 2>&1 >> $INSTALL_LOG_FILE
 elif [ -n "$is_gzip" ]; then
-  gunzip $javafile 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
+  gunzip $javafile 2>&1 >/dev/null >> $INSTALL_LOG_FILE
   chmod +x $javaname
   ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
 elif [ -n "$is_bin" ]; then
@@ -143,25 +143,31 @@ elif [ -n "$is_bin" ]; then
 fi
 # java gets unpacked in current directory but they cleverly
 # named the folder differently than the archive, so search for it:
-java_unpacked=`ls -1d jdk* jre* 2>/dev/null`
+java_unpacked=$(ls -d */ 2>/dev/null)
 for f in $java_unpacked
 do
-  #echo "$f"
-  if [ -d "$f" ]; then
-    if [ -d "/usr/lib/jvm/$f" ]; then
-      echo "Java already installed at /usr/lib/jvm/$f"
-      export JAVA_HOME="/usr/lib/jvm/$f"
-    else
-      mv "$f" /usr/lib/jvm && export JAVA_HOME="/usr/lib/jvm/$f"
-      update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$f/bin/java" 1
-      update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$f/bin/javac" 1
-      update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$f/bin/javaws" 1
-      #update-alternatives --config java
-      #select /usr/lib/jvm/jdk1.7.0_55/bin/java
-    fi
+  if [ -d "/usr/lib/jvm/$f" ]; then
+    echo "Java already installed at /usr/lib/jvm/$f"
+    export JAVA_HOME="/usr/lib/jvm/$f"
+  else
+    echo "Installing Java..."
+    mkdir -p "/usr/lib/jvm"
+    mv "$f" "/usr/lib/jvm"
+    export JAVA_HOME="/usr/lib/jvm/$f"
+    #update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/$f/bin/java" 1
+    #update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/$f/bin/javac" 1
+    #update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/$f/bin/javaws" 1
+    ##update-alternatives --config java
+    ##select /usr/lib/jvm/jdk1.7.0_55/bin/java
   fi
 done
-java_detect  >> $INSTALL_LOG_FILE
+
+rm "/usr/bin/java" 2>/dev/null
+rm "/usr/bin/keytool" 2>/dev/null
+ln -s "$JAVA_HOME/jre/bin/java" "/usr/bin/java"
+ln -s "$JAVA_HOME/jre/bin/keytool" "/usr/bin/keytool"
+
+java_detect 2>&1 >> $INSTALL_LOG_FILE
 if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
   echo_failure "Unable to auto-install Java" | tee -a $INSTALL_LOG_FILE
   echo "  Java download URL:"                >> $INSTALL_LOG_FILE
@@ -221,7 +227,7 @@ echo " -Retrieving MTW server certificate"
 
 # 2.a improt to keystore
 echo " -Importing the MTW certificate to Keystore"
-/usr/bin/keytool -import -noprompt -trustcacerts -alias mtwcert -file /tmp/mtwcert.pem -keystore /usr/lib/jvm/jdk1.7.0_55/jre/lib/security/cacerts
+$JAVA_HOME/jre/bin/keytool -import -noprompt -trustcacerts -alias mtwcert -file /tmp/mtwcert.pem -keystore /usr/lib/jvm/jdk1.7.0_55/jre/lib/security/cacerts
 rm /tmp/mtwcert.pem
 
 update_property_in_file "username" "$DIRECTOR_PROPERTIES_FILE" "$USERNAME"
