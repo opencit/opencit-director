@@ -82,9 +82,7 @@ public class GenerateHash {
 //            System.out.println("PSDebug Directory Path:" + dirPath);
             File dir = new File(dirPath);
             String fileFormat = dirObject.getChoice().getValue().toString();
-            
-            // Initialize the filter property
-            String filter = initializeFilter(dirObject);
+            String filter = dirObject.getTfield().getText();
 //            System.out.println("PSDebug Filter is" + filter);
             //Check for hidden files to include or not
             boolean includeHiddenFiles = Boolean.valueOf(confInfo.get(Constants.HIDDEN_FILES));
@@ -92,7 +90,8 @@ public class GenerateHash {
 //            System.out.println("The param are" + ":" + dir + ":" + (filter.replace(".", "").split(";")) + ":" + includeHiddenFiles + ":" + isWindows);
             
             // Get the files from a directory recursively, this list will containg the files with its actual file appended with "###"(in case of symbolic links)
-            allFiles = getFilesFromDir(dir, filter.replace(".", "").split(";"), includeHiddenFiles, isWindows);
+            //TODO boski change
+            allFiles = getFilesFromDir(dir, fileFormat, filter, includeHiddenFiles, isWindows);
 //            System.out.println("PSDebug Dir List All files:" +" "+ allFiles.toString());
             // Sort the list of files alphabetically
             Collections.sort(allFiles);
@@ -143,14 +142,14 @@ public class GenerateHash {
     }
 
     // Traverse through directory iteratively and returns list of 'file###actualfile'
-    private List<String> getFilesFromDir(File dir, String[] extensions, boolean includeHiddenFiles, boolean isWindows) {
+    private List<String> getFilesFromDir(File dir, String fileFormat, String filter, boolean includeHiddenFiles, boolean isWindows) {
 //        System.out.println("PSDebug getFilesfromDir Function");
 //        System.out.println("PSDebug dir path:" + dir.getAbsolutePath());
 //        System.out.println("PSDebug includeHiddenFiles:" + includeHiddenFiles);
         iterateRecursively(dir.getAbsolutePath(), dir.getAbsolutePath(), includeHiddenFiles);
         
         // Select the files depending on the filter value
-        switch (extensions[0]) {
+        switch (fileFormat) {
             case "*":
                 break;
             case "binary":
@@ -171,7 +170,7 @@ public class GenerateHash {
 		}
                 break;
             default:
-                allFiles = getFilesWithSpecifiedExtension(allFiles, extensions);
+                //BS COMM allFiles = getFilesWithSpecifiedExtension(allFiles, filter);
                 break;
         }
 //        System.out.println("PSDebug all Files val is:" + allFiles.toString());
@@ -201,7 +200,6 @@ public class GenerateHash {
             return false;
         }
     }
-
     
     // Get the files with specified file extension
     private List<String> getFilesWithSpecifiedExtension(List<String> allFiles, String [] extensions) {
@@ -219,8 +217,6 @@ public class GenerateHash {
 
     // Calculate hash and return hash value
     public String computeHash(MessageDigest md, File file) {
-        
-                
         Map<String, String> fileAndHash = new LinkedHashMap<>();
         StringBuffer sb = null;
         try {
@@ -245,7 +241,7 @@ public class GenerateHash {
         return sb.toString();
     }    
     
-    // This function will iterate recursively through a directory and will add the file###actualFile to list
+    // This function will iterate recursively through a directory and will add the file###actualFile to list. This is needed when we have symolic link
     public void iterateRecursively(String origPath, String newPath, boolean includeHiddenFiles) {
        
         File [] files = new File(newPath).listFiles();

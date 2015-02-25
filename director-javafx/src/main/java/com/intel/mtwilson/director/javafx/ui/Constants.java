@@ -20,6 +20,7 @@ public class Constants {
     public static final String IMAGE_ID = "Image ID";
     public static final String TRUST_POLICY_PATH="Trust Policy Path";
     public static final String HASH_TYPE = "hash.type";
+    public static final String CONF_HASH_TYPE_SHA256 = "SHA-256";
     public static final String Mt_WILSON_IP = "mtwilson.server.ip";
     public static final String Mt_WILSON_PORT = "mtwilson.server.port";
     public static final String IMAGE_LOCATION = "Image Location";
@@ -50,12 +51,13 @@ public class Constants {
     public static final String KERNEL_ID = "Kernel ID";
     public static final String INITRD_ID = "Initrd ID";
     
-    public static final String IMAGE_STORE_TYPE = "image.store.type";
+    public static final String IMAGE_STORE_TYPE = "IMAGE_STORE_TYPE";
     public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
     public static final String GLANCE_IP = "glance.ip";
     public static final String USER_NAME = "username";
     public static final String PASSWORD = "password";
     public static final String TENANT_NAME = "tenant.name";
+    public static final String CONF_CUSTOMER_ID = "CUSTOMER_ID";
     
     public static final String MOUNT_PATH = "/tmp/mount";
     

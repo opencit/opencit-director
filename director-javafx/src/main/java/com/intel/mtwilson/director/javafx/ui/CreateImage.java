@@ -101,7 +101,7 @@ public class CreateImage {
         final FileUtilityOperation op = new FileUtilityOperation();
         
         ObservableList<String> hashTypeList = FXCollections.observableArrayList(
-            "SHA-256", "SHA1"
+            "SHA256", "SHA1"
         );
         
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(

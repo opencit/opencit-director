@@ -136,14 +136,14 @@ public class GenerateManifest {
             
             // Root Element
             Element rootElement = doc.createElement("TrustPolicy");
-            doc.appendChild(rootElement);
+            doc.appendChild(rootElement);            
+            Attr manifestVersion = doc.createAttribute("xmlns");
+            manifestVersion.setValue("mtwilson:trustdirector:policy:1.1");
+            rootElement.setAttributeNode(manifestVersion);
             
             Element headers = doc.createElement("Headers");
             rootElement.appendChild(headers);
             
-            Attr manifestVersion = doc.createAttribute("version");
-            manifestVersion.setValue("1.1");
-            rootElement.setAttributeNode(manifestVersion);
             
             if((!isBareMetalLocal) && (!isBareMetalRemote)){
             Element imageEncryption = doc.createElement("Image_Encryption");

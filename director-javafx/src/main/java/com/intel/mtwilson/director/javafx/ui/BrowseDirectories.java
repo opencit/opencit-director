@@ -8,6 +8,8 @@ import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.GenerateHash;
 import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
+import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
+import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -173,10 +175,10 @@ public class BrowseDirectories {
         hBox2.setStyle("-fx-background-color: #336699;");
         Button browse = new Button("Add more");
         browse.setPrefSize(100, 20);
-        Button hash = new Button("Next");
+        Button next = new Button("Next");
         //hash.setPrefSize(100, 20);
         hBox2.getChildren().add(browse);
-        hBox2.getChildren().add(hash);
+        hBox2.getChildren().add(next);
         
         //Add handler to "Add more" button
         browse.setOnAction(new EventHandler<ActionEvent>() {
@@ -220,10 +222,11 @@ public class BrowseDirectories {
         });
         
         // Add handler to "Calculate Hash" button
-        hash.setOnAction(new EventHandler<ActionEvent>() {
+        next.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
 //                CreateImage.manifestFlag=true;
+                System.out.println("..................................................................");
                 boolean isProper = true;
                 boolean isDirExist = true;
                 List<Directories> dirList = new ArrayList<>();
@@ -260,8 +263,20 @@ public class BrowseDirectories {
                     // Add entry in confInfo for hidden file check
                     confInfo.put(Constants.HIDDEN_FILES, String.valueOf(includeHiddenFiles.isSelected()));
                     
-                    // Calculate Hash and generate manifest 
-                    String manifestFileLocation = new GenerateHash().calculateHash(dirList, confInfo);
+                    //Encrypt image 
+                    if(confInfo.get(Constants.IS_ENCRYPTED).equals("true")){
+                        MHUtilityOperation mhUtil = new MHUtilityOperation();
+                        String message = mhUtil.encryptImage(confInfo);
+                        if(message != null){
+                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                                System.exit(1);
+                        }
+                    }
+                    // Generate TrustPolicy and encrypt image if necessary
+                    System.err.println("Calling generateTP......................................");
+                    //String manifestFileLocation = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                    String manifestFileLocation = null;
+                    System.err.println("After Calling generateTP......................................");
                     // Unmount the VM Image
                     //MountVMImage.unmountImage(mountPath);
                     if(!isBareMetalLocal){
@@ -271,7 +286,8 @@ public class BrowseDirectories {
                     }
                     if (manifestFileLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
-                        new UserConfirmation().glanceUploadConfirmation(primaryStage, manifestFileLocation, confInfo);
+                        //BS temp comment
+                        //new UserConfirmation().glanceUploadConfirmation(primaryStage, manifestFileLocation, confInfo);
                     } else if(isBareMetalLocal || isBareMetalRemote) {
                         new UserConfirmation().generateManifesConfirmation(primaryStage, manifestFileLocation);
                         
