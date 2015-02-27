@@ -11,8 +11,13 @@ import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -274,8 +279,7 @@ public class BrowseDirectories {
                     }
                     // Generate TrustPolicy and encrypt image if necessary
                     System.err.println("Calling generateTP......................................");
-                    //String manifestFileLocation = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                    String manifestFileLocation = null;
+                    String trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
                     System.err.println("After Calling generateTP......................................");
                     // Unmount the VM Image
                     //MountVMImage.unmountImage(mountPath);
@@ -284,12 +288,14 @@ public class BrowseDirectories {
                     int exitCode = MountVMImage.unmountImage(mountPath);
                     //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
                     }
-                    if (manifestFileLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
+                    //sign trustpolicy with MTW and save it to a file
+                    String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                    String trustPolicyLocation = saveTrustPolicy(signedTrustPolicy);
+                    if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
-                        //BS temp comment
-                        //new UserConfirmation().glanceUploadConfirmation(primaryStage, manifestFileLocation, confInfo);
+                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
                     } else if(isBareMetalLocal || isBareMetalRemote) {
-                        new UserConfirmation().generateManifesConfirmation(primaryStage, manifestFileLocation);
+                        new UserConfirmation().generateManifesConfirmation(primaryStage, trustPolicyLocation);
                         
                     }else {
                         logger.log(Level.SEVERE, "Error in creating the manifest file");
@@ -321,6 +327,26 @@ public class BrowseDirectories {
         
         primaryStage.show();
 
+    }
+    
+    //save trustPolicy
+    private String saveTrustPolicy(String signedTrustPolicy) {
+        PrintWriter out = null;
+
+        String trustPolicyLocation = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        String trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
+        String filePath = trustPolicyDirLocation + trustPolicyLocation;
+        try {
+            out = new PrintWriter(filePath);
+            out.println(signedTrustPolicy);
+            out.close();
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            out.close();
+        }
+        return filePath;
     }
     
     // Initialize the table components i.e disable the textfield etc

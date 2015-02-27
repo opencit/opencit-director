@@ -93,7 +93,7 @@ public class GenerateManifest {
 //        System.out.println("Target location is:" + targetLocation);
         }else if(isBareMetalLocal){
             
-             targetLocation = trustPolicyDirLocation + trustPolicyLocation;
+            targetLocation = trustPolicyDirLocation + trustPolicyLocation;
              
           
         }else if(isBareMetalRemote){

@@ -5,8 +5,8 @@
  */
 package com.intel.mtwilson.director.javafx.utils;
 
-import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.dcsg.cpg.crypto.Sha256Digest;
+//import com.intel.dcsg.cpg.crypto.Sha1Digest;
+//import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.director.javafx.ui.Constants;
 import com.intel.mtwilson.director.javafx.ui.Directories;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
@@ -79,10 +79,11 @@ public class GenerateTrustPolicy {
         //Set Image
         Image image = new Image();
         image.setImageId(configInfo.get(Constants.IMAGE_ID));
-
-        //Set whitelist
+               
+        //Set whitelist and calculate cumulative hash
         Whitelist whitelist = createWhitelist(directories, configInfo, image);
         trustpolicy.setWhitelist(whitelist);
+        trustpolicy.setImage(image);
  
         //create xml
         JAXB jaxb = new JAXB();
@@ -196,9 +197,11 @@ public class GenerateTrustPolicy {
             
             //Extend image hash
             if(digestSha1 != null)
-                digestSha1.extend(Sha1Digest.valueOfHex(dir.getValue()));
-            else if(digestSha256 != null)
-                digestSha256.extend(Sha256Digest.valueOfHex(dir.getValue()).toByteArray());
+                digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(dir.getValue()));
+            else if(digestSha256 != null){
+                digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex(dir.getValue()).toByteArray());
+                System.out.println("Extended hash is::"+dir.getValue()+"  "+digestSha256.toHexString());
+            }
             else{}
         }
         fileList = fileList.replaceAll("\\n$", "");
@@ -222,9 +225,10 @@ public class GenerateTrustPolicy {
             whiltelistFile.add(newFile);
             //Extend image hash
             if(digestSha1 != null)
-                digestSha1.extend(Sha1Digest.valueOfHex(newFile.getValue()));
-            else if(digestSha256 != null)
-                digestSha256.extend(Sha256Digest.valueOfHex(newFile.getValue()).toByteArray());
+                digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(newFile.getValue()));
+            else if(digestSha256 != null){
+                digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex("72282991e99088498fa5a8f0497e474fb69dc5d94a2a7ff862f2ddd17e53b5fc").toByteArray());
+            }
             else{}
         }
         if(digestSha1 != null)
@@ -232,6 +236,7 @@ public class GenerateTrustPolicy {
         else if(digestSha256 != null)
             imageHash.setValue(digestSha256.toHexString());
         else{}
+        image.setImageHash(imageHash);
         return whitelist;
     }
     
