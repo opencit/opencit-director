@@ -20,6 +20,7 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy.Whitelist.*;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -144,11 +145,9 @@ public class GenerateTrustPolicy {
         for (Directories directory : directories){
             Dir dir = new Dir();
             //set include exclude attribute
-            dir.setPath(directory.getCbox().getText());
+            dir.setPath(directory.getCbox().getText());            
             
-            
-            String excludeFileList = Constants.EXCLUDE_FILE_NAME;
-            String cmd = "cat "+excludeFileList+" | grep -E '^("+dir.getPath()+")'";
+            String cmd = "cat "+Constants.EXCLUDE_FILE_NAME+" | grep -E '^("+dir.getPath()+")'";
             String exclude = executeShellCommand(cmd);
             if(exclude != null && !exclude.isEmpty()){
                 exclude = exclude.replaceAll("\\n", "|");
@@ -157,31 +156,16 @@ public class GenerateTrustPolicy {
             }
             System.out.println("Exclude tag is::::: "+exclude);
 
-
-            String filter = directory.getChoice().getValue().toString();
-            String findCmd = "find "+mountPath+dir.getPath()+" ! -type d";
-            switch (filter){
-                case "All Files":
-                    whitelist.setDigestAlg("sha256");
-                    if(dir.getExclude() != null){
-                        findCmd += " | grep -vE '"+dir.getExclude()+"'";
-                    }
-                    break;
-                case "Binaries":
-                    whitelist.setDigestAlg("sha1");
-                    break;
-                default:
-                    String include = directory.getTfield().getText();
-                    if(include != null && !include.equals("")){
-                        dir.setInclude(include);
-                    }
-                    findCmd += "| grep -E '"+include+"'";
-                    if(dir.getExclude() != null){
-                        findCmd += " | grep -vE '"+dir.getExclude()+"'";
-                    }
-                    break;
+            String findCmd = "find " + mountPath + dir.getPath() + " ! -type d";
+            String include = directory.getTfield().getText();
+            if (include != null && !include.equals("")) {
+                dir.setInclude(include);
             }
-            System.out.println("Find Command is::: "+findCmd);
+            findCmd += "| grep -E '" + include + "'";
+            if (dir.getExclude() != null) {
+                findCmd += " | grep -vE '" + dir.getExclude() + "'";
+            }
+            System.out.println("Find Command is::: " + findCmd);
             String fileListForDir = executeShellCommand(findCmd);
             //System.out.println("file list is::: "+fileListForDir);
 
@@ -345,4 +329,23 @@ public class GenerateTrustPolicy {
         
         return sb.toString();
     }    
+    public String createSha256(java.io.File file) throws Exception  {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    InputStream fis = new FileInputStream(file);
+    int n = 0;
+    byte[] mdbytes = new byte[8192];
+    while (n != -1) {
+        n = fis.read(mdbytes);
+        if (n > 0) {
+            digest.update(mdbytes, 0, n);
+        }
+    }
+    StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < digest.digest().length; i++) {
+                sb.append(Integer.toString((digest.digest()[i] & 0xff) + 0x100, 16).substring(1));
+            }
+        
+        
+        return sb.toString();
+}
 }

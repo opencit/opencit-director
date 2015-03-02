@@ -29,7 +29,7 @@ public class Constants {
     public static final String IMAGE_TYPE = "Image Type";
     public static final String KERNEL_PATH = "Kernel Path";
     public static final String INITRD_PATH = "Initrd Path";
-    public static final String HIDDEN_FILES = "Hidden Files";
+    //public static final String HIDDEN_FILES = "Hidden Files";
     public static final String Enc_IMAGE_LOCATION = "EncImage Location";
     public static final String Enc_KERNEL_PATH = "EncKernel Path";
     public static final String Enc_INITRD_PATH = "EncInitrd Path";

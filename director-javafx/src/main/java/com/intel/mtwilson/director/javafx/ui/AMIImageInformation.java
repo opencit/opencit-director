@@ -23,7 +23,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 
@@ -173,7 +172,6 @@ public class AMIImageInformation {
                         confInfo.put(Constants.INITRD_PATH, initrdTField.getText());
                     }
                     confInfo.put(Constants.IMAGE_LOCATION, imageLocationTField.getText());
-                    confInfo.put(Constants.HIDDEN_FILES, "true");
                     
                     if(new File(Constants.MOUNT_PATH + "/Windows/System32/ntoskrnl.exe").exists()) {
                         confInfo.put(Constants.IS_WINDOWS, "true");
@@ -182,10 +180,7 @@ public class AMIImageInformation {
                     }
                     
                     if(includeImageHash) {
-                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
-//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest();
-//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
-//                        String manifestFileLocation = new GenerateManifest().writeToXMLManifest(confInfo);
+                        String manifestFileLocation = null; // BS temp comment please look into it replace it with next line. new GenerateManifest().writeToXMLManifest(confInfo);
                         if (manifestFileLocation != null) {
                             // Show the manifest file location
 //                            new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
