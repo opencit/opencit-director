@@ -301,7 +301,10 @@ public class BrowseDirectories {
                     }
                     //sign trustpolicy with MTW and save it to a file
                     String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                    String trustPolicyLocation = saveTrustPolicy(signedTrustPolicy);
+                    if(signedTrustPolicy == null | signedTrustPolicy.equals("")|signedTrustPolicy.equals("null")){
+                        //TODO handle exception
+                    }
+                    String trustPolicyLocation = saveTrustPolicy(signedTrustPolicy, confInfo);
                     if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
                         new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
@@ -345,16 +348,24 @@ public class BrowseDirectories {
 "Select all files - Leave blank or put *\n" +
 "Filter file based on file format - (*.bin$|*.jar$)\n" +
 "Filter file based on file name - (^/root/ssl.crt$|^/root/director-javafx-0.1-SNAPSHOT.jar$)\n" +
-"Filter file based on some pattern - *log*";
+"Filter file based on some pattern - *log*\n";
         return message;
     }
     //save trustPolicy
-    private String saveTrustPolicy(String signedTrustPolicy) {
+    private String saveTrustPolicy(String signedTrustPolicy, Map<String, String> confInfo) {
         PrintWriter out = null;
-
-        String trustPolicyLocation = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        String trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
-        String filePath = trustPolicyDirLocation + trustPolicyLocation;
+        String imagePathDelimiter = "/";
+        String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        String trustPolicyDirLocation;
+        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL)) | Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
+            trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
+        }
+        else{
+            String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
+            int endIndex = imageLocation.lastIndexOf(imagePathDelimiter);
+            trustPolicyDirLocation = imageLocation.substring(0, endIndex);
+        }
+        String filePath = trustPolicyDirLocation + trustPolicyName;
         try {
             out = new PrintWriter(filePath);
             out.println(signedTrustPolicy);
