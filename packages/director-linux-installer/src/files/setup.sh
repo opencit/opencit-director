@@ -103,7 +103,7 @@ prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
 prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
 
 export DIRECTOR_OWNER=${DIRECTOR_OWNER:-director}
-getent passwd $MTWILSON_OWNER >/dev/null
+getent passwd $DIRECTOR_OWNER >/dev/null
 if [ $? != 0 ]; then
   echo "Creating Director owner account [$DIRECTOR_OWNER]"
   useradd -s /bin/false -d /opt/trustdirector $DIRECTOR_OWNER
