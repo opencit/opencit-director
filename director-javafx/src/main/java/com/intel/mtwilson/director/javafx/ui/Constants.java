@@ -39,7 +39,7 @@ public class Constants {
     public static final String remoteSystemPassword="Password";
     
     public static final String IS_ENCRYPTED="Is_Encrypted";
-    public static final String BARE_METAL="Bare_Metal";
+    public static final String BARE_METAL_LOCAL="Bare_Metal";
     public static final String BARE_METAL_REMOTE="Bare_Metal_Remote";
     
     

@@ -374,6 +374,7 @@ public class UserConfirmation {
     public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, Stage primaryStage) throws ImageStoreException {
 //        System.out.println("PSDebug Came to set image prop");
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
+        System.out.println("Value if Is encrypted is received as:::::::::::::::"+isEncrypted);
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -538,7 +539,7 @@ public class UserConfirmation {
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("Image Location"))));
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("EncImage Location"))));
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);

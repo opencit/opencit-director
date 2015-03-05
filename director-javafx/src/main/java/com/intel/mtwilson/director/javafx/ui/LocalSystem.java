@@ -180,7 +180,7 @@ public class LocalSystem {
          
         if(isProper) {
           customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
-          customerInfo.put((Constants.BARE_METAL),"true");
+          customerInfo.put((Constants.BARE_METAL_LOCAL),"true");
 
         } else {
             return null;

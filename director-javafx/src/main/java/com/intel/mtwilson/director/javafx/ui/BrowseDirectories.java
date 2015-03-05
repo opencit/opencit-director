@@ -88,7 +88,7 @@ public class BrowseDirectories {
         // Depending upon mounted image(Windows or Linux)
         
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
-        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL)));
+        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
         isBareMetalRemote=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
         
         if(isBareMetalLocal){
@@ -279,32 +279,37 @@ public class BrowseDirectories {
                 } else if(!isProper) {
                     new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                 } else if (confInfo!=null){
-                    //Encrypt image 
-                    if(confInfo.get(Constants.IS_ENCRYPTED).equals("true")){
-                        MHUtilityOperation mhUtil = new MHUtilityOperation();
-                        String message = mhUtil.encryptImage(confInfo);
-                        if(message != null){
-                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                    
+                    String trustPolicy ;
+                    if (!isBareMetalLocal && !isBareMetalRemote) {
+                        //Encrypt image 
+                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                            MHUtilityOperation mhUtil = new MHUtilityOperation();
+                            String message = mhUtil.encryptImage(confInfo);
+                            if (message != null) {
+                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
                                 System.exit(1);
+                            }
+                        }
+                        // Generate TrustPolicy and encrypt image if necessary
+                        System.err.println("Calling generateTP......................................");
+                        trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                        System.err.println("After Calling generateTP......................................");
+                        //sign trustpolicy with MTW and save it to a file
+                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                            //TODO handle exception
                         }
                     }
-                    // Generate TrustPolicy and encrypt image if necessary
-                    System.err.println("Calling generateTP......................................");
-                    String trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                    System.err.println("After Calling generateTP......................................");
+                    else{
+                        trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);                        
+                    }
                     // Unmount the VM Image
-                    //MountVMImage.unmountImage(mountPath);
-                    if(!isBareMetalLocal){
-                    logger.info("Unmounting the VM Image");
-                    int exitCode = MountVMImage.unmountImage(mountPath);
-                    //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
+                    if (!isBareMetalLocal) {
+                        logger.info("Unmounting the VM Image");
+                        int exitCode = MountVMImage.unmountImage(mountPath);
                     }
-                    //sign trustpolicy with MTW and save it to a file
-                    String signedTrustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                    if(signedTrustPolicy == null | signedTrustPolicy.equals("")|signedTrustPolicy.equals("null")){
-                        //TODO handle exception
-                    }
-                    String trustPolicyLocation = saveTrustPolicy(signedTrustPolicy, confInfo);
+                    String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
                     if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
                         new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
@@ -357,7 +362,7 @@ public class BrowseDirectories {
         String imagePathDelimiter = "/";
         String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         String trustPolicyDirLocation;
-        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL)) | Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
+        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) | Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
             trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
         }
         else{

@@ -105,6 +105,7 @@ public class MHUtilityOperation {
         FileUtilityOperation fileOpt = new FileUtilityOperation();
         int exitCode;
         String randomPassword = getRandomPassword();
+        System.out.println("Encryption password is:::::::::::::"+randomPassword);
         String encLocation = encryptFile(fileLocation, randomPassword);
         if (encLocation == null) {
             return null;

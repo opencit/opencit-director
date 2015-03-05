@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.manifest.xml.Manifest;
+import com.intel.mtwilson.trustpolicy.xml.TrustPolicy.Encryption.Key;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy.Image.ImageHash;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy.Whitelist.*;
 import java.io.BufferedReader;
@@ -28,7 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
@@ -45,6 +46,83 @@ public class GenerateTrustPolicy {
         configProperties = new ConfigProperties();
         mountPath = Constants.MOUNT_PATH;
     }
+    
+    public String createManifest(List<Directories> directories, Map<String, String> configInfo){
+        if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
+            mountPath="";
+        Manifest manifest = new Manifest();
+        switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+            case "SHA-256":
+                manifest.setDigestAlg("sha256");
+                break;
+            case "SHA-1":
+                manifest.setDigestAlg("sha1");
+                break;
+            default:
+                manifest.setDigestAlg("sha1");
+                break;
+        }
+        List<Manifest.Dir> ManifestDir = manifest.getDir();
+        List<Manifest.File> ManifestFile = manifest.getFile();
+        String fileList = "";
+        for (Directories directory : directories){
+            Manifest.Dir dir = new Manifest.Dir();
+            //set include exclude attribute
+            dir.setPath(directory.getCbox().getText());            
+            
+            String cmd = "cat "+Constants.EXCLUDE_FILE_NAME+" | grep -E '^("+dir.getPath()+")'";
+            String exclude = executeShellCommand(cmd);
+            if(exclude != null && !exclude.isEmpty()){
+                exclude = exclude.replaceAll("\\n", "|");
+                exclude = "("+exclude+")";
+                dir.setExclude(exclude);
+            }
+            System.out.println("Exclude tag is::::: "+exclude);
+
+            String findCmd = "find " + mountPath + dir.getPath() + " ! -type d";
+            String include = directory.getTfield().getText();
+            if (include != null && !include.equals("")) {
+                dir.setInclude(include);
+                findCmd += " | grep -E '" + include + "'";            
+            }
+            if (dir.getExclude() != null) {
+                findCmd += " | grep -vE '" + dir.getExclude() + "'";
+            }
+            System.out.println("Find Command is::: " + findCmd);
+            String fileListForDir = executeShellCommand(findCmd);
+            //System.out.println("file list is::: "+fileListForDir);
+
+            if(fileListForDir == null){
+                ManifestDir.add(dir);
+                continue;
+            }
+            //add the directory to manifest, create include and exclude attribute
+            ManifestDir.add(dir);
+            fileList = fileList + fileListForDir + "\n";
+        }
+        
+        fileList = fileList.replaceAll("\\n$", "");
+        //Replace file path with symbolic link if any and add each file to whitelist
+        String files[] = fileList.split("\\n");
+        for (String file : files) {
+            String symLink = getSymlinkValue(file);
+            if (!(new java.io.File(symLink).exists())) {
+                continue;
+            }
+            Manifest.File newFile = new Manifest.File();
+            newFile.setPath(file.replace(mountPath, ""));
+            ManifestFile.add(newFile);            
+        }     
+        JAXB jaxb = new JAXB();
+        String result = null;
+        try {
+            result = jaxb.write(manifest);
+        } catch (JAXBException ex) {
+            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return result;
+    }
+    
     public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo){
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
@@ -63,10 +141,19 @@ public class GenerateTrustPolicy {
         //Set encryption
         if(configInfo.get(Constants.IS_ENCRYPTED).equals("true")){
             Encryption encryption = new Encryption();
-            encryption.setDekKey(configInfo.get(Constants.MH_DEK_URL_IMG));
+            Key key = new Key();
+            key.setURL("uri");
+            key.setValue(configInfo.get(Constants.MH_DEK_URL_IMG));
+            encryption.setKey(key);
             
             try {
-                encryption.setChecksum(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
+                Encryption.Checksum checksum = new Encryption.Checksum();
+                checksum.setDigestAlg("md5");
+                if(configInfo.get(Constants.IS_ENCRYPTED).equals("true"))                    
+                    checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("EncImage Location"))));
+                else
+                    checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
+                encryption.setChecksum(checksum);
             } catch (NoSuchAlgorithmException ex) {
                 Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -107,13 +194,13 @@ public class GenerateTrustPolicy {
         List<Dir> whitelistDir = whitelist.getDir();
         List<File> whiltelistFile = whitelist.getFile();
 //        String mountPath = Constants.MOUNT_PATH;
-        if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL)))
-        mountPath="";
+        if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
+            mountPath="";
         System.out.println("Hash type is ::::::::::"+configInfo.get(Constants.HASH_TYPE));
         ImageHash imageHash = new ImageHash();
         try {
             //set digest algorithm
-            switch (configInfo.get(Constants.HASH_TYPE)) {
+            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
                 case "SHA-256":
                     digestSha256 = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0});
                     System.out.println("sha256");
@@ -160,8 +247,8 @@ public class GenerateTrustPolicy {
             String include = directory.getTfield().getText();
             if (include != null && !include.equals("")) {
                 dir.setInclude(include);
+                findCmd += "| grep -E '" + include + "'";            
             }
-            findCmd += "| grep -E '" + include + "'";
             if (dir.getExclude() != null) {
                 findCmd += " | grep -vE '" + dir.getExclude() + "'";
             }

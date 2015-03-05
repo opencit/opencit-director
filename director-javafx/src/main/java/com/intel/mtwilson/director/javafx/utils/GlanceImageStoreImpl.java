@@ -75,6 +75,7 @@ public class GlanceImageStoreImpl implements IImageStore {
     @Override
     public String uploadImage(String imageLocation, Map<String, String> imageProperties) {
         String id = null;
+        System.out.println("Uploading image from location::"+imageLocation);
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost("http://" + glanceIP + ":9292/v1/images");
@@ -85,9 +86,6 @@ public class GlanceImageStoreImpl implements IImageStore {
                         
             HttpEntity input = new InputStreamEntity(is);
             postRequest.setEntity(input);
-//            MultipartEntity reqEntity;            
-//            reqEntity = new MultipartEntity();
-            
             
             HttpResponse response = httpClient.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != 201) {

@@ -152,7 +152,7 @@ public class CreateImage {
         rbMeasure.setUserData("MeasureOnly");
         rbMeasure.setSelected(true);
         RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
-        rbMeasureEnforce.setUserData("MeasureEnforce");
+        rbMeasureEnforce.setUserData("MeasureAndEnforce");
         rbMeasureEnforce.setToggleGroup(togBoxMeasure);
         
         encryptImage=new CheckBox("Encrypt VM Image");
@@ -441,6 +441,7 @@ public class CreateImage {
             }else{
              customerInfo.put(Constants.IS_ENCRYPTED,"false");
             }
+            System.out.println("Is_Encrypted is set to:::::::::::::::::::::::::::::::"+customerInfo.get(Constants.IS_ENCRYPTED));
           } else {
             return null;
         }
