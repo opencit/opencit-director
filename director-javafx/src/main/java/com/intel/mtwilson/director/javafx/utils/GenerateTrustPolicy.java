@@ -177,6 +177,7 @@ public class GenerateTrustPolicy {
             mountPath="";
         System.out.println("Hash type is ::::::::::"+configInfo.get(Constants.HASH_TYPE));
         ImageHash imageHash = new ImageHash();
+        String opensslCmd ="";
         try {
             //set digest algorithm
             switch (configProperties.getProperty(Constants.HASH_TYPE)) {
@@ -186,6 +187,7 @@ public class GenerateTrustPolicy {
                     md = MessageDigest.getInstance("SHA-256");
                     whitelist.setDigestAlg("sha256");
                     imageHash.setDigestAlg("sha256");
+                    opensslCmd = "openssl dgst -sha256";
                     break;
                 case "SHA-1":
                     digestSha1 = Sha1Digest.ZERO;
@@ -193,6 +195,7 @@ public class GenerateTrustPolicy {
                     md = MessageDigest.getInstance("SHA-1");
                     whitelist.setDigestAlg("sha1");
                     imageHash.setDigestAlg("sha1");
+                    opensslCmd = "openssl dgst -sha1";
                     break;
                 default:
                     digestSha1 = Sha1Digest.ZERO;
@@ -200,6 +203,7 @@ public class GenerateTrustPolicy {
                     md = MessageDigest.getInstance("SHA-1");
                     whitelist.setDigestAlg("sha1");
                     imageHash.setDigestAlg("sha1");
+                    opensslCmd = "openssl dgst -sha1";
                     break;
             }
         }catch (NoSuchAlgorithmException ex) {
@@ -235,14 +239,13 @@ public class GenerateTrustPolicy {
             String fileListForDir = executeShellCommand(findCmd);
             //System.out.println("file list is::: "+fileListForDir);
 
+            //add the directory to whitelist, create include and exclude attribute
+            dir.setValue(executeShellCommand(findCmd+" | "+opensslCmd+"|awk '{print $2}'"));
+            System.out.println("Directory hash command is&&&&&&&&&&&&&&&&&& "+findCmd+" | "+opensslCmd+"|awk '{print $2}'"+"result is"+dir.getValue());
+            whitelistDir.add(dir);
             if(fileListForDir == null){
-                dir.setValue(computeHash(md, ""));
-                whitelistDir.add(dir);
                 continue;
             }
-            //add the directory to whitelist, create include and exclude attribute
-            dir.setValue(computeHash(md, fileListForDir));
-            whitelistDir.add(dir);
             fileList = fileList + fileListForDir + "\n";
             
             //Extend image hash
