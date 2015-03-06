@@ -539,7 +539,7 @@ public class UserConfirmation {
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("EncImage Location"))));
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("Image Location"))));
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);

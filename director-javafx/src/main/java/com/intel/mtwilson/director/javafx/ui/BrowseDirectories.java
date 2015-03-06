@@ -282,24 +282,11 @@ public class BrowseDirectories {
                     
                     String trustPolicy ;
                     if (!isBareMetalLocal && !isBareMetalRemote) {
-                        //Encrypt image 
-                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-                            MHUtilityOperation mhUtil = new MHUtilityOperation();
-                            String message = mhUtil.encryptImage(confInfo);
-                            if (message != null) {
-                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                                System.exit(1);
-                            }
-                        }
                         // Generate TrustPolicy and encrypt image if necessary
                         System.err.println("Calling generateTP......................................");
                         trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
                         System.err.println("After Calling generateTP......................................");
-                        //sign trustpolicy with MTW and save it to a file
-                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
-                            //TODO handle exception
-                        }
+                        
                     }
                     else{
                         trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);                        
@@ -308,6 +295,23 @@ public class BrowseDirectories {
                     if (!isBareMetalLocal) {
                         logger.info("Unmounting the VM Image");
                         int exitCode = MountVMImage.unmountImage(mountPath);
+                    }
+                    if (!isBareMetalLocal && !isBareMetalRemote) {
+                        //Encrypt image 
+                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                            MHUtilityOperation mhUtil = new MHUtilityOperation();
+                            String message = mhUtil.encryptImage(confInfo);
+                            if (message != null) {
+                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                                System.exit(1);
+                            }
+                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                        }  
+                        //sign trustpolicy with MTW and save it to a file
+                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                            //TODO handle exception
+                        }
                     }
                     String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
                     if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {

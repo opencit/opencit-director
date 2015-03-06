@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -138,28 +139,6 @@ public class GenerateTrustPolicy {
         director.setCustomerId(customerId);
         trustpolicy.setDirector(director);
         
-        //Set encryption
-        if(configInfo.get(Constants.IS_ENCRYPTED).equals("true")){
-            Encryption encryption = new Encryption();
-            Key key = new Key();
-            key.setURL("uri");
-            key.setValue(configInfo.get(Constants.MH_DEK_URL_IMG));
-            encryption.setKey(key);
-            
-            try {
-                Encryption.Checksum checksum = new Encryption.Checksum();
-                checksum.setDigestAlg("md5");
-                if(configInfo.get(Constants.IS_ENCRYPTED).equals("true"))                    
-                    checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("EncImage Location"))));
-                else
-                    checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
-                encryption.setChecksum(checksum);
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            trustpolicy.setEncryption(encryption);
-        }
-        System.out.println("Encryption::"+configInfo.get(Constants.IS_ENCRYPTED)+" \n DEK URL::"+configInfo.get(Constants.MH_DEK_URL_IMG));
         //Set Launch control policy
         trustpolicy.setLaunchControlPolicy(configInfo.get(Constants.POLICY_TYPE));
         System.out.println("Launch Control Policy is: "+configInfo.get(Constants.POLICY_TYPE));
@@ -344,6 +323,39 @@ public class GenerateTrustPolicy {
         return excludeList;
     }
     
+    public String setEncryption(String trustpolicyXml, Map<String, String> configInfo){
+        //Set encryption
+        if (configInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+            try {
+                JAXB jaxb = new JAXB();
+                TrustPolicy trustpolicyObj = jaxb.read(trustpolicyXml, TrustPolicy.class);
+                Encryption encryption = trustpolicyObj.getEncryption();
+                if(encryption == null)
+                    encryption = new Encryption();
+                Key key = new Key();
+                key.setURL("uri");
+                key.setValue(configInfo.get(Constants.MH_DEK_URL_IMG));
+                encryption.setKey(key);
+
+                Encryption.Checksum checksum = new Encryption.Checksum();
+                checksum.setDigestAlg("md5");
+                checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
+                encryption.setChecksum(checksum);
+                trustpolicyObj.setEncryption(encryption);
+                trustpolicyXml = jaxb.write(trustpolicyObj);
+            } catch (IOException ex) {
+                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (JAXBException ex) {
+                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (XMLStreamException ex) {
+                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.out.println("Encryption::"+configInfo.get(Constants.IS_ENCRYPTED)+" \n DEK URL::"+configInfo.get(Constants.MH_DEK_URL_IMG));
+        return trustpolicyXml;
+    }
     // Finds the final target of the symbolic link returns null if oath is not a symbolic link
     private String getSymlinkValue(String filePath) {
         Path path = Paths.get(filePath);
