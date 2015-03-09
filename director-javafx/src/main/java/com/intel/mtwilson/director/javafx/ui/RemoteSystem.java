@@ -67,18 +67,18 @@ public class RemoteSystem {
         Label ipAddress=new Label("IP Address");
         Label userName=new Label("User Name");
         Label password=new Label("Password");
-        Label launchPolicy=new Label("Launch Control Policy");       
+        //Label launchPolicy=new Label("Launch Control Policy");       
         ipAddressTField=new TextField();
         userNameTField=new TextField();
         passwordTField=new PasswordField();
         
-        RadioButton rbMeasure=new RadioButton("Measure Only");
-        rbMeasure.setToggleGroup(togBoxMeasure);
-        rbMeasure.setUserData("MeasureOnly");
-        rbMeasure.setSelected(true);
-        RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
-        rbMeasureEnforce.setUserData("MeasureEnforce");
-        rbMeasureEnforce.setToggleGroup(togBoxMeasure);
+        //RadioButton rbMeasure=new RadioButton("Measure Only");
+//        rbMeasure.setToggleGroup(togBoxMeasure);
+//        rbMeasure.setUserData("MeasureOnly");
+//        rbMeasure.setSelected(true);
+//        RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
+//        rbMeasureEnforce.setUserData("MeasureEnforce");
+//        rbMeasureEnforce.setToggleGroup(togBoxMeasure);
         
         Button NextButton=new Button("Next");
         Button cancelButton = new Button("Cancel");
@@ -100,9 +100,9 @@ public class RemoteSystem {
         final HBox launchPolicyHBox = new HBox();
         launchPolicyHBox.setPadding(new Insets(3, 0, 5, 0));
         launchPolicyHBox.setSpacing(10);
-        launchPolicyHBox.getChildren().add(rbMeasure);
-        launchPolicyHBox.getChildren().add(rbMeasureEnforce);
-        grid.add(launchPolicy,0,4);
+//        launchPolicyHBox.getChildren().add(rbMeasure);
+//        launchPolicyHBox.getChildren().add(rbMeasureEnforce);
+//        grid.add(launchPolicy,0,4);
         grid.add(launchPolicyHBox, 1,4);
 
   
@@ -164,7 +164,6 @@ public class RemoteSystem {
           customerInfo.put(Constants.remoteSystemIpAddress,ipAddressTField.getText().toString());
           customerInfo.put(Constants.remoteSystemuserName,userNameTField.getText().toString());
           customerInfo.put(Constants.remoteSystemPassword,passwordTField.getText().toString());
-          customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
           customerInfo.put((Constants.BARE_METAL_REMOTE),"true");
           customerInfo.put((Constants.BARE_METAL_LOCAL),"false");
 

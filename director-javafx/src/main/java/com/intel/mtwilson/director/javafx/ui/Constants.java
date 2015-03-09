@@ -57,7 +57,7 @@ public class Constants {
     public static final String USER_NAME = "username";
     public static final String PASSWORD = "password";
     public static final String TENANT_NAME = "tenant.name";
-    public static final String CONF_CUSTOMER_ID = "CUSTOMER_ID";
+    public static final String CONF_CUSTOMER_ID = "customer.id";
     
     public static final String MOUNT_PATH = "/tmp/mount";
     

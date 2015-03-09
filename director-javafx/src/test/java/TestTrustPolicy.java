@@ -20,9 +20,9 @@ import org.apache.commons.io.FileUtils;
  *
  * @author boskisha
  */
-public class Test {
+public class TestTrustPolicy {
     
-    public Test() {
+    public TestTrustPolicy() {
     }
     
     @BeforeClass
@@ -56,7 +56,7 @@ public class Test {
         System.out.println(Hex.encodeHexString(FileUtils.readFileToByteArray(new File(filepath))));
         
     }
-@Test
+    @Test
     public void testVirtualPcrExtension() { 
         Sha256Digest pcr = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0});
         // repeat for each measurement
@@ -74,9 +74,9 @@ public class Test {
         String r3 = new GenerateTrustPolicy().createSha256(new File("C:\\Users\\boskisha\\Downloads\\tem.java"));
         System.out.println(r1+" \n"+r2+"\n"+r3);
     }
-    // TODO add Test methods here.
-    // The methods must be annotated with annotation @Test. For example:
+    // TODO add TestTrustPolicy methods here.
+    // The methods must be annotated with annotation @TestTrustPolicy. For example:
     //
-    // @Test
+    // @TestTrustPolicy
     // public void hello() {}
 }

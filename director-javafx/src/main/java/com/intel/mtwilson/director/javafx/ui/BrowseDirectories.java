@@ -357,7 +357,7 @@ public class BrowseDirectories {
 "Select all files - Leave blank or put *\n" +
 "Filter file based on file format - (*.bin$|*.jar$)\n" +
 "Filter file based on file name - (^/root/ssl.crt$|^/root/director-javafx-0.1-SNAPSHOT.jar$)\n" +
-"Filter file based on some pattern - openjdk-.*-jre-headless - this filters out all versions of openjdk-jre-headless\n";
+"Filter file based on some pattern - openjdk-.*-jre-headless - filters out all files where path includes any versions of openjdk-jre-headless\n";
         return message;
     }
     //save trustPolicy
