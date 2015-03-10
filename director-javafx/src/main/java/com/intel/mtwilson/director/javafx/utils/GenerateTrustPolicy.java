@@ -132,7 +132,7 @@ public class GenerateTrustPolicy {
         if(customerId == null || customerId.equals("")){
             UUID uuid = new UUID();
             customerId = uuid.toString();
-            configProperties.setProperty(customerId, Constants.CONF_CUSTOMER_ID);
+            //configProperties.setProperty(Constants.CONF_CUSTOMER_ID, customerId);            
         }
         System.out.println("Customer ID is:"+ customerId);
         Director director = new Director();
