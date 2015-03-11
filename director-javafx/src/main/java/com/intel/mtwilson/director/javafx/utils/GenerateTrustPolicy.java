@@ -243,19 +243,22 @@ public class GenerateTrustPolicy {
             dir.setValue(executeShellCommand(findCmd+" | "+opensslCmd+"|awk '{print $2}'"));
             System.out.println("Directory hash command is&&&&&&&&&&&&&&&&&& "+findCmd+" | "+opensslCmd+"|awk '{print $2}'"+"result is"+dir.getValue());
             whitelistDir.add(dir);
-            if(fileListForDir == null){
-                continue;
-            }
-            fileList = fileList + fileListForDir + "\n";
             
             //Extend image hash
             if(digestSha1 != null)
                 digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(dir.getValue()));
             else if(digestSha256 != null){
+                System.out.println("Before extending hash is: "+digestSha256.toHexString());
                 digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex(dir.getValue()).toByteArray());
-                System.out.println("Extended hash is::"+dir.getValue()+"  "+digestSha256.toHexString());
+                System.out.println("After extending "+dir.getValue()+" Extended hash is::"+digestSha256.toHexString());
             }
             else{}
+            if(fileListForDir == null){
+                continue;
+            }
+            //System.out.println("^^^^^^^^^^^^^^^^^^List of files is:"+fileListForDir);
+            fileList = fileList + fileListForDir + "\n";        
+            //System.out.println("^^^^^^^^^^^^^^^^^^Final List of files is:"+fileList);
         }
         fileList = fileList.replaceAll("\\n$", "");
         //Replace file path with symbolic link if any and add each file to whitelist
@@ -280,7 +283,9 @@ public class GenerateTrustPolicy {
             if(digestSha1 != null)
                 digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(newFile.getValue()));
             else if(digestSha256 != null){
-                digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex("72282991e99088498fa5a8f0497e474fb69dc5d94a2a7ff862f2ddd17e53b5fc").toByteArray());
+                System.out.println("Before extending hash is: "+digestSha256.toHexString());
+                digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex(newFile.getValue()).toByteArray());
+                System.out.println("After extending "+newFile.getValue()+" Extended hash is::"+digestSha256.toHexString());
             }
             else{}
         }
