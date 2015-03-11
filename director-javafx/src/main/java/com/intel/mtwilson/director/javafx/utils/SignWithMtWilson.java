@@ -72,7 +72,7 @@ public class SignWithMtWilson {
     private String getMtWilsonResponse(String trustPolicy) {
         String mtWisontResponse = null;
         try {
-            String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/manifest-signature";
+            String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/trustpolicy-signature";
             logger.info("MTwilson URL is" + url);
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost(url);

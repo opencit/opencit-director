@@ -276,17 +276,15 @@ public class ConfigurationInformation {
         //        Open a new window to upload image from local system
         tb_localSystem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e)
-            {
-                
+            {                
                 try{
                     primaryStage.close();
-                    Stage localSystemStage=new Stage();
-                    LocalSystem localSystemObj=new LocalSystem(localSystemStage);
-                    localSystemObj.launch();
-//                
-                }catch(Exception ex)
-                {
-                    
+                    Map<String, String> customerInfo = new HashMap<>();
+                    customerInfo.put((Constants.BARE_METAL_LOCAL), "true");
+                    Stage broeseDirectoryStage=new Stage();
+                    BrowseDirectories secondWindow = new BrowseDirectories(broeseDirectoryStage);
+                    secondWindow.launch(customerInfo);
+                } catch (Exception ex) {                    
                     System.out.println("Exception occurred here");
                     ex.printStackTrace();
                 }
@@ -334,6 +332,21 @@ public class ConfigurationInformation {
         primaryStage.setScene(scene);
         primaryStage.show(); 
         
+    }
+    
+    // Store configuration values in hash map for host manifest generation
+    private Map<String, String> hostWriteToMap() {
+        Map<String, String> customerInfo = new HashMap<>();
+        boolean isProper = true;
+        FileUtilityOperation opt = new FileUtilityOperation();
+         
+        if(isProper) {
+          customerInfo.put((Constants.BARE_METAL_LOCAL),"true");
+
+        } else {
+            return null;
+        }
+        return customerInfo;
     }
     
  }

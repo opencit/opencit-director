@@ -189,7 +189,23 @@
                 <version>20140107</version>
                 <type>jar</type>
             </dependency>
-
+            <dependency>
+                <groupId>com.intel.mtwilson.integration</groupId>
+                <artifactId>mtwilson-trustpolicy-xml</artifactId>
+                <version>3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-io</artifactId>
+                <version>0.3-SNAPSHOT</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-crypto</artifactId>
+                <version>0.2-SNAPSHOT</version>
+                <type>jar</type>
+            </dependency>
         </dependencies>  
     </dependencyManagement>
     
@@ -233,7 +249,7 @@
     </issueManagement>
     
     <repositories>
-        <repository>
+<!--        <repository>
             <id>cpg-x</id>
             <name>Cloud Platform Group</name>
             <url>http://10.1.71.63/maven/repository</url>
@@ -241,7 +257,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository>-->
         <repository>
             <id>cloudsecurityportal.intel.com</id>
             <name>Cloud Security - Intel Architecture Systems Integration</name>

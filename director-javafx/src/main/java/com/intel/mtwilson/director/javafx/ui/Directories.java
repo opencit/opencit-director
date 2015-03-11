@@ -16,12 +16,10 @@ import javafx.scene.control.TextField;
 public class Directories {
     
     private CheckBox checkBox;
-    private ChoiceBox choiceBox;
     private TextField textField;
     
-    public Directories(CheckBox cbox, ChoiceBox choice, TextField tfield) {
+    public Directories(CheckBox cbox, TextField tfield) {
         this.checkBox = cbox;
-        this.choiceBox = choice;
         this.textField = tfield;
     }
     
@@ -31,14 +29,6 @@ public class Directories {
     
     public void setCbox(CheckBox cbox) {
         this.checkBox = cbox;
-    }
-    
-    public ChoiceBox getChoice() {
-        return choiceBox;
-    }
-    
-    public void setChoice(ChoiceBox choice) {
-        this.choiceBox = choice;
     }
     
     public TextField getTfield() {

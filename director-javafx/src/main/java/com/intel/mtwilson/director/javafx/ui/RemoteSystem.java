@@ -7,23 +7,9 @@
 package com.intel.mtwilson.director.javafx.ui;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
-import com.intel.mtwilson.director.javafx.ui.BrowseDirectories;
-import com.intel.mtwilson.director.javafx.ui.ConfigurationInformation;
-import com.intel.mtwilson.director.javafx.ui.Constants;
-import static java.awt.Color.red;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -33,19 +19,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
-import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
 /**
  *
  * @author preetisr
@@ -89,18 +67,18 @@ public class RemoteSystem {
         Label ipAddress=new Label("IP Address");
         Label userName=new Label("User Name");
         Label password=new Label("Password");
-        Label launchPolicy=new Label("Launch Control Policy");       
+        //Label launchPolicy=new Label("Launch Control Policy");       
         ipAddressTField=new TextField();
         userNameTField=new TextField();
         passwordTField=new PasswordField();
         
-        RadioButton rbMeasure=new RadioButton("Measure Only");
-        rbMeasure.setToggleGroup(togBoxMeasure);
-        rbMeasure.setUserData("MeasureOnly");
-        rbMeasure.setSelected(true);
-        RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
-        rbMeasureEnforce.setUserData("MeasureEnforce");
-        rbMeasureEnforce.setToggleGroup(togBoxMeasure);
+        //RadioButton rbMeasure=new RadioButton("Measure Only");
+//        rbMeasure.setToggleGroup(togBoxMeasure);
+//        rbMeasure.setUserData("MeasureOnly");
+//        rbMeasure.setSelected(true);
+//        RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
+//        rbMeasureEnforce.setUserData("MeasureEnforce");
+//        rbMeasureEnforce.setToggleGroup(togBoxMeasure);
         
         Button NextButton=new Button("Next");
         Button cancelButton = new Button("Cancel");
@@ -122,9 +100,9 @@ public class RemoteSystem {
         final HBox launchPolicyHBox = new HBox();
         launchPolicyHBox.setPadding(new Insets(3, 0, 5, 0));
         launchPolicyHBox.setSpacing(10);
-        launchPolicyHBox.getChildren().add(rbMeasure);
-        launchPolicyHBox.getChildren().add(rbMeasureEnforce);
-        grid.add(launchPolicy,0,4);
+//        launchPolicyHBox.getChildren().add(rbMeasure);
+//        launchPolicyHBox.getChildren().add(rbMeasureEnforce);
+//        grid.add(launchPolicy,0,4);
         grid.add(launchPolicyHBox, 1,4);
 
   
@@ -186,9 +164,8 @@ public class RemoteSystem {
           customerInfo.put(Constants.remoteSystemIpAddress,ipAddressTField.getText().toString());
           customerInfo.put(Constants.remoteSystemuserName,userNameTField.getText().toString());
           customerInfo.put(Constants.remoteSystemPassword,passwordTField.getText().toString());
-          customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
           customerInfo.put((Constants.BARE_METAL_REMOTE),"true");
-          customerInfo.put((Constants.BARE_METAL),"false");
+          customerInfo.put((Constants.BARE_METAL_LOCAL),"false");
 
 
         } else {
