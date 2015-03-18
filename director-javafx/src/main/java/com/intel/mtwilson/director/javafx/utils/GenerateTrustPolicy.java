@@ -55,17 +55,8 @@ public class GenerateTrustPolicy {
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
         Manifest manifest = new Manifest();
-        switch (configProperties.getProperty(Constants.HASH_TYPE)) {
-            case "SHA-256":
-                manifest.setDigestAlg("sha256");
-                break;
-            case "SHA-1":
-                manifest.setDigestAlg("sha1");
-                break;
-            default:
-                manifest.setDigestAlg("sha1");
-                break;
-        }
+        //For bare Metal just supporting sha-1
+        manifest.setDigestAlg("sha1");
         List<com.intel.mtwilson.manifest.xml.MeasurementType> manifestList = manifest.getManifest();
         
         for (Directories directory : directories){
@@ -190,16 +181,10 @@ public class GenerateTrustPolicy {
                     imageHash.setDigestAlg("sha256");
                     opensslCmd = "openssl dgst -sha256";
                     break;
-                case "SHA-1":
+                case "SHA-1":                    
+                default:
                     //digestSha1 = Sha1Digest.ZERO;
                     System.out.println("sha1");
-                    md = MessageDigest.getInstance("SHA-1");
-                    whitelist.setDigestAlg("sha1");
-                    imageHash.setDigestAlg("sha1");
-                    opensslCmd = "openssl dgst -sha1";
-                    break;
-                default:
-                    digestSha1 = Sha1Digest.ZERO;
                     md = MessageDigest.getInstance("SHA-1");
                     whitelist.setDigestAlg("sha1");
                     imageHash.setDigestAlg("sha1");
@@ -210,66 +195,68 @@ public class GenerateTrustPolicy {
             Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
         }
          
-        //String fileList = "";
-        //iterate throught each directory
-        //sort directories
+        //sort directories before adding it to trust policy so that list of files and directories added in trust policy is sorted
         Collections.sort(directories);
+        //iterate throught each directory
         for (Directories directory : directories){
-            //set include exclude attribute
             DirectoryMeasurementType directoryWhitelist = new DirectoryMeasurementType();
             directoryWhitelist.setPath(directory.getCbox().getText());            
             
-            String cmd = "cat "+Constants.EXCLUDE_FILE_NAME+" | grep -E '^("+directoryWhitelist.getPath()+")'";
-            String exclude = executeShellCommand(cmd);
+            //set exclude attribute
+            String exclude = executeShellCommand("cat "+Constants.EXCLUDE_FILE_NAME+" | grep -E '^("+directoryWhitelist.getPath()+")'");
             if(exclude != null && !exclude.isEmpty()){
                 exclude = exclude.replaceAll("\\n", "|");
                 exclude = "("+exclude+")";
                 directoryWhitelist.setExclude(exclude);
             }
             System.out.println("Exclude tag is::::: "+exclude);
-
-            String findCmd = "find " + mountPath + directoryWhitelist.getPath() + " ! -type d";            
+            //create command to get list of files from directory that matches specified filter criteria
+            String getFilesCmd = "find " + mountPath + directoryWhitelist.getPath() + " ! -type d";            
             //set include attribute
             String include = directory.getTfield().getText();
             if (include != null && !include.equals("")) {
                 directoryWhitelist.setInclude(include);
-                findCmd += "| grep -E '" + include + "'";            
+                getFilesCmd += "| grep -E '" + include + "'";            
             }
             if (directoryWhitelist.getExclude() != null) {
-                findCmd += " | grep -vE '" + directoryWhitelist.getExclude() + "'";
+                getFilesCmd += " | grep -vE '" + directoryWhitelist.getExclude() + "'";
             }
-            System.out.println("Find Command is::: " + findCmd);
-            String fileListForDir = executeShellCommand(findCmd);
+            System.out.println("Find Command is::: " + getFilesCmd);
+            String fileListForDir = executeShellCommand(getFilesCmd);
             
             //add the directory to whitelist
-            directoryWhitelist.setValue(executeShellCommand(findCmd+" | "+opensslCmd+"|awk '{print $2}'"));
-            System.out.println("Directory hash command is&&&&&&&&&&&&&&&&&& "+findCmd+" | "+opensslCmd+"|awk '{print $2}'"+"result is"+directoryWhitelist.getValue());
-            whitelistValue.add((MeasurementType)directoryWhitelist);
-            
+            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+" | "+opensslCmd+"|awk '{print $2}'"));
+            System.out.println("Directory hash command is&&&&&&&&&&&&&&&&&& " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + "result is" + directoryWhitelist.getValue());
+            whitelistValue.add((MeasurementType) directoryWhitelist);
+
             //Extend image hash to include directory
-            if(digestSha1 != null){
-                System.out.println("Before extending hash is: "+digestSha1.toHexString());
-                digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
-                System.out.println("After extending "+directoryWhitelist.getValue()+" Extended hash is::"+digestSha1.toHexString());
+            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+                case "SHA-256":
+                    if (digestSha256 != null) {
+                        System.out.println("Before extending hash is: " + digestSha256.toHexString());
+                        digestSha256 = digestSha256.extend(directoryWhitelist.getValue().getBytes());
+                        System.out.println("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
+                    } else {
+                        digestSha256 = Sha256Digest.digestOf(directoryWhitelist.getValue().getBytes());
+                    }
+                    break;
+                case "SHA-1":
+                default:
+                    if (digestSha1 != null) {
+                        System.out.println("Before extending hash is: " + digestSha1.toHexString());
+                        digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
+                        System.out.println("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
+                    } else {
+                        digestSha1 = Sha1Digest.digestOf(directoryWhitelist.getValue().getBytes());
+                    }
             }
-            else
-                digestSha1 = Sha1Digest.digestOf(directoryWhitelist.getValue().getBytes());
-//            else if(digestSha256 != null){
-//                System.out.println("Before extending hash is: "+digestSha256.toHexString());
-//                digestSha256 = digestSha256.extend(dir.getValue().getBytes());
-//                System.out.println("After extending "+dir.getValue()+" Extended hash is::"+digestSha256.toHexString());
-//            }
-//            else{}
-            if(fileListForDir == null){
+            if (fileListForDir == null) {
                 continue;
             }
-            //fileList = fileList + fileListForDir + "\n";        
-        
-        fileListForDir = fileListForDir.replaceAll("\\n$", "");
-        String files[] = fileListForDir.split("\\n");
-        
-        //Iterate through list of files and add each to whitelist and extend cumulative hash
-        for (String filePath : files) {
+            fileListForDir = fileListForDir.replaceAll("\\n$", "");
+            String files[] = fileListForDir.split("\\n");
+            //Iterate through list of files and add each to whitelist and extend cumulative hash
+            for (String filePath : files) {
             //Replace filePath path with symbolic link if any and add each filePath to whitelist
             String symLink = getSymlinkValue(filePath);
             if (!(new java.io.File(symLink).exists())) {
@@ -280,26 +267,34 @@ public class GenerateTrustPolicy {
             newFile.setPath(filePath.replace(mountPath, ""));
             newFile.setValue(computeHash(md, new java.io.File(symLink)));
             whitelistValue.add((MeasurementType)newFile);
-            //Extend image hash to include files
-            if(digestSha1 != null){
-                System.out.println("Before extending hash is: "+digestSha1.toHexString());
-                digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
-                System.out.println("After extending "+newFile.getValue()+" Extended hash is::"+digestSha1.toHexString());
-            }
-            else
-                digestSha1 = Sha1Digest.digestOf(newFile.getValue().getBytes());
-//            else if(digestSha256 != null){
-//                System.out.println("Before extending hash is: "+digestSha256.toHexString());
-//                digestSha256 = digestSha256.extend(newFile.getValue().getBytes());
-//                System.out.println("After extending "+newFile.getValue()+" Extended hash is::"+digestSha256.toHexString());
-//            }
-//            else{}
+            //Extend file hash to cumulative image hash 
+            
+            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+                case "SHA-256":
+                    if (digestSha256 != null) {
+                        System.out.println("Before extending hash is: " + digestSha256.toHexString());
+                        digestSha256 = digestSha256.extend(newFile.getValue().getBytes());
+                        System.out.println("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());
+                    } else {
+                        digestSha256 = Sha256Digest.digestOf(newFile.getValue().getBytes());
+                    }
+                    break;
+                case "SHA-1":
+                default:
+                    if (digestSha1 != null) {
+                        System.out.println("Before extending hash is: " + digestSha1.toHexString());
+                        digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
+                        System.out.println("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());
+                    } else {
+                        digestSha1 = Sha1Digest.digestOf(newFile.getValue().getBytes());
+                    }
+            }            
         }
         if(digestSha1 != null)
             imageHash.setValue(digestSha1.toHexString());
-//        else if(digestSha256 != null)
-//            imageHash.setValue(digestSha256.toHexString());
-//        else{}
+        else if(digestSha256 != null)
+            imageHash.setValue(digestSha256.toHexString());
+        else{}
         }
         image.setImageHash(imageHash);
         return whitelist;    
