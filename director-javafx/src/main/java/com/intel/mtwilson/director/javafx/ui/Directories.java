@@ -13,7 +13,7 @@ import javafx.scene.control.TextField;
  *
  * @author admkrushnakant
  */
-public class Directories {
+public class Directories implements Comparable<Directories>{
     
     private CheckBox checkBox;
     private TextField textField;
@@ -38,6 +38,11 @@ public class Directories {
     public void setTfield(TextField tfield) {
         tfield.setEditable(false);
         this.textField = tfield;
+    }
+
+    @Override
+    public int compareTo(Directories anotherInstance) {
+        return this.checkBox.getText().compareTo(anotherInstance.checkBox.getText());
     }
     
 }
