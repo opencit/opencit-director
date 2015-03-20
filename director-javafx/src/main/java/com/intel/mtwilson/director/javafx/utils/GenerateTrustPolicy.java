@@ -33,8 +33,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
@@ -43,7 +41,8 @@ import javax.xml.stream.XMLStreamException;
  * @author boskisha
  */
 public class GenerateTrustPolicy {
-    private ConfigProperties configProperties;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GenerateTrustPolicy.class);
+    private final ConfigProperties configProperties;
     private String mountPath;
     //private String imageHash;
     public GenerateTrustPolicy(){
@@ -71,7 +70,7 @@ public class GenerateTrustPolicy {
                 exclude = "("+exclude+")";
                 dir.setExclude(exclude);
             }
-            System.out.println("Exclude tag is::::: "+exclude);
+            log.debug("Exclude tag is::::: "+exclude);
 
             String findCmd = "find " + mountPath + dir.getPath() + " ! -type d";
             String include = directory.getTfield().getText();
@@ -82,9 +81,9 @@ public class GenerateTrustPolicy {
             if (dir.getExclude() != null) {
                 findCmd += " | grep -vE '" + dir.getExclude() + "'";
             }
-            System.out.println("Find Command is::: " + findCmd);
+            log.debug("Find Command is::: " + findCmd);
             String fileListForDir = executeShellCommand(findCmd);
-            //System.out.println("filePath list is::: "+fileListForDir);
+            log.trace("filePath list is::: "+fileListForDir);
             // add directory to manifest
             if (fileListForDir == null) {
                 manifestList.add((com.intel.mtwilson.manifest.xml.MeasurementType) dir);
@@ -112,9 +111,9 @@ public class GenerateTrustPolicy {
         try {
             result = jaxb.write(manifest);
         } catch (JAXBException ex) {
-            //Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null,ex);
         }
-        System.out.println("TrustPolicy is::: "+result);
+        log.info("TrustPolicy is: "+result);
         return result;
     }
     
@@ -129,14 +128,14 @@ public class GenerateTrustPolicy {
             customerId = uuid.toString();
             //configProperties.setProperty(Constants.CONF_CUSTOMER_ID, customerId);            
         }
-        System.out.println("Customer ID is:"+ customerId);
+        log.debug("Customer ID is:"+ customerId);
         Director director = new Director();
         director.setCustomerId(customerId);
         trustpolicy.setDirector(director);
         
         //Set Launch control policy
         trustpolicy.setLaunchControlPolicy(configInfo.get(Constants.POLICY_TYPE));
-        System.out.println("Launch Control Policy is: "+configInfo.get(Constants.POLICY_TYPE));
+        log.debug("Launch Control Policy is: "+configInfo.get(Constants.POLICY_TYPE));
         
         //Set Image
         Image image = new Image();
@@ -153,9 +152,9 @@ public class GenerateTrustPolicy {
         try {
             result = jaxb.write(trustpolicy);
         } catch (JAXBException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
-        System.out.println("TrustPolicy is: "+result);
+        log.debug("TrustPolicy is: "+result);
         return result;
     }
     
@@ -167,7 +166,7 @@ public class GenerateTrustPolicy {
         Whitelist whitelist = new Whitelist();
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
-        System.out.println("Hash type is ::::::::::"+configProperties.getProperty(Constants.HASH_TYPE));
+        log.debug("Hash type is :"+configProperties.getProperty(Constants.HASH_TYPE));
         ImageHash imageHash = new ImageHash();
         String opensslCmd ="";
         List<MeasurementType> whitelistValue = whitelist.getMeasurements();
@@ -184,7 +183,6 @@ public class GenerateTrustPolicy {
                 case "SHA-1":                    
                 default:
                     //digestSha1 = Sha1Digest.ZERO;
-                    System.out.println("sha1");
                     md = MessageDigest.getInstance("SHA-1");
                     whitelist.setDigestAlg("sha1");
                     imageHash.setDigestAlg("sha1");
@@ -192,7 +190,7 @@ public class GenerateTrustPolicy {
                     break;
             }
         }catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
          
         //sort directories before adding it to trust policy so that list of files and directories added in trust policy is sorted
@@ -209,7 +207,7 @@ public class GenerateTrustPolicy {
                 exclude = "("+exclude+")";
                 directoryWhitelist.setExclude(exclude);
             }
-            System.out.println("Exclude tag is::::: "+exclude);
+            log.debug("Exclude tag is: "+exclude);
             //create command to get list of files from directory that matches specified filter criteria
             String getFilesCmd = "find " + mountPath + directoryWhitelist.getPath() + " ! -type d";            
             //set include attribute
@@ -221,21 +219,21 @@ public class GenerateTrustPolicy {
             if (directoryWhitelist.getExclude() != null) {
                 getFilesCmd += " | grep -vE '" + directoryWhitelist.getExclude() + "'";
             }
-            System.out.println("Find Command is::: " + getFilesCmd);
+            log.debug("Find Command is::: " + getFilesCmd);
             String fileListForDir = executeShellCommand(getFilesCmd);
             
             //add the directory to whitelist
             directoryWhitelist.setValue(executeShellCommand(getFilesCmd+" | "+opensslCmd+"|awk '{print $2}'"));
-            System.out.println("Directory hash command is&&&&&&&&&&&&&&&&&& " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + "result is" + directoryWhitelist.getValue());
+            log.debug("Directory hash command is: " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + "result is" + directoryWhitelist.getValue());
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
             switch (configProperties.getProperty(Constants.HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
-                        System.out.println("Before extending hash is: " + digestSha256.toHexString());
+                        log.trace("Before extending hash is: " + digestSha256.toHexString());
                         digestSha256 = digestSha256.extend(directoryWhitelist.getValue().getBytes());
-                        System.out.println("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
+                        log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
                     } else {
                         digestSha256 = Sha256Digest.digestOf(directoryWhitelist.getValue().getBytes());
                     }
@@ -243,9 +241,9 @@ public class GenerateTrustPolicy {
                 case "SHA-1":
                 default:
                     if (digestSha1 != null) {
-                        System.out.println("Before extending hash is: " + digestSha1.toHexString());
+                        log.trace("Before extending hash is: " + digestSha1.toHexString());
                         digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
-                        System.out.println("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
+                        log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
                     } else {
                         digestSha1 = Sha1Digest.digestOf(directoryWhitelist.getValue().getBytes());
                     }
@@ -272,9 +270,9 @@ public class GenerateTrustPolicy {
             switch (configProperties.getProperty(Constants.HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
-                        System.out.println("Before extending hash is: " + digestSha256.toHexString());
+                        log.trace("Before extending hash is: " + digestSha256.toHexString());
                         digestSha256 = digestSha256.extend(newFile.getValue().getBytes());
-                        System.out.println("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());
+                        log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());
                     } else {
                         digestSha256 = Sha256Digest.digestOf(newFile.getValue().getBytes());
                     }
@@ -282,9 +280,9 @@ public class GenerateTrustPolicy {
                 case "SHA-1":
                 default:
                     if (digestSha1 != null) {
-                        System.out.println("Before extending hash is: " + digestSha1.toHexString());
+                        log.trace("Before extending hash is: " + digestSha1.toHexString());
                         digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
-                        System.out.println("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());
+                        log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());
                     } else {
                         digestSha1 = Sha1Digest.digestOf(newFile.getValue().getBytes());
                     }
@@ -303,7 +301,7 @@ public class GenerateTrustPolicy {
     //Executes command and return results
     //Review: you may  want to use java matcher instead of pipe grep
     public String executeShellCommand(String command){
-        System.out.println("Command to execute is:"+command);
+        log.debug("Command to execute is:"+command);
         String[] cmd = {
         "/bin/sh",
         "-c",
@@ -324,11 +322,11 @@ public class GenerateTrustPolicy {
                 excludeList = result.toString();
                 excludeList = excludeList.replaceAll("\\n$", "");
             }
-            //System.out.println("Result of execute command: "+result);            
+            //log.debug("Result of execute command: "+result);            
         } catch (InterruptedException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
         return excludeList;
     }
@@ -354,16 +352,16 @@ public class GenerateTrustPolicy {
                 trustpolicyObj.setEncryption(encryption);
                 trustpolicyXml = jaxb.write(trustpolicyObj);
             } catch (IOException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             } catch (JAXBException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             } catch (XMLStreamException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             }
         }
-        System.out.println("Encryption::"+configInfo.get(Constants.IS_ENCRYPTED)+" \n DEK URL::"+configInfo.get(Constants.MH_DEK_URL_IMG));
+        log.debug("Encryption::"+configInfo.get(Constants.IS_ENCRYPTED)+" \n DEK URL::"+configInfo.get(Constants.MH_DEK_URL_IMG));
         return trustpolicyXml;
     }
     // Finds the final target of the symbolic link returns null if oath is not a symbolic link
@@ -376,7 +374,7 @@ public class GenerateTrustPolicy {
                 Path symLink = Files.readSymbolicLink(path);
                 symPath = symLink.toString();
             } catch (IOException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             }
             if(symPath.startsWith(".") || symPath.startsWith("..") || !symPath.startsWith("/")){
                 symPath = path.toFile().getParent() + "/" + symPath;
@@ -386,9 +384,9 @@ public class GenerateTrustPolicy {
             }  
             try {
                 symPath = new java.io.File(symPath).getCanonicalPath();
-                //System.out.println("Symbilic link value for '"+filePath+"' is: '"+symPath);
+                log.trace("Symbilic link value for '"+filePath+"' is: '"+symPath);
             } catch (IOException ex) {
-                Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+                log.error(null, ex);
             }
         }else
             symPath = filePath;
@@ -416,7 +414,7 @@ public class GenerateTrustPolicy {
             }
             fis.close();           
         } catch (IOException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }        
         return sb.toString();
     }    
@@ -433,7 +431,7 @@ public class GenerateTrustPolicy {
                 sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
             }
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(GenerateTrustPolicy.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
         
         return sb.toString();

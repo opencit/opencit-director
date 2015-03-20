@@ -26,11 +26,7 @@ import org.rauschig.jarchivelib.CompressionType;
  * @author root
  */
 public class FileUtilityOperation {
-    private static final Logger logger = Logger.getLogger(FileUtilityOperation.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileUtilityOperation.class);
     
     // Extract the tar.gz file
     public boolean extractCompressedImage(String tarFileLocation, String destPath) {
@@ -44,7 +40,7 @@ public class FileUtilityOperation {
             }
             archiver.extract(sourceFile, destDir);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error in extraction", ex);
+            log.error("Error in extracting image ", ex);
             return false;
         }
         return true;
@@ -66,7 +62,7 @@ public class FileUtilityOperation {
                 //check the directory again, if empty then delete it
                 if(file.list().length==0){
                     file.delete();
-                    logger.info("Directory is deleted : " + file.getAbsolutePath());
+                    log.info("Directory is deleted : " + file.getAbsolutePath());
                 }
             }
     	}else{
@@ -84,7 +80,7 @@ public class FileUtilityOperation {
             bufferWriter.close();
             file.setExecutable(true);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
     }
     
@@ -129,7 +125,7 @@ public class FileUtilityOperation {
                 return false;
             }
 	} catch(NumberFormatException ex) {
-	    logger.log(Level.SEVERE, null, ex);
+	    log.error(null, ex);
 	    return false;
 	}
    }

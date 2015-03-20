@@ -1,11 +1,8 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
 import com.intel.mtwilson.director.javafx.utils.IImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
@@ -17,18 +14,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -47,13 +38,8 @@ import javafx.stage.Stage;
  */
 public class UserConfirmation {
     
-    private static final Logger logger = Logger.getLogger(UserConfirmation.class.getName());
-    private static final String opensslPassword = "intelrp";
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserConfirmation.class);
     private ConfigProperties configProperties;
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
     
     public UserConfirmation() {
         configProperties = new ConfigProperties();
@@ -372,9 +358,7 @@ public class UserConfirmation {
     }
     
     public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, Stage primaryStage) throws ImageStoreException {
-//        System.out.println("PSDebug Came to set image prop");
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
-        System.out.println("Value if Is encrypted is received as:::::::::::::::"+isEncrypted);
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -415,7 +399,7 @@ public class UserConfirmation {
             try {
                 md = MessageDigest.getInstance("MD5");
             } catch (NoSuchAlgorithmException ex) {
-                ex.printStackTrace();
+                log.error(null, ex);
             }
         }
         
@@ -430,7 +414,7 @@ public class UserConfirmation {
             String kernelGlanceID = null;
             try{
                 if(isEncrypted) {
-                    System.out.println("PSDebug Came to set image prop 22222");
+                    log.debug("PSDebug Came to set image prop 22222");
                     kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH),imageProperties);
                     if(kernelGlanceID == null) {
                         String message = "Failed to upload the Image to Glance .... Exiting";
@@ -525,7 +509,6 @@ public class UserConfirmation {
         //Upload image to glance
         String imageGlanceID = null;
         if(isEncrypted) {
-//            System.out.println("PSDebug Came to set image prop 4444444444");
             imageGlanceID = imageStoreObj.uploadImage(confInfo.get("EncImage Location"), imageProperties);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
@@ -553,14 +536,14 @@ public class UserConfirmation {
             }
         } else {
             imageGlanceID = imageStoreObj.uploadImage(confInfo.get("Image Location"), imageProperties);
-//            System.out.println("PSDebug glance ID" + imageGlanceID);
+            log.debug("glance ID is" + imageGlanceID);
             if(imageGlanceID == null) {
                 String message = "Failed to upload the Image to Glance .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);
             }            
         }
-//        System.out.println("PSDebug manifestLoca is" + manifestLocation);
+        log.debug("PSDebug manifestLoca is" + manifestLocation);
         String manifestGlanceID = imageStoreObj.uploadTrustPolicy(manifestLocation);
         if(manifestGlanceID == null) {
             String message = "Failed to upload the Manifest to Glance .... Exiting";
@@ -592,8 +575,8 @@ public class UserConfirmation {
     // Check availability of UUID
     private boolean checkUUIDAvailability(String uuid) {
         boolean isAvailable = true;
-        //System.out.println("Checking availability of UUID");
-        logger.info("Checking availability of UUID");
+        //log.debug("Checking availability of UUID");
+        log.info("Checking availability of UUID");
         return isAvailable;
     }
 }

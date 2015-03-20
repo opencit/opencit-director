@@ -23,7 +23,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 
 /**
@@ -31,11 +30,7 @@ import com.intel.mtwilson.director.javafx.utils.MountVMImage;
  * @author root
  */
 public class AMIImageInformation {
-    public static Logger logger = Logger.getLogger(AMIImageInformation.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AMIImageInformation.class);
     public void getAMIImageInfo(final Stage primaryStage, final Map<String, String> confInfo, final String extractedLocation, final boolean includeImageHash) {
         
         primaryStage.setTitle("AMI Image Information");
@@ -120,8 +115,7 @@ public class AMIImageInformation {
                     File file = imageFile.showOpenDialog(primaryStage);
                     kernelTField.setText(file.getAbsolutePath());
                 } catch(Exception e) {
-                    logger.info("Not selected anything");
-                    //System.out.println("Not selected anything");
+                    log.debug("Not selected anything");
                 }
             }
         });
@@ -137,8 +131,7 @@ public class AMIImageInformation {
                     File file = imageFile.showOpenDialog(primaryStage);
                     initrdTField.setText(file.getAbsolutePath());
                 } catch(Exception e) {
-                    //System.out.println("Not selected anything");
-                    logger.info("Not selected anything");
+                    log.debug("Not selected anything");
                 }
             }
         });
@@ -154,8 +147,7 @@ public class AMIImageInformation {
                     File file = imageFile.showOpenDialog(primaryStage);
                     imageLocationTField.setText(file.getAbsolutePath());
                 } catch(Exception e) {
-                    //System.out.println("Not selected anything");
-                    logger.info("Not selected anything");
+                    log.debug("Not selected anything");
                 }
             }
         });
@@ -165,7 +157,6 @@ public class AMIImageInformation {
 
             @Override
             public void handle(ActionEvent t) {
-                boolean isEmpty = false;
                 if(!imageLocationTField.getText().equals("")) {
                     if(!kernelTField.getText().equals("") && !initrdTField.getText().equals("")) {
                         confInfo.put(Constants.KERNEL_PATH, kernelTField.getText());
@@ -185,8 +176,7 @@ public class AMIImageInformation {
                             // Show the manifest file location
 //                            new UserConfirmation().showLocation(primaryStage, manifestFileLocation, confInfo);
                         } else {
-                            //System.out.println("Error in creating the manifest file");
-                            logger.log(Level.SEVERE, "Error in creating the manifest file");
+                            log.error("Error in creating the manifest file");
                         }
                     } else {
                         int exitCode = MountVMImage.mountImage(imageLocationTField.getText());
@@ -194,9 +184,7 @@ public class AMIImageInformation {
 //                            BrowseDirectories secondWindow = new BrowseDirectories(primaryStage);
 //                            secondWindow.launch(confInfo);                        
                         } else {
-                            //System.out.println("Exiting ....");
-                            //System.exit(exitCode);
-                            logger.log(Level.SEVERE, "Error while mounting the image .. Exiting ....");
+                            log.error( "Error while mounting the image .. Exiting ....");
                             String warningMessage = "Error while mounting the image .. Exiting ....";
 //                            new ConfigurationInformation(primaryStage).showWarningPopup(warningMessage);
                             System.exit(exitCode);
