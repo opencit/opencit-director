@@ -3,10 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.intel.mtwilson.director.javafx.ui;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -22,56 +20,47 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+
 /**
  *
  * @author preetisr
  */
 public class RemoteSystem {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RemoteSystem.class);
     private final Stage remoteSystemStage;
-    
     private ConfigProperties configProperties;
-    
     private TextField ipAddressTField;
     private TextField userNameTField;
     private PasswordField passwordTField;
-    
-   private final ToggleGroup togBoxMeasure=new ToggleGroup();    
-   String hostManifest;
-    
-    private static final Logger logger; 
-    // Set FileHandler for logger
-    static {
-        logger = Logger.getLogger(RemoteSystem.class.getName());
-        LoggerUtility.setHandler(logger);
-    }
-    
-    
+
+    private final ToggleGroup togBoxMeasure = new ToggleGroup();
+    String hostManifest;
+
     public RemoteSystem(Stage remoteSystemStage) {
         this.remoteSystemStage = remoteSystemStage;
         configProperties = new ConfigProperties();
     }
-    
+
     public void launch() {
-     
+
         // Check for the Host Manifest
         hostManifest = configProperties.getProperty(Constants.HOST_MANIFEST);
-        if(hostManifest != null) {
+        if (hostManifest != null) {
             hostManifest = hostManifest.trim();
         }
 
         remoteSystemStage.setTitle("Bare Metal Remote System");
-        
-        
-        Label ipAddress=new Label("IP Address");
-        Label userName=new Label("User Name");
-        Label password=new Label("Password");
+
+        Label ipAddress = new Label("IP Address");
+        Label userName = new Label("User Name");
+        Label password = new Label("Password");
         //Label launchPolicy=new Label("Launch Control Policy");       
-        ipAddressTField=new TextField();
-        userNameTField=new TextField();
-        passwordTField=new PasswordField();
-        
+        ipAddressTField = new TextField();
+        userNameTField = new TextField();
+        passwordTField = new PasswordField();
+
         //RadioButton rbMeasure=new RadioButton("Measure Only");
 //        rbMeasure.setToggleGroup(togBoxMeasure);
 //        rbMeasure.setUserData("MeasureOnly");
@@ -79,18 +68,17 @@ public class RemoteSystem {
 //        RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
 //        rbMeasureEnforce.setUserData("MeasureEnforce");
 //        rbMeasureEnforce.setToggleGroup(togBoxMeasure);
-        
-        Button NextButton=new Button("Next");
+        Button NextButton = new Button("Next");
         Button cancelButton = new Button("Cancel");
         cancelButton.setPrefSize(80, 15);
-      
+
         VBox vBox = new VBox();
-  
+
         final GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(30, 15,30, 15));
-        
+        grid.setPadding(new Insets(30, 15, 30, 15));
+
         grid.add(ipAddress, 0, 1);
         grid.add(ipAddressTField, 1, 1);
         grid.add(userName, 0, 2);
@@ -103,22 +91,18 @@ public class RemoteSystem {
 //        launchPolicyHBox.getChildren().add(rbMeasure);
 //        launchPolicyHBox.getChildren().add(rbMeasureEnforce);
 //        grid.add(launchPolicy,0,4);
-        grid.add(launchPolicyHBox, 1,4);
+        grid.add(launchPolicyHBox, 1, 4);
 
-  
         HBox hBox4 = new HBox();
         hBox4.setPadding(new Insets(20, 12, 20, 12));
         hBox4.setSpacing(30);
         hBox4.setStyle("-fx-background-color: #336699;");
         hBox4.getChildren().add(cancelButton);
         hBox4.getChildren().add(NextButton);
-        
-        
-        
-        vBox.getChildren().addAll(grid,hBox4);
-     
-	       
-       // Handler for "Browse" button to Choose Manifest, Mount the disk image and browse the directories
+
+        vBox.getChildren().addAll(grid, hBox4);
+
+        // Handler for "Browse" button to Choose Manifest, Mount the disk image and browse the directories
         NextButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -127,14 +111,14 @@ public class RemoteSystem {
 //                 Write configuration values to map
                 Map<String, String> customerInfo;
                 customerInfo = hostWriteToMap();
-                
-                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(),userNameTField.getText(),passwordTField.getText());
-//                System.out.println("Remote system mounted");
+
+                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText());
+                log.debug("Remote system mounted");
                 BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
-                secondWindow.launch(customerInfo);                                                    
+                secondWindow.launch(customerInfo);
             }
         });
-        
+
         // Handler for "Cancel" button
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -142,39 +126,35 @@ public class RemoteSystem {
             public void handle(ActionEvent arg0) {
                 // Will close the window
                 remoteSystemStage.close();
-                
+
             }
         });
-  
+
         StackPane root = new StackPane();
         root.getChildren().add(vBox);
         Scene scene = new Scene(root);
         //scene.setFill(Color.AQUA);
         remoteSystemStage.setScene(scene);
-        remoteSystemStage.show(); 
-      }
-    
+        remoteSystemStage.show();
+    }
+
     // Store configuration values in hash map for host manifest generation
     private Map<String, String> hostWriteToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
         FileUtilityOperation opt = new FileUtilityOperation();
-         
-        if(isProper) {
-          customerInfo.put(Constants.remoteSystemIpAddress,ipAddressTField.getText().toString());
-          customerInfo.put(Constants.remoteSystemuserName,userNameTField.getText().toString());
-          customerInfo.put(Constants.remoteSystemPassword,passwordTField.getText().toString());
-          customerInfo.put((Constants.BARE_METAL_REMOTE),"true");
-          customerInfo.put((Constants.BARE_METAL_LOCAL),"false");
 
+        if (isProper) {
+            customerInfo.put(Constants.remoteSystemIpAddress, ipAddressTField.getText().toString());
+            customerInfo.put(Constants.remoteSystemuserName, userNameTField.getText().toString());
+            customerInfo.put(Constants.remoteSystemPassword, passwordTField.getText().toString());
+            customerInfo.put((Constants.BARE_METAL_REMOTE), "true");
+            customerInfo.put((Constants.BARE_METAL_LOCAL), "false");
 
         } else {
             return null;
         }
         return customerInfo;
     }
-    
-    
 
-    
 }

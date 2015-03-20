@@ -1,25 +1,18 @@
 package com.intel.mtwilson.director.javafx.utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.intel.mtwilson.director.javafx.ui.Constants;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import com.intel.mtwilson.director.javafx.utils.SetupException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -32,12 +25,8 @@ import com.intel.mtwilson.director.javafx.utils.SetupException;
  * @author root
  */
 public class MHUtilityOperation {
-    private static final Logger logger = Logger.getLogger(MHUtilityOperation.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
-    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MHUtilityOperation.class);
+       
     private ConfigProperties configProperties;
     private String mhKeyName;
     //private String mhJarLocation = ConfigProperties.getProperty(Constants.MH_JAR_LOCATION);
@@ -99,7 +88,7 @@ public class MHUtilityOperation {
     public String startMHProcess(String fileLocation, String mhKeyName) {
         mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
         this.mhKeyName = mhKeyName;
-//	System.out.println("MH Keystore Location : " + keystoreLocation);
+	log.debug("MH Keystore Location : " + keystoreLocation);
         String expScriptName = "/opt/trustdirector/bin/login";
         MountVMImage obj = new MountVMImage();
         FileUtilityOperation fileOpt = new FileUtilityOperation();
@@ -120,18 +109,17 @@ public class MHUtilityOperation {
         File tempCommandFile = new File("/opt/trustdirector/runme");
         fileOpt.writeToFile(tempCommandFile, command, false);
 
-        String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;
-        logger.info(expScriptCommand);
-//        System.out.println(expScriptCommand);
+        String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;        
+        log.debug(expScriptCommand);
         //String command = "cd /root/mhagent/.mhclient;java -jar" + jarLocation + " import-data-encryption-key " + keyName + passFileLocation;
         //callExec(expCommand);
         exitCode = obj.callExec(expScriptCommand);
         if (exitCode != 0) {
             throw new SetupException("KMS setup is not done properly. Error while executing this command: " + "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + randomPassword + " Exit code: " + exitCode);
         }
-//        System.out.println("Exit code is : " + exitCode);
+        log.debug("Exit code is : " + exitCode);
         //if(exitCode != 0) {
-        //System.out.println("Exit code is : " + exitCode);
+        //log.debug("Exit code is : " + exitCode);
         //return null;
         //}
         
@@ -139,12 +127,12 @@ public class MHUtilityOperation {
 //        String keystore = "/root/mhagent/.mhclient/dek-recipients.jks";
 //	String keystore = "./dek-recipients.jks";
         command = "keytool -keystore " + keystoreLocation + " -storepass " + keystorePasswd + " -list";
-//        System.out.println("---- " + command + "----");
+        log.debug("---- " + command + "----");
         exitCode = obj.callExec(command);
         if(exitCode != 0){
             throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
         }
-//        System.out.println("Exit code is : " + exitCode);
+        log.debug("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}
@@ -153,19 +141,19 @@ public class MHUtilityOperation {
         //String id = parseFile(keytoolOutput.getAbsolutePath());
         String id = parseFile(Constants.EXEC_OUTPUT_FILE);
 
-//        System.out.println(id);
+//        log.debug(id);
         //id = "d18b96c4b3e01728aa79621f20ceba67";
         
         command = "java -jar " + mhJarLocation + " wrap-data-encryption-key " + mhKeyName + " " + id;
         fileOpt.writeToFile(tempCommandFile, command, false);
         expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword + " " + tlsSSLPasswd;
-//        System.out.println(command);
-//        System.out.println(expScriptCommand);
+        log.debug(command);
+        log.debug(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
         if(exitCode != 0){
             throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
         }
-//        System.out.println("Exit code is : " + exitCode);
+        log.debug("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}
@@ -173,13 +161,13 @@ public class MHUtilityOperation {
         command = "java -jar " + mhJarLocation + " post-data-encryption-key " + mhKeyName + " " + id + " https://" + KMSServerIP + ":8443";
         fileOpt.writeToFile(tempCommandFile, command, false);
         expScriptCommand = expScriptName + " "+ tempCommandFile + " " + keystorePasswd;
-//        System.out.println(command);
-//        System.out.println(expScriptCommand);
+        log.debug(command);
+        log.debug(expScriptCommand);
         exitCode = obj.callExec(expScriptCommand);
         if(exitCode != 0){
             throw new SetupException("KMS setup is not done properly. Error while executing this command: "+command + " Exit code: "+exitCode);
         }
-//        System.out.println("Exit code is : " + exitCode);
+        log.debug("Exit code is : " + exitCode);
         //if(exitCode != 0) {
             //return null;
         //}
@@ -195,8 +183,7 @@ public class MHUtilityOperation {
         String command = "openssl enc -aes-128-ofb -in " + location + " -out " + location + "-enc" + " -pass pass:" + password;
         int exitCode = new MountVMImage().callExec(command);
         if(exitCode != 0) {
-            //System.out.println("Error while encrypting the file .....");
-            logger.log(Level.SEVERE, "Error while encrypting the file .....");
+            log.debug("Error while encrypting the file .....");
             return null;
         }
         return location+"-enc";
@@ -222,16 +209,12 @@ public class MHUtilityOperation {
             while(scanner.hasNext()){
                 String line = scanner.next();
                 if(line.contains("trustedCertEntry")) {
-                    System.out.println();
-                    System.out.println(line.split(",")[0]);
-                    System.out.println();
                     id = line.split(",")[0];
 		    break;
                 }
-                //System.out.println("Lines: "+scanner.next());
             }
         } catch (IOException ex) {
-            //Logger.getLogger(MHUtility.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
         return id;
     }

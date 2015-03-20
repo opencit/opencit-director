@@ -6,9 +6,6 @@
 
 package com.intel.mtwilson.director.javafx.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  *
  * @author root

@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class ConfigProperties {
     
     public static Properties prop;
-    static Logger logger = Logger.getLogger(ConfigProperties.class.getName());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigProperties.class);
     private static final String filePath = "/opt/trustdirector/configuration/director.properties";
     public ConfigProperties() {
         loadProperty();
@@ -37,15 +37,15 @@ public class ConfigProperties {
             input = new FileInputStream(filePath);
             prop.load(input);
         } catch (FileNotFoundException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         } finally {
             if(input != null) {
                 try {
                     input.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.error(null, ex);
                 }
             }
         }

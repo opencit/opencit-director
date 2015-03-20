@@ -181,6 +181,7 @@ fi
 mkdir -p /opt/trustdirector/bin
 mkdir -p /opt/trustdirector/configuration
 mkdir -p /opt/trustdirector/java
+mkdir -p /var/log/trustdirector
 cp exclude-file-list /opt/trustdirector/configuration/
 cp login /opt/trustdirector/bin/
 cp mount_remote_system.sh /opt/trustdirector/bin/
@@ -188,16 +189,19 @@ cp mount_vm_image.sh /opt/trustdirector/bin/
 cp tdirector.sh /opt/trustdirector/bin/tdirector
 cp client-0.1-SNAPSHOT-with-dependencies.jar /opt/trustdirector/java/
 cp director-javafx-*.jar /opt/trustdirector/java/
+cp lockback.xml /opt/trustdirector/configuration/
 chmod 700 /opt/trustdirector/bin/login
 chmod 700 /opt/trustdirector/bin/mount_remote_system.sh
 chmod 700 /opt/trustdirector/bin/mount_vm_image.sh
 chmod 700 /opt/trustdirector/bin/tdirector
 chmod 700 retrieve-cert.sh
 chmod 700 set-path.sh
+chmod 700 /opt/trustdirector/configuration/lockback.xml
 #TEMP
 mkdir -p /opt/trustdirector/log
 touch /opt/trustdirector/log/manifest-tool.log
 
+ln -s "/opt/trustdirector/bin/tdirector" "/usr/local/bin/tdirector"
 register_startup_script /opt/trustdirector/bin/tdirector tdirector >> $INSTALL_LOG_FILE
 
 # 1 Configuring KMS TLS certificate and Data encryption key
