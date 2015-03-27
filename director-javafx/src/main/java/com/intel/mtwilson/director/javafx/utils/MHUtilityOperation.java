@@ -56,9 +56,49 @@ public class MHUtilityOperation {
         KMSServerIP = configProperties.getProperty(Constants.KMS_SERVER_IP);
     }
 
+    public String encryptImage(Map<String, String> confInfo) {
+        MHUtilityOperation mhOptImage = new MHUtilityOperation();
+        String message = null;
+        // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+        String mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME);
+        String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+        //String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+        if (encryptedImageLocation == null) {
+            message = "Error while Uploading the key to KMS..... Exiting.....";
+        }
+        confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
+        confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
+        if (confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) {
+            MHUtilityOperation mhOptKernel = new MHUtilityOperation();
+
+            // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+            mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+            String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+            //String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
+            if (encryptedKernelPath == null) {
+                message = "Error while Uploading the key to KMS..... Exiting.....";
+            }
+
+            MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
+
+            // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+            mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+            String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+            //String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
+            if (encryptedInitrdPath == null) {
+                message = "Error while Uploading the key to KMS..... Exiting.....";
+            }
+            confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
+            confInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
+            confInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
+            confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
+        }
+        return message;
+    }
+
     public String startMHProcess(String fileLocation, String mhKeyName) {
         mhKeyName += new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-	this.mhKeyName = mhKeyName;
+        this.mhKeyName = mhKeyName;
 //	System.out.println("MH Keystore Location : " + keystoreLocation);
         String expScriptName = "/opt/trustdirector/bin/login";
         MountVMImage obj = new MountVMImage();
@@ -66,34 +106,33 @@ public class MHUtilityOperation {
         int exitCode;
         String randomPassword = getRandomPassword();
         String encLocation = encryptFile(fileLocation, randomPassword);
-        if(encLocation == null) {
+        if (encLocation == null) {
             return null;
         }
         //TODO look at vmpass
         File passFileLocation = new File("/opt/trustdirector/vmpass.txt");
         fileOpt.writeToFile(passFileLocation, randomPassword, false);
-        
+
         //String mhJarLocation = "/root/mhagent/client-0.1-SNAPSHOT-with-dependencies.jar";
         //String keyName = "mydemokey123";
-        
         // Encrypt the VM password and send it to the key management service with a label�?
         String command = "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + passFileLocation;
         File tempCommandFile = new File("/opt/trustdirector/runme");
         fileOpt.writeToFile(tempCommandFile, command, false);
-        
+
         String expScriptCommand = expScriptName + " " + tempCommandFile + " " + randomPassword;
         logger.info(expScriptCommand);
 //        System.out.println(expScriptCommand);
         //String command = "cd /root/mhagent/.mhclient;java -jar" + jarLocation + " import-data-encryption-key " + keyName + passFileLocation;
         //callExec(expCommand);
         exitCode = obj.callExec(expScriptCommand);
-        if(exitCode != 0){
-            throw new SetupException("KMS setup is not done properly. Error while executing this command: "+"java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " +randomPassword + " Exit code: "+exitCode);
+        if (exitCode != 0) {
+            throw new SetupException("KMS setup is not done properly. Error while executing this command: " + "java -jar " + mhJarLocation + " import-data-encryption-key " + mhKeyName + " " + randomPassword + " Exit code: " + exitCode);
         }
 //        System.out.println("Exit code is : " + exitCode);
         //if(exitCode != 0) {
-            //System.out.println("Exit code is : " + exitCode);
-            //return null;
+        //System.out.println("Exit code is : " + exitCode);
+        //return null;
         //}
         
         // Prepare the key for sending to the key management server

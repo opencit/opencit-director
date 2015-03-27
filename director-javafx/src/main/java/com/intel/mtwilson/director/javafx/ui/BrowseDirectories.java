@@ -6,11 +6,16 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-import com.intel.mtwilson.director.javafx.utils.GenerateHash;
-import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
+import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
+import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +28,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -35,8 +41,8 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 
 /**
  *
@@ -50,8 +56,6 @@ public class BrowseDirectories {
     private String mountPath = Constants.MOUNT_PATH;
     private boolean isBareMetalLocal;
     private boolean isBareMetalRemote;
-    private ObservableList<String> choices = FXCollections.observableArrayList(
-            "Binaries", "All Files", "Custom Formats");
     ObservableList<Directories> list = null;
     
     private static final Logger logger = Logger.getLogger(BrowseDirectories.class.getName());
@@ -84,7 +88,7 @@ public class BrowseDirectories {
         // Depending upon mounted image(Windows or Linux)
         
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
-        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL)));
+        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
         isBareMetalRemote=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
         
         if(isBareMetalLocal){
@@ -97,7 +101,7 @@ public class BrowseDirectories {
         for(Directories listComp : list) {
             initializeTableComponents(listComp);
         }
-        primaryStage.setTitle("Generate Manifest!");
+        primaryStage.setTitle("Generate Trust Policy!");
         
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(0));
@@ -121,10 +125,37 @@ public class BrowseDirectories {
         selectAllHBox.setSpacing(130);
         final CheckBox selectAllCBox = new CheckBox("Select All");
         selectAllCBox.setSelected(true);
-        final CheckBox includeHiddenFiles = new CheckBox("Include Hidden Files");
-        includeHiddenFiles.setSelected(true);
+        Button helpBtn = new Button("Help");
         
-        selectAllHBox.getChildren().addAll(selectAllCBox, includeHiddenFiles);    
+        selectAllHBox.getChildren().addAll(selectAllCBox, helpBtn);    
+        
+        helpBtn.setOnAction(new EventHandler<ActionEvent>() {
+ 
+         @Override
+         public void handle(ActionEvent event) {
+             final Stage myDialog = new Stage();
+             myDialog.initModality(Modality.WINDOW_MODAL);
+           
+             Button okButton = new Button("CLOSE");
+             okButton.setOnAction(new EventHandler<ActionEvent>(){
+ 
+                 @Override
+                 public void handle(ActionEvent arg0) {
+                     myDialog.close();
+                 }
+               
+             });
+           
+             Scene myDialogScene = new Scene(VBoxBuilder.create()
+                     .children(new Text(getHelpMessage()), okButton)
+                     .alignment(Pos.CENTER)
+                     .padding(new Insets(10))
+                     .build());
+           
+             myDialog.setScene(myDialogScene);
+             myDialog.show();
+         }
+     });
         
         selectAllCBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -154,16 +185,13 @@ public class BrowseDirectories {
         //firstColumn.setMinWidth(140);
         firstColumn.setCellValueFactory(new PropertyValueFactory("cbox"));
 
-        TableColumn secondColumn = new TableColumn("File Filter");
-        //secondColumn.setMinWidth(100);
-        secondColumn.setCellValueFactory(new PropertyValueFactory("choice"));
-        
-        TableColumn thirdColumn = new TableColumn("File Formats");
+        TableColumn thirdColumn = new TableColumn("Regular Expression");
         //thirdColumn.setMinWidth(100);
         thirdColumn.setCellValueFactory(new PropertyValueFactory("tfield"));
         
         directoryTable.setItems(list);
-        directoryTable.getColumns().addAll(firstColumn, secondColumn, thirdColumn);
+        directoryTable.getColumns().addAll(firstColumn, thirdColumn);
+        directoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
         flowPane.getChildren().add(directoryTable);
         
@@ -173,10 +201,10 @@ public class BrowseDirectories {
         hBox2.setStyle("-fx-background-color: #336699;");
         Button browse = new Button("Add more");
         browse.setPrefSize(100, 20);
-        Button hash = new Button("Next");
+        Button next = new Button("Next");
         //hash.setPrefSize(100, 20);
         hBox2.getChildren().add(browse);
-        hBox2.getChildren().add(hash);
+        hBox2.getChildren().add(next);
         
         //Add handler to "Add more" button
         browse.setOnAction(new EventHandler<ActionEvent>() {
@@ -199,7 +227,7 @@ public class BrowseDirectories {
                                     }
 
                                     checkBox.setSelected(true);
-                                    Directories dir = new Directories(checkBox, new ChoiceBox(choices), new TextField());
+                                    Directories dir = new Directories(checkBox, new TextField());
                                     initializeTableComponents(dir);
                                     list.add(dir);                                
                                 }
@@ -220,10 +248,11 @@ public class BrowseDirectories {
         });
         
         // Add handler to "Calculate Hash" button
-        hash.setOnAction(new EventHandler<ActionEvent>() {
+        next.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
 //                CreateImage.manifestFlag=true;
+                System.out.println("..................................................................");
                 boolean isProper = true;
                 boolean isDirExist = true;
                 List<Directories> dirList = new ArrayList<>();
@@ -234,20 +263,13 @@ public class BrowseDirectories {
                             break;
                         } 
                         dirList.add(dir);
-                        if(dir.getChoice().getValue().toString().equals("Custom Formats") && dir.getTfield().getText().equals("")) {
-                            isProper = false;
-                            break;
-                        }
+                       
                     } else if(dir.getCbox().isSelected() && (mountPath=="/")) {
                         if(!new File(dir.getCbox().getText()).exists()) {
                             isDirExist = false;
                             break;
                         } 
-                        dirList.add(dir);
-                        if(dir.getChoice().getValue().toString().equals("Custom Formats") && dir.getTfield().getText().equals("")) {
-                            isProper = false;
-                            break;
-                        }
+                        dirList.add(dir);                        
                     }
                 }
                 if(!isDirExist) {
@@ -257,23 +279,46 @@ public class BrowseDirectories {
                 } else if(!isProper) {
                     new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                 } else if (confInfo!=null){
-                    // Add entry in confInfo for hidden file check
-                    confInfo.put(Constants.HIDDEN_FILES, String.valueOf(includeHiddenFiles.isSelected()));
                     
-                    // Calculate Hash and generate manifest 
-                    String manifestFileLocation = new GenerateHash().calculateHash(dirList, confInfo);
-                    // Unmount the VM Image
-                    //MountVMImage.unmountImage(mountPath);
-                    if(!isBareMetalLocal){
-                    logger.info("Unmounting the VM Image");
-                    int exitCode = MountVMImage.unmountImage(mountPath);
-                    //System.out.println("----------------------------- \n" + "umount exit code is : " + exitCode + "\n ----------------------");
+                    String trustPolicy ;
+                    if (!isBareMetalLocal && !isBareMetalRemote) {
+                        // Generate TrustPolicy and encrypt image if necessary
+                        System.err.println("Calling generateTP......................................");
+                        trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                        System.err.println("After Calling generateTP......................................");
+                        
                     }
-                    if (manifestFileLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
+                    else{
+                        trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);                        
+                    }
+                    // Unmount the VM Image
+                    if (!isBareMetalLocal) {
+                        logger.info("Unmounting the VM Image");
+                        int exitCode = MountVMImage.unmountImage(mountPath);
+                    }
+                    if (!isBareMetalLocal && !isBareMetalRemote) {
+                        //Encrypt image 
+                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                            MHUtilityOperation mhUtil = new MHUtilityOperation();
+                            String message = mhUtil.encryptImage(confInfo);
+                            if (message != null) {
+                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                                System.exit(1);
+                            }
+                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                        }  
+                        //sign trustpolicy with MTW and save it to a file
+                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                            //TODO handle exception
+                        }
+                    }
+                    String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
+                    if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
-                        new UserConfirmation().glanceUploadConfirmation(primaryStage, manifestFileLocation, confInfo);
+                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
                     } else if(isBareMetalLocal || isBareMetalRemote) {
-                        new UserConfirmation().generateManifesConfirmation(primaryStage, manifestFileLocation);
+                        new UserConfirmation().generateManifesConfirmation(primaryStage, trustPolicyLocation);
                         
                     }else {
                         logger.log(Level.SEVERE, "Error in creating the manifest file");
@@ -306,26 +351,47 @@ public class BrowseDirectories {
         primaryStage.show();
 
     }
+    private String getHelpMessage(){
+        String message = "\n"
+                + "Here are some examples on how to use regular expression:\n\n" + 
+"Select all files - Leave blank or put *\n" +
+"Filter file based on file format - (*.bin$|*.jar$)\n" +
+"Filter file based on file name - (^/root/ssl.crt$|^/root/director-javafx-0.1-SNAPSHOT.jar$)\n" +
+"Filter file based on some pattern - openjdk-.*-jre-headless - filters out all files where path includes any versions of openjdk-jre-headless\n";
+        return message;
+    }
+    //save trustPolicy
+    private String saveTrustPolicy(String signedTrustPolicy, Map<String, String> confInfo) {
+        PrintWriter out = null;
+        String imagePathDelimiter = "/";
+        String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        String trustPolicyDirLocation;
+        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) | Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
+            trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
+        }
+        else{
+            String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
+            int endIndex = imageLocation.lastIndexOf(imagePathDelimiter);
+            trustPolicyDirLocation = imageLocation.substring(0, endIndex);
+        }
+        String filePath = trustPolicyDirLocation + trustPolicyName;
+        try {
+            out = new PrintWriter(filePath);
+            out.println(signedTrustPolicy);
+            out.close();
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            out.close();
+        }
+        return filePath;
+    }
     
     // Initialize the table components i.e disable the textfield etc
     private void initializeTableComponents(final Directories dir) {
-        dir.getTfield().setEditable(false);
+        dir.getTfield().setEditable(true);
         dir.getCbox().setSelected(true);
-        dir.getChoice().setValue("All Files");
-            
-        // Add listener for choice box
-        dir.getChoice().getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue ov, Number value, Number new_value){
-                if(dir.getChoice().getSelectionModel().getSelectedIndex() == 2) {
-                    dir.getTfield().setEditable(true);
-                    dir.getTfield().requestFocus();
-                } else {
-                    dir.getTfield().setText("");
-                    dir.getTfield().setEditable(false);
-                }
-            }
-        });    
     } 
     
     // Check the directory is already selected or not
@@ -362,16 +428,16 @@ public class BrowseDirectories {
         if(isWindows) {
             
             list = FXCollections.observableArrayList(
-                    new Directories(new CheckBox("Windows/System32"), new ChoiceBox(choices), new TextField()),
-                    new Directories(new CheckBox("Windows/Boot"), new ChoiceBox(choices), new TextField())
+                    new Directories(new CheckBox("Windows/System32"), new TextField()),
+                    new Directories(new CheckBox("Windows/Boot"), new TextField())
                     );
             mountPath = Constants.MOUNT_PATH + "/";
         } else {
             list = FXCollections.observableArrayList(
-                    new Directories(new CheckBox("/etc"), new ChoiceBox(choices), new TextField()),
-                    new Directories(new CheckBox("/sbin"), new ChoiceBox(choices), new TextField()),
-                    new Directories(new CheckBox("/bin"), new ChoiceBox(choices), new TextField()),
-                    new Directories(new CheckBox("/boot"), new ChoiceBox(choices), new TextField())
+                    new Directories(new CheckBox("/etc"), new TextField()),
+                    new Directories(new CheckBox("/sbin"), new TextField()),
+                    new Directories(new CheckBox("/bin"), new TextField()),
+                    new Directories(new CheckBox("/boot"), new TextField())
                     );
         }
         

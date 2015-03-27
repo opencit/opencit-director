@@ -39,6 +39,7 @@ load_director_conf() {
     export CONF_GLANCE_IP=$(read_property_from_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_HASH_TYPE=$(read_property_from_file "hash.type" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_IMAGE_STORE_TYPE=$(read_property_from_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE")
+	export CONF_CUSTOMER_ID=$(read_property_from_file "customer.id" "$DIRECTOR_PROPERTIES_FILE")
     echo_success "Done"
   fi
 
@@ -62,6 +63,7 @@ load_director_defaults() {
   export DEFAULT_GLANCE_IP=""
   export DEFAULT_HASH_TYPE=""
   export DEFAULT_IMAGE_STORE_TYPE=""
+  export DEFAULT_CUSTOMER_ID=""
 
   export USERNAME=${USERNAME:-${CONF_USERNAME:-$DEFAULT_USERNAME}}
   export PASSWORD=${PASSWORD:-${CONF_PASSWORD:-$DEFAULT_PASSWORD}}
@@ -78,6 +80,7 @@ load_director_defaults() {
   export GLANCE_IP=${GLANCE_IP:-${CONF_GLANCE_IP:-$DEFAULT_GLANCE_IP}}
   export HASH_TYPE=${HASH_TYPE:-${CONF_HASH_TYPE:-$DEFAULT_HASH_TYPE}}
   export IMAGE_STORE_TYPE=${IMAGE_STORE_TYPE:-${CONF_IMAGE_STORE_TYPE:-$DEFAULT_IMAGE_STORE_TYPE}}
+  export CUSTOMER_ID=${CUSTOMER_ID:-${CONF_CUSTOMER_ID:-$DEFAULT_CUSTOMER_ID}}
 }
 
 #handle encryption
@@ -101,6 +104,7 @@ prompt_with_default KMS_SERVER_IP "Key Management Server IP:" "$KMS_SERVER_IP"
 prompt_with_default GLANCE_IP "Glance IP:" "$GLANCE_IP"
 prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
 prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
+prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
 
 export DIRECTOR_OWNER=${DIRECTOR_OWNER:-director}
 getent passwd $DIRECTOR_OWNER >/dev/null
@@ -177,14 +181,13 @@ fi
 mkdir -p /opt/trustdirector/bin
 mkdir -p /opt/trustdirector/configuration
 mkdir -p /opt/trustdirector/java
-cp exclude-file-list /opt/trustdirector/bin/
+cp exclude-file-list /opt/trustdirector/configuration/
 cp login /opt/trustdirector/bin/
 cp mount_remote_system.sh /opt/trustdirector/bin/
 cp mount_vm_image.sh /opt/trustdirector/bin/
 cp tdirector.sh /opt/trustdirector/bin/tdirector
 cp client-0.1-SNAPSHOT-with-dependencies.jar /opt/trustdirector/java/
 cp director-javafx-*.jar /opt/trustdirector/java/
-chmod 700 /opt/trustdirector/bin/exclude-file-list
 chmod 700 /opt/trustdirector/bin/login
 chmod 700 /opt/trustdirector/bin/mount_remote_system.sh
 chmod 700 /opt/trustdirector/bin/mount_vm_image.sh
@@ -245,6 +248,7 @@ update_property_in_file "kms.server.ip" "$DIRECTOR_PROPERTIES_FILE" "$KMS_SERVER
 update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IP"
 update_property_in_file "hash.type" "$DIRECTOR_PROPERTIES_FILE" "$HASH_TYPE"
 update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
+update_property_in_file "customer.id" "$DIRECTOR_PROPERTIES_FILE" "$CUSTOMER_ID"
 
 #end
 echo_success "Installation Complete"

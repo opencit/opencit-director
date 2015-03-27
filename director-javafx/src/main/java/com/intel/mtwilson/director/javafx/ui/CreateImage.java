@@ -7,7 +7,6 @@ package com.intel.mtwilson.director.javafx.ui;
 import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.GenerateManifest;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
@@ -101,7 +100,7 @@ public class CreateImage {
         final FileUtilityOperation op = new FileUtilityOperation();
         
         ObservableList<String> hashTypeList = FXCollections.observableArrayList(
-            "SHA-256", "SHA1"
+            "SHA256", "SHA1"
         );
         
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(
@@ -153,7 +152,7 @@ public class CreateImage {
         rbMeasure.setUserData("MeasureOnly");
         rbMeasure.setSelected(true);
         RadioButton rbMeasureEnforce=new RadioButton("Measure and Enforce");
-        rbMeasureEnforce.setUserData("MeasureEnforce");
+        rbMeasureEnforce.setUserData("MeasureAndEnforce");
         rbMeasureEnforce.setToggleGroup(togBoxMeasure);
         
         encryptImage=new CheckBox("Encrypt VM Image");
@@ -442,6 +441,7 @@ public class CreateImage {
             }else{
              customerInfo.put(Constants.IS_ENCRYPTED,"false");
             }
+            System.out.println("Is_Encrypted is set to:::::::::::::::::::::::::::::::"+customerInfo.get(Constants.IS_ENCRYPTED));
           } else {
             return null;
         }

@@ -25,7 +25,7 @@ public class ConfigProperties {
     
     public static Properties prop;
     static Logger logger = Logger.getLogger(ConfigProperties.class.getName());
-    
+    private static final String filePath = "/opt/trustdirector/configuration/director.properties";
     public ConfigProperties() {
         loadProperty();
     }
@@ -34,7 +34,7 @@ public class ConfigProperties {
         prop = new Properties();
         InputStream input = null;
         try {
-            input = new FileInputStream("/opt/trustdirector/configuration/director.properties");
+            input = new FileInputStream(filePath);
             prop.load(input);
         } catch (FileNotFoundException ex) {
             logger.log(Level.SEVERE, null, ex);
@@ -81,8 +81,24 @@ public class ConfigProperties {
         return prop.getProperty(name);
     }
     
-    // Implementation is pending
+    // Sets property and save it back to file
     public void setProperty(String name, String value) {
-        OutputStream output = null;
+//        prop.setProperty(name, value);
+//        OutputStream out = null;
+//        try {
+//            File f = new File(filePath);
+//            out = new FileOutputStream( f );
+//            prop.store(out,"savinng "+name+"value is "+value);
+//        } catch (FileNotFoundException ex) {
+//            Logger.getLogger(ConfigProperties.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IOException ex) {
+//            Logger.getLogger(ConfigProperties.class.getName()).log(Level.SEVERE, null, ex);
+//        } finally {
+//            try {
+//                out.close();
+//            } catch (IOException ex) {
+//                Logger.getLogger(ConfigProperties.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
     }
 }

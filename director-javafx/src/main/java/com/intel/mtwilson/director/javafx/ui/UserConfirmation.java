@@ -2,7 +2,7 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.GenerateHash;
+import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
@@ -124,71 +124,83 @@ public class UserConfirmation {
         uploadButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
-            public void handle(ActionEvent t) {
-                if(confInfo.get(Constants.IS_ENCRYPTED)=="true") {
-                    boolean isEncrypted = true;
-                    String opensslPassword = configProperties.getProperty(Constants.PASSWORD);
-                    MHUtilityOperation mhOptImage = new MHUtilityOperation();
-
-		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                    String mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME);
-                    String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
-                    //String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
-                    if(encryptedImageLocation == null) {
-                        new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                        System.exit(1);
-                    }
-                    confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
-                    confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
-                    if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) { 
-                        MHUtilityOperation mhOptKernel = new MHUtilityOperation();
-	
-			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                        mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
-                        String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
-                        //String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
-                        if(encryptedKernelPath == null) {
-                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                            System.exit(1);
-                        }
-                        
-			MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
-
-			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
-                        mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
-                        String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
-                        //String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
-                        if(encryptedInitrdPath == null) {
-                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                            System.exit(1);
-                        }
-                        confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
-                        confInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
-                        confInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
-                        confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
-                    }
-                    String message=null;
+                public void handle(ActionEvent t){
+                 String message=null;
                     try {
-                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
+                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, primaryStage);
                     } catch (ImageStoreException ex) {
                         Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     showUploadSuccessMessage(primaryStage, message);
-                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
-                } else if(confInfo.get(Constants.IS_ENCRYPTED)=="false") {
-                    boolean isEncrypted = false;
-                    String message=null;
-                    try {
-                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
-                    } catch (ImageStoreException ex) {
-                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    showUploadSuccessMessage(primaryStage, message);
-                } else {
-                    new CreateImage(primaryStage).showWarningPopup("Plese select an option");
+                
                 }
-            }
-        });
+              });
+//            @Override
+//            public void handle(ActionEvent t) {
+//                if(confInfo.get(Constants.IS_ENCRYPTED)=="true") {
+//                    boolean isEncrypted = true;
+//                    String opensslPassword = configProperties.getProperty(Constants.PASSWORD);
+//                    MHUtilityOperation mhOptImage = new MHUtilityOperation();
+//
+//		    // Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+//                    String mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME);
+//                    String encryptedImageLocation = mhOptImage.startMHProcess(confInfo.get(Constants.IMAGE_LOCATION), mhKeyName);
+//                    //String encryptedImageLocation = mhOptImage.encryptFile(confInfo.get(Constants.IMAGE_LOCATION), opensslPassword);
+//                    if(encryptedImageLocation == null) {
+//                        new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                        System.exit(1);
+//                    }
+//                    confInfo.put(Constants.MH_DEK_URL_IMG, mhOptImage.getDekURL());
+//                    confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
+//                    if(confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) { 
+//                        MHUtilityOperation mhOptKernel = new MHUtilityOperation();
+//	
+//			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+//                        mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-kernel";
+//                        String encryptedKernelPath = mhOptKernel.startMHProcess(confInfo.get(Constants.KERNEL_PATH), mhKeyName);
+//                        //String encryptedKernelPath = mhOptImage.encryptFile(confInfo.get(Constants.KERNEL_PATH), opensslPassword);
+//                        if(encryptedKernelPath == null) {
+//                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                            System.exit(1);
+//                        }
+//                        
+//			MHUtilityOperation mhOptInitrd = new MHUtilityOperation();
+//
+//			// Uncomment the following two lines and comment the third line for KMS integration (for regestering the decryption key)
+//                        mhKeyName = configProperties.getProperty(Constants.MH_KEY_NAME) + "-initrd";
+//                        String encryptedInitrdPath = mhOptInitrd.startMHProcess(confInfo.get(Constants.INITRD_PATH), mhKeyName);
+//                        //String encryptedInitrdPath = mhOptImage.encryptFile(confInfo.get(Constants.INITRD_PATH), opensslPassword);
+//                        if(encryptedInitrdPath == null) {
+//                            new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+//                            System.exit(1);
+//                        }
+//                        confInfo.put(Constants.MH_DEK_URL_KERNEL, mhOptKernel.getDekURL());
+//                        confInfo.put(Constants.MH_DEK_URL_INITRD, mhOptInitrd.getDekURL());
+//                        confInfo.put(Constants.Enc_KERNEL_PATH, encryptedKernelPath);
+//                        confInfo.put(Constants.Enc_INITRD_PATH, encryptedInitrdPath);
+//                    }
+//                    String message=null;
+//                    try {
+//                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted,primaryStage);
+//                    } catch (ImageStoreException ex) {
+//                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                    showUploadSuccessMessage(primaryStage, message);
+//                    //encImageUploadConfirmation(primaryStage, confInfo, manifestLocation);
+//                } else if(confInfo.get(Constants.IS_ENCRYPTED)=="false") {
+//                    boolean isEncrypted = false;
+//                    String message=null;
+//                    try {
+//                        message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, isEncrypted, primaryStage);
+//                    } catch (ImageStoreException ex) {
+//                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                    showUploadSuccessMessage(primaryStage, message);
+//                } else {
+//                    new CreateImage(primaryStage).showWarningPopup("Plese select an option");
+//                }
+//            }
+//        });
         
         // Handler for "I will Upload" button
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -359,8 +371,10 @@ public class UserConfirmation {
         
     }
     
-    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, boolean isEncrypted, Stage primaryStage) throws ImageStoreException {
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, Stage primaryStage) throws ImageStoreException {
 //        System.out.println("PSDebug Came to set image prop");
+        boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
+        System.out.println("Value if Is encrypted is received as:::::::::::::::"+isEncrypted);
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -429,7 +443,7 @@ public class UserConfirmation {
                         showUploadSuccessMessage(primaryStage, message);
                         System.exit(1);                
                     }
-                    isSuccess = imageStoreObj.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.KERNEL_PATH))));
+                    isSuccess = imageStoreObj.updateImageProperty(kernelGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get(Constants.KERNEL_PATH))));
                     if(!isSuccess) {
                         String message = "Failed to update the Glance Image property .... Exiting";
                         showUploadSuccessMessage(primaryStage, message);
@@ -476,7 +490,7 @@ public class UserConfirmation {
                     showUploadSuccessMessage(primaryStage, message);
                     System.exit(1);                
                 }
-                isSuccess = imageStoreObj.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get(Constants.INITRD_PATH))));
+                isSuccess = imageStoreObj.updateImageProperty(initrdGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get(Constants.INITRD_PATH))));
                 if(!isSuccess) {
                     String message = "Failed to update the Glance Image property .... Exiting";
                     showUploadSuccessMessage(primaryStage, message);
@@ -525,7 +539,7 @@ public class UserConfirmation {
                 showUploadSuccessMessage(primaryStage, message);
                 System.exit(1);                
             }
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateHash().computeHash(md, new File(confInfo.get("Image Location"))));
+            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("Image Location"))));
             if(!isSuccess) {
                 String message = "Failed to update the Glance Image property .... Exiting";
                 showUploadSuccessMessage(primaryStage, message);
