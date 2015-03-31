@@ -3,15 +3,15 @@
 
 
     <artifactId>director-maven-java</artifactId>
-	<groupId>com.intel.mtwilson.director</groupId>
-	<version>0.1-SNAPSHOT</version>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Java project in trust director</description>
     <parent>
-		<groupId>com.intel.mtwilson.director</groupId>
-		<artifactId>director-maven-root</artifactId>
-		<version>0.1-SNAPSHOT</version>
-		<relativePath />
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-root</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath />
     </parent>
 
     <build>
@@ -27,43 +27,43 @@
                 </configuration>
             </plugin>
 
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-                <archive>
-                    <manifestEntries>
-                      <Release>${project.version}</Release>
-                      <!-- <Build-Number>${svn.revision}</Build-Number>  TODO  need a revision id from git or move this to integrated build server that will generate its own numbers -->
-                    </manifestEntries>
-                </archive>
-            </configuration>
-        </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Release>${project.version}</Release>
+                            <!-- <Build-Number>${svn.revision}</Build-Number>  TODO  need a revision id from git or move this to integrated build server that will generate its own numbers -->
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
         </plugins>
         
 		
     </build>
 
-	<dependencyManagement>
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
 
-    </dependencies>  
-	</dependencyManagement>
+        </dependencies>  
+    </dependencyManagement>
 
     <pluginRepositories>
         <pluginRepository>
