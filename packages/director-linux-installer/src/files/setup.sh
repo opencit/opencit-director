@@ -189,7 +189,7 @@ cp mount_vm_image.sh /opt/trustdirector/bin/
 cp tdirector.sh /opt/trustdirector/bin/tdirector
 cp client-0.1-SNAPSHOT-with-dependencies.jar /opt/trustdirector/java/
 cp director-javafx-*.jar /opt/trustdirector/java/
-cp lockback.xml /opt/trustdirector/configuration/
+cp logback.xml /opt/trustdirector/configuration/
 chmod 700 /opt/trustdirector/bin/login
 chmod 700 /opt/trustdirector/bin/mount_remote_system.sh
 chmod 700 /opt/trustdirector/bin/mount_vm_image.sh

@@ -10,41 +10,43 @@
     
     <build>
         <plugins>
+            <!-- the git commit plugin makes available the following properties:
+                 branch
+                 commit.id
+                 commit.id.abbrev
+                 commit.id.describe
+                 build.user.name
+                 build.user.email
+                 build.time
+                 commit.user.name
+                 commit.user.email
+                 commit.message.full
+                 commit.message.short
+                 commit.time
+                 remote.origin.url
+            -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Release>${project.version}</Release>
-                            <!-- <Build-Number>${svn.revision}</Build-Number>  TODO  need a revision id from git or move this to integrated build server that will generate its own numbers -->
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.12</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>revision</goal>
                         </goals>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <skipPoms>false</skipPoms>
+                            <prefix>git</prefix>
+                            <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
+		
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -255,7 +257,7 @@
     </issueManagement>
     
     <repositories>
-<!--        <repository>
+        <!--        <repository>
             <id>cpg-x</id>
             <name>Cloud Platform Group</name>
             <url>http://10.1.71.63/maven/repository</url>
