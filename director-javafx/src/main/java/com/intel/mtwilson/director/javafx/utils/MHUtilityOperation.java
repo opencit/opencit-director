@@ -42,7 +42,7 @@ public class MHUtilityOperation {
         keystorePasswd = configProperties.getProperty(Constants.MH_KEYSTORE_PASSWD);
         keystoreLocation = configProperties.getProperty(Constants.MH_KEYSTORE_LOCATION);
         tlsSSLPasswd = configProperties.getProperty(Constants.MH_TLS_SSL_PASSWD);
-        KMSServerIP = configProperties.getProperty(Constants.KMS_SERVER_IP);
+        KMSServerIP = configProperties.getProperty(Constants.KMS_SERVER);
     }
 
     public String encryptImage(Map<String, String> confInfo) {

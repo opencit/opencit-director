@@ -41,7 +41,7 @@ public class GlanceImageStoreImpl implements IImageStore {
     
     public GlanceImageStoreImpl(){
         configProperties=new ConfigProperties();
-    glanceIP = configProperties.getProperty(Constants.GLANCE_IP);
+    glanceIP = configProperties.getProperty(Constants.GLANCE_SERVER);
     userName = configProperties.getProperty(Constants.USER_NAME);
     password = configProperties.getProperty(Constants.PASSWORD);
     tenantName = configProperties.getProperty(Constants.TENANT_NAME);

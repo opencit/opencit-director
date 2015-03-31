@@ -50,7 +50,7 @@ public class Constants {
     
     public static final String IMAGE_STORE_TYPE = "image.store.type";
     public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
-    public static final String GLANCE_IP = "glance.ip";
+    public static final String GLANCE_SERVER = "glance.server";
     public static final String USER_NAME = "username";
     public static final String PASSWORD = "password";
     public static final String TENANT_NAME = "tenant.name";
@@ -68,7 +68,7 @@ public class Constants {
     
     public static final String EXEC_OUTPUT_FILE = "/opt/trustdirector/log/exec_output";
     
-    public static final String KMS_SERVER_IP = "kms.server.ip";
+    public static final String KMS_SERVER = "kms.server";
     
     public static final String MH_DEK_URL_IMG = "MH Dek Url Image";
     
