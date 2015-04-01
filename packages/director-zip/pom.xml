@@ -34,6 +34,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-javafx</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>
             <version>${mtwilson.version}</version>
@@ -46,6 +57,11 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup</artifactId>
+            <version>${mtwilson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-password-vault</artifactId>
             <version>${mtwilson.version}</version>
         </dependency>
             

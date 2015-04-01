@@ -31,7 +31,6 @@
     </build>
     <modules>
         <module>director-javafx</module>
-        <module>director-kms-client</module>
         <module>director-maven-java</module>
         <module>director-maven-package-makeself</module>
         <module>director-maven-package-zip</module>

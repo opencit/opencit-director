@@ -166,10 +166,10 @@ if ! java_ready_report; then
 fi
 
 # make sure unzip and authbind are installed
-DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfss kpartx vdfuse"
-DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfss kpartx vdfuse"
-DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfss kpartx vdfuse"
-DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfss kpartx vdfuse"
+DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
 auto_install "Installer requirements" "DIRECTOR"
 
 # setup authbind to allow non-root director to listen on ports 80 and 443
