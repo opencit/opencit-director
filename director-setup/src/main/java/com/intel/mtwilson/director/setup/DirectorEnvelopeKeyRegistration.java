@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -132,21 +133,24 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             properties.setProperty("login.basic.username", kmsLoginBasicUsername);
             properties.setProperty("login.basic.password", kmsLoginBasicPassword);
             users = new Users(properties);
-            user = users.findUserByUsername(kmsLoginBasicUsername);
-
-            if (user == null) {
-                configuration("KMS API user does not exist");
-            }
         }
     }
     
     @Override
     protected void validate() throws Exception {
-//        user = users.findUserByUsername(kmsLoginBasicUsername);
-//        
-//        if ( user == null ) {
-//            validation("KMS API user does not exist");
-//        }
+        try {
+            user = users.findUserByUsername(kmsLoginBasicUsername);
+
+            if (user == null) {
+                validation("KMS API user does not exist");
+            }
+            if ( ! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded()) ) {
+                validation("Director envelope public key does not match the KMS user public key");
+            }   
+        } catch (Exception e) {
+            log.error("Attempt to retreive user from the KMS failed: {}", e.getMessage());
+            validation("Attempt to retreive user from the KMS failed");
+        }
     }
     
     @Override
@@ -157,14 +161,23 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             }
         }
         
-        user.setTransferKey(directorEnvelopePublicKey);
-        User edited = users.editUser(user);
-        // confirmation:
-        log.debug("Successfully registered Trust Director envelope key with KMS user {}", edited.getUsername());
-        
         // save the settings in configuration;  DO NOT SAVE MASTER KEY
         getConfiguration().set(KMS_ENDPOINT_URL, kmsEndpointUrl);
         getConfiguration().set(KMS_TLS_POLICY_CERTIFICATE_SHA1, kmsTlsPolicyCertificateSha1);
         getConfiguration().set(KMS_LOGIN_BASIC_USERNAME, kmsLoginBasicUsername);
+        
+        try {
+            if (user == null) {
+                log.error("KMS client call failed to retrieve user");
+                throw new IllegalArgumentException("KMS client call failed to retrieve user");
+            }
+            user.setTransferKey(directorEnvelopePublicKey);
+            User edited = users.editUser(user);
+            // confirmation:
+            log.debug("Successfully registered Trust Director envelope key with KMS user {}", edited.getUsername());
+        } catch (Exception e) {
+            log.error("Attempt to set the director envelope key for the KMS user failed: {}", e.getMessage());
+            throw new IllegalArgumentException("Attempt to set the director envelope key for the KMS user failed");
+        }
     }
 }
