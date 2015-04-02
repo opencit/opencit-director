@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author rksavino
  */
-public class DirectorEvelopeKey extends AbstractSetupTask {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectorEvelopeKey.class);
+public class DirectorEnvelopeKey extends AbstractSetupTask {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectorEnvelopeKey.class);
 
     // configuration keys
     private static final String DIRECTOR_ENVELOPE_ALIAS = "director.envelope.alias";

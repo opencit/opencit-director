@@ -24,7 +24,7 @@
 
 # default settings
 DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
-DIRECTOR_LAYOUT=linux
+DIRECTOR_LAYOUT=home
 DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 INSTALL_LOG_DIRECTORY="/var/log/director"
 INSTALL_LOG_FILE="$INSTALL_LOG_DIRECTORY/director_install.log"
@@ -107,7 +107,7 @@ if [ "$DIRECTOR_LAYOUT" == "linux" ]; then
 elif [ "$DIRECTOR_LAYOUT" == "home" ]; then
   export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-$DIRECTOR_HOME/configuration}
   export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
-  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
+  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-/var/log/director} #$DIRECTOR_HOME/logs}
 fi
 export DIRECTOR_ENV=$DIRECTOR_CONFIGURATION/env
 
@@ -167,10 +167,11 @@ fi
 
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
-DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx " #vdfuse"
 DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
 DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
 auto_install "Installer requirements" "DIRECTOR"
+if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 
 # setup authbind to allow non-root director to listen on ports 80 and 443
 if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then

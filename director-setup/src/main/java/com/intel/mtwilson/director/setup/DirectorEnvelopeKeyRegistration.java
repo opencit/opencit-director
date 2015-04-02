@@ -123,20 +123,30 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
         
         // create KMS Users API client
         Properties properties = new Properties();
-        properties.setProperty("endpoint.url", kmsEndpointUrl);
-        properties.setProperty("tls.policy.certificate.sha1", kmsTlsPolicyCertificateSha1);
-        properties.setProperty("login.basic.username", kmsLoginBasicUsername);
-        properties.setProperty("login.basic.password", kmsLoginBasicPassword);
-        users = new Users(properties);
+        if (kmsEndpointUrl != null && !kmsEndpointUrl.isEmpty()
+                && kmsTlsPolicyCertificateSha1 != null && !kmsTlsPolicyCertificateSha1.isEmpty()
+                && kmsLoginBasicUsername != null && !kmsLoginBasicUsername.isEmpty()
+                && kmsLoginBasicPassword != null && !kmsLoginBasicPassword.isEmpty()) {
+            properties.setProperty("endpoint.url", kmsEndpointUrl);
+            properties.setProperty("tls.policy.certificate.sha1", kmsTlsPolicyCertificateSha1);
+            properties.setProperty("login.basic.username", kmsLoginBasicUsername);
+            properties.setProperty("login.basic.password", kmsLoginBasicPassword);
+            users = new Users(properties);
+            user = users.findUserByUsername(kmsLoginBasicUsername);
+
+            if (user == null) {
+                configuration("KMS API user does not exist");
+            }
+        }
     }
     
     @Override
     protected void validate() throws Exception {
-        user = users.findUserByUsername(kmsLoginBasicUsername);
-        
-        if ( user == null ) {
-            validation("KMS API user does not exist");
-        }
+//        user = users.findUserByUsername(kmsLoginBasicUsername);
+//        
+//        if ( user == null ) {
+//            validation("KMS API user does not exist");
+//        }
     }
     
     @Override

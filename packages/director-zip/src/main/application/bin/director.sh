@@ -24,7 +24,7 @@ NAME=director
 
 # directory layout
 export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
-export DIRECTOR_LAYOUT=linux
+export DIRECTOR_LAYOUT=home
 
 # define application directory layout
 if [ "$DIRECTOR_LAYOUT" == "linux" ]; then
@@ -34,7 +34,7 @@ if [ "$DIRECTOR_LAYOUT" == "linux" ]; then
 elif [ "$DIRECTOR_LAYOUT" == "home" ]; then
   export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-$DIRECTOR_HOME/configuration}
   export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
-  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
+  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-/var/log/director} #$DIRECTOR_HOME/logs}
 fi
 export DIRECTOR_ENV=$DIRECTOR_CONFIGURATION/env
 export DIRECTOR_JAVA=${DIRECTOR_JAVA:-$DIRECTOR_HOME/java}
@@ -73,11 +73,14 @@ fi
 
 # all other variables with defaults
 DIRECTOR_APPLICATION_LOG_FILE=${DIRECTOR_APPLICATION_LOG_FILE:-$DIRECTOR_LOGS/director.log}
+touch "$DIRECTOR_APPLICATION_LOG_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_APPLICATION_LOG_FILE"
+chmod 600 "$DIRECTOR_APPLICATION_LOG_FILE"
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logback.xml"}
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
-DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault"}
+DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault director-envelope-key director-envelope-key-registration"}
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
@@ -92,6 +95,9 @@ fi
 # generated variables
 JARS=$(ls -1 $DIRECTOR_JAVA/*.jar)
 CLASSPATH=$(echo $JARS | tr ' ' ':')
+
+if [ -z "$JAVA_HOME" ]; then java_detect; fi
+CLASSPATH=$CLASSPATH:$(find "$JAVA_HOME" -name jfxrt*.jar | head -n 1)
 
 # the classpath is long and if we use the java -cp option we will not be
 # able to see the full command line in ps because the output is normally
