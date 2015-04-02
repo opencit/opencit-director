@@ -56,7 +56,7 @@ public class ConfigProperties {
         OutputStream output = null;
         try {
             output = new FileOutputStream(new File(propertyFile));
-            prop.setProperty("Glance_IP", "10.35.35.10");
+            prop.setProperty("GLANCE_SERVER", "10.35.35.10");
             prop.setProperty("User_Name", "admin");
             prop.setProperty("Password", "intelrp");
             prop.setProperty("Tenant_Name", "admin");

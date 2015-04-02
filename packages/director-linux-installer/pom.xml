@@ -8,8 +8,9 @@
     
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
-        <artifactId>packages</artifactId>
+        <artifactId>director-maven-package-makeself</artifactId>
         <version>0.1-SNAPSHOT</version>
+        <relativePath/>
     </parent>
     
     <properties>
