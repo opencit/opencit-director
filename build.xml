@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="director" default="build" basedir=".">
+<project name="director" default="all" basedir=".">
 	<description>
 	Run "ant ready" to ensure you have all pre-requisites to build
 	Run "ant" or "ant build" to build the entire project
@@ -91,4 +91,5 @@
 			<condition><not><equals arg1="${mavenExitInstallPackages}" arg2="0"/></not></condition>
 		</fail>
 	</target>
+	<target name="all" depends="ready,clean,build,packages"></target>
 </project>
