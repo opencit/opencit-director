@@ -27,10 +27,6 @@
 # and it is not saved or used by the app script
 export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
 DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
-DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
-INSTALL_LOG_DIRECTORY="/var/log/director"
-INSTALL_LOG_FILE="$INSTALL_LOG_DIRECTORY/director_install.log"
-mkdir -p "$INSTALL_LOG_DIRECTORY"
 
 # the env directory is not configurable; it is defined as DIRECTOR_HOME/env and
 # the administrator may use a symlink if necessary to place it anywhere else
@@ -61,10 +57,6 @@ if [ -n "$DIRECTOR_UTIL_SCRIPT_FILE" ] && [ -f "$DIRECTOR_UTIL_SCRIPT_FILE" ]; t
   . $DIRECTOR_UTIL_SCRIPT_FILE
 fi
 
-# load existing environment first
-load_director_conf
-load_director_defaults
-
 # load installer environment file, if present
 if [ -f ~/director.env ]; then
   echo "Loading environment variables from $(cd ~ && pwd)/director.env"
@@ -74,23 +66,6 @@ if [ -f ~/director.env ]; then
 else
   echo "No environment file"
 fi
-
-prompt_with_default USERNAME "Director Username:" "$USERNAME"
-prompt_with_default_password PASSWORD "Director Password:" "$PASSWORD"
-prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
-prompt_with_default MYSTERYHILL_KEY_NAME "Mystery Hill Key Name:" "$MYSTERYHILL_KEY_NAME"
-prompt_with_default MYSTERYHILL_KEYSTORE "Mystery Hill Keystore:" "$MYSTERYHILL_KEYSTORE"
-prompt_with_default_password MYSTERYHILL_KEYSTORE_PASSWORD "Mystery Hill Keystore Password:" "$MYSTERYHILL_KEYSTORE_PASSWORD"
-prompt_with_default_password MYSTERYHILL_TLS_SSL_PASSWORD "Mystery Hill TLS Password:" "$MYSTERYHILL_TLS_SSL_PASSWORD"
-prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
-prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
-prompt_with_default MTWILSON_SERVER_IP "Mtwilson Server IP:" "$MTWILSON_SERVER_IP"
-prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
-prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
-prompt_with_default GLANCE_SERVER "Glance Server:" "$GLANCE_SERVER"
-prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
-prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
-prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
 
 # determine if we are installing as root or non-root
 if [ "$(whoami)" == "root" ]; then
@@ -128,6 +103,37 @@ fi
 
 # note that the env dir is not configurable; it is defined as "env" under home
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
+
+DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
+touch "$DIRECTOR_PROPERTIES_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
+chmod 600 "$DIRECTOR_PROPERTIES_FILE"
+
+DIRECTOR_INSTALL_LOG_FILE="$DIRECTOR_LOGS/director_install.log"
+touch "$DIRECTOR_INSTALL_LOG_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_INSTALL_LOG_FILE"
+chmod 600 "$DIRECTOR_INSTALL_LOG_FILE"
+
+# load existing environment; set variables will take precendence
+load_director_conf
+load_director_defaults
+
+prompt_with_default USERNAME "Director Username:" "$USERNAME"
+prompt_with_default_password PASSWORD "Director Password:" "$PASSWORD"
+prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
+prompt_with_default MYSTERYHILL_KEY_NAME "Mystery Hill Key Name:" "$MYSTERYHILL_KEY_NAME"
+prompt_with_default MYSTERYHILL_KEYSTORE "Mystery Hill Keystore:" "$MYSTERYHILL_KEYSTORE"
+prompt_with_default_password MYSTERYHILL_KEYSTORE_PASSWORD "Mystery Hill Keystore Password:" "$MYSTERYHILL_KEYSTORE_PASSWORD"
+prompt_with_default_password MYSTERYHILL_TLS_SSL_PASSWORD "Mystery Hill TLS Password:" "$MYSTERYHILL_TLS_SSL_PASSWORD"
+prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
+prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
+prompt_with_default MTWILSON_SERVER_IP "Mtwilson Server IP:" "$MTWILSON_SERVER_IP"
+prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
+prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
+prompt_with_default GLANCE_SERVER "Glance Server:" "$GLANCE_SERVER"
+prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
+prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
+prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
 
 director_backup_configuration() {
   if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
