@@ -22,47 +22,41 @@ NAME=director
 
 ###################################################################################################
 
-# directory layout
-export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
-export DIRECTOR_LAYOUT=home
-
-# define application directory layout
-if [ "$DIRECTOR_LAYOUT" == "linux" ]; then
-  export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-/etc/director}
-  export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-/var/opt/director}
-  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-/var/log/director}
-elif [ "$DIRECTOR_LAYOUT" == "home" ]; then
-  export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-$DIRECTOR_HOME/configuration}
-  export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
-  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-/var/log/director} #$DIRECTOR_HOME/logs}
+# if non-root execution is specified, and we are currently root, start over; the DIRECTOR_SUDO variable limits this to one attempt
+# we make an exception for the uninstall command, which may require root access to delete users and certain directories
+if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$DIRECTOR_SUDO" ] && [ "$1" != "uninstall" ]; then
+  sudo -u $DIRECTOR_USERNAME DIRECTOR_HOME=$DIRECTOR_HOME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
+  exit $?
 fi
-export DIRECTOR_ENV=$DIRECTOR_CONFIGURATION/env
-export DIRECTOR_JAVA=${DIRECTOR_JAVA:-$DIRECTOR_HOME/java}
-export DIRECTOR_BIN=${DIRECTOR_BIN:-$DIRECTOR_HOME/bin}
-
-#export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-${DIRECTOR_CONF:-$DIRECTOR_HOME/configuration}}
-#export DIRECTOR_ENV=${DIRECTOR_ENV:-$DIRECTOR_CONFIGURATION/env}
-#export DIRECTOR_JAVA=${DIRECTOR_JAVA:-$DIRECTOR_HOME/java}
-#export DIRECTOR_BIN=${DIRECTOR_BIN:-$DIRECTOR_HOME/bin}
-#export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
-#export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
 
 ###################################################################################################
+
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
+
+# the env directory is not configurable; it is defined as DIRECTOR_HOME/env and the
+# administrator may use a symlink if necessary to place it anywhere else
+export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
 # load environment variables (these may override the defaults set above)
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
   for env_file in $DIRECTOR_ENV_FILES; do
     . $env_file
+    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
   done
 fi
 
-# if non-root execution is specified, and we are currently root, start over; the DIRECTOR_SUDO variable limits this to one attempt
-# we make an exception for the uninstall command, which may require root access to delete users and certain directories
-if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$DIRECTOR_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $DIRECTOR_USERNAME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
-  exit $?
-fi
+# default directory layout follows the 'home' style
+export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-${DIRECTOR_CONF:-$DIRECTOR_HOME/configuration}}
+export DIRECTOR_JAVA=${DIRECTOR_JAVA:-$DIRECTOR_HOME/java}
+export DIRECTOR_BIN=${DIRECTOR_BIN:-$DIRECTOR_HOME/bin}
+export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
+export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
+
+###################################################################################################
 
 # load linux utility
 if [ -f "$DIRECTOR_HOME/bin/functions.sh" ]; then
@@ -170,7 +164,7 @@ director_is_running() {
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # check the process list just in case the pid file is stale
-    DIRECTOR_PID=$(ps ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | awk '{ print $1 }')
+    DIRECTOR_PID=$(ps wwx | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # Trust Director is not running
@@ -193,18 +187,6 @@ director_stop() {
   fi
 }
 
-director_backup_configuration() {
-    datestr=`date +%Y-%m-%d.%H%M`
-    mkdir -p /var/backup/director.configuration.$datestr
-    cp -r /opt/director/configuration/* /var/backup/director.configuration.$datestr
-}
-
-director_backup_repository() {
-    datestr=`date +%Y-%m-%d.%H%M`
-    mkdir -p /var/backup/director.repository.$datestr
-    cp -r /opt/director/repository/* /var/backup/director.repository.$datestr
-}
-
 # removes Trust Director home directory (including configuration and data if they are there).
 # if you need to keep those, back them up before calling uninstall,
 # or if the configuration and data are outside the home directory
@@ -212,7 +194,7 @@ director_backup_repository() {
 # and DIRECTOR_REPOSITORY=/var/opt/director and then they would not be deleted by this.
 director_uninstall() {
     remove_startup_script director
-	rm /usr/local/bin/director
+    rm -f /usr/local/bin/director
     rm -rf /opt/director
     groupdel director > /dev/null 2>&1
     userdel director > /dev/null 2>&1

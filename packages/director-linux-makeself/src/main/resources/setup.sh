@@ -23,12 +23,28 @@
 #####
 
 # default settings
-DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
-DIRECTOR_LAYOUT=home
+# note the layout setting is used only by this script
+# and it is not saved or used by the app script
+export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
+DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 INSTALL_LOG_DIRECTORY="/var/log/director"
 INSTALL_LOG_FILE="$INSTALL_LOG_DIRECTORY/director_install.log"
 mkdir -p "$INSTALL_LOG_DIRECTORY"
+
+# the env directory is not configurable; it is defined as DIRECTOR_HOME/env and
+# the administrator may use a symlink if necessary to place it anywhere else
+export DIRECTOR_ENV=$DIRECTOR_HOME/env
+
+# load application environment variables if already defined
+if [ -d $DIRECTOR_ENV ]; then
+  DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
+  for env_file in $DIRECTOR_ENV_FILES; do
+    . $env_file
+    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+  done
+fi
 
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
 # we use the following functions:
@@ -36,12 +52,12 @@ mkdir -p "$INSTALL_LOG_DIRECTORY"
 # echo_failure echo_warning
 # register_startup_script
 UTIL_SCRIPT_FILE=$(ls -1 mtwilson-linux-util-*.sh | head -n 1)
-if [ -f "$UTIL_SCRIPT_FILE" ]; then
+if [ -n "$UTIL_SCRIPT_FILE" ] && [ -f "$UTIL_SCRIPT_FILE" ]; then
   . $UTIL_SCRIPT_FILE
 fi
 
 DIRECTOR_UTIL_SCRIPT_FILE=$(ls -1 director-functions.sh | head -n 1)
-if [ -f "$DIRECTOR_UTIL_SCRIPT_FILE" ]; then
+if [ -n "$DIRECTOR_UTIL_SCRIPT_FILE" ] && [ -f "$DIRECTOR_UTIL_SCRIPT_FILE" ]; then
   . $DIRECTOR_UTIL_SCRIPT_FILE
 fi
 
@@ -49,12 +65,12 @@ fi
 load_director_conf
 load_director_defaults
 
-# environment file; override existing environment
+# load installer environment file, if present
 if [ -f ~/director.env ]; then
   echo "Loading environment variables from $(cd ~ && pwd)/director.env"
   . ~/director.env
   env_file_exports=$(cat ~/director.env | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-  eval export $env_file_exports
+  if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
 else
   echo "No environment file"
 fi
@@ -107,11 +123,34 @@ if [ "$DIRECTOR_LAYOUT" == "linux" ]; then
 elif [ "$DIRECTOR_LAYOUT" == "home" ]; then
   export DIRECTOR_CONFIGURATION=${DIRECTOR_CONFIGURATION:-$DIRECTOR_HOME/configuration}
   export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
-  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-/var/log/director} #$DIRECTOR_HOME/logs}
+  export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
 fi
-export DIRECTOR_ENV=$DIRECTOR_CONFIGURATION/env
+
+# note that the env dir is not configurable; it is defined as "env" under home
+export DIRECTOR_ENV=$DIRECTOR_HOME/env
+
+director_backup_configuration() {
+  if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir=/var/backup/director.configuration.$datestr
+    mkdir -p $backupdir
+    cp -r $DIRECTOR_CONFIGURATION/* $backupdir
+  fi
+}
+
+director_backup_repository() {
+  if [ -n "$DIRECTOR_REPOSITORY" ] && [ -d "$DIRECTOR_REPOSITORY" ]; then
+    datestr=`date +%Y%m%d.%H%M`
+    backupdir=/var/backup/director.repository.$datestr
+    mkdir -p $backupdir
+    cp -r $DIRECTOR_REPOSITORY/* $backupdir
+  fi
+}
 
 # backup current configuration, if there is one
+director_backup_configuration
+director_backup_repository
+
 if [ -d $DIRECTOR_CONFIGURATION ]; then
   backup_conf_dir=$DIRECTOR_REPOSITORY/backup/configuration.$(date +"%Y%m%d.%H%M")
   mkdir -p $backup_conf_dir
@@ -131,8 +170,9 @@ echo "# $(date)" > $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_HOME=$DIRECTOR_HOME" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_CONFIGURATION=$DIRECTOR_CONFIGURATION" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_REPOSITORY=$DIRECTOR_REPOSITORY" >> $DIRECTOR_ENV/director-layout
+echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
+echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
-echo "export DIRECTOR_ENV=$DIRECTOR_ENV" >> $DIRECTOR_ENV/director-layout
 
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
@@ -208,10 +248,12 @@ fi
 # register linux startup script
 register_startup_script $DIRECTOR_HOME/bin/director.sh director
 
-# the master password is required
-if [ -z "$DIRECTOR_PASSWORD" ]; then
-  echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
-  echo 'To generate a new master password, run the following command:
+# setup the director, unless the NOSETUP variable is defined
+if [ -z "$DIRECTOR_NOSETUP" ]; then
+  # the master password is required
+  if [ -z "$DIRECTOR_PASSWORD" ]; then
+    echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
+    echo 'To generate a new master password, run the following command:
 
   DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
 
@@ -225,23 +267,23 @@ After you set DIRECTOR_PASSWORD, run the following command to complete installat
   director setup
 
 '
-  exit 1
+    exit 1
+  fi
+
+  director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson,director'}" >/dev/null
+  director setup
 fi
 
-# setup the director
-director setup
-
 # delete the temporary setup environment variables file
-rm $DIRECTOR_ENV/director-setup
+rm -f $DIRECTOR_ENV/director-setup
 
 # ensure the director owns all the content created during setup
+for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_JAVA $DIRECTOR_BIN $DIRECTOR_ENV $DIRECTOR_REPOSITORY $DIRECTOR_LOGS; do
 for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_ENV $DIRECTOR_REPOSITORY $DIRECTOR_LOGS; do
   chown -R $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $directory
 done
 
-# start the server
-director start
-
-
-
+# start the server, unless the NOSETUP variable is defined
+#if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
+echo_success "Installation complete"
 
