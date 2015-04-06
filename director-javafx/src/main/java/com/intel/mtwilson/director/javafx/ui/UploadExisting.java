@@ -6,27 +6,15 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.IImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 import static java.awt.Color.red;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -36,7 +24,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -49,8 +36,8 @@ import javafx.stage.Stage;
  */
 public class UploadExisting {    
 
-    private final Stage uploadExistingStage;
-    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UploadExisting.class);
+    private final Stage uploadExistingStage;    
     private TextField imagePathTField;
     private TextField imageNameTField;
     private TextField manifestPathTField;
@@ -58,13 +45,6 @@ public class UploadExisting {
     private ConfigProperties configProperties;
     
     String hostManifest;
-    
-    private static final Logger logger; 
-    // Set FileHandler for logger
-    static {
-        logger = Logger.getLogger(ConfigurationInformation.class.getName());
-        LoggerUtility.setHandler(logger);
-    }
     
     public UploadExisting(Stage uploadExistingStage) {
         this.uploadExistingStage = uploadExistingStage;
@@ -87,7 +67,7 @@ public class UploadExisting {
                 hostManifest = hostManifest.trim();
             }
         } catch (NullPointerException npe) {
-            logger.log(Level.WARNING, "Host manifest value not set in configuration file.", npe);
+            log.debug("Host manifest value not set in configuration file.", npe);
         }
 
         uploadExistingStage.setTitle("Upload Existing image");
@@ -165,7 +145,7 @@ public class UploadExisting {
                     File file = imageFile.showOpenDialog(uploadExistingStage);
                     imagePathTField.setText(file.getAbsolutePath());
                 } catch(Exception e) {
-                    logger.info("Not selected anything");
+                    log.debug("Not selected anything");
                 }
             }
         });
@@ -181,7 +161,7 @@ public class UploadExisting {
                     File file = manifestFile.showOpenDialog(uploadExistingStage);
                     manifestPathTField.setText(file.getAbsolutePath());
                 } catch(Exception e) {
-                    logger.info("Not selected anything");
+                    log.debug("Not selected anything");
                 }
             }
         });

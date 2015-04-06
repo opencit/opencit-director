@@ -15,10 +15,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import com.intel.mtwilson.director.javafx.ui.Constants;
-import com.intel.mtwilson.director.javafx.ui.UserConfirmation;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -34,23 +31,17 @@ import org.json.JSONObject;
  * @author root
  */
 public class GlanceImageStoreImpl implements IImageStore {
-    private static final Logger logger = Logger.getLogger(UserConfirmation.class.getName());
-    private ConfigProperties configProperties;
     
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlanceImageStoreImpl.class);
+    private ConfigProperties configProperties;
     private String glanceIP;
     private String userName;
     private String password;
     private String tenantName;
-
-
-// Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
     
     public GlanceImageStoreImpl(){
         configProperties=new ConfigProperties();
-    glanceIP = configProperties.getProperty(Constants.GLANCE_IP);
+    glanceIP = configProperties.getProperty(Constants.GLANCE_SERVER);
     userName = configProperties.getProperty(Constants.USER_NAME);
     password = configProperties.getProperty(Constants.PASSWORD);
     tenantName = configProperties.getProperty(Constants.TENANT_NAME);
@@ -75,7 +66,7 @@ public class GlanceImageStoreImpl implements IImageStore {
     @Override
     public String uploadImage(String imageLocation, Map<String, String> imageProperties) {
         String id = null;
-        System.out.println("Uploading image from location::"+imageLocation);
+        log.debug("Uploading image from location: "+imageLocation);
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost postRequest = new HttpPost("http://" + glanceIP + ":9292/v1/images");
@@ -89,7 +80,7 @@ public class GlanceImageStoreImpl implements IImageStore {
             
             HttpResponse response = httpClient.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != 201) {
-                logger.log(Level.SEVERE, null, new RuntimeException("Failed : HTTP error code : "
+                log.error( null, new RuntimeException("Failed to upload image : HTTP error code : "
 				+ response.getStatusLine().getStatusCode()));
             }
             BufferedReader br = new BufferedReader(
@@ -98,26 +89,24 @@ public class GlanceImageStoreImpl implements IImageStore {
             String output;
             
             StringBuffer sb = new StringBuffer();
-            logger.info("Output from Server ....");
             while ((output = br.readLine()) != null) {
                 sb.append(output);
-                logger.info(output);
+                log.info(output);
             }
             
             JSONObject obj = new JSONObject(sb.toString());
             JSONObject property = obj.getJSONObject("image");
             id = property.getString("id");
-            logger.info("ID is : " + id);
             httpClient.getConnectionManager().shutdown();            
             br.close();
             //br1.close();
             is.close();
         } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, null, e);
+            log.error(null, e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, null, e);
+            log.error(null, e);
         } catch (JSONException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }    
         return id;
     }
@@ -154,25 +143,23 @@ public class GlanceImageStoreImpl implements IImageStore {
             HttpResponse response = httpClient.execute(httpPut);
             
             if (response.getStatusLine().getStatusCode() != 200) {
-                logger.log(Level.SEVERE, null, new RuntimeException("Failed : HTTP error code : "
+                log.error(null, new RuntimeException("Failed to upload image: HTTP error code : "
                         + response.getStatusLine().getStatusCode()));
                 return false;
             }
  
             BufferedReader br = new BufferedReader(
                     new InputStreamReader((response.getEntity().getContent())));
-            logger.info("Put request .....");
  
             String output;
-            logger.info("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
-                logger.info(output);
+                log.trace(output);
             }
  
             httpClient.getConnectionManager().shutdown();
             
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
         
         return true;    
@@ -192,7 +179,7 @@ public class GlanceImageStoreImpl implements IImageStore {
             postRequest.setHeader("Accept", "application/json");
             HttpResponse response = httpClient.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != 200) {
-                logger.log(Level.SEVERE, null, new RuntimeException("Failed : HTTP error code : "
+                log.error(null, new RuntimeException("Failed : HTTP error code : "
 				+ response.getStatusLine().getStatusCode()));
             }
             BufferedReader br = new BufferedReader(
@@ -200,10 +187,10 @@ public class GlanceImageStoreImpl implements IImageStore {
  
             String output;
             StringBuffer sb = new StringBuffer();
-            logger.info("Output from Server .... \n");
+            log.info("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
                 sb.append(output);
-                //System.out.println(output);
+                //log.debug(output);
             }
             
             JSONObject obj = new JSONObject(sb.toString());
@@ -212,11 +199,11 @@ public class GlanceImageStoreImpl implements IImageStore {
             httpClient.getConnectionManager().shutdown();            
             br.close();
         } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, null, e);
+            log.error(null, e);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, null, e);
+            log.error(null, e);
         } catch (JSONException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }       
         return authToken;
     }

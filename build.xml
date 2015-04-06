@@ -23,44 +23,72 @@
 	
 	<target name="ready" depends="init">
 		<!-- the root pom -->
-		<exec executable="${cmd.maven}">
-			<arg value="-DskipTests=true"/>
+		<exec executable="${cmd.maven}" dir="director-maven-root" resultproperty="mavenExitInstallRootPom">
 			<arg value="-N"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Cannot install director-maven-root" status="${mavenExitInstallRootPom}">
+			<condition><not><equals arg1="${mavenExitInstallRootPom}" arg2="0"/></not></condition>
+		</fail>
 		<!-- the maven archetypes depend on root pom -->
-		<exec executable="${cmd.maven}" dir="director-maven-root">
-			<arg value="-DskipTests=true"/>
+		<!-- the root pom -->
+		<exec executable="${cmd.maven}" dir="director-maven-java" resultproperty="mavenExitInstallJavaPom">
+			<arg value="-N"/>
 			<arg value="install"/>
 		</exec>
-		<!-- clean all projects -->
-		<exec executable="${cmd.maven}">
-			<arg value="-DskipTests=true"/>
-			<arg value="clean"/>
+		<fail message="Cannot install director-maven-java" status="${mavenExitInstallJavaPom}">
+			<condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
+		</fail>
+		<exec executable="${cmd.maven}" dir="director-maven-package-zip" resultproperty="mavenExitInstallPackageZipPom">
+			<arg value="install"/>
 		</exec>
+		<fail message="Cannot install director-maven-package-zip" status="${mavenExitInstallPackageZipPom}">
+			<condition><not><equals arg1="${mavenExitInstallPackageZipPom}" arg2="0"/></not></condition>
+		</fail>
+		<exec executable="${cmd.maven}" dir="director-maven-package-makeself" resultproperty="mavenExitInstallPackageMakeselfPom">
+			<arg value="install"/>
+		</exec>
+		<fail message="Cannot install director-maven-package-makeself" status="${mavenExitInstallPackageMakeselfPom}">
+			<condition><not><equals arg1="${mavenExitInstallPackageMakeselfPom}" arg2="0"/></not></condition>
+		</fail>
 	</target>
 	
 	<target name="clean" depends="init">
 		<!-- the root pom and all projects -->
-		<exec executable="${cmd.maven}">
+		<exec executable="${cmd.maven}" resultproperty="mavenExitClean">
 			<arg value="clean"/>
 		</exec>
+		<fail message="Cannot clean build files" status="${mavenExitClean}">
+			<condition><not><equals arg1="${mavenExitClean}" arg2="0"/></not></condition>
+		</fail>
+		<!-- the packages -->
+		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitCleanPackages">
+			<arg value="clean"/>
+		</exec>
+		<fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
+			<condition><not><equals arg1="${mavenExitCleanPackages}" arg2="0"/></not></condition>
+		</fail>
 	</target>
 	
 	<target name="build" depends="init">
-		<!-- the root pom and all projects except packages -->
-		<exec executable="${cmd.maven}">
+		<!-- the root pom and all projects except packages -->	
+		<exec executable="${cmd.maven}"  resultproperty="mavenExitInstall">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Cannot build project" status="${mavenExitInstall}">
+			<condition><not><equals arg1="${mavenExitInstall}" arg2="0"/></not></condition>
+		</fail>
 	</target>
 
 	<target name="packages" depends="init">
 		<!-- the packages -->
-		<exec executable="${cmd.maven}" dir="packages">
+		<exec executable="${cmd.maven}" dir="packages" resultproperty="mavenExitInstallPackages">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
 		</exec>
+		<fail message="Cannot build project packages" status="${mavenExitInstallPackages}">
+			<condition><not><equals arg1="${mavenExitInstallPackages}" arg2="0"/></not></condition>
+		</fail>
 	</target>
-	
 </project>

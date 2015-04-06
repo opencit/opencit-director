@@ -4,28 +4,15 @@
  */
 package com.intel.mtwilson.director.javafx.ui;
 
-import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
-import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
-import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-import static java.awt.Color.red;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -37,7 +24,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -50,8 +36,8 @@ import javafx.stage.Stage;
  */
 public class CreateImage {    
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateImage.class);
     private final Stage createImageStage;
-    
     private TextField imagePathTField;
     private TextField imageNameTField;
     private TextField imageIDTField;
@@ -63,14 +49,7 @@ public class CreateImage {
     
     String hostManifest;
     String delimiter="/";
-    
-    private static final Logger logger; 
-    // Set FileHandler for logger
-    static {
-        logger = Logger.getLogger(ConfigurationInformation.class.getName());
-        LoggerUtility.setHandler(logger);
-    }
-    
+
     public CreateImage(Stage createImageStage) {
         this.createImageStage = createImageStage;
         configProperties = new ConfigProperties();
@@ -92,7 +71,7 @@ public class CreateImage {
                 hostManifest = hostManifest.trim();
             }
         } catch (NullPointerException npe) {
-            logger.log(Level.WARNING, "Host manifest value not set in configuration file.", npe);
+            log.error(null, npe);
         }
         
         createImageStage.setTitle("Create Image");
@@ -242,7 +221,7 @@ public class CreateImage {
                         imageNameTField.setText(autoComplete);
                     }
                 } catch(Exception e) {
-                    logger.info("Not selected anything");
+                    log.error("Not selected anything", e);
                 }
             }
         });
@@ -269,10 +248,10 @@ public class CreateImage {
                     
                     
                     Iterator it = customerInfo.entrySet().iterator();
-                    logger.info("Configuration Values Are ");
+                    log.debug("Configuration Values Are ");
                     while (it.hasNext()) {
                         Map.Entry pairs = (Map.Entry) it.next();
-                        logger.info(pairs.getKey().toString() + " : " + pairs.getValue().toString());
+                        log.debug(pairs.getKey().toString() + " : " + pairs.getValue().toString());
                     }
                     
 //                    //Check for the "Host_Manifest" property in the property file, if present, manifest generation will be for host
@@ -308,7 +287,7 @@ public class CreateImage {
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
                             // Mount the VM disk image
                             exitCode = MountVMImage.mountImage(imagePathTField.getText());
-                            logger.info("Exit Code" + exitCode);
+                            log.info("Exit Code" + exitCode);
                             if( exitCode == 0) {
                                 if(new File(Constants.MOUNT_PATH + "/Windows/System32/ntoskrnl.exe").exists()) {
                                     customerInfo.put(Constants.IS_WINDOWS, "true");
@@ -318,7 +297,7 @@ public class CreateImage {
                                 BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
                                 secondWindow.launch(customerInfo);                        
                             } else {
-                                logger.log(Level.SEVERE, "Error while mounting the image .. Exiting ....");
+                                log.error("Error while mounting the image .. Exiting ....");
                                 String warningMessage = "Error while mounting the image .. Exiting ....";
 //                                showWarningPopup(warningMessage);
                                 System.exit(exitCode);
@@ -441,7 +420,7 @@ public class CreateImage {
             }else{
              customerInfo.put(Constants.IS_ENCRYPTED,"false");
             }
-            System.out.println("Is_Encrypted is set to:::::::::::::::::::::::::::::::"+customerInfo.get(Constants.IS_ENCRYPTED));
+            log.debug("Is_Encrypted is set to: "+customerInfo.get(Constants.IS_ENCRYPTED));
           } else {
             return null;
         }

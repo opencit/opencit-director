@@ -1,11 +1,8 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.GlanceImageStoreImpl;
 import com.intel.mtwilson.director.javafx.utils.IImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
@@ -20,18 +17,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -50,13 +41,8 @@ import javafx.stage.Stage;
  */
 public class UserConfirmation {
     
-    private static final Logger logger = Logger.getLogger(UserConfirmation.class.getName());
-    private static final String opensslPassword = "intelrp";
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserConfirmation.class);
     private ConfigProperties configProperties;
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
     
     public UserConfirmation() {
         configProperties = new ConfigProperties();
@@ -375,9 +361,7 @@ public class UserConfirmation {
     }
     
     public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws ImageStoreException {
-//        System.out.println("PSDebug Came to set image prop");
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
-        System.out.println("Value if Is encrypted is received as:::::::::::::::"+isEncrypted);
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
         String containerFormat = null;
@@ -418,7 +402,7 @@ public class UserConfirmation {
             try {
                 md = MessageDigest.getInstance("MD5");
             } catch (NoSuchAlgorithmException ex) {
-                ex.printStackTrace();
+                log.error(null, ex);
             }
         }
         
@@ -433,7 +417,7 @@ public class UserConfirmation {
             String kernelGlanceID = null;
             try{
                 if(isEncrypted) {
-                    System.out.println("PSDebug Came to set image prop 22222");
+                    log.debug("PSDebug Came to set image prop 22222");
                     kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH),imageProperties);
                     if(kernelGlanceID == null) {
                         String message = "Failed to upload the Image to Glance .... Exiting";
@@ -608,20 +592,20 @@ public class UserConfirmation {
         String imagePathDelimiter = "/";
 
         String imageTPDir = trustPolicyLocation.substring(0, trustPolicyLocation.lastIndexOf(imagePathDelimiter));
-        System.out.println("ImageTP directory is:" + imageTPDir);
+        log.debug("ImageTP directory is:" + imageTPDir);
         GenerateTrustPolicy genrateTP = new GenerateTrustPolicy();
-        System.out.println(genrateTP.executeShellCommand("cd " + imageTPDir));
-        System.out.println(genrateTP.executeShellCommand("pwd "));
+        log.debug(genrateTP.executeShellCommand("cd " + imageTPDir));
+        log.debug(genrateTP.executeShellCommand("pwd "));
         String imageName = imageLocation.substring(imageLocation.lastIndexOf(imagePathDelimiter) + 1);
         String trustpolicyName = trustPolicyLocation.substring(trustPolicyLocation.lastIndexOf(imagePathDelimiter) + 1);
-        System.out.println("image and TP name:" + imageName + " " + trustpolicyName);
+        log.debug("image and TP name:" + imageName + " " + trustpolicyName);
         String tarName = imageName + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
-        System.out.println(genrateTP.executeShellCommand("tar -cf " + imageTPDir + imagePathDelimiter + tarName + " -C " + imageTPDir + " " + imageName + " " + trustpolicyName));
+        log.debug(genrateTP.executeShellCommand("tar -cf " + imageTPDir + imagePathDelimiter + tarName + " -C " + imageTPDir + " " + imageName + " " + trustpolicyName));
         return imageTPDir + imagePathDelimiter + tarName;
     }
 
     public void executeShellCommand(String cmd) {
-        System.out.println("Command to execute is:" + cmd);
+        log.debug("Command to execute is:" + cmd);
         try {
             Process p;
             p = Runtime.getRuntime().exec(cmd);
@@ -646,8 +630,8 @@ public class UserConfirmation {
     // Check availability of UUID
     private boolean checkUUIDAvailability(String uuid) {
         boolean isAvailable = true;
-        //System.out.println("Checking availability of UUID");
-        logger.info("Checking availability of UUID");
+        //log.debug("Checking availability of UUID");
+        log.info("Checking availability of UUID");
         return isAvailable;
     }
 }
