@@ -104,37 +104,6 @@ fi
 # note that the env dir is not configurable; it is defined as "env" under home
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
-DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
-touch "$DIRECTOR_PROPERTIES_FILE"
-chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
-chmod 600 "$DIRECTOR_PROPERTIES_FILE"
-
-DIRECTOR_INSTALL_LOG_FILE="$DIRECTOR_LOGS/director_install.log"
-touch "$DIRECTOR_INSTALL_LOG_FILE"
-chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_INSTALL_LOG_FILE"
-chmod 600 "$DIRECTOR_INSTALL_LOG_FILE"
-
-# load existing environment; set variables will take precendence
-load_director_conf
-load_director_defaults
-
-prompt_with_default USERNAME "Director Username:" "$USERNAME"
-prompt_with_default_password PASSWORD "Director Password:" "$PASSWORD"
-prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
-prompt_with_default MYSTERYHILL_KEY_NAME "Mystery Hill Key Name:" "$MYSTERYHILL_KEY_NAME"
-prompt_with_default MYSTERYHILL_KEYSTORE "Mystery Hill Keystore:" "$MYSTERYHILL_KEYSTORE"
-prompt_with_default_password MYSTERYHILL_KEYSTORE_PASSWORD "Mystery Hill Keystore Password:" "$MYSTERYHILL_KEYSTORE_PASSWORD"
-prompt_with_default_password MYSTERYHILL_TLS_SSL_PASSWORD "Mystery Hill TLS Password:" "$MYSTERYHILL_TLS_SSL_PASSWORD"
-prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
-prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
-prompt_with_default MTWILSON_SERVER_IP "Mtwilson Server IP:" "$MTWILSON_SERVER_IP"
-prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
-prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
-prompt_with_default GLANCE_SERVER "Glance Server:" "$GLANCE_SERVER"
-prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
-prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
-prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
-
 director_backup_configuration() {
   if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
     datestr=`date +%Y%m%d.%H%M`
@@ -170,7 +139,6 @@ for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_ENV $DIRECTOR_
   chmod 700 $directory
 done
 
-
 # store directory layout in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_HOME=$DIRECTOR_HOME" >> $DIRECTOR_ENV/director-layout
@@ -193,6 +161,37 @@ do
   eval env_file_var_value="\$$env_file_var_name"
   echo "export $env_file_var_name=$env_file_var_value" >> $DIRECTOR_ENV/director-setup
 done
+
+DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
+touch "$DIRECTOR_PROPERTIES_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
+chmod 600 "$DIRECTOR_PROPERTIES_FILE"
+
+DIRECTOR_INSTALL_LOG_FILE="$DIRECTOR_LOGS/director_install.log"
+touch "$DIRECTOR_INSTALL_LOG_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_INSTALL_LOG_FILE"
+chmod 600 "$DIRECTOR_INSTALL_LOG_FILE"
+
+# load existing environment; set variables will take precendence
+load_director_conf
+load_director_defaults
+
+prompt_with_default USERNAME "Director Username:" "$USERNAME"
+prompt_with_default_password PASSWORD "Director Password:" "$PASSWORD"
+prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
+prompt_with_default MYSTERYHILL_KEY_NAME "Mystery Hill Key Name:" "$MYSTERYHILL_KEY_NAME"
+prompt_with_default MYSTERYHILL_KEYSTORE "Mystery Hill Keystore:" "$MYSTERYHILL_KEYSTORE"
+prompt_with_default_password MYSTERYHILL_KEYSTORE_PASSWORD "Mystery Hill Keystore Password:" "$MYSTERYHILL_KEYSTORE_PASSWORD"
+prompt_with_default_password MYSTERYHILL_TLS_SSL_PASSWORD "Mystery Hill TLS Password:" "$MYSTERYHILL_TLS_SSL_PASSWORD"
+prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
+prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
+prompt_with_default MTWILSON_SERVER_IP "Mtwilson Server IP:" "$MTWILSON_SERVER_IP"
+prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
+prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
+prompt_with_default GLANCE_SERVER "Glance Server:" "$GLANCE_SERVER"
+prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
+prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
+prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
