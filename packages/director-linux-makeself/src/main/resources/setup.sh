@@ -103,6 +103,8 @@ fi
 
 # note that the env dir is not configurable; it is defined as "env" under home
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
+export DIRECTOR_JAVA=$DIRECTOR_HOME/java
+export DIRECTOR_BIN=$DIRECTOR_HOME/bin
 
 director_backup_configuration() {
   if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
@@ -258,24 +260,24 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ]; then
     echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
-    echo 'To generate a new master password, run the following command:
-
-  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
-
-The master password must be stored in a safe place, and it must
-be exported in the environment for all other director commands to work.
-
-LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
-
-After you set DIRECTOR_PASSWORD, run the following command to complete installation:
-
-  director setup
-
-'
+#    echo 'To generate a new master password, run the following command:
+#
+#  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
+#
+#The master password must be stored in a safe place, and it must
+#be exported in the environment for all other director commands to work.
+#
+#LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
+#
+#After you set DIRECTOR_PASSWORD, run the following command to complete installation:
+#
+#  director setup
+#
+#'
     exit 1
   fi
 
-  director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-'mtwilson,director'}" >/dev/null
+  director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
   director setup
 fi
 
@@ -291,4 +293,3 @@ done
 # start the server, unless the NOSETUP variable is defined
 #if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"
-
