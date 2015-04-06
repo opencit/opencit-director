@@ -260,20 +260,20 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ]; then
     echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
-#    echo 'To generate a new master password, run the following command:
-#
-#  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
-#
-#The master password must be stored in a safe place, and it must
-#be exported in the environment for all other director commands to work.
-#
-#LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
-#
-#After you set DIRECTOR_PASSWORD, run the following command to complete installation:
-#
-#  director setup
-#
-#'
+    echo 'To generate a new master password, run the following command:
+
+  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
+
+The master password must be stored in a safe place, and it must
+be exported in the environment for all other director commands to work.
+
+LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
+
+After you set DIRECTOR_PASSWORD, run the following command to complete installation:
+
+  director setup
+
+'
     exit 1
   fi
 
@@ -286,7 +286,6 @@ rm -f $DIRECTOR_ENV/director-setup
 
 # ensure the director owns all the content created during setup
 for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_JAVA $DIRECTOR_BIN $DIRECTOR_ENV $DIRECTOR_REPOSITORY $DIRECTOR_LOGS; do
-for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_ENV $DIRECTOR_REPOSITORY $DIRECTOR_LOGS; do
   chown -R $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $directory
 done
 
