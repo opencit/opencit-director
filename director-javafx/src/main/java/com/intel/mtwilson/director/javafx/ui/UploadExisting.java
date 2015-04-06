@@ -204,12 +204,12 @@ public class UploadExisting {
             public void handle(ActionEvent t) {
                 try {
                 //Generate the Manifest, encrypt the image
-                String manifestFileLocation = manifestPathTField.getText();
-                String imagePathLocation=imagePathTField.getText();
+                String trustPolicyLocation = manifestPathTField.getText();
+                String imageLocation=imagePathTField.getText();
                 
                 //Upload to the Glance
                     String message;
-                    message = UploadNow(manifestFileLocation);
+                    message = UploadNow(trustPolicyLocation, imageLocation);
                 showUploadSuccessMessage(uploadExistingStage, message);
                 } catch (ImageStoreException ex) {
                     Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
@@ -237,26 +237,34 @@ public class UploadExisting {
         uploadExistingStage.show(); 
       }
     
-    
-    private String UploadNow(String manifestFileLocation) throws ImageStoreException{
-        Map<String, String> customerInfo = writeToMap();
-                String message="";
-            try{
-                UserConfirmation userObj=new UserConfirmation();
+       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException {
+        String message = "";
+        try {
+
             IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
-                      boolean isEncrypted = (Boolean)null;
-                     System.out.println("PSDebug Encrypted and saved the manifest and the image to upload NOW");
-                     System.out.println("PSDebug Image Loc is" + imagePathTField.getText());
-            message=imageStoreObj.uploadImage(imagePathTField.getText(), null);
-                    System.out.println("PSDebug Upload done");
-                    showUploadSuccessMessage(uploadExistingStage, message);
-            
-        }catch(NullPointerException e){
+            String tarballLocation = new UserConfirmation().createImageTrustPolicyTar(trustPolicyLocation, imageLocation);
+            String imageGlanceID = imageStoreObj.uploadImage(tarballLocation, null);
+
+            if (imageGlanceID == null) {
+                message = "Failed to upload the Image to Glance .... Exiting";
+                showUploadSuccessMessage(uploadExistingStage, message);
+                System.exit(1);
+            }
+
+            boolean isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mtwilson_trustpolicy_location", "glance_image_tar");
+            if (!isSuccess) {
+                message = "Failed to update the Glance Image property .... Exiting";
+                showUploadSuccessMessage(uploadExistingStage, message);
+                System.exit(1);
+            }
+
+
+        } catch (NullPointerException e) {
             throw new ImageStoreException(e);
         }
-            return message;
+        return message;
     }
-    
+
     //Show the Target location and Manifest location
     private void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
         //primaryStage.setTitle("Upload Success Message");
