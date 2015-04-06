@@ -20,7 +20,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 
 /**
  *
@@ -143,8 +142,6 @@ public class LocalSystem {
     private Map<String, String> hostWriteToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
-        FileUtilityOperation opt = new FileUtilityOperation();
-
         if (isProper) {
             customerInfo.put(Constants.POLICY_TYPE, togBoxMeasure.getSelectedToggle().getUserData().toString());
             customerInfo.put((Constants.BARE_METAL_LOCAL), "true");

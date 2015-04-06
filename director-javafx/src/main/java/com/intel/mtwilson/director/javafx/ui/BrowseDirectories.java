@@ -5,7 +5,7 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
-import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
+import com.intel.mtwilson.director.javafx.utils.KmsUtil;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import java.io.File;
@@ -177,15 +177,15 @@ public class BrowseDirectories {
         hBox2.setPadding(new Insets(15, 12, 15, 12));
         hBox2.setSpacing(155);
         hBox2.setStyle("-fx-background-color: #336699;");
-        Button browse = new Button("Add more");
-        browse.setPrefSize(100, 20);
+        Button addMore = new Button("Add more");
+        addMore.setPrefSize(100, 20);
         Button next = new Button("Next");
         //hash.setPrefSize(100, 20);
-        hBox2.getChildren().add(browse);
+        hBox2.getChildren().add(addMore);
         hBox2.getChildren().add(next);
         
         //Add handler to "Add more" button
-        browse.setOnAction(new EventHandler<ActionEvent>() {
+        addMore.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
                 DirectoryChooser directory = new DirectoryChooser();
@@ -276,12 +276,14 @@ public class BrowseDirectories {
                     if (!isBareMetalLocal && !isBareMetalRemote) {
                         //Encrypt image 
                         if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-                            MHUtilityOperation mhUtil = new MHUtilityOperation();
-                            String message = mhUtil.encryptImage(confInfo);
-                            if (message != null) {
-                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
+                            KmsUtil mhUtil = new KmsUtil();
+                            try {
+                                mhUtil.encryptImage(confInfo);
+                            } catch (Exception ex) {
+                                log.error("Can not enrypt image {}",ex.getMessage());
+                                new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
                                 System.exit(1);
-                            }
+                            }                            
                             trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
                         }  
                         //sign trustpolicy with MTW and save it to a file
