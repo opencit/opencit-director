@@ -7,8 +7,11 @@ import com.intel.mtwilson.director.javafx.utils.IImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 import java.io.File;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -229,7 +232,7 @@ public class UserConfirmation {
         
     }
     
-    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String manifestLocation, Stage primaryStage) throws ImageStoreException {
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws ImageStoreException {
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
@@ -377,61 +380,113 @@ public class UserConfirmation {
             imageProperties.put("Kernel ID", kernelGlanceID);
             imageProperties.put("Initrd ID", initrdGlanceID);
         }
-        
+       
         //Upload image to glance
         String imageGlanceID = null;
-        if(isEncrypted) {
-            imageGlanceID = imageStoreObj.uploadImage(confInfo.get("EncImage Location"), imageProperties);
-            if(imageGlanceID == null) {
-                String message = "Failed to upload the Image to Glance .... Exiting";
-                showUploadSuccessMessage(primaryStage, message);
-                System.exit(1);
-            }
-            
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_encrypted", "true");            
-            if(!isSuccess) {
-                String message = "Failed to update the Glance Image property .... Exiting";
-                showUploadSuccessMessage(primaryStage, message);
-                System.exit(1);                
-            }
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("Image Location"))));
-            if(!isSuccess) {
-                String message = "Failed to update the Glance Image property .... Exiting";
-                showUploadSuccessMessage(primaryStage, message);
-                System.exit(1);                
-            }
-            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_IMG));
-            if(!isSuccess) {
-                String message = "Failed to update the Glance Image property .... Exiting";
-                showUploadSuccessMessage(primaryStage, message);
-                System.exit(1);                
-            }
+        String imageLocation;
+        if (confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+            imageLocation = confInfo.get(Constants.Enc_IMAGE_LOCATION);
         } else {
-            imageGlanceID = imageStoreObj.uploadImage(confInfo.get("Image Location"), imageProperties);
-            log.debug("glance ID is" + imageGlanceID);
-            if(imageGlanceID == null) {
-                String message = "Failed to upload the Image to Glance .... Exiting";
-                showUploadSuccessMessage(primaryStage, message);
-                System.exit(1);
-            }            
+            imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
         }
-        log.debug("PSDebug manifestLoca is" + manifestLocation);
-        String manifestGlanceID = imageStoreObj.uploadTrustPolicy(manifestLocation);
-        if(manifestGlanceID == null) {
-            String message = "Failed to upload the Manifest to Glance .... Exiting";
+        String tarballLocation = null;
+        try{
+        tarballLocation = createImageTrustPolicyTar(trustPolicyLocation, imageLocation);
+        imageGlanceID = imageStoreObj.uploadImage(tarballLocation, imageProperties);
+
+        if (imageGlanceID == null) {
+            String message = "Failed to upload the Image to Glance .... Exiting";
             showUploadSuccessMessage(primaryStage, message);
             System.exit(1);
         }
-        isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-manifest_uuid", manifestGlanceID);
-        if(!isSuccess) {
+
+        isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mtwilson_trustpolicy_location", "glance_image_tar");
+        if (!isSuccess) {
             String message = "Failed to update the Glance Image property .... Exiting";
             showUploadSuccessMessage(primaryStage, message);
             System.exit(1);                
         }
-        String message = "VM Image Uploaded to glance with Manifest file" 
-                + "\n\n" + "Image Glance ID is : " + imageGlanceID + "\n\n" + "Manifest Glance ID is : " 
-                + manifestGlanceID;  
+        }catch(Exception e){
+            
+        }
+        finally{
+            executeShellCommand("rm "+tarballLocation);
+        }
+            
+            
+//            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_encrypted", "true");            
+//            if(!isSuccess) {
+//                String message = "Failed to update the Glance Image property .... Exiting";
+//                showUploadSuccessMessage(primaryStage, message);
+//                System.exit(1);                
+//            }
+//            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_checksum", new GenerateTrustPolicy().computeHash(md, new File(confInfo.get("Image Location"))));
+//            if(!isSuccess) {
+//                String message = "Failed to update the Glance Image property .... Exiting";
+//                showUploadSuccessMessage(primaryStage, message);
+//                System.exit(1);                
+//            }
+//            isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mh_dek_url", confInfo.get(Constants.MH_DEK_URL_IMG));
+//            if(!isSuccess) {
+//                String message = "Failed to update the Glance Image property .... Exiting";
+//                showUploadSuccessMessage(primaryStage, message);
+//                System.exit(1);                
+//            }
+//        } else {
+//            imageGlanceID = imageStoreObj.uploadImage(confInfo.get("Image Location"), imageProperties);
+////            System.out.println("PSDebug glance ID" + imageGlanceID);
+//            if(imageGlanceID == null) {
+//                String message = "Failed to upload the Image to Glance .... Exiting";
+//                showUploadSuccessMessage(primaryStage, message);
+//                System.exit(1);
+//            }            
+//        }
+//        System.out.println("PSDebug manifestLoca is" + trustPolicyLocation);
+        //String manifestGlanceID = imageStoreObj.uploadTrustPolicy(trustPolicyLocation);
+//        if(manifestGlanceID == null) {
+//            String message = "Failed to upload the Manifest to Glance .... Exiting";
+//            showUploadSuccessMessage(primaryStage, message);
+//            System.exit(1);
+//        }
+//        isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-manifest_uuid", manifestGlanceID);
+//        if(!isSuccess) {
+//            String message = "Failed to update the Glance Image property .... Exiting";
+//            showUploadSuccessMessage(primaryStage, message);
+//            System.exit(1);                
+//        }
+        String message = "VM Image and TrustPolicy are uploaded together as a tar ball" 
+                + "\n\n" + "Image Glance ID is : " + imageGlanceID + "\n\n" ;  
         return message;
+    }
+  
+    //Assumption trustpolicy and image location is same
+    public String createImageTrustPolicyTar(String trustPolicyLocation, String imageLocation) {
+        String imagePathDelimiter = "/";
+
+        String imageTPDir = trustPolicyLocation.substring(0, trustPolicyLocation.lastIndexOf(imagePathDelimiter));
+        log.debug("ImageTP directory is:" + imageTPDir);
+        GenerateTrustPolicy genrateTP = new GenerateTrustPolicy();
+        log.debug(genrateTP.executeShellCommand("cd " + imageTPDir));
+        log.debug(genrateTP.executeShellCommand("pwd "));
+        String imageName = imageLocation.substring(imageLocation.lastIndexOf(imagePathDelimiter) + 1);
+        String trustpolicyName = trustPolicyLocation.substring(trustPolicyLocation.lastIndexOf(imagePathDelimiter) + 1);
+        log.debug("image and TP name:" + imageName + " " + trustpolicyName);
+        String tarName = imageName + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
+        log.debug(genrateTP.executeShellCommand("tar -cf " + imageTPDir + imagePathDelimiter + tarName + " -C " + imageTPDir + " " + imageName + " " + trustpolicyName));
+        return imageTPDir + imagePathDelimiter + tarName;
+    }
+
+    public void executeShellCommand(String cmd) {
+        log.debug("Command to execute is:" + cmd);
+        try {
+            Process p;
+            p = Runtime.getRuntime().exec(cmd);
+            p.waitFor();
+        } catch (IOException ex) {
+            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     // Generates random UUID
