@@ -19,7 +19,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 
 /**
@@ -142,7 +141,6 @@ public class RemoteSystem {
     private Map<String, String> hostWriteToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
-        FileUtilityOperation opt = new FileUtilityOperation();
 
         if (isProper) {
             customerInfo.put(Constants.remoteSystemIpAddress, ipAddressTField.getText().toString());

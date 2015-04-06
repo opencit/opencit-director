@@ -5,11 +5,8 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -55,7 +52,6 @@ public class ConfigurationInformation {
         }
         
         primaryStage.setTitle("Trust Director");
-        final FileUtilityOperation op = new FileUtilityOperation();
 	
         //PS:Label
 	Label imageType=new Label("Image Type");
@@ -302,7 +298,6 @@ public class ConfigurationInformation {
     private Map<String, String> hostWriteToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
-        FileUtilityOperation opt = new FileUtilityOperation();
          
         if(isProper) {
           customerInfo.put((Constants.BARE_METAL_LOCAL),"true");

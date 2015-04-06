@@ -9,6 +9,7 @@ import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.IImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
+import static java.awt.Color.red;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,28 +34,30 @@ import javafx.stage.Stage;
  *
  * @author preetisr
  */
-public class UploadExisting {
+public class UploadExisting {    
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UploadExisting.class);
-    private final Stage uploadExistingStage;
+    private final Stage uploadExistingStage;    
     private TextField imagePathTField;
     private TextField imageNameTField;
     private TextField manifestPathTField;
-    private final ToggleGroup togBoxMeasure = new ToggleGroup();
+    private final ToggleGroup togBoxMeasure=new ToggleGroup();
     private ConfigProperties configProperties;
-
+    
     String hostManifest;
-
+    
     public UploadExisting(Stage uploadExistingStage) {
         this.uploadExistingStage = uploadExistingStage;
         configProperties = new ConfigProperties();;
     }
 
+    
     // Return the Stage
     public Stage getStage() {
         return this.uploadExistingStage;
     }
-
+    
+    
     public void launch() {
 //                
         // Check for the Host Manifest
@@ -64,7 +67,7 @@ public class UploadExisting {
                 hostManifest = hostManifest.trim();
             }
         } catch (NullPointerException npe) {
-            log.error(null, npe);
+            log.debug("Host manifest value not set in configuration file.", npe);
         }
 
         uploadExistingStage.setTitle("Upload Existing image");
@@ -73,64 +76,65 @@ public class UploadExisting {
 //        
 //        
         //PS: New label for Create Image window
-        Label imagePath = new Label("Image Path");
+        Label imagePath=new Label("Image Path");
         Label imageName = new Label("Image Name");
         Label manifestPath = new Label("Trust Policy path");
-
+        
         imagePathTField = new TextField();
         imageNameTField = new TextField();
-        manifestPathTField = new TextField();
+        manifestPathTField=new TextField();
 
         Button browseImage = new Button("Browse");
         browseImage.setPrefSize(80, 15);
         Tooltip toolTip = new Tooltip();
         toolTip.setText("For ami and vhd image format, provide the tar bundled image");
         browseImage.setTooltip(toolTip);
-
+        
         final Button browseManifest = new Button("Browse");
         browseManifest.setPrefSize(80, 15);
         Tooltip toolTipManifest = new Tooltip();
         toolTipManifest.setText("Browse the manifest files");
         browseManifest.setTooltip(toolTipManifest);
 //        
-        Button uploadButton = new Button("Upload");
+        Button uploadButton=new Button("Upload");
         Button cancelButton = new Button("Cancel");
         cancelButton.setPrefSize(80, 15);
-
+      
         VBox vBox = new VBox();
-
+  
         final GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(30, 15, 30, 15));
-
-        grid.add(imageName, 0, 1);
-        grid.add(imageNameTField, 1, 1);
-
+        grid.setPadding(new Insets(30, 15,30, 15));
+        
+        grid.add(imageName, 0,1);
+        grid.add(imageNameTField, 1,1);
+        
         final HBox imagePathHBox = new HBox();
         imagePathHBox.setPadding(new Insets(3, 0, 5, 0));
         imagePathHBox.setSpacing(10);
         imagePathHBox.getChildren().addAll(imagePathTField, browseImage);
-        grid.add(imagePath, 0, 2);
-        grid.add(imagePathHBox, 1, 2);
-
+        grid.add(imagePath,0,2);
+        grid.add(imagePathHBox, 1,2);
+        
         final HBox manifestPathHBox = new HBox();
         manifestPathHBox.setPadding(new Insets(3, 0, 5, 0));
         manifestPathHBox.setSpacing(10);
         manifestPathHBox.getChildren().addAll(manifestPathTField, browseManifest);
         grid.add(manifestPath, 0, 3);
-        grid.add(manifestPathHBox, 1, 3);
-
+        grid.add(manifestPathHBox, 1,3);
+  
         HBox hBox4 = new HBox();
         hBox4.setPadding(new Insets(10, 12, 10, 12));
         hBox4.setSpacing(30);
         hBox4.setStyle("-fx-background-color: #336699;");
         hBox4.getChildren().add(uploadButton);
         hBox4.getChildren().add(cancelButton);
-
-        vBox.getChildren().addAll(grid, hBox4);
-
-        // Handler for 'Browse' for Trust Policy Path button, browse the vm image
+        
+        
+        vBox.getChildren().addAll(grid,hBox4);
+     
+	// Handler for 'Browse' for Trust Policy Path button, browse the vm image
         browseImage.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -140,12 +144,12 @@ public class UploadExisting {
                 try {
                     File file = imageFile.showOpenDialog(uploadExistingStage);
                     imagePathTField.setText(file.getAbsolutePath());
-                } catch (Exception ex) {
-                    log.error(null, ex);
+                } catch(Exception e) {
+                    log.debug("Not selected anything");
                 }
             }
         });
-
+       
         // Handler for 'Browse' for Image Path button, browse the vm image
         browseManifest.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -156,44 +160,44 @@ public class UploadExisting {
                 try {
                     File file = manifestFile.showOpenDialog(uploadExistingStage);
                     manifestPathTField.setText(file.getAbsolutePath());
-                } catch (Exception ex) {
-                    log.error(null, ex);
+                } catch(Exception e) {
+                    log.debug("Not selected anything");
                 }
             }
         });
-
-        // Handler for "Cancel" button
+        
+         // Handler for "Cancel" button
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent arg0) {
                 // Will close the window
                 uploadExistingStage.close();
-
+                
             }
-        });
-
+        });     
+        
         //Upload button
         uploadButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent t) {
                 try {
-                    //Generate the Manifest, encrypt the image
-                    String manifestFileLocation = manifestPathTField.getText();
-                    String imagePathLocation = imagePathTField.getText();
-
-                    //Upload to the Glance
+                //Generate the Manifest, encrypt the image
+                String trustPolicyLocation = manifestPathTField.getText();
+                String imageLocation=imagePathTField.getText();
+                
+                //Upload to the Glance
                     String message;
-                    message = UploadNow(manifestFileLocation);
-                    showUploadSuccessMessage(uploadExistingStage, message);
+                    message = UploadNow(trustPolicyLocation, imageLocation);
+                showUploadSuccessMessage(uploadExistingStage, message);
                 } catch (ImageStoreException ex) {
                     Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
+                
             }
         });
-
+        
         // Handler for "Cancel" button
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -201,30 +205,39 @@ public class UploadExisting {
             public void handle(ActionEvent arg0) {
                 // Will close the window
                 uploadExistingStage.close();
-
+                
             }
         });
-
+  
         StackPane root = new StackPane();
         root.getChildren().add(vBox);
         Scene scene = new Scene(root);
         //scene.setFill(Color.AQUA);
         uploadExistingStage.setScene(scene);
-        uploadExistingStage.show();
-    }
-
-    private String UploadNow(String manifestFileLocation) throws ImageStoreException {
-        Map<String, String> customerInfo = writeToMap();
+        uploadExistingStage.show(); 
+      }
+    
+       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException {
         String message = "";
         try {
-            UserConfirmation userObj = new UserConfirmation();
+
             IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
-            boolean isEncrypted = (Boolean) null;
-            log.debug("Encrypted and saved the manifest and the image to upload NOW");
-            log.debug("Image Loc is" + imagePathTField.getText());
-            message = imageStoreObj.uploadImage(imagePathTField.getText(), null);
-            log.debug("Upload done");
-            showUploadSuccessMessage(uploadExistingStage, message);
+            String tarballLocation = new UserConfirmation().createImageTrustPolicyTar(trustPolicyLocation, imageLocation);
+            String imageGlanceID = imageStoreObj.uploadImage(tarballLocation, null);
+
+            if (imageGlanceID == null) {
+                message = "Failed to upload the Image to Glance .... Exiting";
+                showUploadSuccessMessage(uploadExistingStage, message);
+                System.exit(1);
+            }
+
+            boolean isSuccess = imageStoreObj.updateImageProperty(imageGlanceID, "x-image-meta-property-mtwilson_trustpolicy_location", "glance_image_tar");
+            if (!isSuccess) {
+                message = "Failed to update the Glance Image property .... Exiting";
+                showUploadSuccessMessage(uploadExistingStage, message);
+                System.exit(1);
+            }
+
 
         } catch (NullPointerException e) {
             throw new ImageStoreException(e);
@@ -238,16 +251,16 @@ public class UploadExisting {
         //String info = "Manifest Uploaded on glance " + "\n" + "Manifest Glance ID is : " + manifestGlanceID;;
         Label message = new Label(messageInfo);
         message.setFont(new Font("Arial", 14));
-
+        
         Button okButton = new Button("Ok");
         okButton.setPrefSize(80, 20);
-
+        
         VBox vbox = new VBox();
         vbox.setSpacing(30);
         vbox.setPadding(new Insets(15, 12, 15, 12));
-
+        
         vbox.getChildren().addAll(message, okButton);
-
+        
         okButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -261,13 +274,14 @@ public class UploadExisting {
         root.getChildren().add(vbox);
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
-        primaryStage.show();
-
+        primaryStage.show();         
+        
     }
-
+    
+    
     // Show the warning messages
     public void showWarningPopup(String warnMessage) {
-
+        
         Text message = new Text(warnMessage);
         message.setFont(new Font("Arial", 14));
         Button okButton = new Button("Ok");
@@ -282,33 +296,33 @@ public class UploadExisting {
         popup.setY(250);
         Stage stage = new Stage();
         popup.getContent().addAll(vbox);
-
+        
         popup.show(uploadExistingStage);
-
+        
         okButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent arg0) {
                 popup.hide();
             }
-        });
+        }); 
     }
-
+    
     // Store configuration values in hash map
     private Map<String, String> writeToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
         FileUtilityOperation opt = new FileUtilityOperation();
-        if (("".equals(manifestPathTField.getText())) || ("".equals(imagePathTField.getText())) || ("".equals(imageNameTField.getText()))) {
+        if(("".equals(manifestPathTField.getText())) || ("".equals(imagePathTField.getText())) || ("".equals(imageNameTField.getText()))) {
 //            showWarningPopup("Some fields are Empty .. Please fill the Values");
             isProper = false;
-        } else if (!opt.validateUUID(manifestPathTField.getText())) {
+        } else if(!opt.validateUUID(manifestPathTField.getText())){
 //            showWarningPopup("Please provide the valid image ID");
             isProper = false;
-        }
-        if (isProper) {
+        }           
+        if(isProper) {
             customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
-            customerInfo.put(Constants.TRUST_POLICY_LOCATION, manifestPathTField.getText());
+            customerInfo.put(Constants.TRUST_POLICY_LOCATION , manifestPathTField.getText());
             customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
         } else {
             return null;
@@ -316,3 +330,4 @@ public class UploadExisting {
         return customerInfo;
     }
 }
+    

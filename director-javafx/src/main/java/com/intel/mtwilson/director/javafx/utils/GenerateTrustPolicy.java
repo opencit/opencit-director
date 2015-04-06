@@ -50,6 +50,7 @@ public class GenerateTrustPolicy {
         mountPath = Constants.MOUNT_PATH;
     }
     
+    //Creates trust policy for baremetal
     public String createManifest(List<Directories> directories, Map<String, String> configInfo){
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
@@ -117,7 +118,7 @@ public class GenerateTrustPolicy {
         return result;
     }
     
-    
+    //Creates trust policy for VM
     public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo){
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
@@ -174,7 +175,6 @@ public class GenerateTrustPolicy {
             //set digest algorithm
             switch (configProperties.getProperty(Constants.HASH_TYPE)) {
                 case "SHA-256":
-                    digestSha256 = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0});
                     md = MessageDigest.getInstance("SHA-256");
                     whitelist.setDigestAlg("sha256");
                     imageHash.setDigestAlg("sha256");
