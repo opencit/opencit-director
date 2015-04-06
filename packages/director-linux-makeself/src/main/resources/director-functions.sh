@@ -68,23 +68,23 @@ load_director_defaults() {
 }
 
 director_java_install() {
-  INSTALL_LOG_FILE=${INSTALL_LOG_FILE:-"/var/log/director/director_install.log"}
-  java_clear; java_detect 2>&1 >> $INSTALL_LOG_FILE
+  DIRECTOR_INSTALL_LOG_FILE=${DIRECTOR_INSTALL_LOG_FILE:-"/var/log/director/director_install.log"}
+  java_clear; java_detect 2>&1 >> $DIRECTOR_INSTALL_LOG_FILE
   JAVA_PACKAGE=$(ls -1d jdk*)
   if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
     echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
     return 1
   fi
   javafile=$JAVA_PACKAGE
-  echo "Installing $javafile" >> $INSTALL_LOG_FILE
+  echo "Installing $javafile" >> $DIRECTOR_INSTALL_LOG_FILE
   is_targz=$(echo $javafile | grep -E ".tar.gz$|.tgz$")
   is_gzip=$(echo $javafile | grep ".gz$")
   is_bin=$(echo $javafile | grep ".bin$")
   javaname=$(echo $javafile | awk -F . '{ print $1 }')
   if [ -n "$is_targz" ]; then
-    tar xzvf $javafile 2>&1 >> $INSTALL_LOG_FILE
+    tar xzvf $javafile 2>&1 >> $DIRECTOR_INSTALL_LOG_FILE
   elif [ -n "$is_gzip" ]; then
-    gunzip $javafile 2>&1 >/dev/null >> $INSTALL_LOG_FILE
+    gunzip $javafile 2>&1 >/dev/null >> $DIRECTOR_INSTALL_LOG_FILE
     chmod +x $javaname
     ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
   elif [ -n "$is_bin" ]; then
@@ -117,10 +117,10 @@ director_java_install() {
   ln -s "$JAVA_HOME/jre/bin/java" "/usr/bin/java"
   ln -s "$JAVA_HOME/jre/bin/keytool" "/usr/bin/keytool"
 
-  java_detect 2>&1 >> $INSTALL_LOG_FILE
+  java_detect 2>&1 >> $DIRECTOR_INSTALL_LOG_FILE
   if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
-    echo_failure "Unable to auto-install Java" | tee -a $INSTALL_LOG_FILE
-    echo "  Java download URL:"                >> $INSTALL_LOG_FILE
-    echo "  http://www.java.com/en/download/"  >> $INSTALL_LOG_FILE
+    echo_failure "Unable to auto-install Java" | tee -a $DIRECTOR_INSTALL_LOG_FILE
+    echo "  Java download URL:"                >> $DIRECTOR_INSTALL_LOG_FILE
+    echo "  http://www.java.com/en/download/"  >> $DIRECTOR_INSTALL_LOG_FILE
   fi
 }

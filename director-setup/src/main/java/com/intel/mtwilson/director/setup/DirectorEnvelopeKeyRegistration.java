@@ -142,10 +142,18 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             user = users.findUserByUsername(kmsLoginBasicUsername);
 
             if (user == null) {
+                //log.warn("KMS API user does not exist");
                 validation("KMS API user does not exist");
             }
-            if ( ! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded()) ) {
-                validation("Director envelope public key does not match the KMS user public key");
+            if (directorEnvelopePublicKey == null || directorEnvelopePublicKey.getEncoded() == null) {
+                log.error("New envelope public key is null");
+                validation("New envelope public key is null");
+            } else if (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null) {
+                //log.warn("Existing envelope public key is null");
+                validation("Existing envelope public key is null");
+            } else if (! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded())) {
+                log.warn("New director envelope public key does not match the existing KMS user public key");
+                validation("New director envelope public key does not match the existing KMS user public key");
             }   
         } catch (Exception e) {
             log.error("Attempt to retreive user from the KMS failed: {}", e.getMessage());
