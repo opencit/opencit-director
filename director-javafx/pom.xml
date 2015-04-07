@@ -176,6 +176,10 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
         </dependency>
         <dependency>
@@ -190,10 +194,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-client-jaxrs2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
         </dependency>
     </dependencies>
 </project>
