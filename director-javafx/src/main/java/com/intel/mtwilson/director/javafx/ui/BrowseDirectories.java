@@ -280,7 +280,7 @@ public class BrowseDirectories {
                             try {
                                 mhUtil.encryptImage(confInfo);
                             } catch (Exception ex) {
-                                log.error("Can not enrypt image {}",ex.getMessage());
+                                log.error("Can not encrypt image, {}",ex);
                                 new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
                                 System.exit(1);
                             }                            

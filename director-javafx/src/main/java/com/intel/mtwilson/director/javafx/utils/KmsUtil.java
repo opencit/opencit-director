@@ -114,7 +114,7 @@ public class KmsUtil {
         String kmsEndpointUrl;
         String kmsTlsPolicyCertificateSha1;
         String kmsLoginBasicUsername;
-        String kmsLoginBasicPassword = null;
+        String kmsLoginBasicPassword ;
         Keys keys ;
 
         //Get director envelope key
@@ -181,14 +181,17 @@ public class KmsUtil {
         
         try(PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
             if( passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
-                kmsLoginBasicPassword = passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toString();
+                kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
             }
+            else 
+                kmsLoginBasicPassword = null;
         }
-        kmsLoginBasicPassword = getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD, kmsLoginBasicPassword);
+//        kmsLoginBasicPassword = getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD, kmsLoginBasicPassword);
         if( kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty() ) {
             throw new ConfigurationNotFoundException("KMS API password not configured");
         }
-        
+        log.debug("kmsLoginBasicPassword is::::::::::::::"+kmsLoginBasicPassword.toString());
+        log.debug("kmsLoginBasicUsername is::::::::::::::"+kmsLoginBasicUsername);
         // create KMS Keys API client
         Properties properties = new Properties();
         properties.setProperty("endpoint.url", kmsEndpointUrl);
