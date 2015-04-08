@@ -13,7 +13,7 @@ import com.intel.mtwilson.director.javafx.ui.Constants;
  */
 public class ImageStoreUtil {
 
-    public static IImageStore getImageStore(){
+    public static ImageStore getImageStore(){
         ConfigProperties configProperties=new ConfigProperties();
         String imageStore = configProperties.getProperty(Constants.IMAGE_STORE_TYPE);
         switch(imageStore){

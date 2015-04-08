@@ -31,7 +31,7 @@ import org.json.JSONObject;
  *
  * @author root
  */
-public class GlanceImageStoreImpl implements IImageStore {
+public class GlanceImageStoreImpl implements ImageStore {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlanceImageStoreImpl.class);
     private ConfigProperties configProperties;

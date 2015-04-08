@@ -6,7 +6,7 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.IImageStore;
+import com.intel.mtwilson.director.javafx.utils.ImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 import static java.awt.Color.red;
@@ -221,7 +221,7 @@ public class UploadExisting {
         String message = "";
         try {
 
-            IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+            ImageStore imageStoreObj = ImageStoreUtil.getImageStore();
             String tarballLocation = new UserConfirmation().createImageTrustPolicyTar(trustPolicyLocation, imageLocation);
             String imageGlanceID = imageStoreObj.uploadImage(tarballLocation, null);
 
