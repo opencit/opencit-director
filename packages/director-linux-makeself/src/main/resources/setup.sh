@@ -28,6 +28,9 @@
 export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
 DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 
+# this variable is used in configuration/logback.xml
+export LOG_LEVEL=${LOG_LEVEL:-"INFO"}
+
 # the env directory is not configurable; it is defined as DIRECTOR_HOME/env and
 # the administrator may use a symlink if necessary to place it anywhere else
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
@@ -100,18 +103,17 @@ elif [ "$DIRECTOR_LAYOUT" == "home" ]; then
   export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
   export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
 fi
+export DIRECTOR_BIN=$DIRECTOR_HOME/bin
+export DIRECTOR_JAVA=$DIRECTOR_HOME/java
 
 # note that the env dir is not configurable; it is defined as "env" under home
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
-export DIRECTOR_JAVA=$DIRECTOR_HOME/java
-export DIRECTOR_BIN=$DIRECTOR_HOME/bin
 
 director_backup_configuration() {
   if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
     datestr=`date +%Y%m%d.%H%M`
     backupdir=/var/backup/director.configuration.$datestr
-    mkdir -p $backupdir
-    cp -r $DIRECTOR_CONFIGURATION/* $backupdir
+    cp -r $DIRECTOR_CONFIGURATION $backupdir
   fi
 }
 
@@ -119,12 +121,11 @@ director_backup_repository() {
   if [ -n "$DIRECTOR_REPOSITORY" ] && [ -d "$DIRECTOR_REPOSITORY" ]; then
     datestr=`date +%Y%m%d.%H%M`
     backupdir=/var/backup/director.repository.$datestr
-    mkdir -p $backupdir
-    cp -r $DIRECTOR_REPOSITORY/* $backupdir
+    cp -r $DIRECTOR_REPOSITORY $backupdir
   fi
 }
 
-# backup current configuration, if there is one
+# backup current configuration and data, if they exist
 director_backup_configuration
 director_backup_repository
 

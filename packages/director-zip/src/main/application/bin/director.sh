@@ -20,33 +20,46 @@
 DESC="DIRECTOR"
 NAME=director
 
+# the home directory must be defined before we load any environment or
+# configuration files; it is explicitly passed through the sudo command
+export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
+
+# the env directory is not configurable; it is defined as DIRECTOR_HOME/env and
+# the administrator may use a symlink if necessary to place it anywhere else
+export DIRECTOR_ENV=$DIRECTOR_HOME/env
+
+director_load_env() {
+  local env_files="$@"
+  local env_file_exports
+  for env_file in $env_files; do
+    if [ -n "$env_file" ] && [ -f "$env_file" ]; then
+      . $env_file
+      env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
+      if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
+    fi
+  done  
+}
+
+if [ -z "$DIRECTOR_USERNAME" ]; then
+  director_load_env $DIRECTOR_HOME/env/director-username
+fi
+
 ###################################################################################################
 
 # if non-root execution is specified, and we are currently root, start over; the DIRECTOR_SUDO variable limits this to one attempt
 # we make an exception for the uninstall command, which may require root access to delete users and certain directories
 if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$DIRECTOR_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $DIRECTOR_USERNAME DIRECTOR_HOME=$DIRECTOR_HOME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
+  sudo -u $DIRECTOR_USERNAME DIRECTOR_USERNAME=$DIRECTOR_USERNAME DIRECTOR_HOME=$DIRECTOR_HOME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
   exit $?
 fi
 
 ###################################################################################################
 
-# the home directory must be defined before we load any environment or
-# configuration files; it is explicitly passed through the sudo command
-export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
-
-# the env directory is not configurable; it is defined as DIRECTOR_HOME/env and the
-# administrator may use a symlink if necessary to place it anywhere else
-export DIRECTOR_ENV=$DIRECTOR_HOME/env
-
-# load environment variables (these may override the defaults set above)
+# load environment variables; these may override the defaults set above and 
+# also note that director-username file is loaded twice, once before sudo and
+# once here after sudo.
 if [ -d $DIRECTOR_ENV ]; then
-  DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
-  for env_file in $DIRECTOR_ENV_FILES; do
-    . $env_file
-    env_file_exports=$(cat $env_file | grep -E '^[A-Z0-9_]+\s*=' | cut -d = -f 1)
-    if [ -n "$env_file_exports" ]; then eval export $env_file_exports; fi
-  done
+  director_load_env $(ls -1 $DIRECTOR_ENV/*)
 fi
 
 # default directory layout follows the 'home' style
@@ -128,6 +141,12 @@ director_start() {
       return 1
     fi
 
+    # check if we're already running - don't start a second instance
+    if director_is_running; then
+      echo "Trust Director is running"
+      return 0
+    fi
+
     # check if we need to use authbind or if we can start java directly
     prog="java"
     if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
@@ -156,7 +175,7 @@ director_is_running() {
   DIRECTOR_PID=
   if [ -f $DIRECTOR_PID_FILE ]; then
     DIRECTOR_PID=$(cat $DIRECTOR_PID_FILE)
-    local is_running=`ps -eo pid | grep "^\s*${DIRECTOR_PID}$"`
+    local is_running=`ps -A -o pid | grep "^\s*${DIRECTOR_PID}$"`
     if [ -z "$is_running" ]; then
       # stale PID file
       DIRECTOR_PID=
@@ -164,7 +183,7 @@ director_is_running() {
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # check the process list just in case the pid file is stale
-    DIRECTOR_PID=$(ps wwx | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    DIRECTOR_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # Trust Director is not running
@@ -180,7 +199,10 @@ director_stop() {
     kill -9 $DIRECTOR_PID
     if [ $? ]; then
       echo "Stopped Trust Director"
-      rm $DIRECTOR_PID_FILE
+      # truncate pid file instead of erasing,
+      # because we may not have permission to create it
+      # if we're running as a non-root user
+      echo > $DIRECTOR_PID_FILE
     else
       echo "Failed to stop Trust Director"
     fi
