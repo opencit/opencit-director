@@ -413,7 +413,7 @@ public class CreateImage {
             customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
             customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
             customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString()); 
-            customerInfo.put(Constants.HASH_TYPE, hashTypeChoiceBox.getValue().toString());
+            customerInfo.put(Constants.VM_WHITELIST_HASH_TYPE, hashTypeChoiceBox.getValue().toString());
             customerInfo.put(Constants.POLICY_TYPE,togBoxMeasure.getSelectedToggle().getUserData().toString());
             if(encryptImage.isSelected()){
             customerInfo.put(Constants.IS_ENCRYPTED,"true");

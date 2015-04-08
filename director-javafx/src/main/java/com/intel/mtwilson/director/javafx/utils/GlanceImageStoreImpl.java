@@ -6,6 +6,7 @@
 
 package com.intel.mtwilson.director.javafx.utils;
 
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,11 +40,11 @@ public class GlanceImageStoreImpl implements IImageStore {
     private String password;
     private String tenantName;
     
-    public GlanceImageStoreImpl(){
+    public GlanceImageStoreImpl() throws IOException{
         configProperties=new ConfigProperties();
-    glanceIP = configProperties.getProperty(Constants.GLANCE_SERVER);
-    userName = configProperties.getProperty(Constants.USER_NAME);
-    password = configProperties.getProperty(Constants.PASSWORD);
+    glanceIP = getConfiguration().get(Constants.IMAGE_STORE_SERVER, null); //configProperties.getProperty(Constants.IMAGE_STORE_SERVER);
+    userName = configProperties.getProperty(Constants.IMAGE_STORE_USERNAME);
+    password = configProperties.getProperty(Constants.IMAGE_STORE_PASSWORD);
     tenantName = configProperties.getProperty(Constants.TENANT_NAME);
     
     }
