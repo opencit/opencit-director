@@ -18,8 +18,8 @@ import com.intel.mtwilson.director.javafx.ui.Constants;
  */
 public class MountVMImage {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MountVMImage.class);
-    private static final String mountScript = "/opt/trustdirector/bin/mount_vm_image.sh";
-    private static final String mountRemoteFileSystemScript="/opt/trustdirector/bin/mount_remote_system.sh";
+    private static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
+    private static final String mountRemoteFileSystemScript="/opt/director/bin/mount_remote_system.sh";
     
     public static int mountImage(String imagePath) {
         
@@ -76,7 +76,6 @@ public class MountVMImage {
             log.error(null, ex);
         }
         log.debug(output.toString());
-        new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
         log.trace("Exec command output : " + output.toString());
         return exitCode;
         

@@ -25,7 +25,7 @@ public class ConfigProperties {
     
     public static Properties prop;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigProperties.class);
-    private static final String filePath = "/opt/trustdirector/configuration/director.properties";
+    private static final String filePath = "/opt/director/configuration/director.properties";
     public ConfigProperties() {
         loadProperty();
     }

@@ -65,9 +65,7 @@ public class Constants {
     public static final String MH_KEY_NAME = "mysteryhill.key.name";
     
     public static final String MH_JAR_LOCATION = "MH_Jar_Location";
-    
-    public static final String EXEC_OUTPUT_FILE = "/opt/trustdirector/log/exec_output";
-    
+       
     public static final String KMS_SERVER = "kms.server";
     
     public static final String MH_DEK_URL_IMG = "MH Dek Url Image";
@@ -78,7 +76,7 @@ public class Constants {
     
     public static final String MTWILSON_USER_NAME = "mtwilson.username";
     public static final String MTWILSON_PASSWORD = "mtwilson.password";
-    public static final String EXCLUDE_FILE_NAME = "/opt/trustdirector/configuration/exclude-file-list";
+    public static final String EXCLUDE_FILE_NAME = "/opt/director/configuration/exclude-file-list";
     public static final String HOST_MANIFEST = "Host_Manifest";
     public static final String MH_KEYSTORE_PASSWD = "mysteryhill.keystore.password";
     public static final String MH_KEYSTORE_LOCATION = "mysteryhill.keystore";
