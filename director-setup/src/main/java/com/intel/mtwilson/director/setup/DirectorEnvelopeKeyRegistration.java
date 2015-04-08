@@ -112,12 +112,14 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             configuration("KMS API username not configured");
         }
         
-        try(PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
-            if( passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
-                kmsLoginBasicPassword = passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toString();
+        kmsLoginBasicPassword = getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD, null);
+        if (kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty()) {
+            try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
+                if (passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
+                    kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
+                }
             }
         }
-        kmsLoginBasicPassword = getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD, kmsLoginBasicPassword);
         if( kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty() ) {
             configuration("KMS API password not configured");
         }
