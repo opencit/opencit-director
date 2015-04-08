@@ -76,7 +76,6 @@ public class MountVMImage {
             log.error(null, ex);
         }
         log.debug(output.toString());
-        new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
         log.trace("Exec command output : " + output.toString());
         return exitCode;
         

@@ -65,9 +65,7 @@ public class Constants {
     public static final String MH_KEY_NAME = "mysteryhill.key.name";
     
     public static final String MH_JAR_LOCATION = "MH_Jar_Location";
-    
-    public static final String EXEC_OUTPUT_FILE = "/opt/director/log/exec_output";
-    
+       
     public static final String KMS_SERVER = "kms.server";
     
     public static final String MH_DEK_URL_IMG = "MH Dek Url Image";
