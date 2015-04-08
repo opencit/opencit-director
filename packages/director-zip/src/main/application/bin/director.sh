@@ -69,6 +69,10 @@ export DIRECTOR_BIN=${DIRECTOR_BIN:-$DIRECTOR_HOME/bin}
 export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
 export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
 
+# needed for if certain methods are called from director.sh like java_detect, etc.
+DIRECTOR_INSTALL_LOG_FILE=${DIRECTOR_INSTALL_LOG_FILE:-"$DIRECTOR_LOGS/director_install.log"}
+export INSTALL_LOG_FILE="$DIRECTOR_INSTALL_LOG_FILE"
+
 ###################################################################################################
 
 # load linux utility
