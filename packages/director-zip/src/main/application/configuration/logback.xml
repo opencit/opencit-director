@@ -2,7 +2,7 @@
 
     <appender name="LogFile" class="ch.qos.logback.core.FileAppender">
         <!-- environment variable or JVM property DIRECTOR_LOGS must be set -->
-        <file>"${DIRECTOR_LOGS}/director.log"</file>
+        <file>${DIRECTOR_LOGS}/director.log</file>
         <append>true</append>
         <encoder>
             <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>

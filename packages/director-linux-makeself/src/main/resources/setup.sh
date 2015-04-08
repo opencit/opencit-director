@@ -28,9 +28,6 @@
 export DIRECTOR_HOME=${DIRECTOR_HOME:-/opt/director}
 DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 
-# this variable is used in configuration/logback.xml
-export LOG_LEVEL=${LOG_LEVEL:-"INFO"}
-
 # the env directory is not configurable; it is defined as DIRECTOR_HOME/env and
 # the administrator may use a symlink if necessary to place it anywhere else
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
