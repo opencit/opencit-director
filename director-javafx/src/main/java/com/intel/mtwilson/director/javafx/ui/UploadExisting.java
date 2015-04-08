@@ -191,8 +191,10 @@ public class UploadExisting {
                     String message;
                     message = UploadNow(trustPolicyLocation, imageLocation);
                 showUploadSuccessMessage(uploadExistingStage, message);
-                } catch (ImageStoreException ex) {
-                    Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    log.error("Can not generate trust policy", ex);
+                    new CreateImage(uploadExistingStage).showWarningPopup(ex.getClass() + " " + ex.getMessage());
+                    //TODO handling of screen
                 }
                 
             }
@@ -217,7 +219,7 @@ public class UploadExisting {
         uploadExistingStage.show(); 
       }
     
-       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException {
+       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException, Exception {
         String message = "";
         try {
 

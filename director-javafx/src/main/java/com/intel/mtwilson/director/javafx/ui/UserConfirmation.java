@@ -240,7 +240,14 @@ public class UserConfirmation {
         boolean isSuccess = true;
         String isPublic = "true";
         String imageId = confInfo.get(Constants.IMAGE_ID);
-        ImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+        ImageStore imageStoreObj = null;
+        try {
+            imageStoreObj = ImageStoreUtil.getImageStore();
+        } catch (Exception ex) {
+            log.error("Can not find Image store"+ex);
+            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+            //TODO error handling
+        }
         switch(confInfo.get(Constants.IMAGE_TYPE)) {
             case "ami":
                 diskFormat = "ami";

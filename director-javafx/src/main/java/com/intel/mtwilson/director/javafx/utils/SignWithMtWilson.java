@@ -3,6 +3,7 @@ package com.intel.mtwilson.director.javafx.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 import com.intel.mtwilson.director.javafx.ui.Constants;
 import com.intel.mtwilson.director.javafx.ui.UserConfirmation;
 import java.io.BufferedReader;
@@ -38,18 +39,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class SignWithMtWilson {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SignWithMtWilson.class);
     
-    ConfigProperties configProperties;
     private String mtWilsonIP;
     private String mtWilsonPort;
     private String mtWilsonUserName;
     private String mtWilsonPassword;
     
-    public SignWithMtWilson() {
-        ConfigProperties configProperties = new ConfigProperties();
-        mtWilsonIP = configProperties.getProperty(Constants.MTWILSON_SERVER);
-        mtWilsonPort = configProperties.getProperty(Constants.MTWILSON_PORT);
-        mtWilsonUserName = configProperties.getProperty(Constants.MTWILSON_USER_NAME);
-        mtWilsonPassword = configProperties.getProperty(Constants.MTWILSON_PASSWORD);
+    public SignWithMtWilson() throws IOException {
+        mtWilsonIP = getConfiguration().get(Constants.MTWILSON_SERVER);
+        mtWilsonPort = getConfiguration().get(Constants.MTWILSON_PORT);
+        mtWilsonUserName = getConfiguration().get(Constants.MTWILSON_USER_NAME);
+        mtWilsonPassword = getConfiguration().get(Constants.MTWILSON_PASSWORD);
     }
     
     public String signManifest(String imageID, String trustPolicy) {

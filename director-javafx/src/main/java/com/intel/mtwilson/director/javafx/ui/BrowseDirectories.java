@@ -10,6 +10,7 @@ import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -257,12 +258,19 @@ public class BrowseDirectories {
                     new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                 } else if (confInfo!=null){
                     
-                    String trustPolicy ;
+                    String trustPolicy = null;
                     if (!isBareMetalLocal && !isBareMetalRemote) {
-                        // Generate TrustPolicy and encrypt image if necessary
-                        log.debug("Calling generateTP..");
-                        trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                        log.debug("After Calling generateTP..");
+                        try {
+                            // Generate TrustPolicy and encrypt image if necessary
+                            log.debug("Calling generateTP..");
+                            trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                            log.debug("After Calling generateTP..");
+                        } catch (Exception ex) {
+                            log.error("Can not generate trust policy",ex);
+                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+                            System.exit(1);
+                            //TODO handling of screen
+                        }
                         
                     }
                     else{
@@ -274,22 +282,26 @@ public class BrowseDirectories {
                         int exitCode = MountVMImage.unmountImage(mountPath);
                     }
                     if (!isBareMetalLocal && !isBareMetalRemote) {
-                        //Encrypt image 
-                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-                            KmsUtil mhUtil = new KmsUtil();
-                            try {
-                                mhUtil.encryptImage(confInfo);
-                            } catch (Exception ex) {
-                                log.error("Can not encrypt image, {}",ex);
-                                new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
-                                System.exit(1);
-                            }                            
-                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
-                        }  
-                        //sign trustpolicy with MTW and save it to a file
-                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
-                            //TODO handle exception
+                        try {
+                            //Encrypt image
+                            if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                                KmsUtil mhUtil = new KmsUtil();
+                                try {
+                                    mhUtil.encryptImage(confInfo);
+                                } catch (Exception ex) {
+                                    log.error("Can not encrypt image, {}",ex);
+                                    new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
+                                }
+                                trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                            }
+                            //sign trustpolicy with MTW and save it to a file
+                            trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                            if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                                //TODO handle exception
+                            }
+                        } catch (IOException ex) {
+                            log.error("Erroe while encryptin image"+ex);
+                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
                         }
                     }
                     String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
