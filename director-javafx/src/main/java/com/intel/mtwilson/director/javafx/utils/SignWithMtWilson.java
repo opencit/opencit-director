@@ -46,10 +46,10 @@ public class SignWithMtWilson {
     
     public SignWithMtWilson() {
         ConfigProperties configProperties = new ConfigProperties();
-        mtWilsonIP = configProperties.getProperty(Constants.Mt_WILSON_IP);
-        mtWilsonPort = configProperties.getProperty(Constants.Mt_WILSON_PORT);
-        mtWilsonUserName = configProperties.getProperty(Constants.Mt_WILSON_USER_NAME);
-        mtWilsonPassword = configProperties.getProperty(Constants.Mt_WILSON_PASSWORD);
+        mtWilsonIP = configProperties.getProperty(Constants.MTWILSON_SERVER);
+        mtWilsonPort = configProperties.getProperty(Constants.MTWILSON_PORT);
+        mtWilsonUserName = configProperties.getProperty(Constants.MTWILSON_USER_NAME);
+        mtWilsonPassword = configProperties.getProperty(Constants.MTWILSON_PASSWORD);
     }
     
     public String signManifest(String imageID, String trustPolicy) {

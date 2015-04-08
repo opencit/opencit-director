@@ -123,11 +123,11 @@ public class GenerateTrustPolicy {
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
         //Set customerId
-        String customerId = configProperties.getProperty(Constants.CONF_CUSTOMER_ID);
+        String customerId = configProperties.getProperty(Constants.DIRECTOR_ID);
         if(customerId == null || customerId.equals("")){
             UUID uuid = new UUID();
             customerId = uuid.toString();
-            //configProperties.setProperty(Constants.CONF_CUSTOMER_ID, customerId);            
+            //configProperties.setProperty(Constants.DIRECTOR_ID, customerId);            
         }
         log.debug("Customer ID is:"+ customerId);
         Director director = new Director();
@@ -167,13 +167,13 @@ public class GenerateTrustPolicy {
         Whitelist whitelist = new Whitelist();
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
-        log.debug("Hash type is :"+configProperties.getProperty(Constants.HASH_TYPE));
+        log.debug("Hash type is :"+configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE));
         ImageHash imageHash = new ImageHash();
         String opensslCmd ="";
         List<MeasurementType> whitelistValue = whitelist.getMeasurements();
         try {
             //set digest algorithm
-            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     md = MessageDigest.getInstance("SHA-256");
                     whitelist.setDigestAlg("sha256");
@@ -228,7 +228,7 @@ public class GenerateTrustPolicy {
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
-            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
                         log.trace("Before extending hash is: " + digestSha256.toHexString());
@@ -267,7 +267,7 @@ public class GenerateTrustPolicy {
             whitelistValue.add((MeasurementType)newFile);
             //Extend file hash to cumulative image hash 
             
-            switch (configProperties.getProperty(Constants.HASH_TYPE)) {
+            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
                         log.trace("Before extending hash is: " + digestSha256.toHexString());
