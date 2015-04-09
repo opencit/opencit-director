@@ -31,21 +31,19 @@ import org.json.JSONObject;
  *
  * @author root
  */
-public class GlanceImageStoreImpl implements IImageStore {
+public class GlanceImageStoreImpl implements ImageStore {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GlanceImageStoreImpl.class);
-    private ConfigProperties configProperties;
     private String glanceIP;
     private String userName;
     private String password;
     private String tenantName;
     
     public GlanceImageStoreImpl() throws IOException{
-        configProperties=new ConfigProperties();
-    glanceIP = getConfiguration().get(Constants.IMAGE_STORE_SERVER, null); //configProperties.getProperty(Constants.IMAGE_STORE_SERVER);
-    userName = configProperties.getProperty(Constants.IMAGE_STORE_USERNAME);
-    password = configProperties.getProperty(Constants.IMAGE_STORE_PASSWORD);
-    tenantName = configProperties.getProperty(Constants.TENANT_NAME);
+    glanceIP = getConfiguration().get(Constants.IMAGE_STORE_SERVER, null); 
+    userName = getConfiguration().get(Constants.IMAGE_STORE_USERNAME);
+    password = getConfiguration().get(Constants.IMAGE_STORE_PASSWORD);
+    tenantName = getConfiguration().get(Constants.TENANT_NAME);
     
     }
     

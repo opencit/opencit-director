@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.xml.JAXB;
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurementType;
@@ -42,11 +43,9 @@ import javax.xml.stream.XMLStreamException;
  */
 public class GenerateTrustPolicy {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GenerateTrustPolicy.class);
-    private final ConfigProperties configProperties;
     private String mountPath;
     //private String imageHash;
     public GenerateTrustPolicy(){
-        configProperties = new ConfigProperties();
         mountPath = Constants.MOUNT_PATH;
     }
     
@@ -119,11 +118,11 @@ public class GenerateTrustPolicy {
     }
     
     //Creates trust policy for VM
-    public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo){
+    public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo) throws Exception{
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
         //Set customerId
-        String customerId = configProperties.getProperty(Constants.DIRECTOR_ID);
+        String customerId = getConfiguration().get(Constants.DIRECTOR_ID);
         if(customerId == null || customerId.equals("")){
             UUID uuid = new UUID();
             customerId = uuid.toString();
@@ -160,20 +159,20 @@ public class GenerateTrustPolicy {
     }
     
     //Creates whitelist and sets imageHash and digestAlg
-    public Whitelist createWhitelist(List<Directories> directories, Map<String, String> configInfo, Image image){
+    public Whitelist createWhitelist(List<Directories> directories, Map<String, String> configInfo, Image image) throws IOException{
         MessageDigest md = null;
         Sha1Digest digestSha1 = null;
         Sha256Digest digestSha256 = null;
         Whitelist whitelist = new Whitelist();
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
-        log.debug("Hash type is :"+configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE));
+        log.debug("Hash type is :"+getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE));
         ImageHash imageHash = new ImageHash();
         String opensslCmd ="";
         List<MeasurementType> whitelistValue = whitelist.getMeasurements();
         try {
             //set digest algorithm
-            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
+            switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     md = MessageDigest.getInstance("SHA-256");
                     whitelist.setDigestAlg("sha256");
@@ -228,7 +227,7 @@ public class GenerateTrustPolicy {
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
-            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
+            switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
                         log.trace("Before extending hash is: " + digestSha256.toHexString());
@@ -267,7 +266,7 @@ public class GenerateTrustPolicy {
             whitelistValue.add((MeasurementType)newFile);
             //Extend file hash to cumulative image hash 
             
-            switch (configProperties.getProperty(Constants.VM_WHITELIST_HASH_TYPE)) {
+            switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     if (digestSha256 != null) {
                         log.trace("Before extending hash is: " + digestSha256.toHexString());

@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author boskisha
  */
-public interface IImageStore {
+public interface ImageStore {
     public String uploadImage(String imagePath, Map<String, String> imageProperties);
     
     public String uploadTrustPolicy(String trustPolicyPath);

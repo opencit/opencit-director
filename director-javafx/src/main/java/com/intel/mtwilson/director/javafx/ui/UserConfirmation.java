@@ -3,7 +3,7 @@ package com.intel.mtwilson.director.javafx.ui;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.KmsUtil;
-import com.intel.mtwilson.director.javafx.utils.IImageStore;
+import com.intel.mtwilson.director.javafx.utils.ImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 import java.io.File;
@@ -240,7 +240,14 @@ public class UserConfirmation {
         boolean isSuccess = true;
         String isPublic = "true";
         String imageId = confInfo.get(Constants.IMAGE_ID);
-        IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+        ImageStore imageStoreObj = null;
+        try {
+            imageStoreObj = ImageStoreUtil.getImageStore();
+        } catch (Exception ex) {
+            log.error("Can not find Image store"+ex);
+            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+            //TODO error handling
+        }
         switch(confInfo.get(Constants.IMAGE_TYPE)) {
             case "ami":
                 diskFormat = "ami";

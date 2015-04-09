@@ -6,7 +6,7 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.IImageStore;
+import com.intel.mtwilson.director.javafx.utils.ImageStore;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreException;
 import com.intel.mtwilson.director.javafx.utils.ImageStoreUtil;
 import static java.awt.Color.red;
@@ -191,8 +191,10 @@ public class UploadExisting {
                     String message;
                     message = UploadNow(trustPolicyLocation, imageLocation);
                 showUploadSuccessMessage(uploadExistingStage, message);
-                } catch (ImageStoreException ex) {
-                    Logger.getLogger(UploadExisting.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    log.error("Can not generate trust policy", ex);
+                    new CreateImage(uploadExistingStage).showWarningPopup(ex.getClass() + " " + ex.getMessage());
+                    //TODO handling of screen
                 }
                 
             }
@@ -217,11 +219,11 @@ public class UploadExisting {
         uploadExistingStage.show(); 
       }
     
-       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException {
+       private String UploadNow(String trustPolicyLocation, String imageLocation) throws ImageStoreException, Exception {
         String message = "";
         try {
 
-            IImageStore imageStoreObj = ImageStoreUtil.getImageStore();
+            ImageStore imageStoreObj = ImageStoreUtil.getImageStore();
             String tarballLocation = new UserConfirmation().createImageTrustPolicyTar(trustPolicyLocation, imageLocation);
             String imageGlanceID = imageStoreObj.uploadImage(tarballLocation, null);
 
