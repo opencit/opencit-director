@@ -5,26 +5,10 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -32,41 +16,26 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
-import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
 
 /**
  *
  * @author admkrushnakant
  */
 public class ConfigurationInformation {    
-
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationInformation.class);
     private final Stage primaryStage;
-//    private final Stage secondStage;
-    String hostManifest;
-    
-    private static final Logger logger; 
-    
+    String hostManifest;    
     private HBox togBoxTrustPolicyType;
     private HBox togBoxBareMetalType;
     private ConfigProperties configProperties;
-    
-	// Set FileHandler for logger
-    static {
-        logger = Logger.getLogger(ConfigurationInformation.class.getName());
-        LoggerUtility.setHandler(logger);
-    }
     
     public ConfigurationInformation(Stage primaryStage) {
         this.primaryStage = primaryStage;
         configProperties = new ConfigProperties();
     }
     
-	// Return the Stage
+    // Return the Stage
     public Stage getStage() {
     return this.primaryStage;
     }
@@ -79,11 +48,10 @@ public class ConfigurationInformation {
                 hostManifest = hostManifest.trim();
             }
         } catch (NullPointerException npe) {
-            logger.log(Level.WARNING, "Host manifest value not set in configuration file.", npe);
+            log.error("Host manifest value not set in configuration file.", npe);
         }
         
         primaryStage.setTitle("Trust Director");
-        final FileUtilityOperation op = new FileUtilityOperation();
 	
         //PS:Label
 	Label imageType=new Label("Image Type");
@@ -241,10 +209,8 @@ public class ConfigurationInformation {
                     createImageObj.launch();
 //                
                 }catch(Exception ex)
-                {
-                    
-                    System.out.println("Exception occurred here");
-                    ex.printStackTrace();
+                {                    
+                    log.error(null, ex);
                 }
                 
 //                Stage stage = new Stage();
@@ -264,8 +230,7 @@ public class ConfigurationInformation {
                     uploadExistingObj.launch();
                  }catch(Exception ex){
                     
-                    System.out.println("Exception occurred here");
-                    ex.printStackTrace();
+                    log.error(null, ex);
                 }
                 
 //                Stage stage = new Stage();
@@ -285,8 +250,7 @@ public class ConfigurationInformation {
                     BrowseDirectories secondWindow = new BrowseDirectories(broeseDirectoryStage);
                     secondWindow.launch(customerInfo);
                 } catch (Exception ex) {                    
-                    System.out.println("Exception occurred here");
-                    ex.printStackTrace();
+                    log.error(null, ex);
                 }
              }});
         
@@ -302,9 +266,7 @@ public class ConfigurationInformation {
 //                
                 }catch(Exception ex)
                 {
-                    
-                    System.out.println("Exception occurred here");
-                    ex.printStackTrace();
+                    log.error(null, ex);
                 }
              }});
         
@@ -316,9 +278,7 @@ public class ConfigurationInformation {
                     primaryStage.close();
                 }catch(Exception ex)
                 {
-                    
-                    System.out.println("Exception occurred here");
-                    ex.printStackTrace();
+                    log.error(null, ex);
                 }
 //                Stage stage = new Stage();
                 //Fill stage with content
@@ -338,7 +298,6 @@ public class ConfigurationInformation {
     private Map<String, String> hostWriteToMap() {
         Map<String, String> customerInfo = new HashMap<>();
         boolean isProper = true;
-        FileUtilityOperation opt = new FileUtilityOperation();
          
         if(isProper) {
           customerInfo.put((Constants.BARE_METAL_LOCAL),"true");

@@ -56,6 +56,12 @@ public class TestTrustPolicy {
         System.out.println(Hex.encodeHexString(FileUtils.readFileToByteArray(new File(filepath))));
         
     }
+    
+    @Test
+    public void testExtendHash(){
+        System.out.println(Hex.encodeHexString(Sha256Digest.valueOfHex("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855").toByteArray()));
+        System.out.println(Hex.encodeHexString("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".getBytes()));
+    }
     @Test
     public void testVirtualPcrExtension() { 
         Sha256Digest pcr = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0});

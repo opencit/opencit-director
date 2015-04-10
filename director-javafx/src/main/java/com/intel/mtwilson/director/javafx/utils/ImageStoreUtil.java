@@ -5,6 +5,7 @@
  */
 package com.intel.mtwilson.director.javafx.utils;
 
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 import com.intel.mtwilson.director.javafx.ui.Constants;
 
 /**
@@ -13,9 +14,8 @@ import com.intel.mtwilson.director.javafx.ui.Constants;
  */
 public class ImageStoreUtil {
 
-    public static IImageStore getImageStore(){
-        ConfigProperties configProperties=new ConfigProperties();
-        String imageStore = configProperties.getProperty(Constants.IMAGE_STORE_TYPE);
+    public static ImageStore getImageStore() throws Exception{
+        String imageStore = getConfiguration().get(Constants.IMAGE_STORE_TYPE);
         switch(imageStore){
             case(Constants.GLANCE_IMAGE_STORE):
                 return new GlanceImageStoreImpl();    

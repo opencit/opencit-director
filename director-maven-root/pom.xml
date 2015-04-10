@@ -10,41 +10,43 @@
     
     <build>
         <plugins>
+            <!-- the git commit plugin makes available the following properties:
+                 branch
+                 commit.id
+                 commit.id.abbrev
+                 commit.id.describe
+                 build.user.name
+                 build.user.email
+                 build.time
+                 commit.user.name
+                 commit.user.email
+                 commit.message.full
+                 commit.message.short
+                 commit.time
+                 remote.origin.url
+            -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Release>${project.version}</Release>
-                            <!-- <Build-Number>${svn.revision}</Build-Number>  TODO  need a revision id from git or move this to integrated build server that will generate its own numbers -->
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.12</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>revision</goal>
                         </goals>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <skipPoms>false</skipPoms>
+                            <prefix>git</prefix>
+                            <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
+		
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -189,10 +191,43 @@
                 <version>20140107</version>
                 <type>jar</type>
             </dependency>
+            
+            <dependency>
+                <groupId>com.intel.mtwilson.integration</groupId>
+                <artifactId>mtwilson-configuration</artifactId>
+                <version>${mtwilson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.integration</groupId>
+                <artifactId>mtwilson-manifest-xml</artifactId>
+                <version>${mtwilson.version}</version>
+                <type>jar</type>
+            </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
                 <artifactId>mtwilson-trustpolicy-xml</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${mtwilson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.services</groupId>
+                <artifactId>mtwilson-setup</artifactId>
+                <version>${mtwilson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.services</groupId>
+                <artifactId>mtwilson-setup-ext</artifactId>
+                <version>${mtwilson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-console</artifactId>
+                <version>0.2-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-crypto</artifactId>
+                <version>0.3-SNAPSHOT</version>
+                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
@@ -200,11 +235,11 @@
                 <version>0.3-SNAPSHOT</version>
                 <type>jar</type>
             </dependency>
+            
             <dependency>
-                <groupId>com.intel.mtwilson.util</groupId>
-                <artifactId>mtwilson-util-crypto</artifactId>
-                <version>0.2-SNAPSHOT</version>
-                <type>jar</type>
+                <groupId>com.intel.mtwilson.kms</groupId>
+                <artifactId>kms-client-jaxrs2</artifactId>
+                <version>0.1-SNAPSHOT</version>
             </dependency>
         </dependencies>  
     </dependencyManagement>
@@ -226,6 +261,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- for any components that we use from the latest mt wilson build -->
+        <!--<director.version>0.1-SNAPSHOT</director.version>-->
         <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
@@ -249,7 +285,7 @@
     </issueManagement>
     
     <repositories>
-<!--        <repository>
+        <!--        <repository>
             <id>cpg-x</id>
             <name>Cloud Platform Group</name>
             <url>http://10.1.71.63/maven/repository</url>

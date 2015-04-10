@@ -1,2 +1,6 @@
-/director-utils/target/
-/director-javafx/target/
+target
+.settings
+.project
+.classpath
+pom.xml.versionsBackup
+pom.xml.releaseBackup

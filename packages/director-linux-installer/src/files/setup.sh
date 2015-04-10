@@ -35,8 +35,8 @@ load_director_conf() {
     export CONF_MTWILSON_PASSWORD=$(read_property_from_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_MTWILSON_SERVER_IP=$(read_property_from_file "mtwilson.server.ip" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_MTWILSON_SERVER_PORT=$(read_property_from_file "mtwilson.server.port" "$DIRECTOR_PROPERTIES_FILE")
-    export CONF_KMS_SERVER_IP=$(read_property_from_file "kms.server.ip" "$DIRECTOR_PROPERTIES_FILE")
-    export CONF_GLANCE_IP=$(read_property_from_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE")
+    export CONF_KMS_SERVER=$(read_property_from_file "kms.server.ip" "$DIRECTOR_PROPERTIES_FILE")
+    export CONF_GLANCE_SERVER=$(read_property_from_file "glance.server" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_HASH_TYPE=$(read_property_from_file "hash.type" "$DIRECTOR_PROPERTIES_FILE")
     export CONF_IMAGE_STORE_TYPE=$(read_property_from_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE")
 	export CONF_CUSTOMER_ID=$(read_property_from_file "customer.id" "$DIRECTOR_PROPERTIES_FILE")
@@ -59,8 +59,8 @@ load_director_defaults() {
   export DEFAULT_MTWILSON_PASSWORD=""
   export DEFAULT_MTWILSON_SERVER_IP=""
   export DEFAULT_MTWILSON_SERVER_PORT=""
-  export DEFAULT_KMS_SERVER_IP=""
-  export DEFAULT_GLANCE_IP=""
+  export DEFAULT_KMS_SERVER=""
+  export DEFAULT_GLANCE_SERVER=""
   export DEFAULT_HASH_TYPE=""
   export DEFAULT_IMAGE_STORE_TYPE=""
   export DEFAULT_CUSTOMER_ID=""
@@ -76,8 +76,8 @@ load_director_defaults() {
   export MTWILSON_PASSWORD=${MTWILSON_PASSWORD:-${CONF_MTWILSON_PASSWORD:-$DEFAULT_MTWILSON_PASSWORD}}
   export MTWILSON_SERVER_IP=${MTWILSON_SERVER_IP:-${CONF_MTWILSON_SERVER_IP:-$DEFAULT_MTWILSON_SERVER_IP}}
   export MTWILSON_SERVER_PORT=${MTWILSON_SERVER_PORT:-${CONF_MTWILSON_SERVER_PORT:-$DEFAULT_MTWILSON_SERVER_PORT}}
-  export KMS_SERVER_IP=${KMS_SERVER_IP:-${CONF_KMS_SERVER_IP:-$DEFAULT_KMS_SERVER_IP}}
-  export GLANCE_IP=${GLANCE_IP:-${CONF_GLANCE_IP:-$DEFAULT_GLANCE_IP}}
+  export KMS_SERVER=${KMS_SERVER:-${CONF_KMS_SERVER:-$DEFAULT_KMS_SERVER}}
+  export GLANCE_SERVER=${GLANCE_SERVER:-${CONF_GLANCE_SERVER:-$DEFAULT_GLANCE_SERVER}}
   export HASH_TYPE=${HASH_TYPE:-${CONF_HASH_TYPE:-$DEFAULT_HASH_TYPE}}
   export IMAGE_STORE_TYPE=${IMAGE_STORE_TYPE:-${CONF_IMAGE_STORE_TYPE:-$DEFAULT_IMAGE_STORE_TYPE}}
   export CUSTOMER_ID=${CUSTOMER_ID:-${CONF_CUSTOMER_ID:-$DEFAULT_CUSTOMER_ID}}
@@ -100,8 +100,8 @@ prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
 prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
 prompt_with_default MTWILSON_SERVER_IP "Mtwilson Server IP:" "$MTWILSON_SERVER_IP"
 prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
-prompt_with_default KMS_SERVER_IP "Key Management Server IP:" "$KMS_SERVER_IP"
-prompt_with_default GLANCE_IP "Glance IP:" "$GLANCE_IP"
+prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
+prompt_with_default GLANCE_SERVER "Glance IP:" "$GLANCE_SERVER"
 prompt_with_default HASH_TYPE "Hash Type:" "$HASH_TYPE"
 prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
 prompt_with_default CUSTOMER_ID "Customer ID:" "$CUSTOMER_ID"
@@ -181,6 +181,7 @@ fi
 mkdir -p /opt/trustdirector/bin
 mkdir -p /opt/trustdirector/configuration
 mkdir -p /opt/trustdirector/java
+mkdir -p /var/log/trustdirector
 cp exclude-file-list /opt/trustdirector/configuration/
 cp login /opt/trustdirector/bin/
 cp mount_remote_system.sh /opt/trustdirector/bin/
@@ -188,16 +189,19 @@ cp mount_vm_image.sh /opt/trustdirector/bin/
 cp tdirector.sh /opt/trustdirector/bin/tdirector
 cp client-0.1-SNAPSHOT-with-dependencies.jar /opt/trustdirector/java/
 cp director-javafx-*.jar /opt/trustdirector/java/
+cp logback.xml /opt/trustdirector/configuration/
 chmod 700 /opt/trustdirector/bin/login
 chmod 700 /opt/trustdirector/bin/mount_remote_system.sh
 chmod 700 /opt/trustdirector/bin/mount_vm_image.sh
 chmod 700 /opt/trustdirector/bin/tdirector
 chmod 700 retrieve-cert.sh
 chmod 700 set-path.sh
+chmod 700 /opt/trustdirector/configuration/lockback.xml
 #TEMP
 mkdir -p /opt/trustdirector/log
 touch /opt/trustdirector/log/manifest-tool.log
 
+ln -s "/opt/trustdirector/bin/tdirector" "/usr/local/bin/tdirector"
 register_startup_script /opt/trustdirector/bin/tdirector tdirector >> $INSTALL_LOG_FILE
 
 # 1 Configuring KMS TLS certificate and Data encryption key
@@ -206,7 +210,7 @@ mkdir -p /root/.mystery-hill/client
 export MHCLIENT_HOME=/root/.mystery-hill/client
 # 1.a1 retrieve the certificate
 echo " -Retrieving KMS Server certificate"
-./retrieve-cert.sh $KMS_SERVER_IP:8443 > /tmp/ssl.crt
+./retrieve-cert.sh $KMS_SERVER:8443 > /tmp/ssl.crt
 # 1.a2 import to keystore
 echo " -Importing to Keystore"
 java -jar /opt/trustdirector/java/client-0.1-SNAPSHOT-with-dependencies.jar import-tls-certificate --format=PEM /tmp/ssl.crt
@@ -218,7 +222,7 @@ kmsDataEncKey="/tmp/kmsDataEncKey"
 echo "Importing Data encryption key from KMS server"
 # 1.b1 retrieve
 echo " -Retrieving Data encryption key from KMS server"
-scp root@$KMS_SERVER_IP:/root/mhserver/private/*.crt $kmsDataEncKey
+scp root@$KMS_SERVER:/root/mhserver/private/*.crt $kmsDataEncKey
 # 1.b2 import to keystore
 echo " -Importing to Keystore"
 java -jar /opt/trustdirector/java/client-0.1-SNAPSHOT-with-dependencies.jar import-data-encryption-key-recipient --format=DER $kmsDataEncKey
@@ -244,8 +248,8 @@ update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILS
 update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 update_property_in_file "mtwilson.server.ip" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER_IP"
 update_property_in_file "mtwilson.server.port" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
-update_property_in_file "kms.server.ip" "$DIRECTOR_PROPERTIES_FILE" "$KMS_SERVER_IP"
-update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IP"
+update_property_in_file "kms.server" "$DIRECTOR_PROPERTIES_FILE" "$KMS_SERVER"
+update_property_in_file "glance.server" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_SERVER"
 update_property_in_file "hash.type" "$DIRECTOR_PROPERTIES_FILE" "$HASH_TYPE"
 update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
 update_property_in_file "customer.id" "$DIRECTOR_PROPERTIES_FILE" "$CUSTOMER_ID"
