@@ -5,7 +5,6 @@
 package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -20,7 +19,6 @@ public class ManifestTool extends Application {
      */
     public static void main(String[] args) {
         initConfigProperty();
-        initLogger();
         launch(args);
     }
     
@@ -33,9 +31,5 @@ public class ManifestTool extends Application {
     
     private static void initConfigProperty() {
         ConfigProperties.loadProperty();
-    }
-
-    private static void initLogger() {
-        LoggerUtility.initializeHandler();
     }
 }

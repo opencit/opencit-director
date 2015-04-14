@@ -4,19 +4,17 @@
  */
 package com.intel.mtwilson.director.javafx.ui;
 
-import static com.intel.mtwilson.director.javafx.ui.AMIImageInformation.logger;
-import com.intel.mtwilson.director.javafx.utils.LoggerUtility;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
-import com.intel.mtwilson.director.javafx.utils.MHUtilityOperation;
+import com.intel.mtwilson.director.javafx.utils.KmsUtil;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,7 +30,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -58,29 +55,11 @@ public class BrowseDirectories {
     private boolean isBareMetalRemote;
     ObservableList<Directories> list = null;
     
-    private static final Logger logger = Logger.getLogger(BrowseDirectories.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
-/*    
-    final ObservableList<Directories> list = FXCollections.observableArrayList(
-            new Directories(new CheckBox("/etc"), new ChoiceBox(choices), new TextField()),
-            new Directories(new CheckBox("/sbin"), new ChoiceBox(choices), new TextField()),
-            new Directories(new CheckBox("/bin"), new ChoiceBox(choices), new TextField()),
-            new Directories(new CheckBox("/boot"), new ChoiceBox(choices), new TextField())
-            );
-*/    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);  
     public BrowseDirectories(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
     }
-
-//    BrowseDirectories() {
-//        System.out.println("Default Constructor");
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//        
-//    }
     
     public void launch(final Map<String, String> confInfo) {
         
@@ -95,7 +74,7 @@ public class BrowseDirectories {
             mountPath="/";
         }
        
-//        System.out.println("############# : " + "On the Browse directory  window");
+        log.trace("On the Browse directory  window");
         
        //By default disable the text field from table
         for(Directories listComp : list) {
@@ -199,15 +178,15 @@ public class BrowseDirectories {
         hBox2.setPadding(new Insets(15, 12, 15, 12));
         hBox2.setSpacing(155);
         hBox2.setStyle("-fx-background-color: #336699;");
-        Button browse = new Button("Add more");
-        browse.setPrefSize(100, 20);
+        Button addMore = new Button("Add more");
+        addMore.setPrefSize(100, 20);
         Button next = new Button("Next");
         //hash.setPrefSize(100, 20);
-        hBox2.getChildren().add(browse);
+        hBox2.getChildren().add(addMore);
         hBox2.getChildren().add(next);
         
         //Add handler to "Add more" button
-        browse.setOnAction(new EventHandler<ActionEvent>() {
+        addMore.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
                 DirectoryChooser directory = new DirectoryChooser();
@@ -241,8 +220,7 @@ public class BrowseDirectories {
                         new CreateImage(primaryStage).showWarningPopup("Directory does not belong to VM image");
                     }                
                 } catch(Exception ex) {
-                    //System.out.println("Not selected anything");
-                    //logger.info("Not selected anything");
+                    log.error("Not selected anything", ex);
                 }
             }
         });
@@ -252,7 +230,7 @@ public class BrowseDirectories {
             @Override
             public void handle(ActionEvent arg0) {
 //                CreateImage.manifestFlag=true;
-                System.out.println("..................................................................");
+                log.debug("calculating hash.");
                 boolean isProper = true;
                 boolean isDirExist = true;
                 List<Directories> dirList = new ArrayList<>();
@@ -280,12 +258,19 @@ public class BrowseDirectories {
                     new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                 } else if (confInfo!=null){
                     
-                    String trustPolicy ;
+                    String trustPolicy = null;
                     if (!isBareMetalLocal && !isBareMetalRemote) {
-                        // Generate TrustPolicy and encrypt image if necessary
-                        System.err.println("Calling generateTP......................................");
-                        trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                        System.err.println("After Calling generateTP......................................");
+                        try {
+                            // Generate TrustPolicy and encrypt image if necessary
+                            log.debug("Calling generateTP..");
+                            trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                            log.debug("After Calling generateTP..");
+                        } catch (Exception ex) {
+                            log.error("Can not generate trust policy",ex);
+                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+                            System.exit(1);
+                            //TODO handling of screen
+                        }
                         
                     }
                     else{
@@ -293,24 +278,30 @@ public class BrowseDirectories {
                     }
                     // Unmount the VM Image
                     if (!isBareMetalLocal) {
-                        logger.info("Unmounting the VM Image");
+                        log.debug("Unmounting the VM Image");
                         int exitCode = MountVMImage.unmountImage(mountPath);
                     }
                     if (!isBareMetalLocal && !isBareMetalRemote) {
-                        //Encrypt image 
-                        if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-                            MHUtilityOperation mhUtil = new MHUtilityOperation();
-                            String message = mhUtil.encryptImage(confInfo);
-                            if (message != null) {
-                                new CreateImage(primaryStage).showWarningPopup("Error while Uploading the key to KMS..... Exiting.....");
-                                System.exit(1);
+                        try {
+                            //Encrypt image
+                            if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                                KmsUtil mhUtil = new KmsUtil();
+                                try {
+                                    mhUtil.encryptImage(confInfo);
+                                } catch (Exception ex) {
+                                    log.error("Can not encrypt image, {}",ex);
+                                    new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
+                                }
+                                trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
                             }
-                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
-                        }  
-                        //sign trustpolicy with MTW and save it to a file
-                        trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                        if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
-                            //TODO handle exception
+                            //sign trustpolicy with MTW and save it to a file
+                            trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                            if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                                //TODO handle exception
+                            }
+                        } catch (IOException ex) {
+                            log.error("Erroe while encryptin image"+ex);
+                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
                         }
                     }
                     String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
@@ -321,7 +312,7 @@ public class BrowseDirectories {
                         new UserConfirmation().generateManifesConfirmation(primaryStage, trustPolicyLocation);
                         
                     }else {
-                        logger.log(Level.SEVERE, "Error in creating the manifest file");
+                        log.error("Error in creating the trust policy");
 //			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
                     }
                     

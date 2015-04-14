@@ -17,48 +17,44 @@ import com.intel.mtwilson.director.javafx.ui.Constants;
  * @author admkrushnakant
  */
 public class MountVMImage {
-    private static final Logger logger = Logger.getLogger(MountVMImage.class.getName());
-    // Set FileHandler for logger
-    static {
-        LoggerUtility.setHandler(logger);
-    }
-    private static final String mountScript = "/opt/trustdirector/bin/mount_vm_image.sh";
-    private static final String mountRemoteFileSystemScript="/opt/trustdirector/bin/mount_remote_system.sh";
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MountVMImage.class);
+    private static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
+    private static final String mountRemoteFileSystemScript="/opt/director/bin/mount_remote_system.sh";
     
     public static int mountImage(String imagePath) {
         
         String command = mountScript + " " + imagePath;
-        logger.info("\n" + "Mounting the vm image : " + imagePath);
-        logger.info("Command:" + command);
+        log.debug("\n" + "Mounting the vm image : " + imagePath);
+        log.trace("Command:" + command);
         int exitCode = callExec(command);
-        logger.info("\n Exit code is : " + exitCode);
+        log.trace("\n Exit code is : " + exitCode);
         return exitCode;
     }
     
     public static int unmountImage(String mountPath) {
         
-        logger.info("Unmounting the vm image with mount path : " + mountPath);
+        log.debug("Unmounting the vm image with mount path : " + mountPath);
         int exitCode = callExec(mountScript);
-        logger.info("\n Exit code is : " + exitCode);
+        log.trace("\n Exit code is : " + exitCode);
         return exitCode;
     }
     
     public static int mountRemoteSystem(String ipAddress, String userName, String password)
     {
         String command = mountRemoteFileSystemScript + " " + ipAddress + " " + userName + " " + password;
-        logger.info("\n" + "Mounting the The remote System : " + ipAddress);
+        log.info("\n" + "Mounting the The remote System : " + ipAddress);
         
         int exitCode = callExec(command);
-        logger.info("\n Exit code is : " + exitCode);
+        log.trace("\n Exit code is : " + exitCode);
         return exitCode;
         
     }
     
     public static int unmountRemoteSystem(String mountPath)
     {
-        logger.info("Unmounting the Remote File System in mount path : " + mountPath);
+        log.debug("Unmounting the Remote File System in mount path : " + mountPath);
         int exitCode = callExec(mountRemoteFileSystemScript);
-        logger.info("\n Exit code is : " + exitCode);
+        log.debug("\n Exit code is : " + exitCode);
         return exitCode;
         
     }
@@ -77,11 +73,10 @@ public class MountVMImage {
                 output.append(line).append("\n");
             }
         } catch (InterruptedException | IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
-        logger.info(output.toString());
-        new FileUtilityOperation().writeToFile(new File(Constants.EXEC_OUTPUT_FILE), output.toString(), false);
-        logger.info("Exec command output : " + output.toString());
+        log.debug(output.toString());
+        log.trace("Exec command output : " + output.toString());
         return exitCode;
         
     }
