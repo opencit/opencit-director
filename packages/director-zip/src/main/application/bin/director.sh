@@ -46,12 +46,14 @@ fi
 
 ###################################################################################################
 
-# if non-root execution is specified, and we are currently root, start over; the DIRECTOR_SUDO variable limits this to one attempt
-# we make an exception for the uninstall command, which may require root access to delete users and certain directories
-if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$DIRECTOR_SUDO" ] && [ "$1" != "uninstall" ]; then
-  sudo -u $DIRECTOR_USERNAME DIRECTOR_USERNAME=$DIRECTOR_USERNAME DIRECTOR_HOME=$DIRECTOR_HOME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
-  exit $?
-fi
+### THIS NEEDS TO BE UPDATED LATER, MUST NOT REQUIRE USER TO RUN APPLICATION AS ROOT -rksavino
+
+## if non-root execution is specified, and we are currently root, start over; the DIRECTOR_SUDO variable limits this to one attempt
+## we make an exception for the uninstall command, which may require root access to delete users and certain directories
+#if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) == "root" ] && [ -z "$DIRECTOR_SUDO" ] && [ "$1" != "uninstall" ]; then
+#  sudo -u $DIRECTOR_USERNAME DIRECTOR_USERNAME=$DIRECTOR_USERNAME DIRECTOR_HOME=$DIRECTOR_HOME DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD DIRECTOR_SUDO=true director $*
+#  exit $?
+#fi
 
 ###################################################################################################
 
