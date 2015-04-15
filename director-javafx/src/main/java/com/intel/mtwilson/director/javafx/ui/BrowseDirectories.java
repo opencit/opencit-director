@@ -180,10 +180,10 @@ public class BrowseDirectories {
         hBox2.setStyle("-fx-background-color: #336699;");
         Button addMore = new Button("Add more");
         addMore.setPrefSize(100, 20);
-        Button next = new Button("Next");
+        Button create = new Button("Create");
         //hash.setPrefSize(100, 20);
         hBox2.getChildren().add(addMore);
-        hBox2.getChildren().add(next);
+        hBox2.getChildren().add(create);
         
         //Add handler to "Add more" button
         addMore.setOnAction(new EventHandler<ActionEvent>() {
@@ -226,7 +226,7 @@ public class BrowseDirectories {
         });
         
         // Add handler to "Calculate Hash" button
-        next.setOnAction(new EventHandler<ActionEvent>() {
+        create.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
 //                CreateImage.manifestFlag=true;
@@ -276,11 +276,6 @@ public class BrowseDirectories {
                     else{
                         trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);                        
                     }
-                    // Unmount the VM Image
-                    if (!isBareMetalLocal) {
-                        log.debug("Unmounting the VM Image");
-                        int exitCode = MountVMImage.unmountImage(mountPath);
-                    }
                     if (!isBareMetalLocal && !isBareMetalRemote) {
                         try {
                             //Encrypt image
@@ -300,11 +295,20 @@ public class BrowseDirectories {
                                 //TODO handle exception
                             }
                         } catch (IOException ex) {
-                            log.error("Erroe while encryptin image"+ex);
-                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+                            log.error("Error while encryptin image"+ex);
+                            //TODO Error handling
+                            //new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
                         }
                     }
-                    String trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
+                    String trustPolicyLocation = null;
+                    try {
+                        trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
+                    } catch (IOException ex) {
+                        log.error("Error while saving trust policy "+ ex);
+                        //TODO error handling
+                        //new ConfigurationInformation(primaryStage).showWarningPopup("Error while storing trust policy");
+                        
+                    }
                     if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
                         // Show the manifest file location
                         new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
@@ -314,6 +318,11 @@ public class BrowseDirectories {
                     }else {
                         log.error("Error in creating the trust policy");
 //			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
+                    }
+                    // Unmount the VM Image
+                    if (!isBareMetalLocal) {
+                        log.debug("Unmounting the VM Image");
+                        int exitCode = MountVMImage.unmountImage(mountPath);
                     }
                     
 //                  primaryStage.setScene(firstWindowScene);
@@ -352,13 +361,19 @@ public class BrowseDirectories {
         return message;
     }
     //save trustPolicy
-    private String saveTrustPolicy(String signedTrustPolicy, Map<String, String> confInfo) {
+    private String saveTrustPolicy(String signedTrustPolicy, Map<String, String> confInfo) throws IOException {
         PrintWriter out = null;
         String imagePathDelimiter = "/";
         String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        String mountPath = "/tmp/mount";
         String trustPolicyDirLocation;
-        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) | Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
-            trustPolicyDirLocation = "/etc/trustdirector/trustpolicy";
+        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) ) {
+            trustPolicyDirLocation = "/etc/director/trustpolicy";
+            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");            
+        }
+        else if(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))){
+            trustPolicyDirLocation = mountPath+"/etc/director/trustpolicy";
+            MountVMImage.callExec("mkdir -p "+mountPath+"/etc/director/trustpolicy"); 
         }
         else{
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);

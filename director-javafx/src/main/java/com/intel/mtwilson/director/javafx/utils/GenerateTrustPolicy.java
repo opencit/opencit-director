@@ -83,7 +83,7 @@ public class GenerateTrustPolicy {
             }
             log.debug("Find Command is::: " + findCmd);
             String fileListForDir = executeShellCommand(findCmd);
-            log.trace("filePath list is::: "+fileListForDir);
+            log.trace("Directory list is::: "+fileListForDir);
             // add directory to manifest
             if (fileListForDir == null) {
                 manifestList.add((com.intel.mtwilson.manifest.xml.MeasurementType) dir);
