@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Trust Director install script
 # Outline:
@@ -215,7 +215,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 java_detect
 if ! java_ready; then
   # java not installed, check if we have the bundle
-  JAVA_INSTALL_REQ_BUNDLE=$(ls -1 java-*.bin 2>/dev/null | head -n 1)
+  JAVA_INSTALL_REQ_BUNDLE=$(ls -1 jdk-*.tar.gz 2>/dev/null | head -n 1)
   if [ -n "$JAVA_INSTALL_REQ_BUNDLE" ]; then
     director_java_install
     java_detect
