@@ -168,7 +168,7 @@ public class GenerateTrustPolicy {
             mountPath="";
         log.debug("Hash type is :"+getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE));
         ImageHash imageHash = new ImageHash();
-        String opensslCmd ="";
+        //String opensslCmd ="";
         List<MeasurementType> whitelistValue = whitelist.getMeasurements();
         try {
             //set digest algorithm
@@ -177,7 +177,6 @@ public class GenerateTrustPolicy {
                     md = MessageDigest.getInstance("SHA-256");
                     whitelist.setDigestAlg("sha256");
                     imageHash.setDigestAlg("sha256");
-                    opensslCmd = "openssl dgst -sha256";
                     break;
                 case "SHA-1":                    
                 default:
@@ -185,7 +184,6 @@ public class GenerateTrustPolicy {
                     md = MessageDigest.getInstance("SHA-1");
                     whitelist.setDigestAlg("sha1");
                     imageHash.setDigestAlg("sha1");
-                    opensslCmd = "openssl dgst -sha1";
                     break;
             }
         }catch (NoSuchAlgorithmException ex) {
@@ -222,8 +220,11 @@ public class GenerateTrustPolicy {
             String fileListForDir = executeShellCommand(getFilesCmd);
             
             //add the directory to whitelist
-            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+" | "+opensslCmd+"|awk '{print $2}'"));
-            log.debug("Directory hash command is: " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + "result is" + directoryWhitelist.getValue());
+            //String absoluteList = executeShellCommand(getFilesCmd);
+            String relativeFileList = fileListForDir.replace(mountPath,"");
+            log.trace("File list for directory {} is {}", directoryWhitelist.getPath(), relativeFileList);
+            directoryWhitelist.setValue(computeHash(md, relativeFileList));
+            log.debug("Directory hash command is: " + getFilesCmd  + "result is" + directoryWhitelist.getValue());
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
