@@ -309,24 +309,23 @@ public class BrowseDirectories {
                         //new ConfigurationInformation(primaryStage).showWarningPopup("Error while storing trust policy");
                         
                     }
-                    if (trustPolicyLocation != null && (!isBareMetalLocal) && (!isBareMetalRemote)) {
-                        // Show the manifest file location
-                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
-                    } else if(isBareMetalLocal || isBareMetalRemote) {
-                        new UserConfirmation().generateManifesConfirmation(primaryStage, trustPolicyLocation);
-                        
-                    }else {
-                        log.error("Error in creating the trust policy");
-//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-                    }
                     // Unmount the VM Image
                     if (!isBareMetalLocal) {
                         log.debug("Unmounting the VM Image");
                         int exitCode = MountVMImage.unmountImage(mountPath);
                     }
-                    
-//                  primaryStage.setScene(firstWindowScene);
-                    
+                    String message;
+                    if (isBareMetalLocal) {
+                        message = "Trust Policy is saved at: " + trustPolicyLocation + "\n\n";;
+                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message); 
+                    } else if (isBareMetalRemote) {
+                        trustPolicyLocation = trustPolicyLocation.replace("/tmp/mount", "");
+                        message = "Trust Policy is saved on remote host at: " + trustPolicyLocation + "\n\n";
+                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                    } else {
+                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
+//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
+                    }
                 }
             }
         });

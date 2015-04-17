@@ -57,10 +57,6 @@ public class UserConfirmation {
         
         Button saveButton=new Button("Upload Later");
         Button uploadButton=new Button("Upload");
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setPrefSize(80, 15);
-        
-        
         
 //        PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -125,23 +121,12 @@ public class UserConfirmation {
                 }
               });
         
-        // Handler for "I will Upload" button
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                primaryStage.close();
-                 ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
-            }
-        });
-        
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(35);
         hbox.setStyle("-fx-background-color: #336699;");
         
-        hbox.getChildren().addAll(cancelButton, uploadButton,saveButton);
+        hbox.getChildren().addAll(uploadButton,saveButton);
 
 
         
@@ -199,7 +184,7 @@ public class UserConfirmation {
     }
     
     // Show the vm image and manifest glance ID
-    private void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
+    public void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
         //primaryStage.setTitle("Upload Success Message");
         //String info = "Manifest Uploaded on glance " + "\n" + "Manifest Glance ID is : " + manifestGlanceID;;
         Label message = new Label(messageInfo);
