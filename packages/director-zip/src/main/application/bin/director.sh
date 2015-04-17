@@ -132,6 +132,16 @@ director_complete_setup() {
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   director_run setup $DIRECTOR_SETUP_TASKS
+  
+  ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
+  if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
+    openssl s_client -connect ${MTWILSON_SERVER}:${MTWILSON_SERVER_PORT} 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/mtwcert.pem
+    $JAVA_HOME/jre/bin/keytool -import -noprompt -trustcacerts -alias mtwcert -file /tmp/mtwcert.pem -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass "$JAVA_KEYSTORE_PASSWORD"
+    rm /tmp/mtwcert.pem
+  else
+    echo_failure "Mtwilson server address or server port not defined"
+    return -1
+  fi
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order

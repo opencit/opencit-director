@@ -1,0 +1,2 @@
+# building director depends on building the external dependencies first
+dev-1.x: dcg_security-mtwilson/dev-3.x, dcg_security-kms/dev-1.x
