@@ -8,6 +8,7 @@ import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.KmsUtil;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
+import com.intel.mtwilson.director.javafx.utils.UnmountException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class BrowseDirectories {
     private Stage primaryStage;
     private Scene firstWindowScene;
 
-    private String mountPath = Constants.MOUNT_PATH;
+    private String mountPath;
     private boolean isBareMetalLocal;
     private boolean isBareMetalRemote;
     ObservableList<Directories> list = null;
@@ -69,6 +70,7 @@ public class BrowseDirectories {
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
         isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
         isBareMetalRemote=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
+        mountPath = confInfo.get(Constants.MOUNT_PATH2);
         
         if(isBareMetalLocal){
             mountPath="/";
@@ -311,8 +313,10 @@ public class BrowseDirectories {
                     }
                     // Unmount the VM Image
                     if (!isBareMetalLocal) {
-                        log.debug("Unmounting the VM Image");
+                        log.debug("Unmounting the VM Image from mount path {}",mountPath);
                         int exitCode = MountVMImage.unmountImage(mountPath);
+                        if(exitCode != 0)
+                            log.error("Error while unmounting image. Exit code {}", exitCode);
                     }
                     String message;
                     if (isBareMetalLocal) {
@@ -432,11 +436,11 @@ public class BrowseDirectories {
     private void initializeDefaultDirectoryList(boolean isWindows) {
         if(isWindows) {
             
-            list = FXCollections.observableArrayList(
-                    new Directories(new CheckBox("Windows/System32"), new TextField()),
-                    new Directories(new CheckBox("Windows/Boot"), new TextField())
-                    );
-            mountPath = Constants.MOUNT_PATH + "/";
+//            list = FXCollections.observableArrayList(
+//                    new Directories(new CheckBox("Windows/System32"), new TextField()),
+//                    new Directories(new CheckBox("Windows/Boot"), new TextField())
+//                    );
+//            mountPath = Constants.MOUNT_PATH + "/";
         } else {
             list = FXCollections.observableArrayList(
                     new Directories(new CheckBox("/etc"), new TextField()),

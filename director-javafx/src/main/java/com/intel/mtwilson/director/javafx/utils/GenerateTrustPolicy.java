@@ -46,11 +46,12 @@ public class GenerateTrustPolicy {
     private String mountPath;
     //private String imageHash;
     public GenerateTrustPolicy(){
-        mountPath = Constants.MOUNT_PATH;
+        
     }
     
     //Creates trust policy for baremetal
     public String createManifest(List<Directories> directories, Map<String, String> configInfo){
+        mountPath = configInfo.get(Constants.MOUNT_PATH2);
         if(Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL)))
             mountPath="";
         Manifest manifest = new Manifest();
@@ -119,6 +120,7 @@ public class GenerateTrustPolicy {
     
     //Creates trust policy for VM
     public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo) throws Exception{
+        mountPath = configInfo.get(Constants.MOUNT_PATH2);
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
         //Set customerId

@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.UnsuccessfulRemoteMountException;
 
 /**
  *
@@ -110,8 +111,13 @@ public class RemoteSystem {
 //                 Write configuration values to map
                 Map<String, String> customerInfo;
                 customerInfo = hostWriteToMap();
-
-                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText());
+                String mountpath="/mnt/host/"+ipAddressTField.getText();
+                customerInfo.put(Constants.MOUNT_PATH2, mountpath);
+                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText(),mountpath);
+                if(exitCode != 0) {
+                    log.error("Error while mounting remote file system. Exit code {}",exitCode);
+                    ErrorMessage.showErrorMessage(remoteSystemStage, new UnsuccessfulRemoteMountException(Integer.toString(exitCode)));
+                }
                 log.debug("Remote system mounted");
                 BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
                 secondWindow.launch(customerInfo);

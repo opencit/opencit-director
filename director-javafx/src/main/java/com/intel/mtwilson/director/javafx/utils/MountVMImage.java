@@ -21,10 +21,10 @@ public class MountVMImage {
     private static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
     private static final String mountRemoteFileSystemScript="/opt/director/bin/mount_remote_system.sh";
     
-    public static int mountImage(String imagePath) {
+    public static int mountImage(String imagePath, String mountpath) {
         
-        String command = mountScript + " " + imagePath;
-        log.debug("\n" + "Mounting the vm image : " + imagePath);
+        String command = mountScript + " " + imagePath+" "+mountpath;
+        log.debug("\n" + "Mounting the vm image : " + imagePath );
         log.trace("Command:" + command);
         int exitCode = callExec(command);
         log.trace("\n Exit code is : " + exitCode);
@@ -34,14 +34,14 @@ public class MountVMImage {
     public static int unmountImage(String mountPath) {
         
         log.debug("Unmounting the vm image with mount path : " + mountPath);
-        int exitCode = callExec(mountScript);
+        int exitCode = callExec(mountScript+" "+mountPath);
         log.trace("\n Exit code is : " + exitCode);
         return exitCode;
     }
     
-    public static int mountRemoteSystem(String ipAddress, String userName, String password)
+    public static int mountRemoteSystem(String ipAddress, String userName, String password, String mountpath)
     {
-        String command = mountRemoteFileSystemScript + " " + ipAddress + " " + userName + " " + password;
+        String command = mountRemoteFileSystemScript + " " + ipAddress + " " + userName + " " + password + " "+mountpath;
         log.info("\n" + "Mounting the The remote System : " + ipAddress);
         
         int exitCode = callExec(command);
@@ -53,7 +53,7 @@ public class MountVMImage {
     public static int unmountRemoteSystem(String mountPath)
     {
         log.debug("Unmounting the Remote File System in mount path : " + mountPath);
-        int exitCode = callExec(mountRemoteFileSystemScript);
+        int exitCode = callExec(mountRemoteFileSystemScript+" "+mountPath);
         log.debug("\n Exit code is : " + exitCode);
         return exitCode;
         

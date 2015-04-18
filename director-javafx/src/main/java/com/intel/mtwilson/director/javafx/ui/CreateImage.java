@@ -7,6 +7,7 @@ package com.intel.mtwilson.director.javafx.ui;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.UnsuccessfulImageMountException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -269,8 +270,9 @@ public class CreateImage {
 //                    } else {
                         int exitCode = 21;
                         // Check for ami Image
+                        
                         if(customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
-                            
+                            /*
                             // Extract the compressed VM AMI Image
                             String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
                             boolean isExtracted = op.extractCompressedImage(customerInfo.get(Constants.IMAGE_LOCATION), extractedLocation);
@@ -282,14 +284,17 @@ public class CreateImage {
                                 // Get the AMI Image Information
                                 new AMIImageInformation().getAMIImageInfo(createImageStage, customerInfo, extractedLocation, includeImageHash);   
                             }
+                                    */
                         } else {
+                            String mountpath = "/mnt/vm/"+imageNameTField.getText();
+                            customerInfo.put(Constants.MOUNT_PATH2, mountpath);
                             // Mount the VM disk image
-                            exitCode = MountVMImage.mountImage(imagePathTField.getText());
+//                            exitCode = MountVMImage.mountImage(imagePathTField.getText());
                             // Mount the VM disk image
-                            exitCode = MountVMImage.mountImage(imagePathTField.getText());
+                            exitCode = MountVMImage.mountImage(imagePathTField.getText(), mountpath);
                             log.info("Exit Code" + exitCode);
                             if( exitCode == 0) {
-                                if(new File(Constants.MOUNT_PATH + "/Windows/System32/ntoskrnl.exe").exists()) {
+                                if(new File(customerInfo.get(Constants.MOUNT_PATH2) + "/Windows/System32/ntoskrnl.exe").exists()) {
                                     customerInfo.put(Constants.IS_WINDOWS, "true");
                                 } else {
                                     customerInfo.put(Constants.IS_WINDOWS, "false");
@@ -297,10 +302,8 @@ public class CreateImage {
                                 BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
                                 secondWindow.launch(customerInfo);                        
                             } else {
-                                log.error("Error while mounting the image .. Exiting ....");
-                                String warningMessage = "Error while mounting the image .. Exiting ....";
-//                                showWarningPopup(warningMessage);
-                                System.exit(exitCode);
+                                log.error("Error while mounting the image. Exit code {}", exitCode);
+                                ErrorMessage.showErrorMessage(createImageStage, new UnsuccessfulImageMountException(Integer.toString(exitCode)));
                             }
                         }
 //                    }

@@ -1,8 +1,5 @@
 #!/bin/bash
 set -x
-mountPath="/tmp/mount"
-vhdMountPath="/tmp/vhdmnt"
-
 function unmount_vm_image() {
         echo "################ Unmounting the mount path"
         mountPathCheck=$(mount | grep -o "$mountPath")
@@ -17,31 +14,18 @@ function unmount_vm_image() {
 		then
                       echo "Unmount unsuccessful"
 			exit 1
-		fi	
+		fi
+                rm -rf $mountPath	
         fi
 
         kpartx -d /dev/loop0
         losetup -d /dev/loop0
         qemu-nbd -d /dev/nbd0
 
-        vhdPathCheck=$(mount | grep -o "$vhdMountPath")
-        if [ ! -z $vhdPathCheck ]
-        then
-                umount $vhdMountPath 2>/dev/null
-                if [ ! $? ]
-                then
-                        echo "Unmounting $vhdMountPath Failed . . ."
-                        exit 1
-                fi
-        fi
-	
-	killall -9 qemu-nbd
+        killall -9 qemu-nbd
 	killall -9 vdfuse
 
         rm -rf $mountPath
-        mkdir -p $mountPath
-        rm -rf $vhdMountPath
-        mkdir $vhdMountPath
 }
 
 function mount_qcow2_image() {
@@ -54,10 +38,8 @@ function mount_qcow2_image() {
         if [ -b /dev/nbd0p1 ]
         then
                 mount /dev/nbd0p1 $mountPath
-				echo "mount result if condition $?"
         else
                 mount /dev/nbd0 $mountPath
-				echo "mount else condition result $?"
         fi
 }
 
@@ -105,20 +87,20 @@ function mount_raw_image_duplicate() {
 }
 
 function mount_vhd_image() {
-        vdfuse -w -f $imagePath $vhdMountPath
+        vdfuse -w -f $imagePath $mountPath
 	sleep 1
-        out=$(ls $vhdMountPath | grep "Partition1")
+        out=$(ls $mountPath | grep "Partition1")
 
         if [ -z $out ];
         then
-                #mount $vhdMountPath/EntireDisk $mountPath
-		imagePath="$vhdMountPath/EntireDisk"
+                #mount $mountPath/EntireDisk $mountPath
+		imagePath="$mountPath/EntireDisk"
 		#mount_raw_image
 		mount_raw_image_duplicate
                 echo "##########%%%%%%%%%%%%%%% Mounted VHD***********"
         else
-                #mount $vhdMountPath/Partition1 $mountPath
-		imagePath="$vhdMountPath/Partition1"
+                #mount $mountPath/Partition1 $mountPath
+		imagePath="$mountPath/Partition1"
 		#mount_raw_image
 		mount_raw_image_duplicate
         fi
@@ -140,15 +122,15 @@ function check_unmount_status()
 	fi
 }
 
-if [ $# -eq 0 ]
+if [ $# -eq 1 ]
 then
-	#check_unmount_status
+        mountPath=$1
 	unmount_vm_image
 	exit 0
 fi
 
 imagePath=$1
-
+mountPath=$2
 #checkVhd=$(tar tf $imagePath 2>/dev/null | grep 0.vhd)
 #if [ ! -z $checkVhd ]
 #then
@@ -165,26 +147,30 @@ imageFormat=$(qemu-img info $imagePath  | grep "file format" | awk -F ':' '{ pri
 
 echo "################ Original image format is $imageFormat"
 
+#Unmount image if mountpath exist
+if [ -d $mountPath ]; then
+    unmount_vm_image
+fi
+
+#Create mount directory
+mkdir -p $mountPath
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
 case "$imageFormat" in
    "raw")
 	echo "Mounting the raw Image."
-	#check_unmount_status
-	unmount_vm_image
-        echo "Unmount was done for Raw"
 	#mount_raw_image
 	mount_raw_image_duplicate
         echo "Mount the Raw now done"
    ;;
    "vpc")
 	echo "########### Mounting vhd Image" 
-	#check_unmount_status
-	unmount_vm_image
 	mount_vhd_image
    ;;
    "qcow2")
 	echo "################ Mounting qcow2 Image." 
-	#check_unmount_status
-	unmount_vm_image
 	mount_qcow2_image
    ;;
    *)

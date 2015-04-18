@@ -56,7 +56,7 @@ public class Constants {
     public static final String TENANT_NAME = "tenant.name";
     public static final String DIRECTOR_ID = "director.id";
     
-    public static final String MOUNT_PATH = "/tmp/mount";
+    public static final String MOUNT_PATH2 = "mountpath";
     
     public static final String EncPASSWORD = "intelrp";
     
