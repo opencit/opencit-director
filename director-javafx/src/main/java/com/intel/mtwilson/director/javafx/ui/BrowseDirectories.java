@@ -237,6 +237,7 @@ public class BrowseDirectories {
                 boolean isDirExist = true;
                 List<Directories> dirList = new ArrayList<>();
                 for (Directories dir : list) {
+                    log.debug("Mount path {} ,dir path {}",mountPath,dir.getCbox().getText());
                     if(dir.getCbox().isSelected() && (mountPath!="/")) {
                         if(!new File(mountPath + dir.getCbox().getText()).exists()) {
                             isDirExist = false;
@@ -261,9 +262,10 @@ public class BrowseDirectories {
                 } else if (confInfo!=null){
                     
                     String trustPolicy = null;
+                    String trustPolicyWithWl = null;
                     if (!isBareMetalLocal && !isBareMetalRemote) {
                         try {
-                            // Generate TrustPolicy and encrypt image if necessary
+                            // Generate TrustPolicy
                             log.debug("Calling generateTP..");
                             trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
                             log.debug("After Calling generateTP..");
@@ -276,7 +278,13 @@ public class BrowseDirectories {
                         
                     }
                     else{
-                        trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);                        
+                        trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);       
+                        try {
+                            trustPolicyWithWl = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                            saveTrustPolicyWithWhitelist(trustPolicyWithWl,confInfo);
+                        } catch (Exception ex) {
+                            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                     if (!isBareMetalLocal && !isBareMetalRemote) {
                         try {
@@ -305,6 +313,7 @@ public class BrowseDirectories {
                     String trustPolicyLocation = null;
                     try {
                         trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
+                        
                     } catch (IOException ex) {
                         log.error("Error while saving trust policy "+ ex);
                         //TODO error handling
@@ -320,11 +329,16 @@ public class BrowseDirectories {
                     }
                     String message;
                     if (isBareMetalLocal) {
-                        message = "Trust Policy is saved at: " + trustPolicyLocation + "\n\n";;
+                        message = "\nTrust Policy:  " + trustPolicyLocation + "\n"
+                                + "Trust Policy with Whitelist:  "+confInfo.get(Constants.BM_TP_WL_LOCAL);
                         new UserConfirmation().showUploadSuccessMessage(primaryStage, message); 
                     } else if (isBareMetalRemote) {
-                        trustPolicyLocation = trustPolicyLocation.replace("/tmp/mount", "");
-                        message = "Trust Policy is saved on remote host at: " + trustPolicyLocation + "\n\n";
+                        trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
+                        message = "Remote Host: \n"
+                                + "Trust Policy:  " + trustPolicyLocation + "\n\n"
+                                + "Trust Director:\n"
+                                + "Trust Policy:  "+confInfo.get(Constants.BM_TP_LOCAL)+"\n"
+                                + "Trust Policy with Whitelist:  "+confInfo.get(Constants.BM_TP_WL_LOCAL)+"\n";
                         new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
                     } else {
                         new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
@@ -364,35 +378,60 @@ public class BrowseDirectories {
         return message;
     }
     //save trustPolicy
-    private String saveTrustPolicy(String signedTrustPolicy, Map<String, String> confInfo) throws IOException {
+    private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws IOException {
+        String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, false);
+    }
+    
+    //Used to save baremetal trust policy that contains whitelist
+    private String saveTrustPolicyWithWhitelist(String trustPolicy, Map<String, String> confInfo) throws IOException {
+        String fileName = "/TrustPolicyWithWhitelist-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        return saveTrustPolicyHelper(trustPolicy, confInfo, fileName, true);
+    }
+    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isBareMetalTpWl) throws IOException {
         PrintWriter out = null;
         String imagePathDelimiter = "/";
-        String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        String mountPath = "/tmp/mount";
         String trustPolicyDirLocation;
         if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) ) {
             trustPolicyDirLocation = "/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");            
+            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");          
+            if(isBareMetalTpWl)
+                confInfo.put(Constants.BM_TP_WL_LOCAL, trustPolicyDirLocation+filename);
         }
         else if(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))){
             trustPolicyDirLocation = mountPath+"/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p "+mountPath+"/etc/director/trustpolicy"); 
+            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation); 
+            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation.replace(mountPath, ""));  
+            
+            //save trust policy on trust director
+            String localTpLocation = "/etc/director/trustpolicy/"+filename;
+            out = new PrintWriter(localTpLocation);
+            out.println(signedTrustPolicy);
+            out.close();
+            if(isBareMetalTpWl)
+                confInfo.put(Constants.BM_TP_WL_LOCAL, localTpLocation);
+            else
+                confInfo.put(Constants.BM_TP_LOCAL, localTpLocation);
         }
         else{
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
             int endIndex = imageLocation.lastIndexOf(imagePathDelimiter);
             trustPolicyDirLocation = imageLocation.substring(0, endIndex);
         }
-        String filePath = trustPolicyDirLocation + trustPolicyName;
+        String filePath = trustPolicyDirLocation + filename;
         try {
-            out = new PrintWriter(filePath);
-            out.println(signedTrustPolicy);
-            out.close();
+            //if there is bare metal trust policy with whitelist do not need to store on remote system  
+            if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isBareMetalTpWl) {
+                out = new PrintWriter(filePath);
+                out.println(signedTrustPolicy);
+                out.close();
+            }
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            out.close();
+            if(out != null)
+                out.close();
         }
         return filePath;
     }
