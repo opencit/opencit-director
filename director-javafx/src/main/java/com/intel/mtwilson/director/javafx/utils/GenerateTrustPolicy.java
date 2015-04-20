@@ -223,9 +223,17 @@ public class GenerateTrustPolicy {
             log.debug("Find Command is::: " + getFilesCmd);
             String fileListForDir = executeShellCommand(getFilesCmd);
             
+            //update find command to get directory hash
+            //remove mount path from find comamnd
+            if(!Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL))){
+                getFilesCmd = getFilesCmd+" | sed -r 's/.{"+mountPath.length()+"}//'";
+            }
+            //Add openssl command to find
+            getFilesCmd = getFilesCmd+" | "+opensslCmd;
+            
             //add the directory to whitelist
-            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+" | "+opensslCmd+"|awk '{print $2}'"));
-            log.debug("Directory hash command is: " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + "result is" + directoryWhitelist.getValue());
+            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+"|awk '{print $2}'"));
+            log.debug("Directory hash command is: " + getFilesCmd + "|awk '{print $2}'" + " result is " + directoryWhitelist.getValue());
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
