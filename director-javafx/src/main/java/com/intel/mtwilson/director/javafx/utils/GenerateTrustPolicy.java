@@ -230,8 +230,8 @@ public class GenerateTrustPolicy {
             getFilesCmd = getFilesCmd+" | "+opensslCmd;
             
             //add the directory to whitelist
-            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+" | "+opensslCmd+"|awk '{print $2}'"));
-            log.debug("Directory hash command is: " + getFilesCmd + " | " + opensslCmd + "|awk '{print $2}'" + " result is " + directoryWhitelist.getValue());
+            directoryWhitelist.setValue(executeShellCommand(getFilesCmd+"|awk '{print $2}'"));
+            log.debug("Directory hash command is: " + getFilesCmd + "|awk '{print $2}'" + " result is " + directoryWhitelist.getValue());
             whitelistValue.add((MeasurementType) directoryWhitelist);
 
             //Extend image hash to include directory
