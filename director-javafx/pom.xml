@@ -195,5 +195,10 @@
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-client-jaxrs2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.schmizz</groupId>
+            <artifactId>sshj</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

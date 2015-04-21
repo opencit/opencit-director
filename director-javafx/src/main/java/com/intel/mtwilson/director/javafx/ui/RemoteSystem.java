@@ -5,6 +5,7 @@
  */
 package com.intel.mtwilson.director.javafx.ui;
 
+import com.intel.dcsg.cpg.net.InternetAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -19,9 +20,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
+import com.intel.mtwilson.director.javafx.utils.IncorrectCredentialsException;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.UnsuccessfulRemoteMountException;
-
+import java.io.IOException;
+import java.security.PublicKey;
+import java.util.logging.Level;
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 /**
  *
  * @author preetisr
@@ -34,7 +40,8 @@ public class RemoteSystem {
     private TextField ipAddressTField;
     private TextField userNameTField;
     private PasswordField passwordTField;
-
+    private final RemoteHostKey remoteHostKey = new RemoteHostKey(); 
+    
     private final ToggleGroup togBoxMeasure = new ToggleGroup();
     String hostManifest;
 
@@ -113,6 +120,13 @@ public class RemoteSystem {
                 customerInfo = hostWriteToMap();
                 String mountpath="/mnt/host/"+ipAddressTField.getText();
                 customerInfo.put(Constants.MOUNT_PATH2, mountpath);
+                // Testing ssh connection. Main reason is to add sshkey while first connection, need to find better solution 
+                try {
+                    CheckSshConnection(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText());
+                } catch (IOException ex) {
+                    log.debug("Can not connect to remote host");
+                    ErrorMessage.showErrorMessage(remoteSystemStage, new IncorrectCredentialsException());
+                }
                 int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText(),mountpath);
                 if(exitCode != 0) {
                     log.error("Error while mounting remote file system. Exit code {}",exitCode);
@@ -141,6 +155,41 @@ public class RemoteSystem {
         //scene.setFill(Color.AQUA);
         remoteSystemStage.setScene(scene);
         remoteSystemStage.show();
+    }
+    
+    private void CheckSshConnection(String ipaddress, String username, String password) throws IOException{
+        InternetAddress remoteHost = new InternetAddress(ipaddress);
+        SSHClient ssh = new SSHClient();        
+        RemoteHostKeyDeferredVerifier hostKeyVerifier = new RemoteHostKeyDeferredVerifier(remoteHostKey);
+        ssh.addHostKeyVerifier(hostKeyVerifier); // this accepts all remote public keys, then you have to verify the remote host key before continuing!!!
+        ssh.connect(remoteHost.toString());
+        ssh.authPassword(username, password);
+        ssh.disconnect(); 
+    }
+    
+    public static class RemoteHostKey {
+        public String server;
+        public int port;
+        public PublicKey publicKey;
+    }
+    
+    
+     public static class RemoteHostKeyDeferredVerifier implements HostKeyVerifier {
+        private RemoteHostKey remoteHostKey;
+        public RemoteHostKeyDeferredVerifier() {
+            this.remoteHostKey = new RemoteHostKey();
+        }
+        public RemoteHostKeyDeferredVerifier(RemoteHostKey remoteHostKey) {
+            this.remoteHostKey = remoteHostKey;
+        }
+        @Override
+        public boolean verify(String string, int i, PublicKey pk) {
+            remoteHostKey.server = string;
+            remoteHostKey.port = i;
+            remoteHostKey.publicKey = pk;
+            return true;
+        }
+        public RemoteHostKey getRemoteHostKey() { return remoteHostKey; }
     }
 
     // Store configuration values in hash map for host manifest generation
