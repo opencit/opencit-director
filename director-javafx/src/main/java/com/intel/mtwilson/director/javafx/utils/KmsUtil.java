@@ -77,8 +77,6 @@ public class KmsUtil {
         KmsUtil kms = new KmsUtil();
         KeyContainer keyContainer = kms.getEncryptionKeyFromKms();
         String encryptedImageLocation = encryptFile(confInfo.get(Constants.IMAGE_LOCATION), Base64.encodeBase64String(keyContainer.secretKey.getEncoded()));
-        log.debug("Encryption key is;;;;;;;;;;;;;;;;;;;;{}",Base64.encodeBase64String(keyContainer.secretKey.getEncoded()));
-        log.debug("dek is;;;;;;;;;;;;;;;;;;;;;;;;;;;{}",keyContainer.secretKey.toString());
         confInfo.put(Constants.MH_DEK_URL_IMG, keyContainer.url.toString());
         confInfo.put(Constants.Enc_IMAGE_LOCATION, encryptedImageLocation);
         /*if (confInfo.containsKey(Constants.KERNEL_PATH) && confInfo.containsKey(Constants.INITRD_PATH)) {
