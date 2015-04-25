@@ -278,12 +278,12 @@ public class BrowseDirectories {
                         
                     }
                     else{
-                        trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);       
                         try {
+                            trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);       
                             trustPolicyWithWl = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
                             saveTrustPolicyWithWhitelist(trustPolicyWithWl,confInfo);
                         } catch (Exception ex) {
-                            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+                            ErrorMessage.showErrorMessage(primaryStage, ex);
                         }
                     }
                     if (!isBareMetalLocal && !isBareMetalRemote) {

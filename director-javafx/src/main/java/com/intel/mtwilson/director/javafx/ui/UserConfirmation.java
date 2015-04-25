@@ -453,7 +453,7 @@ public class UserConfirmation {
     }
   
     //Assumption trustpolicy and image location is same
-    public String createImageTrustPolicyTar(String trustPolicyLocation, String imageLocation) {
+    public String createImageTrustPolicyTar(String trustPolicyLocation, String imageLocation) throws IOException {
         String imagePathDelimiter = "/";
 
         String imageTPDir = trustPolicyLocation.substring(0, trustPolicyLocation.lastIndexOf(imagePathDelimiter));
