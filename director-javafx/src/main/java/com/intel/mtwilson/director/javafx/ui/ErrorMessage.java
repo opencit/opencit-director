@@ -21,7 +21,9 @@ import javafx.stage.Stage;
  * @author boskisha
  */
 public class ErrorMessage {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ErrorMessage.class);
     public static void showErrorMessage(final Stage primaryStage, Exception e) {
+        log.debug("Error Message called;;;;;;;;;;;;;;");
         Label message = new Label(e.getClass().getName());
         message.setFont(new Font("Arial", 14));
         
@@ -52,32 +54,7 @@ public class ErrorMessage {
         
     }
     
-    //Incomplete implementation
-    /*public static void showWarningMessage( Exception e) {
-        Label message = new Label(e.getClass().getName());
-        message.setFont(new Font("Arial", 14));
+    public static void ConfirmationMessage( Exception e) {
         
-        Button okButton = new Button("Ok");
-        okButton.setPrefSize(80, 20);
-        
-        VBox vbox = new VBox();
-        vbox.setSpacing(30);
-        vbox.setPadding(new Insets(15, 12, 15, 12));
-        
-        vbox.getChildren().addAll(message, okButton);
-        
-        okButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent t) {
-                
-            }
-        });
-
-        StackPane root = new StackPane();
-        root.getChildren().add(vbox);
-        Scene scene = new Scene(root);
-                 
-        
-    }*/
+    }
 }

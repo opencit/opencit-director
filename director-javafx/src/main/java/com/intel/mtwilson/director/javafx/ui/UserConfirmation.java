@@ -113,9 +113,10 @@ public class UserConfirmation {
                  String message=null;
                     try {
                         message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, primaryStage);
-                    } catch (ImageStoreException ex) {
-                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    } catch (Exception ex) {
+                        ErrorMessage.showErrorMessage(primaryStage, ex);
+                        return;
+                    } 
                     showUploadSuccessMessage(primaryStage, message);
                 
                 }
@@ -217,7 +218,7 @@ public class UserConfirmation {
         
     }
     
-    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws ImageStoreException {
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws Exception {
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
@@ -468,17 +469,17 @@ public class UserConfirmation {
         return imageTPDir + imagePathDelimiter + tarName;
     }
 
-    public void executeShellCommand(String cmd) {
-        log.debug("Command to execute is:" + cmd);
-        try {
-            Process p;
-            p = Runtime.getRuntime().exec(cmd);
-            p.waitFor();
-        } catch (IOException ex) {
-            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public int executeShellCommand(String command) throws Exception{
+        String[] cmd = {
+        "/bin/sh",
+        "-c",
+        command
+        };
+        log.debug("Command to execute is:" + command);
+        Process p;
+        p = Runtime.getRuntime().exec(cmd);
+        p.waitFor();
+        return p.exitValue();        
     }
     
     // Generates random UUID
