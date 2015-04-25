@@ -30,6 +30,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import org.apache.derby.diag.ErrorMessages;
 
 /**
  *
@@ -234,6 +235,7 @@ public class CreateImage {
 
             @Override
             public void handle(ActionEvent arg0) {
+                try{
                 boolean includeImageHash = false;
                 // Write configuration values to map
                 Map<String, String> customerInfo;
@@ -308,7 +310,12 @@ public class CreateImage {
                         }
 //                    }
                 }    
+            }catch(Exception e){
+                new ErrorMessage().showErrorMessage(createImageStage, e);
             }
+            
+        }
+        
         });
         
         // Handler for "Cancel" button

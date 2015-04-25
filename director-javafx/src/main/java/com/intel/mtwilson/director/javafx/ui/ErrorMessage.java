@@ -23,8 +23,8 @@ import javafx.stage.Stage;
 public class ErrorMessage {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ErrorMessage.class);
     public static void showErrorMessage(final Stage primaryStage, Exception e) {
-        log.debug("Error Message called;;;;;;;;;;;;;;");
         Label message = new Label(e.getClass().getName());
+        log.error("{}",e);
         message.setFont(new Font("Arial", 14));
         
         Button okButton = new Button("Ok");

@@ -227,13 +227,7 @@ public class UserConfirmation {
         String isPublic = "true";
         String imageId = confInfo.get(Constants.IMAGE_ID);
         ImageStore imageStoreObj = null;
-        try {
-            imageStoreObj = ImageStoreUtil.getImageStore();
-        } catch (Exception ex) {
-            log.error("Can not find Image store"+ex);
-            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
-            //TODO error handling
-        }
+        imageStoreObj = ImageStoreUtil.getImageStore();
         switch(confInfo.get(Constants.IMAGE_TYPE)) {
             case "ami":
                 diskFormat = "ami";
@@ -280,7 +274,6 @@ public class UserConfirmation {
             imageProperties.put(Constants.IS_PUBLIC, isPublic);
             imageProperties.put(Constants.IMAGE_ID, getUUID());
             String kernelGlanceID = null;
-            try{
                 if(isEncrypted) {
                     log.debug("PSDebug Came to set image prop 22222");
                     kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH),imageProperties);
@@ -315,11 +308,6 @@ public class UserConfirmation {
                         System.exit(1);
                     }
                 }
-            }catch(NullPointerException e){
-                throw new ImageStoreException(e);
-            }
-            
-            
             // Upload Initrd
             imageProperties.clear();
             imageProperties.put(Constants.NAME, imageName + "-initrd");
@@ -400,7 +388,7 @@ public class UserConfirmation {
             System.exit(1);                
         }
         }catch(Exception e){
-            
+            throw e;
         }
         finally{
             executeShellCommand("rm "+tarballLocation);

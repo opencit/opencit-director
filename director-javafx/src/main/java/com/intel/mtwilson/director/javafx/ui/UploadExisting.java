@@ -29,6 +29,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import org.apache.derby.diag.ErrorMessages;
 
 /**
  *
@@ -193,8 +194,7 @@ public class UploadExisting {
                 showUploadSuccessMessage(uploadExistingStage, message);
                 } catch (Exception ex) {
                     log.error("Can not generate trust policy", ex);
-                    new CreateImage(uploadExistingStage).showWarningPopup(ex.getClass() + " " + ex.getMessage());
-                    //TODO handling of screen
+                    new ErrorMessage().showErrorMessage(uploadExistingStage, ex);
                 }
                 
             }

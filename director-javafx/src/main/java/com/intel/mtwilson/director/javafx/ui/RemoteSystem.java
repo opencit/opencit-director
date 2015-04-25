@@ -120,36 +120,36 @@ public class RemoteSystem {
 
             @Override
             public void handle(ActionEvent arg0) {
-                boolean includeImageHash = false;
-//                 Write configuration values to map
-                Map<String, String> customerInfo;
-                customerInfo = hostWriteToMap();
-                String mountpath="/mnt/host/"+ipAddressTField.getText();
-                customerInfo.put(Constants.MOUNT_PATH2, mountpath);
-                // Testing ssh connection. Main reason is to add sshkey while first connection, need to find better solution 
                 try {
+                    boolean includeImageHash = false;
+//                 Write configuration values to map
+                    Map<String, String> customerInfo;
+                    customerInfo = hostWriteToMap();
+                    String mountpath = "/mnt/host/" + ipAddressTField.getText();
+                    customerInfo.put(Constants.MOUNT_PATH2, mountpath);
+                    // Testing ssh connection. Main reason is to add sshkey while first connection, need to find better solution 
                     boolean authentication = CheckSshConnection(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText());
                     if (!authentication && !addSshKey(ipAddressTField.getText())) {
                         log.debug("Remote host ssh key is not added to the known host");
                         ErrorMessage.showErrorMessage(remoteSystemStage, new AuthenticationException());
                         return;
-                    }
-                    else 
+                    } else {
                         log.debug("Remote Host authentication successful");
+                    }
+
+                    //calling mount script
+                    int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText(), mountpath);
+                    if (exitCode != 0) {
+                        log.error("Error while mounting remote file system. Exit code {}", exitCode);
+                        ErrorMessage.showErrorMessage(remoteSystemStage, new UnsuccessfulRemoteMountException(Integer.toString(exitCode)));
+                        return;
+                    }
+                    log.debug("Remote system mounted");
+                    BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
+                    secondWindow.launch(customerInfo);
                 } catch (Exception ex) {
                     ErrorMessage.showErrorMessage(remoteSystemStage, ex);
-                    return;
-                } 
-                //calling mount script
-                int exitCode = MountVMImage.mountRemoteSystem(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText(),mountpath);
-                if(exitCode != 0) {
-                    log.error("Error while mounting remote file system. Exit code {}",exitCode);
-                    ErrorMessage.showErrorMessage(remoteSystemStage, new UnsuccessfulRemoteMountException(Integer.toString(exitCode)));
-                    return;
                 }
-                log.debug("Remote system mounted");
-                BrowseDirectories secondWindow = new BrowseDirectories(remoteSystemStage);
-                secondWindow.launch(customerInfo);
             }
         });
         

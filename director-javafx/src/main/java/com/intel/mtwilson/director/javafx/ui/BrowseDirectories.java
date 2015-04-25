@@ -7,6 +7,7 @@ package com.intel.mtwilson.director.javafx.ui;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.KmsUtil;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
+import com.intel.mtwilson.director.javafx.utils.MtwConnectionException;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import com.intel.mtwilson.director.javafx.utils.UnmountException;
 import java.io.File;
@@ -41,13 +42,14 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.derby.diag.ErrorMessages;
 
 /**
  *
  * @author admkrushnakant
  */
 public class BrowseDirectories {
-    
+
     private Stage primaryStage;
     private Scene firstWindowScene;
 
@@ -55,39 +57,38 @@ public class BrowseDirectories {
     private boolean isBareMetalLocal;
     private boolean isBareMetalRemote;
     ObservableList<Directories> list = null;
-    
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);  
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);
+
     public BrowseDirectories(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
     }
-    
+
     public void launch(final Map<String, String> confInfo) {
-        
-         
+
         // Depending upon mounted image(Windows or Linux)
-        
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
-        isBareMetalLocal=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
-        isBareMetalRemote=(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
+        isBareMetalLocal = (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
+        isBareMetalRemote = (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
         mountPath = confInfo.get(Constants.MOUNT_PATH2);
-        
-        if(isBareMetalLocal){
-            mountPath="/";
+
+        if (isBareMetalLocal) {
+            mountPath = "/";
         }
-       
+
         log.trace("On the Browse directory  window");
-        
-       //By default disable the text field from table
-        for(Directories listComp : list) {
+
+        //By default disable the text field from table
+        for (Directories listComp : list) {
             initializeTableComponents(listComp);
         }
         primaryStage.setTitle("Generate Trust Policy!");
-        
+
         VBox vBox = new VBox();
         vBox.setPadding(new Insets(0));
         vBox.setSpacing(0);
-        
+
         HBox titleHBox = new HBox();
         titleHBox.setPadding(new Insets(15, 12, 15, 12));
         titleHBox.setSpacing(150);
@@ -95,7 +96,7 @@ public class BrowseDirectories {
         Text title = new Text("Selected Directories");
         title.setFont(Font.font("Arial", 14));
         titleHBox.getChildren().add(title);
-        
+
         Button backButton = new Button("Back");
         backButton.setPrefSize(80, 20);
         titleHBox.getChildren().add(backButton);
@@ -107,61 +108,60 @@ public class BrowseDirectories {
         final CheckBox selectAllCBox = new CheckBox("Select All");
         selectAllCBox.setSelected(true);
         Button helpBtn = new Button("Help");
-        
-        selectAllHBox.getChildren().addAll(selectAllCBox, helpBtn);    
-        
+
+        selectAllHBox.getChildren().addAll(selectAllCBox, helpBtn);
+
         helpBtn.setOnAction(new EventHandler<ActionEvent>() {
- 
-         @Override
-         public void handle(ActionEvent event) {
-             final Stage myDialog = new Stage();
-             myDialog.initModality(Modality.WINDOW_MODAL);
-           
-             Button okButton = new Button("CLOSE");
-             okButton.setOnAction(new EventHandler<ActionEvent>(){
- 
-                 @Override
-                 public void handle(ActionEvent arg0) {
-                     myDialog.close();
-                 }
-               
-             });
-           
-             Scene myDialogScene = new Scene(VBoxBuilder.create()
-                     .children(new Text(getHelpMessage()), okButton)
-                     .alignment(Pos.CENTER)
-                     .padding(new Insets(10))
-                     .build());
-           
-             myDialog.setScene(myDialogScene);
-             myDialog.show();
-         }
-     });
-        
+
+            @Override
+            public void handle(ActionEvent event) {
+                final Stage myDialog = new Stage();
+                myDialog.initModality(Modality.WINDOW_MODAL);
+
+                Button okButton = new Button("CLOSE");
+                okButton.setOnAction(new EventHandler<ActionEvent>() {
+
+                    @Override
+                    public void handle(ActionEvent arg0) {
+                        myDialog.close();
+                    }
+
+                });
+
+                Scene myDialogScene = new Scene(VBoxBuilder.create()
+                        .children(new Text(getHelpMessage()), okButton)
+                        .alignment(Pos.CENTER)
+                        .padding(new Insets(10))
+                        .build());
+
+                myDialog.setScene(myDialogScene);
+                myDialog.show();
+            }
+        });
+
         selectAllCBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) {
-                if(new_val) {
+                if (new_val) {
                     for (Directories d : list) {
                         d.getCbox().setSelected(true);
                     }
                 } else {
                     for (Directories d : list) {
                         d.getCbox().setSelected(false);
-                    }                    
+                    }
                 }
             }
         });
-        
-        
+
         final AnchorPane flowPane = new AnchorPane();
         flowPane.setStyle("-fx-background-color: DAE6F3;");
         flowPane.autosize();
-        
+
         //Add table to flowpanel
         TableView directoryTable = new TableView();
         directoryTable.setEditable(true);
-  
+
         TableColumn firstColumn = new TableColumn("Directory Path");
         //firstColumn.setMinWidth(140);
         firstColumn.setCellValueFactory(new PropertyValueFactory("cbox"));
@@ -169,13 +169,13 @@ public class BrowseDirectories {
         TableColumn thirdColumn = new TableColumn("Regular Expression");
         //thirdColumn.setMinWidth(100);
         thirdColumn.setCellValueFactory(new PropertyValueFactory("tfield"));
-        
+
         directoryTable.setItems(list);
         directoryTable.getColumns().addAll(firstColumn, thirdColumn);
         directoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        
+
         flowPane.getChildren().add(directoryTable);
-        
+
         HBox hBox2 = new HBox();
         hBox2.setPadding(new Insets(15, 12, 15, 12));
         hBox2.setSpacing(155);
@@ -186,7 +186,7 @@ public class BrowseDirectories {
         //hash.setPrefSize(100, 20);
         hBox2.getChildren().add(addMore);
         hBox2.getChildren().add(create);
-        
+
         //Add handler to "Add more" button
         addMore.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -196,13 +196,13 @@ public class BrowseDirectories {
                 CheckBox checkBox = null;
                 try {
                     File file = directory.showDialog(primaryStage);
-                    if(file.getAbsolutePath().contains(mountPath)) {
-                        if(!file.getAbsolutePath().equals(mountPath)) {
-                            if(!isDirectoryAlreadySelected(file)) {
-                                if(isDirectoryAlreadyPresent(file)) {
+                    if (file.getAbsolutePath().contains(mountPath)) {
+                        if (!file.getAbsolutePath().equals(mountPath)) {
+                            if (!isDirectoryAlreadySelected(file)) {
+                                if (isDirectoryAlreadyPresent(file)) {
                                 } else {
-                                    if(mountPath!="/"){
-                                    checkBox = new CheckBox(file.getAbsolutePath().replace(mountPath, ""));
+                                    if (mountPath != "/") {
+                                        checkBox = new CheckBox(file.getAbsolutePath().replace(mountPath, ""));
                                     } else {
                                         checkBox = new CheckBox(file.getAbsolutePath());
                                     }
@@ -210,91 +210,76 @@ public class BrowseDirectories {
                                     checkBox.setSelected(true);
                                     Directories dir = new Directories(checkBox, new TextField());
                                     initializeTableComponents(dir);
-                                    list.add(dir);                                
+                                    list.add(dir);
                                 }
                             } else {
                                 new CreateImage(primaryStage).showWarningPopup("Directory Already Selected !!");
-                            }   
+                            }
                         } else {
                             new CreateImage(primaryStage).showWarningPopup("Please select a valid directory");
                         }
                     } else {
                         new CreateImage(primaryStage).showWarningPopup("Directory does not belong to VM image");
-                    }                
-                } catch(Exception ex) {
+                    }
+                } catch (Exception ex) {
                     log.error("Not selected anything", ex);
                 }
             }
         });
-        
+
         // Add handler to "Calculate Hash" button
         create.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent arg0) {
-//                CreateImage.manifestFlag=true;
-                log.debug("calculating hash.");
-                boolean isProper = true;
-                boolean isDirExist = true;
-                List<Directories> dirList = new ArrayList<>();
-                for (Directories dir : list) {
-                    log.debug("Mount path {} ,dir path {}",mountPath,dir.getCbox().getText());
-                    if(dir.getCbox().isSelected() && (mountPath!="/")) {
-                        if(!new File(mountPath + dir.getCbox().getText()).exists()) {
-                            isDirExist = false;
-                            break;
-                        } 
-                        dirList.add(dir);
-                       
-                    } else if(dir.getCbox().isSelected() && (mountPath=="/")) {
-                        if(!new File(dir.getCbox().getText()).exists()) {
-                            isDirExist = false;
-                            break;
-                        } 
-                        dirList.add(dir);                        
+                try {
+                    log.debug("calculating hash.");
+                    boolean isProper = true;
+                    boolean isDirExist = true;
+                    List<Directories> dirList = new ArrayList<>();
+                    for (Directories dir : list) {
+                        log.debug("Mount path {} ,dir path {}", mountPath, dir.getCbox().getText());
+                        if (dir.getCbox().isSelected() && (mountPath != "/")) {
+                            if (!new File(mountPath + dir.getCbox().getText()).exists()) {
+                                isDirExist = false;
+                                break;
+                            }
+                            dirList.add(dir);
+
+                        } else if (dir.getCbox().isSelected() && (mountPath == "/")) {
+                            if (!new File(dir.getCbox().getText()).exists()) {
+                                isDirExist = false;
+                                break;
+                            }
+                            dirList.add(dir);
+                        }
                     }
-                }
-                if(!isDirExist) {
-                    new CreateImage(primaryStage).showWarningPopup("Directory does not exist !!");
+                    if (!isDirExist) {
+                        new CreateImage(primaryStage).showWarningPopup("Directory does not exist !!");
                 //} else if(dirList.isEmpty()) {
-                    //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
-                } else if(!isProper) {
-                    new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
-                } else if (confInfo!=null){
-                    
-                    String trustPolicy = null;
-                    String trustPolicyWithWl = null;
-                    if (!isBareMetalLocal && !isBareMetalRemote) {
-                        try {
+                        //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
+                    } else if (!isProper) {
+                        new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
+                    } else if (confInfo != null) {
+                        String trustPolicy = null;
+                        String trustPolicyWithWl = null;
+                        if (!isBareMetalLocal && !isBareMetalRemote) {
                             // Generate TrustPolicy
                             log.debug("Calling generateTP..");
                             trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
                             log.debug("After Calling generateTP..");
-                        } catch (Exception ex) {
-                            log.error("Can not generate trust policy",ex);
-                            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
-                            System.exit(1);
-                            //TODO handling of screen
-                        }
-                        
-                    }
-                    else{
-                        try {
-                            trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);       
+                        } else {
+                            trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);
                             trustPolicyWithWl = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            saveTrustPolicyWithWhitelist(trustPolicyWithWl,confInfo);
-                        } catch (Exception ex) {
-                            ErrorMessage.showErrorMessage(primaryStage, ex);
+                            saveTrustPolicyWithWhitelist(trustPolicyWithWl, confInfo);
                         }
-                    }
-                    if (!isBareMetalLocal && !isBareMetalRemote) {
-                        try {
+                        if (!isBareMetalLocal && !isBareMetalRemote) {
                             //Encrypt image
                             if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
                                 KmsUtil mhUtil = new KmsUtil();
                                 try {
                                     mhUtil.encryptImage(confInfo);
                                 } catch (Exception ex) {
-                                    log.error("Can not encrypt image, {}",ex);
+                                    log.error("Can not encrypt image, {}", ex);
                                     new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
                                 }
                                 trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
@@ -302,52 +287,45 @@ public class BrowseDirectories {
                             //sign trustpolicy with MTW and save it to a file
                             trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
                             if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
-                                //TODO handle exception
+                                throw new MtwConnectionException();
                             }
-                        } catch (IOException ex) {
-                            log.error("Error while encryptin image"+ex);
-                            //TODO Error handling
-                            //new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
+                        }
+                        String trustPolicyLocation = null;
+                        trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
+
+                        // Unmount the VM Image
+                        if (!isBareMetalLocal) {
+                            log.debug("Unmounting the VM Image from mount path {}", mountPath);
+                            int exitCode = MountVMImage.unmountImage(mountPath);
+                            if (exitCode != 0) {
+                                log.error("Error while unmounting image. Exit code {}", exitCode);
+                            }
+                        }
+                        String message;
+                        if (isBareMetalLocal) {
+                            message = "\nTrust Policy:  " + trustPolicyLocation + "\n"
+                                    + "Trust Policy with Whitelist:  " + confInfo.get(Constants.BM_TP_WL_LOCAL);
+                            new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                        } else if (isBareMetalRemote) {
+                            trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
+                            message = "Remote Host: \n"
+                                    + "Trust Policy:  " + trustPolicyLocation + "\n\n"
+                                    + "Trust Director:\n"
+                                    + "Trust Policy:  " + confInfo.get(Constants.BM_TP_LOCAL) + "\n"
+                                    + "Trust Policy with Whitelist:  " + confInfo.get(Constants.BM_TP_WL_LOCAL) + "\n";
+                            new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                        } else {
+                            new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
+//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
                         }
                     }
-                    String trustPolicyLocation = null;
-                    try {
-                        trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
-                        
-                    } catch (IOException ex) {
-                        log.error("Error while saving trust policy "+ ex);
-                        //TODO error handling
-                        //new ConfigurationInformation(primaryStage).showWarningPopup("Error while storing trust policy");
-                        
-                    }
-                    // Unmount the VM Image
-                    if (!isBareMetalLocal) {
-                        log.debug("Unmounting the VM Image from mount path {}",mountPath);
-                        int exitCode = MountVMImage.unmountImage(mountPath);
-                        if(exitCode != 0)
-                            log.error("Error while unmounting image. Exit code {}", exitCode);
-                    }
-                    String message;
-                    if (isBareMetalLocal) {
-                        message = "\nTrust Policy:  " + trustPolicyLocation + "\n"
-                                + "Trust Policy with Whitelist:  "+confInfo.get(Constants.BM_TP_WL_LOCAL);
-                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message); 
-                    } else if (isBareMetalRemote) {
-                        trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
-                        message = "Remote Host: \n"
-                                + "Trust Policy:  " + trustPolicyLocation + "\n\n"
-                                + "Trust Director:\n"
-                                + "Trust Policy:  "+confInfo.get(Constants.BM_TP_LOCAL)+"\n"
-                                + "Trust Policy with Whitelist:  "+confInfo.get(Constants.BM_TP_WL_LOCAL)+"\n";
-                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
-                    } else {
-                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
-//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-                    }
+
+                } catch (Exception ex) {
+                    new ErrorMessage().showErrorMessage(primaryStage, ex);
                 }
             }
         });
-        
+
         // Handler for "Back" button
         backButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -356,64 +334,68 @@ public class BrowseDirectories {
                 primaryStage.setScene(firstWindowScene);
             }
         });
-        
+
         vBox.getChildren().addAll(titleHBox, selectAllHBox, directoryTable, hBox2);
         BorderPane border = new BorderPane();
         border.setCenter(vBox);
-        
+
         StackPane root = new StackPane();
         root.getChildren().add(border);
         primaryStage.setScene(new Scene(root));
-        
+
         primaryStage.show();
 
     }
-    private String getHelpMessage(){
+
+    private String getHelpMessage() {
         String message = "\n"
-                + "Here are some examples on how to use regular expression:\n\n" + 
-"Select all files - Leave blank or put *\n" +
-"Filter file based on file format - (*.bin$|*.jar$)\n" +
-"Filter file based on file name - (^/root/ssl.crt$|^/root/director-javafx-0.1-SNAPSHOT.jar$)\n" +
-"Filter file based on some pattern - openjdk-.*-jre-headless - filters out all files where path includes any versions of openjdk-jre-headless\n";
+                + "Here are some examples on how to use regular expression:\n\n"
+                + "Select all files - Leave blank or put *\n"
+                + "Filter file based on file format - (*.bin$|*.jar$)\n"
+                + "Filter file based on file name - (^/root/ssl.crt$|^/root/director-javafx-0.1-SNAPSHOT.jar$)\n"
+                + "Filter file based on some pattern - openjdk-.*-jre-headless - filters out all files where path includes any versions of openjdk-jre-headless\n";
         return message;
     }
+
     //save trustPolicy
-    private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws IOException {
+
+    private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws Exception {
         String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, false);
     }
-    
+
     //Used to save baremetal trust policy that contains whitelist
-    private String saveTrustPolicyWithWhitelist(String trustPolicy, Map<String, String> confInfo) throws IOException {
+    private String saveTrustPolicyWithWhitelist(String trustPolicy, Map<String, String> confInfo) throws Exception {
         String fileName = "/TrustPolicyWithWhitelist-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         return saveTrustPolicyHelper(trustPolicy, confInfo, fileName, true);
     }
-    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isBareMetalTpWl) throws IOException {
+
+    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isBareMetalTpWl) throws Exception {
         PrintWriter out = null;
         String imagePathDelimiter = "/";
         String trustPolicyDirLocation;
-        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)) ) {
+        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL))) {
             trustPolicyDirLocation = "/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");          
-            if(isBareMetalTpWl)
-                confInfo.put(Constants.BM_TP_WL_LOCAL, trustPolicyDirLocation+filename);
-        }
-        else if(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))){
-            trustPolicyDirLocation = mountPath+"/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation); 
-            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation.replace(mountPath, ""));  
-            
+            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");
+            if (isBareMetalTpWl) {
+                confInfo.put(Constants.BM_TP_WL_LOCAL, trustPolicyDirLocation + filename);
+            }
+        } else if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
+            trustPolicyDirLocation = mountPath + "/etc/director/trustpolicy";
+            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
+            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation.replace(mountPath, ""));
+
             //save trust policy on trust director
-            String localTpLocation = "/etc/director/trustpolicy/"+filename;
+            String localTpLocation = "/etc/director/trustpolicy/" + filename;
             out = new PrintWriter(localTpLocation);
             out.println(signedTrustPolicy);
             out.close();
-            if(isBareMetalTpWl)
+            if (isBareMetalTpWl) {
                 confInfo.put(Constants.BM_TP_WL_LOCAL, localTpLocation);
-            else
+            } else {
                 confInfo.put(Constants.BM_TP_LOCAL, localTpLocation);
-        }
-        else{
+            }
+        } else {
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
             int endIndex = imageLocation.lastIndexOf(imagePathDelimiter);
             trustPolicyDirLocation = imageLocation.substring(0, endIndex);
@@ -430,51 +412,51 @@ public class BrowseDirectories {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(out != null)
+            if (out != null) {
                 out.close();
+            }
         }
         return filePath;
     }
-    
+
     // Initialize the table components i.e disable the textfield etc
     private void initializeTableComponents(final Directories dir) {
         dir.getTfield().setEditable(true);
         dir.getCbox().setSelected(true);
-    } 
-    
+    }
+
     // Check the directory is already selected or not
     private boolean isDirectoryAlreadySelected(File file) {
         boolean isSelected = false;
-        for(Directories testDir : list) {
-            if(file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
-                if(testDir.getCbox().isSelected()) {
+        for (Directories testDir : list) {
+            if (file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
+                if (testDir.getCbox().isSelected()) {
                     isSelected = true;
-                    break;   
+                    break;
                 }
             }
         }
         return isSelected;
     }
-    
+
     // Check the directory is already present or not, if present then select the directory
     private boolean isDirectoryAlreadyPresent(File file) {
         boolean isPresent = false;
-        for(Directories testDir : list) {
-            if(file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
+        for (Directories testDir : list) {
+            if (file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
                 isPresent = true;
-                if(!testDir.getCbox().isSelected()) {
+                if (!testDir.getCbox().isSelected()) {
                     testDir.getCbox().setSelected(true);
-                    break;   
+                    break;
                 }
             }
         }
         return isPresent;
     }
-    
 
     private void initializeDefaultDirectoryList(boolean isWindows) {
-        if(isWindows) {
-            
+        if (isWindows) {
+
 //            list = FXCollections.observableArrayList(
 //                    new Directories(new CheckBox("Windows/System32"), new TextField()),
 //                    new Directories(new CheckBox("Windows/Boot"), new TextField())
@@ -486,8 +468,8 @@ public class BrowseDirectories {
                     new Directories(new CheckBox("/sbin"), new TextField()),
                     new Directories(new CheckBox("/bin"), new TextField()),
                     new Directories(new CheckBox("/boot"), new TextField())
-                    );
+            );
         }
-        
+
     }
 }
