@@ -79,6 +79,7 @@ public class Constants {
     public static final String MH_KEYSTORE_PASSWD = "mysteryhill.keystore.password";
     public static final String MH_KEYSTORE_LOCATION = "mysteryhill.keystore";
     public static final String MH_TLS_SSL_PASSWD = "mysteryhill.tls.ssl.password";
-    public static final String BM_TP_WL_LOCAL = "baremetalTpWithWhitelist";
-    public static final String BM_TP_LOCAL = "baremetalTp";
+    public static final String BM_TRUST_POLICY_LOCAL = "baremetalTpWithWhitelist";
+    public static final String BM_MANIFEST_LOCAL = "baremetalTp";
+    static String DIRECTOR_HOME = "DIRECTOR_HOME";
 }

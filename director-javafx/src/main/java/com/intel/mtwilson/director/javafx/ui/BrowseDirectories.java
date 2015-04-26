@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.director.javafx.ui;
 
+import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
 import com.intel.mtwilson.director.javafx.utils.KmsUtil;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.MtwConnectionException;
 import com.intel.mtwilson.director.javafx.utils.SignWithMtWilson;
 import com.intel.mtwilson.director.javafx.utils.UnmountException;
+import com.intel.mtwilson.director.javafx.utils.UnsuccessfulImageMountException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -57,12 +59,13 @@ public class BrowseDirectories {
     private boolean isBareMetalLocal;
     private boolean isBareMetalRemote;
     ObservableList<Directories> list = null;
-
+    private ConfigProperties configProperties;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);
 
     public BrowseDirectories(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
+        configProperties = new ConfigProperties();
     }
 
     public void launch(final Map<String, String> confInfo) {
@@ -261,16 +264,20 @@ public class BrowseDirectories {
                         new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
                     } else if (confInfo != null) {
                         String trustPolicy = null;
-                        String trustPolicyWithWl = null;
+                        String manifest = null;
+                        String trustPolicyLocation = null;
+                        String manifestLocation = null;
                         if (!isBareMetalLocal && !isBareMetalRemote) {
                             // Generate TrustPolicy
                             log.debug("Calling generateTP..");
                             trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            log.debug("After Calling generateTP..");
+                            log.debug("After Calling generateTP..");                            
+
                         } else {
-                            trustPolicy = new GenerateTrustPolicy().createManifest(dirList, confInfo);
-                            trustPolicyWithWl = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            saveTrustPolicyWithWhitelist(trustPolicyWithWl, confInfo);
+                            manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
+                            trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                            manifestLocation = saveManifest(manifest, confInfo);
+                            trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
                         }
                         if (!isBareMetalLocal && !isBareMetalRemote) {
                             //Encrypt image
@@ -281,38 +288,37 @@ public class BrowseDirectories {
                                 } catch (Exception ex) {
                                     log.error("Can not encrypt image, {}", ex);
                                     new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
-                                }
-                                trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                                }                                
                             }
                             //sign trustpolicy with MTW and save it to a file
                             trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
                             if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
                                 throw new MtwConnectionException();
                             }
+                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                            trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
                         }
-                        String trustPolicyLocation = null;
-                        trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
-
+                        
                         // Unmount the VM Image
                         if (!isBareMetalLocal) {
                             log.debug("Unmounting the VM Image from mount path {}", mountPath);
                             int exitCode = MountVMImage.unmountImage(mountPath);
                             if (exitCode != 0) {
-                                log.error("Error while unmounting image. Exit code {}", exitCode);
+                                throw new UnsuccessfulImageMountException();
                             }
                         }
                         String message;
                         if (isBareMetalLocal) {
-                            message = "\nTrust Policy:  " + trustPolicyLocation + "\n"
-                                    + "Trust Policy with Whitelist:  " + confInfo.get(Constants.BM_TP_WL_LOCAL);
+                            message = "\nManifest:  " + manifestLocation + "\n"
+                                    + "Trust Policy:  " + trustPolicyLocation;
                             new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
                         } else if (isBareMetalRemote) {
                             trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
                             message = "Remote Host: \n"
-                                    + "Trust Policy:  " + trustPolicyLocation + "\n\n"
+                                    + "Manifest:  " + manifestLocation.replace(mountPath, "") + "\n\n"
                                     + "Trust Director:\n"
-                                    + "Trust Policy:  " + confInfo.get(Constants.BM_TP_LOCAL) + "\n"
-                                    + "Trust Policy with Whitelist:  " + confInfo.get(Constants.BM_TP_WL_LOCAL) + "\n";
+                                    + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_LOCAL) + "\n"
+                                    + "Trust Policy:  " + confInfo.get(Constants.BM_TRUST_POLICY_LOCAL) + "\n";
                             new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
                         } else {
                             new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
@@ -361,39 +367,40 @@ public class BrowseDirectories {
 
     private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws Exception {
         String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, false);
+        return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, true);
     }
 
     //Used to save baremetal trust policy that contains whitelist
-    private String saveTrustPolicyWithWhitelist(String trustPolicy, Map<String, String> confInfo) throws Exception {
-        String fileName = "/TrustPolicyWithWhitelist-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        return saveTrustPolicyHelper(trustPolicy, confInfo, fileName, true);
+    private String saveManifest(String trustPolicy, Map<String, String> confInfo) throws Exception {
+        String fileName = "/Manifest" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        return saveTrustPolicyHelper(trustPolicy, confInfo, fileName, false);
     }
 
-    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isBareMetalTpWl) throws Exception {
+    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isTrustPolicy) throws Exception {
         PrintWriter out = null;
         String imagePathDelimiter = "/";
         String trustPolicyDirLocation;
         if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL))) {
-            trustPolicyDirLocation = "/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p /etc/director/trustpolicy");
-            if (isBareMetalTpWl) {
-                confInfo.put(Constants.BM_TP_WL_LOCAL, trustPolicyDirLocation + filename);
-            }
+            //TODO get DIRECTOR_HOME
+            trustPolicyDirLocation = "/opt/director/policy";
+            log.debug("DIRECTOR_HOME IS::::::::"+trustPolicyDirLocation);
+            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation);            
         } else if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
             trustPolicyDirLocation = mountPath + "/etc/director/trustpolicy";
             MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
-            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation.replace(mountPath, ""));
-
+            
             //save trust policy on trust director
-            String localTpLocation = "/etc/director/trustpolicy/" + filename;
+            //TODO get DIRECTOR_HOME
+            String localTpDirectory = "/opt/director/policy";            
+            MountVMImage.callExec("mkdir -p " + localTpDirectory);
+            String localTpLocation = localTpDirectory+filename;
             out = new PrintWriter(localTpLocation);
             out.println(signedTrustPolicy);
             out.close();
-            if (isBareMetalTpWl) {
-                confInfo.put(Constants.BM_TP_WL_LOCAL, localTpLocation);
+            if (isTrustPolicy) {
+                confInfo.put(Constants.BM_TRUST_POLICY_LOCAL, localTpLocation);
             } else {
-                confInfo.put(Constants.BM_TP_LOCAL, localTpLocation);
+                confInfo.put(Constants.BM_MANIFEST_LOCAL, localTpLocation);
             }
         } else {
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
@@ -402,15 +409,16 @@ public class BrowseDirectories {
         }
         String filePath = trustPolicyDirLocation + filename;
         try {
-            //if there is bare metal trust policy with whitelist do not need to store on remote system  
-            if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isBareMetalTpWl) {
+            //if there is bare metal trust policy do not need to store on remote system  
+            log.debug(filePath);
+            if (!(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isTrustPolicy)){
                 out = new PrintWriter(filePath);
                 out.println(signedTrustPolicy);
                 out.close();
             }
 
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+            throw ex;
         } finally {
             if (out != null) {
                 out.close();
