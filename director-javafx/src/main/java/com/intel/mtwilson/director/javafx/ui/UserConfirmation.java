@@ -57,10 +57,6 @@ public class UserConfirmation {
         
         Button saveButton=new Button("Upload Later");
         Button uploadButton=new Button("Upload");
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setPrefSize(80, 15);
-        
-        
         
 //        PS: Save button action: generates Trust Policy and encrypts the image if encrypt option is chosen
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -117,31 +113,21 @@ public class UserConfirmation {
                  String message=null;
                     try {
                         message = setImagePropertiesAndUploadToGlance(confInfo, manifestLocation, primaryStage);
-                    } catch (ImageStoreException ex) {
-                        Logger.getLogger(UserConfirmation.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    } catch (Exception ex) {
+                        ErrorMessage.showErrorMessage(primaryStage, ex);
+                        return;
+                    } 
                     showUploadSuccessMessage(primaryStage, message);
                 
                 }
               });
-        
-        // Handler for "I will Upload" button
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                primaryStage.close();
-                 ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
-            }
-        });
         
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(35);
         hbox.setStyle("-fx-background-color: #336699;");
         
-        hbox.getChildren().addAll(cancelButton, uploadButton,saveButton);
+        hbox.getChildren().addAll(uploadButton,saveButton);
 
 
         
@@ -199,7 +185,7 @@ public class UserConfirmation {
     }
     
     // Show the vm image and manifest glance ID
-    private void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
+    public void showUploadSuccessMessage(final Stage primaryStage, String messageInfo) {
         //primaryStage.setTitle("Upload Success Message");
         //String info = "Manifest Uploaded on glance " + "\n" + "Manifest Glance ID is : " + manifestGlanceID;;
         Label message = new Label(messageInfo);
@@ -232,7 +218,7 @@ public class UserConfirmation {
         
     }
     
-    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws ImageStoreException {
+    public String setImagePropertiesAndUploadToGlance(Map<String, String> confInfo, String trustPolicyLocation, Stage primaryStage) throws Exception {
         boolean isEncrypted = Boolean.valueOf(confInfo.get(Constants.IS_ENCRYPTED));
         String imageName = confInfo.get(Constants.IMAGE_NAME);
         String diskFormat = null;
@@ -241,13 +227,7 @@ public class UserConfirmation {
         String isPublic = "true";
         String imageId = confInfo.get(Constants.IMAGE_ID);
         ImageStore imageStoreObj = null;
-        try {
-            imageStoreObj = ImageStoreUtil.getImageStore();
-        } catch (Exception ex) {
-            log.error("Can not find Image store"+ex);
-            new CreateImage(primaryStage).showWarningPopup(ex.getClass()+" "+ex.getMessage());
-            //TODO error handling
-        }
+        imageStoreObj = ImageStoreUtil.getImageStore();
         switch(confInfo.get(Constants.IMAGE_TYPE)) {
             case "ami":
                 diskFormat = "ami";
@@ -294,7 +274,6 @@ public class UserConfirmation {
             imageProperties.put(Constants.IS_PUBLIC, isPublic);
             imageProperties.put(Constants.IMAGE_ID, getUUID());
             String kernelGlanceID = null;
-            try{
                 if(isEncrypted) {
                     log.debug("PSDebug Came to set image prop 22222");
                     kernelGlanceID = imageStoreObj.uploadImage(confInfo.get(Constants.Enc_KERNEL_PATH),imageProperties);
@@ -329,11 +308,6 @@ public class UserConfirmation {
                         System.exit(1);
                     }
                 }
-            }catch(NullPointerException e){
-                throw new ImageStoreException(e);
-            }
-            
-            
             // Upload Initrd
             imageProperties.clear();
             imageProperties.put(Constants.NAME, imageName + "-initrd");
@@ -414,7 +388,7 @@ public class UserConfirmation {
             System.exit(1);                
         }
         }catch(Exception e){
-            
+            throw e;
         }
         finally{
             executeShellCommand("rm "+tarballLocation);
@@ -467,7 +441,7 @@ public class UserConfirmation {
     }
   
     //Assumption trustpolicy and image location is same
-    public String createImageTrustPolicyTar(String trustPolicyLocation, String imageLocation) {
+    public String createImageTrustPolicyTar(String trustPolicyLocation, String imageLocation) throws IOException {
         String imagePathDelimiter = "/";
 
         String imageTPDir = trustPolicyLocation.substring(0, trustPolicyLocation.lastIndexOf(imagePathDelimiter));
@@ -483,17 +457,17 @@ public class UserConfirmation {
         return imageTPDir + imagePathDelimiter + tarName;
     }
 
-    public void executeShellCommand(String cmd) {
-        log.debug("Command to execute is:" + cmd);
-        try {
-            Process p;
-            p = Runtime.getRuntime().exec(cmd);
-            p.waitFor();
-        } catch (IOException ex) {
-            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public int executeShellCommand(String command) throws Exception{
+        String[] cmd = {
+        "/bin/sh",
+        "-c",
+        command
+        };
+        log.debug("Command to execute is:" + command);
+        Process p;
+        p = Runtime.getRuntime().exec(cmd);
+        p.waitFor();
+        return p.exitValue();        
     }
     
     // Generates random UUID

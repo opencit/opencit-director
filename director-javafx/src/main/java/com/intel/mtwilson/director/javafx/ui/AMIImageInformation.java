@@ -31,7 +31,7 @@ import com.intel.mtwilson.director.javafx.utils.MountVMImage;
  */
 public class AMIImageInformation {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AMIImageInformation.class);
-    public void getAMIImageInfo(final Stage primaryStage, final Map<String, String> confInfo, final String extractedLocation, final boolean includeImageHash) {
+   /* public void getAMIImageInfo(final Stage primaryStage, final Map<String, String> confInfo, final String extractedLocation, final boolean includeImageHash) {
         
         primaryStage.setTitle("AMI Image Information");
         
@@ -211,5 +211,5 @@ public class AMIImageInformation {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show(); 
-    }    
+    }    */
 }
