@@ -56,15 +56,12 @@ public class ConfigurationInformation {
         //PS:Label
 	Label imageType=new Label("Image Type");
         final Label trustPolicy=new Label("Trust Policy");
-        final Label manifestSource=new Label (" Manifest Source");
+        final Label manifestSource=new Label ("Manifest Source");
         
         
         
         //PS: Toggle Button to choose the Image Type
 	final ToggleGroup imageGroup=new ToggleGroup();
-	ToggleButton tb_none = new ToggleButton("None");
-	tb_none.setToggleGroup(imageGroup);
-	tb_none.setSelected(true);
 		
 	final ToggleButton tb_vm = new ToggleButton("VM");
 	tb_vm.setToggleGroup(imageGroup);
@@ -76,12 +73,6 @@ public class ConfigurationInformation {
         tb_bareMetal.setUserData(manifestSource);
         tb_bareMetal.setUserData(togBoxBareMetalType);
 		
-        ToggleButton tb_docker = new ToggleButton("Docker");
-	tb_docker.setToggleGroup(imageGroup);
-        
-        
-        Button closeButton=new Button("Close");
-		        
         //PS: Toggle Button to choose the Trust Policy Type
 		final ToggleGroup trustPolicyGroup=new ToggleGroup();
 		ToggleButton tb_createImage= new ToggleButton("Create Image");
@@ -101,10 +92,8 @@ public class ConfigurationInformation {
         HBox togBoxImageType=new HBox();
         togBoxImageType.setPadding(new Insets(3, 3, 5, 5));
         togBoxImageType.setSpacing(10);
-        togBoxImageType.getChildren().add(tb_none);
         togBoxImageType.getChildren().add(tb_vm);
         togBoxImageType.getChildren().add(tb_bareMetal);
-        togBoxImageType.getChildren().add(tb_docker);
         
         //PS: HBox for TrustPolicy Type toggle button
         final HBox togBoxTrustPolicyType=new HBox();
@@ -133,28 +122,26 @@ public class ConfigurationInformation {
         grid.add(imageType, 0,1);
         grid.add(togBoxImageType, 1, 1);
         
-        grid.add(togBoxTrustPolicyType, 1, 2);
-        grid.add(togBoxBareMetalType, 1, 2);
+        grid.add(togBoxTrustPolicyType, 0, 2, 2,1);
+        grid.add(togBoxBareMetalType, 0, 2,2,1);
         
-        grid.add(closeButton, 1, 3);
-	
         VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
         
         
-        //PS: When NONE button is clicked
-	tb_none.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) 
-            {
-                //Execute some code here for the event.. 
-                manifestSource.setVisible(false);
-                togBoxBareMetalType.setVisible(false);
-                trustPolicy.setVisible(false);
-                togBoxTrustPolicyType.setVisible(false);
-                
-                
-               
-            } });
+//        //PS: When NONE button is clicked
+//	tb_none.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e) 
+//            {
+//                //Execute some code here for the event.. 
+//                manifestSource.setVisible(false);
+//                togBoxBareMetalType.setVisible(false);
+//                trustPolicy.setVisible(false);
+//                togBoxTrustPolicyType.setVisible(false);
+//                
+//                
+//               
+//            } });
                 
         //PS: When VM button is chosen        
         tb_vm.setOnAction(new EventHandler<ActionEvent>() {
@@ -184,18 +171,18 @@ public class ConfigurationInformation {
             } });
         
         //PS: DOCKER button is selected
-        tb_docker.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e) 
-            {
-                //Execute some code here for the event.. 
-                manifestSource.setVisible(false);
-                togBoxBareMetalType.setVisible(false);
-                trustPolicy.setVisible(false);
-                togBoxTrustPolicyType.setVisible(false);
-                
-                
-               
-            } });
+//        tb_docker.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e) 
+//            {
+//                //Execute some code here for the event.. 
+//                manifestSource.setVisible(false);
+//                togBoxBareMetalType.setVisible(false);
+//                trustPolicy.setVisible(false);
+//                togBoxTrustPolicyType.setVisible(false);
+//                
+//                
+//               
+//            } });
         
         //Open a new window for CREATE IMAGE button
         tb_createImage.setOnAction(new EventHandler<ActionEvent>() {
@@ -270,20 +257,20 @@ public class ConfigurationInformation {
                 }
              }});
         
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent e)
-            {
-                
-                try{
-                    primaryStage.close();
-                }catch(Exception ex)
-                {
-                    log.error(null, ex);
-                }
-//                Stage stage = new Stage();
-                //Fill stage with content
-//                stage.show();
-            }});
+//        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e)
+//            {
+//                
+//                try{
+//                    primaryStage.close();
+//                }catch(Exception ex)
+//                {
+//                    log.error(null, ex);
+//                }
+////                Stage stage = new Stage();
+//                //Fill stage with content
+////                stage.show();
+//            }});
         
         // Load the stack pane: This is the primary window for TD
         StackPane root = new StackPane();
