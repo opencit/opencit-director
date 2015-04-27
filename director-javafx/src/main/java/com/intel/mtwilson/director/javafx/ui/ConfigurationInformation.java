@@ -122,8 +122,8 @@ public class ConfigurationInformation {
         grid.add(imageType, 0,1);
         grid.add(togBoxImageType, 1, 1);
         
-        grid.add(togBoxTrustPolicyType, 0, 2, 2,1);
-        grid.add(togBoxBareMetalType, 0, 2,2,1);
+        grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);
+        grid.add(togBoxBareMetalType, 0, 2, 2, 1);
         
         VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);

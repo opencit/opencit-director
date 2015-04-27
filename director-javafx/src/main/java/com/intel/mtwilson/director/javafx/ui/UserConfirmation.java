@@ -101,7 +101,7 @@ public class UserConfirmation {
                             + "mh_dek_url for Kernel : " + mhOptKernel.getDekURL() + "\n\n" + "Encrypted Initrd Path : "
                                 + encryptedInitrdPath + "\n\n" + "mh_dek_url for Initrd : " + mhOptInitrd.getDekURL() + "\n\n";
                 }*/
-                showUploadSuccessMessage(primaryStage, "Saved Successfully");
+                showUploadSuccessMessage(primaryStage, "Trust Policy is saved at "+manifestLocation);
             }
         });
         

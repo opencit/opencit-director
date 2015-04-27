@@ -82,7 +82,6 @@ public class BrowseDirectories {
 
         log.trace("On the Browse directory  window");
 
-        //By default disable the text field from table
         for (Directories listComp : list) {
             initializeTableComponents(listComp);
         }
@@ -209,11 +208,13 @@ public class BrowseDirectories {
                                     } else {
                                         checkBox = new CheckBox(file.getAbsolutePath());
                                     }
-
-                                    checkBox.setSelected(true);
                                     Directories dir = new Directories(checkBox, new TextField());
                                     initializeTableComponents(dir);
+                                    ObservableList<Directories> tmp = deepCopy(list);
+//                                    tmp.add(dir);
+                                    list.clear();
                                     list.add(dir);
+                                    list.addAll(tmp);
                                 }
                             } else {
                                 new CreateImage(primaryStage).showWarningPopup("Directory Already Selected !!");
@@ -227,6 +228,14 @@ public class BrowseDirectories {
                 } catch (Exception ex) {
                     log.error("Not selected anything", ex);
                 }
+            }
+
+            private ObservableList<Directories> deepCopy(ObservableList<Directories> list) {
+                ObservableList<Directories> copy = FXCollections.observableArrayList();
+                for (Directories dir : list) {
+                    copy.add(dir);
+                }
+                return copy;
             }
         });
 
@@ -258,7 +267,7 @@ public class BrowseDirectories {
                     }
                     if (!isDirExist) {
                         new CreateImage(primaryStage).showWarningPopup("Directory does not exist !!");
-                //} else if(dirList.isEmpty()) {
+                        //} else if(dirList.isEmpty()) {
                         //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
                     } else if (!isProper) {
                         new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
@@ -271,7 +280,7 @@ public class BrowseDirectories {
                             // Generate TrustPolicy
                             log.debug("Calling generateTP..");
                             trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            log.debug("After Calling generateTP..");                            
+                            log.debug("After Calling generateTP..");
 
                         } else {
                             manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
@@ -288,7 +297,7 @@ public class BrowseDirectories {
                                 } catch (Exception ex) {
                                     log.error("Can not encrypt image, {}", ex);
                                     new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
-                                }                                
+                                }
                             }
                             //sign trustpolicy with MTW and save it to a file
                             trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
@@ -298,7 +307,7 @@ public class BrowseDirectories {
                             trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
                             trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
                         }
-                        
+
                         // Unmount the VM Image
                         if (!isBareMetalLocal) {
                             log.debug("Unmounting the VM Image from mount path {}", mountPath);
@@ -364,7 +373,6 @@ public class BrowseDirectories {
     }
 
     //save trustPolicy
-
     private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws Exception {
         String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, true);
@@ -383,17 +391,17 @@ public class BrowseDirectories {
         if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL))) {
             //TODO get DIRECTOR_HOME
             trustPolicyDirLocation = "/opt/director/policy";
-            log.debug("DIRECTOR_HOME IS::::::::"+trustPolicyDirLocation);
-            MountVMImage.callExec("mkdir -p "+trustPolicyDirLocation);            
+            log.debug("DIRECTOR_HOME IS::::::::" + trustPolicyDirLocation);
+            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
         } else if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
             trustPolicyDirLocation = mountPath + "/etc/director/trustpolicy";
             MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
-            
+
             //save trust policy on trust director
             //TODO get DIRECTOR_HOME
-            String localTpDirectory = "/opt/director/policy";            
+            String localTpDirectory = "/opt/director/policy";
             MountVMImage.callExec("mkdir -p " + localTpDirectory);
-            String localTpLocation = localTpDirectory+filename;
+            String localTpLocation = localTpDirectory + filename;
             out = new PrintWriter(localTpLocation);
             out.println(signedTrustPolicy);
             out.close();
@@ -411,7 +419,7 @@ public class BrowseDirectories {
         try {
             //if there is bare metal trust policy do not need to store on remote system  
             log.debug(filePath);
-            if (!(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isTrustPolicy)){
+            if (!(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isTrustPolicy)) {
                 out = new PrintWriter(filePath);
                 out.println(signedTrustPolicy);
                 out.close();
