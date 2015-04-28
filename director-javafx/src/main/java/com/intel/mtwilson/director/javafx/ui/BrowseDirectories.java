@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -245,98 +247,59 @@ public class BrowseDirectories {
             public void handle(ActionEvent arg0) {
                 try {
                     log.debug("calculating hash.");
-                    boolean isProper = true;
-                    boolean isDirExist = true;
                     List<Directories> dirList = new ArrayList<>();
-                    for (Directories dir : list) {
-                        log.debug("Mount path {} ,dir path {}", mountPath, dir.getCbox().getText());
-                        if (dir.getCbox().isSelected() && (mountPath != "/")) {
-                            if (!new File(mountPath + dir.getCbox().getText()).exists()) {
-                                isDirExist = false;
-                                break;
-                            }
-                            dirList.add(dir);
+                    dirList = list.subList(0, list.size());
+                    String trustPolicyLocation = null;
+                    String manifestLocation = null;
+                    
+                    //create trust policy
+                    String trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
+                    //Encrypt image if required and update policy
+                    if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
+                        KmsUtil mhUtil = new KmsUtil();
+                        mhUtil.encryptImage(confInfo);
+                        trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
+                    }
+                    //sign trustpolicy with MTW 
+                    trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
+                    if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
+                        throw new MtwConnectionException();
+                    }
+                    //save trust policy to a file
+                    trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
 
-                        } else if (dir.getCbox().isSelected() && (mountPath == "/")) {
-                            if (!new File(dir.getCbox().getText()).exists()) {
-                                isDirExist = false;
-                                break;
-                            }
-                            dirList.add(dir);
+                    if (isBareMetalLocal || isBareMetalRemote) {
+                        // Generate manifest                      
+                        String manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
+                        manifestLocation = saveManifest(manifest, confInfo);
+                    }
+                    
+                    // Unmount the VM Image
+                    if (!isBareMetalLocal) {
+                        log.debug("Unmounting the VM Image from mount path {}", mountPath);
+                        int exitCode = MountVMImage.unmountImage(mountPath);
+                        if (exitCode != 0) {
+                            throw new UnsuccessfulImageMountException();
                         }
                     }
-                    if (!isDirExist) {
-                        new CreateImage(primaryStage).showWarningPopup("Directory does not exist !!");
-                        //} else if(dirList.isEmpty()) {
-                        //new FirstWindow(primaryStage).showWarningPopup("Please select atleast one directory !!");
-                    } else if (!isProper) {
-                        new CreateImage(primaryStage).showWarningPopup("Please enter the custom file formats !!");
-                    } else if (confInfo != null) {
-                        String trustPolicy = null;
-                        String manifest = null;
-                        String trustPolicyLocation = null;
-                        String manifestLocation = null;
-                        if (!isBareMetalLocal && !isBareMetalRemote) {
-                            // Generate TrustPolicy
-                            log.debug("Calling generateTP..");
-                            trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            log.debug("After Calling generateTP..");
-
-                        } else {
-                            manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
-                            trustPolicy = new GenerateTrustPolicy().createTrustPolicy(dirList, confInfo);
-                            manifestLocation = saveManifest(manifest, confInfo);
-                            trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
-                        }
-                        if (!isBareMetalLocal && !isBareMetalRemote) {
-                            //Encrypt image
-                            if (confInfo.containsKey(Constants.IS_ENCRYPTED) && confInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-                                KmsUtil mhUtil = new KmsUtil();
-                                try {
-                                    mhUtil.encryptImage(confInfo);
-                                } catch (Exception ex) {
-                                    log.error("Can not encrypt image, {}", ex);
-                                    new CreateImage(primaryStage).showWarningPopup("Error while encrypting image..... Exiting.....");
-                                }
-                            }
-                            //sign trustpolicy with MTW and save it to a file
-                            trustPolicy = new SignWithMtWilson().signManifest(confInfo.get(Constants.IMAGE_ID), trustPolicy);
-                            if (trustPolicy == null | trustPolicy.equals("") | trustPolicy.equals("null")) {
-                                throw new MtwConnectionException();
-                            }
-                            trustPolicy = new GenerateTrustPolicy().setEncryption(trustPolicy, confInfo);
-                            trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
-                        }
-
-                        // Unmount the VM Image
-                        if (!isBareMetalLocal) {
-                            log.debug("Unmounting the VM Image from mount path {}", mountPath);
-                            int exitCode = MountVMImage.unmountImage(mountPath);
-                            if (exitCode != 0) {
-                                throw new UnsuccessfulImageMountException();
-                            }
-                        }
-                        String message;
-                        if (isBareMetalLocal) {
-                            message = "\nManifest:  " + manifestLocation + "\n"
-                                    + "Trust Policy:  " + trustPolicyLocation;
-                            new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
-                        } else if (isBareMetalRemote) {
-                            trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
-                            message = "Remote Host: \n"
-                                    + "Manifest:  " + manifestLocation.replace(mountPath, "") + "\n\n"
-                                    + "Trust Director:\n"
-                                    + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_LOCAL) + "\n"
-                                    + "Trust Policy:  " + confInfo.get(Constants.BM_TRUST_POLICY_LOCAL) + "\n";
-                            new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
-                        } else {
-                            new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
-//			new ConfigurationInformation(primaryStage).showWarningPopup("Error in creating the manifest file, \n \nPlease refer the manifest-tool.log for more information");
-                        }
+                    //promp policy location or upload image
+                    if (isBareMetalLocal) {
+                        String message = "\nManifest:  " + manifestLocation + "\n"
+                                + "Trust Policy:  " + trustPolicyLocation;
+                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                    } else if (isBareMetalRemote) {
+                        trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
+                        String message = "Remote Host: \n"
+                                + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_REMOTE) + "\n\n"
+                                + "Trust Director:\n"
+                                + "Manifest:  " + manifestLocation + "\n"
+                                + "Trust Policy:  " + trustPolicyLocation + "\n";
+                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                    } else {
+                        new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
                     }
-
                 } catch (Exception ex) {
-                    new ErrorMessage().showErrorMessage(primaryStage, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
             }
         });
@@ -372,67 +335,44 @@ public class BrowseDirectories {
         return message;
     }
 
-    //save trustPolicy
+    //save trustPolicy and return file path
     private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws Exception {
-        String trustPolicyName = "/TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        return saveTrustPolicyHelper(trustPolicy, confInfo, trustPolicyName, true);
-    }
-
-    //Used to save baremetal trust policy that contains whitelist
-    private String saveManifest(String trustPolicy, Map<String, String> confInfo) throws Exception {
-        String fileName = "/Manifest" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
-        return saveTrustPolicyHelper(trustPolicy, confInfo, fileName, false);
-    }
-
-    private String saveTrustPolicyHelper(String signedTrustPolicy, Map<String, String> confInfo, String filename, boolean isTrustPolicy) throws Exception {
-        PrintWriter out = null;
-        String imagePathDelimiter = "/";
+        String trustPolicyName = "TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         String trustPolicyDirLocation;
-        if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL))) {
+        if(isBareMetalLocal || isBareMetalRemote){
             //TODO get DIRECTOR_HOME
-            trustPolicyDirLocation = "/opt/director/policy";
-            log.debug("DIRECTOR_HOME IS::::::::" + trustPolicyDirLocation);
-            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
-        } else if (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE))) {
-            trustPolicyDirLocation = mountPath + "/etc/director/trustpolicy";
-            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
-
-            //save trust policy on trust director
-            //TODO get DIRECTOR_HOME
-            String localTpDirectory = "/opt/director/policy";
-            MountVMImage.callExec("mkdir -p " + localTpDirectory);
-            String localTpLocation = localTpDirectory + filename;
-            out = new PrintWriter(localTpLocation);
-            out.println(signedTrustPolicy);
-            out.close();
-            if (isTrustPolicy) {
-                confInfo.put(Constants.BM_TRUST_POLICY_LOCAL, localTpLocation);
-            } else {
-                confInfo.put(Constants.BM_MANIFEST_LOCAL, localTpLocation);
-            }
-        } else {
+            trustPolicyDirLocation =  "/opt/director/repository/policy";
+        }
+        else{
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
-            int endIndex = imageLocation.lastIndexOf(imagePathDelimiter);
+            int endIndex = imageLocation.lastIndexOf("/");
             trustPolicyDirLocation = imageLocation.substring(0, endIndex);
         }
-        String filePath = trustPolicyDirLocation + filename;
-        try {
-            //if there is bare metal trust policy do not need to store on remote system  
-            log.debug(filePath);
-            if (!(Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)) && isTrustPolicy)) {
-                out = new PrintWriter(filePath);
-                out.println(signedTrustPolicy);
-                out.close();
-            }
+        if(!Files.exists(Paths.get(trustPolicyDirLocation)));
+            MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
+        String trustpolicyPath = trustPolicyDirLocation+"/"+trustPolicyName;
+        Files.write(Paths.get(trustpolicyPath), trustPolicy.getBytes());
+        return trustpolicyPath;
+    }
 
-        } catch (FileNotFoundException ex) {
-            throw ex;
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+    //Save baremetal manifest and return path
+    private String saveManifest(String trustPolicy, Map<String, String> confInfo) throws Exception {
+        String fileName = "Manifest" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        //TODO get DIRECTOR_HOME
+        String manifestDir =  "/opt/director/repository/policy";
+        String manifestLocalPath = manifestDir+"/"+fileName;
+        if(!Files.exists(Paths.get(manifestDir)));
+            MountVMImage.callExec("mkdir -p " + manifestDir);
+        Files.write(Paths.get(manifestLocalPath), trustPolicy.getBytes());
+        if(isBareMetalRemote){
+            String remoteDirPath = mountPath+"/boot/trust";
+            if(!Files.exists(Paths.get(remoteDirPath)));
+                MountVMImage.callExec("mkdir -p " + remoteDirPath);
+            String manifestPath = remoteDirPath+"/"+"Manifest.xml";
+            Files.write(Paths.get(manifestPath), trustPolicy.getBytes());
+            confInfo.put(Constants.BM_MANIFEST_REMOTE,manifestPath.replace(mountPath, ""));
         }
-        return filePath;
+        return manifestLocalPath;
     }
 
     // Initialize the table components i.e disable the textfield etc
