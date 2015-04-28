@@ -29,7 +29,12 @@ function unmount_vm_image() {
 }
 
 function mount_qcow2_image() {
-        modprobe nbd
+        if [ ! -f /sbin/modprobe ]
+        then
+            echo "modprobe is not available"
+            exit 1
+        fi
+        /sbin/modprobe nbd
         qemu-nbd -d /dev/nbd0
 	echo "############ Image file path is $imagePath"
 	echo "PSDebug: mount_qcow2_image"
