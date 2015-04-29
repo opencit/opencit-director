@@ -25,6 +25,8 @@ import com.intel.mtwilson.director.javafx.utils.IncorrectCredentialsException;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.UnsuccessfulRemoteMountException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.util.logging.Level;
 import javafx.scene.text.Font;
@@ -223,6 +225,11 @@ public class RemoteSystem {
 //        log.debug(sshKey);
 //        confirmation("Host key is:\n"+sshKeyCmd+"\n\nAre you sure you want to continue connecting?");
 //        if (confirmationResult) {
+        
+        //Create ~/.ssh directory if it does not exist
+        log.debug("User home is {}",System.getProperty("user.home"));
+        if(!Files.exists(Paths.get(System.getProperty("user.home")+"/.ssh")))
+            new UserConfirmation().executeShellCommand("mkdir ~/.ssh");
         String addHostKey = "ssh-keyscan -Ht rsa " + ipAddress + " >> ~/.ssh/known_hosts";
         int exitCode = new UserConfirmation().executeShellCommand(addHostKey);
         log.debug("addHostKey exit code is {}",exitCode);
