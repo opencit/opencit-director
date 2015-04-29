@@ -200,6 +200,8 @@ public class BrowseDirectories {
                 CheckBox checkBox = null;
                 try {
                     File file = directory.showDialog(primaryStage);
+                    if(file == null)
+                        return;
                     if (file.getAbsolutePath().contains(mountPath)) {
                         if (!file.getAbsolutePath().equals(mountPath)) {
                             if (!isDirectoryAlreadySelected(file)) {
@@ -228,7 +230,7 @@ public class BrowseDirectories {
                         new CreateImage(primaryStage).showWarningPopup("Directory does not belong to VM image");
                     }
                 } catch (Exception ex) {
-                    log.error("Not selected anything", ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
             }
 
