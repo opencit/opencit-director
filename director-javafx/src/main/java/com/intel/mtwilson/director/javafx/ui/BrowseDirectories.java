@@ -292,7 +292,8 @@ public class BrowseDirectories {
                     } else if (isBareMetalRemote) {
                         trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
                         String message = "Remote Host: \n"
-                                + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_REMOTE) + "\n\n"
+                                + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_REMOTE) + "\n"
+                                + "Trust Policy: " + confInfo.get(Constants.BM_TRUSTPOLICY_REMOTE) + "\n\n"
                                 + "Trust Director:\n"
                                 + "Manifest:  " + manifestLocation + "\n"
                                 + "Trust Policy:  " + trustPolicyLocation + "\n";
@@ -354,6 +355,14 @@ public class BrowseDirectories {
             MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
         String trustpolicyPath = trustPolicyDirLocation+"/"+trustPolicyName;
         Files.write(Paths.get(trustpolicyPath), trustPolicy.getBytes());
+        if(isBareMetalRemote){
+            String remoteDirPath = mountPath+"/boot/trust";
+            if(!Files.exists(Paths.get(remoteDirPath)));
+                MountVMImage.callExec("mkdir -p " + remoteDirPath);
+            String policyPath = remoteDirPath+"/"+"TrustPolicy.xml";
+            Files.write(Paths.get(policyPath), trustPolicy.getBytes());
+            confInfo.put(Constants.BM_TRUSTPOLICY_REMOTE,policyPath.replace(mountPath, ""));
+        }
         return trustpolicyPath;
     }
 
