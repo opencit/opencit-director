@@ -85,7 +85,7 @@ public class CreateImage {
         );
         
         ObservableList<String> imageFormatList = FXCollections.observableArrayList(
-            "qcow2", "raw", "vhd", "ami"
+            "qcow2", "raw", "vhd"
         );
         
         

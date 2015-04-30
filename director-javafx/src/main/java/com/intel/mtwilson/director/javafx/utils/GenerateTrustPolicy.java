@@ -119,7 +119,7 @@ public class GenerateTrustPolicy {
         } catch (JAXBException ex) {
             log.error(null, ex);
         }
-        log.info("TrustPolicy is: " + result);
+        log.debug("Manifest is: " + result);
         return result;
     }
 
