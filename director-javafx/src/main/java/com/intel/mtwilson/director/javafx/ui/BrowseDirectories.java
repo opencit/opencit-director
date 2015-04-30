@@ -250,7 +250,24 @@ public class BrowseDirectories {
                 try {
                     log.debug("calculating hash.");
                     List<Directories> dirList = new ArrayList<>();
-                    dirList = list.subList(0, list.size());
+                    for (Directories dir : list) {
+                        log.debug("Mount path {} ,dir path {}", mountPath, dir.getCbox().getText());
+                        if (dir.getCbox().isSelected() && (mountPath != "/")) {
+                            if (!new File(mountPath + dir.getCbox().getText()).exists()) {
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                return;
+                            }
+                            dirList.add(dir);
+
+                        } else if (dir.getCbox().isSelected() && (mountPath == "/")) {
+                            if (!new File(dir.getCbox().getText()).exists()) {
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                return;
+                            }
+                            dirList.add(dir);
+                        }
+                    }
+                    
                     String trustPolicyLocation = null;
                     String manifestLocation = null;
                     
