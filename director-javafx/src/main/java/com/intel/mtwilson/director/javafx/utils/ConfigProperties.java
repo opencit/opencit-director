@@ -26,26 +26,26 @@ public class ConfigProperties {
     public static Properties prop;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigProperties.class);
     private static final String filePath = "/opt/director/configuration/director.properties";
-    public ConfigProperties() {
+    public ConfigProperties() throws Exception {
         loadProperty();
     }
     
-    public static void loadProperty() {
+    public static void loadProperty() throws Exception{
         prop = new Properties();
         InputStream input = null;
         try {
             input = new FileInputStream(filePath);
             prop.load(input);
         } catch (FileNotFoundException ex) {
-            log.error(null, ex);
+            throw new FileNotFoundException();
         } catch (IOException ex) {
-            log.error(null, ex);
+            throw new IOException();
         } finally {
             if(input != null) {
                 try {
                     input.close();
                 } catch (IOException ex) {
-                    log.error(null, ex);
+                    throw new IOException();
                 }
             }
         }

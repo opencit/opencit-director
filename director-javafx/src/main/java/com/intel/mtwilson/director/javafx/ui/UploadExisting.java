@@ -52,7 +52,7 @@ public class UploadExisting {
 
     String hostManifest;
 
-    public UploadExisting(Stage uploadExistingStage) {
+    public UploadExisting(Stage uploadExistingStage) throws Exception{
         this.uploadExistingStage = uploadExistingStage;
         this.firstWindowScene = uploadExistingStage.getScene();
         configProperties = new ConfigProperties();
@@ -183,10 +183,14 @@ public class UploadExisting {
 
             @Override
             public void handle(ActionEvent arg0) {
-                uploadExistingStage.close();
-                log.debug("stage is closed");
-                ConfigurationInformation window = new ConfigurationInformation(new Stage());
-                window.launch();
+                try {
+                    uploadExistingStage.close();
+                    log.debug("stage is closed");
+                    ConfigurationInformation window = new ConfigurationInformation(new Stage());
+                    window.launch();
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(uploadExistingStage, exception);
+                }
             }
         });
 
@@ -256,8 +260,13 @@ public class UploadExisting {
 
             @Override
             public void handle(ActionEvent t) {
-                primaryStage.close();
-//                createImageStage.close();
+                try {
+                    primaryStage.close();
+                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                    window.launch();
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(primaryStage, exception);
+                }
             }
         });
 

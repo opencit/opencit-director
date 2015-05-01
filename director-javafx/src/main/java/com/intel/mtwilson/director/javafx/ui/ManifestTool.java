@@ -18,18 +18,25 @@ public class ManifestTool extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        initConfigProperty();
-        launch(args);
+        try {
+            initConfigProperty();
+            launch(args);
+        } catch (Exception exception) {
+            ErrorMessage.showErrorMessage(null, exception);
+        }
     }
     
     @Override
     public void start(final Stage primaryStage) {
-        //new WriteToPropertyFile().write();
-        ConfigurationInformation firstWindow = new ConfigurationInformation(primaryStage);
-        firstWindow.launch();
+        try {
+            ConfigurationInformation firstWindow = new ConfigurationInformation(primaryStage);
+            firstWindow.launch();
+        } catch (Exception exception) {
+            ErrorMessage.showErrorMessage(primaryStage, exception);
+        }
     }
     
-    private static void initConfigProperty() {
+    private static void initConfigProperty()throws Exception {
         ConfigProperties.loadProperty();
     }
 }

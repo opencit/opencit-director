@@ -64,7 +64,7 @@ public class KmsUtil {
 //    private String tlsSSLPasswd;
 //    private String KMSServerIP;
 
-    public KmsUtil() {
+    public KmsUtil()throws Exception {
         configProperties = new ConfigProperties();
 //        mhJarLocation = "/opt/trustdirector/java/client-0.1-SNAPSHOT-with-dependencies.jar";
 //        keystorePasswd = configProperties.getProperty(Constants.MH_KEYSTORE_PASSWD);
@@ -155,11 +155,7 @@ public class KmsUtil {
             log.error("Key must be recreated");
             throw new java.security.UnrecoverableKeyException();
         }
-        catch(NullPointerException e) {
-            log.debug("Invalid certificate");
-            log.error("Invalid certificate");
-            throw new NullPointerException();
-        }
+        
         
         //Collect KMS configurations
         kmsEndpointUrl = getConfiguration().get(KMS_ENDPOINT_URL, null);
@@ -333,21 +329,17 @@ public class KmsUtil {
         return new BigInteger(130, random).toString(32);
     }
 
-    public String parseFile(String location) {
+    public String parseFile(String location) throws Exception{
         Path path = Paths.get(location);
         String id = null;
-        try {
-            Scanner scanner = new Scanner(path);
-            scanner.useDelimiter(System.getProperty("line.separator"));
-            while (scanner.hasNext()) {
-                String line = scanner.next();
-                if (line.contains("trustedCertEntry")) {
-                    id = line.split(",")[0];
-                    break;
-                }
+        Scanner scanner = new Scanner(path);
+        scanner.useDelimiter(System.getProperty("line.separator"));
+        while (scanner.hasNext()) {
+            String line = scanner.next();
+            if (line.contains("trustedCertEntry")) {
+                id = line.split(",")[0];
+                break;
             }
-        } catch (IOException ex) {
-            log.error(null, ex);
         }
         return id;
     }

@@ -64,7 +64,7 @@ public class BrowseDirectories {
     private ConfigProperties configProperties;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);
 
-    public BrowseDirectories(Stage primaryStage) {
+    public BrowseDirectories(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
         configProperties = new ConfigProperties();
@@ -329,15 +329,18 @@ public class BrowseDirectories {
             @Override
             public void handle(ActionEvent arg0) {
                 //Temporary added bare-metal remote check, need to remove it later
-                log.debug("isBareMetalLocal {}",isBareMetalLocal);
-                if (isBareMetalLocal) {
-                    primaryStage.close();
-                    primaryStage = new Stage();
-                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                    window.launch();
-                }
-                else{
-                    primaryStage.setScene(firstWindowScene);
+                try {
+                    log.debug("isBareMetalLocal {}", isBareMetalLocal);
+                    if (isBareMetalLocal) {
+                        primaryStage.close();
+                        primaryStage = new Stage();
+                        ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                        window.launch();
+                    } else {
+                        primaryStage.setScene(firstWindowScene);
+                    }
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(primaryStage, exception);
                 }
             }
         });

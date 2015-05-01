@@ -53,7 +53,7 @@ public class RemoteSystem {
     private final ToggleGroup togBoxMeasure = new ToggleGroup();
     String hostManifest;
     private Scene firstWindowScene;
-    public RemoteSystem(Stage remoteSystemStage) {
+    public RemoteSystem(Stage remoteSystemStage) throws Exception{
         this.remoteSystemStage = remoteSystemStage;
         configProperties = new ConfigProperties();
         firstWindowScene = remoteSystemStage.getScene();
@@ -166,9 +166,13 @@ public class RemoteSystem {
 
             @Override
             public void handle(ActionEvent arg0) {
-                remoteSystemStage.close();
-                ConfigurationInformation window = new ConfigurationInformation(remoteSystemStage);
-                window.launch();
+                try {
+                    remoteSystemStage.close();
+                    ConfigurationInformation window = new ConfigurationInformation(remoteSystemStage);
+                    window.launch();
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(remoteSystemStage, exception);
+                }
             }
         });
 

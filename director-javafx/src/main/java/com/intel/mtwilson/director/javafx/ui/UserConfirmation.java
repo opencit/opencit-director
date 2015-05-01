@@ -43,7 +43,7 @@ public class UserConfirmation {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserConfirmation.class);
     private ConfigProperties configProperties;
 
-    public UserConfirmation() {
+    public UserConfirmation() throws Exception{
         configProperties = new ConfigProperties();
     }
 
@@ -171,9 +171,13 @@ public class UserConfirmation {
 
             @Override
             public void handle(ActionEvent arg0) {
-                primaryStage.close();
-                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
+                try {
+                    primaryStage.close();
+                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                    window.launch();
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(primaryStage, exception);
+                }
             }
         });
 
@@ -204,9 +208,13 @@ public class UserConfirmation {
 
             @Override
             public void handle(ActionEvent t) {
-                primaryStage.close();
-                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
+                try {
+                    primaryStage.close();
+                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                    window.launch();
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(primaryStage, exception);
+                }
             }
         });
 

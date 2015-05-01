@@ -33,7 +33,7 @@ public class LocalSystem {
     private final ToggleGroup togBoxMeasure = new ToggleGroup();
     String hostManifest;
 
-    public LocalSystem(Stage localSystemStage) {
+    public LocalSystem(Stage localSystemStage) throws Exception{
         this.localSystemStage = localSystemStage;
         configProperties = new ConfigProperties();
     }
@@ -100,22 +100,16 @@ public class LocalSystem {
 
             @Override
             public void handle(ActionEvent arg0) {
-                boolean includeImageHash = false;
+                try {
+                    boolean includeImageHash = false;
 //                 Write configuration values to map
-                Map<String, String> customerInfo;
-                customerInfo = hostWriteToMap();
-                int exitCode = 0;
-//                if((hostManifest != null) && (hostManifest.equalsIgnoreCase("true"))) {
-//                 Extract the compressed HOST image tgz file
-//                String extractCommand = "mount /"; 
-//                int extractExitCode = MountVMImage.callExec(extractCommand);
-//                if(extractExitCode != 0) {
-////               showWarningPopup("Error while extracting .... Exiting .....");
-//                 System.exit(1);
-//                } else {
-                BrowseDirectories secondWindow = new BrowseDirectories(localSystemStage);
-                secondWindow.launch(customerInfo);
-//                }                         
+                    Map<String, String> customerInfo;
+                    customerInfo = hostWriteToMap();
+                    BrowseDirectories secondWindow = new BrowseDirectories(localSystemStage);
+                    secondWindow.launch(customerInfo);
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(localSystemStage, exception);
+                }
             }
         });
 

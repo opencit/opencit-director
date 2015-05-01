@@ -51,7 +51,7 @@ public class SignWithMtWilson {
         mtWilsonPassword = getConfiguration().get(Constants.MTWILSON_PASSWORD);
     }
     
-    public String signManifest(String imageID, String trustPolicy) {
+    public String signManifest(String imageID, String trustPolicy) throws Exception{
 //        this.mtWilsonIP = ip;
 //        this.mtWilsonPort = port;
         String response = getMtWilsonResponse(trustPolicy);
@@ -61,7 +61,7 @@ public class SignWithMtWilson {
         
     }
 
-    private String getMtWilsonResponse(String trustPolicy) {
+    private String getMtWilsonResponse(String trustPolicy) throws Exception{
         String mtWisontResponse = null;
         try {
             String url = "https://" + mtWilsonIP + ":" + mtWilsonPort + "/mtwilson/v2/trustpolicy-signature";
@@ -83,7 +83,7 @@ public class SignWithMtWilson {
             HttpResponse response = httpClient.execute(postRequest);
             if (response.getStatusLine().getStatusCode() != 200) {
                 log.error(null, new RuntimeException(response.getStatusLine().toString()));
-                return null;
+                throw new MtwConnectionException();
             }
             BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
             String output = null;
