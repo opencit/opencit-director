@@ -52,10 +52,16 @@ public class RemoteSystem {
     public boolean confirmationResult=false;
     private final ToggleGroup togBoxMeasure = new ToggleGroup();
     String hostManifest;
-
+    private Scene firstWindowScene;
     public RemoteSystem(Stage remoteSystemStage) {
         this.remoteSystemStage = remoteSystemStage;
         configProperties = new ConfigProperties();
+        firstWindowScene = remoteSystemStage.getScene();
+    }
+    
+    // Return the Stage
+    public Stage getStage() {
+        return this.remoteSystemStage;
     }
 
     public void launch() {
@@ -160,9 +166,9 @@ public class RemoteSystem {
 
             @Override
             public void handle(ActionEvent arg0) {
-                // Will close the window
                 remoteSystemStage.close();
-
+                ConfigurationInformation window = new ConfigurationInformation(remoteSystemStage);
+                window.launch();
             }
         });
 

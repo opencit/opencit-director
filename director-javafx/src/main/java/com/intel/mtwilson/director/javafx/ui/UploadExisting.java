@@ -183,9 +183,10 @@ public class UploadExisting {
 
             @Override
             public void handle(ActionEvent arg0) {
-                // Will close the window
                 uploadExistingStage.close();
-
+                log.debug("stage is closed");
+                ConfigurationInformation window = new ConfigurationInformation(new Stage());
+                window.launch();
             }
         });
 
@@ -208,17 +209,6 @@ public class UploadExisting {
                     new ErrorMessage().showErrorMessage(uploadExistingStage, ex);
                 }
 
-            }
-        });
-
-        // Handler for "Cancel" button
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent arg0) {
-                // Will close the window
-                uploadExistingStage.close();
-                uploadExistingStage.setScene(firstWindowScene);
             }
         });
 

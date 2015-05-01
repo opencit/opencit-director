@@ -197,12 +197,8 @@ public class ConfigurationInformation {
 //                
                 }catch(Exception ex)
                 {                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
-                
-//                Stage stage = new Stage();
-                //Fill stage with content
-//                stage.show();
             }});
         
         //Open a new window to upload existing image
@@ -216,8 +212,7 @@ public class ConfigurationInformation {
                     UploadExisting uploadExistingObj=new UploadExisting(uploadExistingStage);
                     uploadExistingObj.launch();
                  }catch(Exception ex){
-                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
                 
 //                Stage stage = new Stage();
@@ -237,7 +232,7 @@ public class ConfigurationInformation {
                     BrowseDirectories secondWindow = new BrowseDirectories(broeseDirectoryStage);
                     secondWindow.launch(customerInfo);
                 } catch (Exception ex) {                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
              }});
         
@@ -248,12 +243,12 @@ public class ConfigurationInformation {
                 try{
                     primaryStage.close();
                     Stage remoteSystemStage=new Stage();
-                    RemoteSystem remoteSystemObj=new RemoteSystem(remoteSystemStage);
+                    RemoteSystem remoteSystemObj=new RemoteSystem(primaryStage);
                     remoteSystemObj.launch();
 //                
                 }catch(Exception ex)
                 {
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
              }});
         

@@ -326,10 +326,19 @@ public class BrowseDirectories {
 
         // Handler for "Back" button
         backButton.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent arg0) {
-                primaryStage.setScene(firstWindowScene);
+                //Temporary added bare-metal remote check, need to remove it later
+                log.debug("isBareMetalLocal {}",isBareMetalLocal);
+                if (isBareMetalLocal) {
+                    primaryStage.close();
+                    primaryStage = new Stage();
+                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                    window.launch();
+                }
+                else{
+                    primaryStage.setScene(firstWindowScene);
+                }
             }
         });
 
