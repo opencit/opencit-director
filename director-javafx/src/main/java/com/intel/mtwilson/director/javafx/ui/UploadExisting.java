@@ -141,9 +141,9 @@ public class UploadExisting {
         hBox4.setPadding(new Insets(10, 12, 10, 12));
         hBox4.setSpacing(30);
         hBox4.setStyle("-fx-background-color: #336699;");
-        hBox4.getChildren().add(uploadButton);
         hBox4.getChildren().add(cancelButton);
-
+        hBox4.getChildren().add(uploadButton);
+        
         vBox.getChildren().addAll(grid, hBox4);
 
         // Handler for 'Browse' for Trust Policy Path button, browse the vm image
