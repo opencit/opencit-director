@@ -42,7 +42,7 @@ public class ConfigurationInformation {
         primaryStage.setTitle("Trust Director");
 	
         //PS:Label
-	Label imageType=new Label("Image Type");
+	Label imageType=new Label("Application Deployment Type");
         final Label trustPolicy=new Label("Trust Policy");
         final Label manifestSource=new Label ("Manifest Source");
         

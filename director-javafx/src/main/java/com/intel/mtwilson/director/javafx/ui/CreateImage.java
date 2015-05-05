@@ -131,24 +131,19 @@ public class CreateImage {
         grid.add(imageFormat, 0, 1);
         grid.add(imageFormatChoiceBox, 1, 1);
 
-        grid.add(hashType, 0, 2);
-        grid.add(hashTypeChoiceBox, 1, 2);
-        hashType.setVisible(false);
-        hashTypeChoiceBox.setVisible(false);
-
-        grid.add(imageID, 0, 3);
-        grid.add(imageIDTField, 1, 3);
+        grid.add(imageID, 0, 2);
+        grid.add(imageIDTField, 1, 2);
 
         final HBox imagePathHBox = new HBox();
         imagePathHBox.setPadding(new Insets(3, 0, 5, 0));
         imagePathHBox.setSpacing(10);
         imagePathHBox.getChildren().addAll(imagePathTField, browseImage);
 
-        grid.add(imagePath, 0, 4);
-        grid.add(imagePathHBox, 1, 4);
+        grid.add(imagePath, 0, 3);
+        grid.add(imagePathHBox, 1, 3);
 
-        grid.add(imageName, 0, 5);
-        grid.add(imageNameTField, 1, 5);
+        grid.add(imageName, 0, 4);
+        grid.add(imageNameTField, 1, 4);
 
         final HBox launchPolicyHBox = new HBox();
         launchPolicyHBox.setPadding(new Insets(3, 0, 5, 0));
