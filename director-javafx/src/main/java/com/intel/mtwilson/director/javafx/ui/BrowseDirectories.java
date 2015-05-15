@@ -64,7 +64,7 @@ public class BrowseDirectories {
     private ConfigProperties configProperties;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BrowseDirectories.class);
 
-    public BrowseDirectories(Stage primaryStage) {
+    public BrowseDirectories(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         this.firstWindowScene = primaryStage.getScene();
         configProperties = new ConfigProperties();
@@ -200,6 +200,8 @@ public class BrowseDirectories {
                 CheckBox checkBox = null;
                 try {
                     File file = directory.showDialog(primaryStage);
+                    if(file == null)
+                        return;
                     if (file.getAbsolutePath().contains(mountPath)) {
                         if (!file.getAbsolutePath().equals(mountPath)) {
                             if (!isDirectoryAlreadySelected(file)) {
@@ -228,7 +230,7 @@ public class BrowseDirectories {
                         new CreateImage(primaryStage).showWarningPopup("Directory does not belong to VM image");
                     }
                 } catch (Exception ex) {
-                    log.error("Not selected anything", ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
             }
 
@@ -248,7 +250,24 @@ public class BrowseDirectories {
                 try {
                     log.debug("calculating hash.");
                     List<Directories> dirList = new ArrayList<>();
-                    dirList = list.subList(0, list.size());
+                    for (Directories dir : list) {
+                        log.debug("Mount path {} ,dir path {}", mountPath, dir.getCbox().getText());
+                        if (dir.getCbox().isSelected() && (mountPath != "/")) {
+                            if (!new File(mountPath + dir.getCbox().getText()).exists()) {
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                return;
+                            }
+                            dirList.add(dir);
+
+                        } else if (dir.getCbox().isSelected() && (mountPath == "/")) {
+                            if (!new File(dir.getCbox().getText()).exists()) {
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                return;
+                            }
+                            dirList.add(dir);
+                        }
+                    }
+                    
                     String trustPolicyLocation = null;
                     String manifestLocation = null;
                     
@@ -290,7 +309,8 @@ public class BrowseDirectories {
                     } else if (isBareMetalRemote) {
                         trustPolicyLocation = trustPolicyLocation.replace(mountPath, "");
                         String message = "Remote Host: \n"
-                                + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_REMOTE) + "\n\n"
+                                + "Manifest:  " + confInfo.get(Constants.BM_MANIFEST_REMOTE) + "\n"
+                                + "Trust Policy: " + confInfo.get(Constants.BM_TRUSTPOLICY_REMOTE) + "\n\n"
                                 + "Trust Director:\n"
                                 + "Manifest:  " + manifestLocation + "\n"
                                 + "Trust Policy:  " + trustPolicyLocation + "\n";
@@ -306,10 +326,22 @@ public class BrowseDirectories {
 
         // Handler for "Back" button
         backButton.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent arg0) {
-                primaryStage.setScene(firstWindowScene);
+                //Temporary added bare-metal remote check, need to remove it later
+                try {
+                    log.debug("isBareMetalLocal {}", isBareMetalLocal);
+                    if (isBareMetalLocal) {
+                        primaryStage.close();
+                        primaryStage = new Stage();
+                        ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                        window.launch();
+                    } else {
+                        primaryStage.setScene(firstWindowScene);
+                    }
+                } catch (Exception exception) {
+                    ErrorMessage.showErrorMessage(primaryStage, exception);
+                }
             }
         });
 
@@ -352,6 +384,14 @@ public class BrowseDirectories {
             MountVMImage.callExec("mkdir -p " + trustPolicyDirLocation);
         String trustpolicyPath = trustPolicyDirLocation+"/"+trustPolicyName;
         Files.write(Paths.get(trustpolicyPath), trustPolicy.getBytes());
+        if(isBareMetalRemote){
+            String remoteDirPath = mountPath+"/boot/trust";
+            if(!Files.exists(Paths.get(remoteDirPath)));
+                MountVMImage.callExec("mkdir -p " + remoteDirPath);
+            String policyPath = remoteDirPath+"/"+"TrustPolicy.xml";
+            Files.write(Paths.get(policyPath), trustPolicy.getBytes());
+            confInfo.put(Constants.BM_TRUSTPOLICY_REMOTE,policyPath.replace(mountPath, ""));
+        }
         return trustpolicyPath;
     }
 

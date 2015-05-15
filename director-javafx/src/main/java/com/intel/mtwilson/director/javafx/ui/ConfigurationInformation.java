@@ -25,12 +25,11 @@ import javafx.stage.Stage;
 public class ConfigurationInformation {    
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigurationInformation.class);
     private final Stage primaryStage;
-    String hostManifest;    
     private HBox togBoxTrustPolicyType;
     private HBox togBoxBareMetalType;
     private ConfigProperties configProperties;
     
-    public ConfigurationInformation(Stage primaryStage) {
+    public ConfigurationInformation(Stage primaryStage)throws Exception {
         this.primaryStage = primaryStage;
         configProperties = new ConfigProperties();
     }
@@ -40,25 +39,12 @@ public class ConfigurationInformation {
     return this.primaryStage;
     }
     public void launch() {
-                
-        // Check for the Host Manifest
-        try {
-            hostManifest = configProperties.getProperty(Constants.HOST_MANIFEST);
-            if (hostManifest != null) {
-                hostManifest = hostManifest.trim();
-            }
-        } catch (NullPointerException npe) {
-            log.error("Host manifest value not set in configuration file.", npe);
-        }
-        
         primaryStage.setTitle("Trust Director");
 	
         //PS:Label
-	Label imageType=new Label("Image Type");
+	Label imageType=new Label("Application Deployment Type");
         final Label trustPolicy=new Label("Trust Policy");
         final Label manifestSource=new Label ("Manifest Source");
-        
-        
         
         //PS: Toggle Button to choose the Image Type
 	final ToggleGroup imageGroup=new ToggleGroup();
@@ -197,12 +183,8 @@ public class ConfigurationInformation {
 //                
                 }catch(Exception ex)
                 {                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
-                
-//                Stage stage = new Stage();
-                //Fill stage with content
-//                stage.show();
             }});
         
         //Open a new window to upload existing image
@@ -216,8 +198,7 @@ public class ConfigurationInformation {
                     UploadExisting uploadExistingObj=new UploadExisting(uploadExistingStage);
                     uploadExistingObj.launch();
                  }catch(Exception ex){
-                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
                 
 //                Stage stage = new Stage();
@@ -237,7 +218,7 @@ public class ConfigurationInformation {
                     BrowseDirectories secondWindow = new BrowseDirectories(broeseDirectoryStage);
                     secondWindow.launch(customerInfo);
                 } catch (Exception ex) {                    
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
              }});
         
@@ -248,29 +229,14 @@ public class ConfigurationInformation {
                 try{
                     primaryStage.close();
                     Stage remoteSystemStage=new Stage();
-                    RemoteSystem remoteSystemObj=new RemoteSystem(remoteSystemStage);
+                    RemoteSystem remoteSystemObj=new RemoteSystem(primaryStage);
                     remoteSystemObj.launch();
 //                
                 }catch(Exception ex)
                 {
-                    log.error(null, ex);
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
              }});
-        
-//        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override public void handle(ActionEvent e)
-//            {
-//                
-//                try{
-//                    primaryStage.close();
-//                }catch(Exception ex)
-//                {
-//                    log.error(null, ex);
-//                }
-////                Stage stage = new Stage();
-//                //Fill stage with content
-////                stage.show();
-//            }});
         
         // Load the stack pane: This is the primary window for TD
         StackPane root = new StackPane();

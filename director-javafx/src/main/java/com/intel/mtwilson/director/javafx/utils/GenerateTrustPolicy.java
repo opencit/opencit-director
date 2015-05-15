@@ -53,7 +53,7 @@ public class GenerateTrustPolicy {
     }
 
     //Creates trust policy for baremetal
-    public String createManifest(List<Directories> directories, Map<String, String> configInfo) throws IOException{
+    public String createManifest(List<Directories> directories, Map<String, String> configInfo) throws Exception{
         mountPath = configInfo.get(Constants.MOUNT_PATH2);
         if (Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL))) {
             mountPath = "";
@@ -114,12 +114,8 @@ public class GenerateTrustPolicy {
         }
         JAXB jaxb = new JAXB();
         String result = null;
-        try {
-            result = jaxb.write(manifest);
-        } catch (JAXBException ex) {
-            log.error(null, ex);
-        }
-        log.info("TrustPolicy is: " + result);
+        result = jaxb.write(manifest);        
+        log.debug("Manifest is: " + result);
         return result;
     }
 
@@ -156,17 +152,14 @@ public class GenerateTrustPolicy {
         //create xml
         JAXB jaxb = new JAXB();
         String result = null;
-        try {
-            result = jaxb.write(trustpolicy);
-        } catch (JAXBException ex) {
-            log.error(null, ex);
-        }
+        result = jaxb.write(trustpolicy);
+        
         log.debug("TrustPolicy is: " + result);
         return result;
     }
 
     //Creates whitelist and sets imageHash and digestAlg
-    public Whitelist createWhitelist(List<Directories> directories, Map<String, String> configInfo, Image image) throws IOException {
+    public Whitelist createWhitelist(List<Directories> directories, Map<String, String> configInfo, Image image) throws Exception {
         MessageDigest md = null;
         Sha1Digest digestSha1 = null;
         Sha256Digest digestSha256 = null;
@@ -178,28 +171,24 @@ public class GenerateTrustPolicy {
         ImageHash imageHash = new ImageHash();
         String opensslCmd = "";
         List<MeasurementType> whitelistValue = whitelist.getMeasurements();
-        try {
-            //set digest algorithm
-            switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
-                case "SHA-256":
-                    md = MessageDigest.getInstance("SHA-256");
-                    whitelist.setDigestAlg("sha256");
-                    imageHash.setDigestAlg("sha256");
-                    opensslCmd = "openssl dgst -sha256";
-                    break;
-                case "SHA-1":
-                default:
-                    //digestSha1 = Sha1Digest.ZERO;
-                    md = MessageDigest.getInstance("SHA-1");
-                    whitelist.setDigestAlg("sha1");
-                    imageHash.setDigestAlg("sha1");
-                    opensslCmd = "openssl dgst -sha1";
-                    break;
-            }
-        } catch (NoSuchAlgorithmException ex) {
-            log.error(null, ex);
+        //set digest algorithm
+        switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
+            case "SHA-256":
+                md = MessageDigest.getInstance("SHA-256");
+                whitelist.setDigestAlg("sha256");
+                imageHash.setDigestAlg("sha256");
+                opensslCmd = "openssl dgst -sha256";
+                break;
+            case "SHA-1":
+            default:
+                //digestSha1 = Sha1Digest.ZERO;
+                md = MessageDigest.getInstance("SHA-1");
+                whitelist.setDigestAlg("sha1");
+                imageHash.setDigestAlg("sha1");
+                opensslCmd = "openssl dgst -sha1";
+                break;
         }
-
+        
         //sort directories before adding it to trust policy so that list of files and directories added in trust policy is sorted
         Collections.sort(directories);
         //iterate throught each directory
@@ -351,36 +340,26 @@ public class GenerateTrustPolicy {
         return excludeList;
     }
 
-    public String setEncryption(String trustpolicyXml, Map<String, String> configInfo) {
+    public String setEncryption(String trustpolicyXml, Map<String, String> configInfo) throws Exception{
         //Set encryption
         if (configInfo.get(Constants.IS_ENCRYPTED).equals("true")) {
-            try {
-                JAXB jaxb = new JAXB();
-                TrustPolicy trustpolicyObj = jaxb.read(trustpolicyXml, TrustPolicy.class);
-                Encryption encryption = trustpolicyObj.getEncryption();
-                if (encryption == null) {
-                    encryption = new Encryption();
-                }
-                Key key = new Key();
-                key.setURL("uri");
-                key.setValue(configInfo.get(Constants.MH_DEK_URL_IMG));
-                encryption.setKey(key);
-
-                Encryption.Checksum checksum = new Encryption.Checksum();
-                checksum.setDigestAlg("md5");
-                checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
-                encryption.setChecksum(checksum);
-                trustpolicyObj.setEncryption(encryption);
-                trustpolicyXml = jaxb.write(trustpolicyObj);
-            } catch (IOException ex) {
-                log.error(null, ex);
-            } catch (JAXBException ex) {
-                log.error(null, ex);
-            } catch (XMLStreamException ex) {
-                log.error(null, ex);
-            } catch (NoSuchAlgorithmException ex) {
-                log.error(null, ex);
+            JAXB jaxb = new JAXB();
+            TrustPolicy trustpolicyObj = jaxb.read(trustpolicyXml, TrustPolicy.class);
+            Encryption encryption = trustpolicyObj.getEncryption();
+            if (encryption == null) {
+                encryption = new Encryption();
             }
+            Key key = new Key();
+            key.setURL("uri");
+            key.setValue(configInfo.get(Constants.MH_DEK_URL_IMG));
+            encryption.setKey(key);
+
+            Encryption.Checksum checksum = new Encryption.Checksum();
+            checksum.setDigestAlg("md5");
+            checksum.setValue(computeHash(MessageDigest.getInstance("MD5"), new java.io.File(configInfo.get("Image Location"))));
+            encryption.setChecksum(checksum);
+            trustpolicyObj.setEncryption(encryption);
+            trustpolicyXml = jaxb.write(trustpolicyObj);
         }
         log.debug("Encryption::" + configInfo.get(Constants.IS_ENCRYPTED) + " \n DEK URL::" + configInfo.get(Constants.MH_DEK_URL_IMG));
         return trustpolicyXml;
@@ -388,29 +367,21 @@ public class GenerateTrustPolicy {
 
     // Finds the final target of the symbolic link returns null if oath is not a symbolic link
 
-    private String getSymlinkValue(String filePath) {
+    private String getSymlinkValue(String filePath) throws Exception {
         Path path = Paths.get(filePath);
         boolean isSymbolicLink = Files.isSymbolicLink(path);
         String symPath = null;
         if (isSymbolicLink) {
-            try {
-                Path symLink = Files.readSymbolicLink(path);
-                symPath = symLink.toString();
-            } catch (IOException ex) {
-                log.error(null, ex);
-            }
+            Path symLink = Files.readSymbolicLink(path);
+            symPath = symLink.toString();
             if (symPath.startsWith(".") || symPath.startsWith("..") || !symPath.startsWith("/")) {
                 symPath = path.toFile().getParent() + "/" + symPath;
             }
             if (symPath.startsWith("/") && (!symPath.startsWith(mountPath))) {
                 symPath = mountPath + symPath;
             }
-            try {
-                symPath = new java.io.File(symPath).getCanonicalPath();
-                log.trace("Symbilic link value for '" + filePath + "' is: '" + symPath);
-            } catch (IOException ex) {
-                log.error(null, ex);
-            }
+            symPath = new java.io.File(symPath).getCanonicalPath();
+            log.trace("Symbilic link value for '" + filePath + "' is: '" + symPath);
         } else {
             symPath = filePath;
         }
@@ -418,47 +389,38 @@ public class GenerateTrustPolicy {
     }
 
     // Calculate hash and return hash value
-    public String computeHash(MessageDigest md, java.io.File file) {
+    public String computeHash(MessageDigest md, java.io.File file) throws Exception{
         if (!file.exists()) {
             return null;
         }
         StringBuffer sb = null;
-        try {
-            byte[] dataBytes = new byte[1024];
-            int nread = 0;
-            FileInputStream fis = new FileInputStream(file);
-            while ((nread = fis.read(dataBytes)) != -1) {
-                md.update(dataBytes, 0, nread);
-            };
-            byte[] mdbytes = md.digest();
+        byte[] dataBytes = new byte[1024];
+        int nread = 0;
+        FileInputStream fis = new FileInputStream(file);
+        while ((nread = fis.read(dataBytes)) != -1) {
+            md.update(dataBytes, 0, nread);
+        };
+        byte[] mdbytes = md.digest();
 
-            //convert the byte to hex format
-            sb = new StringBuffer();
-            for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            fis.close();
-        } catch (IOException ex) {
-            log.error(null, ex);
+        //convert the byte to hex format
+        sb = new StringBuffer();
+        for (int i = 0; i < mdbytes.length; i++) {
+            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
         }
+        fis.close();
         return sb.toString();
     }
 
-    public String computeHash(MessageDigest md, String text) {
+    public String computeHash(MessageDigest md, String text) throws Exception{
         StringBuffer sb = null;
-        try {
-            md.update(text.getBytes("UTF-8"));
-            byte[] mdbytes = md.digest();
+        md.update(text.getBytes("UTF-8"));
+        byte[] mdbytes = md.digest();
 
-            //convert the byte to hex format
-            sb = new StringBuffer();
-            for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-        } catch (UnsupportedEncodingException ex) {
-            log.error(null, ex);
+        //convert the byte to hex format
+        sb = new StringBuffer();
+        for (int i = 0; i < mdbytes.length; i++) {
+            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
         }
-
         return sb.toString();
     }
 

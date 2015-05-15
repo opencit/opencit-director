@@ -40,9 +40,13 @@ public class ErrorMessage {
 
             @Override
             public void handle(ActionEvent t) {
-                primaryStage.close();
-                ConfigurationInformation window = new ConfigurationInformation(primaryStage);
-                window.launch();
+                try {
+                    primaryStage.close();
+                    ConfigurationInformation window = new ConfigurationInformation(primaryStage);
+                    window.launch();
+                } catch (Exception exception) {
+                    showErrorMessage(primaryStage, exception);
+                }
             }
         });
 

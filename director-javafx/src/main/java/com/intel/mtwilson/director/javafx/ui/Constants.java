@@ -80,5 +80,6 @@ public class Constants {
     public static final String MH_KEYSTORE_LOCATION = "mysteryhill.keystore";
     public static final String MH_TLS_SSL_PASSWD = "mysteryhill.tls.ssl.password";
     public static final String BM_MANIFEST_REMOTE = "remoteManifest";
-    static String DIRECTOR_HOME = "DIRECTOR_HOME";
+    public static final String DIRECTOR_HOME = "DIRECTOR_HOME";
+    public static final String BM_TRUSTPOLICY_REMOTE = "RemoteTrustPolicy";
 }

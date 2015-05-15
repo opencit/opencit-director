@@ -12,9 +12,9 @@ import java.util.Map;
  * @author boskisha
  */
 public interface ImageStore {
-    public String uploadImage(String imagePath, Map<String, String> imageProperties);
+    public String uploadImage(String imagePath, Map<String, String> imageProperties)throws Exception ;
     
-    public String uploadTrustPolicy(String trustPolicyPath);
+    public String uploadTrustPolicy(String trustPolicyPath) throws Exception;
     
-    public boolean updateImageProperty(String imageID, String propName, String propValue);
+    public boolean updateImageProperty(String imageID, String propName, String propValue)throws Exception ;
 }
