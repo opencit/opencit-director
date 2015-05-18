@@ -278,13 +278,13 @@ public class GenerateTrustPolicy {
                             digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
                             log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());                        
                 }
-            }
-            if (digestSha1 != null) {
-                imageHash.setValue(digestSha1.toHexString());
-            } else if (digestSha256 != null) {
-                imageHash.setValue(digestSha256.toHexString());
-            } else {
-            }
+            }            
+        }
+        if (digestSha1 != null) {
+            imageHash.setValue(digestSha1.toHexString());
+        } else if (digestSha256 != null) {
+            imageHash.setValue(digestSha256.toHexString());
+        } else {
         }
         image.setImageHash(imageHash);
         return whitelist;
