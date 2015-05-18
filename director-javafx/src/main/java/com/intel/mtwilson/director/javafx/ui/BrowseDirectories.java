@@ -254,14 +254,14 @@ public class BrowseDirectories {
                         log.debug("Mount path {} ,dir path {}", mountPath, dir.getCbox().getText());
                         if (dir.getCbox().isSelected() && (mountPath != "/")) {
                             if (!new File(mountPath + dir.getCbox().getText()).exists()) {
-                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException(mountPath+dir.getCbox().getText()));
                                 return;
                             }
                             dirList.add(dir);
 
                         } else if (dir.getCbox().isSelected() && (mountPath == "/")) {
                             if (!new File(dir.getCbox().getText()).exists()) {
-                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException());
+                                ErrorMessage.showErrorMessage(primaryStage, new FileNotFoundException(dir.getCbox().getText()));
                                 return;
                             }
                             dirList.add(dir);
