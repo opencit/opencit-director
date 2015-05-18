@@ -235,6 +235,7 @@ public class CreateImage {
                         } else {
                             //Discarding image name after space from mount path
                             String mountpath = "/mnt/vm/" + imageNameTField.getText().split(" ")[0];
+                            log.debug("Mount path is {}",mountpath);
                             customerInfo.put(Constants.MOUNT_PATH2, mountpath);
                             // Mount the VM disk image
 //                            exitCode = MountVMImage.mountImage(imagePathTField.getText());
