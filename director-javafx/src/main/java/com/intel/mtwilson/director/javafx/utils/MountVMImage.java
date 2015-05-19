@@ -30,6 +30,8 @@ public class MountVMImage {
         
         log.debug("Unmounting the vm image with mount path : " + mountPath);
         int exitCode = callExec(mountScript+" "+mountPath);
+        if(exitCode != 0)
+            throw new UnmountException(Integer.toString(exitCode));
         return exitCode;
     }
     

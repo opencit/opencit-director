@@ -46,6 +46,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.apache.derby.diag.ErrorMessages;
 
 /**
@@ -293,14 +294,6 @@ public class BrowseDirectories {
                         manifestLocation = saveManifest(manifest, confInfo);
                     }
                     
-                    // Unmount the VM Image
-                    if (!isBareMetalLocal) {
-                        log.debug("Unmounting the VM Image from mount path {}", mountPath);
-                        int exitCode = MountVMImage.unmountImage(mountPath);
-                        if (exitCode != 0) {
-                            throw new UnsuccessfulImageMountException();
-                        }
-                    }
                     //promp policy location or upload image
                     if (isBareMetalLocal) {
                         String message = "\nManifest:  " + manifestLocation + "\n"
@@ -321,6 +314,17 @@ public class BrowseDirectories {
                 } catch (Exception ex) {
                     ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
+                finally{
+                    // Unmount the VM Image
+                    if (!isBareMetalLocal) {
+                        log.debug("Unmounting the VM Image from mount path {}", mountPath);
+                        try {                        
+                            MountVMImage.unmountImage(mountPath);
+                        } catch (Exception ex) {
+                            ErrorMessage.showErrorMessage(primaryStage, ex);
+                        }
+                    }
+                }
             }
         });
 
@@ -337,6 +341,7 @@ public class BrowseDirectories {
                         ConfigurationInformation window = new ConfigurationInformation(primaryStage);
                         window.launch();
                     } else {
+                        MountVMImage.unmountImage(mountPath);
                         primaryStage.setScene(firstWindowScene);
                     }
                 } catch (Exception exception) {
@@ -354,7 +359,17 @@ public class BrowseDirectories {
         primaryStage.setScene(new Scene(root));
 
         primaryStage.show();
-
+        
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+          public void handle(WindowEvent we) {
+              System.out.println("Stage is closing");
+              try {
+                  MountVMImage.unmountImage(mountPath);
+              } catch (Exception ex) {
+                  ErrorMessage.showErrorMessage(primaryStage, ex);
+              }
+          }
+        });
     }
 
     private String getHelpMessage() {
