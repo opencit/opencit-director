@@ -6,9 +6,12 @@ package com.intel.mtwilson.director.javafx.ui;
 
 import com.intel.mtwilson.director.javafx.utils.ConfigProperties;
 import com.intel.mtwilson.director.javafx.utils.FileUtilityOperation;
+import com.intel.mtwilson.director.javafx.utils.GenerateTrustPolicy;
+import com.intel.mtwilson.director.javafx.utils.ImageInUseException;
 import com.intel.mtwilson.director.javafx.utils.MountVMImage;
 import com.intel.mtwilson.director.javafx.utils.UnsuccessfulImageMountException;
 import java.io.File;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -85,6 +88,7 @@ public class CreateImage {
         Label imageID = new Label("Image ID");
 
         imagePathTField = new TextField();
+        imagePathTField.setEditable(false);
         imageNameTField = new TextField();
         imageIDTField = new TextField();
         imageFormatChoiceBox = new ChoiceBox(imageFormatList);
@@ -101,7 +105,7 @@ public class CreateImage {
         final Button browseManifest = new Button("Next");
         browseManifest.setPrefSize(80, 15);
         Tooltip toolTipManifest = new Tooltip();
-        toolTipManifest.setText("Browse the manifest files");
+        toolTipManifest.setText("Select Image");
         browseImage.setTooltip(toolTipManifest);
 
         Button saveButton = new Button("Upload Later");
@@ -182,14 +186,9 @@ public class CreateImage {
                 FileChooser imageFile = new FileChooser();
                 try {
                     File file = imageFile.showOpenDialog(createImageStage);
-                    imagePathTField.setText(file.getAbsolutePath());
-
-                    if (imagePathTField.getText() != null) {
-                        String autoComplete = imagePathTField.getText();
-                        int index = autoComplete.lastIndexOf(delimiter);
-                        autoComplete = autoComplete.substring(index + 1, autoComplete.length() - 4);
-
-                        imageNameTField.setText(autoComplete);
+                    if(file != null && file.exists()){
+                        imagePathTField.setText(file.getAbsolutePath());
+                        imageNameTField.setText(getImageNameFromPath(imagePathTField.getText()));
                     }
                 } catch (Exception e) {
                     ErrorMessage.showErrorMessage(createImageStage, e);
@@ -233,12 +232,18 @@ public class CreateImage {
                              }
                              */
                         } else {
-                            //Discarding image name after space from mount path
-                            String mountpath = "/mnt/vm/" + imageNameTField.getText().split(" ")[0];
+                            //get image path md5 and use last four digits of md5 as a prefix of directory name
+                            String pathHash = new GenerateTrustPolicy().computeHash(MessageDigest.getInstance("MD5"),imagePathTField.getText());
+                            //Get image name from path and remove all spaces
+                            String dirname = pathHash.substring(28,32)+getImageNameFromPath(imagePathTField.getText()).replaceAll(" ", "");
+                            String mountpath = "/mnt/vm/" + dirname;
                             log.debug("Mount path is {}",mountpath);
+                            //check if mount path already exist. If it does then image is already in use and we need to throw an exception
+                            if(new File(mountpath).exists()){
+                                ErrorMessage.showErrorMessage(createImageStage, new ImageInUseException(mountpath));
+                                return;
+                            }
                             customerInfo.put(Constants.MOUNT_PATH2, mountpath);
-                            // Mount the VM disk image
-//                            exitCode = MountVMImage.mountImage(imagePathTField.getText());
                             // Mount the VM disk image
                             exitCode = MountVMImage.mountImage(imagePathTField.getText(), mountpath);
                             log.info("Exit Code" + exitCode);
@@ -287,6 +292,14 @@ public class CreateImage {
         createImageStage.setScene(scene);
         createImageStage.show();
 
+    }
+    
+    private String getImageNameFromPath(String path) throws Exception{
+        int index = path.lastIndexOf(File.separator);
+        path = path.substring(index + 1);
+        if(path.contains("."))
+            return path.substring(0,path.lastIndexOf("."));
+        return path;
     }
 
     //Show the Target location and Manifest location

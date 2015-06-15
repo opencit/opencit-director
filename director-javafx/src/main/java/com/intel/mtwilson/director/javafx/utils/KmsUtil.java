@@ -138,24 +138,13 @@ public class KmsUtil {
         
         SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
         RsaCredentialX509 wrappingKeyCertificate;
-        try {
-            wrappingKeyCertificate = keystore.getRsaCredentialX509(directorEnvelopeAlias, keystorePassword);
-            log.debug("Found key {}", wrappingKeyCertificate.getCertificate().getSubjectX500Principal().getName());
-            
-            directorEnvelopePublicKey = wrappingKeyCertificate.getPublicKey();
-            if ( directorEnvelopePublicKey == null ) {
-                log.error("Trust Director envelope public key is not configured");
-            }
-        } catch (FileNotFoundException e) {
-            log.error("Keystore does not contain the specified key %s", directorEnvelopeAlias);
-            throw new FileNotFoundException();
+        wrappingKeyCertificate = keystore.getRsaCredentialX509(directorEnvelopeAlias, keystorePassword);
+        log.debug("Found key {}", wrappingKeyCertificate.getCertificate().getSubjectX500Principal().getName());
+
+        directorEnvelopePublicKey = wrappingKeyCertificate.getPublicKey();
+        if ( directorEnvelopePublicKey == null ) {
+            log.error("Trust Director envelope public key is not configured");
         }
-        catch(java.security.UnrecoverableKeyException e) {
-            log.debug("Incorrect password for existing key: {}", e.getMessage());
-            log.error("Key must be recreated");
-            throw new java.security.UnrecoverableKeyException();
-        }
-        
         
         //Collect KMS configurations
         kmsEndpointUrl = getConfiguration().get(KMS_ENDPOINT_URL, null);
@@ -184,8 +173,6 @@ public class KmsUtil {
         if( kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty() ) {
             throw new ConfigurationNotFoundException("KMS API password not configured");
         }
-        log.debug("kmsLoginBasicPassword is::::::::::::::"+kmsLoginBasicPassword.toString());
-        log.debug("kmsLoginBasicUsername is::::::::::::::"+kmsLoginBasicUsername);
         // create KMS Keys API client
         Properties properties = new Properties();
         properties.setProperty("endpoint.url", kmsEndpointUrl);
