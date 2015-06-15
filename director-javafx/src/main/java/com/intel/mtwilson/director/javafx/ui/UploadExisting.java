@@ -104,7 +104,7 @@ public class UploadExisting {
         final Button browseManifest = new Button("Browse");
         browseManifest.setPrefSize(80, 15);
         Tooltip toolTipManifest = new Tooltip();
-        toolTipManifest.setText("Choose Trust Policy");
+        toolTipManifest.setText("Select Trust Policy");
         browseManifest.setTooltip(toolTipManifest);
 //        
         Button uploadButton = new Button("Upload");

@@ -105,7 +105,7 @@ public class CreateImage {
         final Button browseManifest = new Button("Next");
         browseManifest.setPrefSize(80, 15);
         Tooltip toolTipManifest = new Tooltip();
-        toolTipManifest.setText("Choose Image");
+        toolTipManifest.setText("Select Image");
         browseImage.setTooltip(toolTipManifest);
 
         Button saveButton = new Button("Upload Later");
