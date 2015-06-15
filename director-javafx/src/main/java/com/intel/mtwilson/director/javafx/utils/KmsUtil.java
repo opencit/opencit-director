@@ -148,12 +148,12 @@ public class KmsUtil {
             }
         } catch (FileNotFoundException e) {
             log.error("Keystore does not contain the specified key %s", directorEnvelopeAlias);
-            throw new FileNotFoundException();
+            throw new FileNotFoundException(e);
         }
         catch(java.security.UnrecoverableKeyException e) {
             log.debug("Incorrect password for existing key: {}", e.getMessage());
             log.error("Key must be recreated");
-            throw new java.security.UnrecoverableKeyException();
+            throw new java.security.UnrecoverableKeyException(e);
         }
         
         
@@ -184,8 +184,6 @@ public class KmsUtil {
         if( kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty() ) {
             throw new ConfigurationNotFoundException("KMS API password not configured");
         }
-        log.debug("kmsLoginBasicPassword is::::::::::::::"+kmsLoginBasicPassword.toString());
-        log.debug("kmsLoginBasicUsername is::::::::::::::"+kmsLoginBasicUsername);
         // create KMS Keys API client
         Properties properties = new Properties();
         properties.setProperty("endpoint.url", kmsEndpointUrl);
