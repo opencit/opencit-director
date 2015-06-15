@@ -88,6 +88,7 @@ public class CreateImage {
         Label imageID = new Label("Image ID");
 
         imagePathTField = new TextField();
+        imagePathTField.setEditable(false);
         imageNameTField = new TextField();
         imageIDTField = new TextField();
         imageFormatChoiceBox = new ChoiceBox(imageFormatList);
@@ -185,9 +186,8 @@ public class CreateImage {
                 FileChooser imageFile = new FileChooser();
                 try {
                     File file = imageFile.showOpenDialog(createImageStage);
-                    imagePathTField.setText(file.getAbsolutePath());
-
-                    if (imagePathTField.getText() != null) {
+                    if(file != null && file.exists()){
+                        imagePathTField.setText(file.getAbsolutePath());
                         imageNameTField.setText(getImageNameFromPath(imagePathTField.getText()));
                     }
                 } catch (Exception e) {
