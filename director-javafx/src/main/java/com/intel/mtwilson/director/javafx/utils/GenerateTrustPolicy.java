@@ -34,6 +34,8 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
@@ -255,7 +257,6 @@ public class GenerateTrustPolicy {
             for (String filePath : files) {
                 //Replace filePath path with symbolic link if any and add each filePath to whitelist
                 String symLink = getSymlinkValue(filePath);
-                //TODO handle a case where file points to a directory
                 if (!(new java.io.File(symLink).exists()) || !(new java.io.File(symLink).isFile())) {
                     continue;
                 }
@@ -351,27 +352,31 @@ public class GenerateTrustPolicy {
         return trustpolicyXml;
     }
 
-    // Finds the final target of the symbolic link returns null if oath is not a symbolic link
+    // Finds the final target of the symbolic link returns empty string if there is circular symbolic link
 
     private String getSymlinkValue(String filePath) throws Exception {
         Path path = Paths.get(filePath);
-        boolean isSymbolicLink = Files.isSymbolicLink(path);
-        String symPath = null;
-        if (isSymbolicLink) {
+        //symLinkSet is used to detect circular symbolic link. 
+        Set<String> symLinkSet = new HashSet<>();
+        while (Files.isSymbolicLink(path)) {
+            if(symLinkSet.contains(filePath)){
+                //Circular symbolic link detected skippig file
+                return "";
+            }
+            symLinkSet.add(filePath);
             Path symLink = Files.readSymbolicLink(path);
-            symPath = symLink.toString();
-            if (symPath.startsWith(".") || symPath.startsWith("..") || !symPath.startsWith("/")) {
-                symPath = path.toFile().getParent() + "/" + symPath;
+            filePath = symLink.toString();
+            if (filePath.startsWith(".") || filePath.startsWith("..") || !filePath.startsWith("/")) {
+                filePath = path.toFile().getParent() + "/" + filePath;
             }
-            if (symPath.startsWith("/") && (!symPath.startsWith(mountPath))) {
-                symPath = mountPath + symPath;
+            if (filePath.startsWith("/") && (!filePath.startsWith(mountPath))) {
+                filePath = mountPath + filePath;
             }
-            symPath = new java.io.File(symPath).getCanonicalPath();
-            log.trace("Symbilic link value for '" + filePath + "' is: '" + symPath);
-        } else {
-            symPath = filePath;
-        }
-        return symPath;
+            filePath = new java.io.File(filePath).getCanonicalPath();
+            log.trace("Symbolic link value for '" + path.toString() + "' is: '" + filePath);
+            path = Paths.get(filePath);
+        } 
+        return filePath;
     }
 
     // Calculate hash and return hash value
