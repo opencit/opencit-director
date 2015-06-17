@@ -384,7 +384,7 @@ public class BrowseDirectories {
 
     //save trustPolicy and return file path
     private String saveTrustPolicy(String trustPolicy, Map<String, String> confInfo) throws Exception {
-        String trustPolicyName = "TrustPolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
+        String trustPolicyName = "trustpolicy-" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         String trustPolicyDirLocation;
         if(isBareMetalLocal || isBareMetalRemote){
             //TODO get DIRECTOR_HOME
@@ -403,7 +403,7 @@ public class BrowseDirectories {
             String remoteDirPath = mountPath+"/boot/trust";
             if(!Files.exists(Paths.get(remoteDirPath)));
                 MountVMImage.callExec("mkdir -p " + remoteDirPath);
-            String policyPath = remoteDirPath+"/"+"TrustPolicy.xml";
+            String policyPath = remoteDirPath+"/"+"trustpolicy.xml";
             Files.write(Paths.get(policyPath), trustPolicy.getBytes());
             confInfo.put(Constants.BM_TRUSTPOLICY_REMOTE,policyPath.replace(mountPath, ""));
         }
@@ -423,7 +423,7 @@ public class BrowseDirectories {
             String remoteDirPath = mountPath+"/boot/trust";
             if(!Files.exists(Paths.get(remoteDirPath)));
                 MountVMImage.callExec("mkdir -p " + remoteDirPath);
-            String manifestPath = remoteDirPath+"/"+"Manifest.xml";
+            String manifestPath = remoteDirPath+"/"+"manifest.xml";
             Files.write(Paths.get(manifestPath), trustPolicy.getBytes());
             confInfo.put(Constants.BM_MANIFEST_REMOTE,manifestPath.replace(mountPath, ""));
         }
