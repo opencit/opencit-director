@@ -34,6 +34,8 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
@@ -178,6 +180,7 @@ public class GenerateTrustPolicy {
                 whitelist.setDigestAlg("sha256");
                 imageHash.setDigestAlg("sha256");
                 opensslCmd = "openssl dgst -sha256";
+                digestSha256 = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0});
                 break;
             case "SHA-1":
             default:
@@ -186,6 +189,7 @@ public class GenerateTrustPolicy {
                 whitelist.setDigestAlg("sha1");
                 imageHash.setDigestAlg("sha1");
                 opensslCmd = "openssl dgst -sha1";
+                digestSha1 = Sha1Digest.ZERO;
                 break;
         }
         
@@ -234,23 +238,15 @@ public class GenerateTrustPolicy {
             //Extend image hash to include directory
             switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
-                    if (digestSha256 != null) {
-                        log.trace("Before extending hash is: " + digestSha256.toHexString());
-                        digestSha256 = digestSha256.extend(directoryWhitelist.getValue().getBytes());
-                        log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
-                    } else {
-                        digestSha256 = Sha256Digest.digestOf(directoryWhitelist.getValue().getBytes());
-                    }
+                    log.trace("Before extending hash is: " + digestSha256.toHexString());
+                    digestSha256 = digestSha256.extend(directoryWhitelist.getValue().getBytes());
+                    log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
                     break;
                 case "SHA-1":
                 default:
-                    if (digestSha1 != null) {
-                        log.trace("Before extending hash is: " + digestSha1.toHexString());
-                        digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
-                        log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
-                    } else {
-                        digestSha1 = Sha1Digest.digestOf(directoryWhitelist.getValue().getBytes());
-                    }
+                    log.trace("Before extending hash is: " + digestSha1.toHexString());
+                    digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
+                    log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
             }
             if (fileListForDir == null) {
                 continue;
@@ -261,7 +257,6 @@ public class GenerateTrustPolicy {
             for (String filePath : files) {
                 //Replace filePath path with symbolic link if any and add each filePath to whitelist
                 String symLink = getSymlinkValue(filePath);
-                //TODO handle a case where file points to a directory
                 if (!(new java.io.File(symLink).exists()) || !(new java.io.File(symLink).isFile())) {
                     continue;
                 }
@@ -274,23 +269,15 @@ public class GenerateTrustPolicy {
 
                 switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                     case "SHA-256":
-                        if (digestSha256 != null) {
                             log.trace("Before extending hash is: " + digestSha256.toHexString());
                             digestSha256 = digestSha256.extend(newFile.getValue().getBytes());
-                            log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());
-                        } else {
-                            digestSha256 = Sha256Digest.digestOf(newFile.getValue().getBytes());
-                        }
+                            log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());                        
                         break;
                     case "SHA-1":
                     default:
-                        if (digestSha1 != null) {
                             log.trace("Before extending hash is: " + digestSha1.toHexString());
                             digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
-                            log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());
-                        } else {
-                            digestSha1 = Sha1Digest.digestOf(newFile.getValue().getBytes());
-                        }
+                            log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());                        
                 }
             }            
         }
@@ -365,27 +352,31 @@ public class GenerateTrustPolicy {
         return trustpolicyXml;
     }
 
-    // Finds the final target of the symbolic link returns null if oath is not a symbolic link
+    // Finds the final target of the symbolic link returns empty string if there is circular symbolic link
 
     private String getSymlinkValue(String filePath) throws Exception {
         Path path = Paths.get(filePath);
-        boolean isSymbolicLink = Files.isSymbolicLink(path);
-        String symPath = null;
-        if (isSymbolicLink) {
+        //symLinkSet is used to detect circular symbolic link. 
+        Set<String> symLinkSet = new HashSet<>();
+        while (Files.isSymbolicLink(path)) {
+            if(symLinkSet.contains(filePath)){
+                //Circular symbolic link detected skippig file
+                return "";
+            }
+            symLinkSet.add(filePath);
             Path symLink = Files.readSymbolicLink(path);
-            symPath = symLink.toString();
-            if (symPath.startsWith(".") || symPath.startsWith("..") || !symPath.startsWith("/")) {
-                symPath = path.toFile().getParent() + "/" + symPath;
+            filePath = symLink.toString();
+            if (filePath.startsWith(".") || filePath.startsWith("..") || !filePath.startsWith("/")) {
+                filePath = path.toFile().getParent() + "/" + filePath;
             }
-            if (symPath.startsWith("/") && (!symPath.startsWith(mountPath))) {
-                symPath = mountPath + symPath;
+            if (filePath.startsWith("/") && (!filePath.startsWith(mountPath))) {
+                filePath = mountPath + filePath;
             }
-            symPath = new java.io.File(symPath).getCanonicalPath();
-            log.trace("Symbilic link value for '" + filePath + "' is: '" + symPath);
-        } else {
-            symPath = filePath;
-        }
-        return symPath;
+            filePath = new java.io.File(filePath).getCanonicalPath();
+            log.trace("Symbolic link value for '" + path.toString() + "' is: '" + filePath);
+            path = Paths.get(filePath);
+        } 
+        return filePath;
     }
 
     // Calculate hash and return hash value
