@@ -38,7 +38,7 @@ function mount_qcow2_image() {
         qemu-nbd -d /dev/nbd0
 	echo "############ Image file path is $imagePath"
 	echo "PSDebug: mount_qcow2_image"
-        qemu-nbd -c /dev/nbd0 $imagePath
+        qemu-nbd -r -c /dev/nbd0 $imagePath
 	sleep 2
         if [ -b /dev/nbd0p1 ]
         then
@@ -79,7 +79,7 @@ function mount_raw_image_duplicate() {
 	loopDevice="/dev/loop0"
 	/sbin/kpartx -d $loopDevice
 	/sbin/losetup -d $loopDevice
-	/sbin/losetup $loopDevice $imagePath
+	/sbin/losetup -r $loopDevice $imagePath
 	out=$(/sbin/kpartx -av $loopDevice | grep -o "$loopDevice")
 	echo "#####%%%%%%%#######__________$out___________################"
 	if [ -z $out ]
@@ -92,7 +92,7 @@ function mount_raw_image_duplicate() {
 }
 
 function mount_vhd_image() {
-        vdfuse -w -f $imagePath $mountPath
+        vdfuse -r -f $imagePath $mountPath
 	sleep 1
         out=$(ls $mountPath | grep "Partition1")
 
