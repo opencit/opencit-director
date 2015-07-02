@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2015-06-30 00:21:57.97
+-- Last modification date: 2015-07-02 22:42:32.226
 
 
 
@@ -26,6 +26,7 @@ CREATE TABLE mw_image (
     location varchar(255)  NOT NULL,
     mounted_by_user_id varchar(36)  NULL,
     deleted boolean  NOT NULL,
+    policy_id varchar(36)  NOT NULL,
     CONSTRAINT mw_image_pk PRIMARY KEY (id)
 );
 
@@ -80,7 +81,6 @@ CREATE TABLE mw_ssh_password (
 CREATE TABLE mw_trust_policy (
     id varchar(36)  NOT NULL,
     description varchar(255)  NOT NULL,
-    image_id varchar(36)  NULL,
     trust_policy xml  NOT NULL,
     host_id varchar(36)  NULL,
     CONSTRAINT mw_trust_policy_pk PRIMARY KEY (id)
@@ -103,12 +103,12 @@ CREATE TABLE mw_user (
 
 
 -- foreign keys
--- Reference:  image_policy (table: mw_trust_policy)
+-- Reference:  image_policy (table: mw_image)
 
 
-ALTER TABLE mw_trust_policy ADD CONSTRAINT image_policy 
-    FOREIGN KEY (image_id)
-    REFERENCES mw_image (id)
+ALTER TABLE mw_image ADD CONSTRAINT image_policy 
+    FOREIGN KEY (policy_id)
+    REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
 ;
