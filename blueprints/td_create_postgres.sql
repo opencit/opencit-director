@@ -1,9 +1,3 @@
--- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2015-07-02 22:42:32.226
-
-
-
-
 -- tables
 -- Table: mw_host
 CREATE TABLE mw_host (
@@ -26,7 +20,9 @@ CREATE TABLE mw_image (
     location varchar(255)  NOT NULL,
     mounted_by_user_id varchar(36)  NULL,
     deleted boolean  NOT NULL,
-    policy_id varchar(36)  NOT NULL,
+    trust_policy_id varchar(36)  NOT NULL,
+    date_created date  NOT NULL,
+    content_length int  NOT NULL,
     CONSTRAINT mw_image_pk PRIMARY KEY (id)
 );
 
@@ -36,12 +32,13 @@ CREATE TABLE mw_image (
 CREATE TABLE mw_image_upload (
     id varchar(36)  NOT NULL,
     image_id varchar(36)  NULL,
-    trust_policy_id varchar(36)  NOT NULL,
     image_uri text  NOT NULL,
     date date  NOT NULL,
     tmp_location varchar(255)  NOT NULL,
     checksum varchar(64)  NOT NULL,
     status varchar(20)  NOT NULL,
+    content_length int  NOT NULL,
+    content_sent int  NOT NULL,
     CONSTRAINT mw_image_upload_pk PRIMARY KEY (id)
 );
 
@@ -88,6 +85,17 @@ CREATE TABLE mw_trust_policy (
 
 
 
+-- Table: mw_trust_policy_draft
+CREATE TABLE mw_trust_policy_draft (
+    id varchar(36)  NOT NULL,
+    image_id varchar(36)  NOT NULL,
+    trust_policy text  NOT NULL,
+    user_id varchar(36)  NOT NULL,
+    CONSTRAINT mw_trust_policy_draft_pk PRIMARY KEY (id)
+);
+
+
+
 -- Table: mw_user
 CREATE TABLE mw_user (
     id varchar(36)  NOT NULL,
@@ -107,7 +115,7 @@ CREATE TABLE mw_user (
 
 
 ALTER TABLE mw_image ADD CONSTRAINT image_policy 
-    FOREIGN KEY (policy_id)
+    FOREIGN KEY (trust_policy_id)
     REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
@@ -133,6 +141,16 @@ ALTER TABLE mw_host ADD CONSTRAINT mw_host_mw_ssh_password
     INITIALLY IMMEDIATE 
 ;
 
+-- Reference:  mw_image_mw_trust_policy_draft (table: mw_trust_policy_draft)
+
+
+ALTER TABLE mw_trust_policy_draft ADD CONSTRAINT mw_image_mw_trust_policy_draft 
+    FOREIGN KEY (image_id)
+    REFERENCES mw_image (id)
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE 
+;
+
 -- Reference:  mw_image_mw_user (table: mw_image)
 
 
@@ -149,16 +167,6 @@ ALTER TABLE mw_image ADD CONSTRAINT mw_image_mw_user
 ALTER TABLE mw_image_upload ADD CONSTRAINT mw_image_store_mapping_mw_image 
     FOREIGN KEY (image_id)
     REFERENCES mw_image (id)
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE 
-;
-
--- Reference:  mw_image_store_mapping_mw_trust_policy (table: mw_image_upload)
-
-
-ALTER TABLE mw_image_upload ADD CONSTRAINT mw_image_store_mapping_mw_trust_policy 
-    FOREIGN KEY (trust_policy_id)
-    REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
 ;
@@ -183,10 +191,19 @@ ALTER TABLE mw_trust_policy ADD CONSTRAINT mw_trust_policy_mw_host
     INITIALLY IMMEDIATE 
 ;
 
+-- Reference:  mw_user_mw_trust_policy_draft (table: mw_trust_policy_draft)
+
+
+ALTER TABLE mw_trust_policy_draft ADD CONSTRAINT mw_user_mw_trust_policy_draft 
+    FOREIGN KEY (user_id)
+    REFERENCES mw_user (id)
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE 
+;
+
 
 
 
 
 
 -- End of file.
-
