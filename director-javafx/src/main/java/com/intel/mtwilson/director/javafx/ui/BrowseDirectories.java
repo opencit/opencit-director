@@ -48,6 +48,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.derby.diag.ErrorMessages;
+import com.intel.mtwilson.util.exec.ExecUtil;
 
 /**
  *
@@ -77,7 +78,7 @@ public class BrowseDirectories {
         initializeDefaultDirectoryList(Boolean.valueOf(confInfo.get(Constants.IS_WINDOWS)));
         isBareMetalLocal = (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_LOCAL)));
         isBareMetalRemote = (Boolean.valueOf(confInfo.get(Constants.BARE_METAL_REMOTE)));
-        mountPath = confInfo.get(Constants.MOUNT_PATH2);
+        mountPath = confInfo.get(Constants.MOUNT_PATH);
 
         if (isBareMetalLocal) {
             mountPath = "/";
@@ -287,7 +288,7 @@ public class BrowseDirectories {
                     }
                     //save trust policy to a file
                     trustPolicyLocation = saveTrustPolicy(trustPolicy, confInfo);
-
+                    log.debug("Image deployment type is:;;;;; ", confInfo.get(Constants.IMAGE_DEPLOYMENT_TYPE));
                     if (isBareMetalLocal || isBareMetalRemote) {
                         // Generate manifest                      
                         String manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
@@ -308,9 +309,20 @@ public class BrowseDirectories {
                                 + "Manifest:  " + manifestLocation + "\n"
                                 + "Trust Policy:  " + trustPolicyLocation + "\n";
                         new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
-                    } else {
+                    } 
+                    else if(confInfo.containsKey(Constants.IMAGE_DEPLOYMENT_TYPE) && confInfo.get(Constants.IMAGE_DEPLOYMENT_TYPE).equals("BM")){
+                        String manifest = new GenerateTrustPolicy().createManifest(dirList, confInfo);
+                        saveManifest(manifest, confInfo);
+                        //String newImageLocation = updateNewImage(trustPolicy, manifest, confInfo);
+                        String message = "Updated image location: "+confInfo.get(Constants.IMAGE_NAME)+"\n"
+                                + "Trust Policy and Manifest are stored at /boot/grub in the new image";
+                        
+                        new UserConfirmation().showUploadSuccessMessage(primaryStage, message);
+                    }
+                    else if(confInfo.containsKey(Constants.IMAGE_DEPLOYMENT_TYPE) && confInfo.get(Constants.IMAGE_DEPLOYMENT_TYPE).equals("VM")){
                         new UserConfirmation().glanceUploadConfirmation(primaryStage, trustPolicyLocation, confInfo);
                     }
+                    else{}
                 } catch (Exception ex) {
                     ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
@@ -326,6 +338,8 @@ public class BrowseDirectories {
                     }
                 }
             }
+
+            
         });
 
         // Handler for "Back" button
@@ -371,7 +385,12 @@ public class BrowseDirectories {
           }
         });
     }
-
+    private String updateNewImage(String trustPolicy, String manifest, Map<String, String> configInfo) throws IOException, InterruptedException {
+                String mountPath = configInfo.get(Constants.MOUNT_PATH);
+                MountVMImage.callExec("echo "+trustPolicy+" > "+mountPath+"/boot/grub/trustpolicy.xml");
+                MountVMImage.callExec("echo "+manifest+" > "+mountPath+"/boot/grub/manifest.xml");
+                return configInfo.get(Constants.IMAGE_NAME);
+    }
     private String getHelpMessage() {
         String message = "\n"
                 + "Here are some examples on how to use regular expression:\n\n"
@@ -389,6 +408,9 @@ public class BrowseDirectories {
         if(isBareMetalLocal || isBareMetalRemote){
             //TODO get DIRECTOR_HOME
             trustPolicyDirLocation =  "/opt/director/repository/policy";
+        }else if(confInfo.containsKey(Constants.IMAGE_DEPLOYMENT_TYPE) && confInfo.get(Constants.IMAGE_DEPLOYMENT_TYPE).equals("BM")){
+            trustPolicyDirLocation =  mountPath+"/boot/grub";
+            trustPolicyName="trustpolicy.xml";
         }
         else{
             String imageLocation = confInfo.get(Constants.IMAGE_LOCATION);
@@ -411,20 +433,24 @@ public class BrowseDirectories {
     }
 
     //Save baremetal manifest and return path
-    private String saveManifest(String trustPolicy, Map<String, String> confInfo) throws Exception {
+    private String saveManifest(String manifest, Map<String, String> confInfo) throws Exception {
         String fileName = "Manifest" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) + ".xml";
         //TODO get DIRECTOR_HOME
         String manifestDir =  "/opt/director/repository/policy";
         String manifestLocalPath = manifestDir+"/"+fileName;
+        if(confInfo.containsKey(Constants.IMAGE_DEPLOYMENT_TYPE) && confInfo.get(Constants.IMAGE_DEPLOYMENT_TYPE).equals("BM")){
+             manifestDir = mountPath+"/boot/grub";
+            manifestLocalPath = manifestDir+"/manifest.xml";
+        }
         if(!Files.exists(Paths.get(manifestDir)));
             MountVMImage.callExec("mkdir -p " + manifestDir);
-        Files.write(Paths.get(manifestLocalPath), trustPolicy.getBytes());
+        Files.write(Paths.get(manifestLocalPath), manifest.getBytes());
         if(isBareMetalRemote){
             String remoteDirPath = mountPath+"/boot/trust";
             if(!Files.exists(Paths.get(remoteDirPath)));
                 MountVMImage.callExec("mkdir -p " + remoteDirPath);
             String manifestPath = remoteDirPath+"/"+"manifest.xml";
-            Files.write(Paths.get(manifestPath), trustPolicy.getBytes());
+            Files.write(Paths.get(manifestPath), manifest.getBytes());
             confInfo.put(Constants.BM_MANIFEST_REMOTE,manifestPath.replace(mountPath, ""));
         }
         return manifestLocalPath;

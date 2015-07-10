@@ -17,9 +17,9 @@ public class MountVMImage {
     private static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
     private static final String mountRemoteFileSystemScript="/opt/director/bin/mount_remote_system.sh";
     
-    public static int mountImage(String imagePath, String mountpath)  throws Exception{
+    public static int mountImage(String imagePath, String mountpath, String mountType)  throws Exception{
         
-        String command = mountScript + " " + imagePath+" "+mountpath;
+        String command = mountScript + " " + imagePath+" "+mountpath+" "+mountType;
         log.debug("\n" + "Mounting the vm image : " + imagePath );
         log.trace("Command:" + command);
         int exitCode = callExec(command);
@@ -54,7 +54,7 @@ public class MountVMImage {
     }
     
     public static int callExec(String command) throws IOException, InterruptedException {
-        
+        log.debug("Command to execute is: "+command);
         StringBuilder output = new StringBuilder();
         Process p;
         p = Runtime.getRuntime().exec(command);

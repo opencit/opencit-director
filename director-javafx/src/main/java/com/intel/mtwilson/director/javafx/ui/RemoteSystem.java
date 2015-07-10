@@ -134,7 +134,7 @@ public class RemoteSystem {
                     Map<String, String> customerInfo;
                     customerInfo = hostWriteToMap();
                     String mountpath = "/mnt/host/" + ipAddressTField.getText();
-                    customerInfo.put(Constants.MOUNT_PATH2, mountpath);
+                    customerInfo.put(Constants.MOUNT_PATH, mountpath);
                     // Testing ssh connection. Main reason is to add sshkey while first connection, need to find better solution 
                     boolean authentication = CheckSshConnection(ipAddressTField.getText(), userNameTField.getText(), passwordTField.getText());
                     if (!authentication && !addSshKey(ipAddressTField.getText())) {

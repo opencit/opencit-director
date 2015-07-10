@@ -34,7 +34,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import org.apache.derby.diag.ErrorMessages;
-
+import com.intel.mtwilson.util.exec.ExecUtil;
+import java.io.IOException;
 /**
  *
  * @author preetisr
@@ -64,9 +65,9 @@ public class CreateImage {
         return this.createImageStage;
     }
 
-    public void launch() {
+    public void launch(final String imageDeploymentType) {
 
-        createImageStage.setTitle("Create Image");
+        createImageStage.setTitle("Create Policy");
 
         final FileUtilityOperation op = new FileUtilityOperation();
 
@@ -156,9 +157,11 @@ public class CreateImage {
         launchPolicyHBox.getChildren().add(rbMeasureEnforce);
         grid.add(launchPolicy, 0, 6);
         grid.add(launchPolicyHBox, 1, 6);
-
-        grid.add(encryptImage, 0, 7);
-
+        if(imageDeploymentType.equals("VM")){
+            grid.add(encryptImage, 0, 7);
+            encryptImage.setSelected(false);
+        }
+ 
         // Set the Image ID
         String uuid = null;
         try {
@@ -204,10 +207,11 @@ public class CreateImage {
                 try {
                     boolean includeImageHash = false;
                     // Write configuration values to map
-                    Map<String, String> customerInfo;
-                    customerInfo = writeToMap();
-                    if (customerInfo != null) {
-                        Iterator it = customerInfo.entrySet().iterator();
+                    Map<String, String> configInfo;
+                    configInfo = writeToMap();
+                    configInfo.put(Constants.IMAGE_DEPLOYMENT_TYPE, imageDeploymentType);
+                    if (configInfo != null) {
+                        Iterator it = configInfo.entrySet().iterator();
                         log.debug("Configuration Values Are ");
                         while (it.hasNext()) {
                             Map.Entry pairs = (Map.Entry) it.next();
@@ -217,7 +221,7 @@ public class CreateImage {
                         int exitCode = 21;
                         // Check for ami Image
 
-                        if (customerInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
+                        if (configInfo.get(Constants.IMAGE_TYPE).equals("ami")) {
                             /*
                              // Extract the compressed VM AMI Image
                              String extractedLocation = new File(customerInfo.get(Constants.IMAGE_LOCATION)).getParent() + "/extracted-ami";
@@ -232,29 +236,39 @@ public class CreateImage {
                              }
                              */
                         } else {
+                            String imagePath=imagePathTField.getText();
+                            String mountType;
+                            if(imageDeploymentType.equals("BM")){
+                                imagePath = createImageCopy(imagePath);
+                                configInfo.put(Constants.IMAGE_NAME, imagePath);    
+                                mountType="writable";
+                            }
+                            else{
+                                mountType = "read-only";
+                            }
                             //get image path md5 and use last four digits of md5 as a prefix of directory name
-                            String pathHash = new GenerateTrustPolicy().computeHash(MessageDigest.getInstance("MD5"),imagePathTField.getText());
+                            String pathHash = new GenerateTrustPolicy().computeHash(MessageDigest.getInstance("MD5"),imagePath);
                             //Get image name from path and remove all spaces
-                            String dirname = pathHash.substring(28,32)+getImageNameFromPath(imagePathTField.getText()).replaceAll(" ", "");
-                            String mountpath = "/mnt/vm/" + dirname;
+                            String dirname = pathHash.substring(28,32)+getImageNameFromPath(imagePath).replaceAll(" ", "");
+                            String mountpath = "/mnt/director/images/" + dirname;
                             log.debug("Mount path is {}",mountpath);
                             //check if mount path already exist. If it does then image is already in use and we need to throw an exception
                             if(new File(mountpath).exists()){
                                 ErrorMessage.showErrorMessage(createImageStage, new ImageInUseException(mountpath));
                                 return;
                             }
-                            customerInfo.put(Constants.MOUNT_PATH2, mountpath);
+                            configInfo.put(Constants.MOUNT_PATH, mountpath);
                             // Mount the VM disk image
-                            exitCode = MountVMImage.mountImage(imagePathTField.getText(), mountpath);
+                            exitCode = MountVMImage.mountImage(imagePath, mountpath, mountType);
                             log.info("Exit Code" + exitCode);
                             if (exitCode == 0) {
-                                if (new File(customerInfo.get(Constants.MOUNT_PATH2) + "/Windows/System32/ntoskrnl.exe").exists()) {
-                                    customerInfo.put(Constants.IS_WINDOWS, "true");
+                                if (new File(configInfo.get(Constants.MOUNT_PATH) + "/Windows/System32/ntoskrnl.exe").exists()) {
+                                    configInfo.put(Constants.IS_WINDOWS, "true");
                                 } else {
-                                    customerInfo.put(Constants.IS_WINDOWS, "false");
+                                    configInfo.put(Constants.IS_WINDOWS, "false");
                                 }
                                 BrowseDirectories secondWindow = new BrowseDirectories(createImageStage);
-                                secondWindow.launch(customerInfo);
+                                secondWindow.launch(configInfo);
                             } else {
                                 log.error("Error while mounting the image. Exit code {}", exitCode);
                                 ErrorMessage.showErrorMessage(createImageStage, new UnsuccessfulImageMountException(Integer.toString(exitCode)));
@@ -267,6 +281,8 @@ public class CreateImage {
                 }
 
             }
+
+            
 
         });
 
@@ -293,13 +309,19 @@ public class CreateImage {
         createImageStage.show();
 
     }
+    private String createImageCopy(String imagePath) throws IOException, InterruptedException {
+                String imageName = getImageNameFromPath(imagePath);
+                String newPath = imagePath.replace(imageName, imageName+"-edited");
+                new MountVMImage().callExec("cp "+imagePath+"  "+newPath);
+                return newPath;
+    }
     
-    private String getImageNameFromPath(String path) throws Exception{
+    private String getImageNameFromPath(String path) {
         int index = path.lastIndexOf(File.separator);
-        path = path.substring(index + 1);
-        if(path.contains("."))
-            return path.substring(0,path.lastIndexOf("."));
-        return path;
+        String name = path.substring(index + 1);
+        if(name.contains("."))
+            return name.substring(0,name.lastIndexOf("."));
+        return name;
     }
 
     //Show the Target location and Manifest location
@@ -364,11 +386,11 @@ public class CreateImage {
 
     // Store configuration values in hash map
     private Map<String, String> writeToMap() {
-        Map<String, String> customerInfo = new HashMap<>();
+        Map<String, String> configInfo = new HashMap<>();
         boolean isProper = true;
         FileUtilityOperation opt = new FileUtilityOperation();
         if (("".equals(imageIDTField.getText())) || ("".equals(imagePathTField.getText())) || ("".equals(imageNameTField.getText()))) {
-//            showWarningPopup("Some fields are Empty .. Please fill the Values");
+            showWarningPopup("Some fields are Empty .. Please fill the Values");
             isProper = false;
         } else if (!opt.validateUUID(imageIDTField.getText())) {
 //            showWarningPopup("Please provide the valid image ID");
@@ -379,21 +401,20 @@ public class CreateImage {
 //            isProper = false;
 //        }         
         if (isProper) {
-            customerInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
-            customerInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
-            customerInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
-            customerInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());
-            customerInfo.put(Constants.VM_WHITELIST_HASH_TYPE, hashTypeChoiceBox.getValue().toString());
-            customerInfo.put(Constants.POLICY_TYPE, togBoxMeasure.getSelectedToggle().getUserData().toString());
+            configInfo.put(Constants.IMAGE_NAME, imageNameTField.getText());
+            configInfo.put(Constants.IMAGE_ID, imageIDTField.getText());
+            configInfo.put(Constants.IMAGE_LOCATION, imagePathTField.getText());
+            configInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());
+            configInfo.put(Constants.VM_WHITELIST_HASH_TYPE, hashTypeChoiceBox.getValue().toString());
+            configInfo.put(Constants.POLICY_TYPE, togBoxMeasure.getSelectedToggle().getUserData().toString());
             if (encryptImage.isSelected()) {
-                customerInfo.put(Constants.IS_ENCRYPTED, "true");
+                configInfo.put(Constants.IS_ENCRYPTED, "true");
             } else {
-                customerInfo.put(Constants.IS_ENCRYPTED, "false");
+                configInfo.put(Constants.IS_ENCRYPTED, "false");
             }
-            log.debug("Is_Encrypted is set to: " + customerInfo.get(Constants.IS_ENCRYPTED));
         } else {
             return null;
-        }
-        return customerInfo;
+        } 
+        return configInfo;
     }
 }

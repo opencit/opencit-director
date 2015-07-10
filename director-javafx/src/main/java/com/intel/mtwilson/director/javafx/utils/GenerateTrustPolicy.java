@@ -56,7 +56,7 @@ public class GenerateTrustPolicy {
 
     //Creates trust policy for baremetal
     public String createManifest(List<Directories> directories, Map<String, String> configInfo) throws Exception{
-        mountPath = configInfo.get(Constants.MOUNT_PATH2);
+        mountPath = configInfo.get(Constants.MOUNT_PATH);
         if (Boolean.valueOf(configInfo.get(Constants.BARE_METAL_LOCAL))) {
             mountPath = "";
         }
@@ -123,7 +123,7 @@ public class GenerateTrustPolicy {
 
     //Creates trust policy for VM
     public String createTrustPolicy(List<Directories> directories, Map<String, String> configInfo) throws Exception {
-        mountPath = configInfo.get(Constants.MOUNT_PATH2);
+        mountPath = configInfo.get(Constants.MOUNT_PATH);
         //Initialize schema
         TrustPolicy trustpolicy = new TrustPolicy();
         //Set customerId

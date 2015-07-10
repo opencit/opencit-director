@@ -199,6 +199,11 @@
             <groupId>net.schmizz</groupId>
             <artifactId>sshj</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-exec</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 </project>
