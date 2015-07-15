@@ -42,7 +42,7 @@ public class ConfigurationInformation {
         primaryStage.setTitle("Trust Director");
 	
         //PS:Label
-	Label imageType=new Label("Application Deployment Type");
+	Label imageType=new Label("Deployment Type");
         final Label trustPolicy=new Label("Trust Policy");
         final Label manifestSource=new Label ("Source");
         
@@ -61,7 +61,7 @@ public class ConfigurationInformation {
 		
         //PS: Toggle Button to choose the Trust Policy Type
 		final ToggleGroup trustPolicyGroup=new ToggleGroup();
-		ToggleButton tb_createImage= new ToggleButton("Create New");
+		ToggleButton tb_createImage= new ToggleButton("Create New Policy");
 		tb_createImage.setToggleGroup(trustPolicyGroup);
 		ToggleButton tb_uploadExisting = new ToggleButton("Upload Pending Policy");
 		tb_uploadExisting.setToggleGroup(trustPolicyGroup);

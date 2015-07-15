@@ -75,7 +75,7 @@ public class UploadExisting {
             log.debug("Host manifest value not set in configuration file.", npe);
         }
 
-        uploadExistingStage.setTitle("Upload Existing image");
+        uploadExistingStage.setTitle("Upload Pending Policy");
 //        
 //        final FileUtilityOperation op = new FileUtilityOperation();
 //        
@@ -209,7 +209,7 @@ public class UploadExisting {
                     message = UploadNow(trustPolicyLocation, imageLocation);
                     showUploadSuccessMessage(uploadExistingStage, message);
                 } catch (Exception ex) {
-                    log.error("Can not upload existing image", ex);
+                    log.error("Can not upload pending policy", ex);
                     new ErrorMessage().showErrorMessage(uploadExistingStage, ex);
                 }
 
