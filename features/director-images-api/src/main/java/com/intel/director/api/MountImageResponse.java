@@ -9,6 +9,6 @@ package com.intel.director.api;
  *
  * @author soakx
  */
-public class MountImageResponse extends BaseMountImage{
+public class MountImageResponse extends ImageAttributes{
 
 }

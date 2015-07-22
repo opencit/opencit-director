@@ -12,5 +12,5 @@ import java.util.List;
  * @author soakx
  */
 public class SearchImagesResponse {
-    List<ImageAttributes> images;
+    public List<ImageAttributes> images;
 }

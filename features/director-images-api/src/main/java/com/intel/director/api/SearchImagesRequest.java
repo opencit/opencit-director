@@ -9,6 +9,5 @@ package com.intel.director.api;
  *
  * @author soakx
  */
-public class SearchImagesRequest extends BasicIdRequest{
-    
+public class SearchImagesRequest extends ImageAttributes {
 }

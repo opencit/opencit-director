@@ -12,6 +12,6 @@ import java.util.List;
  * @author soakx
  */
 public class ListImageDeploymentsResponse {
-
-    public List<String> image_deployments;
+    public List<String> image_deployments;   
+    
 }

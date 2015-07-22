@@ -15,4 +15,5 @@ public class SearchFilesInImageRequest {
     public String include;
     public String exclude;
     public Boolean recursive;
+    public String id;
 }

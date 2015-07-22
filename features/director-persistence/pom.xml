@@ -1,15 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>director-images-api</artifactId>
+    <artifactId>director-persistence</artifactId>
     <packaging>jar</packaging>
-    <description>KMS request and response data structures</description>
+    <description>Director persistence</description>
+    <version>0.1-SNAPSHOT</version>
+
     <parent>
-		  <groupId>com.intel.mtwilson.kms</groupId>
-		  <artifactId>kms-maven-java</artifactId>
-		  <version>0.1-SNAPSHOT</version>
-          <relativePath/>
-     </parent>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-features</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </parent>
 
     <build>
         <plugins>
@@ -36,8 +37,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-images-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2</artifactId>
+            <version>3.0-SNAPSHOT</version>
         </dependency>
       
         <dependency>
@@ -47,6 +55,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-validation</artifactId>
+            <version>0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
@@ -55,6 +64,8 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-tls-policy</artifactId>
+            <version>0.3-SNAPSHOT</version>
+
         </dependency>
       
         <dependency>
@@ -81,11 +92,11 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-        <optional>true</optional>
-    </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
         
         <!-- apache http is required for NopX509HostnameVerifier, but user of this project must provide the dependency, we don't want to force it on all users -->
         <dependency>
