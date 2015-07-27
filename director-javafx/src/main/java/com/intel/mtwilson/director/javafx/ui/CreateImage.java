@@ -33,9 +33,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import org.apache.derby.diag.ErrorMessages;
-import com.intel.mtwilson.util.exec.ExecUtil;
 import java.io.IOException;
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 /**
  *
  * @author preetisr
@@ -52,7 +51,8 @@ public class CreateImage {
     private ChoiceBox hashTypeChoiceBox;
     private final ToggleGroup togBoxMeasure = new ToggleGroup();
     private ConfigProperties configProperties;
-
+    private static final String KMS_ENDPOINT_URL = "kms.endpoint.url";
+    
     String delimiter = "/";
 
     public CreateImage(Stage createImageStage) throws Exception {
@@ -123,9 +123,6 @@ public class CreateImage {
         rbMeasureEnforce.setUserData("MeasureAndEnforce");
         rbMeasureEnforce.setToggleGroup(togBoxMeasure);
 
-        encryptImage = new CheckBox("Encrypt VM Image");
-        encryptImage.setSelected(true);
-
         VBox vBox = new VBox();
 
         final GridPane grid = new GridPane();
@@ -157,14 +154,14 @@ public class CreateImage {
         launchPolicyHBox.getChildren().add(rbMeasureEnforce);
         grid.add(launchPolicy, 0, 6);
         grid.add(launchPolicyHBox, 1, 6);
-        if(imageDeploymentType.equals("VM")){
-            grid.add(encryptImage, 0, 7);
-            encryptImage.setSelected(false);
-        }
- 
-        // Set the Image ID
         String uuid = null;
         try {
+            if(imageDeploymentType.equals("VM") && getConfiguration().get(KMS_ENDPOINT_URL, null) != null){
+                encryptImage = new CheckBox("Encrypt VM Image");
+                encryptImage.setSelected(false);
+                grid.add(encryptImage, 0, 7);                
+            }
+            // Set the Image ID
             uuid = new UserConfirmation().getUUID();
         } catch (Exception exception) {
             ErrorMessage.showErrorMessage(createImageStage, exception);
@@ -407,7 +404,7 @@ public class CreateImage {
             configInfo.put(Constants.IMAGE_TYPE, imageFormatChoiceBox.getValue().toString());
             configInfo.put(Constants.VM_WHITELIST_HASH_TYPE, hashTypeChoiceBox.getValue().toString());
             configInfo.put(Constants.POLICY_TYPE, togBoxMeasure.getSelectedToggle().getUserData().toString());
-            if (encryptImage.isSelected()) {
+            if (encryptImage!=null && encryptImage.isSelected()) {
                 configInfo.put(Constants.IS_ENCRYPTED, "true");
             } else {
                 configInfo.put(Constants.IS_ENCRYPTED, "false");
