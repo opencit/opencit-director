@@ -138,7 +138,6 @@ director_run() {
 director_complete_setup() {
   # run all setup tasks, don't use the force option to avoid clobbering existing
   # useful configuration files
-  echo_failure "DIRECTOR_SETUP_TASKS is $DIRECTOR_SETUP_TASKS........."
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   if [ ! -z "$DIRECTOR_SETUP_TASKS" ]; then
     director_run setup $DIRECTOR_SETUP_TASKS
