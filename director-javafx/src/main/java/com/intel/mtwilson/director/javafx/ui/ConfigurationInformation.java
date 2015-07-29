@@ -99,7 +99,7 @@ public class ConfigurationInformation {
         togBoxBareMetalType.getChildren().add(manifestSource);
         togBoxBareMetalType.getChildren().add(tb_localSystem);
         togBoxBareMetalType.getChildren().add(tb_remoteSystem);
-        togBoxBareMetalType.getChildren().add(tb_image);
+        //togBoxBareMetalType.getChildren().add(tb_image);
         togBoxBareMetalType.setVisible(false);
         	        
         final GridPane grid = new GridPane();
@@ -107,12 +107,17 @@ public class ConfigurationInformation {
         grid.setVgap(10);
         grid.setPadding(new Insets(10, 10, 10, 10));
         
-        
-        grid.add(imageType, 0,1);
-        grid.add(togBoxImageType, 1, 1);
-        
-        grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);
-        grid.add(togBoxBareMetalType, 0, 2, 2, 1);
+        boolean flag = false;
+        if(flag){
+            grid.add(imageType, 0,1);
+            grid.add(togBoxImageType, 1, 1);
+            grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);    
+            grid.add(togBoxBareMetalType, 0, 2, 2, 1);
+        }
+        else{
+            togBoxBareMetalType.setVisible(true);
+        }
+        grid.add(togBoxBareMetalType, 0, 1, 2, 1);
         
         VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
