@@ -17,6 +17,7 @@
         <module>director-maven-package-zip</module>
         <module>director-maven-root</module>
         <module>director-setup</module>
+        <module>director-vm-feature</module>
 		<module>director-maven-package-resources-zip</module>
 		<module>director-maven-package-makeself-merge</module>
 		<module>director-maven-package-zip-merge</module>

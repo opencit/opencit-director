@@ -70,6 +70,7 @@ export DIRECTOR_JAVA=${DIRECTOR_JAVA:-$DIRECTOR_HOME/java}
 export DIRECTOR_BIN=${DIRECTOR_BIN:-$DIRECTOR_HOME/bin}
 export DIRECTOR_REPOSITORY=${DIRECTOR_REPOSITORY:-$DIRECTOR_HOME/repository}
 export DIRECTOR_LOGS=${DIRECTOR_LOGS:-$DIRECTOR_HOME/logs}
+export DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-$DIRECTOR_CONFIGURATION/director.properties}
 
 # needed for if certain methods are called from director.sh like java_detect, etc.
 DIRECTOR_INSTALL_LOG_FILE=${DIRECTOR_INSTALL_LOG_FILE:-"$DIRECTOR_LOGS/director_install.log"}
@@ -93,7 +94,14 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logback.xml"}
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
-DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault director-envelope-key director-envelope-key-registration"}
+
+#check for kms.endpoint.url. If not available skip KMS setup tasks
+CONF_KMS_ENDPOINT_URL=${KMS_ENDPOINT_URL:-$(read_property_from_file "kms.endpoint.url" "$DIRECTOR_PROPERTIES_FILE")}
+if [ ! -z "$CONF_KMS_ENDPOINT_URL" ]; then
+  DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault director-envelope-key director-envelope-key-registration"}
+else
+  DIRECTOR_SETUP_TASKS=""
+fi
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
@@ -131,7 +139,9 @@ director_complete_setup() {
   # run all setup tasks, don't use the force option to avoid clobbering existing
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
-  director_run setup $DIRECTOR_SETUP_TASKS
+  if [ ! -z "$DIRECTOR_SETUP_TASKS" ]; then
+    director_run setup $DIRECTOR_SETUP_TASKS
+  fi
   
   ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
   if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
