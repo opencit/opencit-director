@@ -107,6 +107,7 @@ public class ConfigurationInformation {
         grid.setVgap(10);
         grid.setPadding(new Insets(10, 10, 10, 10));
         
+        //flag needs to be set based on VM feature class availibility 
         boolean flag = false;
         if(flag){
             grid.add(imageType, 0,1);
@@ -116,8 +117,8 @@ public class ConfigurationInformation {
         }
         else{
             togBoxBareMetalType.setVisible(true);
-        }
-        grid.add(togBoxBareMetalType, 0, 1, 2, 1);
+            grid.add(togBoxBareMetalType, 0, 1, 2, 1);
+        }        
         
         VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
