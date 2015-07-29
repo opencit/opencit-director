@@ -17,5 +17,6 @@
         <module>director-maven-package-zip</module>
         <module>director-maven-root</module>
         <module>director-setup</module>
+        <module>director-vm-feature</module>
     </modules>
 </project>
