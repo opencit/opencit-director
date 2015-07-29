@@ -33,7 +33,6 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import org.apache.derby.diag.ErrorMessages;
 
 /**
  *

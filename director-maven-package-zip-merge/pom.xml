@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <artifactId>director-maven-package-zip-merge</artifactId>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>Describes how to create an application zip file using an existing zip file and additional files to merge into it</description>
+
+    <parent>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-root</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+
+    <profiles>
+
+        <profile>
+            <activation>
+                <file>
+                    <missing>${basedir}/lock.mtwilson-maven-package.txt</missing>
+                </file>
+            </activation>
+    <build>
+        <!-- NOTE: the order of plugins listed here is important because
+        when multiple plugins have the same phase, maven 3.0.3 and later
+        executes them in the order listed in the pom.  so first we create
+        the jar, then we copy all resources in to the application directory,
+        then we create the zip file. -->
+        
+        <plugins>
+            
+			<!-- download the zip dependencies to a temporary directory-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+						<id>copy-zip-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/merge-zip</outputDirectory>
+							<includeTypes>zip</includeTypes>
+                        </configuration>
+                    </execution>
+                    <execution>
+						<id>copy-jar-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/merge-java</outputDirectory>
+							<includeTypes>jar</includeTypes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- copy the application directories -->
+			<!--
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-application-directories</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/application</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/application</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>            
+                    </execution>
+                </executions>
+            </plugin>
+			-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>merge-zip-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <unzip dest="${project.build.directory}/application">
+                                    <fileset dir="${project.build.directory}/merge-zip"><include name="*.zip"/></fileset>
+                                </unzip>
+								<copy todir="${project.build.directory}/application/java" failonerror="false">
+									<fileset dir="${project.build.directory}/merge-java"><include name="*.jar"/></fileset>
+								</copy>
+								<copy todir="${project.build.directory}/application" failonerror="false">
+									<fileset dir="${basedir}/src/main/application"/>
+								</copy>
+                                <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+                                    <fileset dir="${project.build.directory}/application" />
+                                </zip>
+                                <!-- how to create a .tgz file: -->
+                                <!--
+                                <tar destfile="${project.build.directory}/${project.artifactId}-${project.version}.tgz" compression="gzip">
+                                    <fileset dir="${project.build.directory}/application" />
+                                </tar>
+                                -->
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant</artifactId>
+                        <version>1.8.4</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>1.0b3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>	    
+            
+                    
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>                      
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                                <!-- how to create a .tgz file: -->
+                                <!--
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.tgz</file>
+                                    <type>tgz</type>
+                                </artifact>
+                                -->
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+					
+        </plugins>
+        		
+    </build>
+	</profile>
+</profiles>
+
+
+</project>

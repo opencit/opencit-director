@@ -24,7 +24,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.eclipse.persistence.exceptions.ValidationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
