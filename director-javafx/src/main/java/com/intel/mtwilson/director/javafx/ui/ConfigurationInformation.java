@@ -107,9 +107,8 @@ public class ConfigurationInformation {
         grid.setVgap(10);
         grid.setPadding(new Insets(10, 10, 10, 10));
         
-        //flag needs to be set based on VM feature class availibility 
-        boolean flag = false;
-        if(flag){
+        boolean isVMFeature = isClass("com.intel.mtwilson.director.vm.feature.VMFeature");
+        if(isVMFeature){
             grid.add(imageType, 0,1);
             grid.add(togBoxImageType, 1, 1);
             grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);    
@@ -283,7 +282,14 @@ public class ConfigurationInformation {
         }
         return customerInfo;
     }
-    
+    public boolean isClass(String className) {
+        try  {
+            Class.forName(className);
+            return true;
+        }  catch (final ClassNotFoundException e) {
+            return false;
+        }
+    }
  }
     
    
