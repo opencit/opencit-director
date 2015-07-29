@@ -42,9 +42,9 @@ public class ConfigurationInformation {
         primaryStage.setTitle("Trust Director");
 	
         //PS:Label
-	Label imageType=new Label("Application Deployment Type");
+	Label imageType=new Label("Deployment Type");
         final Label trustPolicy=new Label("Trust Policy");
-        final Label manifestSource=new Label ("Manifest Source");
+        final Label manifestSource=new Label ("Source");
         
         //PS: Toggle Button to choose the Image Type
 	final ToggleGroup imageGroup=new ToggleGroup();
@@ -61,9 +61,9 @@ public class ConfigurationInformation {
 		
         //PS: Toggle Button to choose the Trust Policy Type
 		final ToggleGroup trustPolicyGroup=new ToggleGroup();
-		ToggleButton tb_createImage= new ToggleButton("Create Image");
+		ToggleButton tb_createImage= new ToggleButton("Create New Policy");
 		tb_createImage.setToggleGroup(trustPolicyGroup);
-		ToggleButton tb_uploadExisting = new ToggleButton("Upload Existing");
+		ToggleButton tb_uploadExisting = new ToggleButton("Upload Pending Policy");
 		tb_uploadExisting.setToggleGroup(trustPolicyGroup);
 				
         //PS: Toggle Button to choose the Bare Metal types
@@ -72,6 +72,8 @@ public class ConfigurationInformation {
 		tb_localSystem.setToggleGroup(bareMetalGroup);
         ToggleButton tb_remoteSystem = new ToggleButton("Remote System");
 		tb_remoteSystem.setToggleGroup(bareMetalGroup);
+                ToggleButton tb_image= new ToggleButton("Image");
+		tb_image.setToggleGroup(bareMetalGroup);
                 
                 
 		//PS: Add toggle button to HBox
@@ -97,6 +99,7 @@ public class ConfigurationInformation {
         togBoxBareMetalType.getChildren().add(manifestSource);
         togBoxBareMetalType.getChildren().add(tb_localSystem);
         togBoxBareMetalType.getChildren().add(tb_remoteSystem);
+        //togBoxBareMetalType.getChildren().add(tb_image);
         togBoxBareMetalType.setVisible(false);
         	        
         final GridPane grid = new GridPane();
@@ -104,12 +107,17 @@ public class ConfigurationInformation {
         grid.setVgap(10);
         grid.setPadding(new Insets(10, 10, 10, 10));
         
-        
-        grid.add(imageType, 0,1);
-        grid.add(togBoxImageType, 1, 1);
-        
-        grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);
-        grid.add(togBoxBareMetalType, 0, 2, 2, 1);
+        boolean isVMFeature = isClass("com.intel.mtwilson.director.vm.feature.VMFeature");
+        if(isVMFeature){
+            grid.add(imageType, 0,1);
+            grid.add(togBoxImageType, 1, 1);
+            grid.add(togBoxTrustPolicyType, 0, 2, 2, 1);    
+            grid.add(togBoxBareMetalType, 0, 2, 2, 1);
+        }
+        else{
+            togBoxBareMetalType.setVisible(true);
+            grid.add(togBoxBareMetalType, 0, 1, 2, 1);
+        }        
         
         VBox vBox = new VBox();
         vBox.getChildren().addAll(grid);
@@ -179,7 +187,7 @@ public class ConfigurationInformation {
                     primaryStage.close();
                     Stage createImageStage=new Stage();
                     CreateImage createImageObj=new CreateImage(createImageStage);
-                    createImageObj.launch();
+                    createImageObj.launch("VM");
 //                
                 }catch(Exception ex)
                 {                    
@@ -237,6 +245,20 @@ public class ConfigurationInformation {
                     ErrorMessage.showErrorMessage(primaryStage, ex);
                 }
              }});
+        tb_image.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e)
+            {                
+                try{
+                    primaryStage.close();
+                    Stage createImageStage=new Stage();
+                    CreateImage createImageObj=new CreateImage(createImageStage);
+                    createImageObj.launch("BM");
+//                
+                }catch(Exception ex)
+                {                    
+                    ErrorMessage.showErrorMessage(primaryStage, ex);
+                }
+            }});
         
         // Load the stack pane: This is the primary window for TD
         StackPane root = new StackPane();
@@ -260,7 +282,14 @@ public class ConfigurationInformation {
         }
         return customerInfo;
     }
-    
+    public boolean isClass(String className) {
+        try  {
+            Class.forName(className);
+            return true;
+        }  catch (final ClassNotFoundException e) {
+            return false;
+        }
+    }
  }
     
    

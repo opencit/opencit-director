@@ -54,7 +54,7 @@ public class Constants {
     public static final String TENANT_NAME = "tenant.name";
     public static final String DIRECTOR_ID = "director.id";
 
-    public static final String MOUNT_PATH2 = "mountpath";
+    public static final String MOUNT_PATH = "mountpath";
 
     public static final String EncPASSWORD = "intelrp";
 
@@ -82,4 +82,5 @@ public class Constants {
     public static final String BM_MANIFEST_REMOTE = "remoteManifest";
     public static final String DIRECTOR_HOME = "DIRECTOR_HOME";
     public static final String BM_TRUSTPOLICY_REMOTE = "RemoteTrustPolicy";
+    public static final String IMAGE_DEPLOYMENT_TYPE = "image_deployment_type";
 }
