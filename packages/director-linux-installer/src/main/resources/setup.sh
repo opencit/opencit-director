@@ -32,6 +32,9 @@ DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 # the administrator may use a symlink if necessary to place it anywhere else
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
+#Vm feature class is used to detect if VM feature is supported or not
+DIRECTOR_VM_FEATURE_CLASS="VMFeaure.class"
+
 # load application environment variables if already defined
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
@@ -177,38 +180,6 @@ chmod 600 "$DIRECTOR_INSTALL_LOG_FILE"
 load_director_conf
 load_director_defaults
 
-#prompt_with_default MYSTERYHILL_KEY_NAME "Mystery Hill Key Name:" "$MYSTERYHILL_KEY_NAME"
-#prompt_with_default MYSTERYHILL_KEYSTORE "Mystery Hill Keystore:" "$MYSTERYHILL_KEYSTORE"
-#prompt_with_default_password MYSTERYHILL_KEYSTORE_PASSWORD "Mystery Hill Keystore Password:" "$MYSTERYHILL_KEYSTORE_PASSWORD"
-#prompt_with_default_password MYSTERYHILL_TLS_SSL_PASSWORD "Mystery Hill TLS Password:" "$MYSTERYHILL_TLS_SSL_PASSWORD"
-#prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
-
-# required TD properties
-prompt_with_default DIRECTOR_ID "Trust Director ID:" "$DIRECTOR_ID"
-update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
-#prompt_with_default VM_WHITELIST_HASH_TYPE "Specify the hash type algorithm to use during VM whitelist:" "$VM_WHITELIST_HASH_TYPE"
-update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
-prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
-update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
-prompt_with_default IMAGE_STORE_SERVER "Image Store Server:" "$IMAGE_STORE_SERVER"
-update_property_in_file "image.store.server" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_SERVER"
-prompt_with_default IMAGE_STORE_USERNAME "Image Store Username:" "$IMAGE_STORE_USERNAME"
-update_property_in_file "image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-prompt_with_default_password IMAGE_STORE_PASSWORD "Image Store Password:" "$IMAGE_STORE_PASSWORD"
-update_property_in_file "image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
-update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
-
-# modifying after mtwilson api client built
-prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
-update_property_in_file "mtwilson.server" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER"
-prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
-update_property_in_file "mtwilson.server.port" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
-prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
-update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_USERNAME"
-prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
-update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
@@ -256,9 +227,45 @@ cp -r bin configuration java $DIRECTOR_HOME
 # copy utilities script file to application folder
 cp $UTIL_SCRIPT_FILE $DIRECTOR_HOME/bin/functions.sh
 
+vm_feature_jar=`find $DIRECTOR_HOME/java/ -name "*.jar" | xargs grep $DIRECTOR_VM_FEATURE_CLASS`
+if [ -n "$vm_feature_jar" ]; then
+  is_vm_feaure_enable=true
+else 
+  is_vm_feaure_enable=false
+fi
+
+# required TD properties
+prompt_with_default DIRECTOR_ID "Trust Director ID:" "$DIRECTOR_ID"
+update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
+#prompt_with_default VM_WHITELIST_HASH_TYPE "Specify the hash type algorithm to use during VM whitelist:" "$VM_WHITELIST_HASH_TYPE"
+update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
+if $is_vm_feaure_enable ; then
+  prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
+  update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
+  prompt_with_default IMAGE_STORE_SERVER "Image Store Server:" "$IMAGE_STORE_SERVER"
+  update_property_in_file "image.store.server" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_SERVER"
+  prompt_with_default IMAGE_STORE_USERNAME "Image Store Username:" "$IMAGE_STORE_USERNAME"
+  update_property_in_file "image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
+  prompt_with_default_password IMAGE_STORE_PASSWORD "Image Store Password:" "$IMAGE_STORE_PASSWORD"
+  update_property_in_file "image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
+  prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
+  update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
+fi
+
+# modifying after mtwilson api client built
+prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
+update_property_in_file "mtwilson.server" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER"
+prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
+update_property_in_file "mtwilson.server.port" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
+prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
+update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_USERNAME"
+prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
+update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
+
 # set permissions
 chown -R $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_HOME
 chmod 755 $DIRECTOR_HOME/bin/*
+
 
 # link /usr/local/bin/director -> /opt/director/bin/director
 EXISTING_DIRECTOR_COMMAND=`which director`
