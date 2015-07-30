@@ -1,3 +1,3 @@
 # building director depends on building the external dependencies first
 dev-1.x: dcg_security-kms/dev-1.x, dcg_security-mtwilson/dev-3.x
-dev-1.x-installer-per-sku: dcg_security-kms/dev-1.x, dcg_security-mtwilson/dev-3.x, dcg_security-common_java/dev-3.x-autobuild
+dev-1.x-installer-per-sku: dcg_security-kms/dev-1.x-QA-CIT-beta1-jb, dcg_security-mtwilson/dev-3.x-jb-move-trustagent, dcg_security-common_java/dev-3.x-autobuild
