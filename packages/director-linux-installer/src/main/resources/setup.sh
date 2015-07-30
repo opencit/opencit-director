@@ -249,8 +249,9 @@ fi
 
 # extract director  (director-zip-0.1-SNAPSHOT.zip)
 echo "Extracting application..."
-DIRECTOR_ZIPFILE=`ls -1 director-*.zip 2>/dev/null | head -n 1`
-unzip -oq $DIRECTOR_ZIPFILE -d $DIRECTOR_HOME
+#DIRECTOR_ZIPFILE=`ls -1 director-*.zip 2>/dev/null | head -n 1`
+#unzip -oq $DIRECTOR_ZIPFILE -d $DIRECTOR_HOME
+cp -r bin configuration java $DIRECTOR_HOME
 
 # copy utilities script file to application folder
 cp $UTIL_SCRIPT_FILE $DIRECTOR_HOME/bin/functions.sh
