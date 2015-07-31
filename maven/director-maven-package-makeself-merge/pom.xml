@@ -20,6 +20,26 @@
         <makeself.name>${project.artifactId}-${project.version}</makeself.name>
     </properties>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<goals><goal>enforce</goal></goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion><version>[3.2.2,)</version><message>Maven version 3.2.2 or later is required to build this project; see also https://issues.apache.org/jira/browse/MNG-4565</message></requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
     <profiles>
         <profile>
             <activation>
