@@ -33,7 +33,7 @@ DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
 #Vm feature class is used to detect if VM feature is supported or not
-DIRECTOR_VM_FEATURE_CLASS="VMFeaure.class"
+DIRECTOR_VM_FEATURE_CLASS="VMFeature.class"
 
 # load application environment variables if already defined
 if [ -d $DIRECTOR_ENV ]; then
