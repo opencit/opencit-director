@@ -4,7 +4,6 @@
 
     <artifactId>director-zip</artifactId>
     <packaging>jar</packaging>
-    <description>Key management server</description>
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-maven-package-zip</artifactId>
