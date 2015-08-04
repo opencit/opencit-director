@@ -78,7 +78,7 @@ director_java_install() {
   fi
   # java gets unpacked in current directory but they cleverly
   # named the folder differently than the archive, so search for it:
-  java_unpacked=$(ls -d */ 2>/dev/null)
+  java_unpacked=$(ls -1d jdk* jre*  2>/dev/null)
   for f in $java_unpacked
   do
     if [ -d "/usr/lib/jvm/$f" ]; then
