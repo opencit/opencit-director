@@ -12,5 +12,6 @@ import java.util.List;
  * @author soakx
  */
 public class SearchFilesInImageResponse {
+
     List<String> files;
 }

@@ -7,12 +7,16 @@ package com.intel.director.service.impl;
 
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.MountImageResponse;
+import com.intel.director.api.TrustDirectorImageUploadRequest;
+import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.MountVMImage;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.persistence.ImagePersistenceManager;
 import com.intel.director.service.ImageService;
 import com.intel.director.util.DirectorUtil;
+import java.io.File;
+import java.io.FileInputStream;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +37,7 @@ import org.powermock.api.mockito.PowerMockito;
 public class ImageServiceImplTest {
 
     ImageService imageService;
+    ImageStoreManagerImpl imageStoreManager;
     String imageId = "123";
     String user = "soak";
     MountVMImage mountVMImageService;
@@ -43,16 +48,16 @@ public class ImageServiceImplTest {
     @Before
     public void setup() throws NoSuchAlgorithmException {
         imagePersistenceManager = Mockito.mock(ImagePersistenceManager.class);
-        imageService = new ImageServiceImpl(imagePersistenceManager);
+        imageStoreManager = Mockito.mock(ImageStoreManagerImpl.class);
+        imageService = new ImageServiceImpl(imagePersistenceManager, imageStoreManager);
         PowerMockito.mockStatic(MountVMImage.class);
         imageAttributes = new ImageAttributes();
         imageAttributes.id = imageId;
         imageAttributes.image_deployments = "VM";
         imageAttributes.image_format = "qcow2";
-        imageAttributes.image_size = 1000L;
+        imageAttributes.image_size = 1000;
         imageAttributes.location = "/opt/director/vm/" + imageId;
-        imageAttributes.mounted = false;
-        imageAttributes.mountedBy = null;
+        imageAttributes.mounted_by_user_id = null;
         imageAttributes.name = "IMG_" + imageId;
         imageAttributes.status = null;
     }
@@ -75,8 +80,24 @@ public class ImageServiceImplTest {
     }
 
     @Test
+    public void testMountImageAlreadyMounted() throws Exception {
+        imageAttributes.mounted_by_user_id = "soak_1";
+        PowerMockito.mockStatic(DirectorUtil.class);
+        Mockito.when(DirectorUtil.computeVMMountPath(imageAttributes.id)).thenReturn(mountPath);
+        Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(imageAttributes);
+        Mockito.when(MountVMImage.mountImage(imageAttributes.location, mountPath)).thenThrow(new RuntimeException("TEST"));
+        String msg = null;
+        try {
+            imageService.mountImage(imageId, user);
+        } catch (ImageMountException exception) {
+            msg = exception.getMessage();
+        }
+        Assert.assertEquals("Expected error", "Unable to mount image. Image is already in use by user: soak_1", msg);
+    }
+
+    @Test
     public void testUnMountImageSuccess() throws Exception {
-        imageAttributes.mountedBy = "soak";
+        imageAttributes.mounted_by_user_id = "soak";
         Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(imageAttributes);
         Mockito.when(MountVMImage.unmountImage(mountPath)).thenReturn(1);
         UnmountImageResponse imageResponse = imageService.unMountImage(imageId, user);
@@ -85,7 +106,7 @@ public class ImageServiceImplTest {
 
     @Test(expected = ImageMountException.class)
     public void testUnMountImageByDifferentUser() throws Exception {
-        imageAttributes.mountedBy = "soak1";
+        imageAttributes.mounted_by_user_id = "soak1";
         Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(imageAttributes);
         Mockito.when(MountVMImage.unmountImage(mountPath)).thenReturn(1);
         imageService.unMountImage(imageId, user);
@@ -93,7 +114,7 @@ public class ImageServiceImplTest {
 
     @Test(expected = ImageMountException.class)
     public void testUnMountImageFailure() throws Exception {
-        imageAttributes.mountedBy = "soak";
+        imageAttributes.mounted_by_user_id = "soak";
         PowerMockito.mockStatic(DirectorUtil.class);
         Mockito.when(DirectorUtil.computeVMMountPath(imageAttributes.id)).thenReturn(mountPath);
         Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(imageAttributes);
@@ -103,12 +124,29 @@ public class ImageServiceImplTest {
 
     @Test
     public void testUploadImageMetaDataToTrustDirector() {
-        Assert.assertTrue(true);
+        TrustDirectorImageUploadRequest directorImageUploadRequest = new TrustDirectorImageUploadRequest();
+        directorImageUploadRequest.imageAttributes = new ImageAttributes();
+        directorImageUploadRequest.imageAttributes.image_deployments = "VM";
+        directorImageUploadRequest.imageAttributes.image_format = "qcow2";
+        Mockito.when(imagePersistenceManager.saveImageMetadata(directorImageUploadRequest.imageAttributes)).thenReturn(imageAttributes);
+        TrustDirectorImageUploadResponse directorImageUploadResponse = imageService.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
+        Assert.assertEquals("Image meta data stored", imageAttributes.id, directorImageUploadResponse.id);
     }
 
     @Test
-    public void testUploadImageToTrustDirector() {
-        Assert.assertTrue(true);
+    public void testUploadImageToTrustDirector() throws Exception {
+        Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(imageAttributes);
+        Mockito.when(imagePersistenceManager.saveImageMetadata(imageAttributes)).thenReturn(imageAttributes);
+        TrustDirectorImageUploadRequest directorImageUploadRequest = new TrustDirectorImageUploadRequest();
+        directorImageUploadRequest.imageAttributes = new ImageAttributes();
+        directorImageUploadRequest.imageAttributes.id = "123";
+        directorImageUploadRequest.imageAttributes.image_deployments = "VM";
+        directorImageUploadRequest.imageAttributes.image_format = "qcow2";
+        imageAttributes.location = "C:/temp/123.txt";
+        Mockito.when(imagePersistenceManager.saveImageMetadata(directorImageUploadRequest.imageAttributes)).thenReturn(imageAttributes);
+        FileInputStream fileInputStream = new FileInputStream(new File("c:/IFRToolLog.txt"));
+        TrustDirectorImageUploadResponse directorImageUploadResponse = imageService.uploadImageToTrustDirector(imageId, fileInputStream);
+        Assert.assertEquals("Image meta data stored", imageAttributes.id, directorImageUploadResponse.id);
     }
 
     @Test
@@ -121,8 +159,4 @@ public class ImageServiceImplTest {
         Assert.assertTrue(true);
     }
 
-    @Test
-    public void testUploadImageToImageStore() {
-        Assert.assertTrue(true);
-    }
 }

@@ -10,5 +10,6 @@ package com.intel.director.persistence.domain;
  * @author GS-0681
  */
 public class User extends BaseDomain {
-    public  String name;    
+
+    public String name;
 }

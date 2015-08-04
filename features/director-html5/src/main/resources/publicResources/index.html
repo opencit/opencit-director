@@ -90,7 +90,7 @@
                 // view models for each page get attached here individually when those pages load
 
                 // activates the specified tab (#id), with optional container name (#id)
-                self.tab = function(tabSelector, containerSelector) {
+                self.tab = function (tabSelector, containerSelector) {
                     if (!containerSelector) {
                         containerSelector = "body";
                     }
@@ -105,7 +105,7 @@
 
             var resourceLoader = new ResourceLoader();
 
-            $(document).ready(function() {
+            $(document).ready(function () {
                 // register scripts and stylesheets already loaded as part of the page markup
                 resourceLoader.registerLoadedJS();
                 resourceLoader.registerLoadedCSS();
@@ -117,7 +117,7 @@
                 //$("#dashboard_content").load("dashboard.html");
                 //resourceLoader.loadHTML("dashboard.html", "#dashboard_content");
                 //$("#dashboard_content").show();
-                setTimeout(function() {
+                setTimeout(function () {
                     resourceLoader.loadHTML("login.html",
                             {into: "#main",
                                 tab: "login",

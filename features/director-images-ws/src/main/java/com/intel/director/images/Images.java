@@ -5,20 +5,26 @@
  */
 package com.intel.director.images;
 
-import com.intel.director.api.ImageStoreUploadRequest;
-import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.api.CreateTrustPolicyRequest;
+import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.ImageStoreRequest;
+import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
 import com.intel.director.api.MountImageResponse;
+import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
+import com.intel.director.api.SignTrustPolicyResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.service.ImageService;
+import com.intel.director.service.LookupService;
+import com.intel.mtwilson.director.javafx.ui.UploadExisting;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +36,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.binary.Base64;
@@ -48,38 +53,20 @@ import org.springframework.stereotype.Component;
 @Path("/images")
 public class Images {
 
+    @Autowired
     ImageService imageService;
+
+    @Autowired
+    LookupService lookupService;
+
     private static final String AUTHORIZATION_HEADER = "Authorization";
-
-    @Path("/{imageId: [0-9a-zA-Z_-]+}/mount")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @POST
-    public MountImageResponse mountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException {
-        MountImageResponse mountImageResponse = null;
-        String user = getLoginUsername(httpServletRequest);
-        mountImageResponse = imageService.mountImage(imageId, user);
-        return mountImageResponse;
-    }
-
-    @Path("/{imageId: [0-9a-zA-Z_-]+}/unmount")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @POST
-    public UnmountImageResponse unMountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException {
-        UnmountImageResponse unmountImageResponse = null;
-        String user = getLoginUsername(httpServletRequest);
-        unmountImageResponse = imageService.unMountImage(imageId, user);
-        return unmountImageResponse;
-    }
 
     @Path("/uploads")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(@FormParam("") TrustDirectorImageUploadRequest directorImageUploadRequest) {
-        TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = null;
-        imageService.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
+        TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
         return trustDirectorImageUploadResponse;
     }
 
@@ -88,8 +75,7 @@ public class Images {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public TrustDirectorImageUploadResponse uploadImageToTrustDirector(@PathParam("imageId") String imageId, @FormParam("image") InputStream uploadedInputStream) throws IOException {
-        TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = null;
-        imageService.uploadImageToTrustDirector(imageId, uploadedInputStream);
+        TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService.uploadImageToTrustDirector(imageId, uploadedInputStream);
         return trustDirectorImageUploadResponse;
     }
 
@@ -98,37 +84,74 @@ public class Images {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public SearchImagesResponse searchImages(@FormParam("") SearchImagesRequest searchImagesRequest) {
-        SearchImagesResponse searchImagesResponse = null;
-        searchImagesResponse = imageService.searchImages(searchImagesRequest);
+        SearchImagesResponse searchImagesResponse = imageService.searchImages(searchImagesRequest);
         return searchImagesResponse;
     }
 
-    @Path("/imageId: [0-9a-zA-Z_-]+}/search")
+    @Path("/{imageId: [0-9a-zA-Z_-]+}/mount")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public MountImageResponse mountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException {
+        String user = getLoginUsername(httpServletRequest);
+        MountImageResponse mountImageResponse = imageService.mountImage(imageId, user);
+        return mountImageResponse;
+    }
+
+    @Path("/{imageId: [0-9a-zA-Z_-]+}/unmount")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public UnmountImageResponse unMountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException {
+        String user = getLoginUsername(httpServletRequest);
+        UnmountImageResponse unmountImageResponse = imageService.unMountImage(imageId, user);
+        return unmountImageResponse;
+    }
+
+    @Path("/trustpolicies")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public CreateTrustPolicyResponse createTrustPolicy(@FormParam("") CreateTrustPolicyRequest createTrustPolicyRequest) {
+        return null;
+    }
+
+    @Path("/images/{imageId: [0-9a-zA-Z_-]+}/search")
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    public SearchFilesInImageResponse searchFilesInImage(@FormParam("") SearchFilesInImageRequest searchFilesInImageRequest) {
+        SearchFilesInImageResponse filesInImageResponse = null;
+        return filesInImageResponse;
+    }
 
-    public SearchFilesInImageResponse searchFilesInImage(@PathParam("imageId") String imageId) {
+    @Path("/trustpolicies/{trustpolicy_id: [0-9a-zA-Z_-]+}/sign")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    public SignTrustPolicyResponse signTrustPolicy(@PathParam("trustpolicy_id") String trustpolicyId) {
         return null;
     }
 
     @Path("/uploads")
-    @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ImageStoreUploadResponse searchFilesInImage(@FormParam("") ImageStoreUploadRequest imageStoreUploadRequest) {
+    @POST
+    public ImageStoreResponse uploadImageToImageStore(@FormParam("") ImageStoreRequest imageStoreRequest) {
         return null;
     }
 
     /**
      * Lookup methods
+     *
+     * @return
      */
     @Path("/image-deployments")
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ListImageDeploymentsResponse getImageDeployments() {
-        return null;
+        return lookupService.getImageDeployments();
     }
 
     @Path("/image-formats")
@@ -136,7 +159,7 @@ public class Images {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ListImageFormatsResponse getImageFormats() {
-        return null;
+        return lookupService.getImageFormats();
     }
 
     @Path("image-launch-policies")
@@ -144,11 +167,14 @@ public class Images {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ListImageLaunchPoliciesResponse getImageLaunchPolicies() {
-        return null;
+        return lookupService.getImageLaunchPolicies();
     }
 
     /**
      * Utility methods
+     *
+     * @param httpServletRequest
+     * @return
      */
     protected String getLoginUsername(HttpServletRequest httpServletRequest) {
         String header = httpServletRequest.getHeader(AUTHORIZATION_HEADER); // Authorization: Basic am9uYXRoYW46am9uYXRoYW4=
@@ -178,11 +204,6 @@ public class Images {
             return username;
         }
         return null;
-    }
-
-    @Autowired
-    public void setImageService(ImageService imageService) {
-        this.imageService = imageService;
     }
 
 }

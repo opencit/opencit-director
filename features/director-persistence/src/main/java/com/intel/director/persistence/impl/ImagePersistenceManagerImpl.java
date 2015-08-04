@@ -51,4 +51,9 @@ public class ImagePersistenceManagerImpl implements ImagePersistenceManager {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public void pleaseAutowire() {
+        System.out.println("22222222222222: Inside ImagePersistenceManagerImpl.pleaseAutoWire");
+    }
+
 }

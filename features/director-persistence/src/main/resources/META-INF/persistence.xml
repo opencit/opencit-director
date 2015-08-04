@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+    <persistence-unit name="DirectorDataPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <class>com.intel.mtwilson.director.data.MwAuditable</class> 
+        <class>com.intel.mtwilson.director.data.MwUser</class> 
+        <class>com.intel.mtwilson.director.data.MwImage</class>  
+        <class>com.intel.mtwilson.director.data.MwTrustPolicy</class> 
+        <class>com.intel.mtwilson.director.data.MwImageUpload</class>
+        <class>com.intel.mtwilson.director.data.MwPolicyUpload</class>
+        <class>com.intel.mtwilson.director.data.MwTrustPolicyDraft</class>
+        <class>com.intel.mtwilson.director.data.MwHost</class>
+        <class>com.intel.mtwilson.director.data.MwSshKey</class>
+        <class>com.intel.mtwilson.director.data.MwSshPassword</class>       
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/DirectorDataPU" />
+            <property name="javax.persistence.jdbc.user" value="postgres" />
+            <property name="javax.persistence.jdbc.password" value="root" />
+            <property name="eclipselink.logging.level" value="FINEST"/>
+            <property name="eclipselink.ddl-generation" value="create-tables"/>
+            <property name="eclipselinkwqewqe.create-ddl-jdbc-file-name" value="createDDL_ddlGeneration.jdbc"/>
+            <property name="eclipselink.drop-ddl-jdbc-file-name" value="dropDDL_ddlGeneration.jdbc"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="both"/>
+        </properties>
+    </persistence-unit>
+</persistence>

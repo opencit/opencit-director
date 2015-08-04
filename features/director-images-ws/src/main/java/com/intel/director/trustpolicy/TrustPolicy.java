@@ -1,6 +1,5 @@
 package com.intel.director.trustpolicy;
 
-
 import com.intel.director.api.CreateTrustPolicyRequest;
 import com.intel.director.api.CreateTrustPolicyResponse;
 import com.intel.director.api.SignTrustPolicyResponse;
@@ -19,24 +18,23 @@ import javax.ws.rs.core.Context;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author GS-0681
  */
 @Path("/trustpolicies")
-public class TrustPolicy { 
-    
+public class TrustPolicy {
+
     @POST
     @Produces(CryptoMediaType.APPLICATION_X_PEM_FILE)
     @Path("/")
-    public CreateTrustPolicyResponse createTrustPolicy( @FormParam("") CreateTrustPolicyRequest createTrustPolicyRequest){
+    public CreateTrustPolicyResponse createTrustPolicy(@FormParam("") CreateTrustPolicyRequest createTrustPolicyRequest) {
         return null;
     }
-    
+
     @POST
     @Path("/trustPolicyId: [0-9a-zA-Z_-]+}/sign")
-    public SignTrustPolicyResponse signTrustPolicy(@PathParam("trustPolicyId") String trustPolicyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse){
+    public SignTrustPolicyResponse signTrustPolicy(@PathParam("trustPolicyId") String trustPolicyId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
         return null;
     }
 }

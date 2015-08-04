@@ -9,7 +9,7 @@ package com.intel.director.images.exception;
  *
  * @author GS-0681
  */
-public class DirectorException extends Exception{
+public class DirectorException extends Exception {
 
     public DirectorException() {
     }
@@ -25,5 +25,5 @@ public class DirectorException extends Exception{
     public DirectorException(Throwable cause) {
         super(cause);
     }
-    
+
 }

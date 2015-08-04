@@ -26,5 +26,4 @@ public class ImageMountException extends DirectorException {
         super(cause);
     }
 
-
 }

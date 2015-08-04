@@ -7,7 +7,7 @@
     <description>HTML5 user interface to KMS</description>
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
-        <artifactId>director-features</artifactId>
+        <artifactId>director-maven-java</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
     

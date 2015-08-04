@@ -1,8 +1,8 @@
 package com.intel.director.service.impl;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ImageStoreUploadRequest;
-import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.api.ImageStoreRequest;
+import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
@@ -13,9 +13,12 @@ import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.MountVMImage;
+import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.persistence.ImagePersistenceManager;
 import com.intel.director.service.ImageService;
+import com.intel.director.service.ImageStoreManager;
 import com.intel.director.util.DirectorUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,18 +40,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageServiceImpl implements ImageService {
 
+    @Autowired
     private ImagePersistenceManager imagePersistenceManager;
+
+    @Autowired
+    private ImageStoreManager imageStoreManager;
+
+    public ImageServiceImpl() {
+    }
 
     @Override
     public MountImageResponse mountImage(String imageId, String user) throws ImageMountException {
         MountImageResponse mountImageResponse = null;
-        try {
-            ImageAttributes image = imagePersistenceManager.fetchImageById(imageId);
-            //Mark the image mounted by the user
-            image.mounted = Boolean.TRUE;
-            image.mountedBy = user;
-            imagePersistenceManager.updateImage(image);
+        ImageAttributes image = imagePersistenceManager.fetchImageById(imageId);
+        //Check if the image is already mounted. If so, return error
+        if (image.mounted_by_user_id != null) {
+            throw new ImageMountException("Unable to mount image. Image is already in use by user: " + image.mounted_by_user_id);
+        }
 
+        //Mark the image mounted by the user
+        image.mounted_by_user_id = user;
+        imagePersistenceManager.updateImage(image);
+        try {
             //Mount the image
             String mountPath = DirectorUtil.computeVMMountPath(image.id);
             MountVMImage.mountImage(image.location, mountPath);
@@ -67,13 +80,12 @@ public class ImageServiceImpl implements ImageService {
 
             //Throw an exception if different user than the mounted_by user 
             //tries to unmount
-            if (!image.mountedBy.equalsIgnoreCase(user)) {
+            if (!image.mounted_by_user_id.equalsIgnoreCase(user)) {
                 throw new ImageMountException("Image cannot be unmounted by a differnt user");
             }
 
             //Mark the image unmounted 
-            image.mounted = Boolean.FALSE;
-            image.mountedBy = null;
+            image.mounted_by_user_id = null;
             imagePersistenceManager.updateImage(image);
 
             //Unmount the image
@@ -88,8 +100,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(TrustDirectorImageUploadRequest trustDirectorImageUploadRequest) {
-        TrustDirectorImageUploadResponse directorImageUploadResponse = null;
-
         //Check if the file with the same name has been uploaded earlier
         //If so, append "_1" to the file name and then save
         File image = new File(Constants.vmImagesPath + trustDirectorImageUploadRequest.imageAttributes.name);
@@ -121,9 +131,9 @@ public class ImageServiceImpl implements ImageService {
         DirectorUtil.writeImageToFile(imageFileInputStream, imageAttributes);
 
         //Save image meta data to the database
-        TrustDirectorImageUploadResponse directorImageUploadResponse = (TrustDirectorImageUploadResponse) imagePersistenceManager.saveImageMetadata(imageAttributes);
+        ImageAttributes attributes = imagePersistenceManager.saveImageMetadata(imageAttributes);
 
-        return directorImageUploadResponse;
+        return DirectorUtil.mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
     }
 
     @Override
@@ -140,30 +150,39 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
+     *
+     * @param imageStoreUploadRequest
+     * @return
+     * @throws DirectorException
+     * @throws ImageStoreException
+     */
+    @Override
+    public ImageStoreResponse uploadImageToImageStore(ImageStoreRequest imageStoreUploadRequest) throws DirectorException, ImageStoreException {
+        ImageStoreResponse uploadImage = imageStoreManager.uploadImage(imageStoreUploadRequest);
+        //save image upload details to mw_image_upload
+        return uploadImage;
+    }
+
+    /**
      * **************************************************************************************
      */
     /**
      * Setters and getters
      *
+     * @param imagePersistenceManager
+     * @param imageStoreManager
      * @return
      */
     @Autowired
-    public ImageServiceImpl(ImagePersistenceManager imagePersistenceManager) {
+    public ImageServiceImpl(ImagePersistenceManager imagePersistenceManager, ImageStoreManager imageStoreManager) {
         this.imagePersistenceManager = imagePersistenceManager;
-    }
-
-    public ImagePersistenceManager getImagePersistenceManager() {
-        return imagePersistenceManager;
-    }
-
-    @Autowired
-    public void setImagePersistenceManager(ImagePersistenceManager imagePersistenceManager) {
-        this.imagePersistenceManager = imagePersistenceManager;
+        this.imageStoreManager = imageStoreManager;
     }
 
     @Override
-    public ImageStoreUploadResponse uploadImageToImageStore(ImageStoreUploadRequest imageStoreUploadRequest) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void pleaseAutoWire() {
+        System.out.println("1111111111111 : Inside ImageServiceImpl.pleaseAutoWire");
+        imagePersistenceManager.pleaseAutowire();
     }
 
 }

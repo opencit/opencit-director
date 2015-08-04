@@ -30,4 +30,6 @@ public interface ImagePersistenceManager {
     public int getTotalImagesCount();
 
     public ImageAttributes fetchImageById(String id);
+
+    public void pleaseAutowire();
 }

@@ -10,7 +10,8 @@ package com.intel.director.api;
  * @author soakx
  */
 public class ImageStoreUploadRequest {
-  public String image_id;
-  public String trust_policy_id;
-  public String image_store_name;
+
+    public String image_id;
+    public String trust_policy_id;
+    public String image_store_name;
 }

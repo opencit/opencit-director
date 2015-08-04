@@ -6,23 +6,23 @@
     </head>
     <body>
 
-            <div class="row">
-                <div class="col-xs-2 col-sm-4"></div>
-                <div class="col-xs-8 col-sm-4" data-bind="with: loginViewModel">
-                    <form id="loginForm" class="form-signin" data-bind="with: userProfile, submit: logout">
-                        <h2 class="form-signin-heading">Click the button to sign out</h2>
+        <div class="row">
+            <div class="col-xs-2 col-sm-4"></div>
+            <div class="col-xs-8 col-sm-4" data-bind="with: loginViewModel">
+                <form id="loginForm" class="form-signin" data-bind="with: userProfile, submit: logout">
+                    <h2 class="form-signin-heading">Click the button to sign out</h2>
 
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign out</button>
-                        <div class="form-group has-error">
-                            <p style="color: red" data-bind="text: error, visible: error"></p>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-xs-2 col-sm-4"></div>
-
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign out</button>
+                    <div class="form-group has-error">
+                        <p style="color: red" data-bind="text: error, visible: error"></p>
+                    </div>
+                </form>
             </div>
+            <div class="col-xs-2 col-sm-4"></div>
 
-<!--        <script src="js/kms_login.js"></script> -->
+        </div>
+
+        <!--        <script src="js/kms_login.js"></script> -->
         <script type="text/javascript">
             // script requires:  kms_login.js  for loginViewModel
             // style requires: bootstrap, dashboard, intel

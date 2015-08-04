@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.validation.Fault;
  * @author jbuhacoff
  */
 public class InvalidParameter extends Fault {
+
     private String parameter;
     private Fault cause;
 
@@ -24,7 +25,7 @@ public class InvalidParameter extends Fault {
         this.parameter = parameter;
         this.cause = cause;
     }
-    
+
     public String getParameter() {
         return parameter;
     }
@@ -32,5 +33,5 @@ public class InvalidParameter extends Fault {
     public Fault getCause() {
         return cause;
     }
-    
+
 }

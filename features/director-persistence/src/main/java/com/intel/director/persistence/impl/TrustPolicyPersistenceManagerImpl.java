@@ -11,5 +11,5 @@ import com.intel.director.persistence.TrustPolicyPersistenceManager;
  *
  * @author GS-0681
  */
-public class TrustPolicyPersistenceManagerImpl implements TrustPolicyPersistenceManager{
+public class TrustPolicyPersistenceManagerImpl implements TrustPolicyPersistenceManager {
 }

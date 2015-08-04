@@ -5,102 +5,159 @@
  */
 package com.intel.director.api;
 
+import java.util.Date;
+
 /**
  *
  * @author soakx
  */
-public class ImageAttributes {
-    public String name;
+public class ImageAttributes extends AuditFields {
+
     public String id;
-    public String location;
+    public String name;
+
     public String image_format;
     public String image_deployments;
     public String status;
-    public Long image_size;
+    public Integer image_size;
     public Integer sent;
-    public Boolean mounted;
-    public String mountedBy;
+    public String mounted_by_user_id;
+    public boolean deleted;
+    public String location;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public void setImage_format(String image_format) {
-        this.image_format = image_format;
-    }
-
-    public void setImage_deployments(String image_deployments) {
-        this.image_deployments = image_deployments;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setImage_size(Long image_size) {
-        this.image_size = image_size;
-    }
-
-    public void setSent(Integer sent) {
-        this.sent = sent;
-    }
-
-    public void setMounted(Boolean mounted) {
-        this.mounted = mounted;
-    }
-
-    public void setMountedBy(String mountedBy) {
-        this.mountedBy = mountedBy;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getLocation() {
-        return location;
+    public ImageAttributes() {
+        super();
     }
 
     public String getImage_format() {
         return image_format;
     }
 
+    public void setImage_format(String image_format) {
+        this.image_format = image_format;
+    }
+
+    public ImageAttributes(String created_by_user_id, Date created_date,
+            String edited_by_user_id, Date edited_date, String id, String name,
+            String format, String image_deployments, String status,
+            Integer image_size, Integer sent, String mounted_by_user_id,
+            boolean deleted, String location) {
+        super(created_by_user_id, created_date, edited_by_user_id, edited_date);
+        this.id = id;
+        this.name = name;
+        this.image_format = format;
+        this.image_deployments = image_deployments;
+        this.status = status;
+        this.image_size = image_size;
+        this.sent = sent;
+        this.mounted_by_user_id = mounted_by_user_id;
+        this.deleted = deleted;
+        this.location = location;
+
+    }
+
+    public ImageAttributes(String created_by_user_id, Date created_date,
+            String edited_by_user_id, Date edited_date, String name,
+            String format, String image_deployments, String status,
+            Integer image_size, Integer sent, String mounted_by_user_id,
+            boolean deleted, String location) {
+        super(created_by_user_id, created_date, edited_by_user_id, edited_date);
+
+        this.name = name;
+        this.image_format = format;
+        this.image_deployments = image_deployments;
+        this.status = status;
+        this.image_size = image_size;
+        this.sent = sent;
+        this.mounted_by_user_id = mounted_by_user_id;
+        this.deleted = deleted;
+        this.location = location;
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getImage_deployments() {
         return image_deployments;
+    }
+
+    public void setImage_deployments(String image_deployments) {
+        this.image_deployments = image_deployments;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public Long getImage_size() {
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getImage_size() {
         return image_size;
+    }
+
+    public void setImage_size(Integer image_size) {
+        this.image_size = image_size;
     }
 
     public Integer getSent() {
         return sent;
     }
 
-    public Boolean getMounted() {
-        return mounted;
+    public void setSent(Integer sent) {
+        this.sent = sent;
     }
 
-    public String getMountedBy() {
-        return mountedBy;
+    public String getLocation() {
+        return location;
     }
-    
-    
-    
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getMounted_by_user_id() {
+        return mounted_by_user_id;
+    }
+
+    public void setMounted_by_user_id(String mounted_by_user_id) {
+        this.mounted_by_user_id = mounted_by_user_id;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageAttributes [id=" + id + ", name=" + name + ", format="
+                + image_format + ", image_deployments=" + image_deployments
+                + ", status=" + status + ", image_size=" + image_size
+                + ", sent=" + sent + ", mounted_by_user_id="
+                + mounted_by_user_id + ", deleted=" + deleted + ", location="
+                + location + ", content_length="
+                + ", created_by_user_id=" + created_by_user_id
+                + ", created_date=" + created_date + ", edited_by_user_id="
+                + edited_by_user_id + ", edited_date=" + edited_date + "]";
+    }
+
 }

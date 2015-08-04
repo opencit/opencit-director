@@ -6,8 +6,9 @@
     <description>Director request and response data structures</description>
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
-        <artifactId>director-features</artifactId>
+        <artifactId>director-maven-java</artifactId>
         <version>0.1-SNAPSHOT</version>
+        <relativePath/>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,6 +18,11 @@
 
     <dependencies>
         <!-- director projects begin --> 
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-glance</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <version>0.1-SNAPSHOT</version>
@@ -38,6 +44,21 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-configuration</artifactId>
+            <version>0.4-SNAPSHOT</version>						
         </dependency>
         <!--MtWilson dependencies end-->
 

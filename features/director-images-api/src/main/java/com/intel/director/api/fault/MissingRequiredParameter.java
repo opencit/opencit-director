@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.validation.Fault;
  * @author jbuhacoff
  */
 public class MissingRequiredParameter extends Fault {
+
     private String parameter;
 
     public MissingRequiredParameter(String parameter) {
@@ -21,6 +22,5 @@ public class MissingRequiredParameter extends Fault {
     public String getParameter() {
         return parameter;
     }
-    
-    
+
 }

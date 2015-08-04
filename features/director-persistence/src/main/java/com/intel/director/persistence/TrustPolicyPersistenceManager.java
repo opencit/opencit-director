@@ -7,10 +7,10 @@ package com.intel.director.persistence;
 
 /**
  *
- * 
- * 
+ *
+ *
  * @author GS-0681
  */
 public interface TrustPolicyPersistenceManager {
-    
+
 }

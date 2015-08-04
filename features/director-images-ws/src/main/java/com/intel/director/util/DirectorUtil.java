@@ -11,14 +11,15 @@ import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.Constants;
+import com.intel.director.images.GlanceImageStoreManager;
+import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ImageStoreManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
@@ -28,20 +29,18 @@ import org.dozer.Mapper;
  */
 public class DirectorUtil {
 
-    public static String computeVMMountPath(String imageName, String imagePath) throws NoSuchAlgorithmException {        
+    public static String computeVMMountPath(String imageName, String imagePath) throws NoSuchAlgorithmException {
         Md5Digest md5Digest = Md5Digest.digestOf(imagePath.getBytes());
         String hexString = md5Digest.toHexString();
         String prefix = hexString.substring(hexString.length() - 4);
-        
+
         StringBuilder sb = new StringBuilder(Constants.mountPath);
         sb.append(prefix);
         sb.append(imageName);
         return sb.toString();
     }
 
-    
-    
-    public static String computeVMMountPath(String imageId) {              
+    public static String computeVMMountPath(String imageId) {
         StringBuilder sb = new StringBuilder(Constants.mountPath);
         sb.append(imageId);
         return sb.toString();
@@ -70,8 +69,6 @@ public class DirectorUtil {
             ImageAttributes imageAttributes) throws IOException {
         OutputStream out = null;
         try {
-            File file = new File(imageAttributes.location);
-            out = new FileOutputStream(file);
             int read = 0;
             byte[] bytes = new byte[1024];
 
@@ -79,22 +76,46 @@ public class DirectorUtil {
             while ((read = uploadedInputStream.read(bytes)) != -1) {
                 out.write(bytes, 0, read);
             }
-
         } finally {
             if (out != null) {
                 out.flush();
                 out.close();
             }
         }
-        imageAttributes.image_size = new File(imageAttributes.location).length();
+        imageAttributes.image_size = new Long(new File(imageAttributes.location).length()).intValue();
+    }
+
+    //TODO: get the class name from the store name
+    public static ImageStoreManager getImageStoreManager(String storeName) throws DirectorException {
+        ImageStoreManager imageStoreManager = null;
+        try {
+            switch (storeName) {
+                case "glance":
+                    imageStoreManager = new GlanceImageStoreManager();
+                    break;
+            }
+        } catch (Exception e) {
+            throw new DirectorException("Unable to fetch an image store manager", e);
+        }
+        return imageStoreManager;
     }
 
     public static void main(String[] args) {
-        try {
-            String s = DirectorUtil.computeVMMountPath("cirus_x56.img", "/opt/vm/");
-            System.out.println(s);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(DirectorUtil.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String imageId = "123";
+        ImageAttributes imageAttributes = new ImageAttributes();
+        imageAttributes.id = imageId;
+        imageAttributes.image_deployments = "VM";
+        imageAttributes.image_format = "qcow2";
+        imageAttributes.image_size = 1000;
+        imageAttributes.location = "/opt/director/vm/" + imageId;
+        imageAttributes.mounted_by_user_id = null;
+        imageAttributes.name = "IMG_" + imageId;
+        imageAttributes.status = null;
+
+        TrustDirectorImageUploadResponse directorImageUploadResponse = mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
+
+        System.out.println(directorImageUploadResponse.id);
+
     }
+
 }
