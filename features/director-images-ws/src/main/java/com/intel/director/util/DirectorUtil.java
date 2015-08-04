@@ -13,7 +13,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.service.ImageStoreManager;
+import com.intel.director.api.ImageStoreManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

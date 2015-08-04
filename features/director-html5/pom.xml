@@ -9,6 +9,7 @@
         <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-maven-java</artifactId>
         <version>0.1-SNAPSHOT</version>
+        <relativePath/>
     </parent>
     
 </project>

@@ -3,8 +3,8 @@ package com.intel.mtwilson.director.dbservice;
 import java.util.List;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ImageAttributesFilter;
-import com.intel.director.api.ImageAttributesOrderBy;
+import com.intel.director.api.ui.ImageAttributesFilter;
+import com.intel.director.api.ui.ImageAttributesOrderBy;
 import com.intel.director.api.User;
 import com.intel.mtwilson.director.db.exception.DbException;
 

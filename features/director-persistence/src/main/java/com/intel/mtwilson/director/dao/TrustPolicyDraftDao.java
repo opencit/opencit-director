@@ -17,10 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.director.api.OrderByEnum;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.TrustPolicyDraftFields;
-import com.intel.director.api.TrustPolicyDraftFilter;
-import com.intel.director.api.TrustPolicyDraftOrderBy;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.db.exception.DbException;

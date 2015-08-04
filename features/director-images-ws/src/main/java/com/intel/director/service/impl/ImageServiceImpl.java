@@ -16,10 +16,11 @@ import com.intel.director.common.MountVMImage;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.exception.ImageMountException;
-import com.intel.director.persistence.ImagePersistenceManager;
 import com.intel.director.service.ImageService;
-import com.intel.director.service.ImageStoreManager;
+import com.intel.director.api.ImageStoreManager;
 import com.intel.director.util.DirectorUtil;
+import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.IDbService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +42,7 @@ import org.springframework.stereotype.Component;
 public class ImageServiceImpl implements ImageService {
 
     @Autowired
-    private ImagePersistenceManager imagePersistenceManager;
+    private IDbService imagePersistenceManager;
 
     @Autowired
     private ImageStoreManager imageStoreManager;
@@ -50,7 +51,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException {
+    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException, DbException {
         MountImageResponse mountImageResponse = null;
         ImageAttributes image = imagePersistenceManager.fetchImageById(imageId);
         //Check if the image is already mounted. If so, return error
@@ -99,7 +100,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(TrustDirectorImageUploadRequest trustDirectorImageUploadRequest) {
+    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(TrustDirectorImageUploadRequest trustDirectorImageUploadRequest) throws DbException {
         //Check if the file with the same name has been uploaded earlier
         //If so, append "_1" to the file name and then save
         File image = new File(Constants.vmImagesPath + trustDirectorImageUploadRequest.imageAttributes.name);
@@ -121,8 +122,7 @@ public class ImageServiceImpl implements ImageService {
      * @throws IOException
      */
     @Override
-    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(String imageId, InputStream imageFileInputStream)
-            throws FileNotFoundException, IOException {
+    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(String imageId, InputStream imageFileInputStream) throws DbException, IOException {
 
         //Get the image details saved in the earlier step
         ImageAttributes imageAttributes = imagePersistenceManager.fetchImageById(imageId);
@@ -137,9 +137,9 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest) {
+    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest) throws DbException{
         SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
-        List<ImageAttributes> imagesBySearchCriteria = imagePersistenceManager.fetchImagesBySearchCriteria(null, null);
+        List<ImageAttributes> imagesBySearchCriteria = imagePersistenceManager.fetchImages(null);
         searchImagesResponse.images = imagesBySearchCriteria;
         return searchImagesResponse;
     }
@@ -174,15 +174,9 @@ public class ImageServiceImpl implements ImageService {
      * @return
      */
     @Autowired
-    public ImageServiceImpl(ImagePersistenceManager imagePersistenceManager, ImageStoreManager imageStoreManager) {
+    public ImageServiceImpl(IDbService imagePersistenceManager, ImageStoreManager imageStoreManager) {
         this.imagePersistenceManager = imagePersistenceManager;
         this.imageStoreManager = imageStoreManager;
-    }
-
-    @Override
-    public void pleaseAutoWire() {
-        System.out.println("1111111111111 : Inside ImageServiceImpl.pleaseAutoWire");
-        imagePersistenceManager.pleaseAutowire();
     }
 
 }

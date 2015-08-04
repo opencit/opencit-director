@@ -9,11 +9,12 @@ import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.exception.ImageStoreException;
-import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.service.ImageStoreManager;
+import com.intel.director.api.ImageStoreManager;
 import com.intel.director.util.DirectorUtil;
-import java.io.IOException;
+import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,33 +22,58 @@ import java.io.IOException;
  */
 public class ImageStoreManagerImpl implements ImageStoreManager {
 
+    private static final Logger log = LoggerFactory.getLogger(ImageStoreManagerImpl.class);
+
     protected ImageStoreManager getImageStoreManager(ImageStoreRequest imageStoreRequest) throws DirectorException {
         return Plugins.findByAttribute(ImageStoreManager.class, "class", DirectorUtil.getImageStoreManager(imageStoreRequest.image_store_name));
     }
 
     @Override
-    public ImageStoreResponse uploadImage(ImageStoreRequest imageStoreUploadRequest) throws DirectorException, ImageStoreException {
+    public ImageStoreResponse uploadImage(ImageStoreRequest imageStoreUploadRequest) {
         //Get the image store implementation for the store requested        
-        ImageStoreResponse imageStoreUploadResponse = getImageStoreManager(imageStoreUploadRequest).uploadImage(imageStoreUploadRequest);
+        ImageStoreResponse imageStoreUploadResponse = null;
+
+        try {
+            imageStoreUploadResponse = getImageStoreManager(imageStoreUploadRequest).uploadImage(imageStoreUploadRequest);
+        } catch (DirectorException ex) {
+            log.error("Error uploading image", ex);
+        }
+
         return imageStoreUploadResponse;
     }
 
     @Override
-    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException, ImageStoreException {
+    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) {
         //Get the image store implementation for the store requested
-        ImageStoreResponse imageStoreResponse = getImageStoreManager(imageStoreSearchRequest).searchImages(imageStoreSearchRequest);
+        ImageStoreResponse imageStoreResponse = null;
+        try {
+            imageStoreResponse = getImageStoreManager(imageStoreSearchRequest).searchImages(imageStoreSearchRequest);
+        } catch (DirectorException ex) {
+            log.error("Error searching image", ex);
+        }
         return imageStoreResponse;
     }
 
     @Override
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException {
-        ImageStoreResponse imageStoreSearchResponse = getImageStoreManager(imageStoreDeleteRequest).searchImages(imageStoreDeleteRequest);
+    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) {
+        ImageStoreResponse imageStoreSearchResponse = null;
+        try {
+            imageStoreSearchResponse = getImageStoreManager(imageStoreDeleteRequest).searchImages(imageStoreDeleteRequest);
+        } catch (DirectorException ex) {
+            log.error("Error deleting image", ex);
+        }
         return imageStoreSearchResponse;
     }
 
     @Override
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) {
+        ImageStoreResponse imageStoreSearchResponse = null;
+        try {
+            imageStoreSearchResponse = getImageStoreManager(imageStoreDeleteRequest).fetchImageDetails(imageStoreDeleteRequest);
+        } catch (DirectorException ex) {
+            log.error("Error fetching image", ex);
+        }
+        return imageStoreSearchResponse;
     }
 
 }

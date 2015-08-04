@@ -15,12 +15,10 @@ import javax.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageStoreUploadFields;
-import com.intel.director.api.ImageStoreUploadFilter;
-import com.intel.director.api.ImageStoreUploadOrderBy;
-import com.intel.director.api.OrderByEnum;
-import com.intel.mtwilson.director.data.MwImageUpload;
+import com.intel.director.api.ui.ImageStoreUploadFilter;
+import com.intel.director.api.ui.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.mtwilson.director.data.MwImageUpload;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;

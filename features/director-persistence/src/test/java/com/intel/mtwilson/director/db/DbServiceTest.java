@@ -3,9 +3,7 @@ package com.intel.mtwilson.director.db;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,16 +12,15 @@ import org.junit.Test;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ImageAttributesFilter;
-import com.intel.director.api.ImageAttributesOrderBy;
-import com.intel.director.api.OrderByEnum;
+import com.intel.director.api.ui.ImageAttributesFilter;
+import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyFields;
-import com.intel.director.api.TrustPolicyFilter;
-import com.intel.director.api.TrustPolicyOrderBy;
+import com.intel.director.api.ui.TrustPolicyFilter;
+import com.intel.director.api.ui.TrustPolicyOrderBy;
 
 import com.intel.director.api.User;
-import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 

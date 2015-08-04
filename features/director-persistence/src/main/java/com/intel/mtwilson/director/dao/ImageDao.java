@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.intel.director.api.ImageAttributeFields;
-import com.intel.director.api.ImageAttributesFilter;
-import com.intel.director.api.ImageAttributesOrderBy;
-import com.intel.director.api.OrderByEnum;
+import com.intel.director.api.ui.ImageAttributesFilter;
+import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -118,9 +118,9 @@ public class ImageDao {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_DEPLOYMENTS)),
                             "%" + imgFilter.getImage_deployments() + "%"));
                 }
-                if (imgFilter.getFormat() != null) {
+                if (imgFilter.getImage_format() != null) {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_FORMAT)),
-                            "%" + imgFilter.getFormat() + "%"));
+                            "%" + imgFilter.getImage_format() + "%"));
                 }
                 if (imgFilter.getName() != null) {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.NAME)),
@@ -225,9 +225,9 @@ public class ImageDao {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_DEPLOYMENTS)),
                             "%" + imgFilter.getImage_deployments() + "%"));
                 }
-                if (imgFilter.getFormat() != null) {
+                if (imgFilter.getImage_format() != null) {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_FORMAT)),
-                            "%" + imgFilter.getFormat() + "%"));
+                            "%" + imgFilter.getImage_format() + "%"));
                 }
                 if (imgFilter.getName() != null) {
                     predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.NAME)),

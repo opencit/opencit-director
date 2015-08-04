@@ -3,20 +3,20 @@ package com.intel.mtwilson.director.dbservice;
 import java.util.List;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ImageAttributesFilter;
-import com.intel.director.api.ImageAttributesOrderBy;
-import com.intel.director.api.ImageStoreUploadFilter;
-import com.intel.director.api.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.ImageAttributesFilter;
+import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.ImageStoreUploadFilter;
+import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.TrustPolicyDraftFilter;
-import com.intel.director.api.TrustPolicyDraftOrderBy;
-import com.intel.director.api.TrustPolicyFilter;
-import com.intel.director.api.TrustPolicyOrderBy;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
+import com.intel.director.api.ui.TrustPolicyFilter;
+import com.intel.director.api.ui.TrustPolicyOrderBy;
 import com.intel.director.api.User;
-import com.intel.director.api.UserFilter;
-import com.intel.director.api.UserOrderBy;
+import com.intel.director.api.ui.UserFilter;
+import com.intel.director.api.ui.UserOrderBy;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /**

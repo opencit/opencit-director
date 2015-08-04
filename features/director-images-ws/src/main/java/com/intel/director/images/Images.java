@@ -24,7 +24,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
-import com.intel.mtwilson.director.javafx.ui.UploadExisting;
+import com.intel.mtwilson.director.db.exception.DbException;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +65,7 @@ public class Images {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(@FormParam("") TrustDirectorImageUploadRequest directorImageUploadRequest) {
+    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(@FormParam("") TrustDirectorImageUploadRequest directorImageUploadRequest) throws DbException {
         TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
         return trustDirectorImageUploadResponse;
     }
@@ -74,7 +74,7 @@ public class Images {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(@PathParam("imageId") String imageId, @FormParam("image") InputStream uploadedInputStream) throws IOException {
+    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(@PathParam("imageId") String imageId, @FormParam("image") InputStream uploadedInputStream) throws IOException, DbException {
         TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService.uploadImageToTrustDirector(imageId, uploadedInputStream);
         return trustDirectorImageUploadResponse;
     }
@@ -83,7 +83,7 @@ public class Images {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public SearchImagesResponse searchImages(@FormParam("") SearchImagesRequest searchImagesRequest) {
+    public SearchImagesResponse searchImages(@FormParam("") SearchImagesRequest searchImagesRequest) throws DbException {
         SearchImagesResponse searchImagesResponse = imageService.searchImages(searchImagesRequest);
         return searchImagesResponse;
     }
@@ -92,7 +92,7 @@ public class Images {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public MountImageResponse mountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException {
+    public MountImageResponse mountImage(@PathParam("imageId") String imageId, @Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) throws ImageMountException, DbException {
         String user = getLoginUsername(httpServletRequest);
         MountImageResponse mountImageResponse = imageService.mountImage(imageId, user);
         return mountImageResponse;

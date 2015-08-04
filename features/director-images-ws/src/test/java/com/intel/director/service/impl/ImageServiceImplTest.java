@@ -12,9 +12,10 @@ import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.MountVMImage;
 import com.intel.director.images.exception.ImageMountException;
-import com.intel.director.persistence.ImagePersistenceManager;
 import com.intel.director.service.ImageService;
 import com.intel.director.util.DirectorUtil;
+import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.IDbService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.NoSuchAlgorithmException;
@@ -42,12 +43,12 @@ public class ImageServiceImplTest {
     String user = "soak";
     MountVMImage mountVMImageService;
     ImageAttributes imageAttributes;
-    ImagePersistenceManager imagePersistenceManager;
+    IDbService imagePersistenceManager;
     String mountPath = "/mnt/director/images/678678-32131-grjeiog-321";
 
     @Before
     public void setup() throws NoSuchAlgorithmException {
-        imagePersistenceManager = Mockito.mock(ImagePersistenceManager.class);
+        imagePersistenceManager = Mockito.mock(IDbService.class);
         imageStoreManager = Mockito.mock(ImageStoreManagerImpl.class);
         imageService = new ImageServiceImpl(imagePersistenceManager, imageStoreManager);
         PowerMockito.mockStatic(MountVMImage.class);
@@ -123,7 +124,7 @@ public class ImageServiceImplTest {
     }
 
     @Test
-    public void testUploadImageMetaDataToTrustDirector() {
+    public void testUploadImageMetaDataToTrustDirector() throws DbException {
         TrustDirectorImageUploadRequest directorImageUploadRequest = new TrustDirectorImageUploadRequest();
         directorImageUploadRequest.imageAttributes = new ImageAttributes();
         directorImageUploadRequest.imageAttributes.image_deployments = "VM";

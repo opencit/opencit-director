@@ -13,6 +13,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.exception.ImageMountException;
+import com.intel.mtwilson.director.db.exception.DbException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,20 +32,18 @@ import java.io.InputStream;
  */
 public interface ImageService {
 
-    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException;
+    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException, DbException;
 
     public UnmountImageResponse unMountImage(String imageId, String user) throws ImageMountException;
 
-    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(TrustDirectorImageUploadRequest trustDirectorImageUploadRequest);
+    public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(TrustDirectorImageUploadRequest trustDirectorImageUploadRequest) throws DbException;
 
-    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(String imageId, InputStream imageFileInputStream) throws FileNotFoundException, IOException;
+    public TrustDirectorImageUploadResponse uploadImageToTrustDirector(String imageId, InputStream imageFileInputStream) throws DbException, IOException;
 
-    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest);
+    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest) throws DbException;
 
     public SearchFilesInImageResponse searchFilesInImage(SearchFilesInImageRequest searchFilesInImageRequest);
 
     public ImageStoreResponse uploadImageToImageStore(ImageStoreRequest imageStoreUploadRequest) throws DirectorException, ImageStoreException;
-
-    public void pleaseAutoWire();
 
 }

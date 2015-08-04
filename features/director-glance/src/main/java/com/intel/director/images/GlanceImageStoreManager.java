@@ -6,6 +6,7 @@
 package com.intel.director.images;
 
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.director.api.ImageStoreManager;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.images.async.GlanceImageExecutor;
@@ -14,7 +15,6 @@ import com.intel.director.images.async.ImageTransferTask;
 import com.intel.director.images.rs.GlanceException;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
-import com.intel.director.service.ImageStoreManager;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import java.io.IOException;
 import org.dozer.DozerBeanMapper;

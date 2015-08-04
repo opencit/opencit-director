@@ -6,7 +6,6 @@ import java.util.Map;
 import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadFields;
-import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -133,7 +132,7 @@ public class Mapper {
         MwImage mwImage = new MwImage();
         mwImage.setImageDeploymentType(imgAttributes.getImage_deployments());
         mwImage.setContentlength(imgAttributes.getImage_size());
-        mwImage.setImageFormat(imgAttributes.getFormat());
+        mwImage.setImageFormat(imgAttributes.getImage_format());
         mwImage.setLocation(imgAttributes.getLocation());
         mwImage.setMountedByUserId(imgAttributes.getMounted_by_user_id());
         mwImage.setName(imgAttributes.getName());
@@ -156,7 +155,7 @@ public class Mapper {
 
         imgAttributes.setId(mwImage.getId());
         imgAttributes.setImage_deployments(mwImage.getImageDeploymentType());
-        imgAttributes.setFormat(mwImage.getImageFormat());
+        imgAttributes.setImage_format(mwImage.getImageFormat());
         imgAttributes.setName(mwImage.getName());;
         imgAttributes.setMounted_by_user_id(mwImage.getMountedByUserId());
         imgAttributes.setLocation(mwImage.getLocation());
