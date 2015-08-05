@@ -44,7 +44,8 @@ public class MwImage extends MwAuditable {
     @JoinColumn(name = "TRUST_POLICY_ID", referencedColumnName = "ID")
     private MwTrustPolicy trustPolicy;
 
-    @OneToOne(mappedBy = "image")
+    @OneToOne(optional = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "TRUST_POLICY_DRAFT_ID", referencedColumnName = "ID")
     private MwTrustPolicyDraft trustPolicyDraft;
 
     @Column(name = "STATUS")

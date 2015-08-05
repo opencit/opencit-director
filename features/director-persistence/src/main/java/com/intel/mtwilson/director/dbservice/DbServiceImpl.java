@@ -7,14 +7,15 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ui.ImageAttributesFilter;
-import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
@@ -72,43 +73,32 @@ public class DbServiceImpl implements IPersistService {
     }
 
     /* (non-Javadoc)
-     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageAttributesFilter, com.intel.director.api.ImageAttributesOrderBy)
+     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageInfoFilter, com.intel.director.api.ImageInfoOrderBy)
      */
-    public List<ImageAttributes> fetchImages(
-            ImageAttributesFilter imgFilter,
-            ImageAttributesOrderBy orderBy) throws DbException {
-        List<MwImage> mwImageList = imgDao.findMwImageEntities(imgFilter,
+    public List<ImageInfo> fetchImages(
+            ImageInfoFilter imgFilter,
+            ImageInfoOrderBy orderBy) throws DbException {
+        return imgDao.findMwImageEntities(imgFilter,
                 orderBy);
-        List<ImageAttributes> imgAttributesList = new ArrayList<ImageAttributes>();
 
-        for (MwImage mwImg : mwImageList) {
-            imgAttributesList.add(mapper.toTransferObject(mwImg));
-        }
-        return imgAttributesList;
     }
 
     /* (non-Javadoc)
-     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageAttributesFilter, com.intel.director.api.ImageAttributesOrderBy, int, int)
+     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageInfoFilter, com.intel.director.api.ImageInfoOrderBy, int, int)
      */
-    public List<ImageAttributes> fetchImages(
-            ImageAttributesFilter imgFilter,
-            ImageAttributesOrderBy orderBy, int firstRecord, int maxRecords) throws DbException {
-        List<MwImage> mwImageList = imgDao.findMwImageEntities(firstRecord,
+    public List<ImageInfo> fetchImages(
+            ImageInfoFilter imgFilter,
+            ImageInfoOrderBy orderBy, int firstRecord, int maxRecords) throws DbException {
+        return imgDao.findMwImageEntities(firstRecord,
                 maxRecords, imgFilter, orderBy);
-        List<ImageAttributes> imgAttributesList = new ArrayList<ImageAttributes>();
-
-        for (MwImage mwImg : mwImageList) {
-            imgAttributesList.add(mapper.toTransferObject(mwImg));
-        }
-        return imgAttributesList;
 
     }
 
     /* (non-Javadoc)
      * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImageById(java.lang.String)
      */
-    public ImageAttributes fetchImageById(String id) throws DbException {
-        return mapper.toTransferObject(imgDao.findMwImage(id));
+    public ImageInfo fetchImageById(String id) throws DbException {
+        return imgDao.findMwImage(id);
     }
 
 
@@ -129,56 +119,61 @@ public class DbServiceImpl implements IPersistService {
     }
 
     /* (non-Javadoc)
-     * @see com.intel.mtwilson.director.dbservice.IPersistService#getTotalImagesCount(com.intel.director.api.ImageAttributesFilter)
+     * @see com.intel.mtwilson.director.dbservice.IPersistService#getTotalImagesCount(com.intel.director.api.ImageInfoFilter)
      */
-    public int getTotalImagesCount(ImageAttributesFilter imgFilter) throws DbException {
+    public int getTotalImagesCount(ImageInfoFilter imgFilter) throws DbException {
         return imgDao.getMwImageCount(imgFilter);
     }
 
 
     /* (non-Javadoc)
-     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageAttributesOrderBy)
+     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageInfoOrderBy)
      */
-    public List<ImageAttributes> fetchImages(ImageAttributesOrderBy orderBy) throws DbException {
-        List<MwImage> mwImageList = imgDao.findMwImageEntities(
+    public List<ImageInfo> fetchImages(ImageInfoOrderBy orderBy) throws DbException {
+        return imgDao.findMwImageEntities(
                 null, orderBy);
-        List<ImageAttributes> imgAttributesList = new ArrayList<ImageAttributes>();
 
-        for (MwImage mwImg : mwImageList) {
-            imgAttributesList.add(mapper.toTransferObject(mwImg));
-        }
-        return imgAttributesList;
     }
 
     /* (non-Javadoc)
-     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageAttributesOrderBy, int, int)
+     * @see com.intel.mtwilson.director.dbservice.IPersistService#fetchImages(com.intel.director.api.ImageInfoOrderBy, int, int)
      */
-    public List<ImageAttributes> fetchImages(ImageAttributesOrderBy orderBy, int firstRecord, int maxRecords) throws DbException {
-        List<MwImage> mwImageList = imgDao.findMwImageEntities(
+    public List<ImageInfo> fetchImages(ImageInfoOrderBy orderBy, int firstRecord, int maxRecords) throws DbException {
+        return imgDao.findMwImageEntities(
                 firstRecord, maxRecords, null, orderBy);
-        List<ImageAttributes> imgAttributesList = new ArrayList<ImageAttributes>();
 
-        for (MwImage mwImg : mwImageList) {
-            imgAttributesList.add(mapper.toTransferObject(mwImg));
-        }
-        return imgAttributesList;
     }
 
     public TrustPolicy fetchPolicyForImage(String imageId) throws DbException {
-        // TODO Auto-generated method stub
-        return null;
+        TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
+        trustPolicyFilter.setImage_id(imageId);
+        List<MwTrustPolicy> mwTrustPolicyList = policyDao.findMwTrustPolicyEntities(trustPolicyFilter,
+                null);
+        return mapper.toTransferObject(mwTrustPolicyList.get(0));
     }
 
     public TrustPolicyDraft fetchPolicyDraftForImage(String imageId)
             throws DbException {
-        // TODO Auto-generated method stub
-        return null;
+        TrustPolicyDraftFilter trustPolicydraftFilter = new TrustPolicyDraftFilter();
+        trustPolicydraftFilter.setImage_id(imageId);
+        List<MwTrustPolicyDraft> mwTrustPolicyDraftList = policyDraftDao.findMwTrustPolicyDraftEntities(trustPolicydraftFilter,
+                null);
+        return mapper.toTransferObject(mwTrustPolicyDraftList.get(0));
     }
 
     public List<ImageStoreUploadTransferObject> fetchPolicyUploadsForImage(
             String imageId) throws DbException {
-        // TODO Auto-generated method stub
-        return null;
+        ImageStoreUploadFilter imgUploadFilter = new ImageStoreUploadFilter();
+        imgUploadFilter.setImage_id(imageId);
+        List<MwImageUpload> mwImageUploadList = imgUploadDao.findMwImageUploadEntities(imgUploadFilter,
+                null);
+        List<ImageStoreUploadTransferObject> imgUploadList = new ArrayList<ImageStoreUploadTransferObject>();
+
+        for (MwImageUpload MwImageUpload : mwImageUploadList) {
+            imgUploadList.add(mapper.toTransferObject(MwImageUpload));
+        }
+        return imgUploadList;
+
     }
 
     /*############################################################################################################################

@@ -13,13 +13,11 @@ public class TrustPolicyFilter extends TrustPolicy {
 
     protected Date to_edited_date;
 
-    protected String imageName;
+    protected String image_name;
 
-    public String name;
+    protected String image_format;
 
-    public String format;
-
-    public String image_deployments;
+    protected String image_id;
 
     protected Date from_image_created_date;
 
@@ -61,12 +59,12 @@ public class TrustPolicyFilter extends TrustPolicy {
         this.to_edited_date = to_edited_date;
     }
 
-    public String getImageName() {
-        return imageName;
+    public String getImage_id() {
+        return image_id;
     }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
+    public void setImage_id(String image_id) {
+        this.image_id = image_id;
     }
 
     public String getName() {
@@ -77,20 +75,20 @@ public class TrustPolicyFilter extends TrustPolicy {
         this.name = name;
     }
 
-    public String getFormat() {
-        return format;
+    public String getImage_name() {
+        return image_name;
     }
 
-    public void setFormat(String format) {
-        this.format = format;
+    public void setImage_name(String image_name) {
+        this.image_name = image_name;
     }
 
-    public String getImage_deployments() {
-        return image_deployments;
+    public String getImage_format() {
+        return image_format;
     }
 
-    public void setImage_deployments(String image_deployments) {
-        this.image_deployments = image_deployments;
+    public void setImage_format(String image_format) {
+        this.image_format = image_format;
     }
 
     public Date getFrom_image_created_date() {

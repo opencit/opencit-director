@@ -1,6 +1,7 @@
 package com.intel.director.service.impl;
 
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.MountImageResponse;
@@ -18,9 +19,10 @@ import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.service.ImageService;
 import com.intel.director.api.ImageStoreManager;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.util.DirectorUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.dbservice.IDbService;
+import com.intel.mtwilson.director.dbservice.IPersistService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,7 +44,7 @@ import org.springframework.stereotype.Component;
 public class ImageServiceImpl implements ImageService {
 
     @Autowired
-    private IDbService imagePersistenceManager;
+    private IPersistService imagePersistenceManager;
 
     @Autowired
     private ImageStoreManager imageStoreManager;
@@ -51,25 +53,43 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException, DbException {
+    public MountImageResponse mountImage(String imageId, String user) throws ImageMountException {
         MountImageResponse mountImageResponse = null;
-        ImageAttributes image = imagePersistenceManager.fetchImageById(imageId);
+        ImageAttributes image;
+        try {
+            image = imagePersistenceManager.fetchImageById(imageId);
+        } catch (DbException ex) {
+            throw new ImageMountException("No image found with id: "+imageId, ex);
+        }
         //Check if the image is already mounted. If so, return error
         if (image.mounted_by_user_id != null) {
             throw new ImageMountException("Unable to mount image. Image is already in use by user: " + image.mounted_by_user_id);
         }
+        String mountPath = DirectorUtil.computeVMMountPath(image.id);
 
-        //Mark the image mounted by the user
-        image.mounted_by_user_id = user;
-        imagePersistenceManager.updateImage(image);
         try {
             //Mount the image
-            String mountPath = DirectorUtil.computeVMMountPath(image.id);
             MountVMImage.mountImage(image.location, mountPath);
             mountImageResponse = DirectorUtil.mapImageAttributesToMountImageResponse(image);
         } catch (Exception ex) {
             throw new ImageMountException("Unable to mount image", ex);
         }
+
+        //Mark the image mounted by the user
+        try {
+            image.mounted_by_user_id = user;
+            imagePersistenceManager.updateImage(image);
+            mountImageResponse.mounted_by_user_id = user;
+        } catch (DbException ex) {
+            try {
+                //unmount the image
+                MountVMImage.unmountImage(mountPath);
+            } catch (Exception ex1) {
+                throw new ImageMountException("Failed to unmoubt image. The attempt was made after the DB update for mounted_by_user failed. ", ex1);
+            }
+
+        }
+
         return mountImageResponse;
     }
 
@@ -137,10 +157,10 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest) throws DbException{
+    public SearchImagesResponse searchImages(SearchImagesRequest searchImagesRequest) throws DbException {
         SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
-        List<ImageAttributes> imagesBySearchCriteria = imagePersistenceManager.fetchImages(null);
-        searchImagesResponse.images = imagesBySearchCriteria;
+        List<ImageInfo> fetchImages = imagePersistenceManager.fetchImages(null);
+        searchImagesResponse.images = fetchImages;
         return searchImagesResponse;
     }
 
@@ -174,7 +194,7 @@ public class ImageServiceImpl implements ImageService {
      * @return
      */
     @Autowired
-    public ImageServiceImpl(IDbService imagePersistenceManager, ImageStoreManager imageStoreManager) {
+    public ImageServiceImpl(IPersistService imagePersistenceManager, ImageStoreManager imageStoreManager) {
         this.imagePersistenceManager = imagePersistenceManager;
         this.imageStoreManager = imageStoreManager;
     }

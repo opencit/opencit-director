@@ -8,11 +8,9 @@ package com.intel.director.service.impl;
 import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
-import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.api.ImageStoreManager;
 import com.intel.director.util.DirectorUtil;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

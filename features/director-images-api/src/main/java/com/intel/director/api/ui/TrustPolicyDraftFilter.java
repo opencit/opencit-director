@@ -1,6 +1,5 @@
-package com.intel.director.api.ui;
+package com.intel.director.api;
 
-import com.intel.director.api.TrustPolicyDraft;
 import java.util.Date;
 
 public class TrustPolicyDraftFilter extends TrustPolicyDraft {
@@ -13,9 +12,11 @@ public class TrustPolicyDraftFilter extends TrustPolicyDraft {
 
     protected Date to_edited_date;
 
+    public String image_id;
+
     public String image_name;
 
-    public String format;
+    public String image_format;
 
     public String image_deployments;
 
@@ -25,6 +26,14 @@ public class TrustPolicyDraftFilter extends TrustPolicyDraft {
 
     public TrustPolicyDraftFilter() {
         super();
+    }
+
+    public String getImage_id() {
+        return image_id;
+    }
+
+    public void setImage_id(String image_id) {
+        this.image_id = image_id;
     }
 
     public Date getFrom_created_date() {
@@ -67,12 +76,12 @@ public class TrustPolicyDraftFilter extends TrustPolicyDraft {
         this.image_name = image_name;
     }
 
-    public String getFormat() {
-        return format;
+    public String getImage_format() {
+        return image_format;
     }
 
-    public void setFormat(String format) {
-        this.format = format;
+    public void setImage_format(String image_format) {
+        this.image_format = image_format;
     }
 
     public String getImage_deployments() {

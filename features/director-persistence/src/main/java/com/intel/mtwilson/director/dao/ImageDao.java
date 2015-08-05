@@ -7,18 +7,19 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.director.api.ImageAttributeFields;
-import com.intel.director.api.ui.ImageAttributesFilter;
-import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ImageInfoFields;
+import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
+import com.intel.director.api.ui.SearchImageByPolicyCriteria;
+import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -83,92 +84,123 @@ public class ImageDao {
         }
     }
 
-    public List<MwImage> findMwImageEntities(ImageAttributesFilter imgFilter,
-            ImageAttributesOrderBy orderBy) throws DbException {
+    public List<ImageInfo> findMwImageEntities(ImageInfoFilter imgFilter,
+            ImageInfoOrderBy orderBy) throws DbException {
         return findMwImageEntities(true, -1, -1, imgFilter, orderBy);
     }
 
-    public List<MwImage> findMwImageEntities(int firstResult, int maxResults,
-            ImageAttributesFilter imgFilter,
-            ImageAttributesOrderBy orderBy) throws DbException {
+    public List<ImageInfo> findMwImageEntities(int firstResult, int maxResults,
+            ImageInfoFilter imgFilter,
+            ImageInfoOrderBy orderBy) throws DbException {
         return findMwImageEntities(false, firstResult, maxResults, imgFilter,
                 orderBy);
     }
 
-    private List<MwImage> findMwImageEntities(boolean all, int firstResult,
-            int maxResults, ImageAttributesFilter imgFilter,
-            ImageAttributesOrderBy orderBy) throws DbException {
+    private List<ImageInfo> findMwImageEntities(boolean all, int firstResult,
+            int maxResults, ImageInfoFilter imgFilter,
+            ImageInfoOrderBy orderBy) throws DbException {
         EntityManager em = getEntityManager();
         try {
-            CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-            CriteriaQuery<MwImage> cq = criteriaBuilder
-                    .createQuery(MwImage.class);
 
-            Root<MwImage> root = cq.from(MwImage.class);
+            Map<ImageInfoFields, String> imageInfotoDataMapper = mapper.getImageInfoToDataColumnsMapper();
 
-            Map<ImageAttributeFields, String> imageAttributestoDataMapper = mapper.getImageAttributesToDataMapper();
+            StringBuffer queryString = new StringBuffer("select id,name,image_format,image_deployments,created_by_user_id,created_date,"
+                    + "location,mounted_by_user_id,sent,status,edited_by_user_id,edited_date,deleted,"
+                    + "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count from mw_image_info_view where 1=1");
 
             if (imgFilter != null) {
-                List<Predicate> predicates = new ArrayList<Predicate>();
                 if (imgFilter.getId() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.ID)),
-                            "%" + imgFilter.getId() + "%"));
+                    queryString.append(" and id like '%" + imgFilter.getId() + "%'");
                 }
-                if (imgFilter.getImage_deployments() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_DEPLOYMENTS)),
-                            "%" + imgFilter.getImage_deployments() + "%"));
-                }
+
                 if (imgFilter.getImage_format() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_FORMAT)),
-                            "%" + imgFilter.getImage_format() + "%"));
+                    queryString.append(" and image_format like '%" + imgFilter.getImage_format() + "%'");
                 }
                 if (imgFilter.getName() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.NAME)),
-                            "%" + imgFilter.getName() + "%"));
+                    queryString.append(" and name like '%" + imgFilter.getName() + "%'");
                 }
-
+                if (imgFilter.getImage_deployments() != null) {
+                    queryString.append(" and image_deployments like '%" + imgFilter.getImage_deployments() + "%'");
+                }
                 if (imgFilter.getCreated_by_user_id() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_BY_USER_ID)),
-                            imgFilter.getCreated_by_user_id()));
-                }
-
-                if (imgFilter.getEdited_by_user_id() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.EDITED_BY_USER_ID)),
-                            imgFilter.getEdited_by_user_id()));
+                    queryString.append(" and created_by_user_id like '%" + imgFilter.getCreated_by_user_id() + "%'");
                 }
 
                 if (imgFilter.getFrom_created_date() != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.<java.sql.Date>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_DATE)), new java.sql.Date(imgFilter.getFrom_created_date().getTime())));
+                    queryString.append(" and  created_date >=  '" + (new java.sql.Date(imgFilter.getFrom_created_date().getTime())) + "'");
+                    ///	predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getFrom_created_date().getTime()) ));
                 }
                 if (imgFilter.getTo_created_date() != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.<java.sql.Date>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_DATE)), new java.sql.Date(imgFilter.getTo_created_date().getTime())));
+                    queryString.append(" and  created_date <=  '" + (new java.sql.Date(imgFilter.getTo_created_date().getTime())) + "'");
+                    ///	predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getTo_created_date().getTime()) ));
                 }
 
-                cq.where(criteriaBuilder.and(predicates.toArray(new Predicate[]{})));
+                if (imgFilter.getPolicyCriteria() != null) {
+                    if (imgFilter.getPolicyCriteria() == SearchImageByPolicyCriteria.WITH) {
+                        queryString.append(" and trust_policy_id is not NULL");
+                    } else if (imgFilter.getPolicyCriteria() == SearchImageByPolicyCriteria.WITHOUT) {
+                        queryString.append(" and trust_policy_id is NULL");
+                    }
+                }
+
+                if (imgFilter.getUploadCriteria() != null) {
+                    if (imgFilter.getUploadCriteria() == SearchImageByUploadCriteria.UPLOADED) {
+                        queryString.append(" and image_upload_count>0");
+                    } else if (imgFilter.getUploadCriteria() == SearchImageByUploadCriteria.NOT_UPLOADED) {
+                        queryString.append(" and image_upload_count=0");
+                    }
+                }
             }
 
             if (orderBy != null) {
                 if ((OrderByEnum.ASC) == (orderBy.getOrderBy())) {
-                    cq.orderBy(criteriaBuilder.asc(root.get(imageAttributestoDataMapper.get(orderBy.getImgFields()))));
+                    queryString.append(" order by " + imageInfotoDataMapper.get(orderBy.getImgFields()) + "  ASC");
+
                 } else if ((OrderByEnum.DESC) == (orderBy.getOrderBy())) {
-                    cq.orderBy(criteriaBuilder.desc(root.get(imageAttributestoDataMapper.get(orderBy.getImgFields()))));
+                    queryString.append(" order by " + imageInfotoDataMapper.get(orderBy.getImgFields()) + "  DESC");
                 }
             }
-
-            Query q = em.createQuery(cq);
 
             if (!all) {
-                if (firstResult != 0) {
-                    q.setFirstResult(firstResult);
-                }
                 if (maxResults != 0) {
-                    q.setMaxResults(maxResults);
+                    queryString.append(" limit " + maxResults + " ");
+                }
+                if (firstResult != 0) {
+                    queryString.append(" offset " + firstResult + " ");
                 }
 
-                q.setMaxResults(maxResults);
-                q.setFirstResult(firstResult);
             }
-            return q.getResultList();
+
+            Query query = emf.createEntityManager().createNativeQuery(queryString.toString());
+            List<ImageInfo> imageInfoList = new ArrayList<ImageInfo>();
+            List<Object[]> imageObjList = query.getResultList();
+            for (Object[] imageObj : imageObjList) {
+                ImageInfo imgInfo = new ImageInfo();
+
+                imgInfo.setId((String) imageObj[0]);
+                imgInfo.setName((String) imageObj[1]);
+                imgInfo.setImage_format((String) imageObj[2]);
+                imgInfo.setImage_deployments((String) imageObj[3]);
+                imgInfo.setCreated_by_user_id((String) imageObj[4]);
+                imgInfo.setCreated_date((java.sql.Date) imageObj[5]);
+                imgInfo.setLocation((String) imageObj[6]);
+                imgInfo.setMounted_by_user_id((String) imageObj[7]);
+                imgInfo.setSent((Integer) imageObj[8]);
+                imgInfo.setStatus((String) imageObj[9]);
+                imgInfo.setEdited_by_user_id((String) imageObj[10]);
+                imgInfo.setEdited_date((java.sql.Date) imageObj[11]);
+                imgInfo.setDeleted((Boolean) imageObj[12]);
+
+                imgInfo.setTrust_policy_id((String) imageObj[13]);
+                imgInfo.setTrust_policy_name((String) imageObj[14]);
+                imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
+                imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
+                imgInfo.setUploads_count(((Long) imageObj[17]).intValue());
+                imageInfoList.add(imgInfo);
+            }
+
+            return imageInfoList;
+
         } catch (Exception e) {
             throw new DbException("ImageDao,findMwImageEntities failed", e);
         } finally {
@@ -176,15 +208,46 @@ public class ImageDao {
         }
     }
 
-    public MwImage findMwImage(String id) throws DbException {
+    public ImageInfo findMwImage(String id) throws DbException {
         EntityManager em = getEntityManager();
         try {
-            return em.find(MwImage.class, id);
+            MwImage mwImage = em.find(MwImage.class, id);
+            ImageInfo imgInfo = new ImageInfo();
+
+            imgInfo.setId(mwImage.getId());
+            imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
+            imgInfo.setImage_format(mwImage.getImageFormat());
+            imgInfo.setName(mwImage.getName());;
+            imgInfo.setMounted_by_user_id(mwImage.getMountedByUserId());
+            imgInfo.setLocation(mwImage.getLocation());
+            imgInfo.setDeleted(mwImage.isDeleted());
+            imgInfo.setCreated_by_user_id(mwImage.getCreatedByUserId());
+            imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
+            imgInfo.setCreated_date(mwImage.getCreatedDate());
+            imgInfo.setEdited_date(mwImage.getEditedDate());
+            imgInfo.setImage_size(mwImage.getContentlength());
+            imgInfo.setStatus(mwImage.getStatus());
+            imgInfo.setSent(mwImage.getSent());
+            if (mwImage.getTrustPolicy() != null) {
+                imgInfo.setTrust_policy_draft_id(mwImage.getTrustPolicy()
+                        .getId());
+                imgInfo.setTrust_policy_draft_name(mwImage.getTrustPolicy()
+                        .getName());
+            }
+            if (mwImage.getTrustPolicy() != null) {
+                imgInfo.setTrust_policy_id(mwImage.getTrustPolicyDraft()
+                        .getId());
+                imgInfo.setTrust_policy_name(mwImage.getTrustPolicyDraft()
+                        .getName());
+            }
+
+            return imgInfo;
         } catch (Exception e) {
             throw new DbException("ImageDao,findMwImage() failed", e);
         } finally {
             em.close();
         }
+
     }
 
     public int getMwImageCount() throws DbException {
@@ -203,58 +266,59 @@ public class ImageDao {
         }
     }
 
-    public int getMwImageCount(ImageAttributesFilter imgFilter) throws DbException {
+    public int getMwImageCount(ImageInfoFilter imgFilter) throws DbException {
         EntityManager em = getEntityManager();
         try {
-            CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-            CriteriaQuery<Long> cq = criteriaBuilder
-                    .createQuery(Long.class);
-
-            Root<MwImage> root = cq.from(MwImage.class);
-            cq.select(em.getCriteriaBuilder().count(root));
-
-            Map<ImageAttributeFields, String> imageAttributestoDataMapper = mapper.getImageAttributesToDataMapper();
+            StringBuffer queryString = new StringBuffer("select count(*) from mw_image_info_view where 1=1");
 
             if (imgFilter != null) {
-                List<Predicate> predicates = new ArrayList<Predicate>();
                 if (imgFilter.getId() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.ID)),
-                            "%" + ImageAttributeFields.ID + "%"));
-                }
-                if (imgFilter.getImage_deployments() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_DEPLOYMENTS)),
-                            "%" + imgFilter.getImage_deployments() + "%"));
-                }
-                if (imgFilter.getImage_format() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.IMAGE_FORMAT)),
-                            "%" + imgFilter.getImage_format() + "%"));
-                }
-                if (imgFilter.getName() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.NAME)),
-                            "%" + imgFilter.getName() + "%"));
-                }
-                if (imgFilter.getCreated_by_user_id() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_BY_USER_ID)),
-                            imgFilter.getCreated_by_user_id()));
+                    queryString.append(" and id like '%" + imgFilter.getId() + "%'");
                 }
 
-                if (imgFilter.getEdited_by_user_id() != null) {
-                    predicates.add(criteriaBuilder.like(root.<String>get(imageAttributestoDataMapper.get(ImageAttributeFields.EDITED_BY_USER_ID)),
-                            imgFilter.getEdited_by_user_id()));
+                if (imgFilter.getImage_format() != null) {
+                    queryString.append(" and image_format like '%" + imgFilter.getImage_format() + "%'");
+                }
+                if (imgFilter.getName() != null) {
+                    queryString.append(" and name like '%" + imgFilter.getName() + "%'");
+                }
+                if (imgFilter.getImage_deployments() != null) {
+                    queryString.append(" and image_deployments like '%" + imgFilter.getImage_deployments() + "%'");
+                }
+                if (imgFilter.getCreated_by_user_id() != null) {
+                    queryString.append(" and created_by_user_id like '%" + imgFilter.getCreated_by_user_id() + "%'");
                 }
 
                 if (imgFilter.getFrom_created_date() != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.<java.sql.Date>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_DATE)), new java.sql.Date(imgFilter.getFrom_created_date().getTime())));
+                    queryString.append(" and  created_date >=  '" + (new java.sql.Date(imgFilter.getFrom_created_date().getTime())) + "'");
+                    ///	predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getFrom_created_date().getTime()) ));
                 }
                 if (imgFilter.getTo_created_date() != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.<java.sql.Date>get(imageAttributestoDataMapper.get(ImageAttributeFields.CREATED_DATE)), new java.sql.Date(imgFilter.getTo_created_date().getTime())));
+                    queryString.append(" and  created_date <=  '" + (new java.sql.Date(imgFilter.getTo_created_date().getTime())) + "'");
+                    ///	predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getTo_created_date().getTime()) ));
                 }
 
-                cq.where(criteriaBuilder.and(predicates.toArray(new Predicate[]{})));
+                if (imgFilter.getPolicyCriteria() != null) {
+                    if (imgFilter.getPolicyCriteria() == SearchImageByPolicyCriteria.WITH) {
+                        queryString.append(" and trust_policy_id is not NULL");
+                    } else if (imgFilter.getPolicyCriteria() == SearchImageByPolicyCriteria.WITHOUT) {
+                        queryString.append(" and trust_policy_id is NULL");
+                    }
+                }
+
+                if (imgFilter.getUploadCriteria() != null) {
+                    if (imgFilter.getUploadCriteria() == SearchImageByUploadCriteria.UPLOADED) {
+                        queryString.append(" and image_upload_count>0");
+                    } else if (imgFilter.getUploadCriteria() == SearchImageByUploadCriteria.NOT_UPLOADED) {
+                        queryString.append(" and image_upload_count=0");
+                    }
+                }
             }
 
-            Query q = em.createQuery(cq);
-            return ((Long) q.getSingleResult()).intValue();
+            Query query = emf.createEntityManager().createNativeQuery(queryString.toString());
+
+            return ((Long) query.getSingleResult()).intValue();
+
         } catch (Exception e) {
             throw new DbException("ImageDao,getMwImageCount(imageFilter) failed", e);
         } finally {

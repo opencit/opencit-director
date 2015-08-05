@@ -3,14 +3,15 @@ package com.intel.mtwilson.director.dbservice;
 import java.util.List;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ui.ImageAttributesFilter;
-import com.intel.director.api.ui.ImageAttributesOrderBy;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
@@ -30,29 +31,29 @@ public interface IPersistService {
 
     public abstract void updateImage(ImageAttributes img) throws DbException;
 
-    public abstract List<ImageAttributes> fetchImages(
-            ImageAttributesFilter imgFilter, ImageAttributesOrderBy orderBy)
+    public abstract List<ImageInfo> fetchImages(
+            ImageInfoFilter imgFilter, ImageInfoOrderBy orderBy)
             throws DbException;
 
-    public abstract List<ImageAttributes> fetchImages(
-            ImageAttributesFilter imgFilter, ImageAttributesOrderBy orderBy,
+    public abstract List<ImageInfo> fetchImages(
+            ImageInfoFilter imgFilter, ImageInfoOrderBy orderBy,
             int firstRecord, int maxRecords) throws DbException;
 
-    public abstract ImageAttributes fetchImageById(String id)
+    public abstract ImageInfo fetchImageById(String id)
             throws DbException;
 
     public abstract void destroyImage(ImageAttributes img) throws DbException;
 
     public abstract int getTotalImagesCount() throws DbException;
 
-    public abstract int getTotalImagesCount(ImageAttributesFilter imgFilter)
+    public abstract int getTotalImagesCount(ImageInfoFilter imgFilter)
             throws DbException;
 
-    public abstract List<ImageAttributes> fetchImages(
-            ImageAttributesOrderBy orderBy) throws DbException;
+    public abstract List<ImageInfo> fetchImages(
+            ImageInfoOrderBy orderBy) throws DbException;
 
-    public abstract List<ImageAttributes> fetchImages(
-            ImageAttributesOrderBy orderBy, int firstRecord, int maxRecords)
+    public abstract List<ImageInfo> fetchImages(
+            ImageInfoOrderBy orderBy, int firstRecord, int maxRecords)
             throws DbException;
 
     public abstract TrustPolicy fetchPolicyForImage(String imageId)

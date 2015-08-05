@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ImageInfoFields;
 import com.intel.director.api.ImageStoreUploadFields;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
@@ -36,12 +38,40 @@ public class Mapper {
             imageAttributestoDataMapper.put(ImageAttributeFields.IMAGE_SIZE, "contentlength");
             imageAttributestoDataMapper.put(ImageAttributeFields.LOCATION, "location");
             imageAttributestoDataMapper.put(ImageAttributeFields.MOUNTED_BY_USER_ID, "mountedByUserId");
-            imageAttributestoDataMapper.put(ImageAttributeFields.CREATED_BY_USER_ID, "createByUserId");
+            imageAttributestoDataMapper.put(ImageAttributeFields.CREATED_BY_USER_ID, "createdByUserId");
             imageAttributestoDataMapper.put(ImageAttributeFields.CREATED_DATE, "createdDate");
             imageAttributestoDataMapper.put(ImageAttributeFields.EDITED_BY_USER_ID, "editedByUserId");
             imageAttributestoDataMapper.put(ImageAttributeFields.EDITED_DATE, "editedDate");
         }
         return imageAttributestoDataMapper;
+    }
+
+    Map<ImageInfoFields, String> imageInfotoDataMapper;
+
+    public Map<ImageInfoFields, String> getImageInfoToDataColumnsMapper() {
+
+        if (imageAttributestoDataMapper == null) {
+            imageInfotoDataMapper = new EnumMap<ImageInfoFields, String>(ImageInfoFields.class);
+            imageInfotoDataMapper.put(ImageInfoFields.ID, "id");
+            imageInfotoDataMapper.put(ImageInfoFields.NAME, "name");
+            imageInfotoDataMapper.put(ImageInfoFields.IMAGE_DEPLOYMENTS, "image_deployments");
+            imageInfotoDataMapper.put(ImageInfoFields.IMAGE_FORMAT, "image_format");
+            imageInfotoDataMapper.put(ImageInfoFields.SENT, "sent");
+            imageInfotoDataMapper.put(ImageInfoFields.STATUS, "status");
+            imageInfotoDataMapper.put(ImageInfoFields.IMAGE_SIZE, "content_length");
+            imageInfotoDataMapper.put(ImageInfoFields.LOCATION, "location");
+            imageInfotoDataMapper.put(ImageInfoFields.MOUNTED_BY_USER_ID, "mountedByUserId");
+            imageInfotoDataMapper.put(ImageInfoFields.CREATED_BY_USER_ID, "created_by_user_id");
+            imageInfotoDataMapper.put(ImageInfoFields.CREATED_DATE, "created_date");
+            imageInfotoDataMapper.put(ImageInfoFields.EDITED_BY_USER_ID, "edited_by_user_id");
+            imageInfotoDataMapper.put(ImageInfoFields.EDITED_DATE, "edited_date");
+            imageInfotoDataMapper.put(ImageInfoFields.TRUST_POLICY_ID, "trust_policy_id");
+            imageInfotoDataMapper.put(ImageInfoFields.TRUST_POLICY_NAME, "trust_policy_name");
+            imageInfotoDataMapper.put(ImageInfoFields.TRUST_POLICY_DRAFT_ID, "trust_policy_draft_id");
+            imageInfotoDataMapper.put(ImageInfoFields.TRUST_POLICY_DRAFT_NAME, "trust_policy_name");
+
+        }
+        return imageInfotoDataMapper;
     }
 
     Map<UserFields, String> userAttributestoDataMapper;
@@ -74,6 +104,7 @@ public class Mapper {
             policyAttributestoDataMapper.put(TrustPolicyFields.EDITED_BY_USER_ID, "editedByUserId");
             policyAttributestoDataMapper.put(TrustPolicyFields.EDITED_DATE, "editedDate");
 
+            policyAttributestoDataMapper.put(TrustPolicyFields.IMAGE_ID, "id");
             policyAttributestoDataMapper.put(TrustPolicyFields.IMAGE_NAME, "name");
             policyAttributestoDataMapper.put(TrustPolicyFields.IMAGE_CREATION_DATE, "createdDate");
             policyAttributestoDataMapper.put(TrustPolicyFields.IMAGE_FORMAT, "imageFormat");
@@ -91,11 +122,11 @@ public class Mapper {
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.ID, "id");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.TRUST_POLICY_DRAFT, "trustPolicyDraft");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.NAME, "name");
-            policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.CREATED_BY_USER_ID, "createByUserId");
+            policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.CREATED_BY_USER_ID, "createdByUserId");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.CREATED_DATE, "createdDate");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.EDITED_BY_USER_ID, "editedByUserId");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.EDITED_DATE, "editedDate");
-
+            policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.IMAGE_ID, "id");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.IMAGE_NAME, "name");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.IMAGE_CREATION_DATE, "createdDate");
             policyDraftAttributestoDataMapper.put(TrustPolicyDraftFields.IMAGE_FORMAT, "imageFormat");
@@ -118,7 +149,7 @@ public class Mapper {
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.STATUS, "status");
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.IMAGE_SIZE, "contentlength");
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.SENT, "sent");
-
+            imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.IMAGE_ID, "id");
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.IMAGE_NAME, "name");
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.IMAGE_CREATION_DATE, "createdDate");
             imageUploadtAttributestoDataMapper.put(ImageStoreUploadFields.IMAGE_FORMAT, "imageFormat");
@@ -138,6 +169,7 @@ public class Mapper {
         mwImage.setName(imgAttributes.getName());
         mwImage.setId(imgAttributes.getId());
         mwImage.setStatus(imgAttributes.getStatus());
+        mwImage.setSent(imgAttributes.getSent());
         mwImage.setCreatedByUserId(imgAttributes.getCreated_by_user_id());
         mwImage.setEditedByUserId(imgAttributes.getEdited_by_user_id());
         if (imgAttributes.getCreated_date() != null) {
@@ -150,8 +182,8 @@ public class Mapper {
         return mwImage;
     }
 
-    public ImageAttributes toTransferObject(MwImage mwImage) {
-        ImageAttributes imgAttributes = new ImageAttributes();
+    public ImageInfo toTransferObject(MwImage mwImage) {
+        ImageInfo imgAttributes = new ImageInfo();
 
         imgAttributes.setId(mwImage.getId());
         imgAttributes.setImage_deployments(mwImage.getImageDeploymentType());
@@ -166,6 +198,7 @@ public class Mapper {
         imgAttributes.setEdited_date(mwImage.getEditedDate());
         imgAttributes.setImage_size(mwImage.getContentlength());
         imgAttributes.setStatus(mwImage.getStatus());
+        imgAttributes.setSent(mwImage.getSent());
         return imgAttributes;
     }
 
@@ -197,7 +230,7 @@ public class Mapper {
 
         mwTrustPolicy.setName(mwTrustPolicy.getName());
         MwImage mwImage = toData(trustPolicy.getImgAttributes());
-        mwTrustPolicy.setTrustPolicy(toCharacterArray(trustPolicy.getTrust_policy()));
+        mwTrustPolicy.setTrustPolicy(toCharacterArray((trustPolicy.getTrust_policy())));
         mwTrustPolicy.setImage(mwImage);
         mwTrustPolicy.setDescription(trustPolicy.getDescription());
         mwTrustPolicy.setCreatedByUserId(trustPolicy.getCreated_by_user_id());
@@ -216,7 +249,7 @@ public class Mapper {
         TrustPolicy trustPolicy = new TrustPolicy();
         trustPolicy.setId(mwTrustPolicy.getId());
         trustPolicy.setDescription(mwTrustPolicy.getDescription());
-        trustPolicy.setTrust_policy(mwTrustPolicy.getTrustPolicy().toString());
+        trustPolicy.setTrust_policy(fromCharacterArray(mwTrustPolicy.getTrustPolicy()));
         trustPolicy.setName(mwTrustPolicy.getName());
         ImageAttributes imgAttributes = toTransferObject(mwTrustPolicy.getImage());
         trustPolicy.setImgAttributes(imgAttributes);
@@ -252,7 +285,7 @@ public class Mapper {
     public TrustPolicyDraft toTransferObject(MwTrustPolicyDraft mwTrustPolicyDraft) {
         TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
         trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
-        trustPolicyDraft.setTrust_policy_draft(mwTrustPolicyDraft.getTrustPolicyDraft().toString());
+        trustPolicyDraft.setTrust_policy_draft(fromCharacterArray(mwTrustPolicyDraft.getTrustPolicyDraft()));
         trustPolicyDraft.setName(mwTrustPolicyDraft.getName());
         ImageAttributes imgAttributes = toTransferObject(mwTrustPolicyDraft.getImage());
         trustPolicyDraft.setImgAttributes(imgAttributes);
@@ -292,7 +325,7 @@ public class Mapper {
         imageStoreUploadTO.setSent(mwImageUpload.getSent());
         imageStoreUploadTO.setStatus(mwImageUpload.getStatus());
 
-        imageStoreUploadTO.setImage_uri(mwImageUpload.getImageUri().toString());
+        imageStoreUploadTO.setImage_uri(fromCharacterArray(mwImageUpload.getImageUri()));
         ImageAttributes imgAttributes = toTransferObject(mwImageUpload.getImage());
         imageStoreUploadTO.setImg(imgAttributes);
         return imageStoreUploadTO;
@@ -307,6 +340,16 @@ public class Mapper {
 
         }
         return characters;
+    }
+
+    public String fromCharacterArray(Character[] chars) {
+        StringBuilder sb = new StringBuilder(chars.length);
+        for (Character c : chars) {
+            sb.append(c.charValue());
+        }
+
+        String str = sb.toString();
+        return str;
     }
 
 }

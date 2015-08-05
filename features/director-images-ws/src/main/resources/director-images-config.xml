@@ -11,5 +11,7 @@
 
     <bean id="imagesBean" class="com.intel.director.images.Images"/>
     <bean id="imageServiceBean"  class="com.intel.director.service.impl.ImageServiceImpl"/>
-    <bean id="imagePersistenceManagerBean"  class="com.intel.director.persistence.impl.ImagePersistenceManagerImpl"/>
+    <bean id="imagePersistenceManagerBean"  class="com.intel.mtwilson.director.dbservice.DbServiceImpl"/>
+    <bean id="imageStoreBean"  class="com.intel.director.service.impl.ImageStoreManagerImpl"/>
+    <bean id="lookupServiceBean"  class="com.intel.director.service.impl.LookupServiceImpl"/>
 </beans>

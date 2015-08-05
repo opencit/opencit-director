@@ -29,14 +29,6 @@ public class ImageAttributes extends AuditFields {
         super();
     }
 
-    public String getImage_format() {
-        return image_format;
-    }
-
-    public void setImage_format(String image_format) {
-        this.image_format = image_format;
-    }
-
     public ImageAttributes(String created_by_user_id, Date created_date,
             String edited_by_user_id, Date edited_date, String id, String name,
             String format, String image_deployments, String status,
@@ -75,12 +67,17 @@ public class ImageAttributes extends AuditFields {
 
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public String toString() {
+        return "ImageAttributes [id=" + id + ", name=" + name + ", format="
+                + image_format + ", image_deployments=" + image_deployments
+                + ", status=" + status + ", image_size=" + image_size
+                + ", sent=" + sent + ", mounted_by_user_id="
+                + mounted_by_user_id + ", deleted=" + deleted + ", location="
+                + location + ", content_length="
+                + ", created_by_user_id=" + created_by_user_id
+                + ", created_date=" + created_date + ", edited_by_user_id="
+                + edited_by_user_id + ", edited_date=" + edited_date + "]";
     }
 
     public String getId() {
@@ -89,6 +86,22 @@ public class ImageAttributes extends AuditFields {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getImage_format() {
+        return image_format;
+    }
+
+    public void setImage_format(String image_format) {
+        this.image_format = image_format;
     }
 
     public String getImage_deployments() {
@@ -123,12 +136,12 @@ public class ImageAttributes extends AuditFields {
         this.sent = sent;
     }
 
-    public String getLocation() {
-        return location;
+    public String getMounted_by_user_id() {
+        return mounted_by_user_id;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setMounted_by_user_id(String mounted_by_user_id) {
+        this.mounted_by_user_id = mounted_by_user_id;
     }
 
     public boolean isDeleted() {
@@ -139,25 +152,12 @@ public class ImageAttributes extends AuditFields {
         this.deleted = deleted;
     }
 
-    public String getMounted_by_user_id() {
-        return mounted_by_user_id;
+    public String getLocation() {
+        return location;
     }
 
-    public void setMounted_by_user_id(String mounted_by_user_id) {
-        this.mounted_by_user_id = mounted_by_user_id;
-    }
-
-    @Override
-    public String toString() {
-        return "ImageAttributes [id=" + id + ", name=" + name + ", format="
-                + image_format + ", image_deployments=" + image_deployments
-                + ", status=" + status + ", image_size=" + image_size
-                + ", sent=" + sent + ", mounted_by_user_id="
-                + mounted_by_user_id + ", deleted=" + deleted + ", location="
-                + location + ", content_length="
-                + ", created_by_user_id=" + created_by_user_id
-                + ", created_date=" + created_date + ", edited_by_user_id="
-                + edited_by_user_id + ", edited_date=" + edited_date + "]";
+    public void setLocation(String location) {
+        this.location = location;
     }
 
 }

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.TrustPolicyDraftFields;
-import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
@@ -48,7 +48,8 @@ public class TrustPolicyDraftDao {
         try {
 
             em.getTransaction().begin();
-            MwImage mwImage = trustPolicyDraft.getImage();
+            String imageId = trustPolicyDraft.getImage().getId();
+            MwImage mwImage = em.find(MwImage.class, imageId);
             trustPolicyDraft.setId((new UUID()).toString());
             mwImage.setTrustPolicyDraft(trustPolicyDraft);
             em.merge(mwImage);
@@ -66,7 +67,8 @@ public class TrustPolicyDraftDao {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            MwImage mwImage = trustPolicyDraft.getImage();
+            String imageId = trustPolicyDraft.getImage().getId();
+            MwImage mwImage = em.find(MwImage.class, imageId);
             mwImage.setTrustPolicyDraft(trustPolicyDraft);
             em.merge(trustPolicyDraft);
             em.merge(mwImage);
@@ -139,9 +141,14 @@ public class TrustPolicyDraftDao {
                             "%" + trustPolicyDraftFilter.getImage_name() + "%"));
                 }
 
-                if (trustPolicyDraftFilter.getFormat() != null) {
+                if (trustPolicyDraftFilter.getImage_format() != null) {
                     predicates.add(criteriaBuilder.like(mwImage.<String>get(policyAttributestoDataMapper.get(TrustPolicyDraftFields.IMAGE_FORMAT)),
-                            "%" + trustPolicyDraftFilter.getFormat() + "%"));
+                            "%" + trustPolicyDraftFilter.getImage_format() + "%"));
+                }
+
+                if (trustPolicyDraftFilter.getImage_id() != null) {
+                    predicates.add(criteriaBuilder.like(mwImage.<String>get(policyAttributestoDataMapper.get(TrustPolicyDraftFields.IMAGE_ID)),
+                            "%" + trustPolicyDraftFilter.getImage_id() + "%"));
                 }
 
                 if (trustPolicyDraftFilter.getCreated_by_user_id() != null) {
@@ -219,7 +226,7 @@ public class TrustPolicyDraftDao {
             }
             return trustPolicyDraftList;
         } catch (Exception e) {
-            throw new DbException("TrustPolicyDao,findMwTrustPolicyEntities failed", e);
+            throw new DbException("TrustPolicyDraftDao,findMwTrustPolicyDraftEntities failed", e);
         } finally {
             em.close();
         }
@@ -281,9 +288,14 @@ public class TrustPolicyDraftDao {
                             "%" + trustPolicyDraftFilter.getImage_name() + "%"));
                 }
 
-                if (trustPolicyDraftFilter.getFormat() != null) {
+                if (trustPolicyDraftFilter.getImage_format() != null) {
                     predicates.add(criteriaBuilder.like(mwImage.<String>get(policyAttributestoDataMapper.get(TrustPolicyDraftFields.IMAGE_FORMAT)),
-                            "%" + trustPolicyDraftFilter.getFormat() + "%"));
+                            "%" + trustPolicyDraftFilter.getImage_format() + "%"));
+                }
+
+                if (trustPolicyDraftFilter.getImage_id() != null) {
+                    predicates.add(criteriaBuilder.like(mwImage.<String>get(policyAttributestoDataMapper.get(TrustPolicyDraftFields.IMAGE_ID)),
+                            "%" + trustPolicyDraftFilter.getImage_id() + "%"));
                 }
 
                 if (trustPolicyDraftFilter.getCreated_by_user_id() != null) {

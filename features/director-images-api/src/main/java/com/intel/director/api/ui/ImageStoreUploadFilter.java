@@ -9,6 +9,28 @@ public class ImageStoreUploadFilter extends ImageStoreUploadTransferObject {
 
     protected Date to_date;
 
+    protected String image_id;
+
+    protected String image_name;
+
+    protected String image_format;
+
+    public String getImage_name() {
+        return image_name;
+    }
+
+    public void setImage_name(String image_name) {
+        this.image_name = image_name;
+    }
+
+    public String getImage_format() {
+        return image_format;
+    }
+
+    public void setImage_format(String image_format) {
+        this.image_format = image_format;
+    }
+
     public Date getFrom_date() {
         return from_date;
     }
@@ -25,15 +47,12 @@ public class ImageStoreUploadFilter extends ImageStoreUploadTransferObject {
         this.to_date = to_date;
     }
 
-    @Override
-    public String toString() {
-        return "ImageStoreUploadResponseFilter [from_date=" + from_date
-                + ", to_date=" + to_date + ", id=" + id + ", image_id="
-                + image_id + ", trust_policy_id="
-                + ", image_uri=" + image_uri + ", date=" + date
-                + ", tmp_location=" + tmp_location + ", checksum=" + checksum
-                + ", status=" + status + ", image_size=" + image_size
-                + ", sent=" + sent + "]";
+    public String getImage_id() {
+        return image_id;
+    }
+
+    public void setImage_id(String image_id) {
+        this.image_id = image_id;
     }
 
 }

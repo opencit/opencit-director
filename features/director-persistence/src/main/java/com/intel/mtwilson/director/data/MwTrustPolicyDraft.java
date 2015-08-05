@@ -16,8 +16,7 @@ import org.eclipse.persistence.annotations.UuidGenerator;
 @Table(name = "MW_TRUST_POLICY_DRAFT")
 public class MwTrustPolicyDraft extends MwAuditable {
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "IMAGE_ID", referencedColumnName = "ID")
+    @OneToOne(mappedBy = "trustPolicyDraft", optional = false)
     private MwImage image;
 
     @Column(name = "TRUST_POLICY_DRAFT")
