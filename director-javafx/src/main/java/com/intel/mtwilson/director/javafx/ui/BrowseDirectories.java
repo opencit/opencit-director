@@ -198,7 +198,7 @@ public class BrowseDirectories {
             public void handle(ActionEvent e) {
                 DirectoryChooser directory = new DirectoryChooser();
                 directory.setInitialDirectory(new File(mountPath));
-                CheckBox checkBox = null;
+                final CheckBox checkBox;
                 try {
                     File file = directory.showDialog(primaryStage);
                     if(file == null)
@@ -207,7 +207,8 @@ public class BrowseDirectories {
                         if (!file.getAbsolutePath().equals(mountPath)) {
                             if (!isDirectoryAlreadySelected(file)) {
                                 if (isDirectoryAlreadyPresent(file)) {
-                                } else {
+                                } 
+                                else {
                                     if (mountPath != "/") {
                                         checkBox = new CheckBox(file.getAbsolutePath().replace(mountPath, ""));
                                     } else {
@@ -220,6 +221,7 @@ public class BrowseDirectories {
                                     list.clear();
                                     list.add(dir);
                                     list.addAll(tmp);
+                                    addCheckboxActionListner(checkBox);
                                 }
                             } else {
                                 new CreateImage(primaryStage).showWarningPopup("Directory Already Selected !!");
@@ -464,12 +466,11 @@ public class BrowseDirectories {
     // Check the directory is already selected or not
     private boolean isDirectoryAlreadySelected(File file) {
         boolean isSelected = false;
+        String filePath = mountPath.equals("/")?file.getAbsolutePath():file.getAbsolutePath().replace(mountPath, "");
         for (Directories testDir : list) {
-            if (file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
-                if (testDir.getCbox().isSelected()) {
-                    isSelected = true;
-                    break;
-                }
+            if (testDir.getCbox().isSelected() && !testDir.getCbox().getText().equals(filePath) && (filePath.startsWith(testDir.getCbox().getText()) || testDir.getCbox().getText().startsWith(filePath))){
+                isSelected = true;
+                break;                
             }
         }
         return isSelected;
@@ -478,8 +479,9 @@ public class BrowseDirectories {
     // Check the directory is already present or not, if present then select the directory
     private boolean isDirectoryAlreadyPresent(File file) {
         boolean isPresent = false;
+        String filePath = mountPath.equals("/")?file.getAbsolutePath():file.getAbsolutePath().replace(mountPath, "");
         for (Directories testDir : list) {
-            if (file.getAbsolutePath().replace(mountPath, "").equals(testDir.getCbox().getText())) {
+            if (filePath.equals(testDir.getCbox().getText())) {
                 isPresent = true;
                 if (!testDir.getCbox().isSelected()) {
                     testDir.getCbox().setSelected(true);
@@ -505,7 +507,25 @@ public class BrowseDirectories {
                     new Directories(new CheckBox("/bin"), new TextField()),
                     new Directories(new CheckBox("/boot"), new TextField())
             );
+            for(Directories directory:list){
+                addCheckboxActionListner(directory.getCbox());
+            }
         }
+    }
+    public void addCheckboxActionListner(final CheckBox checkBox){
+        checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) {
+                if(new_val && isDirectoryAlreadySelected(new File(checkBox.getText()))){
+                    try {
+                        checkBox.setSelected(false);
+                        new CreateImage(primaryStage).showWarningPopup("Directory Already Selected !!");
 
+                    } catch (Exception ex) {
+                        Logger.getLogger(BrowseDirectories.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
     }
 }
