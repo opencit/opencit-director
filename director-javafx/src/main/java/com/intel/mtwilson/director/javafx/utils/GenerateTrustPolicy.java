@@ -239,13 +239,13 @@ public class GenerateTrustPolicy {
             switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                 case "SHA-256":
                     log.trace("Before extending hash is: " + digestSha256.toHexString());
-                    digestSha256 = digestSha256.extend(directoryWhitelist.getValue().getBytes());
+                    digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex(directoryWhitelist.getValue()).value);
                     log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha256.toHexString());
                     break;
                 case "SHA-1":
                 default:
                     log.trace("Before extending hash is: " + digestSha1.toHexString());
-                    digestSha1 = digestSha1.extend(directoryWhitelist.getValue().getBytes());
+                    digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(directoryWhitelist.getValue()));
                     log.trace("After extending " + directoryWhitelist.getValue() + " Extended hash is::" + digestSha1.toHexString());
             }
             if (fileListForDir == null) {
@@ -270,13 +270,13 @@ public class GenerateTrustPolicy {
                 switch (getConfiguration().get(Constants.VM_WHITELIST_HASH_TYPE)) {
                     case "SHA-256":
                             log.trace("Before extending hash is: " + digestSha256.toHexString());
-                            digestSha256 = digestSha256.extend(newFile.getValue().getBytes());
+                            digestSha256 = digestSha256.extend(Sha256Digest.valueOfHex(newFile.getValue()).value);
                             log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha256.toHexString());                        
                         break;
                     case "SHA-1":
                     default:
                             log.trace("Before extending hash is: " + digestSha1.toHexString());
-                            digestSha1 = digestSha1.extend(newFile.getValue().getBytes());
+                            digestSha1 = digestSha1.extend(Sha1Digest.valueOfHex(newFile.getValue()));
                             log.trace("After extending " + newFile.getValue() + " Extended hash is::" + digestSha1.toHexString());                        
                 }
             }            
