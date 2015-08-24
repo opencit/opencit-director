@@ -11,11 +11,6 @@
     </description>
     
     <modules>
-        <module>director-maven-java</module>
-        <module>director-maven-package-makeself</module>
-        <module>director-maven-package-zip</module>
-        <module>director-maven-root</module>
-        <module>director-setup</module>
         <module>features</module>
         <module>director-common</module>
     </modules>
