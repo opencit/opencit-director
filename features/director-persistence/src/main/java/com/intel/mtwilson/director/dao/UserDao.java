@@ -15,10 +15,10 @@ import javax.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.director.api.UserFields;
+import com.intel.director.api.ui.OrderByEnum;
+import com.intel.director.api.ui.UserFields;
 import com.intel.director.api.ui.UserFilter;
 import com.intel.director.api.ui.UserOrderBy;
-import com.intel.director.api.ui.OrderByEnum;
 import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;

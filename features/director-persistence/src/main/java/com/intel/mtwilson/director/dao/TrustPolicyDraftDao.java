@@ -1,5 +1,7 @@
 package com.intel.mtwilson.director.dao;
 
+import static com.intel.dcsg.cpg.validation.RegexPatterns.UUID;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ui.OrderByEnum;
-import com.intel.director.api.TrustPolicyDraftFields;
-import com.intel.director.api.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftFields;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwTrustPolicyDraft;

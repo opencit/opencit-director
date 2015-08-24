@@ -1,6 +1,5 @@
 package com.intel.director.api.ui;
 
-import com.intel.director.api.TrustPolicyFields;
 
 public class TrustPolicyOrderBy extends OrderBy {
 

@@ -11,66 +11,71 @@ import javax.persistence.InheritanceType;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
+
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class MwAuditable {
+	
+	
+	@Id
+	@UuidGenerator(name="UUID")
+	@GeneratedValue(generator="UUID")
+  	@Column(name = "ID", length = 36)
+	protected String id;
+	
+	@Column(name = "CREATED_BY_USER_ID" , length = 36)
+	protected String createdByUserId;
+	
+	@Column(name = "CREATED_DATE" , length = 36)
+	protected Date createdDate;
+	
+	@Column(name = "EDITED_BY_USER_ID" , length = 36)
+	protected String editedByUserId;
+	
+	@Column(name = "EDITED_DATE" , length = 36)
+	protected Date editedDate;
+	
+	
+	public String getId() {
+		return id;
+	}
 
-    @Id
-    @UuidGenerator(name = "UUID")
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "ID", length = 36)
-    protected String id;
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    @Column(name = "CREATED_BY_USER_ID", length = 36)
-    protected String createdByUserId;
+	public String getCreatedByUserId() {
+		return createdByUserId;
+	}
 
-    @Column(name = "CREATED_DATE", length = 36)
-    protected Date createdDate;
+	public void setCreatedByUserId(String createdByUserId) {
+		this.createdByUserId = createdByUserId;
+	}
 
-    @Column(name = "EDITED_BY_USER_ID", length = 36)
-    protected String editedByUserId;
+	public Date getCreatedDate() {
+		return createdDate;
+	}
 
-    @Column(name = "EDITED_DATE", length = 36)
-    protected Date editedDate;
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getEditedByUserId() {
+		return editedByUserId;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setEditedByUserId(String editedByUserId) {
+		this.editedByUserId = editedByUserId;
+	}
 
-    public String getCreatedByUserId() {
-        return createdByUserId;
-    }
+	public Date getEditedDate() {
+		return editedDate;
+	}
 
-    public void setCreatedByUserId(String createdByUserId) {
-        this.createdByUserId = createdByUserId;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getEditedByUserId() {
-        return editedByUserId;
-    }
-
-    public void setEditedByUserId(String editedByUserId) {
-        this.editedByUserId = editedByUserId;
-    }
-
-    public Date getEditedDate() {
-        return editedDate;
-    }
-
-    public void setEditedDate(Date editedDate) {
-        this.editedDate = editedDate;
-    }
-
+	public void setEditedDate(Date editedDate) {
+		this.editedDate = editedDate;
+	} 
+	
+	
+	
 }

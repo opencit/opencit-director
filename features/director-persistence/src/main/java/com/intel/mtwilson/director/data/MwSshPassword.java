@@ -12,62 +12,67 @@ import javax.persistence.OneToMany;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
+
+
 @Entity
 @Table(name = "MW_SSH_PASSWORD")
 public class MwSshPassword {
+		
+		@Id
+		@UuidGenerator(name="UUID")
+		@GeneratedValue(generator="UUID")
+	  	@Column(name = "ID" , length = 36)
+		private String id;
+		
+		@Column(name = "SSH_KEY")
+		private Character[] sshKey;
+		
+		@OneToMany(mappedBy = "sshPassword")
+		private Collection<MwHost> tblMwHostCollection;
+		
+		public MwSshPassword(){
+			super();	
+		}
 
-    @Id
-    @UuidGenerator(name = "UUID")
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "ID", length = 36)
-    private String id;
+		public MwSshPassword(Character[] sshKey,
+				Collection<MwHost> tblMwHostCollection) {
+			super();
+			this.sshKey = sshKey;
+			this.tblMwHostCollection = tblMwHostCollection;
+		}
 
-    @Column(name = "SSH_KEY")
-    private Character[] sshKey;
+		public String getId() {
+			return id;
+		}
 
-    @OneToMany(mappedBy = "sshPassword")
-    private Collection<MwHost> tblMwHostCollection;
+		public void setId(String id) {
+			this.id = id;
+		}
 
-    public MwSshPassword() {
-        super();
-    }
+	
 
-    public MwSshPassword(Character[] sshKey,
-            Collection<MwHost> tblMwHostCollection) {
-        super();
-        this.sshKey = sshKey;
-        this.tblMwHostCollection = tblMwHostCollection;
-    }
+		public Character[] getSshKey() {
+			return sshKey;
+		}
 
-    public String getId() {
-        return id;
-    }
+		public void setSshKey(Character[] sshKey) {
+			this.sshKey = sshKey;
+		}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+		public Collection<MwHost> getTblMwHostCollection() {
+			return tblMwHostCollection;
+		}
 
-    public Character[] getSshKey() {
-        return sshKey;
-    }
+		public void setTblMwHostCollection(Collection<MwHost> tblMwHostCollection) {
+			this.tblMwHostCollection = tblMwHostCollection;
+		}
 
-    public void setSshKey(Character[] sshKey) {
-        this.sshKey = sshKey;
-    }
-
-    public Collection<MwHost> getTblMwHostCollection() {
-        return tblMwHostCollection;
-    }
-
-    public void setTblMwHostCollection(Collection<MwHost> tblMwHostCollection) {
-        this.tblMwHostCollection = tblMwHostCollection;
-    }
-
-    @Override
-    public String toString() {
-        return "MwSshPassword [id=" + id + ", sshKey="
-                + Arrays.toString(sshKey) + ", tblMwHostCollection="
-                + tblMwHostCollection + "]";
-    }
-
+		@Override
+		public String toString() {
+			return "MwSshPassword [id=" + id + ", sshKey="
+					+ Arrays.toString(sshKey) + ", tblMwHostCollection="
+					+ tblMwHostCollection + "]";
+		}
+		
+		
 }

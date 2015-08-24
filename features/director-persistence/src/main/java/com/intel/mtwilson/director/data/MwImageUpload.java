@@ -1,5 +1,7 @@
 package com.intel.mtwilson.director.data;
 
+
+
 import java.sql.Date;
 import java.util.Arrays;
 
@@ -14,126 +16,137 @@ import javax.persistence.OneToOne;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
+
+
 @Entity
 @Table(name = "MW_IMAGE_UPLOAD")
 public class MwImageUpload {
+		
+		@Id
+		@UuidGenerator(name="UUID")
+		@GeneratedValue(generator="UUID")
+	  	@Column(name = "ID", length = 36)
+		private String id;
+		
+		@ManyToOne(optional = false)
+		@JoinColumn(name = "IMAGE_ID", referencedColumnName = "ID")
+		private MwImage image;
 
-    @Id
-    @UuidGenerator(name = "UUID")
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "ID", length = 36)
-    private String id;
+	    
+		@Column(name = "IMAGE_URI")
+		private Character[] imageUri;
+		
+		@Column(name = "TMP_LOCATION")
+		private String tmpLocation;
+		
+		@Column(name = "CHECKSUM")
+		private String checksum;
+		
+		@Column(name = "STATUS", length = 20)
+		private String status;
+		
+		@Column(name = "DATE")
+		private Date date;
+		
+		@Column(name = "IS_TARBALL_UPLOAD")
+		private boolean isTarballUpload;
+		
+		@Column(name = "CONTENT_LENGTH")
+		public Integer contentlength;
+		
+		@Column(name = "SENT")
+		public Integer sent;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "IMAGE_ID", referencedColumnName = "ID")
-    private MwImage image;
 
-    @Column(name = "IMAGE_URI")
-    private Character[] imageUri;
+		public MwImageUpload(){
+			super();
+		}
 
-    @Column(name = "TMP_LOCATION")
-    private String tmpLocation;
+		public String getId() {
+			return id;
+		}
 
-    @Column(name = "CHECKSUM")
-    private String checksum;
+		public void setId(String id) {
+			this.id = id;
+		}
 
-    @Column(name = "STATUS", length = 20)
-    private String status;
+		public MwImage getImage() {
+			return image;
+		}
 
-    @Column(name = "DATE")
-    private Date date;
 
-    @Column(name = "IS_TARBALL_UPLOAD")
-    private boolean isTarballUpload;
+		public void setImage(MwImage image) {
+			this.image = image;
+		}
 
-    @Column(name = "CONTENT_LENGTH")
-    public Integer contentlength;
 
-    @Column(name = "SENT")
-    public Integer sent;
+	
 
-    public MwImageUpload() {
-        super();
-    }
+		public Character[] getImageUri() {
+			return imageUri;
+		}
 
-    public String getId() {
-        return id;
-    }
+		public void setImageUri(Character[] imageUri) {
+			this.imageUri = imageUri;
+		}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+		public String getTmpLocation() {
+			return tmpLocation;
+		}
 
-    public MwImage getImage() {
-        return image;
-    }
+		public void setTmpLocation(String tmpLocation) {
+			this.tmpLocation = tmpLocation;
+		}
 
-    public void setImage(MwImage image) {
-        this.image = image;
-    }
+		public String getChecksum() {
+			return checksum;
+		}
 
-    public Character[] getImageUri() {
-        return imageUri;
-    }
+		public void setChecksum(String checksum) {
+			this.checksum = checksum;
+		}
 
-    public void setImageUri(Character[] imageUri) {
-        this.imageUri = imageUri;
-    }
+		public String getStatus() {
+			return status;
+		}
 
-    public String getTmpLocation() {
-        return tmpLocation;
-    }
+		public void setStatus(String status) {
+			this.status = status;
+		}
 
-    public void setTmpLocation(String tmpLocation) {
-        this.tmpLocation = tmpLocation;
-    }
+		public Date getDate() {
+			return date;
+		}
 
-    public String getChecksum() {
-        return checksum;
-    }
+		public void setDate(Date date) {
+			this.date = date;
+		}
 
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
+		public boolean isTarballUpload() {
+			return isTarballUpload;
+		}
 
-    public String getStatus() {
-        return status;
-    }
+		public void setTarballUpload(boolean isTarballUpload) {
+			this.isTarballUpload = isTarballUpload;
+		}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+		public Integer getContentlength() {
+			return contentlength;
+		}
 
-    public Date getDate() {
-        return date;
-    }
+		public void setContentlength(Integer contentlength) {
+			this.contentlength = contentlength;
+		}
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+		public Integer getSent() {
+			return sent;
+		}
 
-    public boolean isTarballUpload() {
-        return isTarballUpload;
-    }
+		public void setSent(Integer sent) {
+			this.sent = sent;
+		}
 
-    public void setTarballUpload(boolean isTarballUpload) {
-        this.isTarballUpload = isTarballUpload;
-    }
+		
+		
 
-    public Integer getContentlength() {
-        return contentlength;
-    }
-
-    public void setContentlength(Integer contentlength) {
-        this.contentlength = contentlength;
-    }
-
-    public Integer getSent() {
-        return sent;
-    }
-
-    public void setSent(Integer sent) {
-        this.sent = sent;
-    }
-
-}
+	}

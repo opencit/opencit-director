@@ -47,6 +47,8 @@ public class ImageStoreStatusPoller implements Job {
 
         } catch (SchedulerException ex) {
             Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (Exception ex) {
+            Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

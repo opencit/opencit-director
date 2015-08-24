@@ -16,7 +16,7 @@ import javax.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.director.api.ImageStoreUploadFields;
+import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
@@ -184,7 +184,7 @@ public class ImageStoreUploadDao {
             }
             List<Object[]> result = q.getResultList();
             List<MwImageUpload> imageUploadList = new ArrayList<MwImageUpload>();
-            List<MwImage> imageList = new ArrayList<MwImage>();
+
             for (Object[] objArray : result) {
                 MwImageUpload tp = (MwImageUpload) objArray[0];
 

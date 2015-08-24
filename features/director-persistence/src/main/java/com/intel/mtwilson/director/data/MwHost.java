@@ -13,116 +13,157 @@ import javax.persistence.OneToMany;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
+
+
 @Entity
 @Table(name = "MW_HOST")
 public class MwHost {
+		
+		@Id
+		@UuidGenerator(name="UUID")
+		@GeneratedValue(generator="UUID")
+	  	@Column(name = "ID" , length = 36)
+		private String id;
+		
+		@Column(name = "NAME" , length = 100)
+		private String name;
+		
+		@Column(name = "IP_ADDRESS", length = 15)
+		private String ipAdsress;
+		
+		@Column(name = "USERNAME", length = 50)
+		private String username;
+		
+		
+		@ManyToOne(optional = true)
+		@JoinColumn(name = "SSH_KEY_ID", referencedColumnName = "ID")
+		private MwSshKey sshKey;
+		
+		
+		@ManyToOne(optional = true)
+		@JoinColumn(name = "SSH_PASSWORD_ID", referencedColumnName = "ID")
+		private MwSshPassword sshPassword;
+		
+	
+		
+		@OneToMany(mappedBy = "host")
+		private Collection<MwTrustPolicy> tblMwTrustPolicyCollection;
 
-    @Id
-    @UuidGenerator(name = "UUID")
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "ID", length = 36)
-    private String id;
+		public MwHost(){
+			super();
+		}
+		
+		
+		public MwHost(String name, String ipAdsress, String username,
+				MwSshKey sshKey, MwSshPassword sshPassword,
+				Collection<MwTrustPolicy> tblMwTrustPolicyCollection) {
+			super();
+			this.name = name;
+			this.ipAdsress = ipAdsress;
+			this.username = username;
+			this.sshKey = sshKey;
+			this.sshPassword = sshPassword;
+			this.tblMwTrustPolicyCollection = tblMwTrustPolicyCollection;
+		}
 
-    @Column(name = "NAME", length = 100)
-    private String name;
 
-    @Column(name = "IP_ADDRESS", length = 15)
-    private String ipAdsress;
 
-    @Column(name = "USERNAME", length = 50)
-    private String username;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "SSH_KEY_ID", referencedColumnName = "ID")
-    private MwSshKey sshKey;
+		public String getId() {
+			return id;
+		}
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "SSH_PASSWORD_ID", referencedColumnName = "ID")
-    private MwSshPassword sshPassword;
 
-    @OneToMany(mappedBy = "host")
-    private Collection<MwTrustPolicy> tblMwTrustPolicyCollection;
 
-    public MwHost() {
-        super();
-    }
+		public void setId(String id) {
+			this.id = id;
+		}
 
-    public MwHost(String name, String ipAdsress, String username,
-            MwSshKey sshKey, MwSshPassword sshPassword,
-            Collection<MwTrustPolicy> tblMwTrustPolicyCollection) {
-        super();
-        this.name = name;
-        this.ipAdsress = ipAdsress;
-        this.username = username;
-        this.sshKey = sshKey;
-        this.sshPassword = sshPassword;
-        this.tblMwTrustPolicyCollection = tblMwTrustPolicyCollection;
-    }
 
-    public String getId() {
-        return id;
-    }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+		public String getName() {
+			return name;
+		}
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public String getIpAdsress() {
-        return ipAdsress;
-    }
+		public void setName(String name) {
+			this.name = name;
+		}
 
-    public void setIpAdsress(String ipAdsress) {
-        this.ipAdsress = ipAdsress;
-    }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+		public String getIpAdsress() {
+			return ipAdsress;
+		}
 
-    public MwSshKey getSshKey() {
-        return sshKey;
-    }
 
-    public void setSshKey(MwSshKey sshKey) {
-        this.sshKey = sshKey;
-    }
 
-    public MwSshPassword getSshPassword() {
-        return sshPassword;
-    }
+		public void setIpAdsress(String ipAdsress) {
+			this.ipAdsress = ipAdsress;
+		}
 
-    public void setSshPassword(MwSshPassword sshPassword) {
-        this.sshPassword = sshPassword;
-    }
 
-    public Collection<MwTrustPolicy> getTblMwTrustPolicyCollection() {
-        return tblMwTrustPolicyCollection;
-    }
 
-    public void setTblMwTrustPolicyCollection(
-            Collection<MwTrustPolicy> tblMwTrustPolicyCollection) {
-        this.tblMwTrustPolicyCollection = tblMwTrustPolicyCollection;
-    }
+		public String getUsername() {
+			return username;
+		}
 
-    @Override
-    public String toString() {
-        return "MwHost [id=" + id + ", name=" + name + ", ipAdsress="
-                + ipAdsress + ", username=" + username + ", sshKey="
-                + sshKey + ", sshPassword=" + sshPassword
-                + ", tblMwTrustPolicyCollection="
-                + tblMwTrustPolicyCollection + "]";
-    }
 
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+
+
+		public MwSshKey getSshKey() {
+			return sshKey;
+		}
+
+
+
+		public void setSshKey(MwSshKey sshKey) {
+			this.sshKey = sshKey;
+		}
+
+
+
+		public MwSshPassword getSshPassword() {
+			return sshPassword;
+		}
+
+
+
+		public void setSshPassword(MwSshPassword sshPassword) {
+			this.sshPassword = sshPassword;
+		}
+
+
+
+		public Collection<MwTrustPolicy> getTblMwTrustPolicyCollection() {
+			return tblMwTrustPolicyCollection;
+		}
+
+
+
+		public void setTblMwTrustPolicyCollection(
+				Collection<MwTrustPolicy> tblMwTrustPolicyCollection) {
+			this.tblMwTrustPolicyCollection = tblMwTrustPolicyCollection;
+		}
+
+
+		@Override
+		public String toString() {
+			return "MwHost [id=" + id + ", name=" + name + ", ipAdsress="
+					+ ipAdsress + ", username=" + username + ", sshKey="
+					+ sshKey + ", sshPassword=" + sshPassword
+					+ ", tblMwTrustPolicyCollection="
+					+ tblMwTrustPolicyCollection + "]";
+		}
+	
+	
+	 
+	
+	
 }
