@@ -203,14 +203,12 @@
 	 <version>${project.version}</version>
 	</dependency>        
 
-<!-- NOT SURE -->
-
-
-            <dependency>
+       <dependency>
 	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-tls-policy-factory</artifactId>
+	    <artifactId>mtwilson-setup</artifactId>
 	 <version>3.0-SNAPSHOT</version>
-	</dependency> 
+	</dependency>        
+
 
     </dependencies>  
 </project>
