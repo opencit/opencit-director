@@ -23,7 +23,7 @@
 	
 	<target name="ready" depends="init">
 		<!-- the root pom -->
-		<exec executable="${cmd.maven}" dir="director-maven-root" resultproperty="mavenExitInstallRootPom">
+		<exec executable="${cmd.maven}" dir="maven/director-maven-root" resultproperty="mavenExitInstallRootPom">
 			<arg value="-N"/>
 			<arg value="install"/>
 		</exec>
@@ -32,6 +32,13 @@
 		</fail>
 		<!-- the maven archetypes depend on root pom -->
 		<!-- the root pom -->
+		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitInstallJavaPom">
+			<arg value="install"/>
+		</exec>
+		<fail message="Cannot install director-maven" status="${mavenExitInstallJavaPom}">
+			<condition><not><equals arg1="${mavenExitInstallJavaPom}" arg2="0"/></not></condition>
+		</fail>
+<!--
 		<exec executable="${cmd.maven}" dir="director-maven-java" resultproperty="mavenExitInstallJavaPom">
 			<arg value="-N"/>
 			<arg value="install"/>
@@ -51,6 +58,7 @@
 		<fail message="Cannot install director-maven-package-makeself" status="${mavenExitInstallPackageMakeselfPom}">
 			<condition><not><equals arg1="${mavenExitInstallPackageMakeselfPom}" arg2="0"/></not></condition>
 		</fail>
+-->
 	</target>
 	
 	<target name="clean" depends="init">

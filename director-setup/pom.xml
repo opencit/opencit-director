@@ -37,9 +37,9 @@
             <artifactId>mtwilson-setup-ext</artifactId>
         </dependency>
         
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-client-jaxrs2</artifactId>
+            <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>twilson-setup</artifactId>
         </dependency>
     </dependencies>
 </project>
