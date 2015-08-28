@@ -10,8 +10,9 @@ package com.intel.director.api;
  * @author soakx
  */
 public class SignTrustPolicyResponse {
-   public String id;
-   public String image_id;
-   public String trust_policy;
-   public String host_id;
+
+    public String id;
+    public String image_id;
+    public String trust_policy;
+    public String host_id;
 }

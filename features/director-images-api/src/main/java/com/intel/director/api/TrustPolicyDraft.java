@@ -1,0 +1,82 @@
+package com.intel.director.api;
+
+import java.util.Date;
+
+public class TrustPolicyDraft extends AuditFields {
+
+    protected String id;
+
+    protected String trust_policy_draft;
+
+    protected String name;
+
+    protected ImageAttributes imgAttributes;
+
+    public TrustPolicyDraft() {
+        super();
+    }
+
+    public TrustPolicyDraft(String created_by_user_id, Date created_date,
+            String edited_by_user_id, Date edited_date, String id,
+            String trust_policy_draft, String name,
+            ImageAttributes imgAttributes) {
+        super(created_by_user_id, created_date, edited_by_user_id, edited_date);
+        this.id = id;
+        this.trust_policy_draft = trust_policy_draft;
+        this.name = name;
+        this.imgAttributes = imgAttributes;
+    }
+
+    public TrustPolicyDraft(String created_by_user_id, Date created_date,
+            String edited_by_user_id, Date edited_date,
+            String trust_policy_draft, String name,
+            ImageAttributes imgAttributes) {
+        super(created_by_user_id, created_date, edited_by_user_id, edited_date);
+
+        this.trust_policy_draft = trust_policy_draft;
+        this.name = name;
+        this.imgAttributes = imgAttributes;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTrust_policy_draft() {
+        return trust_policy_draft;
+    }
+
+    public void setTrust_policy_draft(String trust_policy_draft) {
+        this.trust_policy_draft = trust_policy_draft;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ImageAttributes getImgAttributes() {
+        return imgAttributes;
+    }
+
+    public void setImgAttributes(ImageAttributes imgAttributes) {
+        this.imgAttributes = imgAttributes;
+    }
+
+    @Override
+    public String toString() {
+        return "TrustPolicyDraft [id=" + id + ", trust_policy_draft="
+                + trust_policy_draft + ", name=" + name + ", imgAttributes="
+                + imgAttributes + ", created_by_user_id=" + created_by_user_id
+                + ", created_date=" + created_date + ", edited_by_user_id="
+                + edited_by_user_id + ", edited_date=" + edited_date + "]";
+    }
+
+}

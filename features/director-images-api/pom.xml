@@ -4,12 +4,12 @@
     <artifactId>director-images-api</artifactId>
     <packaging>jar</packaging>
     <description>Director request and response data structures</description>
-    <parent>
-		  <groupId>com.intel.mtwilson.kms</groupId>
-		  <artifactId>kms-maven-java</artifactId>
-		  <version>0.1-SNAPSHOT</version>
-          <relativePath/>
-     </parent>
+<parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-core-feature-zip</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
     <build>
         <plugins>
@@ -35,27 +35,10 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-jaxrs2</artifactId>
-        </dependency>
-      
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-tls-policy</artifactId>
-        </dependency>
+         <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-jaxrs2</artifactId>
+            </dependency>
       
         <dependency>
             <groupId>junit</groupId>

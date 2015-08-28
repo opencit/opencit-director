@@ -12,7 +12,7 @@ import java.io.File;
  * @author soakx
  */
 public class TrustDirectorImageUploadRequest {
-    public String image_deployments;
-    public String format;
+
+    public ImageAttributes imageAttributes;
     public File imageFile;
 }

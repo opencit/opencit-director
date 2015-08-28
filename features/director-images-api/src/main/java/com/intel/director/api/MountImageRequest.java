@@ -9,6 +9,7 @@ package com.intel.director.api;
  *
  * @author soakx
  */
-public class MountImageRequest extends BasicIdRequest{
-    
+public class MountImageRequest {
+
+    public String id;
 }

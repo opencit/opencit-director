@@ -5,6 +5,7 @@
  */
 package com.intel.director.api;
 
+import com.intel.director.api.ui.ImageInfo;
 import java.util.List;
 
 /**
@@ -12,5 +13,6 @@ import java.util.List;
  * @author soakx
  */
 public class SearchImagesResponse {
-    List<ImageAttributes> images;
+
+    public List<ImageInfo> images;
 }
