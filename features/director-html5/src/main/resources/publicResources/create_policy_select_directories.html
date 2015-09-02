@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<title>Create Policy</title>
+<meta name="author" directoryTree="aakash">
+</head>
+<body>
+
+
+
+
+
+
+
+
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-8" style="margin-top: 10px;">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1>Select Directories Page</h1>
+				</div>
+				<div class="panel-body"
+					style="padding-top: 0px; padding-bottom: 0px;">
+
+
+
+					<div class="row">
+						<div class="col-md-8" id="directoryTree" class=""
+							style="height: 500px; padding-left: 0px; padding-right: 0px; float: left;">
+
+							<!-- <div class="col-md-12">
+								<button class="btn-primary btn-large btn" id="collapse_button">Collapse
+									regexPanel</button>
+							</div> -->
+							
+							<div data-bind="with: SelectDirectoriesViewModel"
+								class="col-md-12" style="padding-left: 0px; padding-right: 0px;">
+								<form class="form-horizontal" role="form"
+									data-bind="submit: selectDirectoriesSubmit">
+									<div data-bind="with: selectDirectoriesMetaData">
+
+
+
+										<div id="jstree2112" class="divScroll-2"></div>
+
+										<div class="col-md-offset-1 col-md-1">
+											<button type="button"
+												onclick="displayPreviousCreatePolicyPage()"
+												class="btn btn-primary">Previous</button>
+										</div>
+
+
+										<div class="col-md-offset-6 col-md-1">
+											<button type="submit" class="btn btn-primary">Next</button>
+										</div>
+									</div>
+								</form>
+
+							</div>
+
+
+						</div>
+						<div class="col-md-4 open" id="regexPanel"
+							style="height: 500px; float: left; border-left: 1px solid #ddd">
+
+							<p id="folderPathDiv"></p>
+							
+							<div class="form-group">
+								<label class="control-label col-md-5" for="create_policy_regex_include">RegEx Include Filter:</label>
+								<div class="col-md-5">
+									<input type="text" class="form-control" id="create_policy_regex_include"
+										 placeholder="Enter RegEx">
+								</div>
+							</div>
+
+
+							<div class="form-group">
+								<label class="control-label col-md-5" for="image_name">RegEx Exclude Filter:</label>
+								<div class="col-md-5">
+									<input type="text" class="form-control" id="create_policy_regex_exclude"
+										 placeholder="Enter RegEx">
+								</div>
+							</div>
+
+
+									<div class="col-md-1">
+											<button type="submit" class="btn btn-primary">Apply</button>
+										</div>
+
+
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+
+
+
+
+
+
+			<script type="text/javascript">
+        var endpoint = "/v1/images/";
+        
+        $('#collapse_button').click(function(){
+        	if($('#regexPanel').hasClass('open'))
+        	{
+        		$('#regexPanel').removeClass('col-md-4');
+        		$('#regexPanel').removeClass('open');
+        		$('#regexPanel').addClass('hidden');
+        		$('#directoryTree').addClass('col-md-12');
+        		$('#directoryTree').removeClass('col-md-8');
+        	}
+        	else
+        	{
+        		$('#regexPanel').addClass('col-md-4');
+        		$('#regexPanel').addClass('open');
+        		$('#regexPanel').removeClass('hidden');
+        		$('#directoryTree').removeClass('col-md-12');
+        		$('#directoryTree').addClass('col-md-8');
+        	}
+        });
+        
+        
+        function toggleState(str){	
+        	
+        	 $('#folderPathDiv').text(str.id);
+        if($('#regexPanel').hasClass('open'))
+    	{
+    		$('#regexPanel').removeClass('col-md-4');
+    		$('#regexPanel').removeClass('open');
+    		$('#regexPanel').addClass('hidden');
+    		$('#directoryTree').addClass('col-md-12');
+    		$('#directoryTree').removeClass('col-md-8');
+    	}
+    	else
+    	{
+    		$('#regexPanel').addClass('col-md-4');
+    		$('#regexPanel').addClass('open');
+    		$('#regexPanel').removeClass('hidden');
+    		$('#directoryTree').removeClass('col-md-12');
+    		$('#directoryTree').addClass('col-md-8');
+    	}
+        
+        
+        }
+           
+        
+        
+        /*
+            var endpoint = "/v1";
+            function MainViewModel() {
+                var self = this;
+                self.keysViewModel = new KeyListViewModel();
+                self.settingsViewModel = new SettingListViewModel();
+            }
+            
+        */
+        
+        console.log("createimage.html script");
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/jqueryFileTree.js', 'js/jquery.easing.js', 'js/create_policy_wizard.js', 'js/create_policy_select_directories.js'], function() { 
+                console.log("createTrustPolicy.html: loaded scripts");
+           
+
+	        	var pageInitialized = false;
+	        	$(document).ready(function() {
+	        		 if(pageInitialized) return;
+	        			alert("before js tree");
+	        		  	$('#jstree2112').fileTree({ root: 'C:/Temp', 
+	        				script: '/v1/images/browse/190A3B8E-B8C7-45CB-9E83-D1224A11D5C5/search' ,
+	        				expandSpeed: 1000,
+	        				collapseSpeed: 1000,
+	        				multiFolder: true, 
+	        				loadMessage: "Loading..."
+	        			}, function(file) {
+	        				openFile(file);
+	        				});	
+	        		 
+	        		 mainViewModel.selectDirectoriesViewModel  =  new SelectDirectoriesViewModel();
+		        	   ///]   ko.cleanNode(mainViewModel);
+		        	   
+		        	ko.applyBindings(mainViewModel, document.getElementById("create_policy_content_step_2"));
+	        		  
+	        		    pageInitialized = true;
+	        	});
+                
+           
+            	function openFile(file) {
+	        	    // do something with file
+	        				alert(file);
+	        				}
+            	
+                // add our view models to the main view model defined by index.html
+           
+        /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
+            });
+
+
+        </script>
+</body>
+</html>

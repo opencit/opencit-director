@@ -14,5 +14,5 @@ import java.io.File;
 public class TrustDirectorImageUploadRequest {
 
     public ImageAttributes imageAttributes;
-    public File imageFile;
+    public String imageFile;
 }

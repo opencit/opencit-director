@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    
+        <title>Create Policy</title>
+        <meta name="author" content="aakash">
+    </head>
+    <body>
+
+        
+
+      
+                       
+					
+                    <div data-bind="with: createImageViewModel">	
+						<form class="form-horizontal" role="form" data-bind="submit: createImage">
+						 <div data-bind="with: createImageMetaData">	
+						
+						 <div class="row">
+				            <div class="col-md-2"></div>
+				            <div class="col-md-8" style="margin-top: 10px;">        
+				                <div class="panel panel-default">
+				                    <div class="panel-heading">
+				                        <h1>Create Trust Policy Page</h1>
+				                    </div>
+				                    <div class="panel-body">
+						
+						
+											
+											<div class="form-group">
+										      <label class="control-label col-md-4" for="image_format">Image Format:</label>
+										      <div class="col-md-4">
+										       <select class="form-control" id="image_format" data-bind="value: selected_image_format,
+					                       optionsCaption: 'Choose...'" required >
+										      
+										      </select>
+										      </div>
+										    </div>
+						                    
+	  				   
+	  				   
+	  				   
+							  				    <div class="form-group">
+											      <label class="control-label col-md-4" for="image_name">Image Name:</label>
+											      <div class="col-md-4">          
+											        <input type="text" class="form-control" id="image_name" data-bind="value: image_name" placeholder="Enter Image Name" required>
+											      </div>
+											      </div> 
+											    
+					
+					
+					   
+					   
+					   
+											   <div class="form-group">
+											      <label class="control-label col-md-4" for="launch_control_policy">Launch Control policy:</label>
+											      <div id="launch_control_policy" class="col-md-8">          
+											<!--        <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="0" data-bind="checked: imgPolicy">Measure Only
+											    </label>
+											    <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="1" data-bind="checked: imgPolicy">Measure and Enforce
+											    </label> -->
+											      </div>
+											    </div>
+											    
+					  
+					  
+					    
+		
+					    
+					    
+										     <div  class="form-group">
+										     <label class="control-label col-md-4" for="asset_tag_policy">Trust Policy:</label>
+										      <div id="asset_tag_policy" class="col-md-8">          
+										       <label class="radio-inline">
+										      <input type="radio" value="Trust Only" name="asset_tag_policy" data-bind="checked: asset_tag_policy">Trust Only
+										    </label>
+										    <label class="radio-inline">
+										      <input type="radio" na value="Trust and Location" name="asset_tag_policy" data-bind="checked: asset_tag_policy">Trust and Location
+										    </label> 
+										    
+										  
+										    
+										      </div> 
+										    </div>
+					    
+		
+					
+					
+					
+					
+										    <div class="form-group">        
+										      <div class="col-md-offset-4 col-md-8">
+										        <div class="checkbox">
+										          <label><input type="checkbox" 
+					
+												id="imgEncrypt" name="imgEncrypt" value="encrypt" data-bind="checked:imgEncrypt">Encrypt Image</label>
+										        </div>
+										      </div>
+										    </div>    
+	  				      
+	  				 
+	  				    
+							  				  <div class="col-md-offset-4 col-md-1">
+										        <button type="submit" class="btn btn-primary">Next</button>
+										      </div>
+						      
+						      
+							       </div>
+								  </div>
+			                    </div>
+				      
+					        </div>
+	               
+	            		</div>
+						</form>
+					
+					</div>
+		 
+					
+		 
+		 
+  
+        <script type="text/javascript">
+        var endpoint = "/v1/images/";
+            /*
+            var endpoint = "/v1";
+            function MainViewModel() {
+                var self = this;
+                self.keysViewModel = new KeyListViewModel();
+                self.settingsViewModel = new SettingListViewModel();
+            }
+            
+        */
+        
+        console.log("createimage.html script");
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/create_policy_wizard.js', 'js/create_policy.js'], function() { 
+                console.log("createTrustPolicy.html: loaded scripts");
+            // add our view models to the main view model defined by index.html
+           
+        /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
+            });
+
+
+        </script>
+
+    </body>
+</html>

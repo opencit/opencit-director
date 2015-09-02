@@ -10,5 +10,6 @@ package com.intel.director.api;
  * @author soakx
  */
 public class TrustDirectorImageUploadResponse extends ImageAttributes {
-
+	public String imageUploadUrl;
+	
 }

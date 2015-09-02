@@ -13,5 +13,5 @@ import java.util.List;
  */
 public class SearchFilesInImageResponse {
 
-    List<String> files;
+    public List<String> files;
 }

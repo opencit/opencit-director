@@ -4,11 +4,16 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-features</artifactId>
     <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
-
+    <parent>
+        <artifactId>director-maven-java</artifactId>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
     <modules>
         <module>director-glance</module>
+        <module>director-html5</module>
         <module>director-images-api</module>
         <module>director-images-ws</module>
         <module>director-persistence</module>        

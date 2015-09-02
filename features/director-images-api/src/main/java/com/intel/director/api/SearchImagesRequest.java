@@ -10,4 +10,5 @@ package com.intel.director.api;
  * @author soakx
  */
 public class SearchImagesRequest extends ImageAttributes {
+	public String deploymentType;
 }
