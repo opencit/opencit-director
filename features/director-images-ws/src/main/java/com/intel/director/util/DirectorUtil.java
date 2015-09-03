@@ -14,14 +14,23 @@ import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.api.ImageStoreManager;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
+
+import com.github.dnault.xmlpatch.Patcher;
 
 /**
  *
@@ -99,6 +108,27 @@ public class DirectorUtil {
         }
         return imageStoreManager;
     }
+    
+    
+	public static String patch(String src, String patch) throws IOException {
+		String patched = "";
+		try {
+			InputStream inputStream = new ByteArrayInputStream(src.getBytes(StandardCharsets.UTF_8));
+
+			InputStream patchStream =new ByteArrayInputStream(patch.getBytes(StandardCharsets.UTF_8)); 
+			OutputStream outputStream = new ByteArrayOutputStream(); 
+
+			Patcher.patch(inputStream, patchStream, outputStream);
+			patched = ((ByteArrayOutputStream)outputStream).toString("UTF-8");
+
+		} catch (FileNotFoundException e) {
+			System.err.println("ERROR: Could not access file: "
+					+ e.getMessage());
+			System.exit(1);
+		}
+		return patched;
+	}
+
 
     public static void main(String[] args) {
         String imageId = "123";

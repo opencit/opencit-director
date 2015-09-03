@@ -34,6 +34,7 @@ import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
+import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
@@ -62,11 +63,11 @@ public class ImageServiceImpl implements ImageService {
 	private final int MaxFileSize = 50 * 1024 * 1024 * 1024;
 	private final int MaxMemSize = 4 * 1024;
 
+	@Autowired
+	private IPersistService imagePersistenceManager;
 
-	private IPersistService imagePersistenceManager=new DbServiceImpl();
-
-
-	private ImageStoreManager imageStoreManager= new ImageStoreManagerImpl();;
+	@Autowired
+	private ImageStoreManager imageStoreManager;
 
 	public ImageServiceImpl() {
 		imagePersistenceManager = new DbServiceImpl();
@@ -249,24 +250,31 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	public SearchImagesResponse searchImages(
 			SearchImagesRequest searchImagesRequest) throws DbException {
-		
-		
+		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
+		List<ImageInfo> fetchImages = null;
+		// Fetch all images
+		if (searchImagesRequest.deploymentType == null) {
+			fetchImages = imagePersistenceManager.fetchImages(null);
+		} else {
+
+			// Fetch images for the deployment type
+			ImageInfoFilter filter = new ImageInfoFilter();
+			filter.image_deployments = searchImagesRequest.deploymentType;
+			fetchImages = imagePersistenceManager.fetchImages(filter, null);
+		}
+		searchImagesResponse.images = fetchImages;
+		return searchImagesResponse;
+	}
+
+	@Override
+	public SearchFilesInImageResponse searchFilesInImage(
+			SearchFilesInImageRequest searchFilesInImageRequest) {
 		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
 		Collection<File> listFilesAndDirs = new ArrayList<File>(
 				Arrays.asList(new File(searchFilesInImageRequest.getDir())
 						.listFiles()));
 		
-		TrustPolicy fetchPolicyForImage = null;
-	/*	try {
-			fetchPolicyForImage= imagePersistenceManager.fetchPolicyForImage(searchFilesInImageRequest.id);
-		} catch (DbException e1) {			
-			
-		}
-		
-		String policy = fetchPolicyForImage.getTrust_policy();
-		
-		
-*/
+
 		List<String> files = new ArrayList<String>();
 		StringBuilder builder = new StringBuilder();
 		files.add("<ul class=\"jqueryFileTree\" style=\"display: none;\">");
@@ -323,7 +331,6 @@ public class ImageServiceImpl implements ImageService {
 		filesInImageResponse.files = files;
 		return filesInImageResponse;
 
-	
 	}
 
 	/**
@@ -357,6 +364,38 @@ public class ImageServiceImpl implements ImageService {
 
 		return policyDraftXml;
 	}
+	
+
+	@Override
+	public void editTrustPolicyDraft(
+			TrustPolicyDraftEditRequest trustpolicyDraftEditRequest) {
+		TrustPolicyDraft trustPolicyDraft = null;
+		try {
+			trustPolicyDraft = imagePersistenceManager.fetchPolicyDraftForImage(trustpolicyDraftEditRequest.imageId);
+		} catch (DbException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String draft = trustPolicyDraft.getTrust_policy_draft();
+		
+		try {
+			draft = DirectorUtil.patch(draft, trustpolicyDraftEditRequest.patch);
+			trustPolicyDraft.setTrust_policy_draft(draft);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			imagePersistenceManager.updatePolicyDraft(trustPolicyDraft);
+		} catch (DbException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
 
 	/**
 	 * *************************************************************************

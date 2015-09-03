@@ -9,6 +9,7 @@ import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
+import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
@@ -50,5 +51,7 @@ public interface ImageService {
     public ImageStoreResponse uploadImageToImageStore(ImageStoreRequest imageStoreUploadRequest) throws DirectorException, ImageStoreException;
 
 	public String getTrustPolicyForImage(String imageId);
+	
+	public void editTrustPolicyDraft(TrustPolicyDraftEditRequest trustPolicyDraftEditRequest);
 
 }

@@ -5,7 +5,6 @@
  */
 package com.intel.director.api;
 
-import java.io.File;
 
 /**
  *
