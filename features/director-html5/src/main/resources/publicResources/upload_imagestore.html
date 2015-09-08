@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    
+        <title>Create Policy</title>
+        <meta name="author" content="aakash">
+    </head>
+    <body>
+
+        
+
+      
+                       
+					
+                    <div data-bind="with: selectDirectoriesViewModel">	
+						<form class="form-horizontal" role="form" data-bind="submit: selectDirectories">
+						 <div data-bind="with: createImageMetaData">	
+						
+						 <div class="row">
+				            <div class="col-md-2"></div>
+				            <div class="col-md-8" style="margin-top: 10px;">        
+				                <div class="panel panel-default">
+				                    <div class="panel-heading">
+				                        <h1>Upload to Store Page</h1>
+				                    </div>
+				                    <div class="panel-body">
+						
+						
+										
+										 
+	  				      					  <div class="col-md-offset-1 col-md-1">
+										        <button type="button" onclick="displayPreviousCreatePolicyPage()" class="btn btn-primary">Previous</button>
+										      </div>
+	  				 
+	  				    
+							  				  <div class="col-md-offset-6 col-md-1">
+										        <button type="submit" class="btn btn-primary">Submit</button>
+										      </div>
+						      
+						      
+							       </div>
+								  </div>
+			                    </div>
+				      
+					        </div>
+	               
+	            		</div>
+						</form>
+					
+					</div>
+		 
+					
+		 
+		 
+  
+        <script type="text/javascript">
+        var endpoint = "/v1/images/";
+            /*
+            var endpoint = "/v1";
+            function MainViewModel() {
+                var self = this;
+                self.keysViewModel = new KeyListViewModel();
+                self.settingsViewModel = new SettingListViewModel();
+            }
+            
+        */
+        
+        console.log("createimage.html script");
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/create_policy_wizard.js', 'js/create_policy.js'], function() { 
+                console.log("createTrustPolicy.html: loaded scripts");
+            // add our view models to the main view model defined by index.html
+           
+        /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
+            });
+
+
+        </script>
+
+    </body>
+</html>

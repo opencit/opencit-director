@@ -5,15 +5,32 @@
  */
 package com.intel.director.api;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 /**
  *
  * @author soakx
  */
 public class SearchFilesInImageRequest {
 
-    public String directorypath;
+    public String dir;
     public String include;
     public String exclude;
     public Boolean recursive;
+    public Boolean filesForPolicy;
     public String id;
+	public String getDir()  {
+		try {
+			return URLDecoder.decode(dir, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+	}
+	public void setDir(String dir) {
+		this.dir = dir;
+	}
+    
+    
 }

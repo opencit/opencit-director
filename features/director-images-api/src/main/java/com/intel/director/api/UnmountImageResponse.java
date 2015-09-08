@@ -10,5 +10,5 @@ package com.intel.director.api;
  * @author soakx
  */
 public class UnmountImageResponse extends ImageAttributes {
-
+	
 }

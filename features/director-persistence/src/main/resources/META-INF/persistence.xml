@@ -16,7 +16,7 @@
 	 <class>com.intel.mtwilson.director.data.MwImageStoreSettings</class>       
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
-      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://10.35.34.220:5432/DirectorDataPU" />
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/DirectorDataPU" />
       <property name="javax.persistence.jdbc.user" value="postgres" />
       <property name="javax.persistence.jdbc.password" value="password" />
       <property name="eclipselink.logging.level" value="FINEST"/>

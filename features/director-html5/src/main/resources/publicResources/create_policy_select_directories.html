@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<title>Create Policy</title>
+<meta name="author" directoryTree="aakash">
+</head>
+<body>
+
+
+
+
+
+
+
+
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-8" style="margin-top: 10px;">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1>Select Directories Page</h1>
+				</div>
+				<div class="panel-body"
+					style="padding-top: 0px; padding-bottom: 0px;">
+
+
+
+					<div class="row">
+						<div class="col-md-8" id="directoryTree" class=""
+							style="height: 500px; padding-left: 0px; padding-right: 0px; float: left;">
+
+							<!-- <div class="col-md-12">
+								<button class="btn-primary btn-large btn" id="collapse_button">Collapse
+									regexPanel</button>
+							</div> -->
+
+							<div data-bind="with: SelectDirectoriesViewModel"
+								class="col-md-12" style="padding-left: 0px; padding-right: 0px;">
+								<form class="form-horizontal" role="form"
+									data-bind="submit: selectDirectoriesSubmit">
+									<div data-bind="with: selectDirectoriesMetaData">
+
+
+
+										<div id="jstree2" class="divScroll-2"></div>
+
+										<div class="col-md-offset-1 col-md-1">
+											<button type="button"
+												onclick="displayPreviousCreatePolicyPage()"
+												class="btn btn-primary">Previous</button>
+										</div>
+
+
+										<div class="col-md-offset-6 col-md-1">
+											<button type="submit" class="btn btn-primary">Next</button>
+										</div>
+									</div>
+								</form>
+
+							</div>
+
+
+						</div>
+						<div class="col-md-4 open" id="regexPanel"
+							style="height: 500px; float: left; border-left: 1px solid #ddd">
+
+							<p id="folderPathDiv"></p>
+
+							<div class="form-group">
+								<label class="control-label col-md-5"
+									for="create_policy_regex_include">RegEx Include Filter:</label>
+								<div class="col-md-5">
+									<input type="text" class="form-control"
+										id="create_policy_regex_include" placeholder="Enter RegEx">
+								</div>
+							</div>
+
+
+							<div class="form-group">
+								<label class="control-label col-md-5" for="image_name">RegEx
+									Exclude Filter:</label>
+								<div class="col-md-5">
+									<input type="text" class="form-control"
+										id="create_policy_regex_exclude" placeholder="Enter RegEx">
+								</div>
+							</div>
+
+
+							<div class="col-md-1">
+								<button type="submit" class="btn btn-primary">Apply</button>
+							</div>
+
+
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+
+
+
+
+
+
+			<script type="text/javascript">
+				var endpoint = "/v1/images/";
+
+				$('#collapse_button').click(function() {
+					if ($('#regexPanel').hasClass('open')) {
+						$('#regexPanel').removeClass('col-md-4');
+						$('#regexPanel').removeClass('open');
+						$('#regexPanel').addClass('hidden');
+						$('#directoryTree').addClass('col-md-12');
+						$('#directoryTree').removeClass('col-md-8');
+					} else {
+						$('#regexPanel').addClass('col-md-4');
+						$('#regexPanel').addClass('open');
+						$('#regexPanel').removeClass('hidden');
+						$('#directoryTree').removeClass('col-md-12');
+						$('#directoryTree').addClass('col-md-8');
+					}
+				});
+
+				function toggleState(str) {
+
+					$('#folderPathDiv').text(str.id);
+					if ($('#regexPanel').hasClass('open')) {
+						$('#regexPanel').removeClass('col-md-4');
+						$('#regexPanel').removeClass('open');
+						$('#regexPanel').addClass('hidden');
+						$('#directoryTree').addClass('col-md-12');
+						$('#directoryTree').removeClass('col-md-8');
+					} else {
+						$('#regexPanel').addClass('col-md-4');
+						$('#regexPanel').addClass('open');
+						$('#regexPanel').removeClass('hidden');
+						$('#directoryTree').removeClass('col-md-12');
+						$('#directoryTree').addClass('col-md-8');
+					}
+
+				}
+
+
+				console.log("createimage.html script");
+				resourceLoader.loadJS([ 'js/knockout.js', 'js/jquery.js',
+						'js/jqueryFileTree.js', 'js/jquery.easing.js',
+						'js/create_policy_wizard.js',
+						'js/create_policy_select_directories.js' ], function() {
+					console.log("createTrustPolicy.html: loaded scripts");
+				});
+
+				var pageInitialized = false;
+				var patches = [];
+
+				setInterval(function (){editPolicyDraft();}, 10000);
+
+				var editPolicyDraft = function (){
+					if(patches.length == 0){
+						return;
+					}
+					var patchBegin = "<patch>";
+					var patchEnd = "</patch>";
+					var patchesStr="";
+					for(i=0;i<patches.length;i++){
+						var addRemoveXml = patches[i];
+						patchesStr = patchesStr.concat(addRemoveXml);
+					}	
+
+					var finalPatch = patchBegin.concat(patchesStr, patchEnd);
+					
+					var formData = JSON.stringify({patch:finalPatch});
+					$.ajax({
+						type: "POST",
+						url: "/v1/images/policydraft/190A3B8E-B8C7-45CB-9E83-D1224A11D5C5/edit",
+						data: formData,
+						contentType: "application/json",
+						success: function(data, status) {
+							patches.length = 0;
+						},
+						error: function (jqXHR, textStatus, errorThrown){
+							alert("ERROR in saving to draft");
+						}
+					});							
+				}						
+
+				$(document)
+						.ready(
+								function() {
+									if (pageInitialized)
+										return;
+									$('#jstree2')
+											.fileTree(
+													{
+														root : 'C:/Temp',
+														script : '/v1/images/browse/190A3B8E-B8C7-45CB-9E83-D1224A11D5C5/search',
+														expandSpeed : 1000,
+														collapseSpeed : 1000,
+														multiFolder : true,
+														loadMessage : "Loading..."
+													},
+													function(file,
+															checkedStatus) {
+														editPatch(file,
+																checkedStatus);
+													});
+
+									mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
+
+									ko
+											.applyBindings(
+													mainViewModel,
+													document
+															.getElementById("create_policy_content_step_2"));
+
+									pageInitialized = true;
+								});
+
+				/* Patches processing */
+
+				function editPatch(file, checkedStatus) {
+					var addRemoveXml;
+					if (checkedStatus == true) {
+						addRemoveXml = "<add sel='TrustPolicy/Whitelist'><File>"
+								+ file + "</File></add>";
+					} else {
+						addRemoveXml = "<remove sel='TrustPolicy/Whitelist/File[text()=\""
+								+ file + "\"]'/>";
+					}
+					patches.push(addRemoveXml);
+					//editPolicyDraft();
+				}
+				
+				    				
+			</script>
+</body>
+</html>

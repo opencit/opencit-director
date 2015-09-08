@@ -11,4 +11,5 @@ package com.intel.director.api;
  */
 public class MountImageResponse extends ImageAttributes {
 
+
 }
