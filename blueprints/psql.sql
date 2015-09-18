@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2015-09-16 01:16:19.46
+-- Last modification date: 2015-09-18 21:52:34.251
 
 
 
@@ -9,9 +9,16 @@
 CREATE TABLE image_action (
     id varchar(36)  NOT NULL ,
     image_id varchar(36)  NULL ,
-    action text  NOT NULL ,
-    action_current_count int  NOT NULL ,
-    action_completed int  NOT NULL ,
+    policy_id varchar(36)  NOT NULL ,
+    content text  NOT NULL ,
+    content_etag varchar(32)  NOT NULL ,
+    task_name text  NOT NULL ,
+    status text  NOT NULL ,
+    task_complete int  NOT NULL ,
+    task_complete_max int  NOT NULL ,
+    task_progress int  NOT NULL ,
+    task_progress_max int  NOT NULL ,
+    is_archived boolean  NOT NULL ,
     CONSTRAINT image_action_pk PRIMARY KEY (id)
 );
 
@@ -33,6 +40,7 @@ CREATE TABLE mw_host (
 -- Table: mw_image
 CREATE TABLE mw_image (
     id varchar(36)  NOT NULL ,
+    policy_id varchar(36)  NOT NULL ,
     image_deployments varchar(20)  NOT NULL ,
     image_format varchar(255)  NOT NULL ,
     location varchar(255)  NOT NULL ,
@@ -93,12 +101,12 @@ CREATE TABLE mw_ssh_password (
 -- Table: mw_trust_policy
 CREATE TABLE mw_trust_policy (
     id varchar(36)  NOT NULL ,
-    image_id varchar(36)  NOT NULL ,
     description varchar(255)  NOT NULL ,
     trust_policy xml  NOT NULL ,
     host_id varchar(36)  NOT NULL ,
-    archive boolean  NOT NULL ,
-    upload_variables_md5 varchar(32)  NOT NULL ,
+    is_archived boolean  NOT NULL ,
+    image_update_md5 varchar(32)  NOT NULL ,
+    image_action_id varchar(36)  NOT NULL ,
     CONSTRAINT mw_trust_policy_pk PRIMARY KEY (id)
 );
 
@@ -130,12 +138,12 @@ CREATE TABLE mw_user (
 
 
 -- foreign keys
--- Reference:  image_policy (table: mw_trust_policy)
+-- Reference:  image_policy (table: mw_image)
 
 
-ALTER TABLE mw_trust_policy ADD CONSTRAINT image_policy 
-    FOREIGN KEY (image_id)
-    REFERENCES mw_image (id)
+ALTER TABLE mw_image ADD CONSTRAINT image_policy 
+    FOREIGN KEY (policy_id)
+    REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
 ;
@@ -215,6 +223,16 @@ ALTER TABLE mw_image_upload ADD CONSTRAINT mw_policy_upload_mw_image_upload
 
 ALTER TABLE mw_policy_upload ADD CONSTRAINT mw_policy_upload_mw_trust_policy 
     FOREIGN KEY (trust_policy_id)
+    REFERENCES mw_trust_policy (id)
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE 
+;
+
+-- Reference:  mw_trust_policy_image_action (table: image_action)
+
+
+ALTER TABLE image_action ADD CONSTRAINT mw_trust_policy_image_action 
+    FOREIGN KEY (policy_id)
     REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
