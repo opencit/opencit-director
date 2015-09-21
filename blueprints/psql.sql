@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2015-09-18 21:52:34.251
+-- Last modification date: 2015-09-18 23:00:24.307
 
 
 
@@ -29,6 +29,7 @@ CREATE TABLE mw_host (
     id varchar(36)  NOT NULL ,
     name varchar(100)  NOT NULL ,
     ip_address varchar(15)  NOT NULL ,
+    trust_policy_id varchar(36)  NOT NULL ,
     username varchar(50)  NOT NULL ,
     ssh_key_id varchar(36)  NULL ,
     ssh_password_id varchar(50)  NULL ,
@@ -103,10 +104,8 @@ CREATE TABLE mw_trust_policy (
     id varchar(36)  NOT NULL ,
     description varchar(255)  NOT NULL ,
     trust_policy xml  NOT NULL ,
-    host_id varchar(36)  NOT NULL ,
     is_archived boolean  NOT NULL ,
     image_update_md5 varchar(32)  NOT NULL ,
-    image_action_id varchar(36)  NOT NULL ,
     CONSTRAINT mw_trust_policy_pk PRIMARY KEY (id)
 );
 
@@ -238,12 +237,12 @@ ALTER TABLE image_action ADD CONSTRAINT mw_trust_policy_image_action
     INITIALLY IMMEDIATE 
 ;
 
--- Reference:  mw_trust_policy_mw_host (table: mw_trust_policy)
+-- Reference:  mw_trust_policy_mw_host (table: mw_host)
 
 
-ALTER TABLE mw_trust_policy ADD CONSTRAINT mw_trust_policy_mw_host 
-    FOREIGN KEY (host_id)
-    REFERENCES mw_host (id)
+ALTER TABLE mw_host ADD CONSTRAINT mw_trust_policy_mw_host 
+    FOREIGN KEY (trust_policy_id)
+    REFERENCES mw_trust_policy (id)
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE 
 ;
