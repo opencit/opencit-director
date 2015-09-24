@@ -14,17 +14,6 @@ UL.jqueryFileTree LI {
 	white-space: nowrap;
 }
 
-
-UL.jqueryFileTree LI.selected {
-	list-style: none;
-	padding: 0px;
-	padding-left: 20px;
-	margin: 0px;
-	white-space: nowrap;
-	background-color:rgb(198, 252, 194);
-}
-
-
 UL.jqueryFileTree A {
 	color: #333;
 	text-decoration: none;

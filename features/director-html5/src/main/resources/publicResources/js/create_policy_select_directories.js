@@ -42,6 +42,7 @@ function ApplyRegExViewModel() {
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_"+sel_dir+"']");
+		
 		var config = {root: 'C:/Temp',  dir: sel_dir, 
 				script: '/v1/images/browse/'+currentCreatePolicyImageId+'/search' ,
 				expandSpeed: 1000,
@@ -57,12 +58,11 @@ function ApplyRegExViewModel() {
 		var len = node.parent().children().length;	
 		var counter = 0;
 		node.parent().children().each(function() {
-			if(counter++ >1){
+			if(counter++ >2){
 				$(this).remove();
 			}
 		});
 
-		
 		node.parent().removeClass('collapsed').addClass('expanded');
 		(node.parent()).fileTree(config, function(file, checkedStatus) {
 		editPatch(file, checkedStatus);
@@ -143,13 +143,9 @@ var editPolicyDraft = function() {
 		success : function(data, status) {
 			patches.length = 0;
 			//Show message in div
-			console.log("************* saved");
 			var $messageDiv = $('#saveMessage'); // get the reference of the div
-			console.log("************* 1111111");
 			$messageDiv.show().html('Draft saved'); // show and set the message
-			console.log("************* 222222222");
 			setTimeout(function(){ $messageDiv.hide().html('');}, 3000); // 3 seconds later, hide
-			console.log("************* 3333333333");
 			                                                             // and clear the message
 		},
 		error : function(jqXHR, textStatus, errorThrown) {

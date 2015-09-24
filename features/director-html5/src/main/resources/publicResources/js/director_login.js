@@ -7,6 +7,7 @@ var DIRECTOR_PAGES = [
     {"href": "vm_images_page.html", "target": "#main", "target_tab": "create_policy_wizard"},
     {"href": "help.html", "target": "#main", "target_tab": "help"},
     {"href": "logout.html", "target": "#main", "target_tab": "logout"},
+    {"href": "settings_upload_image_to_director.html", "target": "#main", "target_tab": "settings_upload_image_to_director"},
     {"href": "license.html", "target": "#main", "target_tab": "license"},
     {"href": "/v1/resources/profile.html", "target": "#main", "target_tab": "my_profile"},
     {"href": "/v1/resources/users.html", "target": "#main", "target_tab": "users"},
