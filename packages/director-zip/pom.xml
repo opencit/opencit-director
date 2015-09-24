@@ -1,12 +1,12 @@
-	<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+<groupId>com.intel.mtwilson.director</groupId>
 
     <artifactId>director-zip</artifactId>
     <packaging>jar</packaging>
-    <description>Key management server</description>
-        <version>0.1-SNAPSHOT</version>
-
+<version>0.1-SNAPSHOT</version>
+    <description>TDAAS</description>
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-core-application-zip</artifactId>
@@ -58,9 +58,16 @@
             <classifier>feature</classifier>
             <type>zip</type>
         </dependency>
+    
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher</artifactId>
+        </dependency>
+        
+        <dependency>
+    <groupId>com.intel.mtwilson.core</groupId>
+    <artifactId>mtwilson-core-feature-inventory</artifactId>
+    <version>0.1-SNAPSHOT</version>
         </dependency>
         
         <!--
@@ -80,7 +87,15 @@
             <artifactId>mtwilson-core-jetty9</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-
+     
+        <!--
+        transitive dependency from kms-user
+        <dependency>
+            <groupId>com.intel.mtwilson.kms</groupId>
+            <artifactId>kms-user-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jersey2-util</artifactId>
@@ -97,7 +112,15 @@
             <artifactId>mtwilson-shiro-file</artifactId>
         </dependency>
         <!-- replacing the original login api with our new one that uses tokens and in-memory database -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-ws-v2</artifactId>
+            <version>${mtwilson.version}</version>
+        </dependency>
+        -->
 
+        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-extensions-cache</artifactId>
@@ -181,34 +204,44 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>        
+    
+	
+	
+        <dependency>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-glance</artifactId>
+  <version>0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-	    <groupId>com.intel.mtwilson.director</groupId>
-	    <artifactId>director-glance</artifactId>
-	 <version>${project.version}</version>
-	</dependency>
-        <dependency>
-	    <groupId>com.intel.mtwilson.director</groupId>
-	    <artifactId>director-images-api</artifactId>
-	 <version>${project.version}</version>
-	</dependency>
-        <dependency>
-	    <groupId>com.intel.mtwilson.director</groupId>
-	    <artifactId>director-images-ws</artifactId>
-	 <version>${project.version}</version>
-	</dependency>
-        <dependency>
-	    <groupId>com.intel.mtwilson.director</groupId>
-	    <artifactId>director-persistence</artifactId>
-	 <version>${project.version}</version>
-	</dependency>        
 
-       <dependency>
-	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>mtwilson-setup</artifactId>
-	 <version>3.0-SNAPSHOT</version>
-	</dependency>        
+	
+        <dependency>
+    <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-html5</artifactId>
 
+  <version>0.1-SNAPSHOT</version>
+        </dependency>
 
+	
+        <dependency>
+    <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-images-api</artifactId>
+
+  <version>0.1-SNAPSHOT</version>
+        </dependency>
+
+	
+        <dependency>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-images-ws</artifactId>
+  <version>0.1-SNAPSHOT</version>
+        </dependency>
+
+	
+        <dependency>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-persistence</artifactId>
+  <version>0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>  
 </project>

@@ -97,9 +97,9 @@ public class DbServiceTest {
 		 testImageUploadDao();
 		 testMiscellaneous();
 		 testImageStoreSettings();
-		 removeImageupload();
+	/*	 removeImageupload();
 		 removeAllImagesEntries();
-		 removeAllImageStoreSettingsEntries();
+		 removeAllImageStoreSettingsEntries();*/
 	 }
 	 
 	 

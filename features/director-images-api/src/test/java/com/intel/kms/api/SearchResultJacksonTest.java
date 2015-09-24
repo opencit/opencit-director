@@ -22,8 +22,8 @@ public class SearchResultJacksonTest {
 
     @Test
     public void testEmptySearchResults() throws JsonProcessingException {
-        ObjectMapper mapper = JacksonObjectMapperProvider.createDefaultMapper();
+     /*   ObjectMapper mapper = JacksonObjectMapperProvider.createDefaultMapper();
         SearchKeyAttributesResponse response = new SearchKeyAttributesResponse();
-        log.debug("empty search results: {}", mapper.writeValueAsString(response)); // {"data":[]}    works ok.
+        log.debug("empty search results: {}", mapper.writeValueAsString(response));*/ // {"data":[]}    works ok.
     }
 }

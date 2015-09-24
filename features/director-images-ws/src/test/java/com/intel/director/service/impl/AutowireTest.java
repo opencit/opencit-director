@@ -17,8 +17,8 @@ public class AutowireTest {
 
     public static void main(String[] args) {
         ApplicationContext context = new ClassPathXmlApplicationContext("director-images-config.xml");
-        ImageService imageService = (ImageService) context.getBean("imageServiceBean");
-        imageService.pleaseAutoWire();
+       
+   ///     imageService.pleaseAutoWire();
 
     }
 }

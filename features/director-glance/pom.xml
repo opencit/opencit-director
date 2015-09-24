@@ -3,6 +3,7 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-glance</artifactId>
     <packaging>jar</packaging>
+        <version>0.1-SNAPSHOT</version>
 
     <description>Director request and response data structures</description>
     <parent>
@@ -54,16 +55,24 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-configuration</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-			<version>2.0.2</version>
-		</dependency>
+
+<dependency>
+	<groupId>org.json</groupId>
+	<artifactId>json</artifactId>
+	<version>20141113</version>
+</dependency>
+
 
         <dependency>
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>
 			<version>5.4.0</version>
         </dependency>
+<dependency>
+	<groupId>com.googlecode.json-simple</groupId>
+	<artifactId>json-simple</artifactId>
+	<version>1.1.1</version>
+</dependency>
+
     </dependencies>
 </project>

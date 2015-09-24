@@ -54,9 +54,9 @@ function displayNextCreatePolicyPage(){
 }
 
 
-function displayPreviousCreatePolicyPage(divid){
-	var divid1=$('#'+masterStepsDiv).find( "li .selected" ).attr('id');
-	divid=divid1;
+function displayPreviousCreatePolicyPage(){
+	var divid=$('#'+masterStepsDiv).find( "li .selected" ).attr('id');
+	
 	var n = divid.lastIndexOf("_");
 	
 	 var stepNum = divid.substring(n+1);

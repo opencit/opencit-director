@@ -8,8 +8,8 @@
     <packaging>pom</packaging>
   
     <modules>
-        <module>director-linux-installer</module>
-        <module>director-linux-makeself</module>
         <module>director-zip</module>
+
+        <module>director-linux-makeself</module>
     </modules>
 </project>

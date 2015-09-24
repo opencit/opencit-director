@@ -108,7 +108,6 @@
   margin: 25px 0 0 0;
   padding:5px;
   height:80px;
-  width:240px;
   text-decoration: none;
   outline-style:none;
   -moz-border-radius  : 5px;
@@ -118,10 +117,10 @@
 .swMain ul.anchor li a .stepNumber{
   position:relative;
   float:left;
-  width:30px;
+
   text-align: center;
   padding: 0 5px 5px;
-  font: bold 41px Verdana, Arial, Helvetica, sans-serif;
+  font: bold 33px Verdana, Arial, Helvetica, sans-serif;
 }
 .swMain ul.anchor li a .stepDesc{
   position:relative;
@@ -130,10 +129,10 @@
   text-align: left;
   padding:5px;
 
-  font: bold 18px Verdana, Arial, Helvetica, sans-serif;
+  font: bold 15px Verdana, Arial, Helvetica, sans-serif;
 }
 .swMain ul.anchor li a .stepDesc small{
-  font: normal 12px Verdana, Arial, Helvetica, sans-serif;
+  font: normal 11px Verdana, Arial, Helvetica, sans-serif;
 }
 .swMain ul.anchor li a.selected{
   color:#F8F8F8;

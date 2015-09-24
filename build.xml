@@ -13,7 +13,7 @@
 	</target>
 	
 	<target name="init">
-		<condition property="cmd.maven" value="mvn.bat">
+		<condition property="cmd.maven" value="mvn.cmd">
 			<os family="windows"/>
 		</condition>
 		<condition property="cmd.maven" value="mvn">
@@ -58,7 +58,7 @@
 		<fail message="Cannot install director-maven-package-makeself" status="${mavenExitInstallPackageMakeselfPom}">
 			<condition><not><equals arg1="${mavenExitInstallPackageMakeselfPom}" arg2="0"/></not></condition>
 		</fail>
--->
+		-->
 	</target>
 	
 	<target name="clean" depends="init">
@@ -76,10 +76,18 @@
 		<fail message="Cannot clean project packages" status="${mavenExitCleanPackages}">
 			<condition><not><equals arg1="${mavenExitCleanPackages}" arg2="0"/></not></condition>
 		</fail>
+		<!-- the maven poms -->
+		<exec executable="${cmd.maven}" dir="maven" resultproperty="mavenExitCleanMaven">
+			<arg value="clean"/>
+		</exec>
+		<fail message="Cannot clean build files" status="${mavenExitCleanMaven}">
+			<condition><not><equals arg1="${mavenExitCleanMaven}" arg2="0"/></not></condition>
+		</fail>
+
 	</target>
 	
 	<target name="build" depends="init">
-		<!-- the root pom and all projects except packages -->	
+		<!-- the root pom and all projects except packages (has its own "packages" target) and maven (was built by "ready" target) -->	
 		<exec executable="${cmd.maven}"  resultproperty="mavenExitInstall">
 			<arg value="-DskipTests=true"/>
 			<arg value="install"/>
@@ -99,5 +107,7 @@
 			<condition><not><equals arg1="${mavenExitInstallPackages}" arg2="0"/></not></condition>
 		</fail>
 	</target>
+
 	<target name="all" depends="ready,clean,build,packages"></target>
+	
 </project>

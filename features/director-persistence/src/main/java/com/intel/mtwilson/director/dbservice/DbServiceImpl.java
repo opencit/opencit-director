@@ -183,10 +183,14 @@ public class DbServiceImpl implements IPersistService {
      * @see com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyForImage(java.lang.String)
      */
     public TrustPolicy fetchPolicyForImage(String imageId) throws DbException {
+    	
         TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
         trustPolicyFilter.setImage_id(imageId);
         List<MwTrustPolicy> mwTrustPolicyList = policyDao.findMwTrustPolicyEntities(trustPolicyFilter,
                 null);
+        if(mwTrustPolicyList.size()==0){
+        	return null;
+        }
         return mapper.toTransferObject(mwTrustPolicyList.get(0));
     }
 
@@ -200,6 +204,9 @@ public class DbServiceImpl implements IPersistService {
         trustPolicydraftFilter.setImage_id(imageId);
         List<MwTrustPolicyDraft> mwTrustPolicyDraftList = policyDraftDao.findMwTrustPolicyDraftEntities(trustPolicydraftFilter,
                 null);
+        if(mwTrustPolicyDraftList.size()==0){
+        	return null;
+        }
         return mapper.toTransferObject(mwTrustPolicyDraftList.get(0));
     }
 

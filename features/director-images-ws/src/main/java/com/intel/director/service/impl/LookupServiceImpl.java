@@ -39,8 +39,8 @@ public class LookupServiceImpl implements LookupService {
     public ListImageLaunchPoliciesResponse getImageLaunchPolicies() {
         ListImageLaunchPoliciesResponse imageLaunchPoliciesResponse = new ListImageLaunchPoliciesResponse();
         imageLaunchPoliciesResponse.image_launch_policies = new ArrayList<>();
-        imageLaunchPoliciesResponse.image_launch_policies.add("Measure only");
-        imageLaunchPoliciesResponse.image_launch_policies.add("Measure and Enforce");
+        imageLaunchPoliciesResponse.image_launch_policies.add("MeasureOnly");
+        imageLaunchPoliciesResponse.image_launch_policies.add("MeasureAndEnforce");
         return imageLaunchPoliciesResponse;
     }
 

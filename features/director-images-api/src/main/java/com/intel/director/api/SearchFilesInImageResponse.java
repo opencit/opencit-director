@@ -7,11 +7,24 @@ package com.intel.director.api;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
- *
+ * 
  * @author soakx
  */
+@JsonInclude(Include.NON_NULL)
 public class SearchFilesInImageResponse {
+	@JsonIgnore
+	public List<String> files;
+	@JsonIgnore
+	public List<String> getFiles() {
+		return files;
+	}
 
-    public List<String> files;
+	
+	public List<String> patchXML = null;
+	public String treeContent = null;
 }

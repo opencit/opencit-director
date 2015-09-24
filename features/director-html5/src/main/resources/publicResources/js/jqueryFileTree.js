@@ -45,14 +45,15 @@ if(jQuery) (function($){
 			if( o.collapseEasing == undefined ) o.collapseEasing = null;
 			if( o.multiFolder == undefined ) o.multiFolder = true;
 			if( o.loadMessage == undefined ) o.loadMessage = 'Loading...';
+			if( o.init == undefined ) o.init = false;
 			
 			$(this).each( function() {
-				
-				function showTree(c, t) {
+				console.log("Hello");
+				function showTree(c, treeOptions) {
 					$(c).addClass('wait');
 					$(".jqueryFileTree.start").remove();
-				
-					var formData = JSON.stringify({dir: t });
+					canPushPatch = false;
+					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, filesForPolicy: treeOptions.filesForPolicy , init: treeOptions.init, include:treeOptions.include});
 					$.ajax({
 					  type: "POST",
 					  url: o.script,
@@ -60,16 +61,19 @@ if(jQuery) (function($){
 					contentType: "application/json",
 					  success: function(data, status) {
 						$(c).find('.start').html('');
-						$(c).removeClass('wait').append(data);
-						if( o.root == t ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
-						bindTree(c);
+						var response = data;						
+						$(c).removeClass('wait').append(data.treeContent);
+						if(!(response.patchXML == null)){
+							editPatchWithDataFromServer(response.patchXML);
+						}
+						if( o.root == treeOptions.dir ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
+							bindTree(c);
 						},
 						 error: function (jqXHR, textStatus, errorThrown)
 					    {
 					 		alert("ERROR");
 					    },
-					});
-					
+					});					
 				}
 				
 				var eventHandlerFunction=function() {
@@ -81,7 +85,12 @@ if(jQuery) (function($){
 								$(this).parent().parent().find('LI.directory').removeClass('expanded').addClass('collapsed');
 							}
 							$(this).parent().find('UL').remove(); // cleanup
-							showTree( $(this).parent(), escape($(this).attr('rel').match( /.*\// )) );
+							var treeOptions = {};
+							treeOptions.dir = escape($(this).attr('rel').match( /.*\// ));
+							treeOptions.recursive = false;
+							treeOptions.filesForPolicy = false;
+
+							showTree( $(this).parent(), treeOptions );
 							$(this).parent().removeClass('collapsed').addClass('expanded');
 						} else {
 							// Collapse
@@ -95,15 +104,40 @@ if(jQuery) (function($){
 			function bindTree(t) {
 				$(t).find('LI A').bind(o.folderEvent, eventHandlerFunction);
 				$(t).find('LI input').bind(o.folderEvent, function() {
-						h($(this).attr('id'), $(this).is(':checked'));
+							if( $(this).parent().hasClass('directory') ) {							
+								$(this).parent().find('UL').remove(); // cleanup
+								var treeOptions = {};
+								treeOptions.dir = escape($(this).attr('id'));
+								treeOptions.recursive = true;
+								treeOptions.filesForPolicy = false;
+								//if($(this).attr('checked')){
+								if(this.checked){
+									treeOptions.filesForPolicy = true;
+								}
+								showTree( $(this).parent(),  treeOptions);
+								$(this).parent().removeClass('collapsed').addClass('expanded');
+
+							}else{								
+								//h($(this).attr('id'), isChecked);
+								h($(this).attr('id'), this.checked);
+							}
+							var isChecked = this.checked;//$(this).attr('checked') ;
+							if(isChecked){
+								$(this).parent().addClass('selected');
+							}else{
+								$(this).parent().removeClass('selected');
+							}
 				});
 				// Prevent A from triggering the # on non-click events
 				if( o.folderEvent.toLowerCase != 'click' ) $(t).find('LI A').bind('click', function() { return false; });
 			}
 				// Loading message
-				$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + o.loadMessage + '<li></ul>');
+				if(o.init){
+					$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + o.loadMessage + '<li></ul>');
+				}
 				// Get the initial file list
-				showTree( $(this), escape(o.root) );
+				o.dir = escape(o.dir);
+				showTree( $(this), o );
 			});
 		}
 	});

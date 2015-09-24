@@ -4,7 +4,7 @@ var DIRECTOR_PAGES = [
     {"href": "navbar.html", "target": "#navbar"},
     {"href": "dashboard.html", "target": "#main", "target_tab": "dashboard"}, // TODO:  target_tab should be calculated automatically or generated and synchronized with the links ... the links should be generated from this list too...
     {"href": "settings.html", "target": "#main", "target_tab": "settings"},
-    {"href": "create_policy_wizard.html", "target": "#main", "target_tab": "create_policy_wizard"},
+    {"href": "vm_images_page.html", "target": "#main", "target_tab": "create_policy_wizard"},
     {"href": "help.html", "target": "#main", "target_tab": "help"},
     {"href": "logout.html", "target": "#main", "target_tab": "logout"},
     {"href": "license.html", "target": "#main", "target_tab": "license"},
@@ -33,7 +33,7 @@ function LoginViewModel() {
     self.loginRequest = new LoginRequest({});
     self.userProfile = new UserProfile({});
     self.options = {
-        "postLoginActivatePage": "create_policy_wizard.html",  // dashboard should be the first view we show after login; dashboard can then load the "run once" or "are there notifications" code.
+        "postLoginActivatePage": "vm_images_page.html",  // dashboard should be the first view we show after login; dashboard can then load the "run once" or "are there notifications" code.
         "postLogoutRedirect": "index.html" //  where to send user after logout is done
     };
 

@@ -39,7 +39,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class ImageServiceImplTest {
 
     ImageService imageService;
-    ImageStoreManagerImpl imageStoreManager;
+  
     String imageId = "123";
     String user = "soak";
     MountVMImage mountVMImageService;
@@ -50,8 +50,8 @@ public class ImageServiceImplTest {
     @Before
     public void setup() throws NoSuchAlgorithmException {
         imagePersistenceManager = Mockito.mock(IPersistService.class);
-        imageStoreManager = Mockito.mock(ImageStoreManagerImpl.class);
-        imageService = new ImageServiceImpl(imagePersistenceManager, imageStoreManager);
+    
+        imageService = new ImageServiceImpl(imagePersistenceManager);
         PowerMockito.mockStatic(MountVMImage.class);
         imageAttributes = new ImageInfo();
         imageAttributes.id = imageId;

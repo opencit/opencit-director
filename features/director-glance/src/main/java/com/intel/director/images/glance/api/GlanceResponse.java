@@ -10,12 +10,5 @@ package com.intel.director.images.glance.api;
  * @author GS-0681
  */
 public class GlanceResponse {
-
-    public String status;
-    public boolean visibility;
-    public String id;
-    public int size;
-    public String name;
-    public String checksum;
-    public String file;
+	public Image image;
 }

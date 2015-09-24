@@ -5,6 +5,9 @@
  */
 package com.intel.director.service;
 
+import java.io.File;
+import java.util.Map;
+
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.exception.ImageStoreException;
@@ -16,11 +19,13 @@ import com.intel.director.images.exception.DirectorException;
  */
 public interface ImageStoreManager {
 
-    public ImageStoreResponse uploadImage(ImageStoreRequest imageStoreUploadRequest) throws ImageStoreException, DirectorException;
+    public ImageStoreResponse upload(File file, Map<String, String> imageProperties) throws  DirectorException;
+    
+    
 
-    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException, ImageStoreException;
+   public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException;
 
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException;
+    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException;
 
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException;
+    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException;
 }

@@ -5,17 +5,20 @@
  */
 package com.intel.director.api;
 
+import java.io.File;
+import java.util.Map;
+
 /**
  *
  * @author GS-0681
  */
 public interface ImageStoreManager {
 
-    public ImageStoreResponse uploadImage(ImageStoreRequest imageStoreUploadRequest);
+    public void upload(File file, Map<String, String> imageProperties);
 
-    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest);
+  /*  public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest);
 
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest);
+    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest);*/
 
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest);
+   /// public ImageStoreResponse fetchImageUploadDetails(ImageStoreRequest imageStoreDeleteRequest);
 }

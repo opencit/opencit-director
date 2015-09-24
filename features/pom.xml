@@ -3,13 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-features</artifactId>
-    <packaging>pom</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
 
     <modules>
-        <module>director-glance</module>
-        <module>director-html5</module>
         <module>director-images-api</module>
+		<module>director-persistence</module>
         <module>director-images-ws</module>
-        <module>director-persistence</module>        
+		<module>director-glance</module>
+        <module>director-html5</module>
+        
+                
     </modules>
 </project>

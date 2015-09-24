@@ -1,7 +1,10 @@
 package com.intel.director.service;
 
+import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
+import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
+import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
@@ -48,10 +51,13 @@ public interface ImageService {
 
     public SearchFilesInImageResponse searchFilesInImage(SearchFilesInImageRequest searchFilesInImageRequest);
 
-    public ImageStoreResponse uploadImageToImageStore(ImageStoreRequest imageStoreUploadRequest) throws DirectorException, ImageStoreException;
+    public ImageStoreResponse uploadImageToImageStore(ImageStoreUploadRequest imageStoreUploadRequest) throws DirectorException;
 
 	public String getTrustPolicyForImage(String imageId);
 	
 	public void editTrustPolicyDraft(TrustPolicyDraftEditRequest trustPolicyDraftEditRequest);
-
+	
+	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) throws DirectorException; 
+	
+	public CreateTrustPolicyMetaDataRequest getPolicyMetadata(String draftid) throws DirectorException;
 }

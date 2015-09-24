@@ -11,30 +11,30 @@
      
 
   			<span>
-  			<div class="row col-md-12" " >
+  			<div class="row col-md-12">
   			  <div class="col-md-3"></div>
 				            <div id="wizard" class="swMain col-md-6" style="margin-top: 3px;">   
 				     
-  			<ul class="anchor" id="createPolicySteps">
-  				<li><a href="#create_policy.html" id="create_policy_step_1" class="selected" style="margin-top: 5px;" isdone="1" rel="1">
-                <label class="stepNumber">1</label>
-                <span class="stepDesc">
+  			<ul class="anchor col-md-12" id="createPolicySteps">
+  				<li class="col-md-4" ><a href="#create_policy.html" id="create_policy_step_1" class="selected col-md-12" style="margin-top: 5px;" isdone="1" rel="1">
+                <label class="stepNumber col-md-2">1</label>
+                <span class="stepDesc col-md-10">
                    Policy Metadata<br>
-                   <small>Enter basic details required <br> for policy generation</small>
+                   <small>Enter basic details    for policy generation</small>
                 </span>
             </a></li>
-  				<li><a href="#create_policy_select_directories.html" id="create_policy_step_2"  class="disabled" style="margin-top: 5px;" isdone="0" rel="2">
-                <label class="stepNumber">2</label>
-                <span class="stepDesc">
+  				<li class="col-md-4"><a href="#create_policy_select_directories.html" id="create_policy_step_2"  class="disabled col-md-12" style="margin-top: 5px;" isdone="0" rel="2">
+                <label class="stepNumber col-md-2">2</label>
+                <span class="stepDesc col-md-10">
                    Select Files<br>
-                   <small>Select file/directories for<br> calculating hash </small>
+                   <small>Select file/directories  for calculating hash </small>
                 </span>
             </a></li>
-  				<li><a href="#upload_imagestore.html" id="create_policy_step_3"  class="disabled" isdone="0" style="margin-top: 5px;" rel="3">
-                <label class="stepNumber">3</label>
-                <span class="stepDesc">
+  				<li class="col-md-4" ><a href="#upload_imagestore.html" id="create_policy_step_3"  class="disabled col-md-12" isdone="0" style="margin-top: 5px;" rel="3">
+                <label class="stepNumber col-md-2">3</label>
+                <span class="stepDesc col-md-10">
                    Upload to Store<br>
-                   <small>Upload Policy generated <br> to image store</small>
+                   <small>Upload Policy generated  to image store</small>
                 </span>                   
              </a></li>
   				
@@ -53,7 +53,7 @@
 					
 		 
 		 
-  
+  		
         <script type="text/javascript">
         var endpoint = "/v1/images/";
             /*
@@ -66,17 +66,9 @@
             
         */
         
-        console.log("createimage.html script");
-            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/create_policy_wizard.js'], function() { 
-                console.log("createTrustPolicy.html: loaded scripts");
-            // add our view models to the main view model defined by index.html
-           
-        /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
-            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
-            });
-
+       
 
         </script>
-
+ <script src="js/create_policy_wizard.js"></script>
     </body>
 </html>

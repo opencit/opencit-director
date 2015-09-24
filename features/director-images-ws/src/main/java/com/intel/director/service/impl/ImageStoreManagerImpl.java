@@ -9,9 +9,11 @@ import com.intel.dcsg.cpg.extensions.Plugins;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.api.ImageStoreManager;
+import com.intel.director.service.ImageStoreManager;
 import com.intel.director.util.DirectorUtil;
 import org.slf4j.Logger;
+import java.util.Map;
+import java.io.File;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -21,57 +23,14 @@ import org.slf4j.LoggerFactory;
 public class ImageStoreManagerImpl implements ImageStoreManager {
 
     private static final Logger log = LoggerFactory.getLogger(ImageStoreManagerImpl.class);
+    public ImageStoreResponse upload(File file, Map<String, String> imageProperties) throws  DirectorException{return null;}
+    
+    
 
-    protected ImageStoreManager getImageStoreManager(ImageStoreRequest imageStoreRequest) throws DirectorException {
-        return Plugins.findByAttribute(ImageStoreManager.class, "class", DirectorUtil.getImageStoreManager(imageStoreRequest.image_store_name));
-    }
+   public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException{return null;}
 
-    @Override
-    public ImageStoreResponse uploadImage(ImageStoreRequest imageStoreUploadRequest) {
-        //Get the image store implementation for the store requested        
-        ImageStoreResponse imageStoreUploadResponse = null;
+    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException{return null;}
 
-        try {
-            imageStoreUploadResponse = getImageStoreManager(imageStoreUploadRequest).uploadImage(imageStoreUploadRequest);
-        } catch (DirectorException ex) {
-            log.error("Error uploading image", ex);
-        }
-
-        return imageStoreUploadResponse;
-    }
-
-    @Override
-    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) {
-        //Get the image store implementation for the store requested
-        ImageStoreResponse imageStoreResponse = null;
-        try {
-            imageStoreResponse = getImageStoreManager(imageStoreSearchRequest).searchImages(imageStoreSearchRequest);
-        } catch (DirectorException ex) {
-            log.error("Error searching image", ex);
-        }
-        return imageStoreResponse;
-    }
-
-    @Override
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) {
-        ImageStoreResponse imageStoreSearchResponse = null;
-        try {
-            imageStoreSearchResponse = getImageStoreManager(imageStoreDeleteRequest).searchImages(imageStoreDeleteRequest);
-        } catch (DirectorException ex) {
-            log.error("Error deleting image", ex);
-        }
-        return imageStoreSearchResponse;
-    }
-
-    @Override
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) {
-        ImageStoreResponse imageStoreSearchResponse = null;
-        try {
-            imageStoreSearchResponse = getImageStoreManager(imageStoreDeleteRequest).fetchImageDetails(imageStoreDeleteRequest);
-        } catch (DirectorException ex) {
-            log.error("Error fetching image", ex);
-        }
-        return imageStoreSearchResponse;
-    }
+    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException{return null;}
 
 }
