@@ -70,7 +70,6 @@ import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.director.api.ImageListResponse;
 
 /**
  * 
@@ -223,19 +222,14 @@ public class Images extends Application {
 	@Path("/browse/{imageId: [0-9a-zA-Z_-]+}/search")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	//@Produces(MediaType.TEXT_PLAIN)
-	@Produces(MediaType.APPLICATION_JSON)
-
-	public SearchFilesInImageResponse searchFilesInImage(@PathParam("imageId") String imageId,
+	@Produces(MediaType.TEXT_PLAIN)
+	public String searchFilesInImage(@PathParam("imageId") String imageId,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
 		imageService = new ImageServiceImpl();
 		SearchFilesInImageResponse filesInImageResponse = imageService
 				.searchFilesInImage(searchFilesInImageRequest);
 		String join = StringUtils.join(filesInImageResponse.files, "");
-		filesInImageResponse.treeContent = join;
-		
-		//return join;
-		return filesInImageResponse;
+		return join;
 	}
 
 	@Path("/trustpolicies/{trustpolicy_id: [0-9a-zA-Z_-]+}/sign")
@@ -252,8 +246,11 @@ public class Images extends Application {
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public ImageStoreResponse uploadImageToImageStore(
-			ImageStoreRequest imageStoreRequest) {
-		return null;
+			ImageStoreUploadRequest imageStoreUploadRequest) throws DirectorException {
+		
+		
+		
+		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
 	}
 
 	/**
@@ -291,14 +288,6 @@ public class Images extends Application {
 		return imageService.getPolicyMetadata(draftid);
 	}
 	
-@Path("/imagesList/{image_deployment: [a-zA-Z_-]+}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public ImageListResponse getImages(@PathParam("image_deployment") String draftid) throws DirectorException {
-		return imageService.getImages(draftid);
-	}
-
-
 	
 	@Path("/imagestores")
 	@GET

@@ -36,7 +36,7 @@ public class TreeNode {
 	}
 	
 	public void checkNode(){
-		this.checked = " checked=\"true\"";
+		this.checked = "checked=\"true\"";
 	}
 
 

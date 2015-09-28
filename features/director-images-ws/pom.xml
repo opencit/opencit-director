@@ -3,7 +3,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.intel.mtwilson.director</groupId>
 	<artifactId>director-images-ws</artifactId>
-	<packaging>jar</packaging>
     <version>0.1-SNAPSHOT</version>
 
 	<description>Director request and response data structures</description>

@@ -4,7 +4,6 @@
         <version>0.1-SNAPSHOT</version>
 <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-html5</artifactId>
-    <packaging>jar</packaging>
     <description>HTML5 user interface to Director</description>
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>

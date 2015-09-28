@@ -212,22 +212,26 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-glance</artifactId>
   <version>0.1-SNAPSHOT</version>
+ <classifier>feature</classifier>
+<type>zip</type>
         </dependency>
 
 	
         <dependency>
     <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-html5</artifactId>
-
+ <classifier>feature</classifier>
   <version>0.1-SNAPSHOT</version>
+<type>zip</type>
         </dependency>
 
 	
         <dependency>
     <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-images-api</artifactId>
-
+ <classifier>feature</classifier>
   <version>0.1-SNAPSHOT</version>
+<type>zip</type>
         </dependency>
 
 	
@@ -235,6 +239,8 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-images-ws</artifactId>
   <version>0.1-SNAPSHOT</version>
+ <classifier>feature</classifier>
+<type>zip</type>
         </dependency>
 
 	
@@ -242,6 +248,22 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-persistence</artifactId>
   <version>0.1-SNAPSHOT</version>
+ <classifier>feature</classifier>
+<type>zip</type>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup-ext</artifactId>
+            <version>3.0-SNAPSHOT</version>
+
         </dependency>
     </dependencies>  
 </project>

@@ -1,8 +1,8 @@
 <configuration>
 
     <appender name="LogFile" class="ch.qos.logback.core.FileAppender">
-        <!-- environment variable or JVM property KMS_LOGS must be set -->
-        <file>${KMS_LOGS:-/opt/kms/logs}/kms.log</file>
+        <!-- environment variable or JVM property director_LOGS must be set -->
+        <file>${DIRECTOR_LOGS:-/opt/director/logs}/director.log</file>
         <append>true</append>
         <encoder>
             <pattern>[%date] %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -43,7 +43,7 @@
         </encoder>
     </appender>
 
-    <root level="${KMS_LOG_LEVEL:-INFO}">
+    <root level="${DIRECTOR_LOG_LEVEL:-INFO}">
         <appender-ref ref="LogFile"/>
         <appender-ref ref="ConsoleError"/>
         <appender-ref ref="ConsoleWarn"/>

@@ -116,7 +116,6 @@ CLASSPATH=$CLASSPATH:$(find "$JAVA_HOME" -name jfxrt*.jar | head -n 1)
 # able to see the full command line in ps because the output is normally
 # truncated at 4096 characters. so we export the classpath to the environment
 export CLASSPATH
-echo $CLASSPATH
 ###################################################################################################
 
 # run a director command

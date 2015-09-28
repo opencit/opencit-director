@@ -5,13 +5,13 @@ var image_policies=new Array();
 
 $.ajax({
     type: "GET",
-    url:  endpoint+current_image_id+"/getpolicymetadataforimage",
+    url:  endpoint+"trustpolicies/"+current_trust_policy_id+"/getmetadata",
 //                accept: "application/json",
     contentType: "application/json",
     headers: {'Accept': 'application/json'},
     dataType: "json",
     success: function(data, status, xhr) {
-    ///	alert("getmetadata data::"+data);
+    	alert("getmetadata data::"+data);
     	showImageLaunchPolicies(data);
     	
     
@@ -37,7 +37,7 @@ $.ajax({
 function EditImageMetaData(data) {
 	
 	   
-
+alert("data.image_name::"+data.image_name);
 	this.imageid=current_image_id;
 	this.image_name=ko.observable(current_image_name);
 ///	this.isEncrypted=ko.observable(false);
@@ -66,8 +66,8 @@ function EditImageViewModel(data) {
         headers: {'Accept': 'application/json'},
         data: ko.toJSON(self.editImageMetaData), //$("#loginForm").serialize(), 
         success: function(data, status, xhr) {
-        ///	alert("post success"+data);
-        	nextButton();
+        	alert("post success"+data);
+       	displayNextEditPolicyPage();
         }
     });
     

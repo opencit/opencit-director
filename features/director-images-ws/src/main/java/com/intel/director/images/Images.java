@@ -60,7 +60,6 @@ import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SignTrustPolicyResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
-import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.exception.ImageStoreException;
@@ -71,7 +70,6 @@ import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.director.api.ImageListResponse;
 
 /**
  * 
@@ -112,7 +110,7 @@ public class Images extends Application {
 		imageService = new ImageServiceImpl();
 		TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService
 				.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
-		trustDirectorImageUploadResponse.imageUploadUrl = "/v1/images/uploads/"
+		trustDirectorImageUploadResponse.imageUploadUrl = "/v1/images/"
 				+ trustDirectorImageUploadResponse.id + "/content";
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper
@@ -191,16 +189,14 @@ public class Images extends Application {
 		return unmountImageResponse;
 	}
 
-	/*
-	 * @Path("/trustpolicies/")
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON)
-	 * 
-	 * @POST public CreateTrustPolicyResponse createTrustPolicy(
-	 * CreateTrustPolicyRequest createTrustPolicyRequest) { return null; }
-	 */
+	@Path("/trustpolicies")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public CreateTrustPolicyResponse createTrustPolicy(
+			CreateTrustPolicyRequest createTrustPolicyRequest) {
+		return null;
+	}
 
 	@Path("/policydraft/{imageId: [0-9a-zA-Z_-]+}/edit")
 	@POST
@@ -226,18 +222,18 @@ public class Images extends Application {
 	@Path("/browse/{imageId: [0-9a-zA-Z_-]+}/search")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	// @Produces(MediaType.TEXT_PLAIN)
+	//@Produces(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
-	public SearchFilesInImageResponse searchFilesInImage(
-			@PathParam("imageId") String imageId,
+
+	public SearchFilesInImageResponse searchFilesInImage(@PathParam("imageId") String imageId,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
 		imageService = new ImageServiceImpl();
 		SearchFilesInImageResponse filesInImageResponse = imageService
 				.searchFilesInImage(searchFilesInImageRequest);
 		String join = StringUtils.join(filesInImageResponse.files, "");
 		filesInImageResponse.treeContent = join;
-
-		// return join;
+		
+		//return join;
 		return filesInImageResponse;
 	}
 
@@ -255,9 +251,8 @@ public class Images extends Application {
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public ImageStoreResponse uploadImageToImageStore(
-			ImageStoreUploadRequest imageStoreUploadRequest)
-			throws DirectorException {
-		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
+			ImageStoreRequest imageStoreRequest) {
+		return null;
 	}
 
 	/**
@@ -287,53 +282,27 @@ public class Images extends Application {
 	public ListImageLaunchPoliciesResponse getImageLaunchPolicies() {
 		return lookupService.getImageLaunchPolicies();
 	}
-
+	
 	@Path("/trustpolicies/{trustpolicyid}/getmetadata")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadata(
-			@PathParam("trustpolicyid") String draftid)
-			throws DirectorException {
+	public CreateTrustPolicyMetaDataRequest getPolicyMetadata(@PathParam("trustpolicyid") String draftid) throws DirectorException {
 		return imageService.getPolicyMetadata(draftid);
 	}
-
-	@Path("/{image_id: [0-9a-zA-Z_-]+}/getpolicymetadataforimage")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadataForImage(
-			@PathParam("image_id") String image_id) throws DirectorException {
-		return imageService.getPolicyMetadataForImage(image_id);
-	}
-
-	@Path("/{image_id: [0-9a-zA-Z_-]+}/createpolicy")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public TrustPolicy createTrustPolicy(@PathParam("image_id") String image_id) throws DirectorException {
-
-		return imageService.createTrustPolicy(image_id);
-	}
-
-	@Path("/imagesList/{image_deployment: [a-zA-Z_-]+}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public ImageListResponse getImages(
-			@PathParam("image_deployment") String draftid)
-			throws DirectorException {
-		return imageService.getImages(draftid);
-	}
-
+	
+	
 	@Path("/imagestores")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public GetImageStoresResponse getImageStores() throws DirectorException {
-		GetImageStoresResponse imageStores = new GetImageStoresResponse();
-		List<String> imageStoreNames = new ArrayList<String>();
+		GetImageStoresResponse imageStores= new GetImageStoresResponse();
+		List<String> imageStoreNames= new ArrayList<String>();
 		imageStoreNames.add("Glance");
 		imageStoreNames.add("Swift");
 		imageStores.setImageStoreNames(imageStoreNames);
 		return imageStores;
 	}
+	
 
 	/**
 	 * Utility methods
@@ -385,7 +354,7 @@ public class Images extends Application {
 
 	(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
 			throws DirectorException {
-
+	
 		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = imageService
 				.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 

@@ -1,27 +1,25 @@
 		var endpoint = "/v1/images/";
 
-		
-		
-		
-				function EditSelectDirectoriesMetaData(data) {
+
+				function SelectDirectoriesMetaData(data) {
 	
-				
-					this.imageid = current_image_id;
+					alert("SelectDirectoriesMetaData currentEditPolicyImageId::"+currentEditPolicyImageId);
+					this.imageid = currentCreatePolicyImageId;
 					///this.image_name=ko.observable();
 
 				}
 
 			
-				function EditSelectDirectoriesViewModel() {
+				function SelectDirectoriesViewModel() {
 					var self = this;
 				
-					self.editSelectDirectoriesMetaData = new EditSelectDirectoriesMetaData({});
+					self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 
-					self.editSelectDirectoriesSubmit = function(loginFormElement) {
+					self.selectDirectoriesSubmit = function(loginFormElement) {
 
 						////Code
 
-						displayNextEditPolicyPage();
+						displayNextCreatePolicyPage();
 
 					}
 
@@ -33,8 +31,8 @@
 					
 					   
 				this.dir_path=ko.observable();
-				///	this.create_policy_regex_exclude=ko.observable("");
-				///	this.create_policy_regex_include=ko.observable("");
+					this.create_policy_regex_exclude=ko.observable("");
+					this.create_policy_regex_include=ko.observable("");
 					
 				this.selected_image_format= ko.observable();
 
@@ -129,7 +127,7 @@
 					
 					$.ajax({
 						type: "POST",
-						url: "/v1/images/policydraft/"+current_image_id+"/edit",
+						url: "/v1/images/policydraft/"+currentCreatePolicyImageId+"/edit",
 						data: formData,
 						contentType: "application/json",
 						success: function(data, status) {
@@ -144,7 +142,7 @@
 				$(document)
 						.ready(
 								function() {
-								
+									alert("1 st time");
 									
 									if (pageInitialized)
 										return;
@@ -164,14 +162,14 @@
 																checkedStatus);
 													});
 									
-									mainViewModel.editSelectDirectoriesViewModel = new EditSelectDirectoriesViewModel();
+									mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
 									 mainViewModel.applyRegExViewModel  =  new ApplyRegExViewModel();
 									
 									ko
 											.applyBindings(
 													mainViewModel,
 													document
-															.getElementById("edit_policy_content_step_2"));
+															.getElementById("create_policy_content_step_2"));
 
 									pageInitialized = true;
 								});

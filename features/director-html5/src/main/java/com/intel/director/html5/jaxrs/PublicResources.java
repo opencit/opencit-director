@@ -29,7 +29,7 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
  * "public" directory in order to be found. Example jar structure:
  * <pre>
  * META-INF/services
- * public/*s
+ * public/*
  * com/example/*.class
  * </pre>
  *
