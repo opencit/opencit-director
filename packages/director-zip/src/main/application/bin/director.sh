@@ -174,7 +174,7 @@ director_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
       echo $! > $DIRECTOR_PID_FILE
     )
     if director_is_running; then
@@ -198,7 +198,7 @@ director_is_running() {
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # check the process list just in case the pid file is stale
-    DIRECTOR_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    DIRECTOR_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main jetty-start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # Trust Director is not running
