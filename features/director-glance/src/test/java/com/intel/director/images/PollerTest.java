@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
+import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.images.glance.constants.Constants;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 
@@ -38,7 +39,10 @@ public class PollerTest {
         imageProperties.put(com.intel.director.constants.Constants.CONTAINER_FORMAT,"bare");
         imageProperties.put(com.intel.director.constants.Constants.IS_PUBLIC, "true");
         File file = new File("C:/MysteryHill/DirectorAll/Docs/vm_launch.txt");
-        glanceImageStoreManager.upload(file ,imageProperties);
+        String id=glanceImageStoreManager.upload(file ,imageProperties);
+        ImageStoreUploadResponse resp=glanceImageStoreManager.fetchDetails(null, id);
+        System.out.println("ImageStoreUploadResponse::"+resp);
+        
         
     }
 }

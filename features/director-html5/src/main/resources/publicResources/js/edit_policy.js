@@ -5,13 +5,13 @@ var image_policies=new Array();
 
 $.ajax({
     type: "GET",
-    url:  endpoint+"trustpolicies/"+current_trust_policy_id+"/getmetadata",
+    url:  endpoint+current_image_id+"/getpolicymetadataforimage",
 //                accept: "application/json",
     contentType: "application/json",
     headers: {'Accept': 'application/json'},
     dataType: "json",
     success: function(data, status, xhr) {
-    	alert("getmetadata data::"+data);
+    ///	alert("getmetadata data::"+data);
     	showImageLaunchPolicies(data);
     	
     
@@ -37,7 +37,7 @@ $.ajax({
 function EditImageMetaData(data) {
 	
 	   
-alert("data.image_name::"+data.image_name);
+
 	this.imageid=current_image_id;
 	this.image_name=ko.observable(current_image_name);
 ///	this.isEncrypted=ko.observable(false);
@@ -57,6 +57,7 @@ function EditImageViewModel(data) {
     
     self.editImageMetaData.launch_control_policy=$('input[name=launch_control_policy]:checked').val();
     self.editImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
+    self.editImageMetaData.isEncrypted=$('input[name=isEncrypted]').is(':checked')
     	
     $.ajax({
         type: "POST",
@@ -66,8 +67,20 @@ function EditImageViewModel(data) {
         headers: {'Accept': 'application/json'},
         data: ko.toJSON(self.editImageMetaData), //$("#loginForm").serialize(), 
         success: function(data, status, xhr) {
-        	alert("post success"+data);
-       	displayNextEditPolicyPage();
+        	
+       	 $.ajax({
+             type: "POST",
+             url:  endpoint+current_image_id+"/mount",
+//                         accept: "application/json",
+             contentType: "application/json",
+             headers: {'Accept': 'application/json'},
+             data: ko.toJSON(self.createImageMetaData), //$("#loginForm").serialize(), 
+             success: function(data, status, xhr) {
+             	///alert("data"+data);
+            	nextButton();
+             }
+         });
+        	///nextButton();
         }
     });
     
@@ -98,7 +111,11 @@ function EditImageViewModel(data) {
 	        	image_policies=data.image_launch_policies;
 	     	 addRadios(image_policies);
 	     	$("input[name=launch_control_policy][value='" + policydata.launch_control_policy + "']").attr('checked', 'checked');
-	     	 
+	     
+	           $("input[name=asset_tag_policy][value='Trust Only']").attr('checked', 'checked');  
+	     	if(policydata.isEncrypted==true){
+	     		$("input[name=isEncrypted]").prop('checked', 'true'); 
+	     	 }
 	        	   mainViewModel.editImageViewModel  =  new EditImageViewModel(policydata);
 	        	   ///]   ko.cleanNode(mainViewModel);
 	        	   

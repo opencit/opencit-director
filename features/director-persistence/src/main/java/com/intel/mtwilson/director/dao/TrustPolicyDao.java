@@ -92,8 +92,11 @@ public class TrustPolicyDao {
 		try {
 			
 			em.getTransaction().begin();
-			MwTrustPolicy MwTrustPolicy = em.getReference(MwTrustPolicy.class, trustPolicy.getId());
-			em.remove(MwTrustPolicy);
+			MwTrustPolicy mwTrustPolicy = em.getReference(MwTrustPolicy.class, trustPolicy.getId());
+			MwImage mwImage=mwTrustPolicy.getImage();
+			mwImage.setTrustPolicy(null);
+			em.merge(mwImage);
+			em.remove(mwTrustPolicy);
 			
 			em.getTransaction().commit();
 		} 

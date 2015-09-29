@@ -9,6 +9,11 @@ import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.ImageStoreManager;
 import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
+import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.async.GlanceImageExecutor;
+import com.intel.director.images.async.ImageTransferTask;
+import com.intel.director.images.quartz.ImageStoreStatusPoller;
 import com.intel.director.images.rs.GlanceException;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
@@ -20,6 +25,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.dozer.DozerBeanMapper;
+import org.dozer.Mapper;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 
 /**
  *
@@ -40,7 +56,7 @@ public class GlanceImageStoreManager implements ImageStoreManager {
     }
 
     @Override
-    public void upload(File file, Map<String, String> imageProperties) throws GlanceException {
+    public String upload(File file, Map<String, String> imageProperties) throws ImageStoreException {
     	String glanceid;
         try {
             //this is a 2 step process
@@ -50,33 +66,84 @@ public class GlanceImageStoreManager implements ImageStoreManager {
           ///  glanceResponse.id = "123";
             //2) The actual transfer of image. This is an async process
             //http://docs.openstack.org/developer/glance/glanceapi.html#add-a-new-image
-         
+            uploadImage(file,imageProperties, glanceid);
+          return glanceid;
             ////startPolling(file.geimageProperties, glanceid);
         } catch (Exception e) {
-            throw new GlanceException("Error while uploading image to Glance", e);
+            throw new ImageStoreException("Error while uploading image to Glance", e);
         }
       
     }
 
- /*   @Override
-    public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    
+    public ImageStoreUploadResponse fetchDetails(Map<String, String> imageProperties,String glanceId) throws ImageStoreException {
+    	
+    	try{
+    	return glanceRsClient.fetchDetails(imageProperties, glanceId);
+    	
+    	}catch(Exception e){
+    	 
+             throw new ImageStoreException("Error while fetchDetails if upload from Glance", e);
+         
+    	}
     }
+    
+    
 
-    @Override
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void uploadImage(File file, Map<String, String> imageProperties, String id) throws IOException {
+    	  glanceRsClient.uploadImage(file,imageProperties,id);
+    	
+      /*  System.out.println("Inside async uploadImage");
+        ImageTransferTask imageTransferTask = new ImageTransferTask(file,imageProperties,id, glanceRsClient);
+        System.out.println("Created TASK");
+        GlanceImageExecutor.submitTask(imageTransferTask);
+        System.out.println("Task submitted");*/
     }
+    
+    
+    
+  /*  private void startPolling(Map<String, String> imageProperties,String glanceid){
+    	 
+        System.out.println("Inside start polling method");
 
-    @Override
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		System.out.println("Inside static block of ImageStoreStatusPoller");
+		SchedulerFactory sf = new StdSchedulerFactory();
+		try {
+			Scheduler sched = sf.getScheduler();
+
+			JobDetail job = JobBuilder.newJob()
+					.withIdentity("StatusPoller", "poller") // name "myJob",
+															// group "group1"
+					.ofType(ImageStoreStatusPoller.class).build();
+			job.getJobDataMap().put("glanceid", glanceid);
+			job.getJobDataMap().put("glancersclient", glanceRsClient);
+			job.getJobDataMap().put("imagepropertiesmap", imageProperties);
+
+			// Trigger the job to run now, and then every 40 seconds
+			Trigger trigger = TriggerBuilder
+					.newTrigger()
+					.withIdentity("PollerTrigger", "poller")
+					.withSchedule(
+							CronScheduleBuilder.cronSchedule("0 0/1 * * * ?"))
+					.build();
+			// Tell quartz to schedule the job using our trigger
+			sched.start();
+			sched.scheduleJob(job, trigger);
+			System.out
+					.println("Inside static block of ImageStoreStatusPoller  sched.start()");
+		} catch (SchedulerException ex) {
+			Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(
+					Level.SEVERE, null, ex);
+		} catch (Exception ex) {
+			Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(
+					Level.SEVERE, null, ex);
+		}
+
+	
+        	/// ImageStoreStatusPoller imgPoller=new ImageStoreStatusPoller(glanceRsClient,imageProperties,glanceid);
+
+        
+
     }*/
-
-  /*  private ImageStoreResponse mapGlanceResponseToImageStoreResponse(GlanceResponse glanceResponse) {
-        Mapper m = new DozerBeanMapper();
-        ImageStoreResponse imageStoreResponse = m.map(glanceResponse, ImageStoreResponse.class);
-        return imageStoreResponse;
-    }*/
-
 }

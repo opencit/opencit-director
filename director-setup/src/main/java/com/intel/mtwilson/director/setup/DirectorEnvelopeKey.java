@@ -13,9 +13,7 @@ import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.Folders;
-import com.intel.mtwilson.configuration.PasswordVaultFactory;
 import com.intel.mtwilson.setup.AbstractSetupTask;
-import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyManagementException;
@@ -25,6 +23,8 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 /**
  *

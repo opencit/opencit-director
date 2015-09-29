@@ -6,7 +6,11 @@
 package com.intel.director.api;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+
+import com.intel.director.exception.ImageStoreException;
+
 
 /**
  *
@@ -14,7 +18,10 @@ import java.util.Map;
  */
 public interface ImageStoreManager {
 
-    public void upload(File file, Map<String, String> imageProperties);
+    public String upload(File file, Map<String, String> imageProperties) throws ImageStoreException;
+    public ImageStoreUploadResponse fetchDetails(Map<String, String> imageProperties,String glanceId) throws ImageStoreException ;
+    
+
 
   /*  public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest);
 

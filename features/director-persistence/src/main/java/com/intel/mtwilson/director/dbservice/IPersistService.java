@@ -12,6 +12,7 @@ import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
+import com.intel.director.api.ui.ImageActionObject;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
@@ -209,4 +210,20 @@ public interface IPersistService {
 	
 	public abstract void destroyImageStoreSettings(
 			ImageStoreSettings imgStoreSettings) throws DbException;
+	
+	
+	
+	public abstract ImageActionObject createImageAction(ImageActionObject imageactionobject) throws DbException;
+
+	public abstract void updateImageAction(String id,ImageActionObject imageactionobject) throws DbException;
+
+	public abstract void deleteImageAction(ImageActionObject imageactionobject) throws DbException;
+	
+	public abstract List<ImageActionObject> searchByAction() throws DbException;
+	
+	
+	
+	
+	
+	
 }

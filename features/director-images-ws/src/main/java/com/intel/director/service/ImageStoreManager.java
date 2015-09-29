@@ -19,13 +19,13 @@ import com.intel.director.images.exception.DirectorException;
  */
 public interface ImageStoreManager {
 
-    public ImageStoreResponse upload(File file, Map<String, String> imageProperties) throws  DirectorException;
+    public ImageStoreResponse upload(File file, Map<String, String> imageProperties) throws ImageStoreException, DirectorException;
     
     
 
-   public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException;
+  /*  public ImageStoreResponse searchImages(ImageStoreRequest imageStoreSearchRequest) throws DirectorException, ImageStoreException;
 
-    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException;
+    public ImageStoreResponse deleteImage(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException;*/
 
-    public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException;
+  /////  public ImageStoreResponse fetchImageDetails(ImageStoreRequest imageStoreDeleteRequest) throws DirectorException, ImageStoreException;
 }

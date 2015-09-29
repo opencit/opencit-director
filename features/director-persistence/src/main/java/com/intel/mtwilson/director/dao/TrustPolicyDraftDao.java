@@ -89,8 +89,11 @@ public class TrustPolicyDraftDao {
         try {
 
             em.getTransaction().begin();
-            MwTrustPolicyDraft MwTrustPolicyDraft = em.getReference(MwTrustPolicyDraft.class, trustPolicyDraft.getId());
-            em.remove(MwTrustPolicyDraft);
+            MwTrustPolicyDraft mwTrustPolicyDraft = em.getReference(MwTrustPolicyDraft.class, trustPolicyDraft.getId());
+            MwImage mwImage=mwTrustPolicyDraft.getImage();
+			mwImage.setTrustPolicyDraft(null);
+			em.merge(mwImage);
+            em.remove(mwTrustPolicyDraft);
 
             em.getTransaction().commit();
         } catch (Exception e) {

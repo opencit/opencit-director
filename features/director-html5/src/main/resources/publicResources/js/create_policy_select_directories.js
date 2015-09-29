@@ -2,7 +2,7 @@ var endpoint = "/v1/images/";
 
 function SelectDirectoriesMetaData(data) {
 
-	this.imageid = currentCreatePolicyImageId;
+	this.imageid = current_image_id;
 	// /this.image_name=ko.observable();
 
 }
@@ -13,10 +13,34 @@ function SelectDirectoriesViewModel() {
 	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 
 	self.selectDirectoriesSubmit = function(loginFormElement) {
-
+		
 		// //Code
-
-		displayNextCreatePolicyPage();
+		  $.ajax({
+              type: "POST",
+              url:  endpoint+current_image_id+"/createpolicy",
+//                          accept: "application/json",
+              contentType: "application/json",
+              headers: {'Accept': 'application/json'},
+              data: ko.toJSON(self.selectDirectoriesMetaData), //$("#loginForm").serialize(), 
+              success: function(data, status, xhr) {
+            		 $.ajax({
+                         type: "POST",
+                         url:  endpoint+current_image_id+"/unmount",
+//                                     accept: "application/json",
+                         contentType: "application/json",
+                         headers: {'Accept': 'application/json'},
+                         data: ko.toJSON(self.createImageMetaData), //$("#loginForm").serialize(), 
+                         success: function(data, status, xhr) {
+                         	
+                        	nextButton();
+                         }
+                     });
+             	///nextButton();
+              }
+          });
+		  
+		///nextButton();
+		///displayNextCreatePolicyPage();
 
 	}
 
@@ -43,7 +67,7 @@ function ApplyRegExViewModel() {
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_"+sel_dir+"']");
 		var config = {root: 'C:/Temp',  dir: sel_dir, 
-				script: '/v1/images/browse/'+currentCreatePolicyImageId+'/search' ,
+				script: '/v1/images/browse/'+current_image_id+'/search' ,
 				expandSpeed: 1000,
 				collapseSpeed: 1000,
 				multiFolder: true, 
@@ -137,7 +161,7 @@ var editPolicyDraft = function() {
 
 	$.ajax({
 		type : "POST",
-		url : "/v1/images/policydraft/" + currentCreatePolicyImageId + "/edit",
+		url : "/v1/images/policydraft/" + current_image_id + "/edit",
 		data : formData,
 		contentType : "application/json",
 		success : function(data, status) {
@@ -164,7 +188,7 @@ var callRegex = function() {
 	var config = {
 		root : 'C:/Temp',
 		dir : 'C:/Temp/Test',
-		script : '/v1/images/browse/190A3B8E-B8C7-45CB-9E83-D1224A11D5C5/search',
+		script : '/v1/images/browse/'+current_image_id+'/search',
 		expandSpeed : 1000,
 		collapseSpeed : 1000,
 		multiFolder : true,
@@ -199,7 +223,7 @@ $(document)
 								root : 'C:/Temp',
 								dir : 'C:/Temp',
 								script : '/v1/images/browse/'
-										+ currentCreatePolicyImageId
+										+ current_image_id
 										+ '/search',
 								expandSpeed : 1000,
 								collapseSpeed : 1000,
@@ -214,7 +238,7 @@ $(document)
 					mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
 
 					ko.applyBindings(mainViewModel, document
-							.getElementById("create_policy_content_step_2"));
+							.getElementById("select_directories_page"));
 
 					pageInitialized = true;
 				});

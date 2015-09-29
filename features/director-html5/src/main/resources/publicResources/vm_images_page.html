@@ -10,27 +10,27 @@
 		
 		
 		 <script type="text/javascript">
+		 
         var endpoint = "/v1/images/";
- 		var currentCreatePolicyImageId,currentCreatePolicyImageName;
- 		var currentEditPolicyImageId,currentEditPolicyImageName;
+ 		var currentFlow;
  		var current_image_id;
  		var current_image_name;
  		var current_trust_policy_id;
  		
- 		
+ 		console.log("inside vm_images_page.js");
         console.log("vm_images_page script");
-            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/vm_images_page.js'], function() { 
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js'], function() { 
                 console.log("vm_images_page.html: loaded scripts");
             // add our view models to the main view model defined by index.html
            
-        /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+      
             ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
             });
 
 
         </script>
      
-
+ <script src="js/vm_images_page.js"></script>
   	
   		
         <div id="vmImagesContent">             
@@ -39,6 +39,8 @@
 		
 		<div id="create_policy_wizard_"   style="display: none;" > </div>
 		<div id="edit_policy_wizard"   style="display: none;" > </div>
+		
+		<div id="upload_to_image_store_redirect"   style="display: none;" > </div>
 		
 		
 	

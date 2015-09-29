@@ -6,6 +6,7 @@
     <class>com.intel.mtwilson.director.data.MwAuditable</class> 
     <class>com.intel.mtwilson.director.data.MwUser</class> 
 	 <class>com.intel.mtwilson.director.data.MwImage</class>  
+	 <class>com.intel.mtwilson.director.data.MwImageAction</class>  
 	 <class>com.intel.mtwilson.director.data.MwTrustPolicy</class> 
 	 <class>com.intel.mtwilson.director.data.MwImageUpload</class>
 	 <class>com.intel.mtwilson.director.data.MwPolicyUpload</class>
@@ -18,7 +19,7 @@
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
       <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/DirectorDataPU" />
       <property name="javax.persistence.jdbc.user" value="postgres" />
-      <property name="javax.persistence.jdbc.password" value="password" />
+      <property name="javax.persistence.jdbc.password" value="root" />
       <property name="eclipselink.logging.level" value="FINEST"/>
       <property name="eclipselink.ddl-generation" value="create-tables"/>
       <property name="eclipselinkwqewqe.create-ddl-jdbc-file-name" value="createDDL_ddlGeneration.jdbc"/>

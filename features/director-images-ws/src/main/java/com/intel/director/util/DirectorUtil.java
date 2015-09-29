@@ -6,7 +6,10 @@
 package com.intel.director.util;
 
 import com.intel.dcsg.cpg.crypto.Md5Digest;
+import com.intel.mtwilson.trustpolicy.xml.Checksum;
+import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
 import com.intel.mtwilson.trustpolicy.xml.Director;
+import com.intel.mtwilson.trustpolicy.xml.Encryption;
 import com.intel.mtwilson.trustpolicy.xml.Image;
 import com.intel.mtwilson.trustpolicy.xml.LaunchControlPolicy;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
@@ -202,6 +205,9 @@ public class DirectorUtil {
 		policy.setDirector(director);
 		policy.setImage(image);
 		policy.setWhitelist(whitelist);
+		policy=setEncryption(createTrustPolicyMetaDataRequest,policy);
+		
+	
 		JAXBContext context = JAXBContext.newInstance(TrustPolicy.class);
 		Marshaller m = context.createMarshaller();
 
@@ -211,6 +217,24 @@ public class DirectorUtil {
 		return w.toString();
 
 	}
+	
+	
+	
+public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(CreateTrustPolicyMetaDataRequest req,com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy){
+	boolean encryptFlag=req.getIsEncrypted();
+	if(encryptFlag){
+		 Encryption encryption = new Encryption();
+		 DecryptionKey key = new DecryptionKey();
+          key.setURL("uri");
+          key.setValue("213123123123");
+         Checksum checksum = new Checksum();
+         checksum.setValue("sdfsdfsdfsdf");
+          encryption.setChecksum(checksum);
+          encryption.setKey(key);
+		policy.setEncryption(encryption);
+	}
+	return policy;
+}
 
 	public static String updatePolicyDraft(String existingPolicyDraft,
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) throws JAXBException{
@@ -224,7 +248,7 @@ public class DirectorUtil {
 		LaunchControlPolicy controlPolicy = LaunchControlPolicy.fromValue(createTrustPolicyMetaDataRequest
 				.getLaunch_control_policy());
 		policy.setLaunchControlPolicy(controlPolicy);
-		// /policy.setEncryption(value);
+		policy=setEncryption(createTrustPolicyMetaDataRequest,policy);
 		Marshaller m = jaxbContext.createMarshaller();
 
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

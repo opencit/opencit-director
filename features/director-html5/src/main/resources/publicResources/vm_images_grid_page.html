@@ -9,38 +9,25 @@
 <body>
 
 
-<h1>TO DO:- Create VM Image Page grid</h1>
-
-	<div class="col-md-offset-1 col-md-1"><h6>ubuntu9</h6>
-		<button type="button" onclick="createPolicy('22FFF463-A079-4520-B1F8-2D91259BA025','ubuntu9')"
-			class="btn btn-primary">Create Policy</button>
-	</div>
-	
-
-	<div class="col-md-offset-1 col-md-1"><h6>ubuntu9</h6>
-		<button type="button" onclick="editPolicy('22FFF463-A079-4520-B1F8-2D91259BA025','ubuntu9','80a73844-50f3-4cdb-b422-505ad28e28a2')"
-			class="btn btn-primary">Edit Policy</button>
-	</div>	
 
 
 
-
+</br>
+</br>
+</br>
+ <div class="row">
+				            <div class="col-md-1"></div>
+				            <div  class="col-md-10" style="margin-top: 10px;"><div id="vmGrid"></div></div>
+				            <div class="col-md-1"></div>
+</div>
 
 
 	<script type="text/javascript">
-        var endpoint = "/v1/images/";
-            /*
-            var endpoint = "/v1";
-            function MainViewModel() {
-                var self = this;
-                self.keysViewModel = new KeyListViewModel();
-                self.settingsViewModel = new SettingListViewModel();
-            }
-            
-        */
+        
+    
         
         console.log("createimage.html script");
-            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/vm_images_page.js','js/vm_images_grid_page.js'], function() { 
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js'], function() { 
                 console.log("vm_images_grid_page.html: loaded scripts");
             // add our view models to the main view model defined by index.html
            
@@ -50,6 +37,6 @@
 
 
         </script>
-
+ <script src="js/vm_images_grid_page.js"></script>
 </body>
 </html>

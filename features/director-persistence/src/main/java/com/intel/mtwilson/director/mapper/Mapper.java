@@ -1,8 +1,14 @@
 package com.intel.mtwilson.director.mapper;
 
+import java.io.IOException;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ui.ImageInfo;
@@ -12,11 +18,14 @@ import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
+import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ui.ImageActionObject;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyFields;
 import com.intel.director.api.User;
 import com.intel.director.api.ui.UserFields;
 import com.intel.mtwilson.director.data.MwImage;
+import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.data.MwImageUpload;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
@@ -195,23 +204,22 @@ Map<UserFields, String> userAttributestoDataMapper;
 	 
 	 
 	 public  ImageInfo toTransferObject(MwImage mwImage){
-		 ImageInfo imgAttributes= new ImageInfo();
-		
-		 imgAttributes.setId(mwImage.getId());
-		 imgAttributes.setImage_deployments(mwImage.getImageDeploymentType());
-		 imgAttributes.setImage_format(mwImage.getImageFormat());
-		 imgAttributes.setName(mwImage.getName());;
-		 imgAttributes.setMounted_by_user_id(mwImage.getMountedByUserId());
-		 imgAttributes.setLocation(mwImage.getLocation());
-		 imgAttributes.setDeleted(mwImage.isDeleted());
-		 imgAttributes.setCreated_by_user_id(mwImage.getCreatedByUserId());
-		 imgAttributes.setEdited_by_user_id(mwImage.getEditedByUserId());
-		 imgAttributes.setCreated_date(mwImage.getCreatedDate());
-		 imgAttributes.setEdited_date(mwImage.getEditedDate());
-		 imgAttributes.setImage_size(mwImage.getContentlength());
-		 imgAttributes.setStatus(mwImage.getStatus());
-		 imgAttributes.setSent(mwImage.getSent());
-		 return imgAttributes;
+		 ImageInfo imgInfo= new ImageInfo();
+		 imgInfo.setId(mwImage.getId());
+		 imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
+		 imgInfo.setImage_format(mwImage.getImageFormat());
+		 imgInfo.setName(mwImage.getName());;
+		 imgInfo.setMounted_by_user_id(mwImage.getMountedByUserId());
+		 imgInfo.setLocation(mwImage.getLocation());
+		 imgInfo.setDeleted(mwImage.isDeleted());
+		 imgInfo.setCreated_by_user_id(mwImage.getCreatedByUserId());
+		 imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
+		 imgInfo.setCreated_date(mwImage.getCreatedDate());
+		 imgInfo.setEdited_date(mwImage.getEditedDate());
+		 imgInfo.setImage_size(mwImage.getContentlength());
+		 imgInfo.setStatus(mwImage.getStatus());
+		 imgInfo.setSent(mwImage.getSent());
+		 return imgInfo;
 	 }
 	 
 	 
@@ -392,5 +400,62 @@ Map<UserFields, String> userAttributestoDataMapper;
 		String str = sb.toString();
 		return str;
 	}
+	
+	public  MwImageAction toData(ImageActionObject imageaction){
+		   MwImageAction mwImageAction= new MwImageAction();
+		   Gson gson=new Gson();
+		   mwImageAction.setImage_id(imageaction.getImage_id());
+		   mwImageAction.setAction_size_max(imageaction.getAction_size_max());
+		   mwImageAction.setAction_size(imageaction.getAction_size());
+		   mwImageAction.setAction_count(imageaction.getAction_count());
+		   mwImageAction.setAction_completed(imageaction.getAction_completed());
+		   mwImageAction.setAction(gson.toJson(imageaction.getAction()));
+		   mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
+		   mwImageAction.setCurrent_task_status(imageaction.getCurrent_task_status());
+		   return mwImageAction;
+		  }
+		  
+		 
+		 
+		 public  ImageActionObject toTransferObject(MwImageAction mwImageAction){
+		   Gson gson = new Gson();
+		   ImageActionObject imageActionObject= new ImageActionObject();
+		   imageActionObject.setId(mwImageAction.getId());
+		   imageActionObject.setImage_id(mwImageAction.getImage_id());
+		   imageActionObject.setAction_count(mwImageAction.getAction_count());
+		   imageActionObject.setAction_completed(mwImageAction.getAction_completed());
+		   imageActionObject.setAction_size(mwImageAction.getAction_size());
+		   imageActionObject.setAction_size_max(mwImageAction.getAction_size_max());
+		   imageActionObject.setCurrent_task_name(mwImageAction.getCurrent_task_name());
+		   imageActionObject.setCurrent_task_status(mwImageAction.getCurrent_task_status());
+		   JSONArray actionlist = new JSONArray(mwImageAction.getAction());
+		   ObjectMapper mapper = new  ObjectMapper();
+		   List<ImageActionActions> someClassList = null;
+		   try {
+			   someClassList =
+					    mapper.readValue(mwImageAction.getAction(), mapper.getTypeFactory().constructCollectionType(List.class, ImageActionActions.class));
+		   } catch (IOException e) {
+			// TODO Auto-generated catch block
+			   e.printStackTrace();
+		   }
+		   return imageActionObject;
+		}
+		 
+		 
+		 public  MwImageAction toDataUpdate(ImageActionObject imageActionObject){
+			 MwImageAction mwImageAction = new MwImageAction();
+			 Gson gson = new Gson();
+			 mwImageAction.setImage_id(imageActionObject.getImage_id());
+			 mwImageAction.setAction(gson.toJson(imageActionObject.getAction()));
+			 mwImageAction.setAction_completed(imageActionObject.getAction_completed());
+			 mwImageAction.setAction_count(imageActionObject.getAction_count());
+			 mwImageAction.setAction_size(imageActionObject.getAction_size());
+			 mwImageAction.setAction_size_max(imageActionObject.getAction_size_max());
+			 mwImageAction.setCurrent_task_name(imageActionObject.getCurrent_task_name());
+			 mwImageAction.setCurrent_task_status(imageActionObject.getCurrent_task_status());
+			 return mwImageAction;
+		 }
+
+
 	
 }

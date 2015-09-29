@@ -7,13 +7,21 @@
 <meta name="author" directoryTree="aakash">
 </head>
 <body>
-	<div class="row">
+
+
+
+
+
+
+
+
+
+	<div id="select_directories_page" class="row">
 		<div class="col-md-2"></div>
 		<div class="col-md-8" style="margin-top: 10px;">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h1>Select Directories Page</h1>
-					<span id="saveMessage"/>
 				</div>
 				<div class="panel-body"
 					style="padding-top: 0px; padding-bottom: 0px;">
@@ -41,7 +49,7 @@
 
 										<div class="col-md-offset-1 col-md-1">
 											<button type="button"
-												onclick="displayPreviousCreatePolicyPage()"
+												onclick="backButton()"
 												class="btn btn-primary">Previous</button>
 										</div>
 
@@ -56,61 +64,65 @@
 
 
 						</div>
-						<div class="hidden" id="regexPanel"
-							data-bind="with: applyRegExViewModel"
+						<div class="hidden" id="regexPanel" data-bind="with: applyRegExViewModel"
 							style="height: 500px; float: left; padding-left: 0px; padding-right: 0px; border-left: 1px solid #ddd">
-
-							<form class="form-horizontal" role="form"
-								data-bind="submit: applyRegEx">
-								<input type="hidden" id="sel_dir" />
-								<div data-bind="with: applyRegexMetaData">
-
-									<h4 id="folderPathDiv"
-										style="padding-left: 15px; padding-left: 5px;"></h4>									
-								</div>
-								<div
-									style="height: 110px; float: left; padding-left: 0px; padding-right: 0px; padding-top: 25px;">
-									<div class="form-group">
-										<label class="control-label col-md-6"
-											style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-											for="create_policy_regex_include">Include Filter:</label>
-										<div class="col-md-5"
-											style="padding-left: 0px; padding-right: 0px;">
-											<input type="text" class="form-control"
-												id="create_policy_regex_include" placeholder="Enter RegEx" />
-										</div>
-									</div>
-
-
-									<div class="form-group">
-										<label class="control-label col-md-6"
-											style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-											for="create_policy_regex_exclude">Exclude Filter:</label>
-										<div class="col-md-5"
-											style="padding-left: 0px; padding-right: 0px;">
-											<input type="text" class="form-control"
-												id="create_policy_regex_exclude" placeholder="Enter RegEx" />
-										</div>
+						
+						 
+						
+						
+						<form class="form-horizontal" role="form" data-bind="submit: applyRegEx">
+						 <div data-bind="with: applyRegexMetaData">	
+						
+							<h4 id="folderPathDiv" style="padding-left: 15px; padding-left: 5px;"></h4>
+							<input type="hidden" name="dir_path" value="Norway"></div>
+							<div
+								style="height: 110px; float: left; padding-left: 0px; padding-right: 0px; padding-top: 25px;">
+								<div class="form-group">
+									<label class="control-label col-md-6"
+										style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
+										for="create_policy_regex_include">Include Filter:</label>
+									<div class="col-md-5"
+										style="padding-left: 0px; padding-right: 0px;">
+										<input type="text" class="form-control"
+											id="create_policy_regex_include"   placeholder="Enter RegEx" />
 									</div>
 								</div>
 
-								<div class="col-md-offset-6 col-md-1"
-									style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
-									<button type="submit" class="btn btn-primary">Apply</button>
-								</div>
 
+								<div class="form-group">
+									<label class="control-label col-md-6"
+										style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
+										for="create_policy_regex_exclude">Exclude Filter:</label>
+									<div class="col-md-5"
+										style="padding-left: 0px; padding-right: 0px;">
+										<input type="text" class="form-control"
+											id="create_policy_regex_exclude"   placeholder="Enter RegEx" />
+									</div>
+								</div>
+							</div>
+
+							<div class="col-md-offset-6 col-md-1"
+								style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
+								<button type="submit" class="btn btn-primary">Apply</button>
+							</div>
+							
 							</form>
-						</div>
+							</div>
 					</div>
 				</div>
 
 			</div>
 
+</div>
+
+</div>
+ <script src="js/create_policy_select_directories.js">
+ 
+ 
+ 
+ </script>
 
 
-
-			<script src="js/create_policy_select_directories.js">
-				
-			</script>
+			
 </body>
 </html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>File Upload</title>
+		<style>
+			form {
+			display: block;
+			margin: 20px auto;
+			border-radius: 10px;
+			padding: 15px
+			}
+			
+			#progressbox {
+			position: relative;
+			width: 400px;
+			border: 1px solid #ddd;
+			padding: 1px;
+			border-radius: 3px;
+			}
+			
+			#progressbar {
+			background-color: lightblue;
+			width: 0%;
+			height: 20px;
+			border-radius: 4px;
+			}
+			
+			#percent {
+			position: absolute;
+			display: inline-block;
+			top: 3px;
+			left: 48%;
+			}
+			
+			.btn-file {
+			position: relative;
+			overflow: hidden;
+			}
+			
+			.btn-file input[type=file] {
+			position: absolute;
+			top: 0;
+			right: 0;
+			min-width: 100%;
+			min-height: 100%;
+			font-size: 100px;
+			text-align: right;
+			filter: alpha(opacity = 0);
+			opacity: 0;
+			background: red;
+			cursor: inherit;
+			display: block;
+			}
+			
+			input[readonly] {
+			background-color: white !important;
+			cursor: text !important;
+			}
+		</style>
+		<script src="js/jquery.js"></script>
+		<script src="js/jquery.form.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<script src="js/bootstrap.min.js"></script>
+		
+		
+		<script src="js/file_upload_script.js"></script>
+		<script type="text/javascript">
+			var image_deployments = window.image_deployments_parent;
+			var image_format = window.image_format_parent;
+			var urlToUpload = "/v1/images/uploads/content/upload?image_deployments="
+			+ image_deployments + "&image_format=" + image_format;
+			window.onload = function() {
+				document.myform.action = urlToUpload;
+			}
+			function validateForm() {
+			    var x = document.forms["myform"]["myfile"].value;
+			    if (x == null || x == "") {
+			        alert("First Choose File Please...");
+			        return false;
+			    }
+			}
+		</script>
+		
+		<script>
+			$(document).on('change','.btn-file :file',function() {
+				var input = $(this), numFiles = input.get(0).files ? input
+				.get(0).files.length : 1, label = input.val().replace(
+				/\\/g, '/').replace(/.*\//, '');
+				input.trigger('fileselect', [ numFiles, label ]);
+			});
+			
+			$(document).ready(function() {
+				$('.btn-file :file').on('fileselect',function(event, numFiles, label) {
+					var input = $(this).parents('.input-group').find(':text'), log = numFiles > 1 ? numFiles
+					+ ' files selected' : label;
+					
+					if (input.length) {
+						input.val(log);
+						} 
+					else {
+						if (log)
+							alert(log);
+					}
+				});
+			});
+		</script>
+		
+	</head>
+	<body>
+		
+		<form id="UploadForm" name="myform" onsubmit="return validateForm()" method="post"
+		enctype="multipart/form-data">
+			<h4>Please Select File :: </h4>
+			<div class="input-group">
+				<span class="input-group-btn"> <span
+					class="btn btn-primary btn-file"> Browse&hellip; <input
+						type="file" id="myfile" name="myfile">
+					</span>
+				</span> <input type="text" class="form-control" readonly>
+			</div>
+			<br /> <input class="btn btn-primary" type="submit" value="Upload">
+			<div id="progressbox">
+				<div id="progressbar"></div>
+				<div id="percent">0%</div>
+			</div>
+			<br />
+			<div id="message"></div>
+			<div><font color="red">Note : Please Don't Close This Window when upload is in progress...!!!</font></div>
+		</form>
+	</body>
+</html>

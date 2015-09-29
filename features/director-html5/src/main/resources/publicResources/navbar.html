@@ -8,9 +8,13 @@
         <div class="navbar-collapse collapse" style="display: none;" data-bind="visible: loginViewModel.userProfile.authenticated">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="#dashboard" data-toggle="tab">Dashboard</a></li>
-                <li class="active"><a href="#create_policy_wizard" data-toggle="tab">Images</a></li>
-                <li><a href="#settings" data-toggle="tab">Settings</a></li>
-                <li><a href="#help" data-toggle="tab">Help</a></li>
+                <li class="active"><a href="#create_policy_wizard" data-toggle="tab" onclick="backToVmImagesPage()" >Images</a></li>
+                <li class="dropdown">
+                	<a class="dropdown-toggle" data-toggle="dropdown" href="#settings_vivek">Settings<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+						 <li><a href="#settings_upload_image_to_director" data-toggle="tab">Upload Image to Director</a></li> 
+						</ul>
+				</li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#"><i class="glyphicon glyphicon-user"></i> <span data-bind="text: loginViewModel.userProfile.username()">Me</span> <span class="caret"></span></a>
                     <ul id="g-account-menu" class="dropdown-menu" role="menu">

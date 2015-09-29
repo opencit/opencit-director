@@ -11,7 +11,8 @@
     </description>
     
     <modules>
-		<module>director-common</module>
+	 <module>director-common</module>
+	 <module>director-setup</module>
         <module>features</module>
     </modules>
 </project>

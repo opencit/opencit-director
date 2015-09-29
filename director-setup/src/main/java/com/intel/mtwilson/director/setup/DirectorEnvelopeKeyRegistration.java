@@ -11,15 +11,15 @@ import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.kms.client.jaxrs2.Users;
 import com.intel.kms.user.User;
 import com.intel.mtwilson.Folders;
-import com.intel.mtwilson.configuration.PasswordVaultFactory;
 import com.intel.mtwilson.setup.AbstractSetupTask;
-import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Properties;
+import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 /**
  *

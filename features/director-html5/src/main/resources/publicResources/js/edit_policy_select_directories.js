@@ -1,25 +1,27 @@
 		var endpoint = "/v1/images/";
 
-
-				function SelectDirectoriesMetaData(data) {
+		
+		
+		
+				function EditSelectDirectoriesMetaData(data) {
 	
-					alert("SelectDirectoriesMetaData currentEditPolicyImageId::"+currentEditPolicyImageId);
-					this.imageid = currentCreatePolicyImageId;
+				
+					this.imageid = current_image_id;
 					///this.image_name=ko.observable();
 
 				}
 
 			
-				function SelectDirectoriesViewModel() {
+				function EditSelectDirectoriesViewModel() {
 					var self = this;
 				
-					self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
+					self.editSelectDirectoriesMetaData = new EditSelectDirectoriesMetaData({});
 
-					self.selectDirectoriesSubmit = function(loginFormElement) {
+					self.editSelectDirectoriesSubmit = function(loginFormElement) {
 
 						////Code
 
-						displayNextCreatePolicyPage();
+						displayNextEditPolicyPage();
 
 					}
 
@@ -31,8 +33,8 @@
 					
 					   
 				this.dir_path=ko.observable();
-					this.create_policy_regex_exclude=ko.observable("");
-					this.create_policy_regex_include=ko.observable("");
+				///	this.create_policy_regex_exclude=ko.observable("");
+				///	this.create_policy_regex_include=ko.observable("");
 					
 				this.selected_image_format= ko.observable();
 
@@ -49,7 +51,7 @@
 				   
 				    self.applyRegEx = function(loginFormElement) {
 				    
-				    	 alert("Inside apply regex method");
+				    	console.log("Inside apply regex method");
 				    	
 				    $.ajax({
 				        type: "POST",
@@ -60,7 +62,7 @@
 				        data: ko.toJSON(self.applyRegexMetaData), //$("#loginForm").serialize(), 
 				        success: function(data, status, xhr) {
 				        	
-				      alert("regex server call successfull");
+				        	console.log("regex server call successfull");
 				        }
 				    });
 				    
@@ -127,7 +129,7 @@
 					
 					$.ajax({
 						type: "POST",
-						url: "/v1/images/policydraft/"+currentCreatePolicyImageId+"/edit",
+						url: "/v1/images/policydraft/"+current_image_id+"/edit",
 						data: formData,
 						contentType: "application/json",
 						success: function(data, status) {
@@ -142,7 +144,7 @@
 				$(document)
 						.ready(
 								function() {
-									alert("1 st time");
+								
 									
 									if (pageInitialized)
 										return;
@@ -162,14 +164,14 @@
 																checkedStatus);
 													});
 									
-									mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
+									mainViewModel.editSelectDirectoriesViewModel = new EditSelectDirectoriesViewModel();
 									 mainViewModel.applyRegExViewModel  =  new ApplyRegExViewModel();
 									
 									ko
 											.applyBindings(
 													mainViewModel,
 													document
-															.getElementById("create_policy_content_step_2"));
+															.getElementById("edit_policy_content_step_2"));
 
 									pageInitialized = true;
 								});

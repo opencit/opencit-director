@@ -16,24 +16,24 @@ public class LookupServiceImplTest {
 
     LookupService lookupService = null;
 
-    @Before
+   /// @Before
     public void setup() {
         lookupService = new LookupServiceImpl();
     }
 
-    @Test
+   /// @Test
     public void testGetImageDeployments() {
         ListImageDeploymentsResponse imageDeployments = lookupService.getImageDeployments();
         Assert.assertEquals("2 deployment types", 2, imageDeployments.image_deployments.size());
     }
 
-    @Test
+   /// @Test
     public void testGetImageFormats() {
         ListImageFormatsResponse imageFormats = lookupService.getImageFormats();
         Assert.assertEquals("2 format types", 2, imageFormats.image_formats.size());
     }
 
-    @Test
+   /// @Test
     public void testGetLaunchPolicies() {
         ListImageLaunchPoliciesResponse imageLaunchPolicies = lookupService.getImageLaunchPolicies();
         Assert.assertEquals("2 launch policies", 2, imageLaunchPolicies.image_launch_policies.size());
