@@ -8,6 +8,8 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.client.jaxrs2.Keys;
+import com.intel.kms.client.jaxrs2.Users;
+import com.intel.kms.user.User;
 import com.intel.kms.ws.v2.api.Key;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.util.Properties;
@@ -30,6 +32,7 @@ public class KmsClientTest {
     
     @BeforeClass
     public static void setUpClass() {
+        Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class); 
     }
     
     @AfterClass
@@ -38,6 +41,7 @@ public class KmsClientTest {
     
     @Before
     public void setUp() {
+        
     }
     
     @After
@@ -49,7 +53,7 @@ public class KmsClientTest {
         Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
         Properties properties = new Properties();
         properties.setProperty("endpoint.url", "https://10.1.68.58");
-        properties.setProperty("tls.policy.certificate.sha1", "82fe5d82a8725529a5110584d3b0111172a7572c");
+        properties.setProperty("tls.policy.certificate.sha1", "3d006b84f7e4c82ad04da777d26b476158b4fae2 ");
         properties.setProperty("login.basic.username", "td");
         properties.setProperty("login.basic.password", "password");
         Keys keys = new Keys(properties);
@@ -73,9 +77,15 @@ public class KmsClientTest {
 //        return keyContainer;
         
     }
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
+    @Test
+    public void testKmsUser() throws Exception{
+        Properties properties = new Properties();        
+        properties.setProperty("endpoint.url", "https://10.1.68.58");
+        properties.setProperty("tls.policy.certificate.sha1", "3d006b84f7e4c82ad04da777d26b476158b4fae2");
+        properties.setProperty("login.basic.username", "admin");
+        properties.setProperty("login.basic.password", "password");
+        Users users = new Users(properties);
+        User user = users.findUserByUsername("admin");
+        System.out.println(user);
+    }   
 }
