@@ -29,7 +29,7 @@
         */
       
         $( document ).ready(function() {
-        	
+        	///alert("inside create js ready function");
         	fetchImageLaunchPolicies();
         });
 

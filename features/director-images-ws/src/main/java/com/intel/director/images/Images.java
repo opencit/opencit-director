@@ -5,7 +5,6 @@
  */
 package com.intel.director.images;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -29,12 +28,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-
-
-
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
-import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -42,14 +36,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.director.api.CreateTrustPolicyRequest;
-import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
+import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GetImageStoresResponse;
+import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.ListImageDeploymentsResponse;
@@ -63,10 +58,9 @@ import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SignTrustPolicyResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
-import com.intel.director.api.TrustPolicy;
+import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
-import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.service.ImageService;
@@ -75,8 +69,6 @@ import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.director.api.ImageListResponse;
-import com.intel.director.api.ui.ImageActionObject;
 
 /**
  * 
@@ -180,12 +172,6 @@ public class Images extends Application {
 
 		return uploadImageToTrustDirector;
 	}
-
-	
-	
-	
-	
-	
 
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -297,6 +283,7 @@ public class Images extends Application {
 	public ImageStoreResponse uploadImageToImageStore(
 			ImageStoreUploadRequest imageStoreUploadRequest)
 			throws DirectorException {
+		System.out.println(imageStoreUploadRequest.getImage_action_id());
 		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
 	}
 
@@ -349,7 +336,7 @@ public class Images extends Application {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public TrustPolicy createTrustPolicy(@PathParam("image_id") String image_id) throws DirectorException {
+	public ImageActionObject createTrustPolicy(@PathParam("image_id") String image_id) throws DirectorException, JAXBException {
 
 		return imageService.createTrustPolicy(image_id);
 	}
@@ -462,6 +449,7 @@ public class Images extends Application {
 		return "Create Success";
     }
 	
+	
 	@PUT
     @Path("/action/{id: [0-9a-zA-Z_-]+}/update")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -471,5 +459,14 @@ public class Images extends Application {
 		imageActionImpl.updateImageAction(id,imageActionObject);
 		return "Update Success";
 		
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/recreatedraft")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)  
+	public TrustPolicyDraft createPolicyDraftFromPolicy(@PathParam("imageId") String imageId,
+			@QueryParam("action_id") String image_action_id) throws Exception {
+		return imageService.createPolicyDraftFromPolicy(imageId,image_action_id);
+
 	}
 }

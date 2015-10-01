@@ -1,7 +1,8 @@
 package com.intel.director.api.ui;
 
-import com.intel.director.api.ImageAttributes;
 import java.util.Date;
+
+import com.intel.director.api.ImageAttributes;
 
 public class ImageAttributesFilter extends ImageAttributes {
 

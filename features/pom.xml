@@ -3,17 +3,22 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-features</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-
+    <packaging>pom</packaging>
+    <parent>
+        <artifactId>director-maven-java</artifactId>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
 
     <modules>
         <module>director-images-api</module>
-		<module>director-persistence</module>
-        <module>director-images-ws</module>
-		<module>director-glance</module>
+	<module>director-image-store</module>
+        <module>director-persistence</module>
         <module>director-html5</module>
-        
-                
+        <module>director-images-ws</module>
+	<module>director-async-image-processor</module>
+	<module>director-common</module>
+        <module>director-glance</module>
     </modules>
 </project>

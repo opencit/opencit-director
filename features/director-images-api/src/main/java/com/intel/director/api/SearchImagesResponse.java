@@ -5,8 +5,9 @@
  */
 package com.intel.director.api;
 
-import com.intel.director.api.ui.ImageInfo;
 import java.util.List;
+
+import com.intel.director.api.ui.ImageInfo;
 
 /**
  *

@@ -1,7 +1,8 @@
 package com.intel.director.api.ui;
 
-import com.intel.director.api.ImageStoreUploadTransferObject;
 import java.util.Date;
+
+import com.intel.director.api.ImageStoreUploadTransferObject;
 
 public class ImageStoreUploadFilter extends ImageStoreUploadTransferObject {
 

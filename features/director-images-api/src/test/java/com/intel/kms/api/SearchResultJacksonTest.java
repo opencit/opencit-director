@@ -4,10 +4,9 @@
  */
 package com.intel.kms.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.jaxrs2.provider.JacksonObjectMapperProvider;
 import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * The AbstractResponse superclass is annotated with JsonInclude NON_EMPTY as

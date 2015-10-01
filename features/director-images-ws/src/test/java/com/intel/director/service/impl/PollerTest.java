@@ -8,18 +8,9 @@ package com.intel.director.service.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.SearchFilesInImageRequest;
-import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.service.ImageService;
-
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 
 /**
  *

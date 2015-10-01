@@ -2,7 +2,7 @@ package com.intel.director.service;
 
 import java.util.List;
 
-import com.intel.director.api.ui.ImageActionObject;
+import com.intel.director.api.ImageActionObject;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 public interface ImageActionService {

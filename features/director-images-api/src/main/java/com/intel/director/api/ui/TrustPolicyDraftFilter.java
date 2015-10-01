@@ -1,7 +1,8 @@
 package com.intel.director.api.ui;
 
-import com.intel.director.api.TrustPolicyDraft;
 import java.util.Date;
+
+import com.intel.director.api.TrustPolicyDraft;
 
 public class TrustPolicyDraftFilter extends TrustPolicyDraft {
 

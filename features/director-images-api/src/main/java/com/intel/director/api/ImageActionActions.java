@@ -1,7 +1,7 @@
 package com.intel.director.api;
 
 public class ImageActionActions {
-	private String status,storename,task_name,location,uri;
+	private String status,storename,task_name,location,uri,executionDetails;
 
 	public String getStatus() {
 		return status;
@@ -42,5 +42,15 @@ public class ImageActionActions {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
+
+	public String getExecutionDetails() {
+		return executionDetails;
+	}
+
+	public void setExecutionDetails(String executionDetails) {
+		this.executionDetails = executionDetails;
+	}
+	
+	
 	
 }

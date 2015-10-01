@@ -23,7 +23,10 @@ function SelectDirectoriesViewModel() {
               headers: {'Accept': 'application/json'},
               data: ko.toJSON(self.selectDirectoriesMetaData), //$("#loginForm").serialize(), 
               success: function(data, status, xhr) {
-            		 $.ajax({
+            	  if(data.id!=undefined && data.id!=null && data.id!="" ){
+            	  current_image_action_id = data.id;
+            	  }
+            	  $.ajax({
                          type: "POST",
                          url:  endpoint+current_image_id+"/unmount",
 //                                     accept: "application/json",
@@ -31,7 +34,7 @@ function SelectDirectoriesViewModel() {
                          headers: {'Accept': 'application/json'},
                          data: ko.toJSON(self.createImageMetaData), //$("#loginForm").serialize(), 
                          success: function(data, status, xhr) {
-                         	
+     
                         	nextButton();
                          }
                      });

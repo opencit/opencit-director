@@ -1,6 +1,5 @@
 package com.intel.director.api;
 
-import com.intel.director.api.ImageListResponseInfo;
 import java.util.List;
 
 public class ImageListResponse {

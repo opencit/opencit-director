@@ -5,34 +5,12 @@
  */
 package com.intel.director.util;
 
-import com.intel.dcsg.cpg.crypto.Md5Digest;
-import com.intel.mtwilson.trustpolicy.xml.Checksum;
-import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.Director;
-import com.intel.mtwilson.trustpolicy.xml.Encryption;
-import com.intel.mtwilson.trustpolicy.xml.Image;
-import com.intel.mtwilson.trustpolicy.xml.LaunchControlPolicy;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
-import com.intel.mtwilson.trustpolicy.xml.Whitelist;
-import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
-import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.MountImageResponse;
-import com.intel.director.api.TrustDirectorImageUploadResponse;
-import com.intel.director.api.UnmountImageResponse;
-import com.intel.director.common.Constants;
-import com.intel.director.images.GlanceImageStoreManager;
-import com.intel.director.images.exception.DirectorException;
-
-import java.text.SimpleDateFormat;
-
-import com.intel.director.api.ImageStoreManager;
-
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,11 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -56,6 +30,24 @@ import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
 import com.github.dnault.xmlpatch.Patcher;
+import com.intel.dcsg.cpg.crypto.Md5Digest;
+import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
+import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.MountImageResponse;
+import com.intel.director.api.TrustDirectorImageUploadResponse;
+import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.common.Constants;
+import com.intel.director.images.GlanceImageStoreManager;
+import com.intel.director.images.exception.DirectorException;
+import com.intel.director.imagestore.ImageStoreManager;
+import com.intel.mtwilson.trustpolicy.xml.Checksum;
+import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
+import com.intel.mtwilson.trustpolicy.xml.Director;
+import com.intel.mtwilson.trustpolicy.xml.Encryption;
+import com.intel.mtwilson.trustpolicy.xml.Image;
+import com.intel.mtwilson.trustpolicy.xml.LaunchControlPolicy;
+import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 
 /**
  * 
@@ -222,7 +214,11 @@ public class DirectorUtil {
 	
 public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(CreateTrustPolicyMetaDataRequest req,com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy){
 	boolean encryptFlag=req.getIsEncrypted();
-	if(encryptFlag){
+	boolean isPolicyEncrypted=false;
+	if(policy.getEncryption()!=null){
+		isPolicyEncrypted=true;
+	}
+	if(encryptFlag  && !isPolicyEncrypted){
 		 Encryption encryption = new Encryption();
 		 DecryptionKey key = new DecryptionKey();
           key.setURL("uri");
@@ -232,6 +228,8 @@ public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(Crea
           encryption.setChecksum(checksum);
           encryption.setKey(key);
 		policy.setEncryption(encryption);
+	}else if(isPolicyEncrypted && !encryptFlag){
+		policy.setEncryption(null);
 	}
 	return policy;
 }
@@ -256,6 +254,19 @@ public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(Crea
 		m.marshal(policy, w);
 		return w.toString();
 
+	}
+	
+	
+	public static TrustPolicy  getPolicy(String policyxml) throws JAXBException{
+		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
+		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+				.createUnmarshaller();
+
+		StringReader reader = new StringReader(policyxml);
+		TrustPolicy policy = (TrustPolicy) unmarshaller
+				.unmarshal(reader);
+		return policy;
+		
 	}
 
 	public static void main(String[] args) {
@@ -287,7 +298,7 @@ public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(Crea
         String imageName = imageLocation.substring(imageLocation.lastIndexOf(imagePathDelimiter) + 1);
         String trustpolicyName = trustPolicyLocation.substring(trustPolicyLocation.lastIndexOf(imagePathDelimiter) + 1);
       
-        String tarName = imageName + "-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
+        String tarName = imageName + "-tar"+ ".tar";
         executeShellCommand("tar -cf " + imageTPDir + imagePathDelimiter + tarName + " -C " + imageTPDir + " " + imageName + " " + trustpolicyName);
         return imageTPDir + imagePathDelimiter + tarName;
     }
@@ -324,6 +335,21 @@ public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(Crea
 	        return excludeList;
 	    }
 
+	 
+	 public static boolean isImageEncryptStatus(String existingPolicyDraft) throws JAXBException{
+			JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
+
+			StringReader reader = new StringReader(existingPolicyDraft);
+			TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+			
+			if(policy.getEncryption()==null)
+				return false;
+			else
+				return true;
+
+		}
 		
 	
 

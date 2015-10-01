@@ -1,28 +1,25 @@
 package com.intel.mtwilson.director.mapper;
 
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributeFields;
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ImageInfoFields;
 import com.intel.director.api.ImageStoreSettings;
-import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.ImageActionActions;
-import com.intel.director.api.ui.ImageActionObject;
+import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyFields;
-import com.intel.director.api.User;
 import com.intel.director.api.ui.UserFields;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
@@ -428,16 +425,9 @@ Map<UserFields, String> userAttributestoDataMapper;
 		   imageActionObject.setAction_size_max(mwImageAction.getAction_size_max());
 		   imageActionObject.setCurrent_task_name(mwImageAction.getCurrent_task_name());
 		   imageActionObject.setCurrent_task_status(mwImageAction.getCurrent_task_status());
-		   JSONArray actionlist = new JSONArray(mwImageAction.getAction());
-		   ObjectMapper mapper = new  ObjectMapper();
-		   List<ImageActionActions> someClassList = null;
-		   try {
-			   someClassList =
-					    mapper.readValue(mwImageAction.getAction(), mapper.getTypeFactory().constructCollectionType(List.class, ImageActionActions.class));
-		   } catch (IOException e) {
-			// TODO Auto-generated catch block
-			   e.printStackTrace();
-		   }
+		   TypeToken<List<ImageActionActions>> token = new TypeToken<List<ImageActionActions>>(){};
+		   List<ImageActionActions> action = gson.fromJson(mwImageAction.getAction(), token.getType());
+		   imageActionObject.setAction(action);
 		   return imageActionObject;
 		}
 		 

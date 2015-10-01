@@ -5,37 +5,17 @@
  */
 package com.intel.director.images;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.api.ImageStoreManager;
-import com.intel.director.api.ImageStoreRequest;
-import com.intel.director.api.ImageStoreResponse;
-import com.intel.director.api.ImageStoreUploadResponse;
-import com.intel.director.exception.ImageStoreException;
-import com.intel.director.images.async.GlanceImageExecutor;
-import com.intel.director.images.async.ImageTransferTask;
-import com.intel.director.images.quartz.ImageStoreStatusPoller;
-import com.intel.director.images.rs.GlanceException;
-import com.intel.director.images.rs.GlanceRsClient;
-import com.intel.director.images.rs.GlanceRsClientBuilder;
-import com.intel.mtwilson.configuration.ConfigurationFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.dozer.DozerBeanMapper;
-import org.dozer.Mapper;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.rs.GlanceRsClient;
+import com.intel.director.images.rs.GlanceRsClientBuilder;
+import com.intel.director.imagestore.ImageStoreManager;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
 
 /**
  *

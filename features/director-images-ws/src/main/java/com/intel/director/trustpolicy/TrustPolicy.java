@@ -1,9 +1,5 @@
 package com.intel.director.trustpolicy;
 
-import com.intel.director.api.CreateTrustPolicyRequest;
-import com.intel.director.api.CreateTrustPolicyResponse;
-import com.intel.director.api.SignTrustPolicyResponse;
-import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
@@ -12,6 +8,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+
+import com.intel.director.api.CreateTrustPolicyRequest;
+import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.SignTrustPolicyResponse;
+import com.intel.mtwilson.jaxrs2.mediatype.CryptoMediaType;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

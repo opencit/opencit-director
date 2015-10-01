@@ -5,16 +5,12 @@
  */
 package com.intel.director.images.async;
 
-import com.intel.director.api.ImageStoreRequest;
-import com.intel.director.images.glance.api.GlanceResponse;
-import com.intel.director.images.rs.GlanceRsClient;
-import com.intel.dcsg.cpg.io.UUID;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.intel.director.images.rs.GlanceRsClient;
 
 /**
  *

@@ -9,31 +9,29 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
-
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ImageInfoFields;
+import com.intel.director.api.ImageStoreSettings;
+import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.TrustPolicy;
+import com.intel.director.api.TrustPolicyDraft;
+import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
-import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
-import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.SearchImageByUploadCriteria;
-import com.intel.director.api.TrustPolicy;
-import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFields;
 import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
-import com.intel.director.api.User;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;

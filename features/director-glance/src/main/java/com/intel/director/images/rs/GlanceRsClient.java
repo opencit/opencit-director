@@ -5,17 +5,15 @@
  */
 package com.intel.director.images.rs;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -31,11 +29,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.director.api.ImageStoreRequest;
-import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.constants.Constants;
-import com.intel.director.images.glance.api.GlanceResponse;
 
 /**
  * 
@@ -108,13 +103,14 @@ public class GlanceRsClient {
 		System.out.println(" response uploadImageMetaData" + response);
 
 		InputStream inputStream = (InputStream) response.getEntity();
-		ImageStoreUploadResponse imsgeStoreResponse = new ImageStoreUploadResponse();
-		imsgeStoreResponse.setId(glanceId);
-		imsgeStoreResponse.setImage_uri(response
+		ImageStoreUploadResponse imageStoreResponse = new ImageStoreUploadResponse();
+		imageStoreResponse.setId(glanceId);
+		imageStoreResponse.setImage_uri(response
 				.getHeaderString(Constants.GLANCE_HEADER_LOCATION));
-		imsgeStoreResponse.setSent(new Integer(response
+		imageStoreResponse.setSent(new Integer(response
 				.getHeaderString(Constants.CONTENT_LENGTH)));
-
+		imageStoreResponse.setChecksum(response.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
+	///	imageStoreResponse.setImage_id(Constants.GL);
 	///	String type = response.getHeaderString("Content-Type");
 	/*	BufferedReader br = new BufferedReader(new InputStreamReader(
 				inputStream));
@@ -128,7 +124,7 @@ public class GlanceRsClient {
 		}*/
 		
 
-		return imsgeStoreResponse;
+		return imageStoreResponse;
 	}
 
 	public String uploadImageMetaData(Map<String, String> imageProperties)

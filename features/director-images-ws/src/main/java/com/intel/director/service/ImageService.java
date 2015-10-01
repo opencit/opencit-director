@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
@@ -16,7 +17,7 @@ import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
-import com.intel.director.api.TrustPolicy;
+import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.images.exception.DirectorException;
@@ -78,7 +79,7 @@ public interface ImageService {
 	public CreateTrustPolicyMetaDataRequest getPolicyMetadataForImage(
 			String image_id) throws DirectorException;
 
-	public TrustPolicy createTrustPolicy(String image_id)
+	public ImageActionObject createTrustPolicy(String image_id)
 			throws DirectorException;
 
 	String getTrustPolicyByTrustId(String trustId);
@@ -86,4 +87,6 @@ public interface ImageService {
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
 			String image_deployments, String image_format,
 			HttpServletRequest request) throws DbException, IOException;
+
+	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DbException;
 }

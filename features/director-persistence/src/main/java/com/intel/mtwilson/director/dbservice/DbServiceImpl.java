@@ -6,22 +6,22 @@ import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ui.ImageInfo;
-import com.intel.director.api.ui.ImageInfoFilter;
-import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ImageStoreSettings;
-import com.intel.director.api.ui.ImageStoreUploadFilter;
-import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.ui.ImageActionObject;
+import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageInfoOrderBy;
+import com.intel.director.api.ui.ImageStoreUploadFilter;
+import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
-import com.intel.director.api.User;
 import com.intel.director.api.ui.UserFilter;
 import com.intel.director.api.ui.UserOrderBy;
 import com.intel.mtwilson.director.dao.ImageActionDao;
@@ -1467,14 +1467,21 @@ public class DbServiceImpl implements IPersistService {
 			throws DbException {
 		MwImageAction mwImageAction = mapper.toDataUpdate(imageactionobject);
 		mwImageAction.setId(id);
-		imageActionDao.updateImageAction(id, mwImageAction);
+		imageActionDao.updateImageAction(mwImageAction);
+	}
+	
+	@Override
+	public void updateImageAction(ImageActionObject imageactionobject)
+			throws DbException {
+		MwImageAction mwImageAction = mapper.toDataUpdate(imageactionobject);
+		imageActionDao.updateImageAction(mwImageAction);
 	}
 
 	@Override
 	public void deleteImageAction(ImageActionObject imageactionobject)
 			throws DbException {
 		MwImageAction mwImageAction = mapper.toData(imageactionobject);
-		imageActionDao.createImageAction(mwImageAction);
+		imageActionDao.deleteImageAction(mwImageAction);
 
 	}
 
@@ -1490,6 +1497,18 @@ public class DbServiceImpl implements IPersistService {
 			imageActionObject.add(actionObject);
 		}
 		return imageActionObject;
+	}
+
+	@Override
+	public void deleteImageActionById(String image_action_id)
+			throws DbException {
+		imageActionDao.deleteImageActionByID(image_action_id);
+		
+	}
+
+	@Override
+	public ImageActionObject fetchImageActionById(String image_action_id) throws DbException {
+		return mapper.toTransferObject(imageActionDao.getImageActionByID(image_action_id));
 	}
 
 }

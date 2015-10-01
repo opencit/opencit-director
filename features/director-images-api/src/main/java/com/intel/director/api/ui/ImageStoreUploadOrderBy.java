@@ -1,6 +1,5 @@
 package com.intel.director.api.ui;
 
-import com.intel.director.api.ui.ImageStoreUploadFields;
 
 public class ImageStoreUploadOrderBy extends OrderBy {
 

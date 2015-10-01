@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.intel.director.api.ImageActionObject;
+import com.intel.director.service.ImageActionService;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
-import com.intel.director.api.ui.ImageActionObject;
-import com.intel.director.service.ImageActionService;
 
 public class ImageActionImpl implements ImageActionService {
 	@Autowired

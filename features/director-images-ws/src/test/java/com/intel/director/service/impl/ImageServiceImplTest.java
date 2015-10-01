@@ -5,6 +5,15 @@
  */
 package com.intel.director.service.impl;
 
+import java.security.NoSuchAlgorithmException;
+
+import org.junit.Assert;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
@@ -17,17 +26,6 @@ import com.intel.director.service.ImageService;
 import com.intel.director.util.DirectorUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.IPersistService;
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.NoSuchAlgorithmException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *

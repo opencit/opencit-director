@@ -8,7 +8,6 @@ package com.intel.director.service;
 import java.io.File;
 import java.util.Map;
 
-import com.intel.director.api.ImageStoreRequest;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;

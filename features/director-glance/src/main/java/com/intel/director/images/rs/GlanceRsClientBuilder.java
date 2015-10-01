@@ -5,15 +5,15 @@
  */
 package com.intel.director.images.rs;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.images.glance.constants.Constants;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+
+import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.director.images.glance.constants.Constants;
 
 /**
  *

@@ -1,12 +1,5 @@
 package com.intel.mtwilson.director.dao;
 
-import com.intel.director.api.ImageInfoFields;
-import com.intel.director.api.ui.ImageInfo;
-import com.intel.director.api.ui.ImageInfoFilter;
-import com.intel.director.api.ui.ImageInfoOrderBy;
-import com.intel.director.api.ui.OrderByEnum;
-import com.intel.director.api.ui.SearchImageByPolicyCriteria;
-import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +13,13 @@ import javax.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.intel.director.api.ImageInfoFields;
+import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageInfoOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
+import com.intel.director.api.ui.SearchImageByPolicyCriteria;
+import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;

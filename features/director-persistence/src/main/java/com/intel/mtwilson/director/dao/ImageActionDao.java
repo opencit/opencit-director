@@ -7,16 +7,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.intel.director.api.ImageActionActions;
-import com.intel.director.api.ui.ImageActionObject;
-import com.intel.director.api.ui.ImageInfo;
-import com.intel.mtwilson.director.data.MwHost;
+import com.intel.director.api.ImageActionObject;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -129,12 +126,10 @@ List<Object[]> imageObjList =query.getResultList();
  }
  
  
- public void updateImageAction(String id,MwImageAction img) throws DbException {
+ public void updateImageAction(MwImageAction img) throws DbException {
   EntityManager em = getEntityManager();
   try {
    em.getTransaction().begin();
-   @SuppressWarnings("unused")
-MwImageAction mwImageAction = em.getReference(MwImageAction.class, id);
    em.merge(img);
    em.getTransaction().commit();
   } 
@@ -152,8 +147,7 @@ MwImageAction mwImageAction = em.getReference(MwImageAction.class, id);
   try {
    
    em.getTransaction().begin();
-   MwImageAction mwImageAction = em.getReference(MwImageAction.class, img.getId());
-   em.remove(mwImageAction);
+   em.remove(img);
    em.getTransaction().commit();
   } 
   catch(Exception e){

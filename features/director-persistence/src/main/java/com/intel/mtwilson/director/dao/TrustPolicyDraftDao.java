@@ -1,7 +1,5 @@
 package com.intel.mtwilson.director.dao;
 
-import static com.intel.dcsg.cpg.validation.RegexPatterns.UUID;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

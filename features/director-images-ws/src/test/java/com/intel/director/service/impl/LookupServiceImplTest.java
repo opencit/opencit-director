@@ -4,13 +4,12 @@
  */
 package com.intel.director.service.impl;
 
+import org.junit.Assert;
+
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
 import com.intel.director.service.LookupService;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class LookupServiceImplTest {
 
