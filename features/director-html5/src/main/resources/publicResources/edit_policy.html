@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<title>Edit Policy</title>
+<meta name="author" content="aakash">
+</head>
+<body>
+
+
+
+
+
+
+	<div data-bind="with: editImageViewModel">
+		<form class="form-horizontal" role="form"
+			data-bind="submit: editImage">
+			<div data-bind="with: editImageMetaData">
+
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8" style="margin-top: 10px;">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h1>Edit Trust Policy Page</h1>
+							</div>
+							<div class="panel-body">
+
+
+
+								<!-- 	<div class="form-group">
+										      <label class="control-label col-md-4" for="image_format">Image Format:</label>
+										      <div class="col-md-4">
+										       <select class="form-control" id="image_format" data-bind="value: selected_image_format,
+					                       optionsCaption: 'Choose...'" required >
+										      
+										      </select>
+										      </div>
+										    </div>
+						                     -->
+
+
+
+								<div class="form-group">
+									<label class="control-label col-md-4" for="image_name">Image
+										Name:</label>
+									<div class="col-md-4">
+										<input type="text" class="form-control" id="image_name"
+											data-bind="value: image_name" placeholder="Enter Image Name"
+											disabled>
+									</div>
+								</div>
+
+
+
+
+
+
+								<div class="form-group">
+									<label class="control-label col-md-4"
+										for="launch_control_policy">Launch Control policy:</label>
+									<div id="launch_control_policy" class="col-md-8">
+										<!--        <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="0" data-bind="checked: imgPolicy">Measure Only
+											    </label>
+											    <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="1" data-bind="checked: imgPolicy">Measure and Enforce
+											    </label> -->
+									</div>
+								</div>
+
+
+
+
+
+
+								<div class="form-group">
+									<label class="control-label col-md-4" for="asset_tag_policy">Trust
+										Policy:</label>
+									<div id="asset_tag_policy" class="col-md-8">
+										<label class="radio-inline"> <input type="radio"
+											value="Trust Only" name="asset_tag_policy" />Trust Only
+										</label> <label class="radio-inline"> <input type="radio" na
+											value="Trust and Location" name="asset_tag_policy" />Trust
+											and Location
+										</label>
+									</div>
+								</div>
+
+
+
+
+
+
+
+								<div class="form-group">
+									<div class="col-md-offset-4 col-md-8">
+										<div class="checkbox">
+											<label><input type="checkbox" id="isEncrypted"
+												name="isEncrypted" value="encrypt" data-bind="isEncrypted">Encrypt
+												Image</label>
+										</div>
+									</div>
+								</div>
+
+
+								<div class="col-md-offset-1 col-md-1">
+									<button type="button" onclick="backToVmImagesPage()"
+										class="btn btn-primary">Back to Images</button>
+								</div>
+
+								<div class="col-md-offset-6 col-md-1">
+									<button type="submit" class="btn btn-primary">Next</button>
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</form>
+
+	</div>
+
+
+
+
+
+
+	<script src="js/edit_policy.js"></script>
+
+</body>
+</html>

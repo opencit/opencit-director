@@ -5,8 +5,9 @@
 
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
-import com.intel.mtwilson.configuration.PasswordVaultFactory;
+import com.intel.mtwilson.core.PasswordVaultFactory;
 import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
+
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.spec.InvalidKeySpecException;

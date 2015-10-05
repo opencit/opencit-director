@@ -98,7 +98,7 @@ DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cach
 #check for kms.endpoint.url. If not available skip KMS setup tasks
 CONF_KMS_ENDPOINT_URL=${KMS_ENDPOINT_URL:-$(read_property_from_file "kms.endpoint.url" "$DIRECTOR_PROPERTIES_FILE")}
 if [ ! -z "$CONF_KMS_ENDPOINT_URL" ]; then
-  DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault director-envelope-key director-envelope-key-registration"}
+  DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore director-envelope-key director-envelope-key-registration"}
 else
   DIRECTOR_SETUP_TASKS=""
 fi
@@ -124,7 +124,6 @@ CLASSPATH=$CLASSPATH:$(find "$JAVA_HOME" -name jfxrt*.jar | head -n 1)
 # able to see the full command line in ps because the output is normally
 # truncated at 4096 characters. so we export the classpath to the environment
 export CLASSPATH
-
 ###################################################################################################
 
 # run a director command
@@ -185,7 +184,7 @@ director_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
       echo $! > $DIRECTOR_PID_FILE
     )
     if director_is_running; then
@@ -209,7 +208,7 @@ director_is_running() {
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # check the process list just in case the pid file is stale
-    DIRECTOR_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    DIRECTOR_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main jetty-start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$DIRECTOR_PID" ]; then
     # Trust Director is not running

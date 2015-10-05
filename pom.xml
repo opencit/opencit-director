@@ -11,8 +11,10 @@
     </description>
     
     <modules>
+
         <module>director-javafx</module>
         <module>director-setup</module>
-        <module>director-vm-feature</module>
+        <module>features</module>
+
     </modules>
 </project>

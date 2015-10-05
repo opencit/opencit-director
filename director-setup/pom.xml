@@ -32,14 +32,26 @@
             <artifactId>mtwilson-configuration</artifactId>
         </dependency>
         <!-- for SetupTask and AbstractSetupTask -->
+
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
         </dependency>
         
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-client-jaxrs2</artifactId>
+            <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-password-vault</artifactId>
+			<version>${mtwilson.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.kms</groupId>
+			<artifactId>kms-client-jaxrs2</artifactId>
+		</dependency>
+
     </dependencies>
 </project>
