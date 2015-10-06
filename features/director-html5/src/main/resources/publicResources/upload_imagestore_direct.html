@@ -117,7 +117,7 @@
 
 
 								<div class="col-md-offset-6 col-md-1">
-									<button type="submit" class="btn btn-primary"  data-toggle="modal" data-target="#redirect">Upload</button>
+									<button type="submit" class="btn btn-primary" onclick="uploadToStore()"  data-toggle="modal" data-target="#redirect">Upload</button>
 								</div>
 								<!-- Modal -->
 								<div class="modal fade" id="redirect" role="dialog">
@@ -127,11 +127,10 @@
 										<div class="modal-content">
 											<div class="modal-header">
 												<button type="button" class="close" data-dismiss="modal">&times;</button>
-												<h4 class="modal-title">Task has been Queued for
-													Execution Successfully</h4>
+												<h4 class="modal-title">Task successfully Queued </h4>
 											</div>
 											<div class="modal-body">
-												<p>Task You've initiated has successfully Completed...</p>
+												<p>Task has been queued for  asynchronus execution </p>
 											</div>
 											<div class="modal-footer">
 												<button type="button" class="btn btn-default"

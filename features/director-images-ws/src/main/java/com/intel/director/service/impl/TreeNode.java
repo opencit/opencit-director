@@ -122,12 +122,10 @@ public class TreeNode {
 			add = false;
 		}
 		if (ulBeginBool) {
-			System.out.print("<ul>");
 			addToTree(ulBegin, add);
 			builder.append(ulBegin);
 			
 		}
-		System.out.println(incrementalPath + (isLeaf() ? " -> " + data : ""));
 
 		String checkbox = null;
 		String liClass = null;
@@ -173,7 +171,6 @@ public class TreeNode {
 
 		if (ulEndBool) {
 			builder.append(ulEnd);
-			System.out.println("</ul>");
 			addToTree(ulEnd, add);
 		}
 		int noOfChildren = childs.size();
@@ -191,7 +188,6 @@ public class TreeNode {
 			if(haveAllElementsOfNodeRendered()){
 				builder.append(ulEnd);
 				addToTree(ulEnd, add);
-				System.out.print("</ul>");
 			}
 
 		}

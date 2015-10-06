@@ -22,7 +22,7 @@ public class Tree {
 	public Tree(TreeNode root, boolean recursive, boolean filesForPolicy) {
 		this.root = root;
 		
-		commonRoot = null;
+		commonRoot = root;
 		
 		if(recursive){
 			directoryCollapsed = "expanded";
@@ -65,8 +65,7 @@ public class Tree {
 	}
 
 	public List<TreeNode> getCommonRoot() {
-		List<TreeNode> list = new ArrayList<TreeNode>();
-		;
+		List<TreeNode> list = new ArrayList<TreeNode>();		
 		if (commonRoot != null) {
 			list.add(commonRoot);
 			return list;

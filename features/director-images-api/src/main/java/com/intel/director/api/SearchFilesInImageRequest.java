@@ -18,6 +18,7 @@ public class SearchFilesInImageRequest {
     public String include;
     public String exclude;
     public boolean recursive;
+    public boolean includeRecursive;
     public boolean filesForPolicy;
     public boolean init;
     public String id;

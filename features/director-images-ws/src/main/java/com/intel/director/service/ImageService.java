@@ -1,7 +1,5 @@
 package com.intel.director.service;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
@@ -15,13 +13,12 @@ import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
-import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
+import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.images.exception.ImageMountException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /*
@@ -39,24 +36,21 @@ import com.intel.mtwilson.director.db.exception.DbException;
 public interface ImageService {
 
 	public MountImageResponse mountImage(String imageId, String user)
-			throws ImageMountException, DbException;
+			throws DirectorException;
 
 	public UnmountImageResponse unMountImage(String imageId, String user)
-			throws ImageMountException;
+			throws DirectorException;
 
-	public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(
-			TrustDirectorImageUploadRequest trustDirectorImageUploadRequest)
-			throws DbException;
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
+			String image_deployments, String image_format,
+			HttpServletRequest request) throws DirectorException;
 
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			String imageId, HttpServletRequest request) throws DbException,
-			IOException;
 
 	public SearchImagesResponse searchImages(
 			SearchImagesRequest searchImagesRequest) throws DbException;
 
 	public SearchFilesInImageResponse searchFilesInImage(
-			SearchFilesInImageRequest searchFilesInImageRequest);
+			SearchFilesInImageRequest searchFilesInImageRequest) throws DirectorException;;
 
 	public ImageStoreResponse uploadImageToImageStore(
 			ImageStoreUploadRequest imageStoreUploadRequest)
@@ -82,11 +76,10 @@ public interface ImageService {
 	public ImageActionObject createTrustPolicy(String image_id)
 			throws DirectorException;
 
-	String getTrustPolicyByTrustId(String trustId);
+	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
-			String image_deployments, String image_format,
-			HttpServletRequest request) throws DbException, IOException;
 
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DbException;
+
+
+	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DirectorException;
 }

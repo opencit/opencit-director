@@ -34,7 +34,7 @@ function SelectDirectoriesViewModel() {
                          headers: {'Accept': 'application/json'},
                          data: ko.toJSON(self.createImageMetaData), //$("#loginForm").serialize(), 
                          success: function(data, status, xhr) {
-     
+                        	editPolicyDraft();
                         	nextButton();
                          }
                      });
@@ -54,6 +54,7 @@ function ApplyRegexMetaData(data) {
 	this.dir_path = ko.observable();
 	this.create_policy_regex_exclude = ko.observable("");
 	this.create_policy_regex_include = ko.observable("");
+	this.create_policy_regex_includeRecursive = ko.observable("");
 
 	this.selected_image_format = ko.observable();
 
@@ -66,6 +67,7 @@ function ApplyRegExViewModel() {
 
 	self.applyRegEx = function(loginFormElement) {
 		var include = loginFormElement.create_policy_regex_include.value;
+		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_"+sel_dir+"']");
@@ -78,13 +80,14 @@ function ApplyRegExViewModel() {
 				init: false,
 				filesForPolicy: false,
 				recursive: true,
-				include: include
+				include: include,
+				includeRecursive: includeRecursive
 			};
 
 		var len = node.parent().children().length;	
 		var counter = 0;
 		node.parent().children().each(function() {
-			if(counter++ >1){
+			if(counter++ > 2){
 				$(this).remove();
 			}
 		});
@@ -170,17 +173,13 @@ var editPolicyDraft = function() {
 		success : function(data, status) {
 			patches.length = 0;
 			//Show message in div
-			console.log("************* saved");
 			var $messageDiv = $('#saveMessage'); // get the reference of the div
-			console.log("************* 1111111");
 			$messageDiv.show().html('Draft saved'); // show and set the message
-			console.log("************* 222222222");
 			setTimeout(function(){ $messageDiv.hide().html('');}, 3000); // 3 seconds later, hide
-			console.log("************* 3333333333");
 			                                                             // and clear the message
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			alert("ERROR in saving to draft");
+		///	alert("ERROR in saving to draft");
 		}
 	});
 }

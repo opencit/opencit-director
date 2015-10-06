@@ -126,33 +126,6 @@ public class ImageServiceImplTest {
         imageService.unMountImage(imageId, user);
     }
 
-   /// @Test
-    public void testUploadImageMetaDataToTrustDirector() throws DbException {
-        TrustDirectorImageUploadRequest directorImageUploadRequest = new TrustDirectorImageUploadRequest();
-        directorImageUploadRequest.imageAttributes = new ImageAttributes();
-        directorImageUploadRequest.imageAttributes.image_deployments = "VM";
-        directorImageUploadRequest.imageAttributes.image_format = "qcow2";
-        Mockito.when(imagePersistenceManager.saveImageMetadata(directorImageUploadRequest.imageAttributes)).thenReturn(imageAttributes);
-        TrustDirectorImageUploadResponse directorImageUploadResponse = imageService.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
-        Assert.assertEquals("Image meta data stored", imageAttributes.id, directorImageUploadResponse.id);
-    }
-
-   /// @Test
-    public void testUploadImageToTrustDirector() throws Exception {
-        Mockito.when(imagePersistenceManager.fetchImageById(imageId)).thenReturn(info);
-        Mockito.when(imagePersistenceManager.saveImageMetadata(imageAttributes)).thenReturn(imageAttributes);
-        TrustDirectorImageUploadRequest directorImageUploadRequest = new TrustDirectorImageUploadRequest();
-        directorImageUploadRequest.imageAttributes = new ImageAttributes();
-        directorImageUploadRequest.imageAttributes.id = "123";
-        directorImageUploadRequest.imageAttributes.image_deployments = "VM";
-        directorImageUploadRequest.imageAttributes.image_format = "qcow2";
-        imageAttributes.location = "C:/temp/123.txt";
-        Mockito.when(imagePersistenceManager.saveImageMetadata(directorImageUploadRequest.imageAttributes)).thenReturn(imageAttributes);
-//        FileInputStream fileInputStream = new FileInputStream(new File("c:/IFRToolLog.txt"));
- //       TrustDirectorImageUploadResponse directorImageUploadResponse = imageService.uploadImageToTrustDirector(imageId, fileInputStream);
-//        Assert.assertEquals("Image meta data stored", imageAttributes.id, directorImageUploadResponse.id);
-    }
-
   ///  @Test
     public void testSearchImages() {
         Assert.assertTrue(true);

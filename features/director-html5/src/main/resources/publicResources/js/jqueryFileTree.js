@@ -46,6 +46,7 @@ if(jQuery) (function($){
 			if( o.multiFolder == undefined ) o.multiFolder = true;
 			if( o.loadMessage == undefined ) o.loadMessage = 'Loading...';
 			if( o.init == undefined ) o.init = false;
+			if(o.includeRecursive == undefined) o.includeRecursive=false;
 			
 			$(this).each( function() {
 				console.log("Hello");
@@ -53,7 +54,7 @@ if(jQuery) (function($){
 					$(c).addClass('wait');
 					$(".jqueryFileTree.start").remove();
 					canPushPatch = false;
-					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, filesForPolicy: treeOptions.filesForPolicy , init: treeOptions.init, include:treeOptions.include});
+					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, filesForPolicy: treeOptions.filesForPolicy , init: treeOptions.init, includeRecursive:treeOptions.includeRecursive, include:treeOptions.include});
 					$.ajax({
 					  type: "POST",
 					  url: o.script,

@@ -5,13 +5,9 @@
  */
 package com.intel.director.images;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +19,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,10 +31,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+
+
+
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GetImageStoresResponse;
@@ -56,13 +53,12 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SignTrustPolicyResponse;
-import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
+import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.images.exception.ImageMountException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageActionImpl;
@@ -70,13 +66,8 @@ import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
 
-/**
- * 
- * @author GS-0681
- */
-@Component
 @Path("/images")
-public class Images extends Application {
+public class Images {
 
 	ImageService imageService = new ImageServiceImpl();
 
@@ -84,76 +75,16 @@ public class Images extends Application {
 
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 
-	@GET
-	@Path("/abc11")
-	public Response getMsg(@PathParam("param") String msg) {
-		
-		String output = "Jersey say : " + " Succes s" + msg;
-
-		Map<String, Object> response = new HashMap<String, Object>();
-		// / Image img = new Image();
-		// / img.setImageName("testImage");
-
-		// /return img;
-		return Response.status(201).entity("Called successfuly").build();
-
-	}
-
-	@Path("/uploadtotd")
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response uploadImageMetaDataToTrustDirector(
-			TrustDirectorImageUploadRequest directorImageUploadRequest)
-			throws DbException, JsonProcessingException, URISyntaxException {
-		imageService = new ImageServiceImpl();
-		TrustDirectorImageUploadResponse trustDirectorImageUploadResponse = imageService
-				.uploadImageMetaDataToTrustDirector(directorImageUploadRequest);
-		trustDirectorImageUploadResponse.imageUploadUrl = "/v1/images/uploads/"
-				+ trustDirectorImageUploadResponse.id + "/content";
-		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper
-				.writeValueAsString(trustDirectorImageUploadResponse);
-		return Response.created(
-				new URI(trustDirectorImageUploadResponse.imageUploadUrl))
-				.build();
-	}
-
-	@Path("/uploads/{imageId: [0-9a-zA-Z_-]+}/content")
-	@POST
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			@PathParam("imageId") String imageId,
-			@Context HttpServletRequest request) throws Exception {
-		if (!ServletFileUpload.isMultipartContent(request)) {
-			TrustDirectorImageUploadResponse directorImageUploadResponse = new TrustDirectorImageUploadResponse();
-			directorImageUploadResponse.status = "Error";
-			return directorImageUploadResponse;
-		}
-
-		imageService = new ImageServiceImpl();
-		long lStartTime = new Date().getTime();
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.uploadImageToTrustDirector(imageId, request);
-		long lEndTime = new Date().getTime();
-
-		long difference = lEndTime - lStartTime;
-
-		System.out.println("Elapsed milliseconds: " + difference);
-
-		return uploadImageToTrustDirector;
-	}
-	
-	
 	@Path("/uploads/content/upload")
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
+
 			@Context HttpServletRequest request,
 			@QueryParam("image_format") String image_format,
-			@QueryParam("image_deployments") String image_deployments) throws Exception {
+			@QueryParam("image_deployments") String image_deployments)
+			throws Exception {
 		if (!ServletFileUpload.isMultipartContent(request)) {
 			TrustDirectorImageUploadResponse directorImageUploadResponse = new TrustDirectorImageUploadResponse();
 			directorImageUploadResponse.status = "Error";
@@ -163,7 +94,8 @@ public class Images extends Application {
 		imageService = new ImageServiceImpl();
 		long lStartTime = new Date().getTime();
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.uploadImageToTrustDirectorSingle(image_deployments,image_format,request);
+				.uploadImageToTrustDirectorSingle(image_deployments, image_format,
+						request);
 		long lEndTime = new Date().getTime();
 
 		long difference = lEndTime - lStartTime;
@@ -194,7 +126,7 @@ public class Images extends Application {
 	public MountImageResponse mountImage(@PathParam("imageId") String imageId,
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse)
-			throws ImageMountException, DbException {
+			throws DirectorException {
 		String user = getLoginUsername(httpServletRequest);
 		MountImageResponse mountImageResponse = imageService.mountImage(
 				imageId, user);
@@ -209,23 +141,12 @@ public class Images extends Application {
 			@PathParam("imageId") String imageId,
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse)
-			throws ImageMountException {
+			throws DirectorException {
 		String user = getLoginUsername(httpServletRequest);
 		UnmountImageResponse unmountImageResponse = imageService.unMountImage(
 				imageId, user);
 		return unmountImageResponse;
 	}
-
-	/*
-	 * @Path("/trustpolicies/")
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON)
-	 * 
-	 * @POST public CreateTrustPolicyResponse createTrustPolicy(
-	 * CreateTrustPolicyRequest createTrustPolicyRequest) { return null; }
-	 */
 
 	@Path("/policydraft/{imageId: [0-9a-zA-Z_-]+}/edit")
 	@POST
@@ -255,7 +176,8 @@ public class Images extends Application {
 	@Produces(MediaType.APPLICATION_JSON)
 	public SearchFilesInImageResponse searchFilesInImage(
 			@PathParam("imageId") String imageId,
-			SearchFilesInImageRequest searchFilesInImageRequest) {
+			SearchFilesInImageRequest searchFilesInImageRequest)
+			throws DirectorException {
 		imageService = new ImageServiceImpl();
 		searchFilesInImageRequest.id = imageId;
 		SearchFilesInImageResponse filesInImageResponse = imageService
@@ -336,7 +258,9 @@ public class Images extends Application {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public ImageActionObject createTrustPolicy(@PathParam("image_id") String image_id) throws DirectorException, JAXBException {
+	public ImageActionObject createTrustPolicy(
+			@PathParam("image_id") String image_id) throws DirectorException,
+			JAXBException {
 
 		return imageService.createTrustPolicy(image_id);
 	}
@@ -423,50 +347,54 @@ public class Images extends Application {
 	@GET
 	@Produces(MediaType.APPLICATION_XML)  
 	public Response downloadPolicy(@PathParam("trustPolicyId") String trustPolicyId) throws Exception {
-		String xml= imageService.getTrustPolicyByTrustId(trustPolicyId);
-		ResponseBuilder response = Response.ok(xml);
-		response.header( "Content-Disposition","attachment; filename=policy_"+trustPolicyId+".xml");
+		TrustPolicy policy= imageService.getTrustPolicyByTrustId(trustPolicyId);
+		ResponseBuilder response = Response.ok(policy.getTrust_policy());
+		response.header( "Content-Disposition","attachment; filename=policy_"+policy.getImgAttributes().getName()+".xml");
+
 		return response.build();
 	}
-	
+
 	@GET
-    @Path("/action/getdata")
+	@Path("/action/getdata")
 	@Produces(MediaType.APPLICATION_JSON)
-    public List<ImageActionObject> get() throws DbException {
-		ImageActionImpl imageActionImpl=new ImageActionImpl();
-		
+	public List<ImageActionObject> get() throws DbException {
+		ImageActionImpl imageActionImpl = new ImageActionImpl();
+
 		return imageActionImpl.getdata();
-		
-    }
+
+	}
 
 	@POST
-  	@Path("/action/create")
+	@Path("/action/create")
 	@Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public String createImageAction(ImageActionObject imageActionObject) throws DbException {
-		ImageActionImpl imageActionImpl=new ImageActionImpl(); 
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String createImageAction(ImageActionObject imageActionObject)
+			throws DbException {
+		ImageActionImpl imageActionImpl = new ImageActionImpl();
 		imageActionImpl.createImageAction(imageActionObject);
 		return "Create Success";
-    }
-	
-	
-	@PUT
-    @Path("/action/{id: [0-9a-zA-Z_-]+}/update")
-	@Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public String updateSsh(@PathParam("id") String id,ImageActionObject imageActionObject) throws DbException{
-		ImageActionImpl imageActionImpl=new ImageActionImpl();
-		imageActionImpl.updateImageAction(id,imageActionObject);
-		return "Update Success";
-		
 	}
-	
+
+	@PUT
+	@Path("/action/{id: [0-9a-zA-Z_-]+}/update")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String updateSsh(@PathParam("id") String id,
+			ImageActionObject imageActionObject) throws DbException {
+		ImageActionImpl imageActionImpl = new ImageActionImpl();
+		imageActionImpl.updateImageAction(id, imageActionObject);
+		return "Update Success";
+
+	}
+
 	@Path("/{imageId: [0-9a-zA-Z_-]+}/recreatedraft")
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)  
-	public TrustPolicyDraft createPolicyDraftFromPolicy(@PathParam("imageId") String imageId,
+	@Produces(MediaType.APPLICATION_JSON)
+	public TrustPolicyDraft createPolicyDraftFromPolicy(
+			@PathParam("imageId") String imageId,
 			@QueryParam("action_id") String image_action_id) throws Exception {
-		return imageService.createPolicyDraftFromPolicy(imageId,image_action_id);
+		return imageService.createPolicyDraftFromPolicy(imageId,
+				image_action_id);
 
 	}
 }

@@ -23,6 +23,7 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,6 @@ import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
-import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -91,13 +91,13 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public MountImageResponse mountImage(String imageId, String user)
-			throws ImageMountException {
+			throws DirectorException {
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		ImageAttributes image;
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
 		} catch (DbException ex) {
-			throw new ImageMountException("No image found with id: " + imageId,
+			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
 		// Check if the image is already mounted. If so, return error
@@ -113,7 +113,7 @@ public class ImageServiceImpl implements ImageService {
 			// Mount the image
 			/* MountVMImage.mountImage(image.location, mountPath); */
 		} catch (Exception ex) {
-			throw new ImageMountException("Unable to mount image", ex);
+			throw new DirectorException("Unable to mount image", ex);
 		}
 
 		// Mark the image mounted by the user
@@ -125,12 +125,15 @@ public class ImageServiceImpl implements ImageService {
 			mountImageResponse = DirectorUtil
 					.mapImageAttributesToMountImageResponse(image);
 		} catch (DbException ex) {
+			throw new DirectorException(
+					"Unable to reset mounted_by_user_id field", ex);
+		} finally {
 			try {
 				// unmount the image
 				MountVMImage.unmountImage(mountPath);
 			} catch (Exception ex1) {
-				throw new ImageMountException(
-						"Failed to unmoubt image. The attempt was made after the DB update for mounted_by_user failed. ",
+				throw new DirectorException(
+						"Failed to unmount image. The attempt was made after the DB update for mounted_by_user failed. ",
 						ex1);
 			}
 
@@ -141,7 +144,7 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public UnmountImageResponse unMountImage(String imageId, String user)
-			throws ImageMountException {
+			throws DirectorException {
 		UnmountImageResponse unmountImageResponse = null;
 		try {
 			ImageAttributes image = imagePersistenceManager
@@ -151,7 +154,7 @@ public class ImageServiceImpl implements ImageService {
 			// tries to unmount
 			if (user != null) {
 				if (!image.mounted_by_user_id.equalsIgnoreCase(user)) {
-					throw new ImageMountException(
+					throw new DirectorException(
 							"Image cannot be unmounted by a differnt user");
 				}
 			}
@@ -172,25 +175,6 @@ public class ImageServiceImpl implements ImageService {
 			throw new ImageMountException("Unable to unmount image", ex);
 		}
 		return unmountImageResponse;
-	}
-
-	@Override
-	public TrustDirectorImageUploadResponse uploadImageMetaDataToTrustDirector(
-			TrustDirectorImageUploadRequest trustDirectorImageUploadRequest)
-			throws DbException {
-		// Check if the file with the same name has been uploaded earlier
-		// If so, append "_1" to the file name and then save
-		File image = new File(Constants.vmImagesPath
-				+ trustDirectorImageUploadRequest.imageAttributes.name);
-		if (image.exists()) {
-			trustDirectorImageUploadRequest.imageAttributes.name += "_1";
-		}
-
-		// Save image meta data to the database
-		ImageAttributes imageAttributes = imagePersistenceManager
-				.saveImageMetadata(trustDirectorImageUploadRequest.imageAttributes);
-		return DirectorUtil
-				.mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
 	}
 
 	/**
@@ -241,87 +225,10 @@ public class ImageServiceImpl implements ImageService {
 		return files;
 	}
 
-	/**
-	 * 
-	 * @param imageId
-	 * @param imageFileInputStream
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	@Override
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			String imageId, HttpServletRequest request) throws DbException,
-			IOException {
-
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		// maximum size that will be stored in memory
-		factory.setSizeThreshold(MaxMemSize);
-		// Location to save data that is larger than maxMemSize.
-		factory.setRepository(new File("c:/temp/"));
-
-		// Create a new file upload handler
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		// maximum file size to be uploaded.
-		upload.setSizeMax(MaxFileSize);
-		File file = null;
-
-		String parameter = request.getParameter("imgFile");
-		System.out.println("Image file : " + parameter);
-
-		// Parse the request to get file items.
-
-		try {
-			List fileItems = upload.parseRequest(request);
-
-			// Process the uploaded file items
-			@SuppressWarnings("rawtypes")
-			Iterator i = fileItems.iterator();
-			String filePath = "C:/temp/";
-			while (i.hasNext()) {
-				FileItem fi = (FileItem) i.next();
-				// System.out.print(fi);
-				if (!fi.isFormField()) {
-					// Get the uploaded file parameters
-					String fileName = fi.getName();
-					// Write the file
-					if (fileName.lastIndexOf("\\") >= 0) {
-						file = new File(
-								filePath
-										+ fileName.substring(fileName
-												.lastIndexOf("\\")));
-					} else {
-						file = new File(
-								filePath
-										+ fileName.substring(fileName
-												.lastIndexOf("\\") + 1));
-					}
-					fi.write(file);
-					// System.out.print(fi);
-				}
-			}
-		} catch (Exception e) {
-			throw new IOException("Cannot write the uploaded file", e);
-		}
-
-		// Get the image details saved in the earlier step
-		ImageAttributes imageAttributes = imagePersistenceManager
-				.fetchImageById(imageId);
-		imageAttributes.location = file.getCanonicalPath();
-
-		// Write image to file
-
-		// Save image meta data to the database
-		imagePersistenceManager.updateImage(imageAttributes);
-
-		return DirectorUtil
-				.mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
-	}
-
 	@Override
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
 			String image_deployments, String image_format,
-			HttpServletRequest request) throws DbException, IOException {
+			HttpServletRequest request) throws DirectorException {
 
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// maximum size that will be stored in memory
@@ -335,8 +242,6 @@ public class ImageServiceImpl implements ImageService {
 		upload.setSizeMax(MaxFileSize);
 		File file = null;
 
-		String parameter = request.getParameter("imgFile");
-
 		// Parse the request to get file items.
 
 		try {
@@ -348,7 +253,6 @@ public class ImageServiceImpl implements ImageService {
 			String filePath = "C:/temp/";
 			while (i.hasNext()) {
 				FileItem fi = (FileItem) i.next();
-				// System.out.print(fi);
 				if (!fi.isFormField()) {
 					// Get the uploaded file parameters
 					String fileName = fi.getName();
@@ -365,28 +269,36 @@ public class ImageServiceImpl implements ImageService {
 												.lastIndexOf("\\") + 1));
 					}
 					fi.write(file);
-					// System.out.print(fi);
 				}
 			}
 		} catch (Exception e) {
-			throw new IOException("Cannot write the uploaded file", e);
+			throw new DirectorException("Cannot write the uploaded file", e);
 		}
 		ImageAttributes imageAttributes = new ImageAttributes();
 		imageAttributes.name = file.getName();
 		imageAttributes.image_deployments = image_deployments;
-		imageAttributes.location = file.getCanonicalPath();
+		try {
+			imageAttributes.location = file.getCanonicalPath();
+		} catch (IOException e) {
+			throw new DirectorException("Cannot get location of file", e);
+		}
 		imageAttributes.image_format = image_format;
 		Date currentDate = new Date();
 		imageAttributes.setCreated_date(currentDate);
 		imageAttributes.setEdited_date(currentDate);
-		imagePersistenceManager.saveImageMetadata(imageAttributes);
+		try {
+			imagePersistenceManager.saveImageMetadata(imageAttributes);
+		} catch (DbException e) {
+			throw new DirectorException("Cannot save image meta data", e);
+		}
 		return DirectorUtil
 				.mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
 	}
 
 	@Override
 	public SearchFilesInImageResponse searchFilesInImage(
-			SearchFilesInImageRequest searchFilesInImageRequest) {
+			SearchFilesInImageRequest searchFilesInImageRequest)
+			throws DirectorException {
 		List<String> trustPolicyElementsList = new ArrayList<String>();
 		Set<String> fileNames = new HashSet<String>();
 		Set<String> patchFileAddSet = new HashSet<String>();
@@ -452,18 +364,39 @@ public class ImageServiceImpl implements ImageService {
 		// In case of regex, find the list of files and add it here and then set
 		// it in
 		if (searchFilesInImageRequest.include != null) {
+			List<File> regexFiles = new ArrayList<File>();
+			if (searchFilesInImageRequest.includeRecursive) {
+				regexFiles = getFiles(searchFilesInImageRequest.getDir(), null);
+			} else {
+				regexFiles = new ArrayList<File>(Arrays.asList(new File(
+						searchFilesInImageRequest.getDir()).listFiles()));
+				;
+			}
 			trustPolicyElementsList = new ArrayList<String>();
+			for (File file : regexFiles) {
+				try {
+					if (FilenameUtils.getExtension(file.getCanonicalPath())
+							.endsWith(
+									searchFilesInImageRequest.include.replace(
+											"*.", ""))) {
+						patchFileAddSet.add(file.getCanonicalPath().replace(
+								"\\", "/"));
+						if (!trustPolicyElementsList.contains(file
+								.getCanonicalPath().replace("\\", "/"))) {
+							trustPolicyElementsList.add(file.getCanonicalPath()
+									.replace("\\", "/"));
+						}
+					}
+				} catch (IOException ioe) {
+					throw new DirectorException(
+							"Exception while fetchinf files in regex", ioe);
+				}
+			}
+
 			patchDirAddSet.add(searchFilesInImageRequest.getDir());
-			patchFileAddSet.add("C:/Temp/Test/TEST_File.txt");
-			patchFileAddSet
-					.add("C:/Temp/Test/AChild2/AChild2_1/AChild2_1_file.txt");
-			trustPolicyElementsList.add("C:/Temp/Test/TEST_File.txt");
-			trustPolicyElementsList
-					.add("C:/Temp/Test/AChild2/AChild2_1/AChild2_1_file.txt");
 		}
 		if (searchFilesInImageRequest.recursive) {
 			filesInImageResponse.patchXML = new ArrayList<>();
-			StringBuilder builder = new StringBuilder();
 			String parentDir = searchFilesInImageRequest.getDir();
 			if (searchFilesInImageRequest.filesForPolicy) {
 				// This means that the user has checked the parent directory
@@ -525,18 +458,18 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public String getTrustPolicyByTrustId(String trustId) {
-		String policyXml = null;
+	public TrustPolicy getTrustPolicyByTrustId(String trustId) {
+		TrustPolicy fetchPolicy = null;
 		try {
-			TrustPolicy fetchPolicy = imagePersistenceManager
+			 fetchPolicy = imagePersistenceManager
 					.fetchPolicyById(trustId);
-			policyXml = fetchPolicy.getTrust_policy();
+		///	policyXml = fetchPolicy.getTrust_policy();
 		} catch (DbException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		return policyXml;
+		return fetchPolicy;
 	}
 
 	@Override
@@ -874,11 +807,10 @@ public class ImageServiceImpl implements ImageService {
 	private void init(List<String> trustPolicyElementsList,
 			Map<String, Boolean> directoryListContainingPolicyFiles,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
-		if (!searchFilesInImageRequest.init) {
-			trustPolicyElementsList = null;
-			return;
-		}
-
+		/*
+		 * if (!searchFilesInImageRequest.init) { trustPolicyElementsList =
+		 * null; return; }
+		 */
 		// Fetch the files from the draft
 		TrustPolicyDraft trustPolicyDraft = null;
 		try {
@@ -898,11 +830,14 @@ public class ImageServiceImpl implements ImageService {
 					for (Measurement measurement : trustPolicyDraftObj
 							.getWhitelist().getMeasurements()) {
 						trustPolicyElementsList.add(measurement.getPath());
-						if (measurement instanceof FileMeasurement) {
-							DirectorUtil.getParentDirectory(
-									measurement.getPath(),
-									searchFilesInImageRequest.getDir(),
-									directoryListContainingPolicyFiles, true);
+						if (searchFilesInImageRequest.init) {
+							if (measurement instanceof FileMeasurement) {
+								DirectorUtil.getParentDirectory(
+										measurement.getPath(),
+										searchFilesInImageRequest.getDir(),
+										directoryListContainingPolicyFiles,
+										true);
+							}
 						}
 					}
 				}
@@ -1218,18 +1153,47 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId,
-			String image_action_id) throws DbException {
+			String image_action_id) throws DirectorException {
 		// TODO Auto-generated method stub
 
-		ImageInfo imageInfo = imagePersistenceManager.fetchImageById(imageId);
-		TrustPolicy existingTrustPolicy = imagePersistenceManager
-				.fetchPolicyById(imageInfo.getTrust_policy_id());
-		TrustPolicyDraft trustPolicyDraft = trustPolicyToTrustPolicyDraft(existingTrustPolicy);
-		imagePersistenceManager.destroyPolicy(existingTrustPolicy);
-		if(image_action_id!=null){
-		imagePersistenceManager.deleteImageActionById(image_action_id);
+		ImageInfo imageInfo;
+		try {
+			imageInfo = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			throw new DirectorException("Cannot fetch image by id", e);
 		}
-		return imagePersistenceManager.savePolicyDraft(trustPolicyDraft);
+		TrustPolicy existingTrustPolicy;
+		try {
+			existingTrustPolicy = imagePersistenceManager
+					.fetchPolicyById(imageInfo.getTrust_policy_id());
+		} catch (DbException e) {
+			throw new DirectorException("Cannot get policy by id", e);
+		}
+		TrustPolicyDraft trustPolicyDraft = trustPolicyToTrustPolicyDraft(existingTrustPolicy);
+		try {
+			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
+		} catch (DbException e) {
+			throw new DirectorException(
+					"Cannot delete policy draft before createing a signed policy",
+					e);
+		}
+		if (image_action_id != null) {
+			try {
+				imagePersistenceManager.deleteImageActionById(image_action_id);
+			} catch (DbException e) {
+				throw new DirectorException("Cannot delete image action : "
+						+ image_action_id, e);
+			}
+		}
+
+		TrustPolicyDraft savePolicyDraft = null;
+		try {
+			savePolicyDraft = imagePersistenceManager
+					.savePolicyDraft(trustPolicyDraft);
+		} catch (DbException e) {
+			throw new DirectorException("Unable to save policy draft ", e);
+		}
+		return savePolicyDraft;
 	}
 
 	public TrustPolicyDraft trustPolicyToTrustPolicyDraft(
@@ -1322,8 +1286,17 @@ public class ImageServiceImpl implements ImageService {
 				}
 
 			}
-
+			
+			if(taskList.size()>0){
+			imageActionObject.setImage_id(imageStoreUploadRequest.getImage_id());
 			imageActionObject.setAction(taskList);
+			if(imageActionObject.getCurrent_task_name()==null){
+				ImageActionActions acts=taskList.get(0);
+				imageActionObject.setCurrent_task_name(acts.getTask_name());
+				imageActionObject.setCurrent_task_status(acts.getStatus());
+			}
+			
+			}
 			imagePersistenceManager.updateImageAction(
 					imageActionObject.getId(), imageActionObject);
 		} catch (Exception e) {

@@ -106,6 +106,8 @@ function UploadStoreViewModel() {
 		self.uploadStoreMetaData.store_name_for_policy_upload = $(
 				'#policy_upload_combo').val();
 		console.log(self.uploadStoreMetaData.store_name_for_tarball_upload);
+
+		
 		$.ajax({
 			type : "POST",
 			url : endpoint + "uploads",

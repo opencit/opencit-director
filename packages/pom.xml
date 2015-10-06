@@ -8,15 +8,8 @@
     <packaging>pom</packaging>
   
     <modules>
-        <module>director-linux-installer</module>
-        <module>director-linux-makeself</module>
-        <module>director-vm-linux-makeself</module>
         <module>director-zip</module>
-        <module>director-vm-zip</module>
-        <!--<module>director-javadoc</module>-->
-        <!--commenting out director-javadoc due to this error:
-            [ERROR] Failed to execute goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar (all-javadoc-jar) on project director-javadoc: Execution all-javadoc-jar of
-            goal org.apache.maven.plugins:maven-javadoc-plugin:2.10.1:jar failed: For artifact {null:null:null:jar}: The groupId cannot be empty. -> [Help 1]
-        -->
+
+        <module>director-linux-makeself</module>
     </modules>
 </project>

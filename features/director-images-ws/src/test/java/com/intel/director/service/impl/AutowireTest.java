@@ -5,9 +5,6 @@
  */
 package com.intel.director.service.impl;
 
-import com.intel.director.service.ImageService;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -16,9 +13,18 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class AutowireTest {
 
     public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("director-images-config.xml");
-       
-   ///     imageService.pleaseAutoWire();
+    	test();
+    }
+    
+    private static void test() throws ArithmeticException{
+    	String s = null;
+    	try{
+    		throw new ArithmeticException();
+    	}catch(ArithmeticException e){
+    		throw e;
+    	}finally{
+    		System.out.println("***************");
+    	}
 
     }
 }

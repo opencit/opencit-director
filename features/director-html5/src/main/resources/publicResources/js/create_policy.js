@@ -56,7 +56,7 @@
             self.createImage = function(loginFormElement) {
             
             self.createImageMetaData.launch_control_policy=$('input[name=launch_control_policy]:checked').val();
-            self.createImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
+         //   self.createImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
             self.createImageMetaData.isEncrypted=$('input[name=isEncrypted]').is(':checked');
           
             
@@ -117,7 +117,7 @@
         	        	   mainViewModel.createImageViewModel  =  new CreateImageViewModel();
         	       
         	           $("input[name=launch_control_policy][value='MeasureOnly']").attr('checked', 'checked');  
-        	           $("input[name=asset_tag_policy][value='Trust Only']").attr('checked', 'checked');  
+        	    ///       $("input[name=asset_tag_policy][value='Trust Only']").attr('checked', 'checked');  
         	           
         	        	ko.applyBindings(mainViewModel, document.getElementById("create_policy_content_step_1"));
         	        }

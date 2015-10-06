@@ -8,55 +8,7 @@
 
 
         <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-8" style="margin-top: 10px;">        
-                <div class="panel panel-default" data-bind="with: keysViewModel">
-                    <div class="panel-heading">
-
-                        <ul class="list-inline pull-right">
-                            <!--
-                           <li><a href="#"><i class="glyphicon glyphicon-cog"></i></a></li>
-                           <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-comment"></i><span class="count">3</span></a><ul class="dropdown-menu" role="menu"><li><a href="#">1. Is there a way..</a></li><li><a href="#">2. Hello, admin. I would..</a></li><li><a href="#"><strong>All messages</strong></a></li></ul></li>
-                           <li><a href="#"><i class="glyphicon glyphicon-user"></i></a></li>
-                            -->
-                            <li><a title="Refresh" data-toggle="modal" href="#" data-bind="click: searchKeys"><span class="glyphicon glyphicon-refresh"></span> Refresh</a></li>
-                            <li><a title="Add Key" data-toggle="modal" href="#addKeyModalDialog"><span class="glyphicon glyphicon-plus-sign"></span> Add Key</a></li>
-                        </ul>
-
-                        <h1>Keys</h1>
-                    </div>
-                    <div class="panel-body">
-                        <p><span data-bind="text: keys().length"></span> keys</p>
-                        <table class="table table-striped" data-bind="visible: keys().length > 0">
-                            <thead>
-                                <tr>
-                                    <th style="width: 150px;">Key ID</th>
-                                    <th style="width: 75px;">Algorithm</th>
-                                    <th style="width: 75px;">Key Length</th>
-                                    <th style="width: 75px;">Mode</th>
-                                    <th style="width: 75px;">Padding Mode</th>
-                                    <th style="width: 75px;"><!-- Action Icons --></th>
-                                </tr>
-                            </thead>
-                            <tbody data-bind="foreach: keys">
-                                <tr>
-                                    <td><span data-bind="click: $parent.viewKey, text: id"></span></td>
-                                    <td><span data-bind="text: algorithm"></span></td>
-                                    <td><span data-bind="text: key_length"></span></td>
-                                    <td><span data-bind="text: cipher_mode"></span></td>
-                                    <td><span data-bind="text: padding_mode"></span></td>
-                                    <td>
-                                        <a title="Delete Key" data-toggle="modal" href="#deleteKeyModalDialog" data-bind="click: $parent.confirmDeleteKey"><span class="glyphicon glyphicon-trash"></span></a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="col-md-2"></div>
+     <h3>Yet to be implemented</h3>
 
 
         </div>     

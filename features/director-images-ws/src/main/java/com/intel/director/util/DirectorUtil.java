@@ -37,9 +37,6 @@ import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.common.Constants;
-import com.intel.director.images.GlanceImageStoreManager;
-import com.intel.director.images.exception.DirectorException;
-import com.intel.director.imagestore.ImageStoreManager;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
 import com.intel.mtwilson.trustpolicy.xml.Director;
@@ -119,22 +116,6 @@ public class DirectorUtil {
 				new File(imageAttributes.location).length()).intValue();
 	}
 
-	// TODO: get the class name from the store name
-	public static ImageStoreManager getImageStoreManager(String storeName)
-			throws DirectorException {
-		ImageStoreManager imageStoreManager = null;
-		try {
-			switch (storeName) {
-			case "glance":
-				imageStoreManager = new GlanceImageStoreManager();
-				break;
-			}
-		} catch (Exception e) {
-			throw new DirectorException(
-					"Unable to fetch an image store manager", e);
-		}
-		return imageStoreManager;
-	}
 
 	public static String patch(String src, String patch) throws IOException {
 		String patched = "";

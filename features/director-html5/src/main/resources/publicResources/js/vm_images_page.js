@@ -1,11 +1,9 @@
 
-alert("aaa");
+
 var pageInitialized = false;
 $(document).ready(function() {
-	alert("pageInitialized::"+pageInitialized);
 	 if(pageInitialized==true) return;
 	
-	 alert("bbb");
 
 	  $("#vm_images_grid_page").load("vm_images_grid_page.html");
 	  
@@ -99,7 +97,6 @@ function goToEditPolicyWizard(){
 
 
 function backToVmImagesPage(){
-	alert("inside backToVmImagesPage");
 	 $("#create_policy_script").remove();
 	 $("#edit_policy_wizard").html("");
 	 $("#create_policy_wizard_").html("");
@@ -109,9 +106,7 @@ function backToVmImagesPage(){
 	 $("#upload_to_image_store_redirect").hide("");
 	 $("#vm_images_grid_page").show();
 		///ko.applyBindings(mainViewModel, document.getElementById("create_policy_content_step_1"));
-	alert("before");
 	 refresh_vm_images_Grid();
-	 alert("after");
 	/// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));
 	
 }

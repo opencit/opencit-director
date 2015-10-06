@@ -23,16 +23,8 @@ public class ImageActionImpl implements ImageActionService {
 		List<ImageActionObject> allActionObject= new ArrayList<ImageActionObject>();
 		List<ImageActionObject> actionObjectIncomplete= new ArrayList<ImageActionObject>();
 		allActionObject=ImageActionImplPersistenceManager.searchByAction();
-		for(int index=0;index<allActionObject.size();index++){
-			if(allActionObject.get(index).getAction_size()>allActionObject.get(index).getAction_size_max()){
-				ImageActionObject img=new ImageActionObject();
-				img.setAction(allActionObject.get(index).getAction());
-				img.setId((allActionObject.get(index).getId()));
-				img.setAction_completed((allActionObject.get(index).getAction_completed()));
-				img.setAction_count(allActionObject.get(index).getAction_count());
-				img.setAction_size(allActionObject.get(index).getAction_size());
-				img.setAction_size_max(allActionObject.get(index).getAction_size_max());
-				img.setImage_id(allActionObject.get(index).getImage_id());
+		for(ImageActionObject img :  allActionObject){
+			if(img.getAction_completed() != img.getAction_count()){
 				actionObjectIncomplete.add(img);
 			}
 		}
@@ -40,8 +32,12 @@ public class ImageActionImpl implements ImageActionService {
 		if(count_of_action==null){
 			return actionObjectIncomplete;
 		}
-		System.out.println(actionObjectIncomplete);
-		return actionObjectIncomplete.subList(0, count_of_action);
+		
+		if(count_of_action > actionObjectIncomplete.size()){
+		return actionObjectIncomplete.subList(0, actionObjectIncomplete.size());
+		}else{
+			return actionObjectIncomplete.subList(0, count_of_action);	
+		}
 		
 	}
 

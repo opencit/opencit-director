@@ -34,7 +34,7 @@ public class MountVMImage {
 
     public static int mountRemoteSystem(String ipAddress, String userName, String password, String mountpath) throws Exception {
         String command = Constants.mountRemoteFileSystemScript + " " + ipAddress + " " + userName + " " + password + " " + mountpath;
-        log.info("\n" + "Mounting the The remote System : " + ipAddress);
+        log.info("\n" + "Mounting the The remote System : " + ipAddress+ "with command: "+command);
         return executeCommandInExecUtil(Constants.mountRemoteFileSystemScript, ipAddress, userName, password, mountpath);
     }
 
@@ -44,7 +44,7 @@ public class MountVMImage {
     }
 
     private static int executeCommandInExecUtil(String command, String... args) throws IOException {
-        Result result = ExecUtil.execute(Constants.mountScript, args);
+        Result result = ExecUtil.execute(command, args);
         return result.getExitCode();
     }
 }

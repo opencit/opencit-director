@@ -38,11 +38,7 @@ function mount_qcow2_image() {
         qemu-nbd -d /dev/nbd0
 	echo "############ Image file path is $imagePath"
 	echo "PSDebug: mount_qcow2_image"
-	    if [ $mountType = "writable" ]; then
-			qemu-nbd -c /dev/nbd0 $imagePath
-		else
-			qemu-nbd -r -c /dev/nbd0 $imagePath
-		fi
+        qemu-nbd -r -c /dev/nbd0 $imagePath
 	sleep 2
         if [ -b /dev/nbd0p1 ]
         then
@@ -83,11 +79,7 @@ function mount_raw_image_duplicate() {
 	loopDevice="/dev/loop0"
 	/sbin/kpartx -d $loopDevice
 	/sbin/losetup -d $loopDevice
-	if [ $mountType = "writable" ]; then
-		/sbin/losetup $loopDevice $imagePath
-	else
-		/sbin/losetup -r $loopDevice $imagePath
-	fi
+	/sbin/losetup -r $loopDevice $imagePath
 	out=$(/sbin/kpartx -av $loopDevice | grep -o "$loopDevice")
 	echo "#####%%%%%%%#######__________$out___________################"
 	if [ -z $out ]
@@ -100,11 +92,7 @@ function mount_raw_image_duplicate() {
 }
 
 function mount_vhd_image() {
-	if [ $mountType = "writable" ]; then
-        vdfuse -f $imagePath $mountPath
-	else
-		vdfuse -r -f $imagePath $mountPath
-	fi
+        vdfuse -r -f $imagePath $mountPath
 	sleep 1
         out=$(ls $mountPath | grep "Partition1")
 
@@ -148,7 +136,6 @@ fi
 
 imagePath=$1
 mountPath=$2
-mountType=$3
 #checkVhd=$(tar tf $imagePath 2>/dev/null | grep 0.vhd)
 #if [ ! -z $checkVhd ]
 #then

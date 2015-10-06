@@ -12,7 +12,6 @@
     
     <modules>
 
-        <module>director-javafx</module>
         <module>director-setup</module>
         <module>features</module>
 

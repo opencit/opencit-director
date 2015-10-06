@@ -56,7 +56,7 @@ function EditImageViewModel(data) {
     self.editImage = function(loginFormElement) {
     
     self.editImageMetaData.launch_control_policy=$('input[name=launch_control_policy]:checked').val();
-    self.editImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
+  ///  self.editImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
     self.editImageMetaData.isEncrypted=$('input[name=isEncrypted]').is(':checked')
     	
     $.ajax({
@@ -112,7 +112,7 @@ function EditImageViewModel(data) {
 	     	 addRadios(image_policies);
 	     	$("input[name=launch_control_policy][value='" + policydata.launch_control_policy + "']").attr('checked', 'checked');
 	     
-	           $("input[name=asset_tag_policy][value='Trust Only']").attr('checked', 'checked');  
+	    ///       $("input[name=asset_tag_policy][value='Trust Only']").attr('checked', 'checked');  
 	     	if(policydata.isEncrypted==true){
 	     		$("input[name=isEncrypted]").prop('checked', 'true'); 
 	     	 }
