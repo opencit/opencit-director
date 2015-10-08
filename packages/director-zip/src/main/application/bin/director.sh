@@ -105,6 +105,15 @@ fi
 
 ###################################################################################################
 
+# java command
+if [ -z "$JAVA_CMD" ]; then
+  if [ -n "$JAVA_HOME" ]; then
+    JAVA_CMD=$JAVA_HOME/bin/java
+  else
+    JAVA_CMD=`which java`
+  fi
+fi
+
 # generated variables
 JARS=$(ls -1 $DIRECTOR_JAVA/*.jar)
 CLASSPATH=$(echo $JARS | tr ' ' ':')
@@ -121,7 +130,7 @@ export CLASSPATH
 # run a director command
 director_run() {
   local args="$*"
-  java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $args
+  $JAVA_CMD $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $args
   return $?
 }
 
@@ -146,7 +155,7 @@ director_complete_setup() {
 # arguments are optional, if provided they are the names of the tasks to run, in order
 director_setup() {
   local args="$*"
-  java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main setup $args
+  $JAVA_CMD $JAVA_OPTS com.intel.mtwilson.launcher.console.Main setup $args
   return $?
 }
 
@@ -289,7 +298,7 @@ case "$1" in
       print_help
     else
       #echo "args: $*"
-      java $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
+      $JAVA_CMD $JAVA_OPTS com.intel.mtwilson.launcher.console.Main $*
     fi
     ;;
 esac

@@ -221,7 +221,11 @@ if ! java_ready; then
     java_detect
   fi
 fi
-if ! java_ready_report; then
+if java_ready_report; then
+  echo "# $(date)" > $DIRECTOR_ENV/director-java
+  echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
+  echo "export JAVA_CMD=$java" >> $DIRECTOR_ENV/director-java
+else
   echo_failure "Java $JAVA_REQUIRED_VERSION not found"
   exit 1
 fi
