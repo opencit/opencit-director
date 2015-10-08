@@ -32,13 +32,13 @@
             <version>${mtwilson.version}</version>
             <type>sh</type>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>jdk</artifactId>
-            <version>1.7.0_51</version>
-            <type>tar.gz</type>
+            <version>1.7.0_79</version>
+            <type>tgz</type>
             <classifier>linux-x64</classifier>
-        </dependency>-->
+        </dependency>
     </dependencies>
 
 

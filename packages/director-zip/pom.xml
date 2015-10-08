@@ -212,8 +212,6 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-glance</artifactId>
   <version>0.1-SNAPSHOT</version>
- <classifier>feature</classifier>
-<type>zip</type>
         </dependency>
 
 	
@@ -229,9 +227,7 @@
         <dependency>
     <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-images-api</artifactId>
- <classifier>feature</classifier>
   <version>0.1-SNAPSHOT</version>
-<type>zip</type>
         </dependency>
 
 	
@@ -239,8 +235,6 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-images-ws</artifactId>
   <version>0.1-SNAPSHOT</version>
- <classifier>feature</classifier>
-<type>zip</type>
         </dependency>
 
 	
@@ -248,8 +242,6 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-persistence</artifactId>
   <version>0.1-SNAPSHOT</version>
- <classifier>feature</classifier>
-<type>zip</type>
         </dependency>
 
 

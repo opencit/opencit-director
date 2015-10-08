@@ -346,6 +346,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+<!--
         <repository>
             <id>java.net</id>
             <name>java.net Maven Repository</name>
@@ -355,6 +356,17 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+-->
+
+<repository>
+<snapshots>
+<enabled>false</enabled>
+</snapshots>
+<id>central-bintray</id>
+<name>bintray</name>
+<url>http://jcenter.bintray.com/</url>
+</repository>
+
         <repository>
             <id>apache</id>
             <name>apache repository</name>
