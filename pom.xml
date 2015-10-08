@@ -12,6 +12,6 @@
     
     <modules>
         <module>features</module>
-        <module>director-common</module>
+<!--        <module>director-common</module> -->
     </modules>
 </project>
