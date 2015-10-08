@@ -115,7 +115,7 @@ if [ -z "$JAVA_CMD" ]; then
 fi
 
 # generated variables
-JARS=$(ls -1 $DIRECTOR_JAVA/*.jar)
+JARS=$(ls -1 $DIRECTOR_JAVA/*.jar $DIRECTOR_HOME/features/*/java/*.jar)
 CLASSPATH=$(echo $JARS | tr ' ' ':')
 
 if [ -z "$JAVA_HOME" ]; then java_detect; fi
