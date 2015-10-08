@@ -51,7 +51,7 @@ public class DirectorEnvelopeKey extends AbstractSetupTask {
         
         String keystorePath = getConfiguration().get(DIRECTOR_KEYSTORE, null);
         if( keystorePath == null ) {
-            keystorePath = Folders.configuration() + File.separator + "keystore.jks";
+            keystorePath = Folders.configuration() + File.separator + "envelope-keystore.jks";
         }
         keystoreFile = new File(keystorePath);
         
