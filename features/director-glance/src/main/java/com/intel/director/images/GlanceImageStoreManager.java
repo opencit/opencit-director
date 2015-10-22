@@ -12,6 +12,8 @@ import java.util.Map;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.async.GlanceImageExecutor;
+import com.intel.director.images.async.ImageTransferTask;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
 import com.intel.director.imagestore.ImageStoreManager;
@@ -72,13 +74,13 @@ public class GlanceImageStoreManager implements ImageStoreManager {
     
 
     private void uploadImage(File file, Map<String, String> imageProperties, String id) throws IOException {
-    	  glanceRsClient.uploadImage(file,imageProperties,id);
+    	//  glanceRsClient.uploadImage(file,imageProperties,id);
     	
-      /*  System.out.println("Inside async uploadImage");
+        System.out.println("Inside async uploadImage");
         ImageTransferTask imageTransferTask = new ImageTransferTask(file,imageProperties,id, glanceRsClient);
         System.out.println("Created TASK");
         GlanceImageExecutor.submitTask(imageTransferTask);
-        System.out.println("Task submitted");*/
+        System.out.println("Task submitted");
     }
     
     

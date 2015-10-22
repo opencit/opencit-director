@@ -32,6 +32,7 @@
             <version>${mtwilson.version}</version>
             <type>sh</type>
         </dependency>
+<!--
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>jdk</artifactId>
@@ -39,6 +40,7 @@
             <type>tgz</type>
             <classifier>linux-x64</classifier>
         </dependency>
+-->
     </dependencies>
 
 

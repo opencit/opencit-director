@@ -18,7 +18,7 @@
         <module>director-html5</module>
         <module>director-images-ws</module>
 	<module>director-async-image-processor</module>
-	<module>director-common</module>
         <module>director-glance</module>
+        <module>director-kms</module>
     </modules>
 </project>

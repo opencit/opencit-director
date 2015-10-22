@@ -19,9 +19,16 @@ public class ImageStoreUploadRequest {
     public String store_name_for_image_upload ;
     public String store_name_for_policy_upload ;
     public String store_name_for_tarball_upload ;
+    public String display_name;
     
 	public String getImage_id() {
 		return image_id;
+	}
+	public String getDisplay_name() {
+		return display_name;
+	}
+	public void setDisplay_name(String display_name) {
+		this.display_name = display_name;
 	}
 	public void setImage_id(String image_id) {
 		this.image_id = image_id;

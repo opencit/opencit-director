@@ -1,11 +1,14 @@
 package com.intel.mtwilson.director.dbservice;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
@@ -33,13 +36,12 @@ public interface IPersistService {
 
 	public abstract void updateImage(ImageAttributes img) throws DbException;
 
-	public abstract List<ImageInfo> fetchImages(
-			ImageInfoFilter imgFilter, ImageInfoOrderBy orderBy)
-			throws DbException;
+	public abstract List<ImageInfo> fetchImages(ImageInfoFilter imgFilter,
+			ImageInfoOrderBy orderBy) throws DbException;
 
-	public abstract List<ImageInfo> fetchImages(
-			ImageInfoFilter imgFilter, ImageInfoOrderBy orderBy,
-			int firstRecord, int maxRecords) throws DbException;
+	public abstract List<ImageInfo> fetchImages(ImageInfoFilter imgFilter,
+			ImageInfoOrderBy orderBy, int firstRecord, int maxRecords)
+			throws DbException;
 
 	public abstract ImageInfo fetchImageById(String id)
 			throws DbException;
@@ -51,12 +53,11 @@ public interface IPersistService {
 	public abstract int getTotalImagesCount(ImageInfoFilter imgFilter)
 			throws DbException;
 
-	public abstract List<ImageInfo> fetchImages(
-			ImageInfoOrderBy orderBy) throws DbException;
-
-	public abstract List<ImageInfo> fetchImages(
-			ImageInfoOrderBy orderBy, int firstRecord, int maxRecords)
+	public abstract List<ImageInfo> fetchImages(ImageInfoOrderBy orderBy)
 			throws DbException;
+
+	public abstract List<ImageInfo> fetchImages(ImageInfoOrderBy orderBy,
+			int firstRecord, int maxRecords) throws DbException;
 
 	public abstract TrustPolicy fetchPolicyForImage(String imageId)
 			throws DbException;
@@ -79,6 +80,7 @@ public interface IPersistService {
 			throws DbException;
 
 	public abstract User fetchUserById(String id) throws DbException;
+
 
 	public abstract void destroyUser(User User) throws DbException;
 
@@ -207,7 +209,6 @@ public interface IPersistService {
 	public abstract ImageStoreSettings fetchImageStoreSettingsByName(String name)
 			throws DbException;
 
-	
 	public abstract void destroyImageStoreSettings(
 			ImageStoreSettings imgStoreSettings) throws DbException;
 	
@@ -218,17 +219,45 @@ public interface IPersistService {
 	public abstract void updateImageAction(String id,ImageActionObject imageactionobject) throws DbException;
 
 	public abstract void deleteImageAction(ImageActionObject imageactionobject) throws DbException;
-	
+
 	public abstract List<ImageActionObject> searchByAction() throws DbException;
 
-	public abstract void deleteImageActionById(String image_action_id) throws DbException;
-	
-	public abstract ImageActionObject fetchImageActionById(String image_action_id) throws DbException;
-	
+	public abstract void deleteImageActionById(String image_action_id)
+			throws DbException;
+
+	public abstract ImageActionObject fetchImageActionById(
+			String image_action_id) throws DbException;
+
 	public void updateImageAction(ImageActionObject imageactionobject)
 			throws DbException;
-	
-	
-	
-	
+
+	public abstract SshSettingInfo saveSshMetadata(SshSettingInfo ssh)
+			throws DbException;
+
+	public abstract void updateSsh(SshSettingInfo ssh) throws DbException;
+
+	public abstract void updateSshById(String sshId) throws DbException;
+
+	public abstract SshSettingInfo fetchSshById(String id) throws DbException;
+
+
+	public abstract SshSettingInfo fetchSshByImageId(String image_id)
+			throws DbException;
+
+	public abstract void destroySsh(SshSettingInfo ssh) throws DbException;
+
+	public abstract void destroySshById(String sshId) throws DbException;
+
+	public abstract List<SshSettingInfo> showAllSsh() throws DbException;
+
+	public String editProperties(String path, Map<String, String> data)
+			throws IOException;
+
+	public String  getProperties(String path) throws IOException;
+
+	/*
+	 * public abstract SshPassword saveSshPasswordMetadata(SshPassword
+	 * sshPassword) throws DbException;
+	 */
+
 }

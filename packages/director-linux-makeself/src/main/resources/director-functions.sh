@@ -3,6 +3,7 @@
 ########## FUNCTIONS LIBRARY ##########
 load_director_conf() {
   DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
+  GLANCE_PROPERTIES_FILE=${GLANCE_PROPERTIES_FILE:-"/opt/director/configuration/glance.properties"}
   if [ -n "$DEFAULT_ENV_LOADED" ]; then return; fi
 
   # director.properties file
@@ -21,10 +22,23 @@ load_director_conf() {
     export CONF_MTWILSON_PASSWORD=$(read_property_from_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE")
     echo_success "Done"
   fi
+  
+  if [ -f "$GLANCE_PROPERTIES_FILE" ]; then
+    echo -n "Reading properties from file [$GLANCE_PROPERTIES_FILE]....."
+	export CONF_GLANCE_IMAGE_STORE_IP=$(read_property_from_file "glance.ip" "$GLANCE_PROPERTIES_FILE")
+    export CONF_GLANCE_IMAGE_STORE_PORT=$(read_property_from_file "glance.port" "$GLANCE_PROPERTIES_FILE")
+    export CONF_GLANCE_IMAGE_STORE_USERNAME=$(read_property_from_file "glance.image.store.username" "$GLANCE_PROPERTIES_FILE")
+    export CONF_GLANCE_IMAGE_STORE_PASSWORD=$(read_property_from_file "glance.image.store.password" "$GLANCE_PROPERTIES_FILE")
+    export CONF_GLANCE_TENANT_NAME=$(read_property_from_file "glance.tenant.name" "$GLANCE_PROPERTIES_FILE")
+	echo_success "Done"
+  fi
 
+  
   export DEFAULT_ENV_LOADED=true
   return 0
 }
+
+
 
 load_director_defaults() {
   export DEFAULT_DIRECTOR_ID=""
@@ -38,6 +52,8 @@ load_director_defaults() {
   export DEFAULT_MTWILSON_SERVER_PORT=""
   export DEFAULT_MTWILSON_USERNAME=""
   export DEFAULT_MTWILSON_PASSWORD=""
+  
+  
 
   export DIRECTOR_ID=${DIRECTOR_ID:-${CONF_DIRECTOR_ID:-$DEFAULT_DIRECTOR_ID}}
   export VM_WHITELIST_HASH_TYPE=${VM_WHITELIST_HASH_TYPE:-${CONF_VM_WHITELIST_HASH_TYPE:-$DEFAULT_VM_WHITELIST_HASH_TYPE}}

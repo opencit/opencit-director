@@ -1,4 +1,3 @@
-
 var imageStores = new Array();
 
 var option;
@@ -21,27 +20,33 @@ function displayImageStore() {
 					imageStores = data.imageStoreNames;
 
 					option = "<option value='0'>Select</option>";
-					for (var i = 0; i < imageStores.length; i++) {
-						option += '<option value="' + imageStores[i] + '">'
-								+ imageStores[i] + '</option>';
 
-					}
+					option += '<option value="Glance">Glance</option>';
 
-		///		alert("current_trust_policy_id::"+current_trust_policy_id+" currentFlow::"+currentFlow);
-					if (currentFlow && (currentFlow == "Upload") && (current_trust_policy_id=="null")) {
-				///			alert("inside !current_trust_policy_id");
-						$('#upload_image_name').val(current_image_name);
+					$('#upload_image_name').val(current_image_name);
+					if (currentFlow && (currentFlow == "Upload")
+							&& (current_trust_policy_id == "null")) {
+						// / alert("inside !current_trust_policy_id");
+if(current_display_name=='undefined' || current_display_name==""){
+	current_display_name=current_image_name;
+}
+						$('#display_name_last').val(current_display_name);
+						$('#display_name_last_direct')
+								.val(current_display_name);
 						$('#tarball_radio_div').hide();
 						$('#tarball_upload_div').hide();
-						
+
 						$('#image_policy_upload_div').show();
 						$('#policy_upload_div').hide();
 						$('#image_upload_combo').append(option);
 					} else {
-
+						$('#tarball_radio_div').hide();
 						$("input[name=tarball_radio][value='1']").attr(
 								'checked', 'checked');
-						$('#upload_image_name').val(current_image_name);
+
+						$('#display_name_last').val(current_display_name);
+						$('#display_name_last_direct')
+								.val(current_display_name);
 						$('#tarball_upload_div').show();
 						$('#image_policy_upload_div').hide();
 						$('#tarball_upload_combo').append(option);
@@ -68,46 +73,52 @@ function toggleradios11() {
 
 		$('#image_policy_upload_div').show();
 		$('#tarball_upload_div').hide();
+		$('#image_policy_upload_div').hide();
 
-		//	$('#image_upload_combo').append(option);
-		///	$('#policy_upload_combo').append(option);
 	} else {
 
-		$('#tarball_upload_div').show();
+		$('#tarball_upload_div').hide();
 		$('#image_policy_upload_div').hide();
-		///	$('#tarball_upload_combo').append(option);
+
 	}
 };
 
-
-
 function UploadStoreMetaData(data) {
 	this.image_id = current_image_id;
+	this.display_name = null;
 }
-
 function UploadStoreViewModel() {
 	var self = this;
+	$('#display_name_last').val(current_display_name);
+	$('#display_name_last_direct').val(current_image_name);
 
 	self.uploadStoreMetaData = new UploadStoreMetaData();
 
 	self.uploadToStore = function(loginFormElement) {
-		console.log(current_image_action_id);
-
+		self.uploadStoreMetaData.check_image_action_id = checkImageActionId;
+		self.uploadStoreMetaData.image_action_id = current_image_action_id;
+		
+		 self.uploadStoreMetaData.store_name_for_tarball_upload = $(
+		 '#tarball_upload_combo').val();
+		 self.uploadStoreMetaData.store_name_for_image_upload = $(
+		 '#image_upload_combo').val();
+		 self.uploadStoreMetaData.store_name_for_policy_upload = $(
+		 '#policy_upload_combo').val();
 	
-			
-			self.uploadStoreMetaData.check_image_action_id = checkImageActionId;
-			self.uploadStoreMetaData.image_action_id = current_image_action_id;
-		
-		
-		self.uploadStoreMetaData.store_name_for_tarball_upload = $(
-				'#tarball_upload_combo').val();
-		self.uploadStoreMetaData.store_name_for_image_upload = $(
-				'#image_upload_combo').val();
-		self.uploadStoreMetaData.store_name_for_policy_upload = $(
-				'#policy_upload_combo').val();
-		console.log(self.uploadStoreMetaData.store_name_for_tarball_upload);
+		if (checkImageActionId) {
+			if ($('#display_name_last').val() != current_display_name) {
+				self.uploadStoreMetaData.display_name = $('#display_name_last')
+						.val();
+				current_display_name = $('#display_name_last').val();
+			}
+		} else {
+			if ($('#display_name_last_direct').val() != current_display_name) {
+				self.uploadStoreMetaData.display_name = $(
+						'#display_name_last_direct').val();
+				current_display_name = $('#display_name_last_direct').val();
+			}
+		}
 
-		
 		$.ajax({
 			type : "POST",
 			url : endpoint + "uploads",
@@ -116,10 +127,11 @@ function UploadStoreViewModel() {
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.uploadStoreMetaData), 
+			data : ko.toJSON(self.uploadStoreMetaData),
 			success : function(data, status, xhr) {
 				console.log("uploadToStore success" + data);
-				current_image_action_id = undefined; 
+				current_image_action_id = "";
+				current_image_id = "";
 			}
 		});
 
@@ -127,49 +139,37 @@ function UploadStoreViewModel() {
 
 };
 
-function createPolicyDraftFromPolicy()
-{
+function createPolicyDraftFromPolicy() {
+	if (current_image_action_id != "") {
+		$.ajax({
+			type : "GET",
+			url : endpoint + current_image_id + "/recreatedraft?action_id="
+					+ current_image_action_id,
+			success : function(data, status, xhr) {
+				console.log("Draft Created Successfully");
+
+			}
+		});
+	} else {
+		$.ajax({
+			type : "GET",
+			url : endpoint + current_image_id + "/recreatedraft",
+			success : function(data, status, xhr) {
+				console.log("Draft Created Successfully");
+
+			}
+		});
+	}
 	$.ajax({
-		type : "GET",
-		url : endpoint + current_image_id + "/recreatedraft?action_id="+current_image_action_id,
+		type : "POST",
+		url : endpoint + current_image_id + "/mount",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 		success : function(data, status, xhr) {
-			console.log("Draft Created Successfully");
-			
+			backButton();
 		}
 	});
-	backButton();
-}
-
-function validateEntries()
-{
-	var isTarball = $('input[name=tarball_radio]:checked').val();
-	console.log(isTarball);
-	if (isTarball != 0) 
-	{
-		var tarLocation = $('#tarball_upload_combo').val();
-		console.log(tarLocation);
-		if(tarLocation == 0)
-		{
-			console.log("Not Valid");
-			return false;
-		}
-	} else {
-		var policyLocation = $('#policy_upload_combo').val();
-		var imageLocation = $('#image_upload_combo').val();
-		
-		if(policyLocation == 0 && imageLocation == 0)
-		{
-			console.log("Not Valid Policy && Image Policy");
-			return false;
-		}
-		if(policyLocation == "0" && imageLocation == "0")
-		{
-			console.log("Not Valid Policy && Image Policy As String");
-			return false;
-		}
-		
-		
-	}
-	console.log("Valid");
-	return true;
 }

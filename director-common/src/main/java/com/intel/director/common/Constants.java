@@ -1,0 +1,127 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.intel.director.common;
+
+/**
+ * 
+ * @author GS-0681
+ */
+public class Constants {
+	public static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
+	public static final String mountRemoteFileSystemScript = "/opt/director/bin/mount_remote_system.sh";
+	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
+	public static final String mountPath = "/mnt/director/";
+	public static final String uploadPath = "director.upload.path";
+	public static final String defaultUploadPath = "/mnt/images/";
+	public static final String vmImagesPath = "/opt/kms/images/vm/";
+
+	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
+	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
+
+	public static final String CUSTOMER_ID = "Customer ID";
+	public static final String IMAGE_NAME = "Image Name";
+	public static final String IMAGE_ID = "Image ID";
+	public static final String TRUST_POLICY_PATH = "Trust Policy Path";
+	public static final String HASH_TYPE = "Hash_Type";
+	public static final String Mt_WILSON_IP = "Mt_Wilson_IP";
+	public static final String Mt_WILSON_PORT = "Mt_Wilson_Port";
+	public static final String IMAGE_LOCATION = "Image Location";
+	public static final String TRUST_POLICY_LOCATION = "Trust Policy Location";
+	public static final String POLICY_TYPE = "Policy Type";
+	public static final String IMAGE_TYPE = "Image Type";
+	public static final String KERNEL_PATH = "Kernel Path";
+	public static final String INITRD_PATH = "Initrd Path";
+	public static final String HIDDEN_FILES = "Hidden Files";
+	public static final String Enc_IMAGE_LOCATION = "EncImage Location";
+	public static final String Enc_KERNEL_PATH = "EncKernel Path";
+	public static final String Enc_INITRD_PATH = "EncInitrd Path";
+
+	public static final String remoteSystemIpAddress = "IP Address";
+	public static final String remoteSystemuserName = "User Name";
+	public static final String remoteSystemPassword = "Password";
+
+	public static final String IS_ENCRYPTED = "Is_Encrypted";
+	public static final String BARE_METAL = "Bare_Metal";
+	public static final String BARE_METAL_REMOTE = "Bare_Metal_Remote";
+
+	public static final String CONTAINER_FORMAT = "Container Format";
+	public static final String DISK_FORMAT = "Disk Format";
+	public static final String IS_PUBLIC = "Is Public";
+	public static final String NAME = "Name";
+	// public static final String IMAGE_ID = "Image ID";
+	public static final String KERNEL_ID = "Kernel ID";
+	public static final String INITRD_ID = "Initrd ID";
+
+	public static final String USER_NAME = "User_Name";
+	public static final String PASSWORD = "Password";
+	public static final String TENANT_NAME = "Tenant_Name";
+
+	public static final String MOUNT_PATH = "/tmp/mount";
+
+	public static final String EncPASSWORD = "intelrp";
+
+	public static final String IS_WINDOWS = "Is Windows";
+
+	public static final String MH_KEY_NAME = "MH_Key_Name";
+
+	public static final String MH_JAR_LOCATION = "MH_Jar_Location";
+
+	public static final String EXEC_OUTPUT_FILE = "./log/exec_output";
+
+	public static final String KMS_SERVER_IP = "KMS_Server_IP";
+
+	public static final String MH_DEK_URL_IMG = "MH Dek Url Image";
+
+	public static final String MH_DEK_URL_KERNEL = "MH Dek Url Kernel";
+
+	public static final String MH_DEK_URL_INITRD = "MH Dek Url Initrd";
+
+	public static final String Mt_WILSON_USER_NAME = "Mt_Wilson_User_Name";
+	public static final String Mt_WILSON_PASSWORD = "Mt_Wilson_Password";
+	public static final String EXCLUDE_FILE_NAME = "./resources/exclude-file-list";
+	public static final String HOST_MANIFEST = "Host_Manifest";
+	public static final String MH_KEYSTORE_PASSWD = "MH_Keystore_Password";
+	public static final String MH_KEYSTORE_LOCATION = "MH_Keystore_Location";
+	public static final String MH_TLS_SSL_PASSWD = "MH_TLS_SSL_Passwd";
+
+	public static final String VM_IMAGES_PATH = "C:/tmp/";
+	public static final String IMAGE_STORE_TYPE = "image.store.type";
+	public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
+	public static final String GLANCE_IMAGE_STORE_SERVER = "glance.image.store.server";
+	public static final String GLANCE_IMAGE_STORE_USERNAME = "glance.image.store.username";
+	public static final String GLANCE_IMAGE_STORE_PASSWORD = "glance.image.store.password";
+	public static final String GLANCE_TENANT_NAME = "glance.tenant.name";
+	public static final String GLANCE_IP = "glance.ip";
+	public static final String GLANCE_PORT = "glance.port";
+	public static final String DIRECTOR_ID = "director.id";
+	public static final String CONTENT_LENGTH = "Content-Length";
+	public static final String GLANCE_HEADER_CREATED_AT = "X-Image-Meta-Created_at";
+	public static final String GLANCE_HEADER_DISK_FORMAT = "X-Image-Meta-Disk_format";
+	public static final String GLANCE_HEADER_STATUS = "X-Image-Meta-Status";
+	public static final String GLANCE_HEADER_LOCATION = "Location";
+	public static final String GLANCE_HEADER_CHECKSUM = "Image-Meta-Checksum";
+	public static final String GLANCE_HEADER_CONTAINER_FORMAT = "X-Image-Meta-Container_format";
+	public static final String GLANCE = "Glance";
+	public static final String SWIFT = "Swift";
+
+	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
+	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
+	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
+	public static final String TASK_NAME_UPLOAD_IMAGE = " Upload Image";
+	public static final String TASK_NAME_ENCRYPT_IMAGE = "Encrypt Image";
+	public static final String TASK_NAME_UPLOAD_TAR = "Upload Tar";
+	public static final String COMPLETE = "Complete";
+	public static final String INCOMPLETE = "Incomplete";
+	public static final String IN_PROGRESS = "In Progress";
+	public static final String ERROR = "Error";
+
+	public static final String DEPLOYMENT_TYPE_VM = "VM";
+	public static final String DEPLOYMENT_TYPE_BAREMETAL = "BareMetal";
+
+	public static final String MTWILSON_PROP_FILE = "mtwilson.properties";
+	public static final String KMS_PROP_FILE = "kms.properties";
+
+}
