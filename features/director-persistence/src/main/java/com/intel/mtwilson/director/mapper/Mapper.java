@@ -1,9 +1,14 @@
 package com.intel.mtwilson.director.mapper;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.intel.director.api.ImageActionActions;
@@ -36,6 +41,8 @@ import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
 
 public class Mapper {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(Mapper.class);
 
 	Map<ImageAttributeFields, String> imageAttributestoDataMapper;
 
@@ -508,9 +515,35 @@ public class Mapper {
 				.getCurrent_task_status());
 		TypeToken<List<ImageActionActions>> token = new TypeToken<List<ImageActionActions>>() {
 		};
-		List<ImageActionActions> action = gson.fromJson(
-				mwImageAction.getAction(), token.getType());
-		imageActionObject.setAction(action);
+		
+		List<ImageActionActions> taskList = new ArrayList<>();
+		String actions = mwImageAction.getAction();
+		actions = actions.replace("[", "").replace("]", "");
+		String[] split = actions.split("},");
+		ObjectMapper mapper = new ObjectMapper();
+		for(String s : split){
+			if(!s.endsWith("}")){
+				s = s+"}";
+			}
+			log.info("TASK : "+s);
+			ImageActionActions fromJson = null;
+			try {
+				fromJson = mapper.readValue(s, ImageActionActions.class);
+				log.info("TASK CREATED : "+fromJson.toString());
+				taskList.add(fromJson);			
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				log.error("Error in action mapping ", e);
+			}
+
+		}
+		log.info("No of tasks : "+taskList.size());
+		for(ImageActionActions temp : taskList){
+			log.info("************************ "+temp.toString());
+		}
+//
+		imageActionObject.setAction(taskList);
 		return imageActionObject;
 	}
 

@@ -66,23 +66,27 @@ public class ImageActionPoller implements Job {
 		log.debug("incompleteImageActionObjects::"
 				+ incompleteImageActionObjects);
 		for (ImageActionObject imageActionObj : incompleteImageActionObjects) {
+			log.info("ImageAction in poller: " + imageActionObj.getId());
 			List<ImageActionActions> imageActions = imageActionObj.getAction();
+			log.info("ImageAction task list in poller: " + imageActionObj.getAction().size());
 			// iterate over tasks from each image action object
 			ImageActionActions imageActionsActions = getNextActionToBeExecuted(imageActions);
 			if (imageActionsActions == null) {
 				continue;
 			}
+			log.info("ImageAction: " + imageActionObj.getId());
 			// for (ImageActionActions imageActionsActions : imageActions) {
-			if (imageActionsActions != null) {
-				String task_name = imageActionsActions.getTask_name();
-				String imageStore = imageActionsActions.getStorename();
+			String task_name = imageActionsActions.getTask_name();
+			String imageStore = imageActionsActions.getStorename();
+			log.info("task_name: " + task_name);
 
-				ImageActionTask task = ImageActionTaskFactory
-						.getImageActionTask(task_name, imageStore);
-				task.setImageActionObject(imageActionObj);
-				task.setTaskAction(imageActionsActions);
-				ImageActionExecutor.submitTask(task);
-			}
+			ImageActionTask task = ImageActionTaskFactory.getImageActionTask(
+					task_name, imageStore);
+			log.info("task : " + task.getTaskName());
+			task.setImageActionObject(imageActionObj);
+			task.setTaskAction(imageActionsActions);
+			ImageActionExecutor.submitTask(task);
+			log.info("Submitted task : " + task.getTaskName());
 
 			// }
 		}
@@ -93,13 +97,15 @@ public class ImageActionPoller implements Job {
 	/**
 	 * Find the next task to be executed from the array of tasks
 	 * 
-	 * @param list List of tasks to be executed
+	 * @param list
+	 *            List of tasks to be executed
 	 * @return The task to be executed. This task is in INCOMPLETE status
 	 */
 	private ImageActionActions getNextActionToBeExecuted(
 			List<ImageActionActions> list) {
 		ImageActionActions ret = null;
 		for (ImageActionActions imageActionsActions : list) {
+			log.info("imageActionsActions.getStatus() : "+imageActionsActions.getStatus());
 			if (imageActionsActions.getStatus().equals(Constants.INCOMPLETE)) {
 				ret = imageActionsActions;
 				break;

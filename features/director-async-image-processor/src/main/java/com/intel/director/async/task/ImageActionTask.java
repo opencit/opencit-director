@@ -12,7 +12,7 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
  * Superclass for all image actions
  * 
  * @author GS-0681
- *
+ * 
  */
 public abstract class ImageActionTask implements Runnable {
 
@@ -47,7 +47,7 @@ public abstract class ImageActionTask implements Runnable {
 	public abstract String getTaskName();
 
 	/**
-	 * Convert the json array into ImageActionActions for an ImageAction 
+	 * Convert the json array into ImageActionActions for an ImageAction
 	 * 
 	 * @return Objects containing list of tasks to be executed
 	 */
@@ -66,7 +66,8 @@ public abstract class ImageActionTask implements Runnable {
 	/**
 	 * Checks if the previous task of the passed task is completed
 	 * 
-	 * @param taskName task which is to be executed
+	 * @param taskName
+	 *            task which is to be executed
 	 * @return true if the previous task is COMPLETED
 	 */
 	protected boolean previousTasksCompleted(String taskName) {
@@ -89,32 +90,36 @@ public abstract class ImageActionTask implements Runnable {
 	 * Method to update the image action status after task execution
 	 * 
 	 * 
-	 * @param status Status of the task execution
-	 * @param details details of the task execution. Contains error details in case of error.
+	 * @param status
+	 *            Status of the task execution
+	 * @param details
+	 *            details of the task execution. Contains error details in case
+	 *            of error.
 	 */
 	protected void updateImageActionState(String status, String details) {
 		String currentTaskStatus = status;
-		taskAction.setStatus(status);
-		taskAction.setExecutionDetails(details);
-		int count = imageActionObject.getAction_completed();
-		int action_completed;
-		if (Constants.COMPLETE.equals(status)) {
-			action_completed = count + 1;
-		} else {
-			if(Constants.ERROR.equals(status)){
-				currentTaskStatus += " : "+ details;
+		synchronized (this) {
+			taskAction.setStatus(status);
+			taskAction.setExecutionDetails(details);
+			int count = imageActionObject.getAction_completed();
+			int action_completed;
+			if (Constants.COMPLETE.equals(status)) {
+				action_completed = count + 1;
+			} else {
+				if (Constants.ERROR.equals(status)) {
+					currentTaskStatus += " : " + details;
+				}
+				action_completed = count;
 			}
-			action_completed = count;
-		}
-		imageActionObject.setCurrent_task_status(currentTaskStatus);
-		imageActionObject.setAction_completed(action_completed);
-		imageActionObject.setCurrent_task_name(getTaskName());
-		
+			imageActionObject.setCurrent_task_status(currentTaskStatus);
+			imageActionObject.setAction_completed(action_completed);
+			imageActionObject.setCurrent_task_name(getTaskName());
 
-		try {
-			persistService.updateImageAction(imageActionObject);
-		} catch (DbException e3) {
-			e3.printStackTrace();
+			try {
+				persistService.updateImageAction(imageActionObject);
+			} catch (DbException e3) {
+				e3.printStackTrace();
+			}
 		}
 	}
 

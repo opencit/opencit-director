@@ -23,7 +23,7 @@ import com.intel.director.util.TdaasUtil;
 public class CreateTarTask extends ImageActionTask {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(UploadTarTask.class);
+			.getLogger(CreateTarTask.class);
 
 	/**
 	 * 
@@ -36,8 +36,11 @@ public class CreateTarTask extends ImageActionTask {
 		// Call to update the task status
 
 		if (previousTasksCompleted(taskAction.getTask_name())) {
+			log.info("Previous task was completed which was Create Tar");
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
+				log.info("Create Tar is In Progress");
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
+				log.info("Create Tar is being executed");
 				runCreateTarTask();
 			}
 		}
@@ -54,7 +57,7 @@ public class CreateTarTask extends ImageActionTask {
 		File trustPolicyFile = null;
 
 		try {
-			log.debug("Inside runCreateTartask for ::"
+			log.info("Inside runCreateTartask for ::"
 					+ imageActionObject.getImage_id());
 			ImageInfo imageinfo = persistService
 					.fetchImageById(imageActionObject.getImage_id());
@@ -65,21 +68,25 @@ public class CreateTarTask extends ImageActionTask {
 					.fetchPolicyForImage(imageActionObject.getImage_id());
 			boolean encrypt = false;
 			if (trustPolicy != null) {
+				log.info("Create Tar has a trust policy");
+
 				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
 						.getPolicy(trustPolicy.getTrust_policy());
 
 				if (policy != null && policy.getEncryption() != null) {
+					log.info("Create Tar has a trust policy which is encrypted");
 					imageName = imageinfo.getName() + "-enc";
 					encrypt = true;
 				}
 
 			}
 			if (!encrypt) {
+				log.info("Create Tar has a trust policy which is NOT encrypted");
 				imageName = imageinfo.getName();
 			}
 
 			if (trustPolicy != null) {
-
+				log.info("Create Tar : Create policy file start");
 				trustPolicyName = "policy_" + trustPolicy.getDisplay_name()
 						+ ".xml";
 				trustPolicyLocation = imageLocation;
@@ -87,6 +94,7 @@ public class CreateTarTask extends ImageActionTask {
 						+ trustPolicyName);
 
 				if (!trustPolicyFile.exists()) {
+					log.info("Create Tar : Create policy NEW file : "+trustPolicyFile.getName());
 					trustPolicyFile.createNewFile();
 				}
 
@@ -95,18 +103,20 @@ public class CreateTarTask extends ImageActionTask {
 				BufferedWriter bw = new BufferedWriter(fw);
 				bw.write(trustPolicy.getTrust_policy());
 				bw.close();
+				log.info("Create Tar : Create policy file End");
 
 			}
 
 			String tarLocation = imageLocation;
 			String tarName = "tar_" + trustPolicy.getDisplay_name() + ".tar";
-			log.debug("Create Tar ::tarName::" + tarName + " tarLocation::"
+			log.info("Create Tar ::tarName::" + tarName + " tarLocation::"
 					+ tarLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
 			DirectorUtil.createTar(imageLocation, imageName, trustPolicyName,
 					tarLocation, tarName);
 			// log.debug("//////////////tar::"+tar);
 			// //Thread.sleep(60000);
+			log.info("Create Tar : commplete");
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 		} catch (Exception e) {

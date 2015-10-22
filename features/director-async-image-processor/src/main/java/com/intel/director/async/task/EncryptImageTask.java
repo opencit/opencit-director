@@ -28,7 +28,7 @@ import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 public class EncryptImageTask extends ImageActionTask {
 
 	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(ImageActionTask.class);
+			.getLogger(EncryptImageTask.class);
 
 	/**
 	 * Entry method for executing the task
@@ -97,21 +97,28 @@ public class EncryptImageTask extends ImageActionTask {
 				return;
 			}
 
+			
 			String url = policy.getEncryption().getKey()
 					.getValue();
 			String keyId = TdaasUtil.getKeyIdFromUrl(url);
 			log.debug("EncryptImageTask: Key id for KMS : "+keyId);
 			if (keyId == null) {
+				log.debug("EncryptImageTask: Returning since no key for encryption");
 				return;
 			}
 
+			String encryptFileName = imageInfo.getName();
+			if(policy.getEncryption() != null){				
+				encryptFileName = encryptFileName + "-enc";
+				log.debug("Adding -enc since its encrypted : "+encryptFileName);
+			}
 			//TODO: Get actual key from KMS
 			String keyFromKMS = "password";//new KmsUtil().getKeyFromKMS(keyId);
 			log.debug("EncryptImageTask: Key from  KMS : "+keyFromKMS);
 			log.debug("Got the trust policy with encrypt URL : "
 					+ policy.getEncryption().getKey().getURL());
 			EncryptImage.encryptFile(
-					imageInfo.getLocation() + imageInfo.getName(), keyFromKMS);
+					imageInfo.getLocation() + encryptFileName , keyFromKMS);
 			log.info("Completed encryption task  ");
 		} catch (JAXBException | IOException | XMLStreamException e) {
 			log.error("Error while creating Trustpolicy", e);

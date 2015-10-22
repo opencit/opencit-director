@@ -140,7 +140,9 @@ public class ImageServiceImpl implements ImageService {
 		log.info("Mounting image from location: " + image.location);
 
 		String mountPath = DirectorUtil.getMountPath(image.id);
+		log.info("mount path is "+mountPath);
 		String mounteImageName = image.getName();
+		log.info("mount image : "+mounteImageName);
 		/*
 		 * if(
 		 * Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image.getImage_deployments
@@ -157,27 +159,35 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			// Mount the image
 			if (image.getImage_format() != null) {
-
+				log.info("VM/BM image Mount ");
 				if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
 						.getImage_deployments())) {
+					log.info("BM IMage mount");
 					// Case of Bare metal Image
 					String modifiedImagePath = image.getLocation()
 							+ image.getName();
+					log.info("Imagepath : "+modifiedImagePath);
 					DirectorUtil
 							.createCopy(
 									image.getLocation() + image.getName(),
 									image.getLocation() + "Modified_"
 											+ image.getName());
 					MountImage.unmountImage(mountPath);
+					log.info("Unmounting");
 					MountImage.mountImage(image.getLocation() + "Modified_"
 							+ image.getName(), mountPath);
+					log.info("Mount BM image complete");
 				} else {
+					log.info("VM IMage mount");
 					MountImage.mountImage(
 							image.getLocation() + mounteImageName, mountPath);
+					log.info("VM IMage mount complete");
 				}
 			} else {
+				log.info("BM Live mount flow");
 				SshSettingInfo info = imagePersistenceManager
 						.fetchSshByImageId(imageId);
+				log.info("BM LIve host : "+info.toString());
 				int exitCode = MountImage.mountRemoteSystem(
 						info.getIpAddress(), info.getUsername(), info
 								.getSshPassword().getKey(), mountPath);
@@ -185,6 +195,7 @@ public class ImageServiceImpl implements ImageService {
 					log.error("Error mounting remote host : "+info.toString());
 					throw new DirectorException("Error mounting remote host with the credentials provided : "+info.toString());
 				}
+				log.info("BM Live  mount complete");
 				// Mount Code For bare Metal Live
 			}
 		} catch (Exception ex) {
@@ -250,13 +261,10 @@ public class ImageServiceImpl implements ImageService {
 			String mountPath = com.intel.director.common.DirectorUtil
 					.getMountPath(imageId);
 			user = "admin";
-			if (user != null) {
-				if (!image.mounted_by_user_id.equalsIgnoreCase(user)) {
-					log.error("Image cannot be unmounted by different user:"
-							+ user);
-					throw new DirectorException(
-							"Image cannot be unmounted by a differnt user");
-				}
+			if(image.getMounted_by_user_id() == null){
+				unmountImageResponse = TdaasUtil
+						.mapImageAttributesToUnMountImageResponse(image);
+				return unmountImageResponse;
 			}
 
 			image.setMounted_by_user_id(null);
@@ -273,14 +281,13 @@ public class ImageServiceImpl implements ImageService {
 				log.info("Unmounting from location : " + mountPath);
 				MountImage.unmountImage(mountPath);
 				log.info("Unmount script execution complete : " + mountPath);
-
-				unmountImageResponse = TdaasUtil
-						.mapImageAttributesToUnMountImageResponse(image);
-				log.info("*** unmount complete");
+				log.info("*** unmount BM/VM complete");
 			} else {
 				int exitCode = MountImage.unmountRemoteSystem(mountPath);
-				// Unmount Call For bare metal Live
+				log.info("*** unmount of BM LIVE complete");
 			}
+			unmountImageResponse = TdaasUtil
+					.mapImageAttributesToUnMountImageResponse(image);
 		} catch (DbException dbe) {
 			log.error("Error while updating DB with unmount data: "
 					+ dbe.getMessage());

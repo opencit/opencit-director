@@ -24,6 +24,7 @@ import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
+import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.DashboardService;
 import com.intel.director.util.TdaasUtil;
@@ -139,44 +140,53 @@ public class DashboardImpl implements DashboardService {
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		List<ImageInfo> images = dashboardImplPersistenceManager
 				.fetchImages(null);
+		
+		if(images == null)
+		{
+			return resultList;
+		}
+		
 		ImageActionImpl imgAction = new ImageActionImpl();
 		List<ImageActionObject> imageactions = imgAction.getdata();
 		List<ImageStoreUploadTransferObject> image_store_list = dashboardImplPersistenceManager
 				.fetchImageUploads(null);
 		int flag = 0;
 		for (ImageInfo image : images) {
-			if (imageactions != null) {
-				for (ImageActionObject imageaction : imageactions) {
-					if (imageaction.getImage_id().equals(image.getId())) {
-						flag = 1;
-						break;
+
+			if (image.getImage_format() != null) {
+				if (imageactions != null) {
+					for (ImageActionObject imageaction : imageactions) {
+						if (imageaction.getImage_id().equals(image.getId())) {
+							flag = 1;
+							break;
+						}
 					}
 				}
-			}
 
-			if (flag == 1) {
-				flag = 0;
-				continue;
-			}
+				if (flag == 1) {
+					flag = 0;
+					continue;
+				}
 
-			if (imageactions != null) {
-				for (ImageStoreUploadTransferObject image_store : image_store_list) {
-					if (image_store.getImg().getId().equals(image.getId())) {
-						flag = 1;
-						break;
+				if (imageactions != null) {
+					for (ImageStoreUploadTransferObject image_store : image_store_list) {
+						if (image_store.getImg().getId().equals(image.getId())) {
+							flag = 1;
+							break;
+						}
 					}
 				}
-			}
-			if (flag == 1) {
-				flag = 0;
-				continue;
-			} else {
-				flag = 0;
-				result = tdaasUtil.toImageReadyToDeploy(image);
-				resultList.add(result);
-				result = new ImagesReadyToDeployResponse();
-			}
+				if (flag == 1) {
+					flag = 0;
+					continue;
+				} else {
+					flag = 0;
+					result = tdaasUtil.toImageReadyToDeploy(image);
+					resultList.add(result);
+					result = new ImagesReadyToDeployResponse();
+				}
 
+			}
 		}
 
 		return resultList;
@@ -194,7 +204,7 @@ public class DashboardImpl implements DashboardService {
 
 		for (ImageActionObject imgObj : imgAction) {
 			actions = imgObj.getCurrent_task_name();
-			if (actions.contains(upload)) {
+			if (actions.contains(upload) || actions.contains(Constants.IN_PROGRESS)) {
 				uploadInProgress.add(imgObj);
 			}
 			index++;

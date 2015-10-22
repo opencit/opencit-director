@@ -71,7 +71,7 @@ function showBMImageLaunchPolicies(policydata) {
 		dataType : "json",
 		success : function(data, status, xhr) {
 
-			current_display_name = data.image_name;
+			current_display_name = data.display_name;
 			console.log(current_display_name);
 			$("#display_name_live_edit").val(current_display_name);
 

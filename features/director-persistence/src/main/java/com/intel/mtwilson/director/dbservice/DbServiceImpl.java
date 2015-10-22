@@ -48,6 +48,8 @@ import com.intel.mtwilson.director.mapper.Mapper;
 import com.intel.director.common.SettingFileProperties;
 
 public class DbServiceImpl implements IPersistService {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(DbServiceImpl.class);
 
 	ImageDao imgDao;
 	UserDao userDao;
@@ -1502,6 +1504,7 @@ public class DbServiceImpl implements IPersistService {
 		List<MwImageAction> mwImageAction = new ArrayList<MwImageAction>();
 		List<ImageActionObject> imageActionObject = new ArrayList<ImageActionObject>();
 		mwImageAction = imageActionDao.showAllAction();
+		
 		for (int index = 0; index < mwImageAction.size(); index++) {
 
 			ImageActionObject actionObject = mapper
