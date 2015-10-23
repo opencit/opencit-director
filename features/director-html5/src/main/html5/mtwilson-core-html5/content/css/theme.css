@@ -144,7 +144,7 @@
     height: 16px;
     border: none;
     cursor: pointer;
-    background-image: url(icons.png);
+    background-image: url(../images/icons.png);
     background-repeat: no-repeat;
     background-color: transparent;
 }

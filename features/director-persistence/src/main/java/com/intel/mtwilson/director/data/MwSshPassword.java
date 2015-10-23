@@ -27,18 +27,15 @@ public class MwSshPassword {
 		@Column(name = "SSH_KEY")
 		private Character[] sshKey;
 		
-		@OneToMany(mappedBy = "sshPassword")
-		private Collection<MwHost> tblMwHostCollection;
 		
 		public MwSshPassword(){
 			super();	
 		}
 
-		public MwSshPassword(Character[] sshKey,
-				Collection<MwHost> tblMwHostCollection) {
+		public MwSshPassword(Character[] sshKey) {
 			super();
 			this.sshKey = sshKey;
-			this.tblMwHostCollection = tblMwHostCollection;
+			
 		}
 
 		public String getId() {
@@ -59,19 +56,11 @@ public class MwSshPassword {
 			this.sshKey = sshKey;
 		}
 
-		public Collection<MwHost> getTblMwHostCollection() {
-			return tblMwHostCollection;
-		}
-
-		public void setTblMwHostCollection(Collection<MwHost> tblMwHostCollection) {
-			this.tblMwHostCollection = tblMwHostCollection;
-		}
-
+		
 		@Override
 		public String toString() {
 			return "MwSshPassword [id=" + id + ", sshKey="
-					+ Arrays.toString(sshKey) + ", tblMwHostCollection="
-					+ tblMwHostCollection + "]";
+					+ Arrays.toString(sshKey)+"]";
 		}
 		
 		

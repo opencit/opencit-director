@@ -74,7 +74,7 @@ public class TreeNode {
 		}else{
 			currentChild.checked = parent.checked;
 		}
-		if(new File(currentChild.incrementalPath).isDirectory()){
+		if(new File(parent.mountPath + currentChild.incrementalPath).isDirectory()){
 			currentChild.isDirectory = true;
 		}
 
@@ -141,7 +141,7 @@ public class TreeNode {
 					+ checked + " style=\"float:left;\"/>";
 			
 			liClass = "directory " + ((!checked.isEmpty()?"expanded":parent.directoryCollapsed));
-			toggleIcon = "<img src=\"images/arrow-right.png\" title=\""
+			toggleIcon = "<img src=\"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png\" title=\""
 					+ incrementalPath + "\"  id=\"toggle_"
 					+ incrementalPath
 					+ "\"   onclick=\"toggleState(this)\" />";

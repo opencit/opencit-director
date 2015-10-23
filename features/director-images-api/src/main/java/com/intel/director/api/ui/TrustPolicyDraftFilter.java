@@ -15,6 +15,8 @@ public class TrustPolicyDraftFilter extends TrustPolicyDraft {
     protected Date to_edited_date;
 
     public String image_id;
+    
+    public String host_id;
 
     public String image_name;
 
@@ -36,6 +38,14 @@ public class TrustPolicyDraftFilter extends TrustPolicyDraft {
 
     public void setImage_id(String image_id) {
         this.image_id = image_id;
+    }
+    
+    public String getHostId() {
+        return host_id;
+    }
+    
+    public void setHostId(String host_id) {
+        this.host_id = host_id;
     }
 
     public Date getFrom_created_date() {

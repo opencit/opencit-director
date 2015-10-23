@@ -94,13 +94,18 @@ JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logb
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
 DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore director-envelope-key director-envelope-key-registration"}
+DIRECTOR_SETUP_TASKS_AFTER_SLEEP=${DIRECTOR_SETUP_TASKS_AFTER_SLEEP:-"director-envelope-key-registration"}
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place
 DIRECTOR_PID_FILE=${DIRECTOR_PID_FILE:-/var/run/director.pid}
+SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
 if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -w $(dirname "$DIRECTOR_PID_FILE") ]; then
   DIRECTOR_PID_FILE=$DIRECTOR_REPOSITORY/director.pid
+fi
+if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -w $(dirname "$SCHEDULER_PID_FILE") ]; then
+  SCHEDULER_PID_FILE=$DIRECTOR_REPOSITORY/scheduler.pid
 fi
 
 ###################################################################################################
@@ -150,6 +155,10 @@ director_complete_setup() {
     echo_failure "Mtwilson server address or server port not defined"
     return -1
   fi
+  
+  sleep 5
+  director_run setup $DIRECTOR_SETUP_TASKS_AFTER_SLEEP
+  
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order
@@ -183,7 +192,7 @@ director_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main jetty-start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
       echo $! > $DIRECTOR_PID_FILE
     )
     if director_is_running; then
@@ -217,6 +226,29 @@ director_is_running() {
   return 0
 }
 
+scheduler_is_running() {
+  SCHEDULER_PID=
+  if [ -f $SCHEDULER_PID_FILE ]; then
+    SCHEDULER_PID=$(cat $SCHEDULER_PID_FILE)
+    local is_running=`ps -A -o pid | grep "^\s*${SCHEDULER_PID}$"`
+    if [ -z "$is_running" ]; then
+      # stale PID file
+      SCHEDULER_PID=
+    fi
+  fi
+  if [ -z "$SCHEDULER_PID" ]; then
+    # check the process list just in case the pid file is stale
+    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.director.quartz.ImageActionScheduler start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+  fi
+  if [ -z "$SCHEDULER_PID" ]; then
+    # Scheduler is not running
+    return 1
+  fi
+  # SCHEDULER is running and SCHEDULER_PID is set
+  return 0
+}
+
+
 
 director_stop() {
   if director_is_running; then
@@ -233,6 +265,26 @@ director_stop() {
   fi
 }
 
+
+scheduler_start() {	
+    cd $DIRECTOR_HOME
+    $prog $JAVA_OPTS com.intel.director.quartz.ImageActionScheduler start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
+    echo $! > $SCHEDULER_PID_FILE
+}
+
+scheduler_stop() {	
+  if scheduler_is_running; then
+    kill -9 $SCHEDULER_PID
+    if [ $? ]; then
+      # truncate pid file instead of erasing,
+      # because we may not have permission to create it
+      # if we're running as a non-root user
+      echo > $SCHEDULER_PID_FILE
+    else
+      echo "Failed to stop Scheduler"
+    fi
+  fi
+}
 # removes Trust Director home directory (including configuration and data if they are there).
 # if you need to keep those, back them up before calling uninstall,
 # or if the configuration and data are outside the home directory
@@ -272,13 +324,17 @@ case "$1" in
     ;;
   start)
     director_start
+    scheduler_start
     ;;
   stop)
     director_stop
+    scheduler_stop
     ;;
   restart)
     director_stop
+    scheduler_stop
     director_start
+    scheduler_start
     ;;
   status)
     if director_is_running; then
@@ -301,6 +357,12 @@ case "$1" in
     director_stop
     director_uninstall
     ;;
+  start-scheduler)
+    scheduler_start
+    ;;    
+  stop-scheduler)
+	scheduler_stop
+    ;;    
   *)
     if [ -z "$*" ]; then
       print_help

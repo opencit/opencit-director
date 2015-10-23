@@ -55,7 +55,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             configuration("Trust Director Envelope alias not configured");
         }
         
-        String keystorePath = getConfiguration().get(DIRECTOR_KEYSTORE, Folders.configuration() + File.separator + "keystore.jks");
+        String keystorePath = getConfiguration().get(DIRECTOR_KEYSTORE, Folders.configuration() + File.separator + "envelope-keystore.jks");
         File keystoreFile = new File(keystorePath);
         if( !keystoreFile.exists() ) {
             configuration("Keystore file does not exist");

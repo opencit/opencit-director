@@ -3,7 +3,6 @@ var endpoint = "/v1/images/";
 function SelectDirectoriesMetaData(data) {
 
 	this.imageid = current_image_id;
-	// /this.image_name=ko.observable();
 
 }
 
@@ -13,37 +12,58 @@ function SelectDirectoriesViewModel() {
 	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 
 	self.selectDirectoriesSubmit = function(loginFormElement) {
-		
+
 		// //Code
-		  $.ajax({
-              type: "POST",
-              url:  endpoint+current_image_id+"/createpolicy",
-//                          accept: "application/json",
-              contentType: "application/json",
-              headers: {'Accept': 'application/json'},
-              data: ko.toJSON(self.selectDirectoriesMetaData), //$("#loginForm").serialize(), 
-              success: function(data, status, xhr) {
-            	  if(data.id!=undefined && data.id!=null && data.id!="" ){
-            	  current_image_action_id = data.id;
-            	  }
-            	  $.ajax({
-                         type: "POST",
-                         url:  endpoint+current_image_id+"/unmount",
-//                                     accept: "application/json",
-                         contentType: "application/json",
-                         headers: {'Accept': 'application/json'},
-                         data: ko.toJSON(self.createImageMetaData), //$("#loginForm").serialize(), 
-                         success: function(data, status, xhr) {
-                        	editPolicyDraft();
-                        	nextButton();
-                         }
-                     });
-             	///nextButton();
-              }
-          });
-		  
-		///nextButton();
-		///displayNextCreatePolicyPage();
+
+		$.ajax({
+			type : "POST",
+			url : endpoint + current_image_id + "/createpolicy",
+			contentType : "application/json",
+			dataType : "text",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
+			success : function(data) {
+				if(data == "ERROR")
+				{
+					current_image_action_id = "";
+					$.ajax({
+						type : "POST",
+						url : endpoint + current_image_id + "/unmount",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.createImageMetaData),
+						success : function(data, status, xhr) {
+							$("#error_modal").modal({backdrop: "static"});
+							console.log("Unmount successfully")
+
+						}
+					});
+				}
+				else
+				{
+					current_image_action_id = data;
+					$.ajax({
+						type : "POST",
+						url : endpoint + current_image_id + "/unmount",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.createImageMetaData),
+						success : function(data, status, xhr) {
+		
+							console.log("Unmount successfully")
+							editPolicyDraft();
+							nextButton();
+						}
+					});
+				}
+			}
+		});
 
 	}
 
@@ -69,34 +89,40 @@ function ApplyRegExViewModel() {
 		var include = loginFormElement.create_policy_regex_include.value;
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
+		console.log("Exclude ::: "+exclude);
 		var sel_dir = loginFormElement.sel_dir.value;
-		var node = $("input[name='directory_"+sel_dir+"']");
-		var config = {root: 'C:/Temp',  dir: sel_dir, 
-				script: '/v1/images/browse/'+current_image_id+'/search' ,
-				expandSpeed: 1000,
-				collapseSpeed: 1000,
-				multiFolder: true, 
-				loadMessage: "Loading...",
-				init: false,
-				filesForPolicy: false,
-				recursive: true,
-				include: include,
-				includeRecursive: includeRecursive
-			};
+		var node = $("input[name='directory_" + sel_dir + "']");
+		var config = {
+			root : '/',
+			dir : sel_dir,
+			script : '/v1/images/browse/' + current_image_id + '/search',
+			expandSpeed : 1000,
+			collapseSpeed : 1000,
+			multiFolder : true,
+			loadMessage : "Loading...",
+			init : false,
+			filesForPolicy : false,
+			recursive : true,
+			include : include,
+			include_recursive : includeRecursive,
+			exclude : exclude
+		};
 
-		var len = node.parent().children().length;	
+		var len = node.parent().children().length;
 		var counter = 0;
 		node.parent().children().each(function() {
-			if(counter++ > 2){
+			if (counter++ > 2) {
 				$(this).remove();
 			}
 		});
 
-		
-		node.parent().removeClass('collapsed').addClass('expanded');
+		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+				'selected');
+		console.log("Is checked : " + node.attr('checked'));
+		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus) {
-		editPatch(file, checkedStatus);
-		});		
+			editPatch(file, checkedStatus);
+		});
 	}
 
 };
@@ -107,7 +133,7 @@ function toggleState(str) {
 	var path = id.substring(n + 1);
 
 	$('#dir_path').val(path);
-	$('#folderPathDiv').text("Apply RegEx Filter on: " + path);
+	$('#folderPathDiv').text(path);
 	$('#sel_dir').val(path);
 	$('input[name=asset_tag_policy]').val(path);
 	if ($('#regexPanel').hasClass('open')) {
@@ -123,7 +149,7 @@ function toggleState(str) {
 		$('#directoryTree').removeClass('col-md-12');
 		$('#directoryTree').addClass('col-md-8');
 	}
-
+	document.forms["form-horizontal"].reset();
 }
 
 var pageInitialized = false;
@@ -172,46 +198,18 @@ var editPolicyDraft = function() {
 		contentType : "application/json",
 		success : function(data, status) {
 			patches.length = 0;
-			//Show message in div
-			var $messageDiv = $('#saveMessage'); // get the reference of the div
+			// Show message in div
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
 			$messageDiv.show().html('Draft saved'); // show and set the message
-			setTimeout(function(){ $messageDiv.hide().html('');}, 3000); // 3 seconds later, hide
-			                                                             // and clear the message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
+			// and clear the message
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-		///	alert("ERROR in saving to draft");
+			// / alert("ERROR in saving to draft");
 		}
-	});
-}
-
-var callRegex = function() {
-	var node = $("input[name='directory_C:/Temp/Test']");
-
-	var config = {
-		root : 'C:/Temp',
-		dir : 'C:/Temp/Test',
-		script : '/v1/images/browse/'+current_image_id+'/search',
-		expandSpeed : 1000,
-		collapseSpeed : 1000,
-		multiFolder : true,
-		loadMessage : "Loading...",
-		init : false,
-		filesForPolicy : false,
-		recursive : true,
-		include : "*.txt"
-	};
-
-	var len = node.parent().children().length;
-	var counter = 0;
-	node.parent().children().each(function() {
-		if (counter++ > 1) {
-			$(this).remove();
-		}
-	});
-
-	node.parent().removeClass('collapsed').addClass('expanded');
-	(node.parent()).fileTree(config, function(file, checkedStatus) {
-		editPatch(file, checkedStatus);
 	});
 }
 
@@ -222,11 +220,10 @@ $(document)
 						return;
 					$('#jstree2').fileTree(
 							{
-								root : 'C:/Temp',
-								dir : 'C:/Temp',
+								root : '/',
+								dir : '/',
 								script : '/v1/images/browse/'
-										+ current_image_id
-										+ '/search',
+										+ current_image_id + '/search',
 								expandSpeed : 1000,
 								collapseSpeed : 1000,
 								multiFolder : true,
@@ -260,4 +257,23 @@ function editPatch(file, checkedStatus) {
 				+ file + "\"]'/>";
 	}
 	patches.push(addRemoveXml);
+}
+
+function backToFirstPage()
+{
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		$.ajax({
+			type : "POST",
+			url : endpoint + current_image_id + "/unmount",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : ko.toJSON(self.createImageMetaData),
+			success : function(data, status, xhr) {
+				backButton();
+			}
+		});
+	}
 }

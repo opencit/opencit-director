@@ -14,4 +14,5 @@ import java.util.List;
 public class ListImageLaunchPoliciesResponse {
 
     public List<String> image_launch_policies;
+	public String display_name;
 }

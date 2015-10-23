@@ -38,7 +38,7 @@ function mount_qcow2_image() {
         qemu-nbd -d /dev/nbd0
 	echo "############ Image file path is $imagePath"
 	echo "PSDebug: mount_qcow2_image"
-        qemu-nbd -r -c /dev/nbd0 $imagePath
+        qemu-nbd  -c /dev/nbd0 $imagePath
 	sleep 2
         if [ -b /dev/nbd0p1 ]
         then

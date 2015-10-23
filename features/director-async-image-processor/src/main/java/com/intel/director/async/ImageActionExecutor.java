@@ -8,6 +8,7 @@ package com.intel.director.async;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.async.task.ImageActionTask;
 
 /**
@@ -22,10 +23,17 @@ public class ImageActionExecutor {
         executorService = Executors.newFixedThreadPool(10);
     }
 
+    
+    /**
+     * The method that accepts a task instance for submitting to the executor
+     * 
+     * 
+     * @param actionTask ImageAction task instance
+     */
     public static void submitTask(ImageActionTask actionTask) {
-        System.out.println("Inside GlanceImageExecutor.submitTask");        
+              
         executorService.execute(actionTask);
-        System.out.println("Completed submitting task");
+        Log.debug("Completed submitting task "+actionTask);
     }
 
 }

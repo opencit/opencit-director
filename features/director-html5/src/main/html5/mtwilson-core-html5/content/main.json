@@ -1,6 +1,11 @@
 {
     "items": [
-        { "href": "/html5/features/director-html5/mtwilson-core-html5/content/vm_images_grid_page.html", "target_tab": "vm-dashboard" },
-	 { "href": "/html5/features/director-html5/mtwilson-core-html5/content/dashboard.html", "target_tab": "bm-dashboard" }
+
+        { "href": "/html5/features/director-html5/mtwilson-core-html5/content/vm_images_page.html", "target_tab": "vm-dashboard" },
+	{ "href": "/html5/features/director-html5/mtwilson-core-html5/content/bm_images_page.html", "target_tab": "bm-dashboard" },
+	{ "href": "/html5/features/director-html5/mtwilson-core-html5/content/settings_upload_image_to_director.html", "target_tab": "upload-to-td" },
+	{ "href": "/html5/features/director-html5/mtwilson-core-html5/content/setting_create_ssh.html", "target_tab": "setting_create_ssh" },
+	{ "href": "/html5/features/director-html5/mtwilson-core-html5/content/director_dashboard.html", "target_tab": "director-dashboard" }
+
     ]
 }

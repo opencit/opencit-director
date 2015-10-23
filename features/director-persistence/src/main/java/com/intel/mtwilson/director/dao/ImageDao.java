@@ -13,8 +13,8 @@ import javax.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.director.api.ImageInfoFields;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFields;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
@@ -234,6 +234,21 @@ public class ImageDao {
 			em.close();
 		}
 	}
+	
+	public MwImage findMwImageById(String id) throws DbException {
+		EntityManager em = getEntityManager();
+		try {
+			MwImage mwImage = em.find(MwImage.class, id);
+			return mwImage;
+		} catch (Exception e) {
+			throw new DbException("ImageDao,findMwImage() failed", e);
+		}
+
+		finally {
+			em.close();
+		}
+	}
+
 
 	public ImageInfo findMwImage(String id) throws DbException {
 		EntityManager em = getEntityManager();

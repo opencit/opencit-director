@@ -46,15 +46,16 @@ if(jQuery) (function($){
 			if( o.multiFolder == undefined ) o.multiFolder = true;
 			if( o.loadMessage == undefined ) o.loadMessage = 'Loading...';
 			if( o.init == undefined ) o.init = false;
-			if(o.includeRecursive == undefined) o.includeRecursive=false;
+			if(o.include_recursive == undefined) o.include_recursive=false;
 			
 			$(this).each( function() {
 				console.log("Hello");
 				function showTree(c, treeOptions) {
 					$(c).addClass('wait');
+
 					$(".jqueryFileTree.start").remove();
 					canPushPatch = false;
-					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, filesForPolicy: treeOptions.filesForPolicy , init: treeOptions.init, includeRecursive:treeOptions.includeRecursive, include:treeOptions.include});
+					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude });
 					$.ajax({
 					  type: "POST",
 					  url: o.script,
@@ -62,10 +63,10 @@ if(jQuery) (function($){
 					contentType: "application/json",
 					  success: function(data, status) {
 						$(c).find('.start').html('');
-						var response = data;						
-						$(c).removeClass('wait').append(data.treeContent);
-						if(!(response.patchXML == null)){
-							editPatchWithDataFromServer(response.patchXML);
+						var response = data;	
+						$(c).removeClass('wait').append(data.tree_content);
+						if(!(response.patch_xml == null)){
+							editPatchWithDataFromServer(response.patch_xml);
 						}
 						if( o.root == treeOptions.dir ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
 							bindTree(c);
@@ -89,7 +90,7 @@ if(jQuery) (function($){
 							var treeOptions = {};
 							treeOptions.dir = escape($(this).attr('rel').match( /.*\// ));
 							treeOptions.recursive = false;
-							treeOptions.filesForPolicy = false;
+							treeOptions.files_for_policy = false;
 
 							showTree( $(this).parent(), treeOptions );
 							$(this).parent().removeClass('collapsed').addClass('expanded');
@@ -110,10 +111,10 @@ if(jQuery) (function($){
 								var treeOptions = {};
 								treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
-								treeOptions.filesForPolicy = false;
+								treeOptions.files_for_policy = false;
 								//if($(this).attr('checked')){
 								if(this.checked){
-									treeOptions.filesForPolicy = true;
+									treeOptions.files_for_policy = true;
 								}
 								showTree( $(this).parent(),  treeOptions);
 								$(this).parent().removeClass('collapsed').addClass('expanded');

@@ -13,8 +13,18 @@ public class TrustPolicy extends AuditFields {
     protected String name;
 
     protected ImageAttributes imgAttributes;
+    
+    protected String display_name;
 
-    public TrustPolicy() {
+    public String getDisplay_name() {
+		return display_name;
+	}
+
+	public void setDisplay_name(String display_name) {
+		this.display_name = display_name;
+	}
+
+	public TrustPolicy() {
         super();
     }
 
