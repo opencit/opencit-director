@@ -218,6 +218,9 @@ update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
 update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
 prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
 update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
+if [ $IMAGE_STORE_TYPE != "Openstack_Glance" ]; then
+	echo_failure "Image store type $IMAGE_STORE_TYPE is not supported. Supported type is: Openstack_Glance"
+fi
 prompt_with_default IMAGE_STORE_SERVER "Image Store Server:" "$IMAGE_STORE_SERVER"
 update_property_in_file "image.store.server" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_SERVER"
 prompt_with_default IMAGE_STORE_USERNAME "Image Store Username:" "$IMAGE_STORE_USERNAME"
@@ -226,7 +229,15 @@ prompt_with_default_password IMAGE_STORE_PASSWORD "Image Store Password:" "$IMAG
 update_property_in_file "image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
 prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
-
+#validating image store credentials
+if [ $IMAGE_STORE_TYPE == "Openstack_Glance" ]; then
+	http_status_code=`curl -i -d '{"auth": {"tenantName": "'$TENANT_NAME'", "passwordCredentials": {"username": "'$IMAGE_STORE_USERNAME'", "password": "'$IMAGE_STORE_PASSWORD'"}}}'  -H "Content-type: application/json" http://$IMAGE_STORE_SERVER:5000/v2.0/tokens 2>/dev/null | head -n 1 | cut -d$' ' -f2`
+	if [ $http_status_code == "200" ]; then
+			echo "$IMAGE_STORE_TYPE credentials are validated successfully"
+	else
+			echo_failure "Can not connect to $IMAGE_STORE_TYPE using given credentials"
+	fi
+fi
 
 #required glance.properties
 update_property_in_file "glance.ip" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
@@ -255,8 +266,13 @@ update_property_in_file "mtwilson.server.port" "$MTWILSON_PROPERTIES_FILE" "$MTW
 update_property_in_file "mtwilson.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
-
-
+#validating MTW credentials 
+http_status_code=`curl --insecure -i -X GET "https://$MTWILSON_SERVER:$MTWILSON_SERVER_PORT/mtwilson/v2/hosts?nameEqualTo=nameEw" -u $MTWILSON_USERNAME:$MTWILSON_PASSWORD 2>/dev/null | head -n 1 | cut -d$' ' -f2`
+if [ $http_status_code == "200" ] || [ $http_status_code == "500" ]; then
+        echo "MtWilson credentials are validated successfully"
+else
+        echo_failure "Can not connect to MtWilson using given credentials"
+fi
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
