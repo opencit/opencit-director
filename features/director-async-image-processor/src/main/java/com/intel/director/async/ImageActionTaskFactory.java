@@ -10,6 +10,13 @@ import com.intel.director.common.Constants;
 
 public class ImageActionTaskFactory {
 
+	/**
+	 * Get the task name class depending on the identifier passed
+	 * 
+	 * @param taskName identifier to initialize the task
+	 * @param imageStoreName THe store name used for upload tasks
+	 * @return
+	 */
 	public static ImageActionTask getImageActionTask(String taskName,
 			String imageStoreName) {
 		ImageActionTask actionTask = null;

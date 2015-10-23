@@ -3,6 +3,97 @@
     <head>
         <title>Settings Button</title>
         <meta name="author" content="jbuhacoff">
+ <link rel="stylesheet" type="text/css" href="/v1/html5/features/director-html5/mtwilson-core-html5/content/css/jsgrid.css" />
+         <link rel="stylesheet" href="/v1/html5/features/director-html5/mtwilson-core-html5/content/css/smart_wizard.css" type="text/css">
+              <link rel="stylesheet" href="/v1/html5/features/director-html5/mtwilson-core-html5/content/css/jqueryFileTree.css" type="text/css">
+              <link rel="stylesheet" type="text/css" href="/v1/html5/features/director-html5/mtwilson-core-html5/content/css/theme.css" />  
+
+<script src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/jsgrid.min.js"></script>
+	<script src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/jqueryFileTree.js"></script>
+          <script src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/jquery.easing.js"></script>
+	
+
+ <script type="text/javascript">
+
+
+
+		function refreshSSHSetting() {
+			console.log("HERE 2");
+			$("#jsGrid").jsGrid({
+				height :"500%",
+				width : "100%",
+				editing : true,
+				inserting : true,
+				
+				sorting : true,
+				paging : true,
+				autoload : true,
+				pageSize : 10,
+				pageButtonCount : 5,
+				deleteConfirm : "Do you really want to delete the client?",
+				controller : db,
+				fields : [ {
+					title : "Id",
+					name : "id",
+					type : "text",
+					editing : false,
+					inserting : false,
+					align : "center",
+
+					width : 75
+				}, {
+					title : "Name",
+					name : "name",
+					align : "center",
+					type : "text",
+
+					width : 75
+				}, {
+					title : "IP Address",
+					name : "ip_address",
+					filtering:true,
+					align : "center",
+
+					type : "text",
+					width : 75
+				}, {
+					title : "Username",
+					name : "username",
+					align : "center",
+
+					type : "text",
+					width : 75
+				}, {
+					title : "Password",
+					name : "password",
+					type : "text",
+					align : "center",
+
+					width : 75
+				}, {
+					title : "Key",
+					name : "key",
+					type : "text",
+					align : "center",
+
+					width : 75
+				}, {
+					type : "control"
+				} ]
+			});
+			var delay = 1000; 
+				setTimeout(function() {
+					$("#jsGrid").show();
+					$("#jsGrid").jsGrid("refresh");
+				}, delay);
+
+
+		};
+
+
+</script>
+
+
     </head>
     <body>
 
@@ -10,9 +101,9 @@
 so the ul itself is not copied -->
 <ul>
 <li class="dropdown">
-	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Settings</a>
+	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">TDAAS Settings</a>
 	<ul id="g-settings-menu" class="dropdown-menu" role="menu">
-		<li><a href="#upload-to-td" data-toggle="tab">Upload Image to Director</a></li>
+		<li><a href="#setting_create_ssh" data-toggle="tab" onclick="refreshSSHSetting();" >Ssh Settings</a></li>
 	</ul>                
 </li>
 </ul>

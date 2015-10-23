@@ -31,6 +31,7 @@ public class MwImage extends MwAuditable {
 
 	@Column(name = "DELETED")
 	private boolean deleted;
+	
 
 	@OneToMany(mappedBy = "image")
 	private Collection<MwImageUpload> tblMwimageUploadCollection;

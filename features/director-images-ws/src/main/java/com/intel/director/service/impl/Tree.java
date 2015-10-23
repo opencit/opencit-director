@@ -14,6 +14,7 @@ public class Tree {
 	public List<String> treeElementsHtml = null;
 	public boolean explodedView = false;
 	public Set<String> dirPathsForEdit = null;
+	public String mountPath = null; 
 	public void setDirPathsForEdit(Set<String> dirPathsForEdit) {
 		this.dirPathsForEdit = dirPathsForEdit;
 	}

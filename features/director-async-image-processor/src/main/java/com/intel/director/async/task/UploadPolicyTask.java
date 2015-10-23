@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import com.intel.director.common.Constants;
 
 /**
+ * Task to upload the policy to image store
  * 
  * @author GS-0681
  */
@@ -32,22 +33,26 @@ public class UploadPolicyTask extends UploadTask {
 		return Constants.TASK_NAME_UPLOAD_POLICY;
 	}
 
+	/**
+	 * Entry method for uploading policy
+	 */
 	@Override
 	public void run() {
 
-	
-			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
-				updateImageActionState(Constants.IN_PROGRESS, "Started");
-				runUploadPolicyTask();
-			}
-		
+		if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
+			updateImageActionState(Constants.IN_PROGRESS, "Started");
+			runUploadPolicyTask();
+		}
 
 	}
 
+	/**
+	 * Actual implementation of policy upload task
+	 */
 	public void runUploadPolicyTask() {
 
 		File trustPolicyFile = null;
-		 String imagePathDelimiter = "/";
+		String imagePathDelimiter = "/";
 		try {
 
 			String imageLocation = imageInfo.getLocation();
@@ -57,7 +62,7 @@ public class UploadPolicyTask extends UploadTask {
 						+ ".xml";
 
 				String trustPolicyLocation = imageLocation;
-				trustPolicyFile = new File(trustPolicyLocation + imagePathDelimiter
+				trustPolicyFile = new File(trustPolicyLocation
 						+ trustPolicyName);
 
 				if (!trustPolicyFile.exists()) {
@@ -74,7 +79,6 @@ public class UploadPolicyTask extends UploadTask {
 			content = trustPolicyFile;
 
 			super.run();
-			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 
 		} catch (Exception e) {
 			updateImageActionState(Constants.ERROR, e.getMessage());

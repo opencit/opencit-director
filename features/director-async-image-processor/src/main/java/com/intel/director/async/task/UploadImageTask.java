@@ -8,13 +8,20 @@ package com.intel.director.async.task;
 import java.io.File;
 
 import com.intel.director.common.Constants;
-import com.intel.director.util.DirectorUtil;
+import com.intel.director.util.TdaasUtil;
+
+;
 
 /**
+ * 
+ * Task to upload image to image store
  * 
  * @author GS-0681
  */
 public class UploadImageTask extends UploadTask {
+
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(UploadTarTask.class);
 
 	public UploadImageTask() {
 		super();
@@ -31,37 +38,60 @@ public class UploadImageTask extends UploadTask {
 		return Constants.TASK_NAME_UPLOAD_IMAGE;
 	}
 
+	/**
+	 * Entry method for running the task
+	 */
 	@Override
 	public void run() {
-		
-	
+
+		if (previousTasksCompleted(taskAction.getTask_name())) {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
+				super.initProperties();
 				runCreateImageTask();
 			}
-		
+		}
+
 	}
-	
-	public void runCreateImageTask(){
-		 String imagePathDelimiter = "/";
+
+	/**
+	 * Actual implementation of task for uploading image
+	 */
+	public void runCreateImageTask() {
+		String imagePathDelimiter = "/";
+		log.debug("Inside runUploadImageTask for ::"
+				+ imageActionObject.getImage_id());
 		try {
 			String imageFilePath = null;
 			String imageLocation = imageInfo.getLocation();
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = DirectorUtil
-					.getPolicy(trustPolicy.getTrust_policy());
-			if (policy != null && policy.getEncryption() != null) {
-				imageFilePath = imageLocation + imagePathDelimiter + imageInfo.getName() + "-enc";
-			} else {
-				imageFilePath = imageLocation + imagePathDelimiter + imageInfo.getName();
+			boolean encrypt = false;
+			if (trustPolicy != null) {
+				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+						.getPolicy(trustPolicy.getTrust_policy());
+				if (policy != null && policy.getEncryption() != null) {
+					imageFilePath = imageLocation + imageInfo.getName()
+							+ "-enc";
+					imageProperties.put(Constants.NAME, imageInfo.getName()
+							+ "-enc");
+					encrypt = true;
+				}
+
+			}
+			if (!encrypt) {
+				imageFilePath = imageLocation + imageInfo.getName();
+				imageProperties.put(Constants.NAME, imageInfo.getName());
 			}
 
 			content = new File(imageFilePath);
-			
+
 		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(
+					" runCreateImageTask failed for ::"
+							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		}
 		super.run();
-		updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
-	
+
 	}
 }

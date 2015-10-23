@@ -109,20 +109,19 @@ public class GlanceRsClient {
 				.getHeaderString(Constants.GLANCE_HEADER_LOCATION));
 		imageStoreResponse.setSent(new Integer(response
 				.getHeaderString(Constants.CONTENT_LENGTH)));
-		imageStoreResponse.setChecksum(response.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
-	///	imageStoreResponse.setImage_id(Constants.GL);
-	///	String type = response.getHeaderString("Content-Type");
-	/*	BufferedReader br = new BufferedReader(new InputStreamReader(
-				inputStream));
-
-		String output;
-		StringBuffer sb = new StringBuffer();
-
-		while ((output = br.readLine()) != null) {
-			sb.append(output);
-			// log.debug(output);
-		}*/
-		
+		imageStoreResponse.setChecksum(response
+				.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
+		// / imageStoreResponse.setImage_id(Constants.GL);
+		// / String type = response.getHeaderString("Content-Type");
+		/*
+		 * BufferedReader br = new BufferedReader(new InputStreamReader(
+		 * inputStream));
+		 * 
+		 * String output; StringBuffer sb = new StringBuffer();
+		 * 
+		 * while ((output = br.readLine()) != null) { sb.append(output); //
+		 * log.debug(output); }
+		 */
 
 		return imageStoreResponse;
 	}
@@ -148,6 +147,12 @@ public class GlanceRsClient {
 						imageProperties.get(Constants.CONTAINER_FORMAT))
 				.header("x-image-meta-disk_format",
 						imageProperties.get(Constants.DISK_FORMAT))
+				.header("x-image-meta-is_public",
+						imageProperties.get(Constants.IS_PUBLIC))
+				.header("x-image-meta-name",
+						imageProperties.get(Constants.NAME))
+				.header("x-image-meta-property-mtwilson_trustpolicy_location",
+						"glance_image_tar")		
 				.post(Entity.json(null));
 		System.out.println(" response uploadImageMetaData" + response);
 
@@ -226,13 +231,10 @@ public class GlanceRsClient {
 		// / return authToken;
 	}
 
-	
 	public void getImageMetaData() {
 	}
-	
-	
 
 	public void deleteImage() {
 	}
-	
+
 }

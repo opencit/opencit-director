@@ -3,17 +3,285 @@
     <head>
         <title>TrustPolicy Button</title>
         <meta name="author" content="soak">
+ <script type="text/javascript">
+		 
+
+
+
+ function backToVmImagesPage(){
+	$("#create_policy_script").remove();
+	$("#edit_policy_wizard").html("");
+	$("#create_policy_wizard_").html("");
+	$("#create_policy_wizard_").hide("");
+	$("#edit_policy_wizard").hide("");
+	$("#upload_to_image_store_redirect").html("");
+	$("#upload_to_image_store_redirect").hide("");
+	$("#vm_images_grid_page").show();
+
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		$.ajax({
+			type : "POST",
+			url : endpoint + current_image_id + "/unmount",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : ko.toJSON(self.createImageMetaData),
+			success : function(data, status, xhr) {
+				current_image_id = "";
+				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+			}
+		});
+
+	}
+	refresh_vm_images_Grid();
+	// /
+	// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));
+
+}
+
+function backToHostsPage() {
+
+	$("#edit_policy_wizard_bm_live").html("");
+	$("#edit_policy_wizard_bm_live").hide("");
+	$("#edit_policy_wizard_bm_image").html("");
+	$("#create_policy_wizard_bm_image").html("");
+	$("#create_policy_wizard_bm_image").hide("");
+	$("#edit_policy_wizard_bm_image").hide("");
+	$("#create_policy_wizard2_").html("");
+	$("#create_policy_wizard2_").hide("");
+	$("#upload_to_image_store_redirect_bm_image").html("");
+	$("#upload_to_image_store_redirect_bm_image").hide("");
+	$("#bm_images_grid_page").show();
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		$.ajax({
+			type : "POST",
+			url : endpoint + current_image_id + "/unmount",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : ko.toJSON(self.createImageMetaData),
+			success : function(data, status, xhr) {
+				current_image_id = "";
+				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOHOSTPAGES");
+			}
+		});
+
+	}
+
+	refreshBMOnlineGrid();
+	refresh_bm_images_Grid();
+
+}
+
+function refresh_vm_images_Grid() {
+alert("inside vm");
+
+	$("#vmGrid").html("")
+	$.ajax({
+		type : "GET",
+		url : endpoint + "imagesList/VM",
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function(data, status, xhr) {
+			console.log("vm grid refreshed");
+			images = data.images;
+			$("#vmGrid").jsGrid({
+
+				height : "auto",
+				width : "100%",
+				sorting : true,
+				paging : true,
+				pageSize : 10,
+				pageButtonCount : 15,
+				data : images,
+				fields : [ {
+					title : "Image Name",
+					name : "image_name",
+					type : "text",
+					width : 250,
+					align : "center"
+				}, {
+					title : "Image Format",
+					name : "image_format",
+					type : "text",
+					width : 120,
+					align : "center"
+				}, {
+					title : "Trust Policy",
+					name : "trust_policy",
+					type : "text",
+					width : 100,
+					align : "center"
+				}, {
+					title : "Image Store Upload",
+					name : "image_upload",
+					type : "text",
+					width : 100,
+					align : "center"
+				}, {
+					title : "Created Date",
+					name : "created_date",
+					type : "text",
+					width : 150,
+					align : "center"
+				} ]
+			});
+			var delay = 1000; 
+			setTimeout(function() {
+				$("#vmGrid").show();
+				$("#vmGrid").jsGrid("refresh");
+			}, delay);
+
+		},
+		error : function(jqXHR, exception) {
+			alert("Failed to get images list");
+		}
+	});
+
+}
+
+function refreshBMOnlineGrid() {
+	endpoint = "/v1/images/";
+	$("#bmGridOnline").html("")
+	$.ajax({
+		type : "GET",
+		url : endpoint + "imagesList/BareMetalLive",
+		dataType : "json",
+		success : function(result) {
+
+			console.log("BM GRID REFRESHED");
+			$("#bmGridOnline").jsGrid({
+
+				height : "auto",
+				width : "100%",
+				sorting : true,
+				paging : true,
+				pageSize : 10,
+				pageButtonCount : 15,
+				data : result.images,
+				fields : [ {
+					title : "Host Name",
+					name : "image_name",
+					type : "text",
+					width : 250,
+					align : "center"
+				},  {
+					title : "Trust Policy",
+					name : "trust_policy",
+					type : "text",
+					width : 100,
+					align : "center"
+				},/* {
+					title : "Status/Push",
+					name : "image_upload",
+					type : "text",
+					width : 100,
+					align : "center"
+				},*/ {
+					title : "Created Date",
+					name : "created_date",
+					type : "text",
+					width : 150,
+					align : "center"
+				} ]
+			})
+		}
+
+	});
+}
+
+function refresh_bm_images_Grid() {
+alert("inside bm");
+	endpoint = "/v1/images/";
+	$("#bmGridImages").html("")
+	$.ajax({
+		type : "GET",
+		url : endpoint + "imagesList/BareMetal",
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function(data, status, xhr) {
+			console.log("bm grid refreshed");
+			images = data.images;
+			$("#bmGridImages").jsGrid({
+
+				height : "auto",
+				width : "100%",
+				sorting : true,
+				paging : true,
+				pageSize : 10,
+				pageButtonCount : 15,
+				data : images,
+				fields : [ {
+					title : "Image Name",
+					name : "image_name",
+					type : "text",
+					width : 250,
+					align : "center"
+				}, {
+					title : "Image Format",
+					name : "image_format",
+					type : "text",
+					width : 120,
+					align : "center"
+				}, {
+					title : "Trust Policy",
+					name : "trust_policy",
+					type : "text",
+					width : 100,
+					align : "center"
+				}, {
+					title : "MOdified Image Download",
+					name : "image_upload",
+					type : "text",
+					width : 100,
+					align : "center"
+				}, {
+					title : "Created Date",
+					name : "created_date",
+					type : "text",
+					width : 150,
+					align : "center"
+				} ]
+			});
+		},
+		error : function(jqXHR, exception) {
+			alert("Failed to get images list");
+		}
+	});
+
+}
+
+
+
+
+
+
+
+
+
+        </script>
+
     </head>
     <body>
+
 
 <!-- NOTE:  the <ul> is for markup correctness; the navbar feature looks for body ul here and gets the inner html as the button content
 so the ul itself is not copied -->
 <ul>
 <li class="dropdown">
-	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Trust Policy</a>
+	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Images</a>
 	<ul id="g-trust-policy-menu" class="dropdown-menu" role="menu">
-		<li><a href="#vm-dashboard" data-toggle="tab">VM</a></li>
-		<li><a href="#bm-dashboard" data-toggle="tab">Bare Metal</a></li>
+<li><a href="#upload-to-td" data-toggle="tab">Upload Image to Director</a></li>
+		<li><a href="#vm-dashboard" data-toggle="tab" onclick="backToVmImagesPage()" >VM</a></li>
+		<li><a href="#bm-dashboard" data-toggle="tab" onclick="backToHostsPage()">Bare Metal</a></li>
 	</ul>                
 </li>
 </ul>

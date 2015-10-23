@@ -16,6 +16,7 @@ public class ImageAttributes extends AuditFields {
     public String id;
     public String name;
 
+  
     public String image_format;
     public String image_deployments;
     public String status;
@@ -45,6 +46,7 @@ public class ImageAttributes extends AuditFields {
         this.mounted_by_user_id = mounted_by_user_id;
         this.deleted = deleted;
         this.location = location;
+        
 
     }
 
@@ -64,6 +66,7 @@ public class ImageAttributes extends AuditFields {
         this.mounted_by_user_id = mounted_by_user_id;
         this.deleted = deleted;
         this.location = location;
+      
 
     }
 
@@ -79,6 +82,8 @@ public class ImageAttributes extends AuditFields {
                 + ", created_date=" + created_date + ", edited_by_user_id="
                 + edited_by_user_id + ", edited_date=" + edited_date + "]";
     }
+
+    
 
     public String getId() {
         return id;

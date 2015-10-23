@@ -50,6 +50,14 @@ public class ImageActionActions {
 	public void setExecutionDetails(String executionDetails) {
 		this.executionDetails = executionDetails;
 	}
+
+	@Override
+	public String toString() {
+		return "ImageActionActions [status=" + status + ", storename="
+				+ storename + ", task_name=" + task_name + ", location="
+				+ location + ", uri=" + uri + ", executionDetails="
+				+ executionDetails + "]";
+	}
 	
 	
 	
