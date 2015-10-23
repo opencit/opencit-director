@@ -271,28 +271,19 @@ fi
 
 
 # register linux startup script
-register_startup_script $DIRECTOR_HOME/bin/director.sh director
+if [ "$DIRECTOR_USERNAME" == "root" ]; then
+  register_startup_script $DIRECTOR_HOME/bin/director.sh director
+else
+  echo '@reboot /opt/director/bin/director.sh start' > $DIRECTOR_CONFIGURATION/crontab
+  crontab -u $DIRECTOR_USERNAME -l | cat - $DIRECTOR_CONFIGURATION/crontab | crontab -u $DIRECTOR_USERNAME -
+fi
+
 
 # setup the director, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
-  if [ -z "$DIRECTOR_PASSWORD" ]; then
-    echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
-    echo 'To generate a new master password, run the following command:
-
-  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
-
-The master password must be stored in a safe place, and it must
-be exported in the environment for all other director commands to work.
-
-LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
-
-After you set DIRECTOR_PASSWORD, run the following command to complete installation:
-
-  director setup
-
-'
-    exit 1
+  if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_HOME/.director_password ]; then
+    director generate-password > $DIRECTOR_HOME/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
