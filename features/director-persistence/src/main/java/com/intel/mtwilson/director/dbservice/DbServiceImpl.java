@@ -1,7 +1,9 @@
 package com.intel.mtwilson.director.dbservice;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -10,6 +12,7 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
@@ -28,9 +31,11 @@ import com.intel.mtwilson.director.dao.ImageActionDao;
 import com.intel.mtwilson.director.dao.ImageDao;
 import com.intel.mtwilson.director.dao.ImageStoreSettingsDao;
 import com.intel.mtwilson.director.dao.ImageStoreUploadDao;
+import com.intel.mtwilson.director.dao.SshSettingDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDraftDao;
 import com.intel.mtwilson.director.dao.UserDao;
+import com.intel.mtwilson.director.data.MwHost;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
@@ -40,8 +45,11 @@ import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
+import com.intel.director.common.SettingFileProperties;
 
 public class DbServiceImpl implements IPersistService {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(DbServiceImpl.class);
 
 	ImageDao imgDao;
 	UserDao userDao;
@@ -51,7 +59,9 @@ public class DbServiceImpl implements IPersistService {
 	ImageStoreSettingsDao imgStoreSettingsDao;
 	Mapper mapper = new Mapper();
 	ImageActionDao imageActionDao;
-
+	SshSettingDao sshDao;
+	SettingFileProperties settingFileProperties;
+	
 	public DbServiceImpl() {
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory("DirectorDataPU");
@@ -62,6 +72,9 @@ public class DbServiceImpl implements IPersistService {
 		imgUploadDao = new ImageStoreUploadDao(emf);
 		imgStoreSettingsDao = new ImageStoreSettingsDao(emf);
 		imageActionDao = new ImageActionDao(emf);
+		sshDao = new SshSettingDao(emf);
+		settingFileProperties=new SettingFileProperties();
+
 	}
 
 	/*
@@ -111,9 +124,7 @@ public class DbServiceImpl implements IPersistService {
 		if (img.getStatus() != null) {
 			mwImage.setStatus(img.getStatus());
 		}
-		if (img.getMounted_by_user_id() != null) {
-			mwImage.setMountedByUserId(img.getMounted_by_user_id());
-		}
+		mwImage.setMountedByUserId(img.getMounted_by_user_id());
 		if (img.getEdited_by_user_id() != null) {
 			mwImage.setEditedByUserId(img.getEdited_by_user_id());
 		}
@@ -204,6 +215,9 @@ public class DbServiceImpl implements IPersistService {
 		return imgDao.findMwImage(id);
 	}
 
+	public ImageInfo fetchImage(String id) throws DbException {
+		return mapper.toTransferObject(imgDao.findMwImageById(id));
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1469,7 +1483,7 @@ public class DbServiceImpl implements IPersistService {
 		mwImageAction.setId(id);
 		imageActionDao.updateImageAction(mwImageAction);
 	}
-	
+
 	@Override
 	public void updateImageAction(ImageActionObject imageactionobject)
 			throws DbException {
@@ -1490,6 +1504,7 @@ public class DbServiceImpl implements IPersistService {
 		List<MwImageAction> mwImageAction = new ArrayList<MwImageAction>();
 		List<ImageActionObject> imageActionObject = new ArrayList<ImageActionObject>();
 		mwImageAction = imageActionDao.showAllAction();
+		
 		for (int index = 0; index < mwImageAction.size(); index++) {
 
 			ImageActionObject actionObject = mapper
@@ -1503,12 +1518,95 @@ public class DbServiceImpl implements IPersistService {
 	public void deleteImageActionById(String image_action_id)
 			throws DbException {
 		imageActionDao.deleteImageActionByID(image_action_id);
-		
+
 	}
 
 	@Override
-	public ImageActionObject fetchImageActionById(String image_action_id) throws DbException {
-		return mapper.toTransferObject(imageActionDao.getImageActionByID(image_action_id));
+	public ImageActionObject fetchImageActionById(String image_action_id)
+			throws DbException {
+		return mapper.toTransferObject(imageActionDao
+				.getImageActionByID(image_action_id));
+	}
+
+	/*
+	 * ##########################################################################
+	 * ##################################################
+	 * ################################################### MWHOST
+	 * ############################################################
+	 * #############
+	 * #############################################################
+	 * ###################################################
+	 */
+
+	public SshSettingInfo saveSshMetadata(SshSettingInfo ssh)
+			throws DbException {
+		MwHost mwHost = mapper.toData(ssh);
+		System.out.println("^^^^^^^^^^^^^^^^^^^^");
+		System.out.println(mwHost);
+		System.out.println("^^^^^^^^^^^^^^^^^^^^");
+		MwHost createdSsh = sshDao.createSshSetting(mwHost);
+		return mapper.toTransferObject(createdSsh);
+	}
+
+	public void updateSsh(SshSettingInfo ssh) throws DbException {
+		MwHost mwSsh = mapper.toDataUpdate(ssh);
+		sshDao.updateSshSetting(mwSsh);
+
+	}
+
+	public void updateSshById(String sshId) throws DbException {
+		MwHost mwSsh = sshDao.fetchSshSettingById(sshId);
+		// MwHost mwSsh = mapper.toData(mw);
+		sshDao.updateSshSetting(mwSsh);
+
+	}
+
+	public SshSettingInfo fetchSshById(String id) throws DbException {
+		MwHost mwHost = sshDao.getMwHost(id);
+		return mapper.toTransferObject(mwHost);
+	}
+
+	public SshSettingInfo fetchSshByImageId(String image_id) throws DbException {
+		MwHost mwHost = sshDao.getMwHostByImageId(image_id);
+
+		return mapper.toTransferObject(mwHost);
+	}
+
+	public void destroySsh(SshSettingInfo ssh) throws DbException {
+		MwHost mwHost = mapper.toDataUpdate(ssh);
+		sshDao.destroySshSetting(mwHost);
+
+	}
+
+	public void destroySshById(String sshId) throws DbException {
+
+		sshDao.destroySshSettingById(sshId);
+
+	}
+
+	public List<SshSettingInfo> showAllSsh() throws DbException {
+
+		List<MwHost> sshList;
+		sshList = sshDao.ShowAll();
+		int i = 0;
+		List<SshSettingInfo> ssh = new ArrayList<SshSettingInfo>();
+		int length = sshList.size();
+		while (i < length) {
+			ssh.add(mapper.toTransferObject(sshList.get(i)));
+			i++;
+		}
+		return ssh;
+
+	}
+	
+	@Override
+	public String editProperties(String path, Map<String,String> data) throws IOException {
+		return settingFileProperties.writePropertiesToConfig(path, data);
+	}
+
+	@Override
+	public String getProperties(String path) throws IOException {
+		return settingFileProperties.readPropertiesFromConfig(path);
 	}
 
 }

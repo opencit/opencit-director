@@ -18,8 +18,8 @@ public class SearchFilesInImageRequest {
     public String include;
     public String exclude;
     public boolean recursive;
-    public boolean includeRecursive;
-    public boolean filesForPolicy;
+    public boolean include_recursive;
+    public boolean files_for_policy;
     public boolean init;
     public String id;
 	public String getDir()  {

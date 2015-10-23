@@ -42,12 +42,26 @@ public class MwTrustPolicy extends MwAuditable{
 		 @Column(name = "DESCRIPTION")
 		 private String description;
 
+		 @Column(name = "DISPLAY_NAME")
+		 private String display_name;
 		
 		public MwTrustPolicy(){
 			super();
 		}
 
 	
+
+		public String getDisplay_name() {
+			return display_name;
+		}
+
+
+
+		public void setDisplay_name(String display_name) {
+			this.display_name = display_name;
+		}
+
+
 
 		public MwImage getImage() {
 			return image;

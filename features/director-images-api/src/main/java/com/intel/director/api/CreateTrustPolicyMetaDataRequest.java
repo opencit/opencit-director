@@ -4,25 +4,44 @@ public class CreateTrustPolicyMetaDataRequest {
 
 	public String imageid;
 	
+	public String hostid;
+	
 	public String launch_control_policy;
 	
 	public String asset_tag_policy;
 	
 	public String selected_image_format;
 	
-
-	public Boolean isEncrypted;
+	public String deployment_type;
+	
+public boolean encrypted=false;
 
     public String image_name;
-    
 
+    public String display_name;
+
+	public String getDisplay_name() {
+		return display_name;
+	}
+
+	public void setDisplay_name(String display_name) {
+		this.display_name = display_name;
+	}
 
 	public String getImageid() {
 		return imageid;
 	}
+	
+	public String getHostid() {
+		return hostid;
+	}
 
 	public void setImageid(String imageid) {
 		this.imageid = imageid;
+	}
+	
+	public void setHostid(String hostid) {
+		this.hostid = hostid;
 	}
 
 	public String getLaunch_control_policy() {
@@ -51,12 +70,12 @@ public class CreateTrustPolicyMetaDataRequest {
 
 
 
-	public Boolean getIsEncrypted() {
-		return isEncrypted;
+	public boolean isEncrypted() {
+		return encrypted;
 	}
 
-	public void setIsEncrypted(Boolean isEncrypted) {
-		this.isEncrypted = isEncrypted;
+	public void setEncrypted(boolean encrypted) {
+		this.encrypted = encrypted;
 	}
 
 	public String getImage_name() {
@@ -67,7 +86,13 @@ public class CreateTrustPolicyMetaDataRequest {
 		this.image_name = image_name;
 	}
 
+	public String getDeploymentType() {
+		return deployment_type;
+	}
 
+	public void setDeploymentType(String deploymentType) {
+		this.deployment_type = deploymentType;
+	}
 	
 	
 	

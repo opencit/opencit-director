@@ -25,6 +25,6 @@ public class SearchFilesInImageResponse {
 	}
 
 	
-	public List<String> patchXML = null;
+	public List<String> patchXml = null;
 	public String treeContent = null;
 }

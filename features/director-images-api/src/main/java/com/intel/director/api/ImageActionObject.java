@@ -69,6 +69,15 @@ public class ImageActionObject {
 	public void setCurrent_task_name(String current_task_name) {
 		this.current_task_name = current_task_name;
 	}
+	@Override
+	public String toString() {
+		return "ImageActionObject [id=" + id + ", image_id=" + image_id
+				+ ", action_count=" + action_count + ", action_completed="
+				+ action_completed + ", action_size=" + action_size
+				+ ", action_size_max=" + action_size_max + ", action=" + action
+				+ ", current_task_status=" + current_task_status
+				+ ", current_task_name=" + current_task_name + "]";
+	}
 
 
 }

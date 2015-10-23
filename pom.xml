@@ -11,6 +11,8 @@
     </description>
     
     <modules>
+        <module>director-common</module>
+ <module>director-trust-policy</module>
 
         <module>director-setup</module>
         <module>features</module>

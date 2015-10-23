@@ -8,11 +8,13 @@ var DIRECTOR_PAGES = [
     {"href": "help.html", "target": "#main", "target_tab": "help"},
     {"href": "logout.html", "target": "#main", "target_tab": "logout"},
     {"href": "settings_upload_image_to_director.html", "target": "#main", "target_tab": "settings_upload_image_to_director"},
+    {"href": "setting_create_ssh.html", "target": "#main", "target_tab": "setting_create_ssh"},
     {"href": "license.html", "target": "#main", "target_tab": "license"},
     {"href": "/v1/resources/profile.html", "target": "#main", "target_tab": "my_profile"},
     {"href": "/v1/resources/users.html", "target": "#main", "target_tab": "users"},
     {"href": "/v1/resources/saml_certificates.html", "target": "#main", "target_tab": "saml_certificates"},
-    {"href": "/v1/resources/tpm_identity_certificates.html", "target": "#main", "target_tab": "tpm_identity_certificates"}
+    {"href": "/v1/resources/tpm_identity_certificates.html", "target": "#main", "target_tab": "tpm_identity_certificates"},
+    {"href": "bm_images_page.html", "target": "#main", "target_tab": "create_policy_wizard_for_hosts"}
 ];
 
 function UserProfile(data) {

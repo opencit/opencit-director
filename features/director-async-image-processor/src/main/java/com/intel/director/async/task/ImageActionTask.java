@@ -2,20 +2,28 @@ package com.intel.director.async.task;
 
 import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.common.Constants;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
 
-public abstract class ImageActionTask implements Runnable{
+/**
+ * 
+ * Superclass for all image actions
+ * 
+ * @author GS-0681
+ * 
+ */
+public abstract class ImageActionTask implements Runnable {
 
 	public ImageActionObject imageActionObject;
 	public ImageActionActions taskAction;
 	IPersistService persistService;
-	
-	public ImageActionTask(){
+
+	public ImageActionTask() {
 		persistService = new DbServiceImpl();
 	}
-	
+
 	public ImageActionTask(ImageActionObject imageActionObject) {
 		this.imageActionObject = imageActionObject;
 	}
@@ -27,7 +35,7 @@ public abstract class ImageActionTask implements Runnable{
 	public void setImageActionObject(ImageActionObject imageActionObject) {
 		this.imageActionObject = imageActionObject;
 	}
-	
+
 	public ImageActionActions getTaskAction() {
 		return taskAction;
 	}
@@ -37,9 +45,14 @@ public abstract class ImageActionTask implements Runnable{
 	}
 
 	public abstract String getTaskName();
-	
-	protected ImageActionActions getImageActionTaskFromArray(){
-		ImageActionActions  iat = null;
+
+	/**
+	 * Convert the json array into ImageActionActions for an ImageAction
+	 * 
+	 * @return Objects containing list of tasks to be executed
+	 */
+	protected ImageActionActions getImageActionTaskFromArray() {
+		ImageActionActions iat = null;
 		for (ImageActionActions imageActionTask : imageActionObject.getAction()) {
 			if (imageActionTask.getTask_name().equals(getTaskName())) {
 				iat = imageActionTask;
@@ -49,17 +62,65 @@ public abstract class ImageActionTask implements Runnable{
 		return iat;
 
 	}
-	
-	protected void updateImageActionState(String status, String details){
-		taskAction.setStatus(status);
-		taskAction.setExecutionDetails(details);
-		imageActionObject.setCurrent_task_name(getTaskName());
-		imageActionObject.setCurrent_task_status(taskAction.getStatus() );
-		
-		try {
-			persistService.updateImageAction(imageActionObject);
-		} catch (DbException e3) {
-			e3.printStackTrace();
+
+	/**
+	 * Checks if the previous task of the passed task is completed
+	 * 
+	 * @param taskName
+	 *            task which is to be executed
+	 * @return true if the previous task is COMPLETED
+	 */
+	protected boolean previousTasksCompleted(String taskName) {
+		boolean completed = true;
+		for (ImageActionActions imageActionTask : imageActionObject.getAction()) {
+			if (imageActionTask.getTask_name().equals(getTaskName())) {
+				completed = true;
+				break;
+			} else {
+				if (!Constants.COMPLETE.equals(imageActionTask.getStatus())) {
+					completed = false;
+					break;
+				}
+			}
+		}
+		return completed;
+	}
+
+	/**
+	 * Method to update the image action status after task execution
+	 * 
+	 * 
+	 * @param status
+	 *            Status of the task execution
+	 * @param details
+	 *            details of the task execution. Contains error details in case
+	 *            of error.
+	 */
+	protected void updateImageActionState(String status, String details) {
+		String currentTaskStatus = status;
+		synchronized (this) {
+			taskAction.setStatus(status);
+			taskAction.setExecutionDetails(details);
+			int count = imageActionObject.getAction_completed();
+			int action_completed;
+			if (Constants.COMPLETE.equals(status)) {
+				action_completed = count + 1;
+			} else {
+				if (Constants.ERROR.equals(status)) {
+					currentTaskStatus += " : " + details;
+				}
+				action_completed = count;
+			}
+			imageActionObject.setCurrent_task_status(currentTaskStatus);
+			imageActionObject.setAction_completed(action_completed);
+			imageActionObject.setCurrent_task_name(getTaskName());
+
+			try {
+				persistService.updateImageAction(imageActionObject);
+			} catch (DbException e3) {
+				e3.printStackTrace();
+			}
 		}
 	}
+
 }

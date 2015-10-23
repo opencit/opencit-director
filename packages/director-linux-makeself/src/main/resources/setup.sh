@@ -42,6 +42,19 @@ if [ -d $DIRECTOR_ENV ]; then
   done
 fi
 
+#Create upload dir and mount dir
+if [ -d /mnt/director ]; then
+  echo "Mount directory exists"
+else
+	mkdir /mnt/director	
+fi
+
+if [ -d /mnt/images ]; then
+  echo "Upload directory exists"
+else
+	mkdir /mnt/images	
+fi
+
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
 # we use the following functions:
 # java_detect java_ready_report 
@@ -167,6 +180,21 @@ touch "$DIRECTOR_PROPERTIES_FILE"
 chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
 chmod 600 "$DIRECTOR_PROPERTIES_FILE"
 
+GLANCE_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/glance.properties"}
+touch "$GLANCE_PROPERTIES_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$GLANCE_PROPERTIES_FILE"
+chmod 600 "$GLANCE_PROPERTIES_FILE"
+
+KMS_PROPERTIES_FILE=${KMS_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/kms.properties"}
+touch "$KMS_PROPERTIES_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$KMS_PROPERTIES_FILE"
+chmod 600 "$KMS_PROPERTIES_FILE"
+
+MTWILSON_PROPERTIES_FILE=${MTWILSON_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/mtwilson.properties"}
+touch "$MTWILSON_PROPERTIES_FILE"
+chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$MTWILSON_PROPERTIES_FILE"
+chmod 600 "$MTWILSON_PROPERTIES_FILE"
+
 DIRECTOR_INSTALL_LOG_FILE=${DIRECTOR_INSTALL_LOG_FILE:-"$DIRECTOR_LOGS/director_install.log"}
 export INSTALL_LOG_FILE="$DIRECTOR_INSTALL_LOG_FILE"
 touch "$DIRECTOR_INSTALL_LOG_FILE"
@@ -210,6 +238,14 @@ if [ $IMAGE_STORE_TYPE == "Openstack_Glance" ]; then
 			echo_failure "Can not connect to $IMAGE_STORE_TYPE using given credentials"
 	fi
 fi
+
+#required glance.properties
+update_property_in_file "glance.ip" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
+update_property_in_file "glance.port" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
+update_property_in_file "glance.image.store.username" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
+update_property_in_file "glance.image.store.password" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
+update_property_in_file "glance.tenant.name" "$GLANCE_PROPERTIES_FILE" "$GLANCE_TENANT_NAME"
+
 # modifying after mtwilson api client built
 prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
 update_property_in_file "mtwilson.server" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER"
@@ -219,6 +255,16 @@ prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
 update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
+
+
+#############################################
+#update for TDAAS: Write 2 different files for KMS andd MtWilson settings
+#############################################
+#MtWilson
+update_property_in_file "mtwilson.server" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_SERVER"
+update_property_in_file "mtwilson.server.port" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
+update_property_in_file "mtwilson.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
+update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
 #validating MTW credentials 
 http_status_code=`curl --insecure -i -X GET "https://$MTWILSON_SERVER:$MTWILSON_SERVER_PORT/mtwilson/v2/hosts?nameEqualTo=nameEw" -u $MTWILSON_USERNAME:$MTWILSON_PASSWORD 2>/dev/null | head -n 1 | cut -d$' ' -f2`

@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.ImageInfoFields;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageInfoFields;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFields;
