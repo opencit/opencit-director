@@ -194,7 +194,7 @@ public class DirectorUtil {
 	
 	
 public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy  setEncryption(CreateTrustPolicyMetaDataRequest req,com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy){
-	boolean encryptFlag=req.getIsEncrypted();
+	boolean encryptFlag=req.isEncrypted();
 	boolean isPolicyEncrypted=false;
 	if(policy.getEncryption()!=null){
 		isPolicyEncrypted=true;
