@@ -491,7 +491,9 @@ public class Mapper {
 		mwImageAction.setAction_size(imageaction.getAction_size());
 		mwImageAction.setAction_count(imageaction.getAction_count());
 		mwImageAction.setAction_completed(imageaction.getAction_completed());
-		mwImageAction.setAction(gson.toJson(imageaction.getAction()));
+		if(imageaction.getAction() != null){
+			mwImageAction.setAction(gson.toJson(imageaction.getAction()));
+		}
 		mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageaction
 				.getCurrent_task_status());
@@ -518,25 +520,27 @@ public class Mapper {
 		
 		List<ImageActionActions> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();
-		actions = actions.replace("[", "").replace("]", "");
-		String[] split = actions.split("},");
-		ObjectMapper mapper = new ObjectMapper();
-		for(String s : split){
-			if(!s.endsWith("}")){
-				s = s+"}";
+		if(actions != null){
+			actions = actions.replace("[", "").replace("]", "");
+			String[] split = actions.split("},");
+			ObjectMapper mapper = new ObjectMapper();
+			for(String s : split){
+				if(!s.endsWith("}")){
+					s = s+"}";
+				}
+				log.info("TASK : "+s);
+				ImageActionActions fromJson = null;
+				try {
+					fromJson = mapper.readValue(s, ImageActionActions.class);
+					log.info("TASK CREATED : "+ fromJson.toString());
+					taskList.add(fromJson);			
+	
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					log.error("Error in action mapping ", e);
+				}
+	
 			}
-			log.info("TASK : "+s);
-			ImageActionActions fromJson = null;
-			try {
-				fromJson = mapper.readValue(s, ImageActionActions.class);
-				log.info("TASK CREATED : "+fromJson.toString());
-				taskList.add(fromJson);			
-
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				log.error("Error in action mapping ", e);
-			}
-
 		}
 		log.info("No of tasks : "+taskList.size());
 		for(ImageActionActions temp : taskList){

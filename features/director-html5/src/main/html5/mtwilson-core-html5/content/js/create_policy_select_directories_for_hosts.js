@@ -23,21 +23,43 @@ function SelectDirectoriesViewModel() {
 			},
 			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
-				current_image_action_id = data;
+				if(data == "ERROR")
+				{
+					current_image_action_id = "";
+					$.ajax({
+						type : "POST",
+						url : endpoint + current_image_id + "/unmount",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.createImageMetaData),
+						success : function(data, status, xhr) {
+							$("#error_modal").modal({backdrop: "static"});
+							console.log("Unmount successfully")
 
-				$.ajax({
-					type : "POST",
-					url : endpoint + current_image_id + "/unmount",
-					contentType : "application/json",
-					headers : {
-						'Accept' : 'application/json'
-					},
-					data : ko.toJSON(self.createImageMetaData),
-					success : function(data, status, xhr) {
-						editPolicyDraft();
-						nextButtonLiveBM();
-					}
-				});
+						}
+					});
+				}
+				else
+				{
+					current_image_action_id = data;
+					$.ajax({
+						type : "POST",
+						url : endpoint + current_image_id + "/unmount",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.createImageMetaData),
+						success : function(data, status, xhr) {
+		
+							console.log("Unmount successfully")
+							editPolicyDraft();
+							nextButtonLiveBM();
+						}
+					});
+				}
 			}
 		});
 
@@ -232,4 +254,23 @@ function editPatch(file, checkedStatus) {
 				+ file + "\"]'/>";
 	}
 	patches.push(addRemoveXml);
+}
+
+function backToBMLiveFirstPage()
+{
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		$.ajax({
+			type : "POST",
+			url : endpoint + current_image_id + "/unmount",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : ko.toJSON(self.createImageMetaData),
+			success : function(data, status, xhr) {
+				backButtonLiveBM();
+			}
+		});
+	}
 }

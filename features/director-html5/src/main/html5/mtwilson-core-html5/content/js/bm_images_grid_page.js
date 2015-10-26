@@ -101,7 +101,7 @@ function refresh_bm_images_Grid() {
 					width : 100,
 					align : "center"
 				}, {
-					title : "MOdified Image Download",
+					title : "Modified Image Download",
 					name : "image_upload",
 					type : "text",
 					width : 100,
