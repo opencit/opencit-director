@@ -4,7 +4,6 @@ import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfigura
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.util.Properties;
 
@@ -22,7 +21,6 @@ import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.director.common.exception.ConfigurationNotFoundException;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.client.jaxrs2.Keys;
-import com.intel.kms.console.cmd.CreateKey;
 import com.intel.kms.ws.v2.api.Key;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.core.PasswordVaultFactory;
@@ -34,7 +32,7 @@ public class KmsUtil {
 	Keys keys;
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(CreateKey.class);
+			.getLogger(KmsUtil.class);
 	private static final String DIRECTOR_ENVELOPE_ALIAS = "director.envelope.alias";
 	private static final String DIRECTOR_KEYSTORE = "director.keystore";
 	private static final String DIRECTOR_KEYSTORE_PASSWORD = "director.keystore.password";
@@ -59,6 +57,7 @@ public class KmsUtil {
 					"Trust Director Envelope alias not configured");
 		}
 
+		log.debug("**** KMSUTIL: Folders.configuration() : " + Folders.configuration());
 		String keystorePath = getConfiguration().get(DIRECTOR_KEYSTORE,
 				Folders.configuration() + File.separator + "keystore.jks");
 		File keystoreFile = new File(keystorePath);

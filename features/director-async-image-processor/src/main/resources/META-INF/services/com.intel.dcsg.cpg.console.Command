@@ -1,0 +1,1 @@
+com.intel.director.quartz.ImageActionScheduler

@@ -2,43 +2,6 @@ window.onload = refereshDashboardGrid();
 
 
 
-function refreshPieChart(){
-	var myPieChart = document.getElementById('chart').getContext("2d");
-		var canvas_legend = document.getElementById("canvasLegend");
-		var delay = 1000; 
-		setTimeout(function() {
-			function loadPage(){
-			$.ajax({
-				type : "GET",
-				data : "",
-				url : "/v1/dashboard/pieChart",
-				dataType : "json",
-				cache : false,
-				success : function(response) {
-
-					console.log(response);
-					var options = {
-						segmentShowStroke : false,
-						animateRotate : true,
-						animateScale : false,
-						percentageInnerCutout : 50,
-						showTooltips: false
-					};
-					var pieChart = new Chart(myPieChart).Pie(response);
-					canvas_legend.innerHTML = pieChart.generateLegend();
-				},
-				error : function(response) {
-					alert('Error while request..');
-				}
-			});
-		};
-
-		window.onload = loadPage();
-		
-
-		}, delay);
-}
-
 
 
 function refereshDashboardGrid() {

@@ -40,7 +40,7 @@ public class SettingImpl {
 	}
 
 	public void postSshData(SshSettingRequest sshSettingRequest)
-			throws DbException {
+			throws DbException, IOException {
 
 
 
@@ -50,11 +50,15 @@ public class SettingImpl {
 
 				.fromSshSettingRequest(sshSettingRequest);
 		settingsPersistenceManager.saveSshMetadata(sshSetingInfo);
-
+		
+		boolean status = TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(), sshSettingRequest.getUsername(), sshSettingRequest.getPassword());
+	
+		System.out.println(status);
+		
 	}
 
 	public void updateSshData(SshSettingRequest sshSettingRequest)
-			throws DbException {
+			throws DbException, IOException {
 		// SshSettingInfo updateSsh=new SshSettingInfo();
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
@@ -62,6 +66,8 @@ public class SettingImpl {
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 		settingsPersistenceManager.updateSsh(tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest));
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(), sshSettingRequest.getUsername(), sshSettingRequest.getPassword());
+		
 	}
 
 	public void updateSshDataById(String sshId) throws DbException {

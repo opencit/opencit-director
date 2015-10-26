@@ -145,7 +145,7 @@ director_complete_setup() {
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   director_run setup $DIRECTOR_SETUP_TASKS
-  
+  director_run setup $DIRECTOR_SETUP_TASKS_AFTER_SLEEP
   ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
   if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
     openssl s_client -connect ${MTWILSON_SERVER}:${MTWILSON_SERVER_PORT} 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/mtwcert.pem
@@ -156,8 +156,6 @@ director_complete_setup() {
     return -1
   fi
   
-  sleep 5
-  director_run setup $DIRECTOR_SETUP_TASKS_AFTER_SLEEP
   
 }
 
@@ -238,7 +236,7 @@ scheduler_is_running() {
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # check the process list just in case the pid file is stale
-    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.director.quartz.ImageActionScheduler start" | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main image-action-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # Scheduler is not running
@@ -267,9 +265,39 @@ director_stop() {
 
 
 scheduler_start() {	
-    cd $DIRECTOR_HOME
-    $prog $JAVA_OPTS com.intel.director.quartz.ImageActionScheduler start >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &
-    echo $! > $SCHEDULER_PID_FILE
+ if [ -z "$DIRECTOR_PASSWORD" ]; then
+      echo_failure "Master password is required; export DIRECTOR_PASSWORD"
+      return 1
+    fi
+
+    # check if we're already running - don't start a second instance
+    if scheduler_is_running; then
+      echo "Image Action Scheduler is running"
+      return 0
+    fi
+
+    # check if we need to use authbind or if we can start java directly
+    prog="java"
+    if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
+      prog="authbind java"
+      JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+    fi
+
+    # the subshell allows the java process to have a reasonable current working
+    # directory without affecting the user's working directory. 
+    # the last background process pid $! must be stored from the subshell.
+    (
+      cd $DIRECTOR_HOME
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main image-action-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
+      echo $! > $SCHEDULER_PID_FILE
+    )
+    if scheduler_is_running; then
+      echo_success "Started Image Action Scheduler"
+    else
+      echo_failure "Failed to start Image Action Scheduler"
+    fi
+
+
 }
 
 scheduler_stop() {	
