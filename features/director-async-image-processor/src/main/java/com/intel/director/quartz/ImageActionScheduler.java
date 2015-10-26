@@ -1,14 +1,7 @@
 package com.intel.director.quartz;
 
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.impl.matchers.GroupMatcher.groupEquals;
-
-import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 
 import com.intel.dcsg.cpg.console.AbstractCommand;
@@ -74,6 +67,7 @@ public class ImageActionScheduler extends AbstractCommand {
 	 * 
 	 * @throws SchedulerException
 	 */
+	/*
 	public void start() throws SchedulerException {
 		log.info("***** Scheduler Started ");
 		JobDetail job = newJob(ImageActionPoller.class).withIdentity(
@@ -95,12 +89,14 @@ public class ImageActionScheduler extends AbstractCommand {
 		scheduler.scheduleJob(job, trigger);
 
 	}
+	*/
 
 	/**
 	 * Stops the scheduler
 	 * 
 	 * @throws SchedulerException
 	 */
+	/*
 	public void stop() throws SchedulerException {
 		log.info("***** Scheduler Stopped");
 
@@ -122,5 +118,6 @@ public class ImageActionScheduler extends AbstractCommand {
 			}
 		}
 	}
+	*/
 
 }
