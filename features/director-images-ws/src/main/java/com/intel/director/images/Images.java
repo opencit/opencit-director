@@ -53,6 +53,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
@@ -192,14 +193,23 @@ public class Images {
 	@POST
 	public MountImageResponse mountImage(@PathParam("imageId") String imageId,
 			@Context HttpServletRequest httpServletRequest,
-			@Context HttpServletResponse httpServletResponse)
-			throws DirectorException {
+			@Context HttpServletResponse httpServletResponse) {
 		log.info("inside mounting image in web service");
 		String user = getLoginUsername(httpServletRequest);
 		log.info("User mounting image : " + user);
 
-		MountImageResponse mountImageResponse = imageService.mountImage(
-				imageId, user);
+		MountImageResponse mountImageResponse = new MountImageResponse();
+		try {
+			mountImageResponse = imageService.mountImage(
+					imageId, user);
+		} catch (DirectorException e) {
+			// TODO Auto-generated catch block
+			log.error("Error while Mounting the Image");
+			mountImageResponse.status = Constants.ERROR;
+			mountImageResponse.details = e.getMessage();
+			return mountImageResponse;
+		}
+		mountImageResponse.status = "SUCCESS";
 		return mountImageResponse;
 	}
 
@@ -280,11 +290,23 @@ public class Images {
 	public SearchFilesInImageResponse searchFilesInImage(
 			@PathParam("imageId") String imageId,
 			SearchFilesInImageRequest searchFilesInImageRequest)
-			throws DirectorException {
+			 {
 		imageService = new ImageServiceImpl();
 		searchFilesInImageRequest.id = imageId;
-		SearchFilesInImageResponse filesInImageResponse = imageService
-				.searchFilesInImage(searchFilesInImageRequest);
+		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
+		try {
+			filesInImageResponse = imageService
+					.searchFilesInImage(searchFilesInImageRequest);
+		} catch (DirectorException e) {
+			// TODO Auto-generated catch block
+			log.error("Error while searching for files in image : "+imageId, e);
+			try {
+				imageService.unMountImage(imageId, null);
+			} catch (DirectorException e1) {
+				// TODO Auto-generated catch block
+				log.error("Error while unmounting image  : "+imageId, e);
+			}
+		}
 		String join = StringUtils.join(filesInImageResponse.files, "");
 		filesInImageResponse.treeContent = join;
 
@@ -491,13 +513,18 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public CreateTrustPolicyMetaDataResponse createTrustPolicyMetaData
+	public CreateTrustPolicyMetaDataResponse createTrustPolicyMetaData(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
+	{
 
-	(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
-			throws DirectorException {
-
-		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = imageService
-				.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
+		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
+		try {
+			createTrustPolicyMetadataResponse = imageService
+					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
+		} catch (DirectorException e) {
+			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
+			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
+			return createTrustPolicyMetadataResponse;
+		}
 
 		return createTrustPolicyMetadataResponse;
 	}

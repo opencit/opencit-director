@@ -138,22 +138,43 @@ public class GlanceRsClient {
 		 */
 
 		String uuid = (new UUID()).toString();
-		Response response = webTarget
-				.path("/v1/images")
-				.request()
-				.header("X-Auth-Token", authToken)
-				.header("x-image-meta-id", uuid)
-				.header("x-image-meta-container_format",
-						imageProperties.get(Constants.CONTAINER_FORMAT))
-				.header("x-image-meta-disk_format",
-						imageProperties.get(Constants.DISK_FORMAT))
-				.header("x-image-meta-is_public",
-						imageProperties.get(Constants.IS_PUBLIC))
-				.header("x-image-meta-name",
-						imageProperties.get(Constants.NAME))
-				.header("x-image-meta-property-mtwilson_trustpolicy_location",
-						"glance_image_tar")		
-				.post(Entity.json(null));
+		Response response;
+		if(imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION)!=null){
+			response = webTarget
+					.path("/v1/images")
+					.request()
+					.header("X-Auth-Token", authToken)
+					.header("x-image-meta-id", uuid)
+					.header("x-image-meta-container_format",
+							imageProperties.get(Constants.CONTAINER_FORMAT))
+					.header("x-image-meta-disk_format",
+							imageProperties.get(Constants.DISK_FORMAT))
+					.header("x-image-meta-is_public",
+							imageProperties.get(Constants.IS_PUBLIC))
+					.header("x-image-meta-name",
+							imageProperties.get(Constants.NAME))
+					.header("x-image-meta-property-mtwilson_trustpolicy_location",
+							imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION))		
+					.post(Entity.json(null));
+		}else{
+			
+			response = webTarget
+					.path("/v1/images")
+					.request()
+					.header("X-Auth-Token", authToken)
+					.header("x-image-meta-id", uuid)
+					.header("x-image-meta-container_format",
+							imageProperties.get(Constants.CONTAINER_FORMAT))
+					.header("x-image-meta-disk_format",
+							imageProperties.get(Constants.DISK_FORMAT))
+					.header("x-image-meta-is_public",
+							imageProperties.get(Constants.IS_PUBLIC))
+					.header("x-image-meta-name",
+							imageProperties.get(Constants.NAME))
+					.post(Entity.json(null));
+			
+		}
+	
 		System.out.println(" response uploadImageMetaData" + response);
 
 		InputStream inputStream = (InputStream) response.getEntity();
