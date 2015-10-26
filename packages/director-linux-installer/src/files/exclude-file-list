@@ -1,5 +1,0 @@
-/etc/rc.local
-/etc/nova/nova.conf
-/etc/nova/nova-compute.conf
-/etc/network/interfaces
-/root/.ssh/authorized_keys

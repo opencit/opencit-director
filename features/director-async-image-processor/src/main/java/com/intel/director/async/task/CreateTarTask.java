@@ -87,8 +87,7 @@ public class CreateTarTask extends ImageActionTask {
 
 			if (trustPolicy != null) {
 				log.info("Create Tar : Create policy file start");
-				trustPolicyName = "policy_" + trustPolicy.getDisplay_name()
-						+ ".xml";
+				trustPolicyName = "trustpolicy.xml";
 				trustPolicyLocation = imageLocation;
 				trustPolicyFile = new File(trustPolicyLocation
 						+ trustPolicyName);

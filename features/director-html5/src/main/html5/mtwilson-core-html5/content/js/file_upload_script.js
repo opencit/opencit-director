@@ -21,6 +21,10 @@ var options = {
         },
         complete : function(response) {
         $("#message").html("<font color='blue'>Your file has been uploaded!</font>");
+		
+		document.getElementById("upload").onclick = function() {
+			this.disabled = false;
+		}
         alert("Completed");
         window.close();
         },

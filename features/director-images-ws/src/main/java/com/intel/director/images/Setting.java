@@ -47,7 +47,7 @@ public class Setting {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<SshSettingRequest> postRecentSsh(SshSettingRequest sshSettingRequest)
-			throws DbException {
+			throws DbException, IOException {
 		log.debug("Dashboard -> postRecentSsh");
 		impl.postSshData(sshSettingRequest);
 		return impl.sshData();
@@ -72,7 +72,7 @@ public class Setting {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<SshSettingRequest> updateSsh(SshSettingRequest sshSettingRequest)
-			throws DbException {
+			throws DbException, IOException {
 		log.debug("Setting -> updateSsh");
 		impl.updateSshData(sshSettingRequest);
 		return impl.sshData();

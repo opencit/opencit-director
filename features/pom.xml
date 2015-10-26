@@ -20,5 +20,7 @@
 	<module>director-async-image-processor</module>
         <module>director-glance</module>
         <module>director-kms</module>
+		        <module>director-attestation-server</module>
+
     </modules>
 </project>

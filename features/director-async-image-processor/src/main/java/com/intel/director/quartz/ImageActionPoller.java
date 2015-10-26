@@ -22,6 +22,7 @@ import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 
 /**
  * Poller that runs every one minute. Check the entries in the Action table
@@ -65,6 +66,7 @@ public class ImageActionPoller implements Job {
 		// iterate over list of image action objects
 		log.debug("incompleteImageActionObjects::"
 				+ incompleteImageActionObjects);
+
 		for (ImageActionObject imageActionObj : incompleteImageActionObjects) {
 			log.info("ImageAction in poller: " + imageActionObj.getId());
 			List<ImageActionActions> imageActions = imageActionObj.getAction();

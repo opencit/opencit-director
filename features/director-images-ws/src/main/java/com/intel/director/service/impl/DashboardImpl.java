@@ -200,14 +200,12 @@ public class DashboardImpl implements DashboardService {
 		imgAction = dashboardImplPersistenceManager.searchByAction();
 		String actions;
 		CharSequence upload = "Upload";
-		int index = 0;
 
 		for (ImageActionObject imgObj : imgAction) {
 			actions = imgObj.getCurrent_task_name();
 			if (actions.contains(upload) || actions.contains(Constants.IN_PROGRESS)) {
 				uploadInProgress.add(imgObj);
 			}
-			index++;
 		}
 		String imgName;
 		for (int it = 0; it < uploadInProgress.size(); it++) {

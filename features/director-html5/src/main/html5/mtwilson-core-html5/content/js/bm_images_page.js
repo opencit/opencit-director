@@ -139,17 +139,14 @@ function goToEditPolicyWizardForBMLive() {
 
 // bactToHost...
 function backToHostsPage() {
-	/////$("#create_policy_script").remove();
+	$("#create_policy_wizard2_").html("");
+	$("#create_policy_wizard2_").hide("");
+	$("#create_policy_wizard_bm_image").html("");
+	$("#create_policy_wizard_bm_image").hide("");
 	$("#edit_policy_wizard_bm_live").html("");
 	$("#edit_policy_wizard_bm_live").hide("");
 	$("#edit_policy_wizard_bm_image").html("");
-	$("#create_policy_wizard_bm_image").html("");
-	$("#create_policy_wizard_bm_image").hide("");
 	$("#edit_policy_wizard_bm_image").hide("");
-	$("#create_policy_wizard2_").html("");
-	$("#create_policy_wizard2_").hide("");
-	$("#upload_to_image_store_redirect_bm_image").html("");
-	$("#upload_to_image_store_redirect_bm_image").hide("");
 	$("#bm_images_grid_page").show();
 	if(current_image_id != "" && current_image_id !=null)
 	{
@@ -168,7 +165,6 @@ function backToHostsPage() {
 		});
 
 	}
-
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
 }
@@ -209,7 +205,7 @@ function backButtonImagesBM() {
 function backButtonLiveBM() {
 	var activeMasterStepsDiv;
 	var active_wizard_page;
-	if ($('#create_policy_wizard_for_hosts').is(':hidden')) {
+	if ($('#create_policy_wizard2_').is(':hidden')) {
 		activeMasterStepsDiv = "editPolicyStepsBMLive";
 		active_wizard_page = "edit_policy_bm_live";
 
@@ -245,8 +241,7 @@ function nextButtonLiveBM() {
 
 	var activeMasterStepsDiv;
 	var active_wizard_page;
-	
-	if ($('#create_policy_wizard_for_hosts').is(':hidden')) {
+	if ($('#create_policy_wizard2_').is(':hidden')) {
 		activeMasterStepsDiv = "editPolicyStepsBMLive";
 		active_wizard_page = "edit_policy_bm_live";
 
@@ -255,9 +250,6 @@ function nextButtonLiveBM() {
 		active_wizard_page = "create_policy_for_hosts";
 
 	}
-
-	//activeMasterStepsDiv = "createPolicyStepsForHosts";
-	//active_wizard_page = "create_policy_for_hosts";
 
 	var divid = $('#' + activeMasterStepsDiv).find("li .selected").attr('id');
 
@@ -289,8 +281,8 @@ function nextButtonLiveBM() {
 			.removeClass("disabled");
 	$("#" + active_wizard_page + "_step_" + nextStepNum).removeClass("done");
 	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
-
 }
+
 
 function nextButtonImagesBM() {
 

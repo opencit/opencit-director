@@ -16,7 +16,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+
+import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.xml.JAXB;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBContext;
@@ -64,6 +71,7 @@ import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
+import com.intel.mtwilson.director.director.attestation.server.SignWithMtWilson;
 import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
 import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
@@ -495,8 +503,10 @@ public class ImageServiceImpl implements ImageService {
 			Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
 			trustPolicyElementsList = new ArrayList<String>();
 			for (File file : regexFiles) {
-				patchFileAddSet.add(file.getAbsolutePath().replace(mountPath,
+				if(file.isFile()){
+					patchFileAddSet.add(file.getAbsolutePath().replace(mountPath,
 						""));
+				}
 				if (!trustPolicyElementsList.contains(file.getAbsolutePath()
 						.replace(mountPath, ""))) {
 					trustPolicyElementsList.add(file.getAbsolutePath().replace(
@@ -753,8 +763,20 @@ public class ImageServiceImpl implements ImageService {
 			try {
 				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
 				CreateTrustPolicy.createTrustPolicy(policy);
+
 				policyXml = TdaasUtil.convertTrustPolicyToString(policy);
+				//Sign the policy with MtWilson
+				 Extensions.register(TlsPolicyCreator.class, com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
+			        Properties p = My.configuration().getClientProperties();
+			        TrustPolicySignature    client = new TrustPolicySignature(p);
+			        JAXB jaxb = new JAXB();
+			        com.intel.mtwilson.trustpolicy.xml.TrustPolicy signedPolicy = client.signTrustPolicy(jaxb.read(policyXml,  com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class));
+			        String signedPolicyXml=jaxb.write(signedPolicy);
+			        log.debug("Signed Policy Is: "+jaxb.write(signedPolicy));
 				
+				///SignWithMtWilson mtw = new SignWithMtWilson();
+				/////mtw.signManifest(image_id, policyXml);
+
 				String mountPath = DirectorUtil.getMountPath(image_id);
 				if ((Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
 						.getImage_deployments()) && image.getImage_format() != null)
@@ -786,7 +808,7 @@ public class ImageServiceImpl implements ImageService {
 						FileWriter fw = new FileWriter(
 								trustPolicyFile.getAbsoluteFile());
 						BufferedWriter bw = new BufferedWriter(fw);
-						bw.write(policyXml);
+						bw.write(signedPolicyXml);
 						bw.close();
 
 					}
@@ -794,7 +816,7 @@ public class ImageServiceImpl implements ImageService {
 				}
 				
 				
-				trustPolicy.setTrust_policy(policyXml);
+				trustPolicy.setTrust_policy(signedPolicyXml);
 			} catch (IOException | JAXBException e) {
 				log.error("Error while creating trust policy", e);			
 				throw new DirectorException("Exception while creating trust policy from draft", e);
@@ -819,6 +841,7 @@ public class ImageServiceImpl implements ImageService {
 				return createImageActionById(image_id, trustPolicy, true);
 			}
 			
+			
 		} catch (DbException  e) {
 			log.error("Db exception thrown in create trust policy", e);
 			if (existingTrustpolicy != null) {
@@ -829,6 +852,10 @@ public class ImageServiceImpl implements ImageService {
 				if (existingTrustpolicy != null) {
 					// /TODO update archive column to false
 				}
+			throw new DirectorException(e);
+
+		} catch (Exception e) {
+			log.error("Error getting MtWIlson signature for image id : "+image_id, e);
 			throw new DirectorException(e);
 		} finally {
 
@@ -1193,15 +1220,21 @@ public class ImageServiceImpl implements ImageService {
 					}
 				}
 
+				String recursiveAttr = " Recursive=\"false\"";
+				if(searchFilesInImageRequest.include_recursive){
+					recursiveAttr = " Recursive=\"true\"";
+				}
 				if (!found) {
 					filesInImageResponse.patchXml
 							.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
 									+ patchFile
 									+ "\" Include=\""
 									+ searchFilesInImageRequest.include
-									+ "\" Exclude=\" "
+									+ "\" Exclude=\""
 									+ searchFilesInImageRequest.exclude
-									+ "\"/></add>");
+									+ "\""
+									+recursiveAttr
+									+ "/></add>");
 				}
 			}
 		}

@@ -78,6 +78,9 @@
 			        alert("First Choose File Please...");
 			        return false;
 			    }
+				document.getElementById("upload").onclick = function() {
+					this.disabled = true;
+				}
 			}
 		</script>
 		
@@ -118,7 +121,7 @@
 					</span>
 				</span> <input type="text" class="form-control" readonly>
 			</div>
-			<br /> <input class="btn btn-primary" type="submit" value="Upload">
+			<br /> <input class="btn btn-primary" id="upload" type="submit" value="Upload">
 			<div id="progressbox">
 				<div id="progressbar"></div>
 				<div id="percent">0%</div>
