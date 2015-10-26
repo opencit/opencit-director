@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
 import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.async.ImageActionExecutor;
@@ -22,14 +18,13 @@ import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 
 /**
  * Poller that runs every one minute. Check the entries in the Action table
  * 
  * @author Siddharth
  */
-public class ImageActionPoller implements Job {
+public class ImageActionPoller {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActionPoller.class);
 
@@ -40,8 +35,7 @@ public class ImageActionPoller implements Job {
 	/**
 	 * Fetches the entries from the MW_ACTION table for processing
 	 */
-	@Override
-	public void execute(JobExecutionContext jec) throws JobExecutionException {
+	public void execute() {
 
 		// Fetch the 10 records from DB
 		// Iterate over them
