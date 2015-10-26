@@ -157,7 +157,7 @@ public class DirectoryAndFileUtil {
 	 */
 	public Digest getFileHash(String imageId, FileMeasurement fileMeasurement,
 			String measurementType) throws IOException {
-		String filePath = DirectorUtil.getMountPath(imageId)
+		String filePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"
 				+ fileMeasurement.getPath();
 		filePath = getSymlinkValue(filePath);
 		if (filePath == null || !new File(filePath).exists())
