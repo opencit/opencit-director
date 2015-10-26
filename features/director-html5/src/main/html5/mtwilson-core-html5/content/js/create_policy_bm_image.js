@@ -1,4 +1,3 @@
-var imageFormats = new Array();
 var image_policies = new Array();
 endpoint = "/v1/images/";
 $.ajax({
@@ -46,10 +45,10 @@ function CreateBMImageViewModel() {
 
 	self.createBMImage = function(loginFormElement) {
 
-	self.createBMImageMetaData.launch_control_policy = "MeasureOnly";
-	self.createBMImageMetaData.encrypted = false;
-	self.createBMImageMetaData.display_name = $('#display_name_bm').val();
-	current_display_name = $('#display_name_bm').val();
+		self.createBMImageMetaData.launch_control_policy = "MeasureOnly";
+		self.createBMImageMetaData.encrypted = false;
+		self.createBMImageMetaData.display_name = $('#display_name_bm').val();
+		current_display_name = $('#display_name_bm').val();
 		$.ajax({
 			type : "POST",
 			url : endpoint + "trustpoliciesmetadata",
@@ -59,6 +58,13 @@ function CreateBMImageViewModel() {
 			},
 			data : ko.toJSON(self.createBMImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
+				if (data.status == "Error") {
+					$('#error_modal_body').text(data.details);
+					$("#error_modal").modal({
+						backdrop : "static"
+					});
+					return;
+				}
 				$.ajax({
 					type : "POST",
 					url : endpoint + current_image_id + "/mount",
@@ -68,6 +74,13 @@ function CreateBMImageViewModel() {
 					},
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
+						if (data.status == "Error") {
+							$('#error_modal_body').text(data.details);
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
+							return;
+						}
 						nextButtonImagesBM();
 					}
 				});

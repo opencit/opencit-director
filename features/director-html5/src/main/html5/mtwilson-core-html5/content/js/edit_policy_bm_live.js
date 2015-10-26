@@ -43,7 +43,13 @@ function EditBMLiveViewModel(data) {
 			},
 			data : ko.toJSON(self.editBMLiveMetaData),
 			success : function(data, status, xhr) {
-
+				if (data.status == "Error") {
+					$('#error_modal_body').text(data.details);
+					$("#error_modal").modal({
+						backdrop : "static"
+					});
+					return;
+				}
 				$.ajax({
 					type : "POST",
 					url : endpoint + current_image_id + "/mount",
@@ -53,6 +59,13 @@ function EditBMLiveViewModel(data) {
 					},
 					data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
+						if (data.status == "Error") {
+							$('#error_modal_body').text(data.details);
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
+							return;
+						}
 						nextButtonLiveBM();
 					}
 				});
@@ -76,7 +89,7 @@ function showBMImageLaunchPolicies(policydata) {
 			$("#display_name_live_edit").val(current_display_name);
 
 			image_policies = data.image_launch_policies;
-			//addRadios(image_policies);
+			// addRadios(image_policies);
 			$(
 					"input[name=launch_control_policy][value='"
 							+ policydata.launch_control_policy + "']").attr(

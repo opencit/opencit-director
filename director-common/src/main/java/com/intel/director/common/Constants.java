@@ -123,5 +123,7 @@ public class Constants {
 
 	public static final String MTWILSON_PROP_FILE = "mtwilson.properties";
 	public static final String KMS_PROP_FILE = "kms.properties";
+	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
+	
 
 }

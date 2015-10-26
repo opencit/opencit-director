@@ -98,4 +98,6 @@ public class Constants {
 	public static final String GLANCE_HEADER_LOCATION="Location";
 	public static final String GLANCE_HEADER_CHECKSUM="Image-Meta-Checksum";
 	public static final String GLANCE_HEADER_CONTAINER_FORMAT="X-Image-Meta-Container_format";
+	
+	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
 }

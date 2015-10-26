@@ -321,17 +321,9 @@ scheduler_stop() {
 director_uninstall() {
     remove_startup_script director
     rm -f /usr/local/bin/director
-    if [ -z "$DIRECTOR_HOME" ]; then
-      echo_failure "Cannot uninstall because DIRECTOR_HOME is not set"
-      return 1
-    fi
-    if [ "$1" == "--purge" ]; then
-      rm -rf $DIRECTOR_HOME
-    else
-      rm -rf $DIRECTOR_HOME/bin $DIRECTOR_HOME/java $DIRECTOR_HOME/features
-    fi
-    groupdel $DIRECTOR_USERNAME > /dev/null 2>&1
-    userdel $DIRECTOR_USERNAME > /dev/null 2>&1
+    rm -rf /opt/director
+    groupdel director > /dev/null 2>&1
+    userdel director > /dev/null 2>&1
 }
 
 print_help() {

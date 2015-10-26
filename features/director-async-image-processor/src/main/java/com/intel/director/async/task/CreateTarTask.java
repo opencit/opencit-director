@@ -57,12 +57,16 @@ public class CreateTarTask extends ImageActionTask {
 		File trustPolicyFile = null;
 
 		try {
+			
+		
 			log.info("Inside runCreateTartask for ::"
 					+ imageActionObject.getImage_id());
 			ImageInfo imageinfo = persistService
 					.fetchImageById(imageActionObject.getImage_id());
 			imageLocation = imageinfo.getLocation();
 			// Fetch the policy and write to a location. Move to common
+			
+			
 			String imageName = null;
 			TrustPolicy trustPolicy = persistService
 					.fetchPolicyForImage(imageActionObject.getImage_id());
@@ -84,12 +88,17 @@ public class CreateTarTask extends ImageActionTask {
 				log.info("Create Tar has a trust policy which is NOT encrypted");
 				imageName = imageinfo.getName();
 			}
-
+			String newLocation=imageLocation+imageActionObject.getImage_id()+File.separator;
+			DirectorUtil.callExec("mkdir -p " + newLocation);
+			DirectorUtil
+			.createCopy(
+					imageLocation+ imageName,
+					newLocation +  imageName);
 			if (trustPolicy != null) {
 				log.info("Create Tar : Create policy file start");
 				trustPolicyName = "trustpolicy.xml";
-				trustPolicyLocation = imageLocation;
-				trustPolicyFile = new File(trustPolicyLocation
+				trustPolicyLocation = newLocation;
+				trustPolicyFile = new File(newLocation
 						+ trustPolicyName);
 
 				if (!trustPolicyFile.exists()) {
@@ -106,12 +115,12 @@ public class CreateTarTask extends ImageActionTask {
 
 			}
 
-			String tarLocation = imageLocation;
-			String tarName = "tar_" + trustPolicy.getDisplay_name() + ".tar";
+			String tarLocation = newLocation;
+			String tarName = "tar_" + trustPolicy.getDisplay_name();
 			log.info("Create Tar ::tarName::" + tarName + " tarLocation::"
 					+ tarLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
-			DirectorUtil.createTar(imageLocation, imageName, trustPolicyName,
+			DirectorUtil.createTar(newLocation, imageName, trustPolicyName,
 					tarLocation, tarName);
 			// log.debug("//////////////tar::"+tar);
 			// //Thread.sleep(60000);

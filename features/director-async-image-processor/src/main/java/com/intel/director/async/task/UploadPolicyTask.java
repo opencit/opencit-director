@@ -58,7 +58,7 @@ public class UploadPolicyTask extends UploadTask {
 			String imageLocation = imageInfo.getLocation();
 			if (trustPolicy != null) {
 
-				String trustPolicyName = "policy_" + trustPolicy.getId()
+				String trustPolicyName = "trustpolicy-" + trustPolicy.getId()
 						+ ".xml";
 
 				String trustPolicyLocation = imageLocation;

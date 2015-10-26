@@ -118,7 +118,7 @@ public class TdaasUtil {
 	}
 	
 	public static String getMountPath(String imageId){
-		return DirectorUtil.getMountPath(imageId) + File.separator + "mnt";
+		return DirectorUtil.getMountPath(imageId) + File.separator + "mount";
 	}
 
 	public static String patch(String src, String patch) throws IOException {
@@ -146,7 +146,7 @@ public class TdaasUtil {
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
 		File parent = new File(filePath).getParentFile();
-	if (parent == null || parent.getAbsolutePath().equals(DirectorUtil.getMountPath(imageId))) {
+	if (parent == null || parent.getAbsolutePath().equals(getMountPath(imageId))) {
 			return;
 		}
 
