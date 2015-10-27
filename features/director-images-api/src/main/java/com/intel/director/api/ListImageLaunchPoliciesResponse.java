@@ -7,12 +7,14 @@ package com.intel.director.api;
 
 import java.util.List;
 
+import com.intel.director.api.ui.ImageLaunchPolicyKeyValue;
+
 /**
  *
  * @author soakx
  */
 public class ListImageLaunchPoliciesResponse {
 
-    public List<String> image_launch_policies;
+    public List<ImageLaunchPolicyKeyValue> image_launch_policies;
 	public String display_name;
 }

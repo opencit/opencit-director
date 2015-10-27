@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
+import com.intel.director.api.ui.ImageLaunchPolicyKeyValue;
 import com.intel.director.common.Constants;
 import com.intel.director.service.LookupService;
 
@@ -41,8 +42,14 @@ public class LookupServiceImpl implements LookupService {
     public ListImageLaunchPoliciesResponse getImageLaunchPolicies() {
         ListImageLaunchPoliciesResponse imageLaunchPoliciesResponse = new ListImageLaunchPoliciesResponse();
         imageLaunchPoliciesResponse.image_launch_policies = new ArrayList<>();
-        imageLaunchPoliciesResponse.image_launch_policies.add(Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY);
-        imageLaunchPoliciesResponse.image_launch_policies.add(Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE);
+        ImageLaunchPolicyKeyValue imagelaunchpolicykeyvalue = new ImageLaunchPolicyKeyValue();
+        imagelaunchpolicykeyvalue.setKey(Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY);
+        imagelaunchpolicykeyvalue.setValue("Hash Only");
+        imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicykeyvalue);
+        imagelaunchpolicykeyvalue = new ImageLaunchPolicyKeyValue();
+        imagelaunchpolicykeyvalue.setKey(Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE	);
+        imagelaunchpolicykeyvalue.setValue("Hash and enforce");
+        imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicykeyvalue);
         return imageLaunchPoliciesResponse;
     }
 
