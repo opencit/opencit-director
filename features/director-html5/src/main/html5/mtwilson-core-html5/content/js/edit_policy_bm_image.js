@@ -121,7 +121,7 @@ function addRadios(arr) {
 
 		temp = temp
 				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i] + '" >' + arr[i] + '</label>';
+				+ arr[i].key + '" >' + arr[i].value + '</label>';
 
 	}
 

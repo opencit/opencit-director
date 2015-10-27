@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -20,7 +21,9 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+
 import com.intel.dcsg.cpg.xml.JAXB;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -31,6 +34,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
@@ -478,7 +482,7 @@ public class ImageServiceImpl implements ImageService {
 		// populate filenames with the leaf nodes of the root folder
 
 		createListOfFileNamesForTree(searchFilesInImageRequest, treeFiles,
-				fileNames);
+				fileNames, directoryListContainingPolicyFiles.keySet());
 
 		// Now add the exploded file view in case of edit
 		Set<String> dirsForEdit = new HashSet<String>();
@@ -514,9 +518,9 @@ public class ImageServiceImpl implements ImageService {
 			Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
 			trustPolicyElementsList = new ArrayList<String>();
 			for (File file : regexFiles) {
-				if(file.isFile()){
-					patchFileAddSet.add(file.getAbsolutePath().replace(mountPath,
-							""));
+				if (file.isFile()) {
+					patchFileAddSet.add(file.getAbsolutePath().replace(
+							mountPath, ""));
 				}
 				if (!trustPolicyElementsList.contains(file.getAbsolutePath()
 						.replace(mountPath, ""))) {
@@ -775,7 +779,24 @@ public class ImageServiceImpl implements ImageService {
 						.getPolicy(policyXml);
 				CreateTrustPolicy.createTrustPolicy(policy);
 
+				// Calculate image hash and add to encryption tag
+				if (policy.getEncryption() != null) {
+					File imgFile = new File(image.getLocation()
+							+ image.getName());
+
+					try {
+						String computeHash = TdaasUtil.computeHash(
+								MessageDigest.getInstance("MD5"), imgFile);
+						policy.getEncryption().getChecksum()
+								.setValue(computeHash);
+					} catch (IOException e) {
+						log.error("Error while calculating hash of image", e);
+					}
+
+				}
+
 				policyXml = TdaasUtil.convertTrustPolicyToString(policy);
+				log.info("****** HASH : " + policyXml);
 				// Sign the policy with MtWilson
 				Extensions
 						.register(
@@ -789,6 +810,7 @@ public class ImageServiceImpl implements ImageService {
 								.read(policyXml,
 										com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class));
 				String signedPolicyXml = jaxb.write(signedPolicy);
+				log.info("****** SIGN : " + signedPolicyXml);
 				log.debug("Signed Policy Is: " + jaxb.write(signedPolicy));
 
 				// /SignWithMtWilson mtw = new SignWithMtWilson();
@@ -1134,8 +1156,7 @@ public class ImageServiceImpl implements ImageService {
 			Set<String> directoryListContainingPolicyFiles) {
 		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
 		for (File file : treeFiles) {
-			String _file = file.getAbsolutePath().replace("\\", "/")
-					.replace(mountPath, "");
+			String _file = file.getAbsolutePath().replace(mountPath, "");
 			_file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
 			if (!directoryListContainingPolicyFiles.contains(mountPath
 					+ File.separator + _file)) {
@@ -1267,8 +1288,8 @@ public class ImageServiceImpl implements ImageService {
 				}
 				if (found) {
 					filesInImageResponse.patchXml
-					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-							+ dirPath + "\"]'></remove>");
+							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+									+ dirPath + "\"]'></remove>");
 				}
 				filesInImageResponse.patchXml
 						.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
