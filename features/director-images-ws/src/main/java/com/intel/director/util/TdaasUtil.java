@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.intel.dcsg.cpg.xml.JAXB;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -669,5 +672,27 @@ public class TdaasUtil {
         log.debug("Manifest is: " + result);
         return result;
 	}
+	
+	   public static String computeHash(MessageDigest md, File file) throws IOException {
+	        if (!file.exists()) {
+	            return null;
+	        }
+	        StringBuffer sb = null;
+	        byte[] dataBytes = new byte[1024];
+	        int nread = 0;
+	        FileInputStream fis = new FileInputStream(file);
+	        while ((nread = fis.read(dataBytes)) != -1) {
+	            md.update(dataBytes, 0, nread);
+	        };
+	        byte[] mdbytes = md.digest();
+
+	        //convert the byte to hex format
+	        sb = new StringBuffer();
+	        for (int i = 0; i < mdbytes.length; i++) {
+	            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+	        }
+	        fis.close();
+	        return sb.toString();
+	    }
 
 }
