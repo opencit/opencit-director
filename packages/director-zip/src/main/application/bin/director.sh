@@ -105,16 +105,13 @@ DIRECTOR_SETUP_TASKS_AFTER_SLEEP=${DIRECTOR_SETUP_TASKS_AFTER_SLEEP:-"director-e
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place
 DIRECTOR_PID_FILE=${DIRECTOR_PID_FILE:-/var/run/director.pid}
-SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
+touch $DIRECTOR_PID_FILE >/dev/null 2>&1
+if [ $? == 1 ]; then DIRECTOR_PID_FILE=$DIRECTOR_LOGS/director.pid; fi
 
-DIRECTOR_PID_DIR=$(dirname $DIRECTOR_PID_FILE)
-if [ ! -d $DIRECTOR_PID_DIR ]; then mkdir -p $DIRECTOR_PID_DIR; fi
-if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -d "$DIRECTOR_PID_DIR" ]; then
-  DIRECTOR_PID_FILE=$DIRECTOR_LOGS/director.pid
-fi
-if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -d "$DIRECTOR_PID_DIR" ]; then
-  SCHEDULER_PID_FILE=$DIRECTOR_LOGS/scheduler.pid
-fi
+# note:  the scheduler.pid would go into DIRECTOR_LOGS (not SCHEDULER_LOGS) if not in /var/run
+SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
+touch $SCHEDULER_PID_FILE >/dev/null 2>&1
+if [ $? == 1 ]; then SCHEDULER_PID_FILE=$DIRECTOR_LOGS/scheduler.pid; fi
 
 ###################################################################################################
 
