@@ -84,6 +84,11 @@ fi
 
 ###################################################################################################
 
+# stored master password
+if [ -z "$DIRECTOR_PASSWORD" ] && [ -f $DIRECTOR_CONFIGURATION/.director_password ]; then
+  export DIRECTOR_PASSWORD=$(cat $DIRECTOR_CONFIGURATION/.director_password)
+fi
+
 # all other variables with defaults
 DIRECTOR_APPLICATION_LOG_FILE=${DIRECTOR_APPLICATION_LOG_FILE:-$DIRECTOR_LOGS/director.log}
 touch "$DIRECTOR_APPLICATION_LOG_FILE"
@@ -101,11 +106,14 @@ DIRECTOR_SETUP_TASKS_AFTER_SLEEP=${DIRECTOR_SETUP_TASKS_AFTER_SLEEP:-"director-e
 # then we need a different place
 DIRECTOR_PID_FILE=${DIRECTOR_PID_FILE:-/var/run/director.pid}
 SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
-if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -w $(dirname "$DIRECTOR_PID_FILE") ]; then
-  DIRECTOR_PID_FILE=$DIRECTOR_REPOSITORY/director.pid
+
+DIRECTOR_PID_DIR=$(dirname $DIRECTOR_PID_FILE)
+if [ ! -d $DIRECTOR_PID_DIR ]; then mkdir -p $DIRECTOR_PID_DIR; fi
+if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -d "$DIRECTOR_PID_DIR" ]; then
+  DIRECTOR_PID_FILE=$DIRECTOR_LOGS/director.pid
 fi
-if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -w $(dirname "$SCHEDULER_PID_FILE") ]; then
-  SCHEDULER_PID_FILE=$DIRECTOR_REPOSITORY/scheduler.pid
+if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -d "$DIRECTOR_PID_DIR" ]; then
+  SCHEDULER_PID_FILE=$DIRECTOR_LOGS/scheduler.pid
 fi
 
 ###################################################################################################
@@ -298,7 +306,7 @@ director_uninstall() {
       return 1
     fi
     if [ "$1" == "--purge" ]; then
-      rm -rf $DIRECTOR_HOME
+      rm -rf $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_DATA $DIRECTOR_LOGS
     else
       rm -rf $DIRECTOR_HOME/bin $DIRECTOR_HOME/java $DIRECTOR_HOME/features
     fi

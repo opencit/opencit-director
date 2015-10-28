@@ -160,6 +160,7 @@ echo "export DIRECTOR_REPOSITORY=$DIRECTOR_REPOSITORY" >> $DIRECTOR_ENV/director
 echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
+if [ -n "$DIRECTOR_PID_FILE" ]; then echo "export DIRECTOR_PID_FILE=$DIRECTOR_PID_FILE" >> $DIRECTOR_ENV/director-layout; fi
 
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
@@ -347,8 +348,8 @@ fi
 # setup the director, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
-  if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_HOME/.director_password ]; then
-    director generate-password > $DIRECTOR_HOME/.director_password
+  if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
+    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
