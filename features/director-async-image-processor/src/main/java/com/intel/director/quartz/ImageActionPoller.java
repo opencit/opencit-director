@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
 import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.async.ImageActionExecutor;
@@ -28,7 +24,7 @@ import com.intel.mtwilson.director.db.exception.DbException;
  * 
  * @author Siddharth
  */
-public class ImageActionPoller implements Job {
+public class ImageActionPoller {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActionPoller.class);
 
@@ -39,8 +35,7 @@ public class ImageActionPoller implements Job {
 	/**
 	 * Fetches the entries from the MW_ACTION table for processing
 	 */
-	@Override
-	public void execute(JobExecutionContext jec) throws JobExecutionException {
+	public void execute() {
 
 		// Fetch the 10 records from DB
 		// Iterate over them
@@ -65,6 +60,7 @@ public class ImageActionPoller implements Job {
 		// iterate over list of image action objects
 		log.debug("incompleteImageActionObjects::"
 				+ incompleteImageActionObjects);
+
 		for (ImageActionObject imageActionObj : incompleteImageActionObjects) {
 			log.info("ImageAction in poller: " + imageActionObj.getId());
 			List<ImageActionActions> imageActions = imageActionObj.getAction();

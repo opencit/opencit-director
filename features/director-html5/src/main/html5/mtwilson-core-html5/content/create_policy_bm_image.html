@@ -48,7 +48,8 @@
 								</div>
 
 								<div class="form-group">
-									<label class="control-label col-md-4" for="hashtype">Hash Type :</label>
+									<label class="control-label col-md-4" for="hashtype">Hash
+										Type :</label>
 									<div class="col-md-4">
 										<label id="hashtype" style="margin-top: 8px;">SHA1</label>
 									</div>
@@ -57,7 +58,7 @@
 
 
 
-							<!--	<div class="form-group">
+								<!--	<div class="form-group">
 									<label class="control-label col-md-4"
 										for="launch_control_policy">Launch Control policy:</label>
 									<div id="launch_control_policy" class="col-md-8">
@@ -112,7 +113,27 @@
 								<div class="col-md-offset-6 col-md-1">
 									<button type="submit" class="btn btn-primary">Next</button>
 								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="error_modal" role="dialog">
+									<div class="modal-dialog">
 
+										<!-- Modal content-->
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">
+													<div id="error_modal_body">Error In Creating Policy</div>
+												</h4>
+											</div>
+
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default"
+													data-dismiss="modal" onclick="backToHostsPage()">Close</button>
+											</div>
+										</div>
+
+									</div>
+								</div>
 
 							</div>
 						</div>
@@ -125,7 +146,8 @@
 	</div>
 
 
-	<script src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/create_policy_bm_image.js"></script>
+	<script
+		src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/create_policy_bm_image.js"></script>
 
 </body>
 </html>

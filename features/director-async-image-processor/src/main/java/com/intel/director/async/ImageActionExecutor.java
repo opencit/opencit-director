@@ -8,7 +8,6 @@ package com.intel.director.async;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.async.task.ImageActionTask;
 
 /**
@@ -33,7 +32,6 @@ public class ImageActionExecutor {
     public static void submitTask(ImageActionTask actionTask) {
               
         executorService.execute(actionTask);
-        Log.debug("Completed submitting task "+actionTask);
     }
 
 }

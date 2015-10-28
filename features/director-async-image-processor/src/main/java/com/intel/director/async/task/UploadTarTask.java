@@ -74,10 +74,11 @@ public class UploadTarTask extends UploadTask {
 				imageName = imageInfo.getName();
 			}
 
-			String tarName = "tar_" + trustPolicy.getDisplay_name() + ".tar";
+			String tarName = "tar_" + trustPolicy.getDisplay_name();
 
 			imageProperties.put(Constants.NAME, tarName);
-			String tarLocation = imageLocation;
+			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
+			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;
 			log.debug("runUploadTarTask tarname::" + tarName
 					+ " ,tarLocation ::" + tarLocation);
 			content = new File(tarLocation + tarName);

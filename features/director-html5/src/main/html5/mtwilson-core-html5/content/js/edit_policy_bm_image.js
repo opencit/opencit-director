@@ -31,10 +31,11 @@ function EditBMImageViewModel(data) {
 
 	self.editBMImage = function(loginFormElement) {
 
-	self.editBMImageMetaData.launch_control_policy = "MeasureOnly";
-	self.editBMImageMetaData.encrypted = false;
-	self.editBMImageMetaData.display_name = $('#display_name_edit_bm').val();
-	current_display_name = $('#display_name_edit_bm').val();
+		self.editBMImageMetaData.launch_control_policy = "MeasureOnly";
+		self.editBMImageMetaData.encrypted = false;
+		self.editBMImageMetaData.display_name = $('#display_name_edit_bm')
+				.val();
+		current_display_name = $('#display_name_edit_bm').val();
 		$.ajax({
 			type : "POST",
 			url : endpoint + "trustpoliciesmetadata",
@@ -44,6 +45,13 @@ function EditBMImageViewModel(data) {
 			},
 			data : ko.toJSON(self.editBMImageMetaData),
 			success : function(data, status, xhr) {
+				if (data.status == "Error") {
+					$('#error_modal_body').text(data.details);
+					$("#error_modal").modal({
+						backdrop : "static"
+					});
+					return;
+				}
 
 				$.ajax({
 					type : "POST",
@@ -54,6 +62,13 @@ function EditBMImageViewModel(data) {
 					},
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
+						if (data.status == "Error") {
+							$('#error_modal_body').text(data.details);
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
+							return;
+						}
 						nextButtonImagesBM();
 					}
 				});
@@ -106,7 +121,7 @@ function addRadios(arr) {
 
 		temp = temp
 				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i] + '" >' + arr[i] + '</label>';
+				+ arr[i].key + '" >' + arr[i].value + '</label>';
 
 	}
 

@@ -109,11 +109,10 @@ public class EncryptImageTask extends ImageActionTask {
 
 			String encryptFileName = imageInfo.getName();
 			if(policy.getEncryption() != null){				
-				encryptFileName = encryptFileName + "-enc";
 				log.debug("Adding -enc since its encrypted : "+encryptFileName);
 			}
 			//TODO: Get actual key from KMS
-			String keyFromKMS = "password";//new KmsUtil().getKeyFromKMS(keyId);
+			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
 			log.debug("EncryptImageTask: Key from  KMS : "+keyFromKMS);
 			log.debug("Got the trust policy with encrypt URL : "
 					+ policy.getEncryption().getKey().getURL());

@@ -10,9 +10,8 @@ var image_policies = new Array();
  * imageFormats=data.image_formats;
  * 
  * var option=""; for (var i=0;i<imageFormats.length;i++){ option += '<option
- * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>';
- *  } $('#image_format').append(option);
- * 
+ * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>'; }
+ * $('#image_format').append(option);
  * 
  * 
  *  } });
@@ -50,7 +49,7 @@ function CreateImageViewModel() {
 				':checked');
 
 		self.createImageMetaData.display_name = $('#display_name').val();
-		current_display_name = $('#display_name').val();	
+		current_display_name = $('#display_name').val();
 		console.log(self.createImageMetaData.display_name);
 
 		$.ajax({
@@ -62,7 +61,13 @@ function CreateImageViewModel() {
 			},
 			data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
-
+				if (data.status == "Error") {
+					$('#error_modal_body').text(data.details);
+					$("#error_modal").modal({
+						backdrop : "static"
+					});
+					return;
+				}
 				$.ajax({
 					type : "POST",
 					url : endpoint + current_image_id + "/mount",
@@ -73,7 +78,13 @@ function CreateImageViewModel() {
 					},
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
-						// /alert("data"+data);
+						if (data.status == "Error") {
+							$('#error_modal_body').text(data.details);
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
+							return;
+						}
 						nextButton();
 					}
 				});
@@ -88,38 +99,38 @@ function CreateImageViewModel() {
 
 function fetchImageLaunchPolicies() {
 
-//	$.ajax({
-//		type : "GET",
-//		url : endpoint + "getdisplayname",
-//		success : function(data, status, xhr) {
-//			current_display_name = data;
-//
-//		}
-//	});
+	// $.ajax({
+	// type : "GET",
+	// url : endpoint + "getdisplayname",
+	// success : function(data, status, xhr) {
+	// current_display_name = data;
+	//
+	// }
+	// });
 
-//	$.ajax({
-//		type : "GET",
-//		url : endpoint + "image-launch-policies",
-//		contentType : "application/json",
-//		headers : {
-//			'Accept' : 'application/json'
-//		},
-//		dataType : "json",
-//		success : function(data, status, xhr) {
-//
-//			image_policies = data.image_launch_policies;
-//			addRadios(image_policies);
-//			mainViewModel.createImageViewModel = new CreateImageViewModel();
-//
-//			$("input[name=launch_control_policy][value='MeasureOnly']").attr(
-//					'checked', 'checked');
-//			// / $("input[name=asset_tag_policy][value='Trust
-//			// Only']").attr('checked', 'checked');
-//
-//			ko.applyBindings(mainViewModel, document
-//					.getElementById("create_policy_content_step_1"));
-//		}
-//	});
+	// $.ajax({
+	// type : "GET",
+	// url : endpoint + "image-launch-policies",
+	// contentType : "application/json",
+	// headers : {
+	// 'Accept' : 'application/json'
+	// },
+	// dataType : "json",
+	// success : function(data, status, xhr) {
+	//
+	// image_policies = data.image_launch_policies;
+	// addRadios(image_policies);
+	// mainViewModel.createImageViewModel = new CreateImageViewModel();
+	//
+	// $("input[name=launch_control_policy][value='MeasureOnly']").attr(
+	// 'checked', 'checked');
+	// // / $("input[name=asset_tag_policy][value='Trust
+	// // Only']").attr('checked', 'checked');
+	//
+	// ko.applyBindings(mainViewModel, document
+	// .getElementById("create_policy_content_step_1"));
+	// }
+	// });
 	$.ajax({
 		type : "GET",
 		url : endpoint + current_image_id + "/trustpolicymetadata",
@@ -131,7 +142,7 @@ function fetchImageLaunchPolicies() {
 			image_policies = data.image_launch_policies;
 			addRadios(image_policies);
 			mainViewModel.createImageViewModel = new CreateImageViewModel();
-			
+
 			$("input[name=launch_control_policy][value='MeasureOnly']").attr(
 					'checked', 'checked');
 			// / $("input[name=asset_tag_policy][value='Trust
@@ -151,7 +162,7 @@ function addRadios(arr) {
 
 		temp = temp
 				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i] + '">' + arr[i] + '</label>';
+				+ arr[i].key + '">' + arr[i].value + '</label>';
 
 	}
 

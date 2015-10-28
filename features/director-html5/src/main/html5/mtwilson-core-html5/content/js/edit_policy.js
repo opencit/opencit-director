@@ -1,4 +1,3 @@
-
 var imageFormats = new Array();
 var image_policies = new Array();
 
@@ -19,8 +18,8 @@ $.ajax({
 		 * imageFormats=data.image_formats;
 		 * 
 		 * var option=""; for (var i=0;i<imageFormats.length;i++){ option += '<option
-		 * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>';
-		 *  } $('#image_format').append(option);
+		 * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>'; }
+		 * $('#image_format').append(option);
 		 */
 
 	}
@@ -48,7 +47,7 @@ function EditImageViewModel(data) {
 		self.editImageMetaData.encrypted = $('input[name=isEncrypted]').is(
 				':checked')
 		self.editImageMetaData.display_name = $('#display_name').val();
-		current_display_name = $('#display_name').val(); 
+		current_display_name = $('#display_name').val();
 		$.ajax({
 			type : "POST",
 			url : endpoint + "trustpoliciesmetadata",
@@ -59,7 +58,13 @@ function EditImageViewModel(data) {
 			},
 			data : ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
-
+				if (data.status == "Error") {
+					$('#error_modal_body').text(data.details);
+					$("#error_modal").modal({
+						backdrop : "static"
+					});
+					return;
+				}
 				$.ajax({
 					type : "POST",
 					url : endpoint + current_image_id + "/mount",
@@ -70,7 +75,13 @@ function EditImageViewModel(data) {
 					},
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
-						// /alert("data"+data);
+						if (data.status == "Error") {
+							$('#error_modal_body').text(data.details);
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
+							return;
+						}
 						nextButton();
 					}
 				});
@@ -89,11 +100,10 @@ function showImageLaunchPolicies(policydata) {
 		url : endpoint + current_image_id + "/trustpolicymetadata",
 		dataType : "json",
 		success : function(data, status, xhr) {
-			
+
 			current_display_name = data.display_name;
 			console.log(current_display_name);
 			$("#display_name").val(current_display_name);
-
 
 			image_policies = data.image_launch_policies;
 			addRadios(image_policies);
@@ -125,7 +135,7 @@ function addRadios(arr) {
 
 		temp = temp
 				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i] + '" >' + arr[i] + '</label>';
+				+ arr[i].key + '" >' + arr[i].value + '</label>';
 
 	}
 

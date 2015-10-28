@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,16 +19,25 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+
+import com.intel.dcsg.cpg.xml.JAXB;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+
+import net.schmizz.sshj.SSHClient;
 
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
@@ -58,15 +68,24 @@ import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
+import com.intel.mtwilson.manifest.xml.FileMeasurementType;
+import com.intel.mtwilson.manifest.xml.Manifest;
+import com.intel.mtwilson.manifest.xml.MeasurementType;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
 import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 import com.intel.mtwilson.trustpolicy.xml.Director;
+import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Encryption;
+import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Image;
 import com.intel.mtwilson.trustpolicy.xml.LaunchControlPolicy;
+import com.intel.mtwilson.trustpolicy.xml.Measurement;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 
 /**
  * 
@@ -102,7 +121,7 @@ public class TdaasUtil {
 	}
 	
 	public static String getMountPath(String imageId){
-		return DirectorUtil.getMountPath(imageId) + File.separator + "mnt";
+		return DirectorUtil.getMountPath(imageId) + File.separator + "mount";
 	}
 
 	public static String patch(String src, String patch) throws IOException {
@@ -130,7 +149,7 @@ public class TdaasUtil {
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
 		File parent = new File(filePath).getParentFile();
-	if (parent == null || parent.getAbsolutePath().equals(DirectorUtil.getMountPath(imageId))) {
+	if (parent == null || parent.getAbsolutePath().equals(getMountPath(imageId))) {
 			return;
 		}
 
@@ -235,7 +254,7 @@ public class TdaasUtil {
 				.createUnmarshaller();
 
 		StringReader reader = new StringReader(policyxml);
-		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);		
 		return policy;
 
 	}
@@ -591,5 +610,89 @@ public class TdaasUtil {
 
 	}
 
+	public static boolean addSshKey(String ip, String username, String password)
+			throws IOException {
+		boolean flag = false;
+		if (checkSshConnection(ip, username, password)) {
+			log.debug("User home is {}", System.getProperty("user.home"));
+			if (!Files.exists(Paths.get(System.getProperty("user.home")
+					+ "/.ssh"))) {
+				ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
+			}
+			String addHostKey = "ssh-keyscan -Ht rsa " + ip
+					+ " >> ~/.ssh/known_hosts";
+			Result executeQuoted = ExecUtil.executeQuoted("/bin/bash", "-c",
+					addHostKey);
+			log.debug("addHostKey exit code is {}", executeQuoted.getExitCode());
+			flag = (executeQuoted.getExitCode() == 0);
+
+		}
+		return flag;
+	}
+
+	private static boolean checkSshConnection(String ipaddress,
+			String username, String password) throws IOException {
+		SSHClient ssh = new SSHClient();
+		
+		log.debug("Trying to connect IP :: " + ipaddress);
+		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
+		ssh.connect(ipaddress);
+		ssh.authPassword(username,password);
+		log.debug("Connected To Host :: " + ipaddress);
+		boolean authentication = ssh.isAuthenticated();
+		log.debug("Host Authentication is {}", authentication);
+		ssh.disconnect();
+		return authentication;
+	}
+
+	public static String getManifestForPolicy(String policyXml) throws JAXBException {
+		// TODO Auto-generated method stub
+		
+		Manifest manifest = new Manifest();
+		TrustPolicy trustpolicy = getPolicy(policyXml);
+		List<Measurement> measurements = trustpolicy.getWhitelist().getMeasurements();
+		manifest.setDigestAlg(trustpolicy.getWhitelist().getDigestAlg().value());
+        List<MeasurementType> manifestList = manifest.getManifest();
+
+        MeasurementType measurementType = null;
+		for(Measurement measurement : measurements)
+		{
+			;
+			if(measurement instanceof DirectoryMeasurement){
+				measurementType = new DirectoryMeasurementType();				
+			}else if (measurement instanceof FileMeasurement){
+				measurementType = new FileMeasurementType();
+			}
+			measurementType.setPath(measurement.getPath());	
+			manifestList.add(measurementType);
+		}
+        JAXB jaxb = new JAXB();
+        String result = null;
+        result = jaxb.write(manifest);        
+        log.debug("Manifest is: " + result);
+        return result;
+	}
+	
+	   public static String computeHash(MessageDigest md, File file) throws IOException {
+	        if (!file.exists()) {
+	            return null;
+	        }
+	        StringBuffer sb = null;
+	        byte[] dataBytes = new byte[1024];
+	        int nread = 0;
+	        FileInputStream fis = new FileInputStream(file);
+	        while ((nread = fis.read(dataBytes)) != -1) {
+	            md.update(dataBytes, 0, nread);
+	        };
+	        byte[] mdbytes = md.digest();
+
+	        //convert the byte to hex format
+	        sb = new StringBuffer();
+	        for (int i = 0; i < mdbytes.length; i++) {
+	            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+	        }
+	        fis.close();
+	        return sb.toString();
+	    }
 
 }
