@@ -5,6 +5,7 @@
         <artifactId>director-maven-java</artifactId>
         <groupId>com.intel.mtwilson.director</groupId>
         <version>0.1-SNAPSHOT</version>
+        <relativePath />
     </parent>
     <artifactId>director-kms</artifactId>
     <packaging>jar</packaging>
