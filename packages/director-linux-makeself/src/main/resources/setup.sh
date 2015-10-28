@@ -160,6 +160,7 @@ echo "export DIRECTOR_REPOSITORY=$DIRECTOR_REPOSITORY" >> $DIRECTOR_ENV/director
 echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
+if [ -n "$DIRECTOR_PID_FILE" ]; then echo "export DIRECTOR_PID_FILE=$DIRECTOR_PID_FILE" >> $DIRECTOR_ENV/director-layout; fi
 
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
@@ -357,26 +358,20 @@ register_startup_script $DIRECTOR_HOME/bin/director.sh director
 # setup the director, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
-  if [ -z "$DIRECTOR_PASSWORD" ]; then
-    echo_failure "Master password required in environment variable DIRECTOR_PASSWORD"
-    echo 'To generate a new master password, run the following command:
-
-  DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD
-
-The master password must be stored in a safe place, and it must
-be exported in the environment for all other director commands to work.
-
-LOSS OF MASTER PASSWORD WILL RESULT IN LOSS OF PROTECTED KEYS AND RELATED DATA
-
-After you set DIRECTOR_PASSWORD, run the following command to complete installation:
-
-  director setup
-
-'
-    exit 1
+  if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
+    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
+  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
+
+  #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
+  #director config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
+  #director config mtwilson.navbar.hometab keys >/dev/null
+
+  director config jetty.port ${JETTY_PORT:-80} >/dev/null
+  director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
+
   director setup
 fi
 

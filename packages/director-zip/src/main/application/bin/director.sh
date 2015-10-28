@@ -84,6 +84,11 @@ fi
 
 ###################################################################################################
 
+# stored master password
+if [ -z "$DIRECTOR_PASSWORD" ] && [ -f $DIRECTOR_CONFIGURATION/.director_password ]; then
+  export DIRECTOR_PASSWORD=$(cat $DIRECTOR_CONFIGURATION/.director_password)
+fi
+
 # all other variables with defaults
 DIRECTOR_APPLICATION_LOG_FILE=${DIRECTOR_APPLICATION_LOG_FILE:-$DIRECTOR_LOGS/director.log}
 touch "$DIRECTOR_APPLICATION_LOG_FILE"
@@ -100,13 +105,13 @@ DIRECTOR_SETUP_TASKS_AFTER_SLEEP=${DIRECTOR_SETUP_TASKS_AFTER_SLEEP:-"director-e
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place
 DIRECTOR_PID_FILE=${DIRECTOR_PID_FILE:-/var/run/director.pid}
+touch $DIRECTOR_PID_FILE >/dev/null 2>&1
+if [ $? == 1 ]; then DIRECTOR_PID_FILE=$DIRECTOR_LOGS/director.pid; fi
+
+# note:  the scheduler.pid would go into DIRECTOR_LOGS (not SCHEDULER_LOGS) if not in /var/run
 SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
-if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -w $(dirname "$DIRECTOR_PID_FILE") ]; then
-  DIRECTOR_PID_FILE=$DIRECTOR_REPOSITORY/director.pid
-fi
-if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -w $(dirname "$SCHEDULER_PID_FILE") ]; then
-  SCHEDULER_PID_FILE=$DIRECTOR_REPOSITORY/scheduler.pid
-fi
+touch $SCHEDULER_PID_FILE >/dev/null 2>&1
+if [ $? == 1 ]; then SCHEDULER_PID_FILE=$DIRECTOR_LOGS/scheduler.pid; fi
 
 ###################################################################################################
 
@@ -321,9 +326,17 @@ scheduler_stop() {
 director_uninstall() {
     remove_startup_script director
     rm -f /usr/local/bin/director
-    rm -rf /opt/director
-    groupdel director > /dev/null 2>&1
-    userdel director > /dev/null 2>&1
+    if [ -z "$DIRECTOR_HOME" ]; then
+      echo_failure "Cannot uninstall because DIRECTOR_HOME is not set"
+      return 1
+    fi
+    if [ "$1" == "--purge" ]; then
+      rm -rf $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_DATA $DIRECTOR_LOGS
+    else
+      rm -rf $DIRECTOR_HOME/bin $DIRECTOR_HOME/java $DIRECTOR_HOME/features
+    fi
+    groupdel $DIRECTOR_USERNAME > /dev/null 2>&1
+    userdel $DIRECTOR_USERNAME > /dev/null 2>&1
 }
 
 print_help() {
