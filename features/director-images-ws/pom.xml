@@ -1,189 +1,198 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.intel.mtwilson.director</groupId>
-	<artifactId>director-images-ws</artifactId>
-	<version>0.1-SNAPSHOT</version>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-images-ws</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
-	<description>Director request and response data structures</description>
-	<parent>
-		<groupId>com.intel.mtwilson.maven</groupId>
-		<artifactId>mtwilson-core-feature-zip</artifactId>
-		<version>3.0-SNAPSHOT</version>
-		<relativePath />
-	</parent>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-	</properties>
+    <description>Director request and response data structures</description>
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-core-feature-zip</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
 
-	<dependencies>
-		<!-- director projects begin -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>bintray</name>
+            <url>http://jcenter.bintray.com</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <!-- director projects begin -->
 
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-trust-policy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-images-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-persistence</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-image-store</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-attestation-server</artifactId>
-		</dependency>
-		<dependency>
-			<artifactId>mtwilson-util-xml</artifactId>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<version>0.2-SNAPSHOT</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-trust-policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-images-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-image-store</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <version>0.1-SNAPSHOT</version>
+            <artifactId>director-attestation-server</artifactId>
+        </dependency>
+        <dependency>
+            <artifactId>mtwilson-util-xml</artifactId>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
 
-		<!-- Director projects end -->
-		<!--MtWilson dependencies begin -->
-
-
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-trustpolicy-xml</artifactId>
-			<version>${mtwilson.version}</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-crypto</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-extensions</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-configuration</artifactId>
-			<version>${mtwilson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-configuration</artifactId>
-			<version>0.4-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-manifest-xml</artifactId>
-			<type>jar</type>
-			<version>${mtwilson.version}</version>
-		</dependency>
-
-		<!--MtWilson dependencies end -->
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>4.1.7.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.dozer</groupId>
-			<artifactId>dozer</artifactId>
-			<version>5.4.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.6.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.10.19</version>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.6.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-multipart</artifactId>
-			<version>2.21</version>
-		</dependency>
+        <!-- Director projects end -->
+        <!--MtWilson dependencies begin -->
 
 
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-trustpolicy-xml</artifactId>
+            <version>${mtwilson.version}</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>2.5</version>
-		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-extensions</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+            <version>${mtwilson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-configuration</artifactId>
+            <version>0.4-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-manifest-xml</artifactId>
+            <type>jar</type>
+            <version>${mtwilson.version}</version>
+        </dependency>
+
+        <!--MtWilson dependencies end -->
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.1.7.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.dozer</groupId>
+            <artifactId>dozer</artifactId>
+            <version>5.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>2.21</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.dnault</groupId>
-			<artifactId>xml-patch</artifactId>
-			<version>0.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>net.schmizz</groupId>
-			<artifactId>sshj</artifactId>
-			<version>0.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>mtwilson-vm-attestation-client-jaxrs2</artifactId>
-			<version>3.0-SNAPSHOT</version>
-		</dependency>
 
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-my</artifactId>
-			<version>${mtwilson.version}</version>
-		</dependency>
 
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-password-vault</artifactId>
-			<version>3.0-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.5</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dnault</groupId>
+            <artifactId>xml-patch</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.schmizz</groupId>
+            <artifactId>sshj</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vm-attestation-client-jaxrs2</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
+            <version>${mtwilson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-password-vault</artifactId>
+            <version>3.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 
 </project>
