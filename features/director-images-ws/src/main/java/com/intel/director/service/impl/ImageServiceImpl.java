@@ -75,6 +75,7 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
 import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
 import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
+import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
@@ -125,6 +126,7 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		log.info("inside mounting image in service");
+		log.info("***** Logged in user : " + ShiroUtil.subjectUsername());
 
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		ImageAttributes image;
@@ -445,6 +447,7 @@ public class ImageServiceImpl implements ImageService {
 		Set<String> patchFileRemoveSet = new HashSet<String>();
 		Set<String> patchDirAddSet = new HashSet<String>();
 		Collection<File> treeFiles = new ArrayList<>();
+
 		String mountPath = DirectorUtil
 				.getMountPath(searchFilesInImageRequest.id);
 		log.info("Browsing files for on image mounted at : " + mountPath);
@@ -461,8 +464,9 @@ public class ImageServiceImpl implements ImageService {
 		// the sub files of these directory need to be fetched.
 		// false - only first level files
 		Map<String, Boolean> directoryListContainingPolicyFiles = new HashMap<>();
+		Set<String> directoryListContainingRegex = new HashSet<String>();
 		init(trustPolicyElementsList, directoryListContainingPolicyFiles,
-				searchFilesInImageRequest);
+				directoryListContainingRegex, searchFilesInImageRequest);
 
 		// Fetch the files
 		if (searchFilesInImageRequest.recursive) {
@@ -503,13 +507,14 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 
-		String parent = searchFilesInImageRequest.getDir().replace("\\", "/");
+		String parent = searchFilesInImageRequest.getDir();
 		TreeNode root = new TreeNode(parent, parent);
 
 		Tree tree = new Tree(root, searchFilesInImageRequest.recursive,
 				searchFilesInImageRequest.files_for_policy);
 		root.parent = tree;
 		tree.mountPath = mountPath;
+		tree.directoryListContainingRegex = directoryListContainingRegex;
 
 		// In case of regex, find the list of files and add it here and then set
 		// it in
@@ -522,6 +527,7 @@ public class ImageServiceImpl implements ImageService {
 					patchFileAddSet.add(file.getAbsolutePath().replace(
 							mountPath, ""));
 				}
+
 				if (!trustPolicyElementsList.contains(file.getAbsolutePath()
 						.replace(mountPath, ""))) {
 					trustPolicyElementsList.add(file.getAbsolutePath().replace(
@@ -530,6 +536,7 @@ public class ImageServiceImpl implements ImageService {
 			}
 
 			patchDirAddSet.add(searchFilesInImageRequest.getDir());
+			root.rootDirWithRegex = parent;
 		}
 
 		// Select all on directory
@@ -802,16 +809,11 @@ public class ImageServiceImpl implements ImageService {
 						.register(
 								TlsPolicyCreator.class,
 								com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
-				Properties p = My.configuration().getClientProperties();
+				Properties p = DirectorUtil.getPropertiesFile(Constants.MTWILSON_PROP_FILE);//My.configuration().getClientProperties();
 				TrustPolicySignature client = new TrustPolicySignature(p);
 				JAXB jaxb = new JAXB();
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy signedPolicy = client
-						.signTrustPolicy(jaxb
-								.read(policyXml,
-										com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class));
-				String signedPolicyXml = jaxb.write(signedPolicy);
+				String signedPolicyXml = client.signTrustPolicy(policyXml);
 				log.info("****** SIGN : " + signedPolicyXml);
-				log.debug("Signed Policy Is: " + jaxb.write(signedPolicy));
 
 				// /SignWithMtWilson mtw = new SignWithMtWilson();
 				// ///mtw.signManifest(image_id, policyXml);
@@ -1167,6 +1169,7 @@ public class ImageServiceImpl implements ImageService {
 
 	private void init(List<String> trustPolicyElementsList,
 			Map<String, Boolean> directoryListContainingPolicyFiles,
+			Set<String> directoryListContainingRegex,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
 		/*
 		 * if (!searchFilesInImageRequest.init) { trustPolicyElementsList =
@@ -1204,6 +1207,10 @@ public class ImageServiceImpl implements ImageService {
 										directoryListContainingPolicyFiles,
 										true);
 							}
+							if(measurement instanceof DirectoryMeasurement){
+								directoryListContainingRegex.add(measurement.getPath());
+							}
+
 						}
 					}
 				}

@@ -1,13 +1,21 @@
 package com.intel.mtwilson.director.dbservice;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.apache.commons.configuration.BaseConfiguration;
+
+import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
@@ -27,6 +35,7 @@ import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
 import com.intel.director.api.ui.UserFilter;
 import com.intel.director.api.ui.UserOrderBy;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.director.dao.ImageActionDao;
 import com.intel.mtwilson.director.dao.ImageDao;
 import com.intel.mtwilson.director.dao.ImageStoreSettingsDao;
@@ -45,6 +54,7 @@ import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
+import com.intel.director.common.Constants;
 import com.intel.director.common.SettingFileProperties;
 
 public class DbServiceImpl implements IPersistService {
@@ -63,8 +73,36 @@ public class DbServiceImpl implements IPersistService {
 	SettingFileProperties settingFileProperties;
 	
 	public DbServiceImpl() {
+		String filePath=Folders.configuration() + File.separator + "director.properties";
+		log.info("Inside DbServiceImpl filePath::"+filePath);
+		File configfile = new File(filePath);
+		org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
+		Configuration configuration = new CommonsConfiguration(apacheConfig);
+		FileReader reader=null;
+		try {
+			reader = new FileReader(configfile);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			log.error("Unable to find director properties",e);
+		}
+
+		Properties prop = new Properties();
+
+		try {
+			prop.load(reader);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error("Unable to read director properties",e);
+		}
+		
+		Properties jpaProperties=new Properties();
+		jpaProperties.put("javax.persistence.jdbc.driver", prop.get(Constants.DIRECTOR_DB_DRIVER));
+		jpaProperties.put("javax.persistence.jdbc.url",prop.get(Constants.DIRECTOR_DB_URL) );
+		jpaProperties.put("javax.persistence.jdbc.user" ,prop.get(Constants.DIRECTOR_DB_USERNAME));
+		jpaProperties.put("javax.persistence.jdbc.password", prop.get(Constants.DIRECTOR_DB_PASSWORD));
 		EntityManagerFactory emf = Persistence
-				.createEntityManagerFactory("DirectorDataPU");
+				.createEntityManagerFactory("DirectorDataPU",jpaProperties);
+		
 		imgDao = new ImageDao(emf);
 		userDao = new UserDao(emf);
 		policyDao = new TrustPolicyDao(emf);

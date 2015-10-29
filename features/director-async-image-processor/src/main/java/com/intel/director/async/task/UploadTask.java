@@ -20,6 +20,7 @@ import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.imagestore.ImageStoreManager;
+import com.intel.mtwilson.Folders;
 
 /**
  * Superclass for all upload tasks
@@ -147,7 +148,7 @@ public abstract class UploadTask extends ImageActionTask {
 			 */
 
 			File configfile = new File(
-					"/opt/director/configuration/director.properties");
+					Folders.configuration() + File.separator + "director.properties");
 			org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
 			Configuration configuration = new CommonsConfiguration(apacheConfig);
 			FileReader reader = new FileReader(configfile);

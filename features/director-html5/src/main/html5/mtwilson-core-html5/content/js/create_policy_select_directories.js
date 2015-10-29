@@ -25,8 +25,7 @@ function SelectDirectoriesViewModel() {
 			},
 			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
-				if(data == "ERROR")
-				{
+				if (data == "ERROR") {
 					current_image_action_id = "";
 					$.ajax({
 						type : "POST",
@@ -37,14 +36,14 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-							$("#error_modal").modal({backdrop: "static"});
+							$("#error_modal").modal({
+								backdrop : "static"
+							});
 							console.log("Unmount successfully")
 
 						}
 					});
-				}
-				else
-				{
+				} else {
 					current_image_action_id = data;
 					$.ajax({
 						type : "POST",
@@ -55,7 +54,7 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-		
+
 							console.log("Unmount successfully")
 							editPolicyDraft();
 							nextButton();
@@ -89,7 +88,7 @@ function ApplyRegExViewModel() {
 		var include = loginFormElement.create_policy_regex_include.value;
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
-		console.log("Exclude ::: "+exclude);
+		console.log("Exclude ::: " + exclude);
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
@@ -118,10 +117,15 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		console.log("Is checked : " + node.attr('checked'));
+		$("img[id='toggle_" + sel_dir + "']")
+				.attr(
+						"src",
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
+
 		node.attr('checked', true);
-		(node.parent()).fileTree(config, function(file, checkedStatus) {
-			editPatch(file, checkedStatus);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
 		});
 	}
 
@@ -229,8 +233,8 @@ $(document)
 								multiFolder : true,
 								init : true,
 								loadMessage : "Loading..."
-							}, function(file, checkedStatus) {
-								editPatch(file, checkedStatus);
+							}, function(file, checkedStatus, rootRegexDir) {
+								editPatch(file, checkedStatus, rootRegexDir);
 							});
 
 					mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
@@ -244,25 +248,35 @@ $(document)
 
 /* Patches processing */
 
-function editPatch(file, checkedStatus) {
+function editPatch(file, checkedStatus, rootRegexDir) {
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
+	var addPath = "'//*[local-name()=\"Whitelist\"]'";
+	var removePath = "'//*[local-name()=\"Whitelist\"]";
+	var pos = "prepend";
+
+	if (rootRegexDir != "") {
+		if (checkedStatus == true) {
+			pos = "after";
+		}
+		addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+				+ rootRegexDir + "\"]'";
+	}
 
 	if (checkedStatus == true) {
-		addRemoveXml = "<add pos=\"prepend\" sel='//*[local-name()=\"Whitelist\"]'><File Path=\""
-				+ file + "\"/></add>";
+
+		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
+				+ "><File Path=\"" + file + "\"/></add>";
 	} else {
-		addRemoveXml = "<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
-				+ file + "\"]'/>";
+		addRemoveXml = "<remove sel=" + removePath
+				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
 	patches.push(addRemoveXml);
 }
 
-function backToFirstPage()
-{
-	if(current_image_id != "" && current_image_id !=null)
-	{
+function backToFirstPage() {
+	if (current_image_id != "" && current_image_id != null) {
 		$.ajax({
 			type : "POST",
 			url : endpoint + current_image_id + "/unmount",

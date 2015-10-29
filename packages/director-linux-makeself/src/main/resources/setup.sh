@@ -217,44 +217,35 @@ prompt_with_default DIRECTOR_ID "Trust Director ID:" "$DIRECTOR_ID"
 update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
 #prompt_with_default VM_WHITELIST_HASH_TYPE "Specify the hash type algorithm to use during VM whitelist:" "$VM_WHITELIST_HASH_TYPE"
 update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
-prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
-update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
-prompt_with_default IMAGE_STORE_SERVER "Image Store Server:" "$IMAGE_STORE_SERVER"
-update_property_in_file "image.store.server" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_SERVER"
-prompt_with_default IMAGE_STORE_USERNAME "Image Store Username:" "$IMAGE_STORE_USERNAME"
-update_property_in_file "image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-prompt_with_default_password IMAGE_STORE_PASSWORD "Image Store Password:" "$IMAGE_STORE_PASSWORD"
-update_property_in_file "image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 
 
-#------------------
-prompt_with_default GLANCE_IMAGE_STORE_IP "Image Store host:" "$GLANCE_IMAGE_STORE_IP"
+#------------------ Glance properties
+
 update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-
-prompt_with_default GLANCE_IMAGE_STORE_PORT "Image Store Port:" "$GLANCE_IMAGE_STORE_PORT"
 update_property_in_file "glance.port" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
-
-update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-
-
-prompt_with_default GLANCE_TENANT_NAME "Image Store Tenant:" "$GLANCE_TENANT_NAME"
-update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_TENANT_NAME"
+update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
+update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
+update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 
 
 #-------------------
 
 
-#required glance.properties
-update_property_in_file "glance.ip" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-update_property_in_file "glance.port" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
-update_property_in_file "glance.image.store.username" "$GLANCE_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$GLANCE_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-update_property_in_file "glance.tenant.name" "$GLANCE_PROPERTIES_FILE" "$GLANCE_TENANT_NAME"
+#required database properties
+prompt_with_default DIRECTOR_DB_URL "Drector db Url:" "$DIRECTOR_DB_URL"
+update_property_in_file "director.db.url" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_URL"
+prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
+update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
+prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
+update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
+prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
+update_property_in_file "director.db.driver" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_DRIVER"
+
+
+
 
 # modifying after mtwilson api client built
 prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
@@ -266,13 +257,12 @@ update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILS
 prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
 update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
-# For Aakash
 
-prompt_with_default MTWILSON_API_URL "Mtwilson API URL:" "$MTWILSON_API_URL"
+
+
 update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-prompt_with_default_password MTWILSON_TLS "Mtwilson TLS SHA1:" "$MTWILSON_TLS"
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
@@ -313,10 +303,10 @@ else
 fi
 
 # make sure unzip and authbind are installed
-DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
-DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx " #vdfuse"
-DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
-DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
+DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2" #vdfuse"
+DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
+DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
 auto_install "Installer requirements" "DIRECTOR"
 if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 

@@ -15,14 +15,5 @@
 	 <class>com.intel.mtwilson.director.data.MwSshKey</class>
 	 <class>com.intel.mtwilson.director.data.MwSshPassword</class> 
 	 <class>com.intel.mtwilson.director.data.MwImageStoreSettings</class>       
-    <properties>
-      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
-      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://10.35.35.58:5432/DirectorDataPU" />
-      <property name="javax.persistence.jdbc.user" value="postgres" />
-      <property name="javax.persistence.jdbc.password" value="root" />
-      <property name="eclipselink.logging.level" value="FINEST"/>
-      <property name="eclipselink.ddl-generation" value="create-tables"/>
-      <property name="eclipselink.ddl-generation.output-mode" value="both"/>
-    </properties>
   </persistence-unit>
 </persistence>

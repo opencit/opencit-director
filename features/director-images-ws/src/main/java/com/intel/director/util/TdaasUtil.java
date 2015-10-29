@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -27,8 +28,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import com.intel.dcsg.cpg.xml.JAXB;
 
@@ -41,8 +46,17 @@ import net.schmizz.sshj.SSHClient;
 
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
+import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dnault.xmlpatch.Patcher;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.Md5Digest;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.ImageAttributes;
@@ -119,8 +133,8 @@ public class TdaasUtil {
 				.map(imageAttributes, TrustDirectorImageUploadResponse.class);
 		return directorImageUploadResponse;
 	}
-	
-	public static String getMountPath(String imageId){
+
+	public static String getMountPath(String imageId) {
 		return DirectorUtil.getMountPath(imageId) + File.separator + "mount";
 	}
 
@@ -145,11 +159,11 @@ public class TdaasUtil {
 		return patched;
 	}
 
-	
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
 		File parent = new File(filePath).getParentFile();
-	if (parent == null || parent.getAbsolutePath().equals(getMountPath(imageId))) {
+		if (parent == null
+				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
 			return;
 		}
 
@@ -174,7 +188,8 @@ public class TdaasUtil {
 			throws JAXBException {
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = new com.intel.mtwilson.trustpolicy.xml.TrustPolicy();
 		Director director = new Director();
-		director.setCustomerId(DirectorUtil.getDirectorId() == null?"TESTDID":DirectorUtil.getDirectorId());
+		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
+				: DirectorUtil.getDirectorId());
 		Image image = new Image();
 		image.setImageId(createTrustPolicyMetaDataRequest.getImageid());
 		Whitelist whitelist = new Whitelist();
@@ -183,9 +198,10 @@ public class TdaasUtil {
 						.getLaunch_control_policy()));
 		policy.setDirector(director);
 		policy.setImage(image);
-		if(createTrustPolicyMetaDataRequest.deployment_type.equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)){
+		if (createTrustPolicyMetaDataRequest.deployment_type
+				.equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
 			whitelist.setDigestAlg(DigestAlgorithm.SHA_1);
-		}else{
+		} else {
 			whitelist.setDigestAlg(DigestAlgorithm.SHA_256);
 		}
 		policy.setWhitelist(whitelist);
@@ -254,14 +270,13 @@ public class TdaasUtil {
 				.createUnmarshaller();
 
 		StringReader reader = new StringReader(policyxml);
-		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);		
+		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
 		return policy;
 
 	}
-	
 
-
-	public static String convertTrustPolicyToString(TrustPolicy policy) throws JAXBException {
+	public static String convertTrustPolicyToString(TrustPolicy policy)
+			throws JAXBException {
 		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
 		Marshaller marshaller = (Marshaller) jaxbContext.createMarshaller();
 		StringWriter writer = new StringWriter();
@@ -399,8 +414,6 @@ public class TdaasUtil {
 
 	}
 
-
-
 	public static PolicyToMountedImageResponse mapImageAttributesToPolicyToMountedImageResponse(
 			ImageAttributes image) {
 		Mapper mapper = new DozerBeanMapper();
@@ -416,15 +429,20 @@ public class TdaasUtil {
 				PolicyToHostResponse.class);
 		return policyToHostResponse;
 	}
-	public SshSettingInfo fromSshSettingRequest(SshSettingRequest sshSettingRequest) {
+
+	public SshSettingInfo fromSshSettingRequest(
+			SshSettingRequest sshSettingRequest) {
 		SshSettingInfo sshSettingInfo = new SshSettingInfo();
 		sshSettingInfo.setId(sshSettingRequest.getId());
 		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
 		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
 		sshSettingInfo.setName(sshSettingRequest.getName());
-		sshSettingInfo.setPassword(fromPassword(sshSettingRequest.getPassword()));
+		sshSettingInfo
+				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
-		sshSettingInfo.setImage_id(toImage(sshSettingRequest.getImage_id(),sshSettingRequest.getIpAddress(),sshSettingRequest.getUsername()));
+		sshSettingInfo.setImage_id(toImage(sshSettingRequest.getImage_id(),
+				sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername()));
 		return sshSettingInfo;
 
 	}
@@ -448,30 +466,32 @@ public class TdaasUtil {
 		img.setStatus(null);
 		return img;
 	}
-	
-	public TrustPolicyDraftRequest toTrustPolicyDraft(TrustPolicyDraft obj){
-		TrustPolicyDraftRequest trustPolicyDraftRequest=new TrustPolicyDraftRequest();
+
+	public TrustPolicyDraftRequest toTrustPolicyDraft(TrustPolicyDraft obj) {
+		TrustPolicyDraftRequest trustPolicyDraftRequest = new TrustPolicyDraftRequest();
 		trustPolicyDraftRequest.setId(obj.getId());
-		trustPolicyDraftRequest.setImage_format(obj.getImgAttributes().getImage_format());
+		trustPolicyDraftRequest.setImage_format(obj.getImgAttributes()
+				.getImage_format());
 		trustPolicyDraftRequest.setImage_name(obj.getName());
 		trustPolicyDraftRequest.setName(obj.getName());
-		trustPolicyDraftRequest.setCreated_by_user_id(obj.getCreated_by_user_id());
+		trustPolicyDraftRequest.setCreated_by_user_id(obj
+				.getCreated_by_user_id());
 		trustPolicyDraftRequest.setCreated_date(obj.getCreated_date());
-		trustPolicyDraftRequest.setEdited_by_user_id(obj.getEdited_by_user_id());
+		trustPolicyDraftRequest
+				.setEdited_by_user_id(obj.getEdited_by_user_id());
 		trustPolicyDraftRequest.setEdited_date(obj.getEdited_date());
 		return trustPolicyDraftRequest;
 	}
-	
-	public ImageUploadRequest toImageUpload(ImageStoreUploadTransferObject obj){
-		ImageUploadRequest imageUploadRequest=new ImageUploadRequest();
+
+	public ImageUploadRequest toImageUpload(ImageStoreUploadTransferObject obj) {
+		ImageUploadRequest imageUploadRequest = new ImageUploadRequest();
 		DateFormat df = new SimpleDateFormat();
 		imageUploadRequest.setDate(df.format(obj.getDate()));
 		imageUploadRequest.setImage_format(obj.getImg().getImage_format());
 		imageUploadRequest.setName(obj.getImg().getName());
-		
+
 		return imageUploadRequest;
 	}
-	
 
 	public static String computeVMMountPath(String imageName, String imagePath)
 			throws NoSuchAlgorithmException {
@@ -491,7 +511,6 @@ public class TdaasUtil {
 		return sb.toString();
 	}
 
-
 	public static MountHostResponse mapHostAttributesToMountHostResponse(
 			SshSettingInfo sshSettingInfo) {
 		Mapper mapper = new DozerBeanMapper();
@@ -500,7 +519,6 @@ public class TdaasUtil {
 		return mountHostResponse;
 	}
 
-
 	public static UnmountHostResponse mapHostAttributesToUnMountHostResponse(
 			SshSettingInfo sshSettingInfo) {
 		Mapper mapper = new DozerBeanMapper();
@@ -508,8 +526,6 @@ public class TdaasUtil {
 				UnmountHostResponse.class);
 		return unmountHostResponse;
 	}
-
-
 
 	// save file to new location
 	public static void writeImageToFile(InputStream uploadedInputStream,
@@ -532,7 +548,6 @@ public class TdaasUtil {
 		imageAttributes.image_size = new Long(
 				new File(imageAttributes.location).length()).intValue();
 	}
-
 
 	public static void getParentDirectory(String filePath, String root,
 			Map<String, Boolean> parentsList, boolean recursive) {
@@ -558,28 +573,15 @@ public class TdaasUtil {
 
 	}
 
+	public ImagesReadyToDeployResponse toImageReadyToDeploy(ImageInfo img)
+			throws DirectorException, DbException {
+		ImageServiceImpl imageServiceImpl = new ImageServiceImpl();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-	public ImagesReadyToDeployResponse toImageReadyToDeploy(ImageInfo img) throws DirectorException, DbException{
-		ImageServiceImpl imageServiceImpl=new ImageServiceImpl();
-		
-		ImagesReadyToDeployResponse imagesReadyToDeploy=new ImagesReadyToDeployResponse();
+		ImagesReadyToDeployResponse imagesReadyToDeploy = new ImagesReadyToDeployResponse();
 		imagesReadyToDeploy.setCreated_by_user_id(img.getCreated_by_user_id());
 		imagesReadyToDeploy.setCreated_date(img.getCreated_date());
-		imagesReadyToDeploy.setDisplay_name(imageServiceImpl.getDisplayNameForImage(img.getId()));
+		imagesReadyToDeploy.setDisplay_name(imageServiceImpl
+				.getDisplayNameForImage(img.getId()));
 		imagesReadyToDeploy.setEdited_by_user_id(img.getEdited_by_user_id());
 		imagesReadyToDeploy.setEdited_date(img.getEdited_date());
 		imagesReadyToDeploy.setImage_format(img.getImage_format());
@@ -587,23 +589,23 @@ public class TdaasUtil {
 		imagesReadyToDeploy.setUser(img.getCreated_by_user_id());
 		return imagesReadyToDeploy;
 	}
-	
+
 	public static String getKeyIdFromUrl(String url) {
-		log.debug("URL :: "+url);
+		log.debug("URL :: " + url);
 		String[] split = url.split("/");
 		int index = 0;
 		for (int i = 0; i < split.length; i++) {
 			if (split[i].equals("keys")) {
-				log.debug("Keys index :: "+i);
+				log.debug("Keys index :: " + i);
 				index = ++i;
 				break;
 			}
 		}
-		
-		log.debug("Index :: "+index);
+
+		log.debug("Index :: " + index);
 
 		if (index != 0) {
-			return split[index];			
+			return split[index];
 		} else {
 			return null;
 		}
@@ -633,11 +635,11 @@ public class TdaasUtil {
 	private static boolean checkSshConnection(String ipaddress,
 			String username, String password) throws IOException {
 		SSHClient ssh = new SSHClient();
-		
+
 		log.debug("Trying to connect IP :: " + ipaddress);
 		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
 		ssh.connect(ipaddress);
-		ssh.authPassword(username,password);
+		ssh.authPassword(username, password);
 		log.debug("Connected To Host :: " + ipaddress);
 		boolean authentication = ssh.isAuthenticated();
 		log.debug("Host Authentication is {}", authentication);
@@ -645,54 +647,57 @@ public class TdaasUtil {
 		return authentication;
 	}
 
-	public static String getManifestForPolicy(String policyXml) throws JAXBException {
+	public static String getManifestForPolicy(String policyXml)
+			throws JAXBException {
 		// TODO Auto-generated method stub
-		
+
 		Manifest manifest = new Manifest();
 		TrustPolicy trustpolicy = getPolicy(policyXml);
-		List<Measurement> measurements = trustpolicy.getWhitelist().getMeasurements();
+		List<Measurement> measurements = trustpolicy.getWhitelist()
+				.getMeasurements();
 		manifest.setDigestAlg(trustpolicy.getWhitelist().getDigestAlg().value());
-        List<MeasurementType> manifestList = manifest.getManifest();
+		List<MeasurementType> manifestList = manifest.getManifest();
 
-        MeasurementType measurementType = null;
-		for(Measurement measurement : measurements)
-		{
+		MeasurementType measurementType = null;
+		for (Measurement measurement : measurements) {
 			;
-			if(measurement instanceof DirectoryMeasurement){
-				measurementType = new DirectoryMeasurementType();				
-			}else if (measurement instanceof FileMeasurement){
+			if (measurement instanceof DirectoryMeasurement) {
+				measurementType = new DirectoryMeasurementType();
+			} else if (measurement instanceof FileMeasurement) {
 				measurementType = new FileMeasurementType();
 			}
-			measurementType.setPath(measurement.getPath());	
+			measurementType.setPath(measurement.getPath());
 			manifestList.add(measurementType);
 		}
-        JAXB jaxb = new JAXB();
-        String result = null;
-        result = jaxb.write(manifest);        
-        log.debug("Manifest is: " + result);
-        return result;
+		JAXB jaxb = new JAXB();
+		String result = null;
+		result = jaxb.write(manifest);
+		log.debug("Manifest is: " + result);
+		return result;
 	}
-	
-	   public static String computeHash(MessageDigest md, File file) throws IOException {
-	        if (!file.exists()) {
-	            return null;
-	        }
-	        StringBuffer sb = null;
-	        byte[] dataBytes = new byte[1024];
-	        int nread = 0;
-	        FileInputStream fis = new FileInputStream(file);
-	        while ((nread = fis.read(dataBytes)) != -1) {
-	            md.update(dataBytes, 0, nread);
-	        };
-	        byte[] mdbytes = md.digest();
 
-	        //convert the byte to hex format
-	        sb = new StringBuffer();
-	        for (int i = 0; i < mdbytes.length; i++) {
-	            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-	        }
-	        fis.close();
-	        return sb.toString();
-	    }
+	public static String computeHash(MessageDigest md, File file)
+			throws IOException {
+		if (!file.exists()) {
+			return null;
+		}
+		StringBuffer sb = null;
+		byte[] dataBytes = new byte[1024];
+		int nread = 0;
+		FileInputStream fis = new FileInputStream(file);
+		while ((nread = fis.read(dataBytes)) != -1) {
+			md.update(dataBytes, 0, nread);
+		}
+		;
+		byte[] mdbytes = md.digest();
 
+		// convert the byte to hex format
+		sb = new StringBuffer();
+		for (int i = 0; i < mdbytes.length; i++) {
+			sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16)
+					.substring(1));
+		}
+		fis.close();
+		return sb.toString();
+	}
 }

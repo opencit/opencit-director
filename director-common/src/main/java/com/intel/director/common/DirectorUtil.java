@@ -8,18 +8,31 @@ package com.intel.director.common;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.exec.ExecuteException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class DirectorUtil {
@@ -150,4 +163,70 @@ public class DirectorUtil {
 		Result result = ExecUtil.execute(command, args);
 		return result.getExitCode();
 	}
+	
+	
+	public static Properties getPropertiesFile(String path) {
+		Properties prop = new Properties();
+		InputStream input = null;
+		try {
+			input = new FileInputStream(Constants.configurationPath + path);
+			File file = new File(Constants.configurationPath + path);
+			if(!file.exists())
+			{
+				file.createNewFile();
+			}
+			prop.load(input);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return prop;
+	}
+	
+	public static String getProperties(String path) {
+		// TODO Auto-generated method stub
+		Properties prop = getPropertiesFile(path);
+		Map<String, String> map = new HashMap<String, String>();
+		for (String key : prop.stringPropertyNames()) {
+			String value = prop.getProperty(key);
+			map.put(key.replace(".", "_"), value);
+		}
+		JSONObject json = new JSONObject(map);
+		return json.toString();
+	}
+
+	public static String editProperties(String path, String data)
+			throws JsonMappingException, JsonParseException {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new Gson().fromJson(data, new TypeToken<HashMap<String, Object>>() {}.getType());
+		try {
+			File file = new File(Constants.configurationPath + path);
+			if(!file.exists())
+			{
+				file.createNewFile();
+			}
+			writeToFile(map,Constants.configurationPath + path);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return data;
+	}
+	
+	  public static  void writeToFile(Map map,String fileName) throws Exception{  
+	        Properties properties = new Properties();  
+	        Set set = map.keySet();  
+	        Iterator itr = set.iterator();  
+	        while(itr.hasNext()){  
+	            String key = (String)itr.next();  
+	            String value = (String) map.get(key);  
+	            properties.setProperty(key.replace('_', '.'), value);  
+	        }  
+	        properties.store(new FileOutputStream(fileName),fileName);  
+	  
+	  
+	    } 
+	  
+	  
+
 }

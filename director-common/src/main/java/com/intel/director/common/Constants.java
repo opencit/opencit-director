@@ -17,6 +17,7 @@ public class Constants {
 	public static final String uploadPath = "director.upload.path";
 	public static final String defaultUploadPath = "/mnt/images/";
 	public static final String vmImagesPath = "/opt/kms/images/vm/";
+	public static final String configurationPath = "/opt/director/configuration/";
 
 	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
 	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
@@ -118,12 +119,21 @@ public class Constants {
 	public static final String IN_PROGRESS = "In Progress";
 	public static final String ERROR = "Error";
 
+
 	public static final String DEPLOYMENT_TYPE_VM = "VM";
 	public static final String DEPLOYMENT_TYPE_BAREMETAL = "BareMetal";
-
+	public static final String INCLUDE_LIST_VM="vm.include";
+	public static final String INCLUDE_LIST_BM="bm.include";
+	public static final String INCLUDE_LIST_BM_LIVE="bmlive.include";
 	public static final String MTWILSON_PROP_FILE = "mtwilson.properties";
 	public static final String KMS_PROP_FILE = "kms.properties";
 	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
+
+	
+	public static final String DIRECTOR_DB_URL="director.db.url";
+	public static final String DIRECTOR_DB_USERNAME="director.db.username";
+	public static final String DIRECTOR_DB_PASSWORD="director.db.password";
+	public static final String DIRECTOR_DB_DRIVER="director.db.driver";
 	
 
 }
