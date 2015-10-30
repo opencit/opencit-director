@@ -7,7 +7,6 @@ import javax.xml.bind.JAXBException;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
-import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
@@ -104,5 +103,8 @@ public interface ImageService {
 	public String getFilepathForImage(String imageId, boolean isModified) throws DbException;
 
 	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
+	
+	public CreateTrustPolicyMetaDataResponse importPolicyTemplate(String imageId) throws DirectorException;
 
 }
+

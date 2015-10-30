@@ -13,8 +13,6 @@ function SelectDirectoriesViewModel() {
 
 	self.selectDirectoriesSubmit = function(loginFormElement) {
 
-		// //Code
-
 		$.ajax({
 			type : "POST",
 			url : endpoint + current_image_id + "/createpolicy",
@@ -25,7 +23,8 @@ function SelectDirectoriesViewModel() {
 			},
 			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
-				if (data == "ERROR") {
+				if(data.toUpperCase() == "ERROR")
+				{
 					current_image_action_id = "";
 					$.ajax({
 						type : "POST",
@@ -36,14 +35,15 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-							$("#error_modal").modal({
-								backdrop : "static"
-							});
-							console.log("Unmount successfully")
+							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+								$('body').removeClass("modal-open");
+							console.log("ERROR and Unmount successfully")
 
 						}
 					});
-				} else {
+				}
+				else
+				{
 					current_image_action_id = data;
 					$.ajax({
 						type : "POST",
@@ -54,7 +54,7 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-
+		
 							console.log("Unmount successfully")
 							editPolicyDraft();
 							nextButton();
@@ -117,6 +117,7 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
+
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
@@ -275,8 +276,10 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 	patches.push(addRemoveXml);
 }
 
-function backToFirstPage() {
-	if (current_image_id != "" && current_image_id != null) {
+function backToFirstPage()
+{
+	if(current_image_id != "" && current_image_id !=null)
+	{
 		$.ajax({
 			type : "POST",
 			url : endpoint + current_image_id + "/unmount",

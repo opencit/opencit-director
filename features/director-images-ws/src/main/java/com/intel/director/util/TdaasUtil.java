@@ -10,12 +10,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -26,16 +24,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import com.intel.dcsg.cpg.xml.JAXB;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -46,18 +37,10 @@ import net.schmizz.sshj.SSHClient;
 
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
-import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dnault.xmlpatch.Patcher;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.dcsg.cpg.crypto.Md5Digest;
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -138,8 +121,7 @@ public class TdaasUtil {
 		return DirectorUtil.getMountPath(imageId) + File.separator + "mount";
 	}
 
-	public static String patch(String src, String patch) throws IOException {
-		String patched = "";
+	public static String patch(String src, String patch) {
 		try {
 			InputStream inputStream = new ByteArrayInputStream(
 					src.getBytes(StandardCharsets.UTF_8));
@@ -149,14 +131,15 @@ public class TdaasUtil {
 			OutputStream outputStream = new ByteArrayOutputStream();
 
 			Patcher.patch(inputStream, patchStream, outputStream);
-			patched = ((ByteArrayOutputStream) outputStream).toString("UTF-8");
-
-		} catch (FileNotFoundException e) {
+			String patched = ((ByteArrayOutputStream) outputStream)
+					.toString("UTF-8");
+			return patched;
+		} catch (IOException e) {
 			System.err.println("ERROR: Could not access file: "
 					+ e.getMessage());
 			System.exit(1);
 		}
-		return patched;
+		return "";
 	}
 
 	public static void getParentDirectory(String imageId, String filePath,
@@ -168,9 +151,9 @@ public class TdaasUtil {
 		}
 
 		if (parent.isDirectory()) {
-			String parentPath = null;
 			try {
-				parentPath = parent.getCanonicalPath().replace("\\", "/");
+				String parentPath = parent.getCanonicalPath()
+						.replace("\\", "/");
 				if (parentPath.equals(root)) {
 					return;
 				}
@@ -274,6 +257,18 @@ public class TdaasUtil {
 		return policy;
 
 	}
+	
+	public static Manifest convertStringToManifest(String manifestStr) throws JAXBException {
+		JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
+		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+				.createUnmarshaller();
+
+		StringReader reader = new StringReader(manifestStr);
+		Manifest manifest = (Manifest) unmarshaller.unmarshal(reader);
+		return manifest;
+
+	}
+
 
 	public static String convertTrustPolicyToString(TrustPolicy policy)
 			throws JAXBException {
@@ -339,15 +334,17 @@ public class TdaasUtil {
 			while ((line = reader.readLine()) != null) {
 				result.append(line + "\n");
 			}
-			if (!result.toString().equals("")) {
-				excludeList = result.toString();
+			if (result.toString().length() != 0) {				excludeList = result.toString();
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
+			reader.close();
 		} catch (InterruptedException ex) {
 			// log.error(null, ex);
+			ex.printStackTrace();
 		} catch (IOException ex) {
 			// log.error(null, ex);
+			ex.printStackTrace();
 		}
 		return excludeList;
 	}
@@ -557,9 +554,9 @@ public class TdaasUtil {
 		}
 
 		if (parent.isDirectory()) {
-			String parentPath = null;
 			try {
-				parentPath = parent.getCanonicalPath().replace("\\", "/");
+				String parentPath = parent.getCanonicalPath()
+						.replace("\\", "/");
 				if (parentPath.equals(root)) {
 					return;
 				}
@@ -660,18 +657,18 @@ public class TdaasUtil {
 
 		MeasurementType measurementType = null;
 		for (Measurement measurement : measurements) {
-			;
 			if (measurement instanceof DirectoryMeasurement) {
 				measurementType = new DirectoryMeasurementType();
 			} else if (measurement instanceof FileMeasurement) {
 				measurementType = new FileMeasurementType();
 			}
-			measurementType.setPath(measurement.getPath());
-			manifestList.add(measurementType);
+			if (measurementType != null) {
+				measurementType.setPath(measurement.getPath());
+				manifestList.add(measurementType);
+			}
 		}
 		JAXB jaxb = new JAXB();
-		String result = null;
-		result = jaxb.write(manifest);
+		String result = jaxb.write(manifest);
 		log.debug("Manifest is: " + result);
 		return result;
 	}

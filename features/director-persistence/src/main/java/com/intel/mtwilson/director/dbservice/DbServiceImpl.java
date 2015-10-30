@@ -20,6 +20,7 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.PolicyTemplateInfo;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -35,11 +36,13 @@ import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
 import com.intel.director.api.ui.UserFilter;
 import com.intel.director.api.ui.UserOrderBy;
+import com.intel.director.common.SettingFileProperties;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.director.dao.ImageActionDao;
 import com.intel.mtwilson.director.dao.ImageDao;
 import com.intel.mtwilson.director.dao.ImageStoreSettingsDao;
 import com.intel.mtwilson.director.dao.ImageStoreUploadDao;
+import com.intel.mtwilson.director.dao.PolicyTemplateDao;
 import com.intel.mtwilson.director.dao.SshSettingDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDraftDao;
@@ -49,13 +52,13 @@ import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.data.MwImageUpload;
+import com.intel.mtwilson.director.data.MwPolicyTemplate;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
 import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
 import com.intel.director.common.Constants;
-import com.intel.director.common.SettingFileProperties;
 
 public class DbServiceImpl implements IPersistService {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -70,8 +73,9 @@ public class DbServiceImpl implements IPersistService {
 	Mapper mapper = new Mapper();
 	ImageActionDao imageActionDao;
 	SshSettingDao sshDao;
+	PolicyTemplateDao policyTemplateDao;
 	SettingFileProperties settingFileProperties;
-	
+
 	public DbServiceImpl() {
 		String filePath=Folders.configuration() + File.separator + "director.properties";
 		log.info("Inside DbServiceImpl filePath::"+filePath);
@@ -101,7 +105,7 @@ public class DbServiceImpl implements IPersistService {
 		jpaProperties.put("javax.persistence.jdbc.user" ,prop.get(Constants.DIRECTOR_DB_USERNAME));
 		jpaProperties.put("javax.persistence.jdbc.password", prop.get(Constants.DIRECTOR_DB_PASSWORD));
 		EntityManagerFactory emf = Persistence
-				.createEntityManagerFactory("DirectorDataPU",jpaProperties);
+				.createEntityManagerFactory("director_data_pu",jpaProperties);
 		
 		imgDao = new ImageDao(emf);
 		userDao = new UserDao(emf);
@@ -111,8 +115,8 @@ public class DbServiceImpl implements IPersistService {
 		imgStoreSettingsDao = new ImageStoreSettingsDao(emf);
 		imageActionDao = new ImageActionDao(emf);
 		sshDao = new SshSettingDao(emf);
-		settingFileProperties=new SettingFileProperties();
-
+		settingFileProperties = new SettingFileProperties();
+		policyTemplateDao = new PolicyTemplateDao(emf);
 	}
 
 	/*
@@ -256,6 +260,7 @@ public class DbServiceImpl implements IPersistService {
 	public ImageInfo fetchImage(String id) throws DbException {
 		return mapper.toTransferObject(imgDao.findMwImageById(id));
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1539,10 +1544,9 @@ public class DbServiceImpl implements IPersistService {
 
 	@Override
 	public List<ImageActionObject> searchByAction() throws DbException {
-		List<MwImageAction> mwImageAction = new ArrayList<MwImageAction>();
 		List<ImageActionObject> imageActionObject = new ArrayList<ImageActionObject>();
-		mwImageAction = imageActionDao.showAllAction();
-		
+		List<MwImageAction> mwImageAction = imageActionDao.showAllAction();
+
 		for (int index = 0; index < mwImageAction.size(); index++) {
 
 			ImageActionObject actionObject = mapper
@@ -1625,7 +1629,7 @@ public class DbServiceImpl implements IPersistService {
 	public List<SshSettingInfo> showAllSsh() throws DbException {
 
 		List<MwHost> sshList;
-		sshList = sshDao.ShowAll();
+		sshList = sshDao.showAll();
 		int i = 0;
 		List<SshSettingInfo> ssh = new ArrayList<SshSettingInfo>();
 		int length = sshList.size();
@@ -1636,15 +1640,84 @@ public class DbServiceImpl implements IPersistService {
 		return ssh;
 
 	}
-	
+
 	@Override
-	public String editProperties(String path, Map<String,String> data) throws IOException {
+	public String editProperties(String path, Map<String, String> data)
+			throws IOException {
 		return settingFileProperties.writePropertiesToConfig(path, data);
 	}
 
 	@Override
 	public String getProperties(String path) throws IOException {
 		return settingFileProperties.readPropertiesFromConfig(path);
+	}
+
+	@Override
+	public PolicyTemplateInfo savePolicyTemplate(
+			PolicyTemplateInfo policyTemplate) throws DbException {
+		return mapper.toTransferObject(policyTemplateDao
+				.createPolicyTemplate(mapper.toData(policyTemplate)));
+	}
+
+	@Override
+	public List<PolicyTemplateInfo> fetchPolicyTemplate(String deployment_type)
+			throws DbException {
+		List<MwPolicyTemplate> mwPolicyTemplateList = policyTemplateDao
+				.findDeploymentType(deployment_type);
+		List<PolicyTemplateInfo> policyTemplateList = new ArrayList<PolicyTemplateInfo>();
+		if (mwPolicyTemplateList != null) {
+			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
+				PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
+				policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
+				policyTemplateList.add(policyTemplateInfo);
+			}
+		}
+		return policyTemplateList;
+	}
+
+	@Override
+	public List<PolicyTemplateInfo> fetchPolicyTemplateForDeploymentIdentifier(
+			String deployment_type, String deployment_type_identifier)
+			throws DbException {
+		List<MwPolicyTemplate> mwPolicyTemplateList = policyTemplateDao
+				.findDeploymentType(deployment_type);
+		List<PolicyTemplateInfo> policyTemplateList = new ArrayList<PolicyTemplateInfo>();
+		if (mwPolicyTemplateList != null) {
+			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
+				if (deployment_type_identifier.equals(mwPolicyTemplate
+						.getDeployment_type_identifier())) {
+					PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
+					policyTemplateInfo = mapper
+							.toTransferObject(mwPolicyTemplate);
+					policyTemplateList.add(policyTemplateInfo);
+				}
+
+			}
+		}
+		return policyTemplateList;
+	}
+
+	@Override
+	public void deletePolicyTemplate(PolicyTemplateInfo policyTemplate)
+			throws DbException {
+		policyTemplateDao.destroyPolicyTemplate(mapper.toData(policyTemplate));
+	}
+
+	@Override
+	public List<PolicyTemplateInfo> fetchPolicyTemplate(
+			PolicyTemplateInfo filter) throws DbException {
+		List<MwPolicyTemplate> mwPolicyTemplateList = policyTemplateDao
+				.findDeploymentTypeByFilter(filter);
+		List<PolicyTemplateInfo> policyTemplateList = new ArrayList<PolicyTemplateInfo>();
+		if (mwPolicyTemplateList != null) {
+			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
+				PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
+				policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
+				policyTemplateList.add(policyTemplateInfo);
+
+			}
+		}
+		return policyTemplateList;
 	}
 
 }

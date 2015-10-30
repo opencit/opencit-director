@@ -8,6 +8,7 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.PolicyTemplateInfo;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -259,5 +260,18 @@ public interface IPersistService {
 	 * public abstract SshPassword saveSshPasswordMetadata(SshPassword
 	 * sshPassword) throws DbException;
 	 */
+	
+	public abstract PolicyTemplateInfo savePolicyTemplate(PolicyTemplateInfo policyTemplate)
+			throws DbException;
+	
+	public abstract List<PolicyTemplateInfo> fetchPolicyTemplate(String deployment_type)
+			throws DbException;
+	
+	public abstract void deletePolicyTemplate(PolicyTemplateInfo policyTemplate)
+			throws DbException;
 
+	public List<PolicyTemplateInfo> fetchPolicyTemplateForDeploymentIdentifier(
+			String deployment_type,String deployment_type_identifier) throws DbException;
+	
+	public List<PolicyTemplateInfo> fetchPolicyTemplate(PolicyTemplateInfo filter) throws DbException;
 }

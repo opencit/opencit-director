@@ -3,7 +3,7 @@ function saveKMSSetting() {
 	self.data = {};
 	self.data.kms_endpoint_url = $('#KMS_IP').val();
 	self.data.kms_login_basic_username = $('#KMS_USERNAME').val();
-	self.data.kms_login_basic_password = $('#KMS_PASSWORD').val();
+//	self.data.kms_login_basic_password = $('#KMS_PASSWORD').val();
 	self.data.kms_tls_policy_certificate_sha1 = $('#KMS_RSAKEY').val();
 	$.ajax({
 		type : 'POST',
@@ -14,7 +14,7 @@ function saveKMSSetting() {
 		success : function (data) {
 			$('#KMS_IP').val(data.kms_endpoint_url);
 			$('#KMS_USERNAME').val(data.kms_login_basic_username);
-			$('#KMS_PASSWORD').val(data.kms_login_basic_password);
+//			$('#KMS_PASSWORD').val(data.kms_login_basic_password);
 			$('#KMS_RSAKEY').val(data.kms_tls_policy_certificate_sha1);
 		}
 	});
@@ -28,7 +28,7 @@ function fetchKMSSetting() {
 		success : function (data) {
 			$('#KMS_IP').val(data.kms_endpoint_url);
 			$('#KMS_USERNAME').val(data.kms_login_basic_username);
-			$('#KMS_PASSWORD').val(data.kms_login_basic_password);
+//			$('#KMS_PASSWORD').val(data.kms_login_basic_password);
 			$('#KMS_RSAKEY').val(data.kms_tls_policy_certificate_sha1);
 		}
 	});

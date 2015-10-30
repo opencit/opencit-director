@@ -59,10 +59,11 @@ function CreateBMImageViewModel() {
 			data : ko.toJSON(self.createBMImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
 				if (data.status == "Error") {
-					$('#error_modal_body').text(data.details);
-					$("#error_modal").modal({
+					$('#error_modal_body_bm_image_2').text(data.details);
+					$("#error_modal_bm_image_2").modal({
 						backdrop : "static"
 					});
+						$('body').removeClass("modal-open");
 					return;
 				}
 				$.ajax({
@@ -75,10 +76,11 @@ function CreateBMImageViewModel() {
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
-							$('#error_modal_body').text(data.details);
-							$("#error_modal").modal({
+							$('#error_modal_body_bm_image_2').text(data.details);
+							$("#error_modal_bm_image_2").modal({
 								backdrop : "static"
 							});
+							$('body').removeClass("modal-open");
 							return;
 						}
 						nextButtonImagesBM();

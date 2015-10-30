@@ -94,7 +94,6 @@ JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logb
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
 DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore director-envelope-key director-envelope-key-registration"}
-DIRECTOR_SETUP_TASKS_AFTER_SLEEP=${DIRECTOR_SETUP_TASKS_AFTER_SLEEP:-"director-envelope-key-registration"}
 
 # the standard PID file location /var/run is typically owned by root;
 # if we are running as non-root and the standard location isn't writable 
@@ -145,7 +144,6 @@ director_complete_setup() {
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   director_run setup $DIRECTOR_SETUP_TASKS
-  director_run setup $DIRECTOR_SETUP_TASKS_AFTER_SLEEP
   ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
   if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
     openssl s_client -connect ${MTWILSON_SERVER}:${MTWILSON_SERVER_PORT} 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/mtwcert.pem
