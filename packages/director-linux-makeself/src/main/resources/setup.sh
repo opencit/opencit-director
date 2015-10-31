@@ -363,7 +363,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
-  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
+  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel}" >/dev/null
+  director config mtwilson.extensions.packageExcludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEEXCLUDEFILTER_STARTSWITH:-java,javax,com.intel.mtwilson.core.data.bundle.jaxrs}" >/dev/null
 
   #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
   #director config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
