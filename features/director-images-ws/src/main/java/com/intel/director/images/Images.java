@@ -92,12 +92,11 @@ public class Images {
 			KmsUtil kmsUtil = new KmsUtil();
 			KeyContainer createKey = kmsUtil.createKey();
 			log.info("******* URL :: " + createKey.url.toString());
-			
-			
-			
-			//fetch
-			String keyFromKMS = kmsUtil.getKeyFromKMS(TdaasUtil.getKeyIdFromUrl(createKey.url.toString()));
-			log.info("******** Key from KMS : "+ keyFromKMS);
+
+			// fetch
+			String keyFromKMS = kmsUtil.getKeyFromKMS(TdaasUtil
+					.getKeyIdFromUrl(createKey.url.toString()));
+			log.info("******** Key from KMS : " + keyFromKMS);
 
 		} catch (Exception e) {
 			log.error("******************************* Error ::: ", e);
@@ -200,8 +199,7 @@ public class Images {
 
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		try {
-			mountImageResponse = imageService.mountImage(
-					imageId, user);
+			mountImageResponse = imageService.mountImage(imageId, user);
 		} catch (DirectorException e) {
 			// TODO Auto-generated catch block
 			log.error("Error while Mounting the Image");
@@ -289,8 +287,7 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public SearchFilesInImageResponse searchFilesInImage(
 			@PathParam("imageId") String imageId,
-			SearchFilesInImageRequest searchFilesInImageRequest)
-			 {
+			SearchFilesInImageRequest searchFilesInImageRequest) {
 		imageService = new ImageServiceImpl();
 		searchFilesInImageRequest.id = imageId;
 		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
@@ -439,7 +436,7 @@ public class Images {
 	@Path("/{image_id: [0-9a-zA-Z_-]+}/createpolicy")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@POST
-	public String createTrustPolicy(@PathParam("image_id") String image_id)   {
+	public String createTrustPolicy(@PathParam("image_id") String image_id) {
 		try {
 			return imageService.createTrustPolicy(image_id);
 		} catch (DirectorException | JAXBException de) {
@@ -513,8 +510,8 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public CreateTrustPolicyMetaDataResponse createTrustPolicyMetaData(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
-	{
+	public CreateTrustPolicyMetaDataResponse createTrustPolicyMetaData(
+			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) {
 
 		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
 		try {
@@ -528,12 +525,30 @@ public class Images {
 
 		return createTrustPolicyMetadataResponse;
 	}
+	
+	
+	@Path("/{image_id: [0-9a-zA-Z_-]+}/importpolicytemplate")
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public CreateTrustPolicyMetaDataResponse importPolicyTemplate(@PathParam("image_id") String image_id){
+		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
+		try {
+			createTrustPolicyMetadataResponse = imageService.importPolicyTemplate(image_id);
+					
+		} catch (DirectorException e) {
+			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
+			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
+			return createTrustPolicyMetadataResponse;
+		}
+
+		return createTrustPolicyMetadataResponse;
+	}
 
 	@Path("/{trustPolicyId: [0-9a-zA-Z_-]+}/download")
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	public Response downloadPolicy(
-			@PathParam("trustPolicyId") String trustPolicyId) throws Exception {
+			@PathParam("trustPolicyId") String trustPolicyId)  {
 
 		TrustPolicy policy = imageService
 				.getTrustPolicyByTrustId(trustPolicyId);
@@ -550,39 +565,59 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustPolicyDraft createPolicyDraftFromPolicy(
 			@PathParam("imageId") String imageId,
-			@QueryParam("action_id") String image_action_id) throws Exception {
-		return imageService.createPolicyDraftFromPolicy(imageId,
-				image_action_id);
+			@QueryParam("action_id") String image_action_id) throws DirectorException  {
+		try {
+			return imageService.createPolicyDraftFromPolicy(imageId,
+					image_action_id);
+		} catch (DirectorException e) {
+			// TODO Auto-generated catch block
+			throw new DirectorException("Error in creating draft again from policy",e);
+		}
 
 	}
-	
+
 	@Path("/{imageId: [0-9a-zA-Z_-]+}/downloadPolicy")
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	public Response downloadPolicyForImageId(
-			@PathParam("imageId") String imageId) throws Exception {
+			@PathParam("imageId") String imageId) throws DirectorException {
+		try {
+			TrustPolicy policy = imageService.getTrustPolicyByImageId(imageId);
+			ResponseBuilder response = Response.ok(policy.getTrust_policy());
+			response.header("Content-Disposition",
+					"attachment; filename=policy_"
+							+ policy.getImgAttributes().getName() + ".xml");
 
-		TrustPolicy policy = imageService.getTrustPolicyByImageId(imageId);
-		ResponseBuilder response = Response.ok(policy.getTrust_policy());
-		response.header("Content-Disposition", "attachment; filename=policy_"
-				+ policy.getImgAttributes().getName() + ".xml");
-
-		return response.build();
+			return response.build();
+		} catch (DbException e) {
+			// TODO Auto-generated catch block
+			throw new DirectorException("Unable to download Policy", e);
+		}
 	}
-	
+
 	@Path("/{imageId: [0-9a-zA-Z_-]+}/downloadImage")
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public Response downloadImage(
-			@PathParam("imageId") String imageId ,
-			@QueryParam("modified") boolean isModified) throws Exception {
-		
-		String pathname = imageService.getFilepathForImage(imageId,isModified);
-		File imagefile = new File(pathname);
-		ResponseBuilder response = Response.ok(imagefile);
-		response.header("Content-Disposition", "attachment; filename="
-				+ pathname.substring(pathname.lastIndexOf(File.separator) + 1));
-		return response.build();
+	public Response downloadImage(@PathParam("imageId") String imageId,
+			@QueryParam("modified") boolean isModified)
+			throws DirectorException {
+		try {
+			String pathname;
+
+			pathname = imageService.getFilepathForImage(imageId, isModified);
+			File imagefile = new File(pathname);
+			ResponseBuilder response = Response.ok(imagefile);
+			response.header(
+					"Content-Disposition",
+					"attachment; filename="
+							+ pathname.substring(pathname
+									.lastIndexOf(File.separator) + 1));
+			return response.build();
+		} catch (DbException e) {
+			// TODO Auto-generated catch block
+			throw new DirectorException("Unable to download Image", e);
+		}
+
 	}
 
 }

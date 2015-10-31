@@ -118,6 +118,23 @@ function backToVmImagesPage() {
 		});
 
 	}
+	$('body').removeClass("modal-open");
+	refresh_vm_images_Grid();
+	// /
+	// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));
+
+}
+
+function backToVmImagesPageWithountUnmount() {
+	$("#create_policy_script").remove();
+	$("#edit_policy_wizard").html("");
+	$("#create_policy_wizard_").html("");
+	$("#create_policy_wizard_").hide("");
+	$("#edit_policy_wizard").hide("");
+	$("#upload_to_image_store_redirect").html("");
+	$("#upload_to_image_store_redirect").hide("");
+	$("#vm_images_grid_page").show();
+	$('body').removeClass("modal-open");
 	refresh_vm_images_Grid();
 	// /
 	// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));

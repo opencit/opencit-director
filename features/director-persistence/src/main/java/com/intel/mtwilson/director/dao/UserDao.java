@@ -12,9 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.UserFields;
 import com.intel.director.api.ui.UserFilter;
@@ -25,7 +22,6 @@ import com.intel.mtwilson.director.mapper.Mapper;
 
 public class UserDao {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
     Mapper mapper = new Mapper();
 
     public UserDao(EntityManagerFactory emf) {

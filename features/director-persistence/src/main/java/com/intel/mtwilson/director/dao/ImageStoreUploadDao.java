@@ -13,9 +13,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
@@ -27,7 +24,6 @@ import com.intel.mtwilson.director.mapper.Mapper;
 
 public class ImageStoreUploadDao {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
     Mapper mapper = new Mapper();
 
     public ImageStoreUploadDao(EntityManagerFactory emf) {

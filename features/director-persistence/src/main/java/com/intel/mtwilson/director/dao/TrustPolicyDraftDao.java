@@ -13,9 +13,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
@@ -28,7 +25,6 @@ import com.intel.mtwilson.director.mapper.Mapper;
 
 public class TrustPolicyDraftDao {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
     Mapper mapper = new Mapper();
 
     public TrustPolicyDraftDao(EntityManagerFactory emf) {
@@ -219,7 +215,6 @@ public class TrustPolicyDraftDao {
             }
             List<Object[]> result = q.getResultList();
             List<MwTrustPolicyDraft> trustPolicyDraftList = new ArrayList<MwTrustPolicyDraft>();
-            List<MwImage> imageList = new ArrayList<MwImage>();
             for (Object[] objArray : result) {
                 MwTrustPolicyDraft tpd = (MwTrustPolicyDraft) objArray[0];
 

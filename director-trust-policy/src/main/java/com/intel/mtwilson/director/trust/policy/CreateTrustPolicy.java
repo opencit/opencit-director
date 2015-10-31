@@ -17,6 +17,7 @@ import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
+import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Encryption;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
@@ -75,7 +76,7 @@ public class CreateTrustPolicy {
 		}		
 		encryption.setKey(decryptionKey);
         Checksum checksum = new Checksum();
-        checksum.setDigestAlg(trustPolicy.getWhitelist().getDigestAlg());
+        checksum.setDigestAlg(DigestAlgorithm.MD_5);
         checksum.setValue("1");
         encryption.setChecksum(checksum);
 		trustPolicy.setEncryption(encryption);

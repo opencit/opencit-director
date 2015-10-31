@@ -35,7 +35,8 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-							$("#error_modal").modal({backdrop: "static"});
+							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+								$('body').removeClass("modal-open");
 							console.log("Unmount successfully")
 
 						}
@@ -115,10 +116,16 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		console.log("Is checked : " + node.attr('checked'));
+
+		$("img[id='toggle_" + sel_dir + "']")
+				.attr(
+						"src",
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
+
 		node.attr('checked', true);
-		(node.parent()).fileTree(config, function(file, checkedStatus) {
-			editPatch(file, checkedStatus);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
 		});
 	}
 
@@ -226,8 +233,8 @@ $(document)
 								multiFolder : true,
 								init : true,
 								loadMessage : "Loading..."
-							}, function(file, checkedStatus) {
-								editPatch(file, checkedStatus);
+							}, function(file, checkedStatus, rootRegexDir) {
+								editPatch(file, checkedStatus, rootRegexDir);
 							});
 
 					mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
@@ -241,17 +248,29 @@ $(document)
 
 /* Patches processing */
 
-function editPatch(file, checkedStatus) {
+function editPatch(file, checkedStatus, rootRegexDir) {
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
+	var addPath = "'//*[local-name()=\"Whitelist\"]'";
+	var removePath = "'//*[local-name()=\"Whitelist\"]";
+	var pos = "prepend";
+
+	if (rootRegexDir != "") {
+		if (checkedStatus == true) {
+			pos = "after";
+		}
+		addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+				+ rootRegexDir + "\"]'";
+	}
 
 	if (checkedStatus == true) {
-		addRemoveXml = "<add pos=\"prepend\" sel='//*[local-name()=\"Whitelist\"]'><File Path=\""
-				+ file + "\"/></add>";
+
+		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
+				+ "><File Path=\"" + file + "\"/></add>";
 	} else {
-		addRemoveXml = "<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
-				+ file + "\"]'/>";
+		addRemoveXml = "<remove sel=" + removePath
+				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
 	patches.push(addRemoveXml);
 }

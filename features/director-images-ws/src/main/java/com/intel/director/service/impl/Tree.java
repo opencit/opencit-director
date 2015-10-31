@@ -1,9 +1,9 @@
 package com.intel.director.service.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class Tree {
 
@@ -15,6 +15,9 @@ public class Tree {
 	public boolean explodedView = false;
 	public Set<String> dirPathsForEdit = null;
 	public String mountPath = null; 
+	public Set<String> directoryListContainingRegex = null;
+	
+	
 	public void setDirPathsForEdit(Set<String> dirPathsForEdit) {
 		this.dirPathsForEdit = dirPathsForEdit;
 	}
@@ -44,8 +47,7 @@ public class Tree {
 
 	
 	public void addElement(String elementValue) {
-		String pattern = Pattern.quote(System.getProperty("file.separator"));
-		pattern = "/";
+		String pattern = File.separator;
 		String[] list = elementValue.split(pattern);
 
 		// latest element of the list is the filename.extrension
@@ -82,5 +84,6 @@ public class Tree {
 		}
 
 	}
+
 
 }

@@ -21,6 +21,7 @@ import com.intel.director.api.MountWilsonSetting;
 import com.intel.director.api.SettingsKMSObject;
 import com.intel.director.api.SshSettingRequest;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorUtil;
 import com.intel.director.service.impl.SettingImpl;
 import com.intel.mtwilson.configuration.ConfigurationException;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -81,25 +82,25 @@ public class Setting {
 	}
 	
 	@GET
-    @Path("/mtwilson/getdata")
+    @Path("/mtwilson/getproperties")
     @Produces(MediaType.APPLICATION_JSON)
     public String getRecentMtWilson() throws IOException {
 		log.debug("Setting -> getRecentMtWilson");
-		return impl.getProperties("mtwilson.properties");
+		return DirectorUtil.getProperties(Constants.MTWILSON_PROP_FILE);
     }
 	
 	@POST
-    @Path("/mtwilson/postdata")
+    @Path("/mtwilson/updateproperties")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
     public String  postRecentMtWilson(MountWilsonSetting request) throws ConfigurationException, IOException {
-		log.debug("Setting -> postRecentMtWilson");		
-		HashMap<String, String> map = new HashMap<String,String>();
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-		map = mapper.readValue(ow.writeValueAsString(request), new TypeReference<HashMap<String,String>>(){});
-		return impl.editProperties(Constants.MTWILSON_PROP_FILE,map);
-    }
+		log.debug("Setting -> updateMtWilsonProperties");
+		if(!request.mtwilson_api_url.contains("https://")){
+			request.mtwilson_api_url= "https://" + request.mtwilson_api_url;
+		}
+		return DirectorUtil.editProperties(Constants.MTWILSON_PROP_FILE,request.toString());
+		
+	 }
 	
 	@GET
 	@Path("/kms/getproperties")
@@ -107,7 +108,7 @@ public class Setting {
 	public String getKMSProperties() throws IOException
 	{
 		log.debug("Setting -> getKMSProperties");		
-		return impl.getProperties("kms.properties");
+		return DirectorUtil.getProperties(Constants.KMS_PROP_FILE);
 	}
 	
 	@POST
@@ -116,13 +117,11 @@ public class Setting {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String updateKMSProperties(SettingsKMSObject request) throws IOException
 	{
-		log.debug("Setting -> updateKMSProperties");		
-
-		HashMap<String, String> map = new HashMap<String,String>();
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-		map = mapper.readValue(ow.writeValueAsString(request), new TypeReference<HashMap<String,String>>(){});
-		return impl.editProperties("kms.properties",map);
+		log.debug("Setting -> updateKMSProperties");
+		if(!request.kms_endpoint_url.contains("https://")){
+			request.kms_endpoint_url = "https://" + request.kms_endpoint_url;
+		}
+		return DirectorUtil.editProperties(Constants.KMS_PROP_FILE,request.toString());
 		
 	}
 

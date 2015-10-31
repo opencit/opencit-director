@@ -94,12 +94,4 @@ public class SettingImpl {
 		return tdaasUtil.toSshSettingRequest(sshInfo);
 	}
 	
-	public String editProperties(String path, Map<String, String> data) throws IOException {
-		return settingsPersistenceManager.editProperties(path,data);
-	}
-
-	public String getProperties(String path) throws IOException {
-		return settingsPersistenceManager.getProperties(path);
-	}
-
 }

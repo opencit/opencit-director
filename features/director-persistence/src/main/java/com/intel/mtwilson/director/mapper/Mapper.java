@@ -1,21 +1,18 @@
 package com.intel.mtwilson.director.mapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
+import com.intel.director.api.PolicyTemplateInfo;
 import com.intel.director.api.SshKey;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
@@ -34,6 +31,7 @@ import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.data.MwImageUpload;
+import com.intel.mtwilson.director.data.MwPolicyTemplate;
 import com.intel.mtwilson.director.data.MwSshKey;
 import com.intel.mtwilson.director.data.MwSshPassword;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
@@ -491,7 +489,7 @@ public class Mapper {
 		mwImageAction.setAction_size(imageaction.getAction_size());
 		mwImageAction.setAction_count(imageaction.getAction_count());
 		mwImageAction.setAction_completed(imageaction.getAction_completed());
-		if(imageaction.getAction() != null){
+		if (imageaction.getAction() != null) {
 			mwImageAction.setAction(gson.toJson(imageaction.getAction()));
 		}
 		mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
@@ -501,7 +499,6 @@ public class Mapper {
 	}
 
 	public ImageActionObject toTransferObject(MwImageAction mwImageAction) {
-		Gson gson = new Gson();
 		ImageActionObject imageActionObject = new ImageActionObject();
 		imageActionObject.setId(mwImageAction.getId());
 		imageActionObject.setImage_id(mwImageAction.getImage_id());
@@ -515,38 +512,35 @@ public class Mapper {
 				.getCurrent_task_name());
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
-		TypeToken<List<ImageActionActions>> token = new TypeToken<List<ImageActionActions>>() {
-		};
-		
+
 		List<ImageActionActions> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();
-		if(actions != null){
+		if (actions != null) {
 			actions = actions.replace("[", "").replace("]", "");
 			String[] split = actions.split("},");
 			ObjectMapper mapper = new ObjectMapper();
-			for(String s : split){
-				if(!s.endsWith("}")){
-					s = s+"}";
+			for (String s : split) {
+				if (!s.endsWith("}")) {
+					s = s + "}";
 				}
-				log.info("TASK : "+s);
+				log.info("TASK : " + s);
 				ImageActionActions fromJson = null;
 				try {
 					fromJson = mapper.readValue(s, ImageActionActions.class);
-					log.info("TASK CREATED : "+ fromJson.toString());
-					taskList.add(fromJson);			
-	
+					log.info("TASK CREATED : " + fromJson.toString());
+					taskList.add(fromJson);
+
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					log.error("Error in action mapping ", e);
 				}
-	
+
 			}
 		}
-		log.info("No of tasks : "+taskList.size());
-		for(ImageActionActions temp : taskList){
-			log.info("************************ "+temp.toString());
+		log.info("No of tasks : " + taskList.size());
+		for (ImageActionActions temp : taskList) {
+			log.info("************************ " + temp.toString());
 		}
-//
+		//
 		imageActionObject.setAction(taskList);
 		return imageActionObject;
 	}
@@ -572,8 +566,6 @@ public class Mapper {
 
 	public MwHost toData(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		MwSshPassword ssh = new MwSshPassword();
-		MwSshKey sshId = new MwSshKey();
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		mwHost.setIpAdsress(sshSetting.getIpAddress());
@@ -612,7 +604,6 @@ public class Mapper {
 
 	public MwHost toDataUpdate(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		MwSshPassword ssh = new MwSshPassword();
 		java.util.Date utilDate = new java.util.Date();
 		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		// ssh = toMw(sshSetting.getPassword());
@@ -703,4 +694,30 @@ public class Mapper {
 
 	}
 
+	public MwPolicyTemplate toData(PolicyTemplateInfo policytemplate) {
+		MwPolicyTemplate mwpolicytemplate = new MwPolicyTemplate();
+		if (policytemplate.getId() != null) {
+			mwpolicytemplate.setId(policytemplate.getId());
+		}
+		mwpolicytemplate.setContent(policytemplate.getContent());
+		mwpolicytemplate
+				.setDeployment_type(policytemplate.getDeployment_type());
+		mwpolicytemplate.setActive(policytemplate.isActive());
+		mwpolicytemplate.setName(policytemplate.getName());
+		mwpolicytemplate.setPolicy_type(policytemplate.getPolicy_type());
+		mwpolicytemplate.setDeployment_type_identifier(policytemplate.getDeployment_type_identifier());
+		return mwpolicytemplate;
+	}
+
+	public PolicyTemplateInfo toTransferObject(MwPolicyTemplate mwpolicytemplate) {
+		PolicyTemplateInfo policytemplate = new PolicyTemplateInfo();
+		policytemplate.setId(mwpolicytemplate.getId());
+		policytemplate.setContent(mwpolicytemplate.getContent());
+		policytemplate.setDeployment_type(mwpolicytemplate.getDeployment_type());
+		policytemplate.setActive(mwpolicytemplate.isActive());
+		policytemplate.setName(mwpolicytemplate.getName());
+		policytemplate.setPolicy_type(mwpolicytemplate.getPolicy_type());
+		policytemplate.setDeployment_type_identifier(mwpolicytemplate.getDeployment_type_identifier());
+		return policytemplate;
+	}
 }

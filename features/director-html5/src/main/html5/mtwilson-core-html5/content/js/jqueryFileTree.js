@@ -120,8 +120,14 @@ if(jQuery) (function($){
 								$(this).parent().removeClass('collapsed').addClass('expanded');
 
 							}else{								
-								//h($(this).attr('id'), isChecked);
-								h($(this).attr('id'), this.checked);
+								console.log("**************");
+								var rootRegexDir = $(this).attr('rootregexdir');
+								console.log("rootRegexDir : "+rootRegexDir );
+								if(rootRegexDir == undefined){
+									rootRegexDir = "";
+								}
+								console.log("*rootRegexDir : "+rootRegexDir);
+								h($(this).attr('id'), this.checked, rootRegexDir);
 							}
 							var isChecked = this.checked;//$(this).attr('checked') ;
 							if(isChecked){
