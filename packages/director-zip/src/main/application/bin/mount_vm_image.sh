@@ -327,7 +327,7 @@ function mount_qcow2_image() {
 		mount_disk_guestmount
 		return
 	fi
-        qemu-nbd -c $NBD_DEVICE $imagePath
+        qemu-nbd -r -c $NBD_DEVICE $imagePath
         sleep 0.5
 	#check for number of partition
 	num_of_partition=`blkid | grep -c "${NBD_DEVICE}p\?[0-9]\?:"`

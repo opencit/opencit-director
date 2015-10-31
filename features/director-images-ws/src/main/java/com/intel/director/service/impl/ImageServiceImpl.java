@@ -77,6 +77,7 @@ import com.intel.mtwilson.manifest.xml.MeasurementType;
 import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
+import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
@@ -428,7 +429,7 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Cannot save image meta data", e);
 		}
 		log.info("Image uploaded to TDAAS at " + imageAttributes.getLocation());
-
+		
 		return TdaasUtil
 				.mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
 	}
@@ -1814,7 +1815,7 @@ public class ImageServiceImpl implements ImageService {
 			files.add(file);
 			if (file.isDirectory()) {
 				if (dirs != null) {
-					dirs.add(file.getAbsolutePath().replace("\\", "/"));
+					//dirs.add(file.getAbsolutePath());
 				}
 				getFilesAndDirectories(file.getAbsolutePath(), dirs, imageId);
 			}
@@ -2032,4 +2033,6 @@ public class ImageServiceImpl implements ImageService {
 		createTrustPolicyMetaDataResponse.setStatus("Success");
 		return createTrustPolicyMetaDataResponse;
 	}
+	
+	
 }

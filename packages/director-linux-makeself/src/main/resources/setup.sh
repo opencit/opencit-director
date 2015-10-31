@@ -163,7 +163,6 @@ echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
 if [ -n "$DIRECTOR_PID_FILE" ]; then echo "export DIRECTOR_PID_FILE=$DIRECTOR_PID_FILE" >> $DIRECTOR_ENV/director-layout; fi
-
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
 echo "export DIRECTOR_USERNAME=$DIRECTOR_USERNAME" >> $DIRECTOR_ENV/director-username
@@ -282,7 +281,10 @@ update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MT
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
-
+#KMS
+update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
+update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 
 
 #############################################
@@ -486,9 +488,10 @@ if [ -n "$is_postgres_tables_available" ]; then
     return 0
   else
    echo "before running scripts"
-	cp psql.sql /tmp 
-	chmod 777 /tmp/psql.sql
-	sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -a -f  "/tmp/psql.sql">> $INSTALL_LOG_FILE
+        #cp psql.sql /tmp
+        #chmod 777 /tmp/psql.sql
+        psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -a -f psql.sql 2>/tmp/intel.postgres.err >> $INSTALL_LOG_FILE
+        #sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -a -f  "/tmp/psql.sql">> $INSTALL_LOG_FILE
 	echo "after running scripts"
 fi
 
@@ -511,8 +514,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
 
   #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
-  #director config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
-  #director config mtwilson.navbar.hometab keys >/dev/null
+ director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
+ director config mtwilson.navbar.hometab director-dashboard >/dev/null
 
   director config jetty.port ${JETTY_PORT:-80} >/dev/null
   director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
@@ -531,6 +534,3 @@ done
 # start the server, unless the NOSETUP variable is defined
 #if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"
-
-
-

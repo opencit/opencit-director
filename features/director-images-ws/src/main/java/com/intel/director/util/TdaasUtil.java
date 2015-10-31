@@ -35,6 +35,7 @@ import javax.xml.bind.Unmarshaller;
 
 import net.schmizz.sshj.SSHClient;
 
+import org.apache.commons.codec.binary.Hex;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
@@ -151,17 +152,12 @@ public class TdaasUtil {
 		}
 
 		if (parent.isDirectory()) {
-			try {
-				String parentPath = parent.getCanonicalPath()
-						.replace("\\", "/");
-				if (parentPath.equals(root)) {
-					return;
-				}
-				parentsList.put(parentPath, recursive);
-				getParentDirectory(imageId, parentPath, root, parentsList, true);
-			} catch (IOException e) {
-				log.error("Error while recursively fetching files", e);
+			String parentPath = parent.getAbsolutePath();
+			if (parentPath.equals(root)) {
+				return;
 			}
+			parentsList.put(parentPath, recursive);
+			getParentDirectory(imageId, parentPath, root, parentsList, true);			
 		}
 
 	}
@@ -678,23 +674,20 @@ public class TdaasUtil {
 		if (!file.exists()) {
 			return null;
 		}
-		StringBuffer sb = null;
-		byte[] dataBytes = new byte[1024];
-		int nread = 0;
-		FileInputStream fis = new FileInputStream(file);
-		while ((nread = fis.read(dataBytes)) != -1) {
-			md.update(dataBytes, 0, nread);
-		}
-		;
-		byte[] mdbytes = md.digest();
+	
+		md.reset();
+		byte[] bytes = new byte[2048];
+		int numBytes;
+		FileInputStream is = new FileInputStream(file);
 
-		// convert the byte to hex format
-		sb = new StringBuffer();
-		for (int i = 0; i < mdbytes.length; i++) {
-			sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16)
-					.substring(1));
+		while ((numBytes = is.read(bytes)) != -1) {
+			md.update(bytes, 0, numBytes);
 		}
-		fis.close();
-		return sb.toString();
+		byte[] digest = md.digest();
+		String result = new String(Hex.encodeHex(digest));
+		return result;
+		
 	}
+	
+
 }
