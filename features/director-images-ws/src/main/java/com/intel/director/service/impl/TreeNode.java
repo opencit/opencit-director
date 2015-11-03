@@ -3,11 +3,13 @@ package com.intel.director.service.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-public class TreeNode {
+public class TreeNode implements Comparable{
 	Tree parent;
 	List<TreeNode> childs;
 	List<TreeNode> leafs;
@@ -93,11 +95,12 @@ public class TreeNode {
 				return;
 			}
 			leafs.add(currentChild);
+			Collections.sort(leafs);
 			return;
 		} else {
 			int index = childs.indexOf(currentChild);
 			if (index == -1) {
-				childs.add(currentChild);
+				childs.add(currentChild);	
 				currentChild.addElement(currentChild.incrementalPath,
 						Arrays.copyOfRange(list, 1, list.length));
 			} else {
@@ -205,41 +208,83 @@ public class TreeNode {
 		}
 		int noOfChildren = childs.size();
 		int childCnt = 0;
-		for (TreeNode n : childs) {
-			boolean showULBegin = false;
-			if (!firstChildOrLeaf) {
-				firstChildOrLeaf = true;
-				showULBegin = true;
-				;
-			}
-			renderedCount++;
-			n.printNode(showULBegin, false);
-			addToTree("</li>", true);
-			// if (++childCnt == noOfChildren) {
-			if (haveAllElementsOfNodeRendered()) {
-				builder.append(ulEnd);
-				addToTree(ulEnd, add);
-			}
+		List<TreeNode> combined = new ArrayList<>();
+		combined.addAll(childs);
+		combined.addAll(leafs);
+		Collections.sort(combined);
+		for (TreeNode n : combined) {
+			if(childs.contains(n)){
+				boolean showULBegin = false;
+				if (!firstChildOrLeaf) {
+					firstChildOrLeaf = true;
+					showULBegin = true;
+					;
+				}
+				renderedCount++;
+				n.printNode(showULBegin, false);
+				addToTree("</li>", true);
+				// if (++childCnt == noOfChildren) {
+				if (haveAllElementsOfNodeRendered()) {
+					builder.append(ulEnd);
+					addToTree(ulEnd, add);
+				}
 
+			}else{
+				int noOfLeafElements = leafs.size();
+				int leaftCnt = 0;
+
+				boolean showULBegin = false;
+				boolean showULEnd = false;
+				if (!firstChildOrLeaf) {
+					firstChildOrLeaf = true;
+					showULBegin = true;
+				}
+
+				renderedCount++;
+
+				if (haveAllElementsOfNodeRendered()) {
+					showULEnd = true;
+				}
+				n.printNode(showULBegin, showULEnd);
+
+			}
 		}
-		int noOfLeafElements = leafs.size();
-		int leaftCnt = 0;
-		for (TreeNode n : leafs) {
-			boolean showULBegin = false;
-			boolean showULEnd = false;
-			if (!firstChildOrLeaf) {
-				firstChildOrLeaf = true;
-				showULBegin = true;
-			}
-
-			renderedCount++;
-
-			if (haveAllElementsOfNodeRendered()) {
-				showULEnd = true;
-			}
-			n.printNode(showULBegin, showULEnd);
-
-		}
+		
+//		for (TreeNode n : childs) {
+//			boolean showULBegin = false;
+//			if (!firstChildOrLeaf) {
+//				firstChildOrLeaf = true;
+//				showULBegin = true;
+//				;
+//			}
+//			renderedCount++;
+//			n.printNode(showULBegin, false);
+//			addToTree("</li>", true);
+//			// if (++childCnt == noOfChildren) {
+//			if (haveAllElementsOfNodeRendered()) {
+//				builder.append(ulEnd);
+//				addToTree(ulEnd, add);
+//			}
+//
+//		}
+//		int noOfLeafElements = leafs.size();
+//		int leaftCnt = 0;
+//		for (TreeNode n : leafs) {
+//			boolean showULBegin = false;
+//			boolean showULEnd = false;
+//			if (!firstChildOrLeaf) {
+//				firstChildOrLeaf = true;
+//				showULBegin = true;
+//			}
+//
+//			renderedCount++;
+//
+//			if (haveAllElementsOfNodeRendered()) {
+//				showULEnd = true;
+//			}
+//			n.printNode(showULBegin, showULEnd);
+//
+//		}
 	}
 
 	private boolean isDirectory() {
@@ -251,5 +296,13 @@ public class TreeNode {
 	public String toString() {
 		return data;
 	}
+
+	@Override
+	public int compareTo(Object o) {
+		TreeNode other = (TreeNode)o;
+		return this.incrementalPath.compareTo(other.incrementalPath);		
+	}
+	
+	
 
 }

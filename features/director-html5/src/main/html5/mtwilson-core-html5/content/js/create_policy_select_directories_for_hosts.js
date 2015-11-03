@@ -83,7 +83,48 @@ function ApplyRegExViewModel() {
 	var self = this;
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
+    self.resetRegEx = function(event) {
+        console.log("Yeah !!!");
+		var sel_dir = $("#sel_dir").val();
+		
+        console.log("DIR : "+sel_dir);
 
+		var node = $("input[name='directory_" + sel_dir + "']");
+		var config = {
+			root : '/',
+			dir : sel_dir,
+			script : '/v1/images/browse/' + current_image_id + '/search',
+			expandSpeed : 1000,
+			collapseSpeed : 1000,
+			multiFolder : true,
+			loadMessage : "Loading...",
+			init : false,
+			filesForPolicy : false,
+			reset_regex : true
+		};
+
+		var len = node.parent().children().length;
+		var counter = 0;
+		node.parent().children().each(function() {
+			if (counter++ > 2) {
+				$(this).remove();
+			}
+		});
+
+		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+				'selected');
+
+		$("img[id='toggle_" + sel_dir + "']")
+				.attr(
+						"src",
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png");
+
+		node.attr('checked', false);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
+		});        
+    }
 	self.applyRegEx = function(loginFormElement) {
 		var include = loginFormElement.create_policy_regex_include.value;
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;

@@ -104,8 +104,15 @@ public class DbServiceImpl implements IPersistService {
 		jpaProperties.put("javax.persistence.jdbc.url",prop.get(Constants.DIRECTOR_DB_URL) );
 		jpaProperties.put("javax.persistence.jdbc.user" ,prop.get(Constants.DIRECTOR_DB_USERNAME));
 		jpaProperties.put("javax.persistence.jdbc.password", prop.get(Constants.DIRECTOR_DB_PASSWORD));
+		
+		log.info("Driver : "+prop.get(Constants.DIRECTOR_DB_DRIVER));
+		log.info("DB URL : "+prop.get(Constants.DIRECTOR_DB_URL));
+		log.info("DB User : "+prop.get(Constants.DIRECTOR_DB_USERNAME));
+		log.info("DB Paswd : "+prop.get(Constants.DIRECTOR_DB_PASSWORD));
+		
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory("director_data_pu",jpaProperties);
+		log.info("Created entiry manager factory");
 		
 		imgDao = new ImageDao(emf);
 		userDao = new UserDao(emf);
@@ -117,6 +124,7 @@ public class DbServiceImpl implements IPersistService {
 		sshDao = new SshSettingDao(emf);
 		settingFileProperties = new SettingFileProperties();
 		policyTemplateDao = new PolicyTemplateDao(emf);
+		log.info("COMPLETE DB init");
 	}
 
 	/*

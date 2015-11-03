@@ -30,6 +30,7 @@ ALTER TABLE MW_POLICY_UPLOAD ADD CONSTRAINT FK_MW_POLICY_UPLOAD_POLICY_ID FOREIG
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_SSH_KEY_ID FOREIGN KEY (SSH_KEY_ID) REFERENCES MW_SSH_KEY (ID);
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_SSH_PASSWORD_ID FOREIGN KEY (SSH_PASSWORD_ID) REFERENCES MW_SSH_PASSWORD (ID);
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_IMAGE_ID FOREIGN KEY (image_id)     REFERENCES mw_image (id);
+CREATE TABLE mw_policy_template(id character varying(36) NOT NULL, name character varying(255), deployment_type character varying(255), content character varying(2000), active boolean, deployment_type_identifier character varying(255), policy_type character varying(255), CONSTRAINT mw_policy_template_pkey PRIMARY KEY (id));
 
 -- View: mw_image_info_view
 
@@ -68,3 +69,11 @@ CREATE OR REPLACE VIEW mw_image_info_view AS
 
 ALTER TABLE mw_image_info_view
   OWNER TO postgres;
+
+INSERT INTO mw_policy_template(id, name, deployment_type, content, active, deployment_type_identifier,policy_type)
+    VALUES ('1', 'Bare Metal (NV)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><Dir Path="/home"/><File Path="/home/director-0.1-SNAPSHOT.bin"/><File Path="/home/intelmh/.cache/motd.legal-displayed"/><File Path="/home/intelmh/.bash_logout"/></Manifest>',
+     true, 'NV', 'Manifest');
+
+INSERT INTO mw_policy_template(id, name, deployment_type, content, active, deployment_type_identifier,policy_type)
+    VALUES ('2', 'Bare Metal (V)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><Dir Path="/home"/><File Path="/home/director-0.1-SNAPSHOT.bin"/><File Path="/home/intelmh/.cache/motd.legal-displayed"/><File Path="/home/intelmh/.bash_logout"/><File Path="/home/intelmh/.bashrc"/></Manifest>',
+     true, 'V', 'Manifest');

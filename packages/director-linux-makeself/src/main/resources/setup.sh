@@ -162,7 +162,7 @@ echo "export DIRECTOR_REPOSITORY=$DIRECTOR_REPOSITORY" >> $DIRECTOR_ENV/director
 echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
-if [ -n "$DIRECTOR_PID_FILE" ]; then echo "export DIRECTOR_PID_FILE=$DIRECTOR_PID_FILE" >> $DIRECTOR_ENV/director-layout; fi
+
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
 echo "export DIRECTOR_USERNAME=$DIRECTOR_USERNAME" >> $DIRECTOR_ENV/director-username

@@ -84,10 +84,15 @@ public class DirectoryAndFileUtil {
 	 */
 	private String createFindCommand(String imageId,
 			DirectoryMeasurement dirMeasurement, boolean skipDirectories) {
-		String directoryAbsolutePath = dirMeasurement.getPath();
+		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+dirMeasurement.getPath();
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		String command = "find " + directoryAbsolutePath;
+		
+		if(dirMeasurement.isRecursive() == null){
+			dirMeasurement.setRecursive(false);
+		}
+		
 		if (dirMeasurement.isRecursive() == false){
 			command += "  -maxdepth 1";
 		}

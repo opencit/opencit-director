@@ -84,7 +84,7 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
-
+import com.intel.director.images.exception.DirectorException;
 /**
  * 
  * @author GS-0681
@@ -145,6 +145,7 @@ public class TdaasUtil {
 
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
+		String mountPath = TdaasUtil.getMountPath(imageId);
 		File parent = new File(filePath).getParentFile();
 		if (parent == null
 				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
@@ -156,7 +157,7 @@ public class TdaasUtil {
 			if (parentPath.equals(root)) {
 				return;
 			}
-			parentsList.put(parentPath, recursive);
+			parentsList.put(parentPath.replace(mountPath, ""), recursive);
 			getParentDirectory(imageId, parentPath, root, parentsList, true);			
 		}
 
@@ -606,8 +607,9 @@ public class TdaasUtil {
 	}
 
 	public static boolean addSshKey(String ip, String username, String password)
-			throws IOException {
+			throws DirectorException {
 		boolean flag = false;
+		try{
 		if (checkSshConnection(ip, username, password)) {
 			log.debug("User home is {}", System.getProperty("user.home"));
 			if (!Files.exists(Paths.get(System.getProperty("user.home")
@@ -621,6 +623,10 @@ public class TdaasUtil {
 			log.debug("addHostKey exit code is {}", executeQuoted.getExitCode());
 			flag = (executeQuoted.getExitCode() == 0);
 
+		}
+		}catch(Exception e){
+			log.error("Unable to add SSh key to remot host, addSshKey method",e);
+			throw new DirectorException("Unable to add SSh key to remot host",e);
 		}
 		return flag;
 	}
