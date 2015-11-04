@@ -1,13 +1,10 @@
 package com.intel.mtwilson.director.dao;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -15,21 +12,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import com.intel.director.api.SshSetting;
-import com.intel.director.api.SshSettingInfo;
 import com.intel.mtwilson.director.data.MwHost;
-import com.intel.mtwilson.director.data.MwImage;
-import com.intel.mtwilson.director.data.MwImageStoreSettings;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
 
 public class SshSettingDao {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
 	Mapper mapper = new Mapper();
 
 	public SshSettingDao(EntityManagerFactory emf) {
@@ -76,8 +64,6 @@ public class SshSettingDao {
 		EntityManager em = getEntityManager();
 		try {
 			em.getTransaction().begin();
-			String id = mwHost.getId();
-			MwHost demo = em.getReference(MwHost.class, id);
 			em.merge(mwHost);
 			em.getTransaction().commit();
 		} catch (Exception e) {
@@ -156,7 +142,7 @@ public class SshSettingDao {
 
 	}
 
-	public List<MwHost> ShowAll() throws DbException {
+	public List<MwHost> showAll() throws DbException {
 
 		EntityManager em = getEntityManager();
 		List<MwHost> list;

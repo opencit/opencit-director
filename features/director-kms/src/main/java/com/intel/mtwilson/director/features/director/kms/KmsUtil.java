@@ -5,12 +5,16 @@ import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfigura
 import java.io.File;
 import java.io.IOException;
 import java.security.PublicKey;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.crypto.SecretKey;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -18,6 +22,8 @@ import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.exception.ConfigurationNotFoundException;
 import com.intel.kms.api.CreateKeyRequest;
 import com.intel.kms.client.jaxrs2.Keys;
@@ -30,7 +36,7 @@ public class KmsUtil {
 	RsaCredentialX509 wrappingKeyCertificate;
 	String kmsLoginBasicUsername;
 	Keys keys;
-
+	Map<String, String> kmsprops = null;
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(KmsUtil.class);
 	private static final String DIRECTOR_ENVELOPE_ALIAS = "director.envelope.alias";
@@ -48,7 +54,7 @@ public class KmsUtil {
 		String kmsEndpointUrl;
 		String kmsTlsPolicyCertificateSha1;
 		String kmsLoginBasicPassword;
-
+		kmsprops = new Gson().fromJson(DirectorUtil.getProperties(Constants.KMS_PROP_FILE), new TypeToken<HashMap<String, Object>>() {}.getType());
 		// Get director envelope key
 		String directorEnvelopeAlias = getConfiguration().get(
 				DIRECTOR_ENVELOPE_ALIAS, "director-envelope");
@@ -92,22 +98,20 @@ public class KmsUtil {
 		}
 
 		// Collect KMS configurations
-		kmsEndpointUrl = getConfiguration().get(KMS_ENDPOINT_URL, null);
+		kmsEndpointUrl = kmsprops.get(KMS_ENDPOINT_URL.replace('.','_'));
 		if (kmsEndpointUrl == null || kmsEndpointUrl.isEmpty()) {
 			throw new ConfigurationNotFoundException(
 					"KMS endpoint URL not configured");
 		}
 
-		kmsTlsPolicyCertificateSha1 = getConfiguration().get(
-				KMS_TLS_POLICY_CERTIFICATE_SHA1, null);
+		kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
 		if (kmsTlsPolicyCertificateSha1 == null
 				|| kmsTlsPolicyCertificateSha1.isEmpty()) {
 			throw new ConfigurationNotFoundException(
 					"KMS TLS policy certificate digest not configured");
 		}
 
-		kmsLoginBasicUsername = getConfiguration().get(
-				KMS_LOGIN_BASIC_USERNAME, null);
+		kmsLoginBasicUsername = kmsprops.get(KMS_LOGIN_BASIC_USERNAME.replace('.', '_'));
 		if (kmsLoginBasicUsername == null || kmsLoginBasicUsername.isEmpty()) {
 			throw new ConfigurationNotFoundException(
 					"KMS API username not configured");

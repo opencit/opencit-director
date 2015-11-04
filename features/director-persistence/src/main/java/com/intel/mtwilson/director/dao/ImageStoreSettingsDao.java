@@ -11,9 +11,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -23,7 +20,6 @@ public class ImageStoreSettingsDao {
 
 	 
 	
-	private Logger log = LoggerFactory.getLogger(getClass());
 	Mapper mapper= new Mapper();
 
 	public ImageStoreSettingsDao(EntityManagerFactory emf) {

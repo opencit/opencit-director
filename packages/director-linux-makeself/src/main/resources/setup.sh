@@ -33,6 +33,8 @@ DIRECTOR_LAYOUT=${DIRECTOR_LAYOUT:-home}
 export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
 # load application environment variables if already defined
+
+
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
   for env_file in $DIRECTOR_ENV_FILES; do
@@ -160,7 +162,6 @@ echo "export DIRECTOR_REPOSITORY=$DIRECTOR_REPOSITORY" >> $DIRECTOR_ENV/director
 echo "export DIRECTOR_JAVA=$DIRECTOR_JAVA" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_BIN=$DIRECTOR_BIN" >> $DIRECTOR_ENV/director-layout
 echo "export DIRECTOR_LOGS=$DIRECTOR_LOGS" >> $DIRECTOR_ENV/director-layout
-if [ -n "$DIRECTOR_PID_FILE" ]; then echo "export DIRECTOR_PID_FILE=$DIRECTOR_PID_FILE" >> $DIRECTOR_ENV/director-layout; fi
 
 # store director username in env file
 echo "# $(date)" > $DIRECTOR_ENV/director-username
@@ -202,6 +203,8 @@ touch "$DIRECTOR_INSTALL_LOG_FILE"
 chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_INSTALL_LOG_FILE"
 chmod 600 "$DIRECTOR_INSTALL_LOG_FILE"
 
+echo "install log file is" $INSTALL_LOG_FILE
+
 # load existing environment; set variables will take precendence
 load_director_conf
 load_director_defaults
@@ -217,44 +220,47 @@ prompt_with_default DIRECTOR_ID "Trust Director ID:" "$DIRECTOR_ID"
 update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
 #prompt_with_default VM_WHITELIST_HASH_TYPE "Specify the hash type algorithm to use during VM whitelist:" "$VM_WHITELIST_HASH_TYPE"
 update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
-prompt_with_default IMAGE_STORE_TYPE "Image Store Type:" "$IMAGE_STORE_TYPE"
-update_property_in_file "image.store.type" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_TYPE"
-prompt_with_default IMAGE_STORE_SERVER "Image Store Server:" "$IMAGE_STORE_SERVER"
-update_property_in_file "image.store.server" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_SERVER"
-prompt_with_default IMAGE_STORE_USERNAME "Image Store Username:" "$IMAGE_STORE_USERNAME"
-update_property_in_file "image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-prompt_with_default_password IMAGE_STORE_PASSWORD "Image Store Password:" "$IMAGE_STORE_PASSWORD"
-update_property_in_file "image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-prompt_with_default TENANT_NAME "Tenant Name:" "$TENANT_NAME"
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 
 
-#------------------
-prompt_with_default GLANCE_IMAGE_STORE_IP "Image Store host:" "$GLANCE_IMAGE_STORE_IP"
+#------------------ Glance properties
+
 update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-
-prompt_with_default GLANCE_IMAGE_STORE_PORT "Image Store Port:" "$GLANCE_IMAGE_STORE_PORT"
 update_property_in_file "glance.port" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
-
-update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-
-
-prompt_with_default GLANCE_TENANT_NAME "Image Store Tenant:" "$GLANCE_TENANT_NAME"
-update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_TENANT_NAME"
+update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
+update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
+update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 
 
 #-------------------
 
 
-#required glance.properties
-update_property_in_file "glance.ip" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-update_property_in_file "glance.port" "$GLANCE_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
-update_property_in_file "glance.image.store.username" "$GLANCE_PROPERTIES_FILE" "$IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$GLANCE_PROPERTIES_FILE" "$IMAGE_STORE_PASSWORD"
-update_property_in_file "glance.tenant.name" "$GLANCE_PROPERTIES_FILE" "$GLANCE_TENANT_NAME"
+#required database properties
+
+prompt_with_default DIRECTOR_DB_NAME "Drector db name:" "$DIRECTOR_DB_NAME"
+update_property_in_file "director.db.name" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_NAME"
+prompt_with_default DIRECTOR_DB_HOSTNAME "Drector db Hostname:" "$DIRECTOR_DB_HOSTNAME"
+update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_HOSTNAME"
+prompt_with_default DIRECTOR_DB_PORTNUM "Drector db Portno:" "$DIRECTOR_DB_PORTNUM"
+update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
+prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
+update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
+prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
+update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
+prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
+update_property_in_file "director.db.driver" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_DRIVER"
+
+export DIRECTOR_DB_URL="jdbc:postgresql://${DIRECTOR_DB_HOSTNAME}:${DIRECTOR_DB_PORTNUM}/${DIRECTOR_DB_NAME}"
+update_property_in_file "director.db.url" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_URL"
+
+export POSTGRES_HOSTNAME=${DIRECTOR_DB_HOSTNAME}
+export POSTGRES_PORTNUM=${DIRECTOR_DB_PORTNUM}
+export POSTGRES_DATABASE=${DIRECTOR_DB_NAME}
+export POSTGRES_USERNAME=${DIRECTOR_DB_USERNAME}
+export POSTGRES_PASSWORD=${DIRECTOR_DB_PASSWORD}
+
 
 # modifying after mtwilson api client built
 prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
@@ -266,17 +272,19 @@ update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILS
 prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
 update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
-# For Aakash
 
-prompt_with_default MTWILSON_API_URL "Mtwilson API URL:" "$MTWILSON_API_URL"
+
+
 update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-prompt_with_default_password MTWILSON_TLS "Mtwilson TLS SHA1:" "$MTWILSON_TLS"
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
-
+#KMS
+update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
+update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 
 
 #############################################
@@ -313,13 +321,117 @@ else
 fi
 
 # make sure unzip and authbind are installed
-DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
-DIRECTOR_APT_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx " #vdfuse"
-DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
-DIRECTOR_ZYPPER_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx vdfuse"
+DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
+DIRECTOR_APT_PACKAGES="zip  unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2" #vdfuse"
+DIRECTOR_YAST_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
+DIRECTOR_ZYPPER_PACKAGES="zip  unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
 auto_install "Installer requirements" "DIRECTOR"
 if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 
+
+export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
+
+ postgres_write_connection_properties "$DIRECTOR_CONFIGURATION/director.properties" director.db
+ 
+
+ 
+  postgres_installed=1
+  touch ${DIRECTOR_HOME}/.pgpass
+  chmod 0600 ${DIRECTOR_HOME}/.pgpass
+  chown ${DIRECTOR_USERNAME}:${DIRECTOR_USERNAME} ${DIRECTOR_HOME}/.pgpass
+  export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+  if [ "$POSTGRES_HOSTNAME" == "127.0.0.1" ] || [ "$POSTGRES_HOSTNAME" == "localhost" ]; then
+    PGPASS_HOSTNAME=localhost
+  else
+    PGPASS_HOSTNAME="$POSTGRES_HOSTNAME"
+  fi
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > ${DIRECTOR_HOME}/.pgpass
+  echo "$PGPASS_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" >> ${DIRECTOR_HOME}/.pgpass
+  if [ $(whoami) == "root" ]; then cp ${DIRECTOR_HOME}/.pgpass ~/.pgpass; fi
+ 
+
+ if [ "$(whoami)" == "root" ]; then
+
+echo "opt postgres value333 is:: $opt_postgres"
+    # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
+    if [ -d "/etc/apt" ]; then
+      mkdir -p /etc/apt/trusted.gpg.d
+      chmod 755 /etc/apt/trusted.gpg.d
+      cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+      POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
+      add_postgresql_install_packages "POSTGRES_SERVER"
+    fi
+	echo "opt postgres value is:: $opt_postgres"
+         if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
+        echo "Installing postgres server..."
+        # when we install postgres server on ubuntu it prompts us for root pw
+        # we preset it so we can send all output to the log
+        aptget_detect; dpkg_detect; yum_detect;
+        if [[ -n "$aptget" ]]; then
+          echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+        fi
+        postgres_installed=0 #postgres is being installed
+        # don't need to restart postgres server unless the install script says we need to (by returning zero)
+        if postgres_server_install; then
+          postgres_restart >> $INSTALL_LOG_FILE
+          sleep 10
+        fi
+        # postgres server end
+      fi 
+      # postgres client install here
+      echo "Installing postgres client..."
+      postgres_install
+      # do not need to restart postgres server after installing the client.
+      #postgres_restart >> $INSTALL_LOG_FILE
+      #sleep 10
+      echo "Installation of postgres client complete" 
+      # postgres client install end
+    
+  
+  fi
+  
+if [ -z "$SKIP_DATABASE_INIT" ]; then
+    # postgres db init here
+    postgres_create_database
+    if [ $? -ne 0 ]; then
+      echo_failure "Cannot create database"
+      exit 1
+    fi
+    #postgres_restart >> $INSTALL_LOG_FILE
+    #sleep 10
+    #export is_postgres_available postgres_connection_error
+    if [ -z "$is_postgres_available" ]; then
+      echo_warning "Run 'director setup' after a database is available"; 
+    fi
+    # postgress db init end
+  else
+    echo_warning "Skipping init of database"
+  fi
+  if [ $postgres_installed -eq 0 ]; then
+    postgres_server_detect
+    has_local_peer=`grep "^local.*all.*all.*peer" $postgres_pghb_conf`
+    if [ -n "$has_local_peer" ]; then
+      echo "Replacing PostgreSQL local 'peer' authentication with 'password' authentication..."
+      sed -i 's/^local.*all.*all.*peer/local all all password/' $postgres_pghb_conf
+    fi
+    #if [ "$POSTGRESQL_KEEP_PGPASS" != "true" ]; then   # Use this line after 2.0 GA, and verify compatibility with other commands
+    if [ "${POSTGRESQL_KEEP_PGPASS:-true}" == "false" ]; then
+      if [ -f ${DIRECTOR_HOME}/.pgpass ]; then
+        echo "Removing .pgpass file to prevent insecure database password storage in plaintext..."
+        rm -f ${DIRECTOR_HOME}/.pgpass
+        if [ $(whoami) == "root" ]; then rm -f ~/.pgpass; fi
+      fi
+    fi
+  fi
+ 
+ 
+ 
+ 
+ 
+
+
+
+ 
 # setup authbind to allow non-root director to listen on ports 80 and 443
 if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
   touch /etc/authbind/byport/80 /etc/authbind/byport/443
@@ -352,8 +464,44 @@ if [ -z "$EXISTING_DIRECTOR_COMMAND" ]; then
 fi
 
 
+
+ 
+postgres_test_dbtables(){
+is_postgres_tables_available=""
+echo "inside db table created  check method"
+res_tables=`sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -c "SELECT table_name FROM information_schema.tables ORDER BY table_name;"|grep -x "\s*mw_image\s*"`
+echo "result of db table exist ${res_tables}"
+if [ -n "$res_tables" ]; then
+   is_postgres_tables_available="yes"
+   return 0
+	
+fi	
+
+return 1
+
+}
+
+
+postgres_test_dbtables
+if [ -n "$is_postgres_tables_available" ]; then
+    echo_success "Database tables in [${POSTGRES_DATABASE}] already exists"
+    return 0
+  else
+   echo "before running scripts"
+        #cp psql.sql /tmp
+        #chmod 777 /tmp/psql.sql
+        psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -a -f psql.sql 2>/tmp/intel.postgres.err >> $INSTALL_LOG_FILE
+        #sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -a -f  "/tmp/psql.sql">> $INSTALL_LOG_FILE
+	echo "after running scripts"
+fi
+
+
 # register linux startup script
 register_startup_script $DIRECTOR_HOME/bin/director.sh director
+
+
+
+
 
 # setup the director, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then
@@ -363,11 +511,12 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
-  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
+  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel}" >/dev/null
+  director config mtwilson.extensions.packageExcludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEEXCLUDEFILTER_STARTSWITH:-java,javax,com.intel.mtwilson.core.data.bundle.jaxrs}" >/dev/null
 
   #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
-  #director config mtwilson.navbar.buttons kms-keys,mtwilson-configuration-settings-ws-v2,mtwilson-core-html5 >/dev/null
-  #director config mtwilson.navbar.hometab keys >/dev/null
+ director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
+ director config mtwilson.navbar.hometab director-dashboard >/dev/null
 
   director config jetty.port ${JETTY_PORT:-80} >/dev/null
   director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null

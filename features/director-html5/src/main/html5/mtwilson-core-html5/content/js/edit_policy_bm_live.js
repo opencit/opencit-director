@@ -44,8 +44,8 @@ function EditBMLiveViewModel(data) {
 			data : ko.toJSON(self.editBMLiveMetaData),
 			success : function(data, status, xhr) {
 				if (data.status == "Error") {
-					$('#error_modal_body').text(data.details);
-					$("#error_modal").modal({
+					$('#error_modal_body_edit_bm_live_1').text(data.details);
+					$("#error_modal_edit_bm_live_1").modal({
 						backdrop : "static"
 					});
 					return;
@@ -60,8 +60,8 @@ function EditBMLiveViewModel(data) {
 					data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
-							$('#error_modal_body').text(data.details);
-							$("#error_modal").modal({
+							$('#error_modal_body_edit_bm_live_1').text(data.details);
+							$("#error_modal_edit_bm_live_1").modal({
 								backdrop : "static"
 							});
 							return;

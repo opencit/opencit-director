@@ -35,7 +35,8 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-							$("#error_modal").modal({backdrop: "static"});
+							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+								$('body').removeClass("modal-open");
 							console.log("Unmount successfully")
 
 						}
@@ -82,7 +83,48 @@ function ApplyRegExViewModel() {
 	var self = this;
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
+    self.resetRegEx = function(event) {
+        console.log("Yeah !!!");
+		var sel_dir = $("#sel_dir").val();
+		
+        console.log("DIR : "+sel_dir);
 
+		var node = $("input[name='directory_" + sel_dir + "']");
+		var config = {
+			root : '/',
+			dir : sel_dir,
+			script : '/v1/images/browse/' + current_image_id + '/search',
+			expandSpeed : 1000,
+			collapseSpeed : 1000,
+			multiFolder : true,
+			loadMessage : "Loading...",
+			init : false,
+			filesForPolicy : false,
+			reset_regex : true
+		};
+
+		var len = node.parent().children().length;
+		var counter = 0;
+		node.parent().children().each(function() {
+			if (counter++ > 2) {
+				$(this).remove();
+			}
+		});
+
+		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+				'selected');
+
+		$("img[id='toggle_" + sel_dir + "']")
+				.attr(
+						"src",
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png");
+
+		node.attr('checked', false);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
+		});        
+    }
 	self.applyRegEx = function(loginFormElement) {
 		var include = loginFormElement.create_policy_regex_include.value;
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
@@ -115,10 +157,16 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		console.log("Is checked : " + node.attr('checked'));
+
+		$("img[id='toggle_" + sel_dir + "']")
+				.attr(
+						"src",
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
+
 		node.attr('checked', true);
-		(node.parent()).fileTree(config, function(file, checkedStatus) {
-			editPatch(file, checkedStatus);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
 		});
 	}
 
@@ -226,8 +274,8 @@ $(document)
 								multiFolder : true,
 								init : true,
 								loadMessage : "Loading..."
-							}, function(file, checkedStatus) {
-								editPatch(file, checkedStatus);
+							}, function(file, checkedStatus, rootRegexDir) {
+								editPatch(file, checkedStatus, rootRegexDir);
 							});
 
 					mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
@@ -241,17 +289,29 @@ $(document)
 
 /* Patches processing */
 
-function editPatch(file, checkedStatus) {
+function editPatch(file, checkedStatus, rootRegexDir) {
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
+	var addPath = "'//*[local-name()=\"Whitelist\"]'";
+	var removePath = "'//*[local-name()=\"Whitelist\"]";
+	var pos = "prepend";
+
+	if (rootRegexDir != "") {
+		if (checkedStatus == true) {
+			pos = "after";
+		}
+		addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+				+ rootRegexDir + "\"]'";
+	}
 
 	if (checkedStatus == true) {
-		addRemoveXml = "<add pos=\"prepend\" sel='//*[local-name()=\"Whitelist\"]'><File Path=\""
-				+ file + "\"/></add>";
+
+		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
+				+ "><File Path=\"" + file + "\"/></add>";
 	} else {
-		addRemoveXml = "<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
-				+ file + "\"]'/>";
+		addRemoveXml = "<remove sel=" + removePath
+				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
 	patches.push(addRemoveXml);
 }

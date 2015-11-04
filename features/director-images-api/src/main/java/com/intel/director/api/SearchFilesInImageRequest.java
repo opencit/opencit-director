@@ -20,6 +20,7 @@ public class SearchFilesInImageRequest {
     public boolean recursive;
     public boolean include_recursive;
     public boolean files_for_policy;
+    public boolean reset_regex;
     public boolean init;
     public String id;
 	public String getDir()  {

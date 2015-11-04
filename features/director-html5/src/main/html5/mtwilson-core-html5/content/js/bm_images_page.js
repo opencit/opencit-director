@@ -165,6 +165,22 @@ function backToHostsPage() {
 		});
 
 	}
+	$('body').removeClass("modal-open");
+	refreshBMOnlineGrid();
+	refresh_bm_images_Grid();
+}
+
+function backToHostsPageWithoutUnmount() {
+	$("#create_policy_wizard2_").html("");
+	$("#create_policy_wizard2_").hide("");
+	$("#create_policy_wizard_bm_image").html("");
+	$("#create_policy_wizard_bm_image").hide("");
+	$("#edit_policy_wizard_bm_live").html("");
+	$("#edit_policy_wizard_bm_live").hide("");
+	$("#edit_policy_wizard_bm_image").html("");
+	$("#edit_policy_wizard_bm_image").hide("");
+	$("#bm_images_grid_page").show();
+	$('body').removeClass("modal-open");
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
 }

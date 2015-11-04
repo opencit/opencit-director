@@ -10,9 +10,6 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFields;
 import com.intel.director.api.ui.ImageInfoFilter;
@@ -26,7 +23,6 @@ import com.intel.mtwilson.director.mapper.Mapper;
 
 public class ImageDao {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
 	Mapper mapper = new Mapper();
 
 	public ImageDao(EntityManagerFactory emf) {

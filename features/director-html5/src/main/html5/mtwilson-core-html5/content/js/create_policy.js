@@ -62,10 +62,11 @@ function CreateImageViewModel() {
 			data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
 				if (data.status == "Error") {
-					$('#error_modal_body').text(data.details);
-					$("#error_modal").modal({
+					$('#error_modal_body_vm_1').text(data.details);
+					$("#error_modal_vm_1").modal({
 						backdrop : "static"
 					});
+						$('body').removeClass("modal-open");
 					return;
 				}
 				$.ajax({
@@ -79,10 +80,11 @@ function CreateImageViewModel() {
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
-							$('#error_modal_body').text(data.details);
-							$("#error_modal").modal({
+							$('#error_modal_body_vm_1').text(data.details);
+							$("#error_modal_vm_1").modal({
 								backdrop : "static"
 							});
+								$('body').removeClass("modal-open");
 							return;
 						}
 						nextButton();
@@ -167,5 +169,24 @@ function addRadios(arr) {
 	}
 
 	$('#launch_control_policy').html(temp);
+	$.ajax({
+		type : 'GET',
+		url : '/v1/setting/kms/getproperties',
+		contentType : "application/json",
+		success : function(data) {
+			
+			if(data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha1 == "" ||
+				data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha1 == null ||
+				data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha1 == undefined )
+				{
+					$('#encryptRow').hide();
+				}
+			else
+				{
+					$('#encryptRow').show();
+				}
+			
+		}
+	});
 };
 

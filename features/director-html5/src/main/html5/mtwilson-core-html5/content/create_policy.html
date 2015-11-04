@@ -88,10 +88,10 @@
 									
 									
 									
-									<div class="form-group">        
+									<div class="form-group" id="encryptRow">        
 										<label class="control-label col-md-4" for="confidentiality">Confidentiality:</label>
 										<div class="col-md-8" id="confidentiality">
-											<div class="checkbox">
+											<div class="checkbox" id="isEncryptedCheckBox">
 												<label><input type="checkbox" 
 												id="isEncrypted" name="isEncrypted" value="encrypt"  />Encrypt Image</label>
 											</div>
@@ -100,7 +100,7 @@
 									
 									<div class="col-md-offset-1 col-md-1">
 										<button type="button"
-										onclick="backToVmImagesPage()"
+										onclick="backToVmImagesPageWithountUnmount()"
 										class="btn btn-primary">Back To Images</button>
 									</div>
 									
@@ -110,19 +110,21 @@
 									</div>
 									
 									<!-- Modal -->
-									<div class="modal fade" id="error_modal" role="dialog">
+									<div class="modal fade" id="error_modal_vm_1" role="dialog">
 										<div class="modal-dialog">
 											
 											<!-- Modal content-->
 											<div class="modal-content">
 												<div class="modal-header">
 													<button type="button" class="close" data-dismiss="modal">&times;</button>
-													<h4 class="modal-title"><div id="error_modal_body">Error In Creating Policy</div></h4>
+													<h4 class="modal-title"><div id="error_modal_body_vm_1">Error In Creating Policy</div></h4>
 												</div>
 												
 												<div class="modal-footer">
 													<button type="button" class="btn btn-default"
-													data-dismiss="modal" onclick="backToVmImagesPage()">Close</button>
+													data-dismiss="modal" onclick="backToVmImagesPageWithountUnmount()">Okay</button>
+													<button type="button" class="btn btn-default"
+													data-dismiss="modal" onclick="backToVmImagesPage()">Force Unmount</button>
 												</div>
 											</div>
 											

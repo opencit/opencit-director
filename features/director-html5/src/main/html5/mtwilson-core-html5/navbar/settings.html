@@ -15,6 +15,37 @@
 
  <script type="text/javascript">
 
+function fetchKMSSetting() {
+	$.ajax({
+		type : 'GET',
+		url : '/v1/settings/kms/getproperties',
+		contentType : "application/json",
+		success : function (data) {
+			$('#KMS_IP').val(data.kmserverip);
+			$('#KMS_PORT').val(data.port);
+			$('#KMS_USERNAME').val(data.username);
+			$('#KMS_PASSWORD').val(data.password);
+			$('#KMS_RSAKEY').val(data.rsakey);
+		}
+	});
+}
+function fetchMtwilsonSetting() {
+	$.ajax({
+		type : 'GET',
+		url : '/v1/setting/mtwilson/getproperties',
+		contentType : "application/json",
+		success : function (data) {
+			$('#mtwilsonapiurl').val(data.mtwilson_api_url);
+			$('#mtwilsonapiusername').val(data.mtwilson_api_username);
+			$('#mtwilsonapipassword').val(data.mtwilson_api_password);
+			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha1);
+			$('#mtwilsonserverip').val(data.mtwilson_server);
+			$('#mtwilsonserverport').val(data.mtwilson_server_port);
+			$('#mtwilsonusername').val(data.mtwilson_username);
+			$('#mtwilsonpassword').val(data.mtwilson_password);
+		}
+	});
+}
 
 
 		function refreshSSHSetting() {
@@ -101,9 +132,11 @@
 so the ul itself is not copied -->
 <ul>
 <li class="dropdown">
-	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">TDAAS Settings</a>
+	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Settings</a>
 	<ul id="g-settings-menu" class="dropdown-menu" role="menu">
-		<li><a href="#setting_create_ssh" data-toggle="tab" onclick="refreshSSHSetting();" >Ssh Settings</a></li>
+		<li><a href="#setting_create_ssh" data-toggle="tab" onclick="refreshSSHSetting();" >SSH Setting</a></li>
+		<li><a href="#setting_kms" data-toggle="tab" onclick="fetchKMSSetting()" >KMS Setting</a></li>
+		<li><a href="#setting_mtwilson" data-toggle="tab" onclick="fetchMtwilsonSetting()" >Attestation Service Setting</a></li>
 	</ul>                
 </li>
 </ul>
