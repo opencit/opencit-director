@@ -54,7 +54,7 @@ public class ImageActionPoller {
 			log.debug("*** Got " + incompleteImageActionObjects.size()
 					+ " to process");
 		} catch (DbException e) {
-			// TODO Auto-generated catch block
+			// TODO Handle Error
 			log.error("searchIncompleteImageAction failed", e);
 		}
 		// iterate over list of image action objects

@@ -30,6 +30,12 @@ function refreshBMOnlineGrid() {
 				pageButtonCount : 15,
 				data : result.images,
 				fields : [ {
+					title : "Policy Name",
+					name : "image_upload",
+					type : "text",
+					width : 100,
+					align : "center"
+				},  {
 					title : "Host Name",
 					name : "image_name",
 					type : "text",
@@ -41,13 +47,7 @@ function refreshBMOnlineGrid() {
 					type : "text",
 					width : 100,
 					align : "center"
-				},/* {
-					title : "Status/Push",
-					name : "image_upload",
-					type : "text",
-					width : 100,
-					align : "center"
-				},*/ {
+				},  {
 					title : "Created Date",
 					name : "created_date",
 					type : "text",

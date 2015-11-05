@@ -114,7 +114,7 @@ function showImageLaunchPolicies(policydata) {
 
 			// / $("input[name=asset_tag_policy][value='Trust
 			// Only']").attr('checked', 'checked');
-			if (policydata.isEncrypted == true) {
+			if (policydata.encrypted == true) {
 				$("input[name=isEncrypted]").prop('checked', 'true');
 			}
 			mainViewModel.editImageViewModel = new EditImageViewModel(
@@ -140,5 +140,24 @@ function addRadios(arr) {
 	}
 
 	$('#launch_control_policy').html(temp);
+	$.ajax({
+		type : 'GET',
+		url : '/v1/setting/kms/getproperties',
+		contentType : "application/json",
+		success : function(data) {
+			
+			if(data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha1 == "" ||
+				data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha1 == null ||
+				data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha1 == undefined )
+			{
+				$('#encryptRow').hide();
+			}
+		else
+			{
+				$('#encryptRow').show();
+			}
+			
+		}
+	});
 };
 

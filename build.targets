@@ -1,2 +1,2 @@
 # A successful build produces the following files:
-packages/director-linux-makeself/target/director-0.1-SNAPSHOT.bin
+packages/director/target/director-0.1-SNAPSHOT.bin

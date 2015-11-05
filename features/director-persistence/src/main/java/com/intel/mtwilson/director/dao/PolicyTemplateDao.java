@@ -119,7 +119,6 @@ public class PolicyTemplateDao {
 
 	public List<MwPolicyTemplate> findDeploymentTypeByFilter(
 			PolicyTemplateInfo filter) throws DbException {
-		// TODO Auto-generated method stub
 		EntityManager em = getEntityManager();
 		List<MwPolicyTemplate> mwPolicyTemplate = new ArrayList<MwPolicyTemplate>();
 		try {

@@ -22,7 +22,6 @@ public class AuditFields {
 	}
 
 	public AuditFields() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getCreated_by_user_id() {

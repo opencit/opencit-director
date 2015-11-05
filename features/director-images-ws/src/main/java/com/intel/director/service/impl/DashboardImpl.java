@@ -1,8 +1,6 @@
 package com.intel.director.service.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import com.intel.director.api.ImageActionObject;
@@ -15,12 +13,10 @@ import com.intel.director.api.User;
 import com.intel.director.api.ui.ImageCountPieChart;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFields;
-import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
-import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
@@ -41,30 +37,58 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
  * 
  */
 public class DashboardImpl implements DashboardService {
-
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(DashboardImpl.class);
 	private IPersistService dashboardImplPersistenceManager;
 
 	public DashboardImpl() {
 		dashboardImplPersistenceManager = new DbServiceImpl();
 	}
 
-	// All user recent policy
-	public List<TrustPolicyDraft> getRecentPolicy() throws DbException {
-		Date threeDaysBackDate;
-		Calendar calender = Calendar.getInstance();
-		calender.setTime(new Date());
-		calender.add(Calendar.DATE, -2);
-		threeDaysBackDate = calender.getTime();
-		TrustPolicyDraftFilter trustPolicyDraftFilter = new TrustPolicyDraftFilter();
-		trustPolicyDraftFilter.setCreated_date(threeDaysBackDate);
+	// Recent policy for All User
+	public List<TrustPolicyDraft> getRecentPolicy() {
+
+		List<ImageInfo> images = null;
+		try {
+			images = dashboardImplPersistenceManager.fetchImages(null);
+		} catch (DbException e) {
+			log.error("Error in fetching images ", e);
+		}
+		if (images == null) {
+			return new ArrayList<TrustPolicyDraft>();
+		}
 		TrustPolicyDraftOrderBy tpOrderBy = new TrustPolicyDraftOrderBy();
 		tpOrderBy.setTrustPolicyDraftFields(TrustPolicyDraftFields.EDITED_DATE);
 		tpOrderBy.setOrderBy(OrderByEnum.DESC);
+		List<TrustPolicyDraft> tpdlists = null;
+		try {
+			tpdlists = dashboardImplPersistenceManager
+					.fetchPolicyDrafts(tpOrderBy);
 
-		List<TrustPolicyDraft> temp = dashboardImplPersistenceManager
-				.fetchPolicyDrafts(trustPolicyDraftFilter, tpOrderBy);
+		} catch (DbException e) {
+			log.error("Error in fetching Policy Drafts ", e);
+			return new ArrayList<TrustPolicyDraft>();
+		}
+		if (tpdlists == null) {
+			return new ArrayList<TrustPolicyDraft>();
+		}
+		List<TrustPolicyDraft> result = new ArrayList<TrustPolicyDraft>();
+		for (TrustPolicyDraft tpd : tpdlists) {
+			String image_format;
+			try {
+				image_format = dashboardImplPersistenceManager.fetchImageById(
+						tpd.getImgAttributes().getId()).getImage_format();
+				if (image_format != null) {
+					result.add(tpd);
+				}
+			} catch (DbException e) {
+				log.error("Error in fetching image ::  "
+						+ tpd.getImgAttributes().getId(), e);
+			}
 
-		return temp;
+		}
+
+		return tpdlists;
 
 	}
 
@@ -88,33 +112,31 @@ public class DashboardImpl implements DashboardService {
 		return trustPolicyDraftRequest;
 	}
 
-	// New imported images without policy
+	// New imported images without policy Done
 	public List<ImageInfo> getImagesWithoutPolicy() throws DbException {
-		List<ImageInfo> imagesWithoutPolicy = new ArrayList<ImageInfo>();
-		List<ImageInfo> temp = new ArrayList<ImageInfo>();
-		Date threeDaysBackDate;
-		Calendar c = Calendar.getInstance();
-		c.setTime(new Date());
-		c.add(Calendar.DATE, -3);
-		threeDaysBackDate = c.getTime();
-		ImageInfoFilter imageInfoFilter = new ImageInfoFilter();
-		imageInfoFilter.setCreated_date(threeDaysBackDate);
-		imageInfoFilter.setEdited_date(threeDaysBackDate);
+
 		ImageInfoOrderBy imgOrderBy = new ImageInfoOrderBy();
 		imgOrderBy.setImgFields(ImageInfoFields.CREATED_DATE);
 		imgOrderBy.setOrderBy(OrderByEnum.DESC);
-		imagesWithoutPolicy = dashboardImplPersistenceManager.fetchImages(
-				imageInfoFilter, imgOrderBy);
-		for (ImageInfo mwTPD : imagesWithoutPolicy) {
+		List<ImageInfo> images = dashboardImplPersistenceManager.fetchImages(
+				null, imgOrderBy);
+		if (images == null) {
+			return new ArrayList<ImageInfo>();
+		}
+
+		List<ImageInfo> result = new ArrayList<ImageInfo>();
+
+		for (ImageInfo mwTPD : images) {
 			if (mwTPD.getTrust_policy_draft_id() == null
-					&& mwTPD.getTrust_policy_id() == null) {
-				temp.add(mwTPD);
+					&& mwTPD.getTrust_policy_id() == null
+					&& mwTPD.getImage_format() != null) {
+				result.add(mwTPD);
 			}
 		}
-		return temp;
+		return result;
 	}
 
-	// Recently deployed Images
+	// Recently deployed Images Done
 	public List<ImageUploadRequest> getRecentlyDeployedImages()
 			throws DbException {
 		ImageStoreUploadOrderBy orderBy = new ImageStoreUploadOrderBy();
@@ -125,6 +147,9 @@ public class DashboardImpl implements DashboardService {
 		List<ImageUploadRequest> imgUploadRequest = new ArrayList<ImageUploadRequest>();
 		List<ImageStoreUploadTransferObject> list = dashboardImplPersistenceManager
 				.fetchImageUploads(orderBy);
+		if (list == null) {
+			return null;
+		}
 		for (ImageStoreUploadTransferObject imgUTO : list) {
 			imgUploadRequest.add(tdaasUtil.toImageUpload(imgUTO));
 		}
@@ -132,122 +157,119 @@ public class DashboardImpl implements DashboardService {
 
 	}
 
-	// Images ready to deploy
+	// Images ready to deploy Done
 	public List<ImagesReadyToDeployResponse> getImagesReadyToDeploy()
 			throws DbException, DirectorException {
 		List<ImagesReadyToDeployResponse> resultList = new ArrayList<ImagesReadyToDeployResponse>();
-		ImagesReadyToDeployResponse result = new ImagesReadyToDeployResponse();
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		List<ImageInfo> images = dashboardImplPersistenceManager
 				.fetchImages(null);
-		
-		if(images == null)
-		{
+
+		if (images == null) {
 			return resultList;
 		}
-		
+
 		ImageActionImpl imgAction = new ImageActionImpl();
 		List<ImageActionObject> imageactions = imgAction.getdata();
-		List<ImageStoreUploadTransferObject> image_store_list = dashboardImplPersistenceManager
+		List<ImageStoreUploadTransferObject> images_upload = dashboardImplPersistenceManager
 				.fetchImageUploads(null);
-		int flag = 0;
-		for (ImageInfo image : images) {
+		ImagesReadyToDeployResponse result = null;
 
-			if (image.getImage_format() != null) {
+		for (ImageInfo image : images) {
+			if(image.getTrust_policy_id()==null || image.getImage_format()==null){
+				continue;
+			}
+			if (image.getImage_format() != null
+					&& image.getTrust_policy_id() != null) {
 				if (imageactions != null) {
 					for (ImageActionObject imageaction : imageactions) {
-						if (imageaction.getImage_id().equals(image.getId())) {
-							flag = 1;
-							break;
+						if ((imageaction.getImage_id().equals(image.getId())) && imageaction.getAction_count()>1) {
+							continue;
 						}
 					}
 				}
 
-				if (flag == 1) {
-					flag = 0;
-					continue;
-				}
-
-				if (imageactions != null) {
-					for (ImageStoreUploadTransferObject image_store : image_store_list) {
-						if (image_store.getImg().getId().equals(image.getId())) {
-							flag = 1;
-							break;
+				if (images_upload != null) {
+					for (ImageStoreUploadTransferObject image_upload : images_upload) {
+						if (image_upload.getImg().getId().equals(image.getId())) {
+							continue;
 						}
 					}
 				}
-				if (flag == 1) {
-					flag = 0;
-					continue;
-				} else {
-					flag = 0;
-					result = tdaasUtil.toImageReadyToDeploy(image);
-					resultList.add(result);
-					result = new ImagesReadyToDeployResponse();
-				}
+
+				result = tdaasUtil.toImageReadyToDeploy(image);
+				resultList.add(result);
 
 			}
 		}
-
 		return resultList;
-
 	}
 
-	// Upload in progress
+	// Upload in progress Done
 	public List<ImageActionObject> uploadInProgress() throws DbException {
-		List<ImageActionObject> imgAction = new ArrayList<ImageActionObject>();
 		List<ImageActionObject> uploadInProgress = new ArrayList<ImageActionObject>();
-		imgAction = dashboardImplPersistenceManager.searchByAction();
-		String actions;
-		CharSequence upload = "Upload";
-
+		List<ImageActionObject> imgAction = dashboardImplPersistenceManager
+				.searchByAction();
+		if(imgAction!=null){
 		for (ImageActionObject imgObj : imgAction) {
-			actions = imgObj.getCurrent_task_name();
-			if (actions.contains(upload) || actions.contains(Constants.IN_PROGRESS)) {
-				uploadInProgress.add(imgObj);
+			String imgName = dashboardImplPersistenceManager.fetchImageById(
+					imgObj.getImage_id()).getName();
+			imgObj.setImage_id(imgName);
+			if(Constants.TASK_NAME_UPLOAD_TAR.equals(imgObj.getCurrent_task_name()) || Constants.TASK_NAME_UPLOAD_IMAGE.equals(imgObj.getCurrent_task_name() )|| Constants.TASK_NAME_UPLOAD_POLICY.equals(imgObj.getCurrent_task_name() )){
+			
+			uploadInProgress.add(imgObj);
 			}
 		}
-		String imgName;
-		for (int it = 0; it < uploadInProgress.size(); it++) {
-			imgName = fetchImageById(uploadInProgress.get(it).getImage_id())
-					.getName();
-			uploadInProgress.get(it).setImage_id(imgName);
 		}
-
 		return uploadInProgress;
 	}
 
 	public int countOfImagesWithPolicy() throws DbException {
-		ImageInfoFilter imageInfoFilter = new ImageInfoFilter();
-		imageInfoFilter.setPolicyCriteria(SearchImageByPolicyCriteria.WITH);
-		return dashboardImplPersistenceManager
-				.getTotalImagesCount(imageInfoFilter);
+		List<ImageInfo> images = dashboardImplPersistenceManager
+				.fetchImages(null);
+		if (images == null) {
+			return 0;
+		}
+		int count = 0;
+		for (ImageInfo image : images) {
+			if (image.getTrust_policy_id() != null
+					&& image.getTrust_policy_draft_id() == null) {
+				count++;
+			}
+		}
+		return count;
 
 	}
 
 	public int countOfImagesWithoutPolicy() throws DbException {
-		ImageInfoFilter imageInfoFilter = new ImageInfoFilter();
-		imageInfoFilter.setPolicyCriteria(SearchImageByPolicyCriteria.WITHOUT);
-		return dashboardImplPersistenceManager
-				.getTotalImagesCount(imageInfoFilter);
+		List<ImageInfo> images = dashboardImplPersistenceManager
+				.fetchImages(null);
+		if (images == null) {
+			return 0;
+		}
+		int count = 0;
+		for (ImageInfo image : images) {
+			if (image.getTrust_policy_id() == null
+					&& image.getTrust_policy_draft_id() != null) {
+				count++;
+			}
+		}
+		return count;
 
 	}
 
 	public int countOfImagesWithPolicyNoDraft() throws DbException {
-		List<ImageInfo> imagesWithoutPolicy = new ArrayList<ImageInfo>();
-		ImageInfoFilter imageInfoFilter = new ImageInfoFilter();
-		imageInfoFilter.setPolicyCriteria(SearchImageByPolicyCriteria.WITH);
-		ImageInfoOrderBy imgOrderBy = new ImageInfoOrderBy();
-		imgOrderBy.setImgFields(ImageInfoFields.ID);
-		imgOrderBy.setOrderBy(OrderByEnum.DESC);
-		imagesWithoutPolicy = dashboardImplPersistenceManager.fetchImages(
-				imageInfoFilter, imgOrderBy);
-		int index = 0, count = 0;
-		for (ImageInfo mwTPD : imagesWithoutPolicy) {
-			if (imagesWithoutPolicy.get(index).getTrust_policy_draft_id() == null) {
+		List<ImageInfo> images = dashboardImplPersistenceManager
+				.fetchImages(null);
+		if (images == null) {
+			return 0;
+		}
+		int count = 0;
+		for (ImageInfo image : images) {
+			if (image.getTrust_policy_id() == null
+					&& image.getTrust_policy_draft_id() == null) {
 				count++;
 			}
-			index++;
 		}
 		return count;
 	}
@@ -256,17 +278,17 @@ public class DashboardImpl implements DashboardService {
 		ImageCountPieChart imgWithPolicyNoDraft = new ImageCountPieChart();
 		ImageCountPieChart imgWithoutPolicy = new ImageCountPieChart();
 		ImageCountPieChart imgWithPolicy = new ImageCountPieChart();
-		ArrayList<ImageCountPieChart> listImageCount = new ArrayList();
+		ArrayList<ImageCountPieChart> listImageCount = new ArrayList<ImageCountPieChart>();
 		imgWithPolicyNoDraft.setValue(countOfImagesWithPolicyNoDraft());
-		imgWithPolicyNoDraft.setLabel("Images with Policy No Draft ");
+		imgWithPolicyNoDraft.setLabel("Images without Policy and Draft ");
 		imgWithPolicyNoDraft.setColor("#F38630");
 		listImageCount.add(imgWithPolicyNoDraft);
 		imgWithoutPolicy.setValue(countOfImagesWithoutPolicy());
 		imgWithoutPolicy.setColor("#E0E4CC");
-		imgWithoutPolicy.setLabel("Images Without Policy ");
+		imgWithoutPolicy.setLabel("Images having draft");
 		listImageCount.add(imgWithoutPolicy);
 		imgWithPolicy.setColor("#E0E4FF");
-		imgWithPolicy.setLabel("Images with Policy ");
+		imgWithPolicy.setLabel("Images having Policy ");
 		imgWithPolicy.setValue(countOfImagesWithPolicy());
 		listImageCount.add(imgWithPolicy);
 		return listImageCount;

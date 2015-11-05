@@ -10,6 +10,6 @@
     <modules>
         <module>director-zip</module>
 
-        <module>director-linux-makeself</module>
+        <module>director</module>
     </modules>
 </project>

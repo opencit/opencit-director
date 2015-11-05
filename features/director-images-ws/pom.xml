@@ -30,41 +30,36 @@
     <dependencies>
         <!-- director projects begin -->
 
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-trust-policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-images-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-persistence</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-image-store</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
-            <artifactId>director-attestation-server</artifactId>
-        </dependency>
-        <dependency>
-            <artifactId>mtwilson-util-xml</artifactId>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <version>0.2-SNAPSHOT</version>
-        </dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-trust-policy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-images-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-persistence</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-image-store</artifactId>
+		</dependency>
+		<dependency>
+			<artifactId>mtwilson-util-xml</artifactId>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
 
         <!-- Director projects end -->
         <!--MtWilson dependencies begin -->

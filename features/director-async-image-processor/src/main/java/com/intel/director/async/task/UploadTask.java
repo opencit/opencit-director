@@ -138,7 +138,6 @@ public abstract class UploadTask extends ImageActionTask {
 
 		try {
 
-			ImageStoreManager imageStoreManager = null;
 
 			/*
 			 * TODO:- Fetch classname from database based on imagestorename
@@ -167,7 +166,7 @@ public abstract class UploadTask extends ImageActionTask {
 					prop.getProperty(Constants.GLANCE_IMAGE_STORE_PASSWORD));
 			configuration.set(Constants.GLANCE_TENANT_NAME,
 					prop.getProperty(Constants.GLANCE_TENANT_NAME));
-			imageStoreManager = new GlanceImageStoreManager(configuration);
+			ImageStoreManager imageStoreManager = new GlanceImageStoreManager(configuration);
 
 			String glanceId = null;
 
@@ -186,11 +185,10 @@ public abstract class UploadTask extends ImageActionTask {
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
 			int size = (int) (content.length() / 1024);
-			int sent = 0;
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			sent = imageStoreUploadResponse.getSent() / 1024;
+			int sent = imageStoreUploadResponse.getSent() / 1024;
 			while (sent != size) {
 
 				log.debug("##################Inside while loop size::" + size
@@ -202,7 +200,7 @@ public abstract class UploadTask extends ImageActionTask {
 				imageUploadTransferObject.setImage_size(size);
 
 				imageUploadTransferObject.setSent(sent);
-
+				updateImageActionContentSent(sent, size) ;
 				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
 				imageUploadTransferObject.setDate(new Date());
@@ -235,7 +233,7 @@ public abstract class UploadTask extends ImageActionTask {
 				imageUploadTransferObject.setImage_size(size);
 
 				imageUploadTransferObject.setSent(sent);
-
+				updateImageActionContentSent(sent, size) ;
 				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
 				imageUploadTransferObject.setDate(new Date());
@@ -258,6 +256,7 @@ public abstract class UploadTask extends ImageActionTask {
 
 			}
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
+			reader.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(

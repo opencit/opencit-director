@@ -138,7 +138,7 @@ public class Dashboard {
 	}
 
 	@GET
-	@Path("/pieChart")
+	@Path("/piechart")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<ImageCountPieChart> getPieChartData() throws DbException {
 		log.debug("Dashboard -> trustpolicies pieChart");

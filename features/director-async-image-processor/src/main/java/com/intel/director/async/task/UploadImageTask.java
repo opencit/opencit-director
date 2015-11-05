@@ -34,7 +34,6 @@ public class UploadImageTask extends UploadTask {
 
 	@Override
 	public String getTaskName() {
-		// TODO Auto-generated method stub
 		return Constants.TASK_NAME_UPLOAD_IMAGE;
 	}
 
@@ -58,7 +57,6 @@ public class UploadImageTask extends UploadTask {
 	 * Actual implementation of task for uploading image
 	 */
 	public void runCreateImageTask() {
-		String imagePathDelimiter = "/";
 		log.debug("Inside runUploadImageTask for ::"
 				+ imageActionObject.getImage_id());
 		try {

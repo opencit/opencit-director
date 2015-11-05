@@ -88,7 +88,7 @@ public class Constants {
 	public static final String MH_KEYSTORE_LOCATION = "MH_Keystore_Location";
 	public static final String MH_TLS_SSL_PASSWD = "MH_TLS_SSL_Passwd";
 
-	public static final String VM_IMAGES_PATH = "C:/tmp/";
+	public static final String TARBALL_PATH = "/tmp/";
 	public static final String IMAGE_STORE_TYPE = "image.store.type";
 	public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
 	public static final String GLANCE_IMAGE_STORE_SERVER = "glance.image.store.server";

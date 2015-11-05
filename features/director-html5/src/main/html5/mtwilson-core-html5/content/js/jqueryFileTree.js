@@ -47,6 +47,7 @@ if(jQuery) (function($){
 			if( o.loadMessage == undefined ) o.loadMessage = 'Loading...';
 			if( o.init == undefined ) o.init = false;
 			if(o.include_recursive == undefined) o.include_recursive=false;
+			if(o.reset_regex == undefined) o.reset_regex=false;
 			
 			$(this).each( function() {
 				console.log("Hello");
@@ -55,7 +56,7 @@ if(jQuery) (function($){
 
 					$(".jqueryFileTree.start").remove();
 					canPushPatch = false;
-					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude });
+					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude, reset_regex:treeOptions.reset_regex });
 					$.ajax({
 					  type: "POST",
 					  url: o.script,

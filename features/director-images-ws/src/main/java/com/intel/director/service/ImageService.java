@@ -1,5 +1,7 @@
 package com.intel.director.service;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,8 +13,6 @@ import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.MountImageResponse;
-import com.intel.director.api.PolicyToMountedImageRequest;
-import com.intel.director.api.PolicyToMountedImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
@@ -48,8 +48,7 @@ public interface ImageService {
 			throws DirectorException;
 
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
-			String image_deployments, String image_format,
-			HttpServletRequest request) throws DirectorException;
+			String image_id, InputStream filInputStream) throws DirectorException;
 
 
 	public SearchImagesResponse searchImages(
@@ -84,11 +83,6 @@ public interface ImageService {
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public PolicyToMountedImageResponse pushPolicyToMountedImage(
-			PolicyToMountedImageRequest policyToMountedImageRequest)
-			throws DirectorException;
-
-
 	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DirectorException;
 
 	public String getDisplayNameForImage(String image_id) throws DirectorException;
@@ -105,6 +99,15 @@ public interface ImageService {
 	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
 	
 	public CreateTrustPolicyMetaDataResponse importPolicyTemplate(String imageId) throws DirectorException;
+
+	public void deleteTrustPolicy(String imageId) throws DirectorException;
+
+	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
+			String image_deployments, String image_format, String fileName,
+			String fileSize) throws DirectorException;
+	
+	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException;
+
 
 }
 

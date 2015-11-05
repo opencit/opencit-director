@@ -24,28 +24,26 @@
 							</div>
 							<div class="panel-body">
 
-								<!-- 
-									<div class="form-group">
-										   	   <label class="control-label col-md-4" for="image_format">Image Format:</label>
-										      <div class="col-md-4">
-										       <select class="form-control" id="image_format" data-bind="value: selected_image_format,
-					                       optionsCaption: 'Choose...'" required >
-										      
-										      </select>
-										      </div>
-										    </div>
-						                     -->
-
+								<div class="form-group">
+									<label class="control-label col-md-4"
+										for="display_name_host_edit">Policy Name:</label>
+									<div class="col-md-4">
+										<input type="text" class="form-control"
+											id="display_name_host_edit" placeholder="Host Name">
+									</div>
+								</div>
 
 
 								<div class="form-group">
 									<label class="control-label col-md-4"
-										for="display_name_live_edit">Host Name:</label>
+										for="host_name_live_edit">Host Name:</label>
 									<div class="col-md-4">
 										<input type="text" class="form-control"
-											id="display_name_live_edit" placeholder="Host Name" disabled>
+											id="host_name_live_edit" placeholder="Host Name" disabled>
 									</div>
 								</div>
+								
+
 
 
 
@@ -59,56 +57,6 @@
 
 
 								<br /> <br />
-
-
-
-								<!-- <div class="form-group">
-									<label class="control-label col-md-4"
-										for="launch_control_policy">Launch Control policy:</label>
-									<div id="launch_control_policy" class="col-md-8">
-										        <label class="radio-inline">
-											      <input type="radio" name="imgPolicy" value="0" data-bind="checked: imgPolicy">Measure Only
-											    </label>
-											    <label class="radio-inline">
-											      <input type="radio" name="imgPolicy" value="1" data-bind="checked: imgPolicy">Measure and Enforce
-											    </label>
-									</div>
-								</div>-->
-
-
-
-
-
-
-								<!-- 	<div class="form-group">
-									<label class="control-label col-md-4" for="asset_tag_policy">Trust
-										Policy:</label>
-									<div id="asset_tag_policy" class="col-md-8">
-										<label class="radio-inline"> <input type="radio"
-											value="Trust Only" name="asset_tag_policy" />Trust Only
-										</label> <label class="radio-inline"> <input type="radio" na
-											value="Trust and Location" name="asset_tag_policy" />Trust
-											and Location
-										</label>
-									</div>
-								</div>
- -->
-
-
-
-
-
-								<!-- 
-								<div class="form-group">
-									<div class="col-md-offset-4 col-md-8">
-										<div class="checkbox">
-											<label><input type="checkbox" id="isEncrypted"
-												name="isEncrypted" value="encrypt" data-bind="isEncrypted">Encrypt
-												Image</label>
-										</div>
-									</div>
-								</div>
- -->
 								<div class="col-md-offset-1 col-md-1">
 									<button type="button" onclick="backToHostsPageWithoutUnmount()"
 										class="btn btn-primary">Back To Images</button>

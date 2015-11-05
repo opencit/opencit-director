@@ -8,7 +8,6 @@ package com.intel.director.async.task;
 import java.io.File;
 
 import com.intel.director.common.Constants;
-import com.intel.director.util.TdaasUtil;
 
 /**
  * Task to upload the tar of image and policy
@@ -49,7 +48,6 @@ public class UploadTarTask extends UploadTask {
 	 */
 	@Override
 	public String getTaskName() {
-		// TODO Auto-generated method stub
 		return Constants.TASK_NAME_UPLOAD_TAR;
 	}
 
@@ -57,26 +55,11 @@ public class UploadTarTask extends UploadTask {
 		log.debug("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		try {
-			String imagePathDelimiter = "/";
-			String imageName;
 			String imageLocation = imageInfo.getLocation();
-			boolean encrypt = false;
-			if (trustPolicy != null) {
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
-						.getPolicy(trustPolicy.getTrust_policy());
-				if (policy != null && policy.getEncryption() != null) {
-					imageName = imageInfo.getName() + "-enc";
-					encrypt = true;
-				}
-			}
 
-			if (!encrypt) {
-				imageName = imageInfo.getName();
-			}
+			String tarName = trustPolicy.getDisplay_name() + ".tar";
 
-			String tarName = "tar_" + trustPolicy.getDisplay_name();
-
-			imageProperties.put(Constants.NAME, tarName);
+			imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
 			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;
 			log.debug("runUploadTarTask tarname::" + tarName

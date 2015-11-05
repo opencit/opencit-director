@@ -38,6 +38,12 @@ function refresh_vm_images_Grid() {
 					width : 250,
 					align : "center"
 				}, {
+					title : "Policy Name",
+					name : "display_name",
+					type : "text",
+					width : 200,
+					align : "center"
+				}, {
 					title : "Image Format",
 					name : "image_format",
 					type : "text",

@@ -12,6 +12,15 @@ public class ImageListResponseInfo extends ImageInfo{
 	public String image_upload;
 	public Date created_date;
 	
+	public String display_name;
+	public String getDisplay_name() {
+		return display_name;
+	}
+	public void setDisplay_name(String display_name) {
+		this.display_name = display_name;
+	}
+	
+	
 	public String getImage_name() {
 		return image_name;
 	}

@@ -4,16 +4,6 @@
  */
 package com.intel.mtwilson.director.setup;
 
-import com.intel.dcsg.cpg.crypto.RandomUtil;
-import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.dcsg.cpg.crypto.RsaUtil;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.dcsg.cpg.crypto.key.password.Password;
-import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.io.UUID;
-import com.intel.dcsg.cpg.x509.X509Builder;
-import com.intel.mtwilson.Folders;
-import com.intel.mtwilson.setup.AbstractSetupTask;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.KeyManagementException;
@@ -23,7 +13,18 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import com.intel.dcsg.cpg.crypto.RandomUtil;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.key.password.Password;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 /**

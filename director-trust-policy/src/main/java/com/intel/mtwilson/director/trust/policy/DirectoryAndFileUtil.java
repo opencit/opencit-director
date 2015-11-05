@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.director.common.DirectorUtil;
@@ -84,10 +85,15 @@ public class DirectoryAndFileUtil {
 	 */
 	private String createFindCommand(String imageId,
 			DirectoryMeasurement dirMeasurement, boolean skipDirectories) {
-		String directoryAbsolutePath = dirMeasurement.getPath();
+		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+dirMeasurement.getPath();
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		String command = "find " + directoryAbsolutePath;
+		
+		if(dirMeasurement.isRecursive() == null){
+			dirMeasurement.setRecursive(false);
+		}
+		
 		if (dirMeasurement.isRecursive() == false){
 			command += "  -maxdepth 1";
 		}
@@ -105,10 +111,10 @@ public class DirectoryAndFileUtil {
 								.length() - 1)).equals(File.separator) ? startIndex
 				: 1 + startIndex;
 		command += " | cut -c " + startIndex + "-";
-		if (include != null && !include.equals("")) {
+		if (include != null && StringUtils.isNotEmpty(include)) {
 			command += " | grep -E '" + include + "'";
 		}
-		if (exclude != null && !exclude.equals("")) {
+		if (exclude != null && StringUtils.isNotEmpty(exclude)) {
 			command += " | grep -vE '" + exclude + "'";
 		}
 		log.debug("Command to filter files {}", command);
@@ -203,7 +209,7 @@ public class DirectoryAndFileUtil {
 
 	private String executeCommand(String command) throws ExecuteException, IOException{
 		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
-		if (result.getStderr() != null && !result.getStderr().equals("")) {
+		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
 		}
 		return result.getStdout();

@@ -112,8 +112,25 @@ public abstract class ImageActionTask implements Runnable {
 				action_completed = count;
 			}
 			imageActionObject.setCurrent_task_status(currentTaskStatus);
+			
 			imageActionObject.setAction_completed(action_completed);
 			imageActionObject.setCurrent_task_name(getTaskName());
+
+			try {
+				persistService.updateImageAction(imageActionObject);
+			} catch (DbException e3) {
+				e3.printStackTrace();
+			}
+		}
+	}
+	
+	
+	protected void updateImageActionContentSent(int sent, int size) {
+		synchronized (this) {
+
+			
+			imageActionObject.setAction_size(sent);
+			imageActionObject.setAction_size_max(size);
 
 			try {
 				persistService.updateImageAction(imageActionObject);

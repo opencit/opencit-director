@@ -2,14 +2,15 @@ var imageFormats = new Array();
 var image_policies = new Array();
 var endpoint = "/v1/images/";
 
-$(document).ready(function () {
-	fetchImageLaunchPolicies();
-});
+
+fetchImageLaunchPolicies();
+
 
 function CreateBMLiveMetaData(data) {
 	
 	this.imageid = current_image_id;
 	this.image_name = $("#image_name").val();
+	this.display_name = $("#display_name_host").val();
 	
 }
 
@@ -23,7 +24,7 @@ function CreateBMLiveViewModel() {
 		
 		self.createBMLiveMetaData.launch_control_policy = "MeasureOnly";
 		self.createBMLiveMetaData.encrypted = false;
-		self.createBMLiveMetaData.display_name = current_image_name;
+		self.createBMLiveMetaData.display_name = $("#display_name_host").val();
 		
 		$.ajax({
 			type : "POST",
@@ -90,20 +91,16 @@ function fetchImageLaunchPolicies() {
 	console.log("HERE 1");
 	$.ajax({
 		type : "GET",
-		url : endpoint + "image-launch-policies",
-		contentType : "application/json",
-		headers : {
-			'Accept' : 'application/json'
-		},
+		url : endpoint + current_image_id + "/trustpolicymetadata",
 		dataType : "json",
-		success : function (data, status, xhr) {
-			console.log("HERE 2");
-			
+		success : function(data, status, xhr) {
+			$("#display_name_host").val(data.display_name);
+			current_display_name = data.display_name;
 			mainViewModel.createBMLiveViewModel = new CreateBMLiveViewModel();
 			
 			ko.applyBindings(mainViewModel, document
 			.getElementById("create_policy_for_hosts_content_step_1"));
 		}
 	});
-	
+
 }

@@ -35,6 +35,7 @@ import javax.xml.bind.Unmarshaller;
 
 import net.schmizz.sshj.SSHClient;
 
+import org.apache.commons.codec.binary.Hex;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
@@ -83,7 +84,6 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
-
 /**
  * 
  * @author GS-0681
@@ -144,6 +144,7 @@ public class TdaasUtil {
 
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
+		String mountPath = TdaasUtil.getMountPath(imageId);
 		File parent = new File(filePath).getParentFile();
 		if (parent == null
 				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
@@ -151,17 +152,12 @@ public class TdaasUtil {
 		}
 
 		if (parent.isDirectory()) {
-			try {
-				String parentPath = parent.getCanonicalPath()
-						.replace("\\", "/");
-				if (parentPath.equals(root)) {
-					return;
-				}
-				parentsList.put(parentPath, recursive);
-				getParentDirectory(imageId, parentPath, root, parentsList, true);
-			} catch (IOException e) {
-				log.error("Error while recursively fetching files", e);
+			String parentPath = parent.getAbsolutePath();
+			if (parentPath.equals(root)) {
+				return;
 			}
+			parentsList.put(parentPath.replace(mountPath, ""), recursive);
+			getParentDirectory(imageId, parentPath, root, parentsList, true);			
 		}
 
 	}
@@ -563,8 +559,8 @@ public class TdaasUtil {
 				parentsList.put(parentPath, recursive);
 				getParentDirectory(parentPath, root, parentsList, true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// TODO Handle Error
+				log.error("Error occured at getParentDirectory" + e);
 			}
 		}
 
@@ -610,8 +606,9 @@ public class TdaasUtil {
 	}
 
 	public static boolean addSshKey(String ip, String username, String password)
-			throws IOException {
+			throws DirectorException {
 		boolean flag = false;
+		try{
 		if (checkSshConnection(ip, username, password)) {
 			log.debug("User home is {}", System.getProperty("user.home"));
 			if (!Files.exists(Paths.get(System.getProperty("user.home")
@@ -625,6 +622,10 @@ public class TdaasUtil {
 			log.debug("addHostKey exit code is {}", executeQuoted.getExitCode());
 			flag = (executeQuoted.getExitCode() == 0);
 
+		}
+		}catch(Exception e){
+			log.error("Unable to add SSh key to remot host, addSshKey method",e);
+			throw new DirectorException("Unable to add SSh key to remot host",e);
 		}
 		return flag;
 	}
@@ -646,7 +647,6 @@ public class TdaasUtil {
 
 	public static String getManifestForPolicy(String policyXml)
 			throws JAXBException {
-		// TODO Auto-generated method stub
 
 		Manifest manifest = new Manifest();
 		TrustPolicy trustpolicy = getPolicy(policyXml);
@@ -678,23 +678,21 @@ public class TdaasUtil {
 		if (!file.exists()) {
 			return null;
 		}
-		StringBuffer sb = null;
-		byte[] dataBytes = new byte[1024];
-		int nread = 0;
-		FileInputStream fis = new FileInputStream(file);
-		while ((nread = fis.read(dataBytes)) != -1) {
-			md.update(dataBytes, 0, nread);
-		}
-		;
-		byte[] mdbytes = md.digest();
+	
+		md.reset();
+		byte[] bytes = new byte[2048];
+		int numBytes;
+		FileInputStream is = new FileInputStream(file);
 
-		// convert the byte to hex format
-		sb = new StringBuffer();
-		for (int i = 0; i < mdbytes.length; i++) {
-			sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16)
-					.substring(1));
+		while ((numBytes = is.read(bytes)) != -1) {
+			md.update(bytes, 0, numBytes);
 		}
-		fis.close();
-		return sb.toString();
+		byte[] digest = md.digest();
+		String result = new String(Hex.encodeHex(digest));
+		is.close();
+		return result;
+		
 	}
+	
+
 }

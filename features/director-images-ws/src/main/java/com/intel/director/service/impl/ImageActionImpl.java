@@ -23,9 +23,9 @@ public class ImageActionImpl implements ImageActionService {
 
 	public List<ImageActionObject> searchIncompleteImageAction(
 			Integer count_of_action) throws DbException {
-		List<ImageActionObject> allActionObject = new ArrayList<ImageActionObject>();
+		
 		List<ImageActionObject> actionObjectIncomplete = new ArrayList<ImageActionObject>();
-		allActionObject = ImageActionImplPersistenceManager.searchByAction();
+		List<ImageActionObject> allActionObject = ImageActionImplPersistenceManager.searchByAction();
 		Log.info("****** Got "+allActionObject.size() + "Actions");
 		for (ImageActionObject img : allActionObject) {
 			if ((img.getAction_completed() != img.getAction_count()) && !(img.getCurrent_task_status() !=null && img.getCurrent_task_status().startsWith(Constants.ERROR))) {
