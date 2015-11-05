@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
@@ -37,7 +38,9 @@ import com.intel.director.constants.Constants;
  * @author GS-0681
  */
 public class GlanceRsClient {
-	;
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(GlanceRsClient.class);
+
 	public WebTarget webTarget;
 	public Client client;
 	public String authToken;
@@ -52,6 +55,8 @@ public class GlanceRsClient {
 
 	public void uploadImage(File file, Map<String, String> imageProperties,
 			String glanceId) throws IOException {
+		long start = new Date().getTime();
+
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		HttpPut putRequest = new HttpPut(webTarget.getUri().toString()
 				+ "/v1/images/" + glanceId);
@@ -84,16 +89,21 @@ public class GlanceRsClient {
 			// log.debug(output);
 		}
 		JSONObject obj = new JSONObject(sb.toString());
+		log.debug("obj::" + obj);
+		ist.close();
+		httpClient.close();
+		long end = new Date().getTime();
+		printTimeDiff("uploadImage", start, end);
 	}
 
 	public ImageStoreUploadResponse fetchDetails(
 			Map<String, String> imageProperties, String glanceId)
 			throws IOException {
+		long start = new Date().getTime();
 
 		Response response = webTarget.path("/v1/images/" + glanceId).request()
 				.header("X-Auth-Token", authToken).get();
 
-		InputStream inputStream = (InputStream) response.getEntity();
 		ImageStoreUploadResponse imageStoreResponse = new ImageStoreUploadResponse();
 		imageStoreResponse.setId(glanceId);
 		imageStoreResponse.setImage_uri(response
@@ -102,30 +112,16 @@ public class GlanceRsClient {
 				.getHeaderString(Constants.CONTENT_LENGTH)));
 		imageStoreResponse.setChecksum(response
 				.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
-		// / imageStoreResponse.setImage_id(Constants.GL);
-		// / String type = response.getHeaderString("Content-Type");
-		/*
-		 * BufferedReader br = new BufferedReader(new InputStreamReader(
-		 * inputStream));
-		 * 
-		 * String output; StringBuffer sb = new StringBuffer();
-		 * 
-		 * while ((output = br.readLine()) != null) { sb.append(output); //
-		 * log.debug(output); }
-		 */
+
+		long end = new Date().getTime();
+		printTimeDiff("fetchDetails", start, end);
 
 		return imageStoreResponse;
 	}
 
 	public String uploadImageMetaData(Map<String, String> imageProperties)
 			throws IOException {
-
-		/*
-		 * File f = new File("C:/MysteryHill/DirectorAll/Docs/vm_launch.txt");
-		 * InputStream is = new FileInputStream(f);
-		 * 
-		 * HttpEntity input = new InputStreamEntity(is);
-		 */
+		long start = new Date().getTime();
 
 		String uuid = (new UUID()).toString();
 		Response response;
@@ -181,12 +177,15 @@ public class GlanceRsClient {
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");
+		long end = new Date().getTime();
+		printTimeDiff("uploadImageMetaData", start, end);
+
 		return id;
 	}
 
 	private void createAuthToken(String glanceIP, String tenantName,
 			String userName, String password) {
-
+		long start = new Date().getTime();
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpPost postRequest = new HttpPost("http://" + glanceIP
@@ -222,6 +221,7 @@ public class GlanceRsClient {
 					"token");
 			authToken = property.getString("id");
 			httpClient.getConnectionManager().shutdown();
+			httpClient.close();
 			br.close();
 		} catch (MalformedURLException e) {
 			// / log.error(null, e);
@@ -230,7 +230,8 @@ public class GlanceRsClient {
 		} /*
 		 * catch (JSONException ex) { /// log.error(null, ex); }
 		 */
-		// / return authToken;
+		long end = new Date().getTime();
+		printTimeDiff("createAuthToken", start, end);
 	}
 
 	public void getImageMetaData() {
@@ -239,4 +240,8 @@ public class GlanceRsClient {
 	public void deleteImage() {
 	}
 
+	
+	private void printTimeDiff(String method, long start, long end){		
+		log.info(method + " took "+ (end-start) +" ms");
+	}
 }

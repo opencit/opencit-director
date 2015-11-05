@@ -29,7 +29,6 @@ public class UploadPolicyTask extends UploadTask {
 
 	@Override
 	public String getTaskName() {
-		// TODO Auto-generated method stub
 		return Constants.TASK_NAME_UPLOAD_POLICY;
 	}
 
@@ -52,7 +51,6 @@ public class UploadPolicyTask extends UploadTask {
 	public void runUploadPolicyTask() {
 
 		File trustPolicyFile = null;
-		String imagePathDelimiter = "/";
 		try {
 
 			String imageLocation = imageInfo.getLocation();
@@ -74,6 +72,7 @@ public class UploadPolicyTask extends UploadTask {
 				BufferedWriter bw = new BufferedWriter(fw);
 				bw.write(trustPolicy.getTrust_policy());
 				bw.close();
+				fw.close();
 			}
 
 			content = trustPolicyFile;

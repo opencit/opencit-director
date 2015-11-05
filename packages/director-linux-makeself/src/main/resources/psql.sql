@@ -71,9 +71,7 @@ ALTER TABLE mw_image_info_view
   OWNER TO postgres;
 
 INSERT INTO mw_policy_template(id, name, deployment_type, content, active, deployment_type_identifier,policy_type)
-    VALUES ('1', 'Bare Metal (NV)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><Dir Path="/home"/><File Path="/home/director-0.1-SNAPSHOT.bin"/><File Path="/home/intelmh/.cache/motd.legal-displayed"/><File Path="/home/intelmh/.bash_logout"/></Manifest>',
-     true, 'NV', 'Manifest');
+    VALUES ('1', 'Bare Metal (NV)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><File Path="/boot/grub/grub.cfg"/></Manifest>', true, 'NV', 'Manifest');
 
 INSERT INTO mw_policy_template(id, name, deployment_type, content, active, deployment_type_identifier,policy_type)
-    VALUES ('2', 'Bare Metal (V)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><Dir Path="/home"/><File Path="/home/director-0.1-SNAPSHOT.bin"/><File Path="/home/intelmh/.cache/motd.legal-displayed"/><File Path="/home/intelmh/.bash_logout"/><File Path="/home/intelmh/.bashrc"/></Manifest>',
-     true, 'V', 'Manifest');
+    VALUES ('2', 'Bare Metal (V)', 'BareMetal', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Manifest xmlns="mtwilson:trustdirector:manifest:1.1" DigestAlg="sha1"><Dir Path="/opt/vrtm"/><File Path="/opt/vrtm/vrtm.version"/></Manifest>', true, 'V', 'Manifest');

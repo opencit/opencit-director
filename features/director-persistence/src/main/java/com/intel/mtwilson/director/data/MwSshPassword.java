@@ -1,13 +1,11 @@
 package com.intel.mtwilson.director.data;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.eclipse.persistence.annotations.UuidGenerator;

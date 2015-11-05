@@ -17,6 +17,8 @@ import com.intel.director.images.rs.GlanceRsClient;
  * @author GS-0681
  */
 public class ImageTransferTask implements Runnable {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageTransferTask.class);
 
     private final String glanceid;
     private final GlanceRsClient glanceRsClient;
@@ -43,8 +45,8 @@ public class ImageTransferTask implements Runnable {
         } catch (InterruptedException ex) {
             Logger.getLogger(ImageTransferTask.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Handle Error
+			log.error("Error in ImageTransferTask" + e);
 		}
         System.out.println("Uploading complete");
     }

@@ -17,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  * @author jbuhacoff
  */
 public class SearchResultJacksonTest {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SearchResultJacksonTest.class);
 
     @Test
     public void testEmptySearchResults() throws JsonProcessingException {

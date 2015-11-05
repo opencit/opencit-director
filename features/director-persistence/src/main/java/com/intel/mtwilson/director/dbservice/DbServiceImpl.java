@@ -36,6 +36,7 @@ import com.intel.director.api.ui.TrustPolicyFilter;
 import com.intel.director.api.ui.TrustPolicyOrderBy;
 import com.intel.director.api.ui.UserFilter;
 import com.intel.director.api.ui.UserOrderBy;
+import com.intel.director.common.Constants;
 import com.intel.director.common.SettingFileProperties;
 import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.director.dao.ImageActionDao;
@@ -58,7 +59,6 @@ import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
-import com.intel.director.common.Constants;
 
 public class DbServiceImpl implements IPersistService {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -86,7 +86,7 @@ public class DbServiceImpl implements IPersistService {
 		try {
 			reader = new FileReader(configfile);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			// TODO Handle Error
 			log.error("Unable to find director properties",e);
 		}
 
@@ -95,7 +95,7 @@ public class DbServiceImpl implements IPersistService {
 		try {
 			prop.load(reader);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO Handle Error
 			log.error("Unable to read director properties",e);
 		}
 		
@@ -105,14 +105,9 @@ public class DbServiceImpl implements IPersistService {
 		jpaProperties.put("javax.persistence.jdbc.user" ,prop.get(Constants.DIRECTOR_DB_USERNAME));
 		jpaProperties.put("javax.persistence.jdbc.password", prop.get(Constants.DIRECTOR_DB_PASSWORD));
 		
-		log.info("Driver : "+prop.get(Constants.DIRECTOR_DB_DRIVER));
-		log.info("DB URL : "+prop.get(Constants.DIRECTOR_DB_URL));
-		log.info("DB User : "+prop.get(Constants.DIRECTOR_DB_USERNAME));
-		log.info("DB Paswd : "+prop.get(Constants.DIRECTOR_DB_PASSWORD));
 		
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory("director_data_pu",jpaProperties);
-		log.info("Created entiry manager factory");
 		
 		imgDao = new ImageDao(emf);
 		userDao = new UserDao(emf);
@@ -124,7 +119,6 @@ public class DbServiceImpl implements IPersistService {
 		sshDao = new SshSettingDao(emf);
 		settingFileProperties = new SettingFileProperties();
 		policyTemplateDao = new PolicyTemplateDao(emf);
-		log.info("COMPLETE DB init");
 	}
 
 	/*

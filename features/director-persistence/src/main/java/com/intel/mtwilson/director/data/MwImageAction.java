@@ -1,6 +1,7 @@
 package com.intel.mtwilson.director.data;
 
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import org.eclipse.persistence.annotations.UuidGenerator;
 
 
 @Entity
+@Cacheable(false)
 @Table(name = "MW_IMAGE_ACTION")
 public class MwImageAction {
 	

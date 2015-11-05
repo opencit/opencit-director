@@ -348,7 +348,7 @@ function nextButtonImagesBM() {
 }
 
 function downloadPolicyFromLastPage() {
-	downloadPolicy(current_image_id,null);
+	downloadPolicyAndManifest(current_image_id,null);
 }
 function downloadImageFromLastPage() {
 	downloadImage(current_image_id);
@@ -358,6 +358,26 @@ function downloadPolicy(imageid, trust_policy_id) {
 	window.location = "/v1/images/" + imageid + "/downloadPolicy";
 }
 
+function downloadPolicyAndManifest(imageid, trust_policy_id) {
+	window.location = "/v1/images/" + imageid + "/downloadPolicyAndManifest";
+}
+
 function downloadImage(imageid) {
 	window.location = "/v1/images/" + imageid + "/downloadImage?modified=true";
+}
+
+function deletePolicy(imageid, trust_policy_id, imagename) {
+	$.ajax({
+		type : "GET",
+		url : "/v1/images/" + imageid + "/deletePolicy",
+		dataType : "text",
+		success : function(result) {
+				console.log("12312");
+				$("#trust_policy_column" + imageid).html("<a href='#' ><span class='glyphicon glyphicon-plus-sign'  title='Create Policy' onclick='createPolicy2(\""
+					+ imageid + '","' + imagename + "\")'></span></a>");
+				$("#policy_name").html("NA");
+		}
+	});
+
+	
 }

@@ -50,7 +50,11 @@
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>com.intel.mtwilson.jersey2.ExtensibleResourceConfig</param-value>
         </init-param>
-        
+        <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>org.glassfish.jersey.filter.LoggingFilter;
+                         org.glassfish.jersey.media.multipart.MultiPartFeature</param-value>
+        </init-param>
         <init-param>
             <param-name>jersey.config.disableMoxyJson</param-name>
             <param-value>true</param-value>

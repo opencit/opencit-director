@@ -67,24 +67,118 @@
 		<script type="text/javascript">
 			var image_deployments = window.image_deployments_parent;
 			var image_format = window.image_format_parent;
-			var urlToUpload = "/v1/images/uploads/content/upload?image_deployments="
-			+ image_deployments + "&image_format=" + image_format;
+			var   blob ,BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
+			/*
 			window.onload = function() {
-				document.myform.action = urlToUpload;
+				document.myform.action = urlToUploadMetadata;
 			}
+			*/
 			function validateForm() {
 			    var x = document.forms["myform"]["myfile"].value;
 			    if (x == null || x == "") {
 			        alert("First Choose File Please...");
 			        return false;
 			    }
-				document.getElementById("upload").onclick = function() {
-					this.disabled = true;
+				
+			var fileName = document.getElementById('myfile').files[0].name;
+			blob = document.getElementById('myfile').files[0];
+			SIZE = blob.size;
+			var upload_size = Math.floor(SIZE/1024);
+			var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata?image_deployments="
+			+ image_deployments + "&image_format=" + image_format + "&fileName=" + fileName + "&fileSize=" + upload_size;
+			var image_id;
+			var xhrmdt = new XMLHttpRequest();
+			xhrmdt.open('POST', urlToUploadMetadata, true); 
+			xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhrmdt.setRequestHeader("Accept", "application/json");
+			xhrmdt.send();
+			var flag = false;
+			xhrmdt.onreadystatechange  = function (e) {
+			
+				if (xhrmdt.readyState === 4 ) {
+				if(xhrmdt.status === 200){
+						var myArr = JSON.parse(xhrmdt.responseText);
+						image_id = myArr.id;
+						//alert(image_id);
+						//alert(SIZE);
+						BYTES_PER_CHUNK = 1048576 * 10;
+						start = 0;
+						end = BYTES_PER_CHUNK;
+						upload_chunks(image_id, start, end);
+							
+						document.getElementById("upload").onclick = function() {
+							this.disabled = true;
+						}
+					}
+					else{
+						alert("Failed to save image upload metdata.");
+					}
 				}
 			}
-		</script>
+			
+			//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
+	}
+			
+			
+	function upload_chunks(image_id, start, end){
+
+		if(start<SIZE){
+		//alert(image_id);		
+		var blobslice=blob.slice(start, end);
+		var xhr = new XMLHttpRequest();
+		var urlToUpload = "/v1/images/uploads/content/upload/" + image_id ;
+		xhr.open('POST', urlToUpload, true); 
+		xhr.setRequestHeader("Content-type", "application/octet-stream");
+		xhr.send(blobslice);
 		
-		<script>
+		xhr.onreadystatechange  = function (e) {
+		
+			if (xhr.readyState === 4 ) {
+			if(xhr.status === 200){
+	var percentComplete;			
+				if(end<SIZE){
+percentComplete=Math.floor((end/SIZE)*100);
+
+}else{
+
+percentComplete=100;
+}
+											
+				 $("#progressbar").width(percentComplete + '%');
+					$("#percent").html(percentComplete + '%');
+
+					if (percentComplete > 0) {
+					$("#message").html("<font color='red'>File Upload is in progress</font>");
+					}
+				start = end;
+
+				end = start + BYTES_PER_CHUNK;	
+	
+				upload_chunks(image_id, start,end);
+
+
+				}
+				else{
+					alert("File upload failed..");
+				}
+			}
+		}
+		
+	}else{
+
+$("#message").html("<font color='blue'>Your file has been uploaded!</font>");
+		
+		document.getElementById("upload").onclick = function() {
+			this.disabled = false;
+		}
+	alert("Image upload successfully completed");
+
+              window.close();
+
+	}
+		}			
+		</script>
+<script>
 			$(document).on('change','.btn-file :file',function() {
 				var input = $(this), numFiles = input.get(0).files ? input
 				.get(0).files.length : 1, label = input.val().replace(
@@ -107,28 +201,35 @@
 				});
 			});
 		</script>
-		
-	</head>
-	<body>
-		
-		<form id="UploadForm" name="myform" onsubmit="return validateForm()" method="post"
+
+</head>
+<body>
+
+	<form id="UploadForm" name="myform" method="post"
 		enctype="multipart/form-data">
-			<h4>Please Select File :: </h4>
-			<div class="input-group">
-				<span class="input-group-btn"> <span
-					class="btn btn-primary btn-file"> Browse&hellip; <input
-						type="file" id="myfile" name="myfile">
-					</span>
-				</span> <input type="text" class="form-control" readonly>
-			</div>
-			<br /> <input class="btn btn-primary" id="upload" type="submit" value="Upload">
-			<div id="progressbox">
-				<div id="progressbar"></div>
-				<div id="percent">0%</div>
-			</div>
-			<br />
-			<div id="message"></div>
-			<div><font color="red">Note : Please Don't Close This Window when upload is in progress...!!!</font></div>
-		</form>
-	</body>
+		<h4>Please Select File ::</h4>
+		<div class="input-group">
+			<span class="input-group-btn"> <span
+				class="btn btn-primary btn-file"> Browse&hellip; <input
+					type="file" id="myfile" name="myfile">
+			</span>
+			</span> <input type="text" class="form-control" readonly>
+		</div>
+		<br /> <input class="btn btn-primary" id="upload" type="button"
+			onclick="validateForm()" value="Upload">
+		<div id="progressbox">
+			<div id="progressbar"></div>
+			<div id="percent">0%</div>
+		</div>
+		<br />
+		<div id="message"></div>
+		<div>
+			<font color="red">Note : Please Don't Close This Window when
+				upload is in progress...!!!</font>
+		</div>
+	</form>
+
+
+
+</body>
 </html>

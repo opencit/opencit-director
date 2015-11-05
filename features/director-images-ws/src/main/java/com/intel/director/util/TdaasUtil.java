@@ -84,7 +84,6 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
-import com.intel.director.images.exception.DirectorException;
 /**
  * 
  * @author GS-0681
@@ -560,8 +559,8 @@ public class TdaasUtil {
 				parentsList.put(parentPath, recursive);
 				getParentDirectory(parentPath, root, parentsList, true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// TODO Handle Error
+				log.error("Error occured at getParentDirectory" + e);
 			}
 		}
 
@@ -648,7 +647,6 @@ public class TdaasUtil {
 
 	public static String getManifestForPolicy(String policyXml)
 			throws JAXBException {
-		// TODO Auto-generated method stub
 
 		Manifest manifest = new Manifest();
 		TrustPolicy trustpolicy = getPolicy(policyXml);
@@ -691,6 +689,7 @@ public class TdaasUtil {
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
+		is.close();
 		return result;
 		
 	}

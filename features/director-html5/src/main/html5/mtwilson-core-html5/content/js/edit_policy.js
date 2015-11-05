@@ -114,7 +114,7 @@ function showImageLaunchPolicies(policydata) {
 
 			// / $("input[name=asset_tag_policy][value='Trust
 			// Only']").attr('checked', 'checked');
-			if (policydata.isEncrypted == true) {
+			if (policydata.encrypted == true) {
 				$("input[name=isEncrypted]").prop('checked', 'true');
 			}
 			mainViewModel.editImageViewModel = new EditImageViewModel(

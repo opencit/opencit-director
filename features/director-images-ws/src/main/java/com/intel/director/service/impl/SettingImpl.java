@@ -1,14 +1,13 @@
 package com.intel.director.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import com.intel.director.images.exception.DirectorException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;

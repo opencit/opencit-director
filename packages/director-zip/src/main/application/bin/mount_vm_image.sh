@@ -295,7 +295,6 @@ function mount_raw_image() {
 			return 0
 		else
     		    	echo >&2 "Mounting failed"			
-			return 1	
 	        fi
 	fi
 	echo >&2 "Will try to mount with guestmount"

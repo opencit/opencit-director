@@ -274,10 +274,11 @@ update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILS
 
 
 
-
+prompt_with_default_password MTWILSON_API_URL "Mtwilson API Url:" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
+prompt_with_default_password MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
@@ -296,7 +297,10 @@ update_property_in_file "mtwilson.server.port" "$MTWILSON_PROPERTIES_FILE" "$MTW
 update_property_in_file "mtwilson.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
-
+#KMS
+update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
+update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 
 
 # director requires java 1.7 or later
@@ -352,7 +356,6 @@ export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
 
  if [ "$(whoami)" == "root" ]; then
 
-echo "opt postgres value333 is:: $opt_postgres"
     # Copy the www.postgresql.org PGP public key so add_postgresql_install_packages can add it later if needed
     if [ -d "/etc/apt" ]; then
       mkdir -p /etc/apt/trusted.gpg.d
@@ -511,8 +514,7 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
-  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel}" >/dev/null
-  director config mtwilson.extensions.packageExcludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEEXCLUDEFILTER_STARTSWITH:-java,javax,com.intel.mtwilson.core.data.bundle.jaxrs}" >/dev/null
+  director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
 
   #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
  director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
@@ -533,5 +535,5 @@ for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_JAVA $DIRECTOR
 done
 
 # start the server, unless the NOSETUP variable is defined
-#if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
+if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"

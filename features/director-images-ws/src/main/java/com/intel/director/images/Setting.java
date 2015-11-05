@@ -1,9 +1,8 @@
 package com.intel.director.images;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import com.intel.director.images.exception.DirectorException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,15 +13,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.intel.director.api.ListSshSetting;
 import com.intel.director.api.MountWilsonSetting;
 import com.intel.director.api.SettingsKMSObject;
 import com.intel.director.api.SshSettingRequest;
-import com.intel.director.api.ListSshSetting;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.impl.SettingImpl;
 import com.intel.mtwilson.configuration.ConfigurationException;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -39,7 +36,7 @@ public class Setting {
 	@GET
 	@Path("/sshsettings/getdata")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<SshSettingRequest> getRecentSsh() throws DirectorException {
+	public List<SshSettingRequest> getRecentSsh() throws DirectorException, DbException {
 		List<SshSettingRequest> newdata = impl.sshData();
 		return newdata;
 	}
@@ -48,7 +45,7 @@ public class Setting {
 	@Path("/sshsettings/postdata")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ListSshSetting postRecentSsh(SshSettingRequest sshSettingRequest) {
+	public ListSshSetting postRecentSsh(SshSettingRequest sshSettingRequest) throws DirectorException {
 		ListSshSetting listSsh= new ListSshSetting();
 		try {
 			log.debug("Dashboard -> postRecentSsh");
@@ -100,7 +97,6 @@ public class Setting {
 		
 
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
 			
 			log.error("Error while Mounting the Image");
 			listSsh.status = Constants.ERROR;

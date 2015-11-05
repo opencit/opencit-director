@@ -47,11 +47,6 @@
 			<artifactId>director-image-store</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-attestation-server</artifactId>
-		</dependency>
-		<dependency>
 			<artifactId>mtwilson-util-xml</artifactId>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<version>0.2-SNAPSHOT</version>

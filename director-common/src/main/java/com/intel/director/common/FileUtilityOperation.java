@@ -20,6 +20,7 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
 
+
 public class FileUtilityOperation {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -27,7 +28,7 @@ public class FileUtilityOperation {
 
 	// Extract the tar.gz file
 	public boolean extractCompressedImage(String tarFileLocation,
-			String destPath) throws Exception {
+			String destPath) {
 		Archiver archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR,
 				CompressionType.GZIP);
 		File sourceFile = new File(tarFileLocation);
@@ -47,37 +48,80 @@ public class FileUtilityOperation {
 
 	// Delete the directory with its contents
 	public void deleteDir(File file) {
-		if (file.isDirectory()) {
-			// directory is empty, then delete it
-			if (file.list().length == 0) {
-				file.delete();
-			} else {
-				// list all the directory contents
-				String files[] = file.list();
-				for (String temp : files) {
-					File fileDelete = new File(file, temp);
-					deleteDir(fileDelete);
-				}
-				// check the directory again, if empty then delete it
+		if (file != null) {
+			if (file.isDirectory()) {
+				// directory is empty, then delete it
 				if (file.list().length == 0) {
 					file.delete();
-					log.info("Directory is deleted : " + file.getAbsolutePath());
+				} else {
+					// list all the directory contents
+					String files[] = file.list();
+					for (String temp : files) {
+						File fileDelete = new File(file, temp);
+						deleteDir(fileDelete);
+					}
+					// check the directory again, if empty then delete it
+					if (file.list().length == 0) {
+						file.delete();
+						log.info("Directory is deleted : "
+								+ file.getAbsolutePath());
+					}
 				}
+			} else {
+				file.delete();
 			}
-		} else {
-			file.delete();
 		}
 	}
 
-	public void writeToFile(File file, String value, boolean append)
-			throws Exception {
+	public boolean writeToFile(String path, String value) {
+		boolean status = true;
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+
+		// Write policy
+		try {
+			File f = new File(path);
+			fw = new FileWriter(f);
+			bw = new BufferedWriter(fw);
+			bw.write(value);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error("Error writing to file "+path, e);
+			status = false;
+		} finally {
+			try {
+				if (bw != null) {
+					bw.close();
+				}
+				if (fw != null) {
+					fw.close();
+				}
+			} catch (IOException e) {
+				log.error(
+						"Unable to close streams used for writing manifest and policy",
+						e);
+			}
+
+		}
+		return status;
+
+	}
+
+
+	public void writeToFile(File file, String value, boolean append) {
 		// File passFile = new File("/tmp/vmpass.txt");
-		FileWriter writer = new FileWriter(file, append);
-		BufferedWriter bufferWriter = new BufferedWriter(writer);
-		bufferWriter.write(value);
-		bufferWriter.newLine();
-		bufferWriter.close();
-		file.setExecutable(true);
+		try {
+			FileWriter writer = new FileWriter(file, append);
+
+			BufferedWriter bufferWriter = new BufferedWriter(writer);
+			bufferWriter.write(value);
+			bufferWriter.newLine();
+			bufferWriter.close();
+			file.setExecutable(true);
+		} catch (IOException e) {
+			// TODO Handle Error
+			log.error("Error in writing to files");
+		}
 	}
 
 	// Encode with Base64
@@ -88,13 +132,13 @@ public class FileUtilityOperation {
 
 	// Validate the UUID
 	public boolean validateUUID(String uuid) {
-		UUID uuidObj = null;
 		try {
-			uuidObj = UUID.fromString(uuid);
+			UUID uuidObj = UUID.fromString(uuid);
+			return uuidObj.toString().equals(uuid);
 		} catch (Exception e) {
 			return false;
 		}
-		return uuidObj.toString().equals(uuid);
+
 	}
 
 	// Validate the IP address
@@ -109,7 +153,7 @@ public class FileUtilityOperation {
 	}
 
 	// Validate the Port
-	public boolean validatePort(String port) throws Exception {
+	public boolean validatePort(String port) {
 		final String PATTERN = "^[0-9]+$";
 		Pattern pattern = Pattern.compile(PATTERN);
 		Matcher matcher = pattern.matcher(port);
@@ -124,5 +168,19 @@ public class FileUtilityOperation {
 			log.error(null, ex);
 			return false;
 		}
+	}
+
+	public boolean createNewFile(String path) {
+		boolean ret = false;
+		File f = new File(path);
+		if (!f.exists()) {
+			try {
+				ret = f.createNewFile();
+			} catch (IOException e) {
+				log.error("Error creating new file at path "+path, e);
+				ret = false;
+			}
+		}
+		return ret;
 	}
 }

@@ -229,3 +229,17 @@ function downloadPolicy(imageid, trust_policy_id) {
 function downloadImage(imageid) {
 	window.location = "/v1/images/" + imageid + "/downloadImage?modified=true";
 }
+
+function deletePolicyVM(imageid, trust_policy_id, imagename) {
+	$.ajax({
+		type : "GET",
+		url : "/v1/images/" + imageid + "/deletePolicy",
+		dataType : "text",
+		success : function(result) {
+				$("#trust_policy_vm_column" + imageid).html("<a href='#' ><span class='glyphicon glyphicon-plus-sign'  title='Create Policy' onclick='createPolicy(\""
+					+ imageid + '","' + imagename + "\")'></span></a>");
+			}
+	});
+
+	
+}

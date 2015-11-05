@@ -5,8 +5,13 @@
  */
 package com.intel.director.common;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,7 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +33,6 @@ import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 public class DirectorUtil {
 
 	private static final Logger log = LoggerFactory
@@ -43,7 +41,6 @@ public class DirectorUtil {
 	public static String createTar(String imageDir, String imageName,
 			String trustPolicyName, String tarLocation, String tarName)
 			throws IOException {
-		String imagePathDelimiter = "/";
 
 		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir
 				+ " " + imageName + " " + trustPolicyName;
@@ -63,7 +60,6 @@ public class DirectorUtil {
 
 	public static void createCopy(String absoluteImagePath,
 			String absoluteModifiedImagePath) throws IOException {
-		String imagePathDelimiter = "/";
 
 		String command = "cp " + absoluteImagePath + " "
 				+ absoluteModifiedImagePath;
@@ -89,8 +85,8 @@ public class DirectorUtil {
 			configuration = ConfigurationFactory.getConfiguration();
 			return configuration.get(Constants.DIRECTOR_ID);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Handle Error
+			log.error("Error while getting Director Id .....");
 		}
 		return null;
 	}
@@ -121,11 +117,13 @@ public class DirectorUtil {
 			while ((line = reader.readLine()) != null) {
 				result.append(line + "\n");
 			}
-			if (!result.toString().equals("")) {
+			
+			if (!StringUtils.isEmpty(result.toString())) {
 				excludeList = result.toString();
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
+			reader.close();
 		} catch (InterruptedException ex) {
 			log.error(null, ex);
 		} catch (IOException ex) {
@@ -148,6 +146,7 @@ public class DirectorUtil {
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
 			}
+			reader.close();
 		} catch (InterruptedException | IOException ex) {
 			log.error(null, ex);
 		}
@@ -177,14 +176,13 @@ public class DirectorUtil {
 			}
 			prop.load(input);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Handle Error
+			log.error("Error while getting the file .....");
 		}
 		return prop;
 	}
 	
 	public static String getProperties(String path) {
-		// TODO Auto-generated method stub
 		Properties prop = getPropertiesFile(path);
 		Map<String, String> map = new HashMap<String, String>();
 		for (String key : prop.stringPropertyNames()) {
@@ -197,7 +195,6 @@ public class DirectorUtil {
 
 	public static String editProperties(String path, String data)
 			throws JsonMappingException, JsonParseException {
-		// TODO Auto-generated method stub
 		Map<String, Object> map = new Gson().fromJson(data, new TypeToken<HashMap<String, Object>>() {}.getType());
 		try {
 			File file = new File(Constants.configurationPath + path);
@@ -207,16 +204,16 @@ public class DirectorUtil {
 			}
 			writeToFile(map,Constants.configurationPath + path);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Handle Error
+			log.error("Error while editing the file .....");
 		}
 		return data;
 	}
 	
-	  public static  void writeToFile(Map map,String fileName) throws Exception{  
+	  public static  void writeToFile(Map<String, Object> map,String fileName) throws Exception{  
 	        Properties properties = new Properties();  
-	        Set set = map.keySet();  
-	        Iterator itr = set.iterator();  
+	        Set<String> set = map.keySet();  
+	        Iterator<String> itr = set.iterator();  
 	        while(itr.hasNext()){  
 	            String key = (String)itr.next();  
 	            String value = (String) map.get(key);  
@@ -228,5 +225,4 @@ public class DirectorUtil {
 	    } 
 	  
 	  
-
 }

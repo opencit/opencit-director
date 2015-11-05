@@ -177,6 +177,7 @@ public class KmsUtil {
 		return key;
 	}
 
+	@SuppressWarnings("restriction")
 	public String getKeyFromKMS(String id) {
 		String password = null;
 		try {
@@ -184,8 +185,8 @@ public class KmsUtil {
 			byte[] key = transferKey(id);
 			return new sun.misc.BASE64Encoder().encode(key);
 		}  catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// TODO Handle Error
+			log.error("Error in getKeyFromKMS() method" + e);
 		}
 		return password;
 	}

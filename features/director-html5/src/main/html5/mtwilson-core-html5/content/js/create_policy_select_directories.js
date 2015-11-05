@@ -35,7 +35,7 @@ function SelectDirectoriesViewModel() {
 						},
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
-							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+							$("#error_modal_vm_2").modal({backdrop: "static"});
 								$('body').removeClass("modal-open");
 							console.log("ERROR and Unmount successfully")
 

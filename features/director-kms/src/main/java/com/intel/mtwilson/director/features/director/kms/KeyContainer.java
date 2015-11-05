@@ -5,9 +5,11 @@
  */
 package com.intel.mtwilson.director.features.director.kms;
 
-import com.intel.kms.ws.v2.api.Key;
 import java.net.URL;
+
 import javax.crypto.SecretKey;
+
+import com.intel.kms.ws.v2.api.Key;
 
 /**
  *

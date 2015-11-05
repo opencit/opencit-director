@@ -51,22 +51,17 @@ public class CreateTarTask extends ImageActionTask {
 	 * After the check in the run method this task creates a tar from an image and policy
 	 */
 	public void runCreateTarTask() {
-		String imageLocation = null;
-		String trustPolicyLocation = null;
 		String trustPolicyName = null;
-		File trustPolicyFile = null;
 
 		try {
-			
-		
+
 			log.info("Inside runCreateTartask for ::"
 					+ imageActionObject.getImage_id());
 			ImageInfo imageinfo = persistService
 					.fetchImageById(imageActionObject.getImage_id());
-			imageLocation = imageinfo.getLocation();
+			String imageLocation = imageinfo.getLocation();
 			// Fetch the policy and write to a location. Move to common
-			
-			
+
 			String imageName = null;
 			TrustPolicy trustPolicy = persistService
 					.fetchPolicyForImage(imageActionObject.getImage_id());
@@ -88,21 +83,20 @@ public class CreateTarTask extends ImageActionTask {
 				log.info("Create Tar has a trust policy which is NOT encrypted");
 				imageName = imageinfo.getName();
 			}
-			String newLocation=imageLocation+imageActionObject.getImage_id()+File.separator;
+			String newLocation = imageLocation
+					+ imageActionObject.getImage_id() + File.separator;
 			DirectorUtil.callExec("mkdir -p " + newLocation);
-			DirectorUtil
-			.createCopy(
-					imageLocation+ imageName,
-					newLocation +  imageName);
+			DirectorUtil.createCopy(imageLocation + imageName, newLocation
+					+ imageName);
+
 			if (trustPolicy != null) {
 				log.info("Create Tar : Create policy file start");
 				trustPolicyName = "trustpolicy.xml";
-				trustPolicyLocation = newLocation;
-				trustPolicyFile = new File(newLocation
-						+ trustPolicyName);
+				File trustPolicyFile = new File(newLocation + trustPolicyName);
 
 				if (!trustPolicyFile.exists()) {
-					log.info("Create Tar : Create policy NEW file : "+trustPolicyFile.getName());
+					log.info("Create Tar : Create policy NEW file : "
+							+ trustPolicyFile.getName());
 					trustPolicyFile.createNewFile();
 				}
 
@@ -111,19 +105,18 @@ public class CreateTarTask extends ImageActionTask {
 				BufferedWriter bw = new BufferedWriter(fw);
 				bw.write(trustPolicy.getTrust_policy());
 				bw.close();
+				fw.close();
 				log.info("Create Tar : Create policy file End");
 
 			}
 
 			String tarLocation = newLocation;
-			String tarName = "tar_" + trustPolicy.getDisplay_name();
+			String tarName = trustPolicy.getDisplay_name()+".tar";
 			log.info("Create Tar ::tarName::" + tarName + " tarLocation::"
 					+ tarLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
 			DirectorUtil.createTar(newLocation, imageName, trustPolicyName,
 					tarLocation, tarName);
-			// log.debug("//////////////tar::"+tar);
-			// //Thread.sleep(60000);
 			log.info("Create Tar : commplete");
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
@@ -144,7 +137,6 @@ public class CreateTarTask extends ImageActionTask {
 	 */
 	@Override
 	public String getTaskName() {
-		// TODO Auto-generated method stub
 		return Constants.TASK_NAME_CREATE_TAR;
 	}
 

@@ -71,7 +71,6 @@ public class EncryptImageTask extends ImageActionTask {
 					.getImage_id());
 			log.debug("EncryptImageTask: Got the trust policy ");
 		} catch (DbException e1) {
-			// TODO Auto-generated catch block
 			log.error("Error while creating Trustpolicy", e1);
 			throw new DirectorException(
 					"Error while encrypting image. DB Error while fetching policy from DB",
@@ -79,7 +78,6 @@ public class EncryptImageTask extends ImageActionTask {
 		}
 		log.debug("Policy in DB for image : " + tp.getId());
 
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		try {
 			ImageInfo imageInfo = persistService
 					.fetchImageById(imageActionObject.getImage_id());
@@ -91,7 +89,7 @@ public class EncryptImageTask extends ImageActionTask {
 			
 			imageLocation += imageInfo.getName();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
-			policy = TdaasUtil.getPolicy(tp.getTrust_policy());
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(tp.getTrust_policy());
 			if (policy.getEncryption() == null) {
 				log.debug("EncryptImageTask: No encryption required,. retun");
 				return;
