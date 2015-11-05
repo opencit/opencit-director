@@ -295,16 +295,7 @@
         <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>
-    
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>bintray</name>
-            <url>http://jcenter.bintray.com</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-    
+        
     <distributionManagement>
         <repository>
             <id>cloudsecurity-maven-repository</id>
