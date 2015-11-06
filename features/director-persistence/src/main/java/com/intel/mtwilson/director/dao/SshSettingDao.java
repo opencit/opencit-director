@@ -13,6 +13,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import com.intel.mtwilson.director.data.MwHost;
+import com.intel.mtwilson.director.data.MwSshPassword;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
 
@@ -124,13 +125,18 @@ public class SshSettingDao {
 
 	public MwHost getMwHostByImageId(String image_id) throws DbException {
 		EntityManager em = getEntityManager();
+		MwHost mwHost = new MwHost();
 
 		try {
 			Query query = em
 					.createQuery("SELECT m FROM MwHost AS m WHERE m.imageId.id = '"
 							+ image_id + "'");
 
-			MwHost mwHost = (MwHost) query.getSingleResult();
+			if( query.getSingleResult()!=null){
+				 mwHost = (MwHost) query.getSingleResult();
+				
+			}
+			
 			return mwHost;
 		} catch (Exception e) {
 			throw new DbException("ImageDao,findMwImageByImageId() failed", e);
@@ -140,6 +146,21 @@ public class SshSettingDao {
 			em.close();
 		}
 
+	}
+	
+	public void destroyPassword(String id) throws DbException {
+		EntityManager em = getEntityManager();
+		try {
+
+			em.getTransaction().begin();
+			MwSshPassword demo = em.getReference(MwSshPassword.class, id);
+			em.remove(demo);
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			throw new DbException("SshSettingDao,destroyPassword failed", e);
+		} finally {
+			em.close();
+		}
 	}
 
 	public List<MwHost> showAll() throws DbException {

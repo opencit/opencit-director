@@ -1585,15 +1585,16 @@ public class DbServiceImpl implements IPersistService {
 	public SshSettingInfo saveSshMetadata(SshSettingInfo ssh)
 			throws DbException {
 		MwHost mwHost = mapper.toData(ssh);
-		System.out.println("^^^^^^^^^^^^^^^^^^^^");
-		System.out.println(mwHost);
-		System.out.println("^^^^^^^^^^^^^^^^^^^^");
 		MwHost createdSsh = sshDao.createSshSetting(mwHost);
 		return mapper.toTransferObject(createdSsh);
 	}
 
 	public void updateSsh(SshSettingInfo ssh) throws DbException {
+		MwImage mwImage = imgDao.getMwImage(ssh.getImage_id().getId());
+		mwImage.setName(ssh.getIpAddress());
+		
 		MwHost mwSsh = mapper.toDataUpdate(ssh);
+		mwSsh.setImageId(mwImage);
 		sshDao.updateSshSetting(mwSsh);
 
 	}
@@ -1612,8 +1613,11 @@ public class DbServiceImpl implements IPersistService {
 
 	public SshSettingInfo fetchSshByImageId(String image_id) throws DbException {
 		MwHost mwHost = sshDao.getMwHostByImageId(image_id);
-
+		if( mwHost.getId()!=null &&! "".equals(mwHost.getId())){
 		return mapper.toTransferObject(mwHost);
+		}else{
+		return new 	SshSettingInfo();
+		}
 	}
 
 	public void destroySsh(SshSettingInfo ssh) throws DbException {
@@ -1720,6 +1724,11 @@ public class DbServiceImpl implements IPersistService {
 			}
 		}
 		return policyTemplateList;
+	}
+
+	@Override
+	public void destroySshPassword(String id) throws DbException {
+		sshDao.destroyPassword(id);
 	}
 
 }
