@@ -17,6 +17,7 @@ import com.intel.director.api.ListSshSetting;
 import com.intel.director.api.MountWilsonSetting;
 import com.intel.director.api.SettingsKMSObject;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
@@ -42,10 +43,29 @@ public class Setting {
 	}
 
 	@POST
-	@Path("/sshsettings/postdata")
+	@Path("/addHost")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ListSshSetting postRecentSsh(SshSettingRequest sshSettingRequest) throws DirectorException {
+	public SshSettingResponse postRecentSsh(SshSettingRequest sshSettingRequest) throws DirectorException {
+		SshSettingResponse sshResponse= new SshSettingResponse();
+		try {
+			log.debug("Dashboard -> postRecentSsh");
+			sshResponse.setSshSettingRequest(impl.addHost(sshSettingRequest));
+		} catch (DirectorException e) {
+			
+			log.error("Error while adding shh settings");
+			sshResponse.status = Constants.ERROR;
+			sshResponse.details = e.getMessage();
+			
+		}
+		return sshResponse;
+	}
+	
+	@POST
+	@Path("/addHost/1")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ListSshSetting addHost(SshSettingRequest sshSettingRequest) throws DirectorException {
 		ListSshSetting listSsh= new ListSshSetting();
 		try {
 			log.debug("Dashboard -> postRecentSsh");
@@ -96,6 +116,27 @@ public class Setting {
 			listSsh.setSshSettings(impl.sshData());
 		
 
+		} catch (DirectorException e) {
+			
+			log.error("Error while Mounting the Image");
+			listSsh.status = Constants.ERROR;
+			listSsh.details = e.getMessage();
+			
+		}
+		 return listSsh;
+		
+	}
+	
+	@PUT
+	@Path("/updatehost")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public SshSettingResponse updateHostInfo(SshSettingRequest sshSettingRequest) 
+	{
+		SshSettingResponse listSsh= new SshSettingResponse();
+		try {
+			log.debug("Setting -> updateSsh");
+			impl.updateSshData(sshSettingRequest);
 		} catch (DirectorException e) {
 			
 			log.error("Error while Mounting the Image");

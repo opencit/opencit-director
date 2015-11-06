@@ -212,9 +212,27 @@ public class DashboardImpl implements DashboardService {
 				.searchByAction();
 		if(imgAction!=null){
 		for (ImageActionObject imgObj : imgAction) {
-			String imgName = dashboardImplPersistenceManager.fetchImageById(
-					imgObj.getImage_id()).getName();
-			imgObj.setImage_id(imgName);
+	
+			
+			ImageInfo image_info;
+			String policy_id, display_name;
+			
+				image_info = dashboardImplPersistenceManager.fetchImageById(imgObj.getImage_id());
+				if (image_info.getTrust_policy_draft_id() != null) {
+					policy_id = image_info.getTrust_policy_draft_id();
+					display_name = dashboardImplPersistenceManager.fetchPolicyDraftById(
+							policy_id).getDisplay_name();
+				} else if (image_info.getTrust_policy_id() != null) {
+					policy_id = image_info.getTrust_policy_id();
+					display_name = dashboardImplPersistenceManager.fetchPolicyById(
+							policy_id).getDisplay_name();
+				} else {
+					display_name = image_info.name;
+				}
+
+			
+			
+			imgObj.setImage_id(display_name);
 			if(Constants.TASK_NAME_UPLOAD_TAR.equals(imgObj.getCurrent_task_name()) || Constants.TASK_NAME_UPLOAD_IMAGE.equals(imgObj.getCurrent_task_name() )|| Constants.TASK_NAME_UPLOAD_POLICY.equals(imgObj.getCurrent_task_name() )){
 			
 			uploadInProgress.add(imgObj);

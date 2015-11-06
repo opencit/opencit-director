@@ -26,13 +26,9 @@ public class ImageActionImpl implements ImageActionService {
 		
 		List<ImageActionObject> actionObjectIncomplete = new ArrayList<ImageActionObject>();
 		List<ImageActionObject> allActionObject = ImageActionImplPersistenceManager.searchByAction();
-		Log.info("****** Got "+allActionObject.size() + "Actions");
 		for (ImageActionObject img : allActionObject) {
 			if ((img.getAction_completed() != img.getAction_count()) && !(img.getCurrent_task_status() !=null && img.getCurrent_task_status().startsWith(Constants.ERROR))) {
-				Log.info("****** Adding image action "+img.getId());
 				actionObjectIncomplete.add(img);
-			}else{
-				Log.info("xxxxxxxxxxxxxx NOT Adding image action "+img.getId());
 			}
 		}
 
@@ -41,7 +37,6 @@ public class ImageActionImpl implements ImageActionService {
 		}
 
 		if (count_of_action > actionObjectIncomplete.size() ) {
-			Log.info("****** Returning Actions # "+actionObjectIncomplete.size());
 			return actionObjectIncomplete;
 		} else {
 			return actionObjectIncomplete.subList(0, count_of_action);

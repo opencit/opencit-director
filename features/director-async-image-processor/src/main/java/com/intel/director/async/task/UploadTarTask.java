@@ -31,15 +31,16 @@ public class UploadTarTask extends UploadTask {
 	 * Entry method for running task. Checks if the previous task was completed
 	 */
 	@Override
-	public void run() {
-
+	public boolean run() {
+		boolean runFlag = false;
 		if (previousTasksCompleted(taskAction.getTask_name())) {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
 				super.initProperties();
-				runUploadTarTask();
+				runFlag  = runUploadTarTask();
 			}
 		}
+		return runFlag;
 
 	}
 
@@ -51,7 +52,8 @@ public class UploadTarTask extends UploadTask {
 		return Constants.TASK_NAME_UPLOAD_TAR;
 	}
 
-	public void runUploadTarTask() {
+	public boolean runUploadTarTask() {
+		boolean runFlag = false;
 		log.debug("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		try {
@@ -65,7 +67,8 @@ public class UploadTarTask extends UploadTask {
 			log.debug("runUploadTarTask tarname::" + tarName
 					+ " ,tarLocation ::" + tarLocation);
 			content = new File(tarLocation + tarName);
-
+			super.run();
+			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(
@@ -73,7 +76,7 @@ public class UploadTarTask extends UploadTask {
 							+ imageActionObject.getImage_id(), e);
 
 		}
-		super.run();
+		return runFlag;
 
 	}
 

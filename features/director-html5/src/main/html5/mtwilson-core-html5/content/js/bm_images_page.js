@@ -28,7 +28,6 @@ function createPolicy2(imageid, imagename) {
 }
 
 function goToCreatePolicyWizard2() {
-	bm_images_grid_page
 	$("#bm_images_grid_page").hide();
 	$("#create_policy_wizard2_").show();
 
@@ -63,28 +62,25 @@ function editPolicyForBMLive(hostid, hostname) {
 	goToEditPolicyWizardForBMLive();
 }
 
-function uploadToImageStorePageForBMImage(imageid, imagename, trust_policy_id) {
+function pushPolicyToHost(imageid, imagename, trust_policy_id) {
 
 	currentFlow = "Upload";
 	current_image_id = imageid;
 	current_image_name = imagename;
 	current_trust_policy_id = trust_policy_id;
-	goToUploadToImageStorePageForBMImage();
+	goToPushPolicyToHost();
 }
 
-function goToUploadToImageStorePageForBMImage() {
+function goToPushPolicyToHost() {
 	$("#bm_images_grid_page").hide();
-	$("#upload_to_image_store_redirect_bm_image").show();
-	var isEmpty = !$.trim($("#upload_to_image_store_redirect_bm_image").html());
+	$("#push_to_specific_host").show();
+	var isEmpty = !$.trim($("#push_to_specific_host").html());
 
 	if (isEmpty == false) {
-		$("#upload_to_image_store_redirect_bm_image").html("");
+		$("#push_to_specific_host").html("");
 	}
 
-	$("#upload_to_image_store_redirect_bm_image")
-			.load(
-					"/v1/html5/features/director-html5/mtwilson-core-html5/content/upload_imagestore_bm_image_direct.html");
-
+	$("#push_to_specific_host").load("/v1/html5/features/director-html5/mtwilson-core-html5/content/push_to_specific_host.html");
 }
 
 function goToCreatePolicyWizardForBMImage() {
@@ -372,10 +368,7 @@ function deletePolicy(imageid, trust_policy_id, imagename) {
 		url : "/v1/images/" + imageid + "/deletePolicy",
 		dataType : "text",
 		success : function(result) {
-				console.log("12312");
-				$("#trust_policy_column" + imageid).html("<a href='#' ><span class='glyphicon glyphicon-plus-sign'  title='Create Policy' onclick='createPolicy2(\""
-					+ imageid + '","' + imagename + "\")'></span></a>");
-				$("#policy_name").html("NA");
+			refreshBMOnlineGrid();
 		}
 	});
 

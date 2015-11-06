@@ -34,7 +34,8 @@ public class EncryptImageTask extends ImageActionTask {
 	 * Entry method for executing the task
 	 */
 	@Override
-	public void run() {
+	public boolean run() {
+		boolean runFlag = false;
 		// Call to update the task status
 		log.debug("Running encrypt image task : " + taskAction.getStatus());
 		if (taskAction.getStatus().equals(Constants.INCOMPLETE)) {
@@ -47,6 +48,7 @@ public class EncryptImageTask extends ImageActionTask {
 						Constants.COMPLETE,
 						"Completed encrypting image : "
 								+ imageActionObject.getImage_id());
+				runFlag = true;
 			} catch (DirectorException e) {
 				log.error("Error in EnryptImageTask", e);
 				updateImageActionState(
@@ -55,8 +57,9 @@ public class EncryptImageTask extends ImageActionTask {
 								+ imageActionObject.getImage_id() + " Error: "
 								+ e.getMessage());
 			}
+			
 		}
-
+		return runFlag;
 	}
 
 	/**

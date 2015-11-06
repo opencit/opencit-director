@@ -2,11 +2,12 @@ package com.intel.director.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.intel.director.images.exception.DirectorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -19,10 +20,9 @@ public class SettingImpl {
 
 	@Autowired
 	// private ImageStoreManager imageStoreManager;
-	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-	.getLogger(SettingImpl.class);
-	
+			.getLogger(SettingImpl.class);
+
 	public SettingImpl() {
 		settingsPersistenceManager = new DbServiceImpl();
 	}
@@ -31,19 +31,19 @@ public class SettingImpl {
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		List<SshSettingInfo> fetchSsh;
 		List<SshSettingRequest> responseSsh = new ArrayList<SshSettingRequest>();
-		
-		try{
 
-		fetchSsh = settingsPersistenceManager.showAllSsh();
+		try {
 
-		for (SshSettingInfo sshSettingInfo : fetchSsh) {
+			fetchSsh = settingsPersistenceManager.showAllSsh();
 
-			responseSsh.add(tdaasUtil.toSshSettingRequest(sshSettingInfo));
-		}
-		
-		}catch(Exception e){
-			log.error("ssddata method failed",e);
-		 throw new 	DirectorException(e);
+			for (SshSettingInfo sshSettingInfo : fetchSsh) {
+
+				responseSsh.add(tdaasUtil.toSshSettingRequest(sshSettingInfo));
+			}
+
+		} catch (Exception e) {
+			log.error("ssddata method failed", e);
+			throw new DirectorException(e);
 		}
 
 		return responseSsh;
@@ -53,31 +53,48 @@ public class SettingImpl {
 	public void postSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 
-
-
-		
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		SshSettingInfo sshSetingInfo = tdaasUtil
 
+		.fromSshSettingRequest(sshSettingRequest);
+
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+
+		log.debug("Going to save sshSetting info in database");
+		try {
+			settingsPersistenceManager.saveSshMetadata(sshSetingInfo);
+		} catch (DbException e) {
+			log.error("unable to save ssh info in database", e);
+			throw new DirectorException(
+					"Unable to save sshsetting info in database", e);
+		}
+
+	}
+
+	public SshSettingRequest addHost(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+
+		TdaasUtil tdaasUtil = new TdaasUtil();
+
+		SshSettingInfo sshSetingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
-	
-		
-		 TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(), sshSettingRequest.getUsername(), sshSettingRequest.getPassword());
-		
-	
-		
-	   
-	    	log.debug("Going to save sshSetting info in database");
-	    	try{
-	    	settingsPersistenceManager.saveSshMetadata(sshSetingInfo);
-	    	}catch(DbException e){
-	    		log.error("unable to save ssh info in database",e);
-	    		throw new DirectorException("Unable to save sshsetting info in database",e);
-	    	}
-	    
-		
-		
-		
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+
+		log.debug("Going to save sshSetting info in database");
+		try {
+			SshSettingInfo info = settingsPersistenceManager
+					.saveSshMetadata(sshSetingInfo);
+			return TdaasUtil.convertSshInfoToRequest(info);
+		} catch (DbException e) {
+			log.error("unable to save ssh info in database", e);
+			throw new DirectorException(
+					"Unable to save sshsetting info in database", e);
+		}
+
 	}
 
 	public void updateSshData(SshSettingRequest sshSettingRequest)
@@ -87,17 +104,29 @@ public class SettingImpl {
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
-		
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(), sshSettingRequest.getUsername(), sshSettingRequest.getPassword());
-		
-		try{
+
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+
+		try {
+
+			SshSettingInfo sshSettingInfo = tdaasUtil
+					.fromSshSettingRequest(sshSettingRequest);
+			SshSettingInfo existingSsh = settingsPersistenceManager
+					.fetchSshByImageId(sshSettingRequest.getImage_id());
+			if (existingSsh.getId() != null && !"".equals(existingSsh)) {
+				sshSettingInfo.setId(existingSsh.getId());
+				sshSettingRequest.setId(existingSsh.getId());
+			}
 			settingsPersistenceManager.updateSsh(tdaasUtil
 					.fromSshSettingRequest(sshSettingRequest));
-	    	}catch(DbException e){
-	    		log.error("unable to update ssh info in database",e);
-	    		throw new DirectorException("Unable to update sshsetting info in database",e);
-	    	}
-	
+		} catch (DbException e) {
+			log.error("unable to update ssh info in database", e);
+			throw new DirectorException(
+					"Unable to update sshsetting info in database", e);
+		}
+
 	}
 
 	public void updateSshDataById(String sshId) throws DbException {
@@ -106,12 +135,13 @@ public class SettingImpl {
 	}
 
 	public void deleteSshSetting(String sshId) throws DirectorException {
-		try{
-		settingsPersistenceManager.destroySshById(sshId);
-		}catch(DbException e){
-    		log.error("unable to delete ssh info in database",e);
-    		throw new DirectorException("Unable to delete sshsetting info in database",e);
-    	}
+		try {
+			settingsPersistenceManager.destroySshById(sshId);
+		} catch (DbException e) {
+			log.error("unable to delete ssh info in database", e);
+			throw new DirectorException(
+					"Unable to delete sshsetting info in database", e);
+		}
 
 	}
 
@@ -122,8 +152,7 @@ public class SettingImpl {
 		SshSettingInfo sshInfo = settingsPersistenceManager
 				.fetchSshByImageId(image_id);
 
-	
 		return tdaasUtil.toSshSettingRequest(sshInfo);
 	}
-	
+
 }

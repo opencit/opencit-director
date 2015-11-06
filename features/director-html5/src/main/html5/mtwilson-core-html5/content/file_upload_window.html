@@ -67,6 +67,7 @@
 		<script type="text/javascript">
 			var image_deployments = window.image_deployments_parent;
 			var image_format = window.image_format_parent;
+			var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata";
 			var   blob ,BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
 			/*
 			window.onload = function() {
@@ -84,15 +85,22 @@
 			blob = document.getElementById('myfile').files[0];
 			SIZE = blob.size;
 			var upload_size = Math.floor(SIZE/1024);
-			var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata?image_deployments="
-			+ image_deployments + "&image_format=" + image_format + "&fileName=" + fileName + "&fileSize=" + upload_size;
+			/*var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata?image_deployments="
+			+ image_deployments + "&image_format=" + image_format + "&fileName=" + fileName + "&fileSize=" + upload_size;*/
 			var image_id;
 			var xhrmdt = new XMLHttpRequest();
 			xhrmdt.open('POST', urlToUploadMetadata, true); 
-			xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			//xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhrmdt.setRequestHeader("Content-Type", "application/json");
 			xhrmdt.setRequestHeader("Accept", "application/json");
-			xhrmdt.send();
-			var flag = false;
+			//xhrmdt.send();
+			upload_data = {
+							'image_deployments': image_deployments,
+							'image_format': image_format,
+							'name': fileName,
+							'image_size': upload_size
+							};
+			xhrmdt.send(JSON.stringify(upload_data));
 			xhrmdt.onreadystatechange  = function (e) {
 			
 				if (xhrmdt.readyState === 4 ) {

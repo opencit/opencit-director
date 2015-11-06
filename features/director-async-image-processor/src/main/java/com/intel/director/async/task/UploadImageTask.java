@@ -18,6 +18,7 @@ import com.intel.director.util.TdaasUtil;
  * 
  * @author GS-0681
  */
+
 public class UploadImageTask extends UploadTask {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -41,22 +42,26 @@ public class UploadImageTask extends UploadTask {
 	 * Entry method for running the task
 	 */
 	@Override
-	public void run() {
+	public boolean run() {
 
+		boolean runFlag = false;
 		if (previousTasksCompleted(taskAction.getTask_name())) {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
 				super.initProperties();
-				runCreateImageTask();
+				runFlag = runCreateImageTask();
 			}
 		}
+		return runFlag;
 
 	}
 
 	/**
 	 * Actual implementation of task for uploading image
 	 */
-	public void runCreateImageTask() {
+	public boolean runCreateImageTask() {
+		boolean runFlag = false;
+
 		log.debug("Inside runUploadImageTask for ::"
 				+ imageActionObject.getImage_id());
 		try {
@@ -81,7 +86,8 @@ public class UploadImageTask extends UploadTask {
 			}
 
 			content = new File(imageFilePath);
-
+			super.run();
+			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error(
@@ -89,7 +95,7 @@ public class UploadImageTask extends UploadTask {
 							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		}
-		super.run();
+		return runFlag;
 
 	}
 }

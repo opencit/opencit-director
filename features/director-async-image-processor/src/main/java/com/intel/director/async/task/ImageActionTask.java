@@ -14,7 +14,7 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
  * @author GS-0681
  * 
  */
-public abstract class ImageActionTask implements Runnable {
+public abstract class ImageActionTask  {
 
 	public ImageActionObject imageActionObject;
 	public ImageActionActions taskAction;
@@ -139,5 +139,7 @@ public abstract class ImageActionTask implements Runnable {
 			}
 		}
 	}
+	
+	public abstract boolean run();
 
 }

@@ -17,6 +17,7 @@ import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
+import com.intel.director.api.SshSettingRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -104,9 +105,13 @@ public interface ImageService {
 
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			String fileSize) throws DirectorException;
+			int fileSize) throws DirectorException;
 	
 	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException;
+
+	public SshSettingRequest getBareMetalMetaData(String image_id) throws DirectorException;
+
+	public void deletePasswordForHost(String image_id) throws DirectorException;
 
 
 }

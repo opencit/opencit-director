@@ -128,14 +128,12 @@ public abstract class UploadTask extends ImageActionTask {
 	}
 
 	@Override
-	public void run() {
-
-		runUploadTask();
-
+	public boolean run() {
+		return runUploadTask();
 	}
 
-	public void runUploadTask() {
-
+	private boolean runUploadTask() {
+		boolean runFlag = false;
 		try {
 
 
@@ -257,6 +255,7 @@ public abstract class UploadTask extends ImageActionTask {
 			}
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			reader.close();
+			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(
@@ -264,6 +263,7 @@ public abstract class UploadTask extends ImageActionTask {
 							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		}
+		return runFlag;
 	}
 
 	public ImageStoreManager getImageStoreImpl(String className)

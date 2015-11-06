@@ -693,6 +693,12 @@ public class TdaasUtil {
 		return result;
 		
 	}
+
+	public static SshSettingRequest convertSshInfoToRequest(SshSettingInfo info) {
+		SshSettingRequest setting = new SshSettingRequest();
+		setting.setImage_id(info.getImage_id().getId());
+		return setting;
+	}
 	
 
 }

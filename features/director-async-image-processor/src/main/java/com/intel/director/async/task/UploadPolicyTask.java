@@ -36,20 +36,20 @@ public class UploadPolicyTask extends UploadTask {
 	 * Entry method for uploading policy
 	 */
 	@Override
-	public void run() {
-
+	public boolean run() {
+		boolean runFlag = false;
 		if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 			updateImageActionState(Constants.IN_PROGRESS, "Started");
-			runUploadPolicyTask();
+			runFlag = runUploadPolicyTask();
 		}
-
+		return runFlag;
 	}
 
 	/**
 	 * Actual implementation of policy upload task
 	 */
-	public void runUploadPolicyTask() {
-
+	public boolean runUploadPolicyTask() {
+		boolean runFlag = false;
 		File trustPolicyFile = null;
 		try {
 
@@ -76,8 +76,8 @@ public class UploadPolicyTask extends UploadTask {
 			}
 
 			content = trustPolicyFile;
-
 			super.run();
+			runFlag = true;
 
 		} catch (Exception e) {
 			updateImageActionState(Constants.ERROR, e.getMessage());
@@ -86,6 +86,7 @@ public class UploadPolicyTask extends UploadTask {
 				trustPolicyFile.delete();
 			}
 		}
+		return runFlag;
 
 	}
 

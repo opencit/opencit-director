@@ -518,7 +518,7 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
 
   #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
  director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
- director config mtwilson.navbar.hometab director-dashboard >/dev/null
+ director config mtwilson.navbar.hometab director-trust-policy >/dev/null
 
   director config jetty.port ${JETTY_PORT:-80} >/dev/null
   director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null

@@ -31,17 +31,21 @@ import org.apache.commons.lang.StringUtils;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GetImageStoresResponse;
+import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
+import com.intel.director.api.MonitorStatus;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
+import com.intel.director.api.SshSettingResponse;
+import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -78,29 +82,35 @@ public class Images {
 	 * API for uploading image metadata like image format,
 	 * deployment type(VM, BareMetal, Docker), image file name,
 	 * image size, etc.
-	 * @param image_format
-	 * @param image_deployments
-	 * @param fileName
-	 * @param fileSize
-	 * @return TrustDirectorImageUploadResponse - contains newly created
-	 * 				image metadata along with image_id
+	 * Creates image upload metadata with specified parameters and returns
+	 * metadata along with image id.
+	 * @param TrustDirectorImageUploadRequest object which includes metadata information
+	 * @return TrustDirectorImageUploadResponse object contains newly created image metadata along with image_id
 	 * @throws Exception
+	 * @TDMethodType POST
+	 * @TDSampleRestCall
+     * <pre>
+     * https://server.com:8443/v1/images/uploads/content/uploadMetadata
+     * Input: {"name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
+     * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+     * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+     * 			"image_format":"qcow2","image_deployments":"VM","status":"Incomplete","image_size":407552,
+     * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
+     * </pre>
 	 */
 	@Path("/uploads/content/uploadMetadata")
 	@POST
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustDirectorImageUploadResponse createUploadImageMetadata(
-			@QueryParam("image_format") String image_format,
-			@QueryParam("image_deployments") String image_deployments,
-			@QueryParam("fileName") String fileName,
-			@QueryParam("fileSize") String fileSize)
+			TrustDirectorImageUploadRequest uploadRequest)
 			throws Exception {
 
 		imageService = new ImageServiceImpl();
+
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.createUploadImageMetadataImpl(image_deployments,
-						image_format, fileName, fileSize);
+				.createUploadImageMetadataImpl(uploadRequest.image_deployments,
+						uploadRequest.image_format, uploadRequest.name, uploadRequest.image_size);
 		log.info("Successfully uploaded image to location: "
 				+ uploadImageToTrustDirector.getLocation());
 	
@@ -111,14 +121,23 @@ public class Images {
 	/**
 	 * API for uploading image data for the given image id.
 	 * Before Uploading image it is divided in chunks
-	 * and sent one by one. Once the chunk is received
-	 * it is then saved to disk.
-	 * @param image_id - id received as response of 
-	 * 						../uploadMetadata request
+	 * and sent to server one by one. Once the chunk is received
+	 * location to save image is retrieved from DB using given image id
+	 * and chunk is saved to that location.
+	 * @param image_id - id received as response of https://server.com:8443/v1/images/uploads/content/uploadMetadata request
 	 * @param filInputStream - image data sent as chunk
-	 * @return TrustDirectorImageUploadResponse - 
-	 * 			updated image upload metadata in response
+	 * @return TrustDirectorImageUploadResponse object with updated image upload metadata
 	 * @throws Exception
+	 * @TDMethodType POST
+	 * @TDSampleRestCall
+     * <pre>
+     * https://server.com:8443/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
+     * Input: chunk for image upload
+     * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+     * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+     * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
+     * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+     * </pre>
 	 */
 	@Path("/uploads/content/upload/{image_id: [0-9a-zA-Z_-]+}")
 	@POST
@@ -224,7 +243,6 @@ public class Images {
 		log.info("inside mounting image in web service");
 		String user = getLoginUsername();
 		log.info("User mounting image : " + user);
-
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		try {
 			mountImageResponse = imageService.mountImage(imageId, user);
@@ -755,6 +773,34 @@ public class Images {
 			throws DirectorException {
 
 		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
+			throws DirectorException {
+		SshSettingResponse settingResponse = new SshSettingResponse();
+		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
+		return settingResponse;
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public MonitorStatus deletePasswordForHost(@PathParam("imageId") String image_id) throws DirectorException
+			 {
+			MonitorStatus monitor = new MonitorStatus();
+			try {
+				imageService.deletePasswordForHost(image_id);
+			} catch (DirectorException e) {
+				log.error("Error in deleting password",e);
+				monitor.status = Constants.ERROR;
+				monitor.details = e.getMessage();
+			}
+			return monitor;
 	}
 
 }

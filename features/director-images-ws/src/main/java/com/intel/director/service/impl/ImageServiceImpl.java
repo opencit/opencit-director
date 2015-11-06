@@ -47,6 +47,7 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshSettingInfo;
+import com.intel.director.api.SshSettingRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -156,7 +157,7 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 
-		log.info("Mounting image from location: " + image.location);
+////		log.info("Mounting image from location: " + image.location);
 
 		String mountPath = null;
 		if (image.getImage_format() == null) {
@@ -204,6 +205,7 @@ public class ImageServiceImpl implements ImageService {
 				int exitCode = MountImage.mountRemoteSystem(
 						info.getIpAddress(), info.getUsername(), info
 								.getSshPassword().getKey(), mountPath);
+				
 				if (exitCode == 1) {
 					log.error("Error mounting remote host : " + info.toString());
 					throw new DirectorException(
@@ -356,19 +358,21 @@ public class ImageServiceImpl implements ImageService {
 
 	/**
 	 * Method for creating new image metadata for the image being
-	 * uploaded and store it in the DB.
+	 * uploaded and store it in the DB. It will require image name,
+	 * image size, image format, image deployment type as parameter.
+	 * New image upload metadata will be created for this 
+	 * parameters along with the authenticated user information
 	 * @param image_deployments
 	 * @param image_format
 	 * @param fileName
 	 * @param fileSize
-	 * @return TrustDirectorImageUploadResponse - newly created 
-	 * 					image metadata in response
+	 * @return TrustDirectorImageUploadResponse object newly created image metadata
 	 * @throws DirectorException
 	 */
 	@Override
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			String fileSize) throws DirectorException {
+			int fileSize) throws DirectorException {
 
 		String loggedinUser = ShiroUtil.subjectUsername();
 
@@ -379,7 +383,7 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setEdited_by_user_id(loggedinUser);
 		imageAttributes.setStatus(Constants.INCOMPLETE);
 		imageAttributes.setDeleted(false);
-		int sizen_kb = Integer.parseInt(fileSize);
+		int sizen_kb = fileSize;
 		imageAttributes.setSent(0);
 		imageAttributes.setImage_size(sizen_kb);
 		imageAttributes.location = Constants.defaultUploadPath;
@@ -408,12 +412,13 @@ public class ImageServiceImpl implements ImageService {
 
 	/**
 	 * Method for uploading image data sent in 
-	 * chunks for the given image_id
-	 * @param image_id - id received as part of response for
-	 * 					../uploadMetadata API
-	 * @param fileInputStream - image data send in chunks
-	 * @return TrustDirectorImageUploadResponse - updated image
-	 * 					upload metadata
+	 * chunks for the given image_id.
+	 * Image name and image save location retrieved 
+	 * from DB using the given image id and given chunk is 
+	 * saved to that location
+	 * @param image_id
+	 * @param fileInputStream - image data sent in chunks
+	 * @return TrustDirectorImageUploadResponse object updated image upload metadata
 	 * @throws DirectorException
 	 */
 	@Override
@@ -1046,8 +1051,8 @@ public class ImageServiceImpl implements ImageService {
 									.getTrust_policy_draft());
 					createPolicyMetadataResponse.status = "NEW";
 				} else {
-					//Signed policy exists. We need to copy it over sans the
-					//signature and hashes
+					// Signed policy exists. We need to copy it over sans the
+					// signature and hashes
 
 					log.debug("policy draft already exists");
 					TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
@@ -1058,16 +1063,18 @@ public class ImageServiceImpl implements ImageService {
 					trustPolicyDraft
 							.setDisplay_name(createTrustPolicyMetaDataRequest
 									.getDisplay_name());
-					
-					com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
+
+					com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+							.getPolicy(policyXml);
 					policy.setSignature(null);
-					List<Measurement> measurements = policy.getWhitelist().getMeasurements();
-					for(Measurement measurement:measurements){
+					List<Measurement> measurements = policy.getWhitelist()
+							.getMeasurements();
+					for (Measurement measurement : measurements) {
 						measurement.setValue(null);
 					}
-					
+
 					policyXml = TdaasUtil.convertTrustPolicyToString(policy);
-					
+
 					String unsigned_trust_policy = policyXml;// / Need to be
 					// removed
 
@@ -1430,14 +1437,12 @@ public class ImageServiceImpl implements ImageService {
 			ImageListResponseInfo imgResponse = new ImageListResponseInfo();
 			imgResponse.setImage_name(imageInfo.getName());
 
-			String trust_policy = "<div id=\"trust_policy_column" + imageInfo.id + "\">";
-			if (imageInfo.getTrust_policy_draft_id() == null
+			String trust_policy = "<div id=\"trust_policy_column"
+					+ imageInfo.id + "\">";
+		if (imageInfo.getTrust_policy_draft_id() == null
 					&& imageInfo.getTrust_policy_id() == null) {
 
-				trust_policy = trust_policy
-						+ "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicy2('"
-						+ imageInfo.getId() + "','" + imageInfo.getName()
-						+ "')\"></span></a>";
+			continue;
 			}
 
 			if (imageInfo.getTrust_policy_draft_id() != null) {
@@ -1472,15 +1477,24 @@ public class ImageServiceImpl implements ImageService {
 			trust_policy = trust_policy + "</div>";
 			imgResponse.setTrust_policy(trust_policy);
 
-			String image_upload = "<div id='policy_name'" + imageInfo.id + ">";
-			String display_name = getDisplayNameForImage(imageInfo.id);
-			if ( display_name.equals(imageInfo.getName()) && imageInfo.getTrust_policy_draft_id() == null && imageInfo.getTrust_policy_id() == null ) {
-				image_upload = image_upload + "NA";
-			} else {
-				image_upload = image_upload
-						+ getDisplayNameForImage(imageInfo.id);
+			String display_name = "<div id='policy_name'" + imageInfo.id + ">";
+			String dname = getDisplayNameForImage(imageInfo.id);
+			if(dname==null){
+				display_name = display_name + "NA";
+			}else{
+				display_name = display_name+dname;
 			}
-			image_upload = image_upload + "</div>";
+			
+		
+			display_name = display_name + "</div>";
+
+			imgResponse.setDisplay_name(display_name);
+
+			String image_upload = "";
+			image_upload += "&nbsp;"
+					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
+					+ imageInfo.getId() + "','" + imageInfo.getName() + "','"
+					+ imageInfo.getTrust_policy_id() + "')\" ></span></a>";
 
 			imgResponse.setImage_upload(image_upload);
 
@@ -1510,7 +1524,8 @@ public class ImageServiceImpl implements ImageService {
 			imgResponse.setImage_name(imageInfo.getName());
 			imgResponse.setImage_format(imageInfo.getImage_format());
 
-			String trust_policy = "<div id=\"trust_policy_column" + imageInfo.id +"\">";
+			String trust_policy = "<div id=\"trust_policy_column"
+					+ imageInfo.id + "\">";
 			if (imageInfo.getTrust_policy_draft_id() == null
 					&& imageInfo.getTrust_policy_id() == null) {
 
@@ -1565,7 +1580,19 @@ public class ImageServiceImpl implements ImageService {
 
 			imgResponse.setImage_upload(image_upload);
 
-			imgResponse.setCreated_date(imageInfo.getCreated_date());
+			String tpid=imageInfo.getTrust_policy_id();
+			if(tpid!=null){
+			try {
+				TrustPolicy trustPolicy=	imagePersistenceManager.fetchPolicyById(tpid);
+				if(trustPolicy!=null && trustPolicy.getCreated_date()!=null){
+					imgResponse.setCreated_date(trustPolicy.getCreated_date());
+				}
+			} catch (DbException e) {
+				log.error("unable to get trust policy by id, getBareMetalLive",e);
+				
+			}
+			}
+			
 
 			imageListresponse.images.add(imgResponse);
 
@@ -1587,7 +1614,8 @@ public class ImageServiceImpl implements ImageService {
 			imgResponse.setImage_name(imageInfo.getName());
 			imgResponse.setImage_format(imageInfo.getImage_format());
 
-			String trust_policy = "<div id=\"trust_policy_vm_column" + imageInfo.id +"\">";
+			String trust_policy = "<div id=\"trust_policy_vm_column"
+					+ imageInfo.id + "\">";
 			if (imageInfo.getTrust_policy_draft_id() == null
 					&& imageInfo.getTrust_policy_id() == null) {
 
@@ -1630,7 +1658,6 @@ public class ImageServiceImpl implements ImageService {
 			trust_policy = trust_policy + "</div>";
 			imgResponse.setTrust_policy(trust_policy);
 
-
 			String image_upload;
 			if (imageInfo.getUploads_count() != 0) {
 				image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
@@ -1644,7 +1671,7 @@ public class ImageServiceImpl implements ImageService {
 					+ imageInfo.getTrust_policy_id() + "')\" ></span></a>";
 
 			imgResponse.setImage_upload(image_upload);
-			
+
 			String display_name;
 
 			display_name = getDisplayNameForImage(imageInfo.getId());
@@ -2159,6 +2186,14 @@ public class ImageServiceImpl implements ImageService {
 					imagePersistenceManager.destroyPolicy(policy);
 				}
 			}
+			
+			if (image.getImage_format() == null) {
+				SshSettingInfo existingSsh = imagePersistenceManager
+						.fetchSshByImageId(imageId);
+				if (existingSsh.getId() != null && !"".equals(existingSsh)) {
+					imagePersistenceManager.destroySshById(existingSsh.getId());
+				}
+			}
 		} catch (DbException e) {
 			log.error("Error in Deleting TrustPolicy or TrustPolicyDraft", e);
 			throw new DirectorException(
@@ -2219,7 +2254,7 @@ public class ImageServiceImpl implements ImageService {
 		try {
 
 			DirectorUtil.createTar(artifactsPath, "trustpolicy.xml",
-					"manifest.xml", artifactsPath + File.separator , tarName);
+					"manifest.xml", artifactsPath + File.separator, tarName);
 		} catch (IOException e) {
 			log.error("Error while creating TAR for policy and manifest", e);
 			return null;
@@ -2231,6 +2266,40 @@ public class ImageServiceImpl implements ImageService {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public SshSettingRequest getBareMetalMetaData(String image_id)
+			throws DirectorException {
+		SshSettingRequest settingRequest = new SshSettingRequest();
+		try {
+			SshSettingInfo ssh = imagePersistenceManager
+					.fetchSshByImageId(image_id);
+			settingRequest.setId(ssh.getId());
+			settingRequest.setName(ssh.getName());
+			settingRequest.setPolicy_name(getDisplayNameForImage(image_id));
+			settingRequest.setIpAddress(ssh.getIpAddress());
+			settingRequest.setUsername(ssh.getUsername());
+		} catch (DbException e) {
+			log.error("Error Fetching ssh from DB in getBareMetalMetaData", e);
+			throw new DirectorException(
+					"Error Fetching ssh from DB in getBareMetalMetaData", e);
+		}
+		return settingRequest;
+	}
+
+	@Override
+	public void deletePasswordForHost(String image_id) throws DirectorException {
+		SshSettingInfo ssh;
+		try {
+			ssh = imagePersistenceManager
+					.fetchSshByImageId(image_id);
+			imagePersistenceManager.destroySshPassword(ssh.getSshPassword().getId());
+		} catch (DbException e) {
+			log.error("Error in deleting SSh Password",e);
+			throw new DirectorException("Error in deleting SSh Password",e);
+		}
+		
 	}
 
 }

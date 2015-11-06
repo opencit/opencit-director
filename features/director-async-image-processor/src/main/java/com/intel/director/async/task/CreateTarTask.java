@@ -31,28 +31,30 @@ public class CreateTarTask extends ImageActionTask {
 	 * 
 	 */
 	@Override
-	public void run() {
+	public boolean run() {
 
 		// Call to update the task status
-
+		boolean runFlag = false;
 		if (previousTasksCompleted(taskAction.getTask_name())) {
 			log.info("Previous task was completed which was Create Tar");
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				log.info("Create Tar is In Progress");
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
 				log.info("Create Tar is being executed");
-				runCreateTarTask();
+				runFlag = runCreateTarTask();
 			}
 		}
+		return runFlag;
 
 	}
 
 	/**
-	 * After the check in the run method this task creates a tar from an image and policy
+	 * After the check in the run method this task creates a tar from an image
+	 * and policy
 	 */
-	public void runCreateTarTask() {
+	public boolean runCreateTarTask() {
 		String trustPolicyName = null;
-
+		boolean runFlag = false;
 		try {
 
 			log.info("Inside runCreateTartask for ::"
@@ -111,15 +113,16 @@ public class CreateTarTask extends ImageActionTask {
 			}
 
 			String tarLocation = newLocation;
-			String tarName = trustPolicy.getDisplay_name()+".tar";
+			String tarName = trustPolicy.getDisplay_name() + ".tar";
 			log.info("Create Tar ::tarName::" + tarName + " tarLocation::"
 					+ tarLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
 			DirectorUtil.createTar(newLocation, imageName, trustPolicyName,
 					tarLocation, tarName);
 			log.info("Create Tar : commplete");
-
+			
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
+			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(
@@ -129,7 +132,7 @@ public class CreateTarTask extends ImageActionTask {
 		} finally {
 
 		}
-
+		return runFlag;
 	}
 
 	/**

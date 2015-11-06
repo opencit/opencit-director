@@ -85,7 +85,6 @@ public class FileUtilityOperation {
 			bw = new BufferedWriter(fw);
 			bw.write(value);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log.error("Error writing to file "+path, e);
 			status = false;
 		} finally {
@@ -171,7 +170,7 @@ public class FileUtilityOperation {
 	}
 
 	public boolean createNewFile(String path) {
-		boolean ret = false;
+		boolean ret = true;
 		File f = new File(path);
 		if (!f.exists()) {
 			try {
