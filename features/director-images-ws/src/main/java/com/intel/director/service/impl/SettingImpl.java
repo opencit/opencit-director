@@ -80,10 +80,11 @@ public class SettingImpl {
 
 		SshSettingInfo sshSetingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
+		log.info("Inside addHost, going to addSshKey ");
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername(),
 				sshSettingRequest.getPassword());
-
+		log.info("Inside addHost,After execution of addSshKey ");
 		log.debug("Going to save sshSetting info in database");
 		try {
 			SshSettingInfo info = settingsPersistenceManager
@@ -105,10 +106,11 @@ public class SettingImpl {
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
+		log.info("Inside updateSshData, going to addSshKey ");
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername(),
 				sshSettingRequest.getPassword());
-
+		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
 
 			SshSettingInfo sshSettingInfo = tdaasUtil
@@ -117,14 +119,17 @@ public class SettingImpl {
 					.fetchSshByImageId(sshSettingRequest.getImage_id());
 			if (existingSsh.getId() != null && !"".equals(existingSsh)) {
 				sshSettingInfo.setId(existingSsh.getId());
-				sshSettingRequest.setId(existingSsh.getId());
+				sshSettingInfo.setImage_id(existingSsh.getImage_id());
+				///sshSettingRequest.setId(existingSsh.getId());
 			}
-			settingsPersistenceManager.updateSsh(tdaasUtil
-					.fromSshSettingRequest(sshSettingRequest));
+			settingsPersistenceManager.updateSsh(sshSettingInfo);
 		} catch (DbException e) {
 			log.error("unable to update ssh info in database", e);
 			throw new DirectorException(
 					"Unable to update sshsetting info in database", e);
+		}catch(Exception e){
+			throw new DirectorException(
+					"updateSshdata failed", e);
 		}
 
 	}
