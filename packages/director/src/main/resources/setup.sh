@@ -274,11 +274,11 @@ update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILS
 
 
 
-prompt_with_default_password MTWILSON_API_URL "Mtwilson API Url:" "$MTWILSON_API_URL"
+prompt_with_default MTWILSON_API_URL "Mtwilson API Url:" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-prompt_with_default_password MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
+prompt_with_default MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
