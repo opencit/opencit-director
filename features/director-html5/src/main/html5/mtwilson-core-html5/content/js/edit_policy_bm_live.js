@@ -10,19 +10,74 @@ function EditBMLiveMetaData() {
 	
 }
 
+
+function show_error_in_editbmlivemodal(message){
+
+$('#error_modal_body_edit_bm_live_1').text(message);
+				$("#error_modal_edit_bm_live_1").modal({
+					backdrop : "static"
+				});
+				$('body').removeClass("modal-open");
+
+
+
+}
+
 function editandNext() {
 	var self = this;
 	$("#host_name_live_edit").val(current_image_name);
 	self.editBMLiveMetaData = new EditBMLiveMetaData();
 	self.data = {};
-	self.data.ip_address = $("#host_ip_edit").val();
-	self.data.username = $("#username_for_host_edit").val();
-	self.data.password = $("#password_for_host_edit").val();
-	self.data.name = $("#host_ip_edit").val();
+
+
+
+	
+if(!$.trim($("#display_name_host_edit").val())==false){
 	self.data.policy_name = $("#display_name_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Policy name is mandatory");
+return;
+}
+
+
+
+
+if(!$.trim($("#host_ip_edit").val())==false){
+	self.data.ip_address = $("#host_ip_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Host Ip/Name is mandatory");
+return;
+}
+
+
+if(!$.trim($("#username_for_host_edit").val())==false){
+	self.data.username = $("#username_for_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Username is mandatory");
+return;
+}
+
+
+	
+	if(!$.trim($("#password_for_host_edit").val())==false){
+	self.data.password = $("#password_for_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Password is mandatory");
+return;
+}
+
+
+
+
+
+	
 	self.data.key = $("#key_edit").val();
 	self.data.image_id = current_image_id;
 	
+
+
+
+
 	$.ajax({
 		type : "PUT",
 		url : "/v1/setting/updatehost",
@@ -33,11 +88,8 @@ function editandNext() {
 		data : JSON.stringify(data), 
 		success : function (data, status, xhr) {
 						if (data.status == "Error") {
-				$('#error_modal_body_bm_live_1').text(data.details);
-				$("#error_modal_bm_live_1").modal({
-					backdrop : "static"
-				});
-				$('body').removeClass("modal-open");
+
+				show_error_in_editbmlivemodal(data.details);
 				return;
 			}
 			;
@@ -55,10 +107,7 @@ function editandNext() {
 				data : ko.toJSON(self.editBMLiveMetaData),
 				success : function (data, status, xhr) {
 					if (data.status == "Error") {
-						$('#error_modal_body_edit_bm_live_1').text(data.details);
-						$("#error_modal_edit_bm_live_1").modal({
-							backdrop : "static"
-						});
+						show_error_in_editbmlivemodal(data.details);
 						return;
 					}
 					$.ajax({
@@ -71,10 +120,7 @@ function editandNext() {
 						data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
-								$('#error_modal_body_edit_bm_live_1').text(data.details);
-								$("#error_modal_edit_bm_live_1").modal({
-									backdrop : "static"
-								});
+								show_error_in_editbmlivemodal(data.details);
 								return;
 							}
 							nextButtonLiveBM();

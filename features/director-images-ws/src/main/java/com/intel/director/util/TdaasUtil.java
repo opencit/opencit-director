@@ -36,6 +36,7 @@ import javax.xml.bind.Unmarshaller;
 import net.schmizz.sshj.SSHClient;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
@@ -615,6 +616,19 @@ public class TdaasUtil {
 					+ "/.ssh"))) {
 				ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
 			}
+			
+			if(Files.exists(Paths.get(System.getProperty("user.home")+"/.ssh/known_hosts"))){
+				Result result = ExecUtil.executeQuoted("/bin/sh", "-c", "ssh-keygen -H  -F " + ip);
+				if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
+					log.error(result.getStderr());
+				}
+				String stdout = result.getStdout();
+				if(StringUtils.isNotBlank(stdout) && StringUtils.isNotEmpty(stdout) ){
+					return true; 
+				}
+			}
+
+			
 			String addHostKey = "ssh-keyscan -Ht rsa " + ip
 					+ " >> ~/.ssh/known_hosts";
 			Result executeQuoted = ExecUtil.executeQuoted("/bin/bash", "-c",
@@ -625,7 +639,7 @@ public class TdaasUtil {
 		}
 		}catch(Exception e){
 			log.error("Unable to add SSh key to remot host, addSshKey method",e);
-			throw new DirectorException("Unable to add SSh key to remot host",e);
+			throw new DirectorException("Unable to connect to remote host",e);
 		}
 		return flag;
 	}
@@ -633,7 +647,6 @@ public class TdaasUtil {
 	private static boolean checkSshConnection(String ipaddress,
 			String username, String password) throws IOException {
 		SSHClient ssh = new SSHClient();
-
 		log.debug("Trying to connect IP :: " + ipaddress);
 		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
 		ssh.connect(ipaddress);

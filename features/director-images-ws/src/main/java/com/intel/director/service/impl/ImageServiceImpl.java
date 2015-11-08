@@ -1078,8 +1078,12 @@ public class ImageServiceImpl implements ImageService {
 					String unsigned_trust_policy = policyXml;// / Need to be
 					// removed
 
+					unsigned_trust_policy = TdaasUtil.updatePolicyDraft(
+							unsigned_trust_policy,
+							createTrustPolicyMetaDataRequest);
 					trustPolicyDraft
-							.setTrust_policy_draft(unsigned_trust_policy);
+					.setTrust_policy_draft(unsigned_trust_policy);
+
 
 					ImageAttributes imgAttrs = new ImageAttributes();
 					imgAttrs.setId(imageid);
@@ -1091,6 +1095,7 @@ public class ImageServiceImpl implements ImageService {
 							.subjectUsername());
 					trustPolicyDraft.setCreated_by_user_id(ShiroUtil
 							.subjectUsername());
+					
 					policyDraftCreated = imagePersistenceManager
 							.savePolicyDraft(trustPolicyDraft);
 					log.debug("policy draft created from existing policy, policyDraftCreatedId::"
@@ -1099,7 +1104,7 @@ public class ImageServiceImpl implements ImageService {
 
 			} else {
 
-				existingDraft.setEdited_date(currentDate);
+				existingDraft.setEdited_date(currentDate);				
 				String existingTrustPolicyDraftxml = existingDraft
 						.getTrust_policy_draft();
 				String trust_policy_draft = TdaasUtil.updatePolicyDraft(
@@ -2052,30 +2057,35 @@ public class ImageServiceImpl implements ImageService {
 		// Check if mounted live BM has /opt/vrtm
 
 		String idendifier = "NV";
-		String dirPath = "/opt";
-		Collection<File> firstLevelFiles = getFirstLevelFiles(dirPath, imageId);
-		for (File f : firstLevelFiles) {
-			if (f.getAbsolutePath().endsWith("/opt/vrtm")) {
-				idendifier = "V";
-			}
+		String dirPath = "/opt/vrtm";
+		File vrtmDir = new File(TdaasUtil.getMountPath(imageId)+dirPath);
+		if(vrtmDir.exists() && vrtmDir.isDirectory()){
+			idendifier = "V";
 		}
-
 		String content = null;
 		Manifest manifest;
-		List<PolicyTemplateInfo> fetchPolicyTemplateForDeploymentIdentifier;
+		
 		try {
-			fetchPolicyTemplateForDeploymentIdentifier = imagePersistenceManager
+			List<PolicyTemplateInfo> fetchPolicyTemplateForDeploymentIdentifier = imagePersistenceManager
 					.fetchPolicyTemplateForDeploymentIdentifier(
 							Constants.DEPLOYMENT_TYPE_BAREMETAL, idendifier);
-			PolicyTemplateInfo policyTemplateInfo = fetchPolicyTemplateForDeploymentIdentifier
-					.get(0);
-			content = policyTemplateInfo.getContent();
+			if(fetchPolicyTemplateForDeploymentIdentifier != null && fetchPolicyTemplateForDeploymentIdentifier.size() > 0){
+				PolicyTemplateInfo policyTemplateInfo = fetchPolicyTemplateForDeploymentIdentifier
+						.get(0);
+				content = policyTemplateInfo.getContent();
+			}
 		} catch (DbException e2) {
 			log.error("Error converting manifest to object " + content, e2);
 			throw new DirectorException("Error converting manifest to object ",
 					e2);
 		}
 
+		if(content == null || StringUtils.isEmpty(content)){
+			createTrustPolicyMetaDataResponse = new CreateTrustPolicyMetaDataResponse();
+			createTrustPolicyMetaDataResponse.setTrustPolicy(policyDraftForImage.getTrust_policy_draft());
+			createTrustPolicyMetaDataResponse.setStatus("Success");
+			return createTrustPolicyMetaDataResponse;
+		}
 		try {
 			manifest = TdaasUtil.convertStringToManifest(content);
 		} catch (JAXBException e1) {

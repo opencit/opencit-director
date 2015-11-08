@@ -24,12 +24,15 @@ function unmount_remote_file_system(){
    echo "Unmount the Remote file system"
    mountPathCheck=$(mount | grep -o "$mountPath")
    echo "Print MountPathCheck $mountPathCheck"
+   uuidFolder="${mountPath/mount}"
+
     if [ ! -z $mountPathCheck ]
     then
        echo "Unmount the file system"
        umount $mountPath
        echo "Unmount operation result: $?"
        rm -rf $mountPath
+	rm -rf $uuidFolder
     fi
 }
 

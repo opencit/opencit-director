@@ -54,9 +54,7 @@ public class SettingImpl {
 			throws DirectorException {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
-		SshSettingInfo sshSetingInfo = tdaasUtil
-
-		.fromSshSettingRequest(sshSettingRequest);
+		SshSettingInfo sshSetingInfo = tdaasUtil.fromSshSettingRequest(sshSettingRequest);
 
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername(),

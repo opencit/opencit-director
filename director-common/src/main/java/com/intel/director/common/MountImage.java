@@ -46,19 +46,23 @@ public class MountImage {
 
 	public static int mountRemoteSystem(String ipAddress, String userName,
 			String password, String mountpath) {
+		int exitcode = 0; 
 		String command = Constants.mountRemoteFileSystemScript + " "
 				+ ipAddress + " " + userName + " " + password + " " + mountpath;
 		log.info("\n" + "Mounting the The remote System : " + ipAddress
 				+ "with command: " + command);
 		try {
-			return DirectorUtil.executeCommandInExecUtil(
+			exitcode = DirectorUtil.executeCommandInExecUtil(
 					Constants.mountRemoteFileSystemScript, ipAddress, userName,
 					password, mountpath);
 		} catch (IOException e) {
 			// TODO Handle Error
+			if(exitcode == 0){
+				exitcode = 1;
+			}
 			log.error("Error in mounting remote host" + e);
 		}
-		return 0;
+		return exitcode;
 	}
 
 	public static int unmountRemoteSystem(String mountPath) {
