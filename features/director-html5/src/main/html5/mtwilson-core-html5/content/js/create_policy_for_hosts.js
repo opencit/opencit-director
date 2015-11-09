@@ -66,6 +66,8 @@ return;
 return;
 }
 
+self.data.image_id=current_image_id;
+
 self.data.name = $("#host_ip").val();
 	
 	self.data.key = $("#key").val();

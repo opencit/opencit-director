@@ -21,7 +21,7 @@ public class Constants {
 
 	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
 	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
-
+	public static final String SUCCESS="success";
 	public static final String CUSTOMER_ID = "Customer ID";
 	public static final String IMAGE_NAME = "Image Name";
 	public static final String IMAGE_ID = "Image ID";

@@ -3,6 +3,7 @@ package com.intel.director.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.intel.director.api.SshSettingInfo;
@@ -76,7 +77,7 @@ public class SettingImpl {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
-		SshSettingInfo sshSetingInfo = tdaasUtil
+		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
 		log.info("Inside addHost, going to addSshKey ");
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
@@ -84,15 +85,43 @@ public class SettingImpl {
 				sshSettingRequest.getPassword());
 		log.info("Inside addHost,After execution of addSshKey ");
 		log.debug("Going to save sshSetting info in database");
-		try {
-			SshSettingInfo info = settingsPersistenceManager
-					.saveSshMetadata(sshSetingInfo);
-			return TdaasUtil.convertSshInfoToRequest(info);
-		} catch (DbException e) {
-			log.error("unable to save ssh info in database", e);
-			throw new DirectorException(
-					"Unable to save sshsetting info in database", e);
+		SshSettingInfo info=null;
+		if( StringUtils.isNotBlank(sshSettingRequest.getImage_id())){
+			
+			SshSettingInfo existingSsh;
+			try {
+				existingSsh = settingsPersistenceManager
+						.fetchSshByImageId(sshSettingRequest.getImage_id());
+				if (existingSsh.getId() != null && !"".equals(existingSsh)) {
+					sshSettingInfo.setId(existingSsh.getId());
+					sshSettingInfo.setImage_id(existingSsh.getImage_id());
+					sshSettingInfo.setName(sshSettingRequest.getIpAddress());
+					///sshSettingRequest.setId(existingSsh.getId());
+				}
+				settingsPersistenceManager.updateSsh(sshSettingInfo);
+				info=sshSettingInfo;
+			} catch (DbException e) {
+				log.error("Inside addHost, unable to update older ssh info in database", e);
+				throw new DirectorException(
+						"Unable to create policy draft", e);
+			}
+		
+			
+			
+		}else{
+			try {
+				
+				 info = settingsPersistenceManager
+						.saveSshMetadata(sshSettingInfo);
+		
+				
+			} catch (DbException e) {
+				log.error("unable to save ssh info in database", e);
+				throw new DirectorException(
+						"Unable to create policy draft", e);
+			}
 		}
+		return TdaasUtil.convertSshInfoToRequest(info);
 
 	}
 

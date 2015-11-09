@@ -10,6 +10,8 @@ $(document).ready(function() {
 	pageInitialized = true;
 });
 function addHost() {
+
+current_image_id='';
 	goToCreatePolicyWizard2();
 }
 

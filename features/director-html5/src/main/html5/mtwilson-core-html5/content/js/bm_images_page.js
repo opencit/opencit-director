@@ -167,6 +167,7 @@ function backToHostsPage() {
 }
 
 function backToHostsPageWithoutUnmount() {
+
 	$("#create_policy_wizard2_").html("");
 	$("#create_policy_wizard2_").hide("");
 	$("#create_policy_wizard_bm_image").html("");
@@ -177,6 +178,7 @@ function backToHostsPageWithoutUnmount() {
 	$("#edit_policy_wizard_bm_image").hide("");
 	$("#bm_images_grid_page").show();
 	$('body').removeClass("modal-open");
+current_image_id='';
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
 }

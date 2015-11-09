@@ -2053,6 +2053,15 @@ public class ImageServiceImpl implements ImageService {
 					"Error mapping trust policy string to object for image: "
 							+ imageId, e);
 		}
+		
+		List<Measurement> existingMeasurements = policy.getWhitelist().getMeasurements();
+		
+		if(existingMeasurements != null && existingMeasurements.size() > 0){
+			createTrustPolicyMetaDataResponse = new CreateTrustPolicyMetaDataResponse();
+			createTrustPolicyMetaDataResponse.setTrustPolicy(policyDraftForImage.getTrust_policy_draft());
+			createTrustPolicyMetaDataResponse.setStatus("Success");
+			return createTrustPolicyMetaDataResponse;
+		}
 
 		// Check if mounted live BM has /opt/vrtm
 

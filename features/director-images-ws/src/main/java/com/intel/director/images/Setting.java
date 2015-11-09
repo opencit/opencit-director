@@ -118,7 +118,7 @@ public class Setting {
 
 		} catch (DirectorException e) {
 			
-			log.error("Error while Mounting the Image");
+			log.error("Error while updateSsh ");
 			listSsh.status = Constants.ERROR;
 			listSsh.details = e.getMessage();
 			
@@ -139,7 +139,7 @@ public class Setting {
 			impl.updateSshData(sshSettingRequest);
 		} catch (DirectorException e) {
 			
-			log.error("Error while Mounting the Image");
+			log.error("Error in updateHostInfo");
 			listSsh.status = Constants.ERROR;
 			listSsh.details = e.getMessage();
 			
