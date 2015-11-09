@@ -395,6 +395,10 @@ export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
   
 if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
+	echo "Creating logs for mtwilson"
+	mkdir -p /opt/mtwilson/logs
+	chmod 777 /opt/mtwilson/*
+	
     postgres_create_database
     if [ $? -ne 0 ]; then
       echo_failure "Cannot create database"
