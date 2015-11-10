@@ -8,6 +8,7 @@ package com.intel.director.async.task;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import com.intel.director.common.Constants;
 
@@ -17,6 +18,8 @@ import com.intel.director.common.Constants;
  * @author GS-0681
  */
 public class UploadPolicyTask extends UploadTask {
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(UploadPolicyTask.class);
 
 	public UploadPolicyTask() {
 		super();
@@ -51,6 +54,8 @@ public class UploadPolicyTask extends UploadTask {
 	public boolean runUploadPolicyTask() {
 		boolean runFlag = false;
 		File trustPolicyFile = null;
+		FileWriter fw = null;
+		BufferedWriter bw = null;
 		try {
 
 			String imageLocation = imageInfo.getLocation();
@@ -67,12 +72,9 @@ public class UploadPolicyTask extends UploadTask {
 					trustPolicyFile.createNewFile();
 				}
 
-				FileWriter fw = new FileWriter(
-						trustPolicyFile.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
+				fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
+				bw = new BufferedWriter(fw);
 				bw.write(trustPolicy.getTrust_policy());
-				bw.close();
-				fw.close();
 			}
 
 			content = trustPolicyFile;
@@ -84,6 +86,16 @@ public class UploadPolicyTask extends UploadTask {
 		} finally {
 			if (trustPolicyFile != null && trustPolicyFile.exists()) {
 				trustPolicyFile.delete();
+			}
+			try {
+				if (bw != null) {
+					bw.close();
+				}
+				if (fw != null) {
+					fw.close();
+				}
+			} catch (IOException e) {
+				log.error("Error closing streams ");
 			}
 		}
 		return runFlag;

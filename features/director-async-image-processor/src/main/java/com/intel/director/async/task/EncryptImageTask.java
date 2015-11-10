@@ -74,7 +74,7 @@ public class EncryptImageTask extends ImageActionTask {
 					.getImage_id());
 			log.debug("EncryptImageTask: Got the trust policy ");
 		} catch (DbException e1) {
-			log.error("Error while creating Trustpolicy", e1);
+			log.error("Error while fetching Trustpolicy for image : "+imageActionObject.getImage_id(), e1);
 			throw new DirectorException(
 					"Error while encrypting image. DB Error while fetching policy from DB",
 					e1);
@@ -114,6 +114,10 @@ public class EncryptImageTask extends ImageActionTask {
 			}
 			//TODO: Get actual key from KMS
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
+			if(keyFromKMS == null){
+				log.error("Null key retrieved for keyId : " + keyId);
+				throw new DirectorException("Null key retrieved for keyId : " + keyId);
+			}
 			log.debug("EncryptImageTask: Key from  KMS : "+keyFromKMS);
 			log.debug("Got the trust policy with encrypt URL : "
 					+ policy.getEncryption().getKey().getURL());

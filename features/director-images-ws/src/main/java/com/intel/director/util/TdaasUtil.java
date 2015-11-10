@@ -526,27 +526,6 @@ public class TdaasUtil {
 		return unmountHostResponse;
 	}
 
-	// save file to new location
-	public static void writeImageToFile(InputStream uploadedInputStream,
-			ImageAttributes imageAttributes) throws IOException {
-		OutputStream out = null;
-		try {
-			int read = 0;
-			byte[] bytes = new byte[1024];
-
-			out = new FileOutputStream(new File(imageAttributes.location));
-			while ((read = uploadedInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-		} finally {
-			if (out != null) {
-				out.flush();
-				out.close();
-			}
-		}
-		imageAttributes.image_size = new Long(
-				new File(imageAttributes.location).length()).intValue();
-	}
 
 	public static void getParentDirectory(String filePath, String root,
 			Map<String, Boolean> parentsList, boolean recursive) {

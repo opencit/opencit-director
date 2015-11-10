@@ -519,9 +519,9 @@ public class Mapper {
 			actions = actions.replace("[", "").replace("]", "");
 			String[] split = actions.split("},");
 			ObjectMapper mapper = new ObjectMapper();
-			for (String s : split) {
+			for (String s : split) {				
 				if (!s.endsWith("}")) {
-					s = s + "}";
+					s = s.concat("}");
 				}
 				ImageActionActions fromJson = null;
 				try {

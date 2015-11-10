@@ -8,6 +8,7 @@ package com.intel.director.async.task;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
@@ -55,6 +56,10 @@ public class CreateTarTask extends ImageActionTask {
 	public boolean runCreateTarTask() {
 		String trustPolicyName = null;
 		boolean runFlag = false;
+
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+
 		try {
 
 			log.info("Inside runCreateTartask for ::"
@@ -67,20 +72,23 @@ public class CreateTarTask extends ImageActionTask {
 			String imageName = null;
 			TrustPolicy trustPolicy = persistService
 					.fetchPolicyForImage(imageActionObject.getImage_id());
-			boolean encrypt = false;
-			if (trustPolicy != null) {
-				log.info("Create Tar has a trust policy");
-
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
-						.getPolicy(trustPolicy.getTrust_policy());
-
-				if (policy != null && policy.getEncryption() != null) {
-					log.info("Create Tar has a trust policy which is encrypted");
-					imageName = imageinfo.getName() + "-enc";
-					encrypt = true;
-				}
-
+			if (trustPolicy == null) {
+				log.error("No trust policy for image : "
+						+ imageActionObject.getImage_id());
+				return false;
 			}
+			boolean encrypt = false;
+			log.info("Create Tar has a trust policy");
+
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+					.getPolicy(trustPolicy.getTrust_policy());
+
+			if (policy != null && policy.getEncryption() != null) {
+				log.info("Create Tar has a trust policy which is encrypted");
+				imageName = imageinfo.getName() + "-enc";
+				encrypt = true;
+			}
+
 			if (!encrypt) {
 				log.info("Create Tar has a trust policy which is NOT encrypted");
 				imageName = imageinfo.getName();
@@ -91,26 +99,20 @@ public class CreateTarTask extends ImageActionTask {
 			DirectorUtil.createCopy(imageLocation + imageName, newLocation
 					+ imageName);
 
-			if (trustPolicy != null) {
-				log.info("Create Tar : Create policy file start");
-				trustPolicyName = "trustpolicy.xml";
-				File trustPolicyFile = new File(newLocation + trustPolicyName);
+			log.info("Create Tar : Create policy file start");
+			trustPolicyName = "trustpolicy.xml";
+			File trustPolicyFile = new File(newLocation + trustPolicyName);
 
-				if (!trustPolicyFile.exists()) {
-					log.info("Create Tar : Create policy NEW file : "
-							+ trustPolicyFile.getName());
-					trustPolicyFile.createNewFile();
-				}
-
-				FileWriter fw = new FileWriter(
-						trustPolicyFile.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(trustPolicy.getTrust_policy());
-				bw.close();
-				fw.close();
-				log.info("Create Tar : Create policy file End");
-
+			if (!trustPolicyFile.exists()) {
+				log.info("Create Tar : Create policy NEW file : "
+						+ trustPolicyFile.getName());
+				trustPolicyFile.createNewFile();
 			}
+
+			fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
+			bw = new BufferedWriter(fw);
+			bw.write(trustPolicy.getTrust_policy());
+			log.info("Create Tar : Create policy file End");
 
 			String tarLocation = newLocation;
 			String tarName = trustPolicy.getDisplay_name() + ".tar";
@@ -120,7 +122,7 @@ public class CreateTarTask extends ImageActionTask {
 			DirectorUtil.createTar(newLocation, imageName, trustPolicyName,
 					tarLocation, tarName);
 			log.info("Create Tar : commplete");
-			
+
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;
 		} catch (Exception e) {
@@ -130,6 +132,16 @@ public class CreateTarTask extends ImageActionTask {
 							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		} finally {
+			try {
+				if (bw != null) {
+					bw.close();
+				}
+				if (fw != null) {
+					fw.close();
+				}
+			} catch (IOException e) {
+				log.error("Error closing streams ");
+			}
 
 		}
 		return runFlag;

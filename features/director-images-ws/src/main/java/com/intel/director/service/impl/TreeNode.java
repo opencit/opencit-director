@@ -60,8 +60,9 @@ public class TreeNode implements Comparable{
 
 		// Avoid first element that can be an empty string if you split a string
 		// that has a starting slash as /sd/card/
-		while (list[0] == null || list[0].equals(""))
+		while (StringUtils.isBlank(list[0])){
 			list = Arrays.copyOfRange(list, 1, list.length);
+		}
 		if (!currentPath.endsWith("/")) {
 			currentPath = currentPath + "/";
 		}
@@ -299,6 +300,12 @@ public class TreeNode implements Comparable{
 	public int compareTo(Object o) {
 		TreeNode other = (TreeNode)o;
 		return this.incrementalPath.compareTo(other.incrementalPath);		
+	}
+
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return incrementalPath.hashCode();
 	}
 	
 	

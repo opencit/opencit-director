@@ -27,7 +27,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.intel.dcsg.cpg.extensions.Extensions;
@@ -124,8 +123,6 @@ public class ImageServiceImpl implements ImageService {
 		user = ShiroUtil.subjectUsername();
 		log.info("inside mounting image in service");
 		log.info("***** Logged in user : " + ShiroUtil.subjectUsername());
-
-		MountImageResponse mountImageResponse = new MountImageResponse();
 		ImageAttributes image;
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
@@ -134,6 +131,11 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
+
+		MountImageResponse mountImageResponse = TdaasUtil
+				.mapImageAttributesToMountImageResponse(image);
+
+
 
 		// Check if the image is already mounted. If so, return error
 
@@ -153,7 +155,7 @@ public class ImageServiceImpl implements ImageService {
 			File f = new File(TdaasUtil.getMountPath(imageId));
 			if(f.exists()){
 				log.info("Not mounting image again");
-				return TdaasUtil.mapImageAttributesToMountImageResponse(image);
+				return mountImageResponse;
 			}
 		}
 
@@ -231,9 +233,6 @@ public class ImageServiceImpl implements ImageService {
 
 			log.info("Update mounted_by_user for image in DB for image at location : "
 					+ image.getLocation());
-			mountImageResponse = TdaasUtil
-					.mapImageAttributesToMountImageResponse(image);
-			// /// MountImage.mountImage(image.getLocation(), mountPath);
 			log.info("*** Completed mounting of image");
 		} catch (DbException ex) {
 			log.error("Error while saving mount data to database: "
@@ -269,7 +268,6 @@ public class ImageServiceImpl implements ImageService {
 	public UnmountImageResponse unMountImage(String imageId, String user)
 			throws DirectorException {
 		log.info("inside unmounting image in service");
-		user = ShiroUtil.subjectUsername();
 		UnmountImageResponse unmountImageResponse = null;
 		try {
 			ImageAttributes image = imagePersistenceManager
@@ -520,7 +518,9 @@ public class ImageServiceImpl implements ImageService {
 					searchFilesInImageRequest.getDir(), null,
 					searchFilesInImageRequest.id);
 		} else {
-			treeFiles = listFilesAndDirs;
+			if(listFilesAndDirs != null){
+				treeFiles = listFilesAndDirs;
+			}
 		}
 
 		// In case of edit mode we want to show the exploded view
@@ -548,8 +548,10 @@ public class ImageServiceImpl implements ImageService {
 
 				Collection<File> firstLevelFiles = getFirstLevelFiles(dirPath,
 						searchFilesInImageRequest.id);
-				createListOfFileNamesForTree(searchFilesInImageRequest,
-						firstLevelFiles, fileNames);
+				if (firstLevelFiles != null) {
+					createListOfFileNamesForTree(searchFilesInImageRequest,
+							firstLevelFiles, fileNames);
+				}
 			}
 		}
 
@@ -676,7 +678,11 @@ public class ImageServiceImpl implements ImageService {
 					.fetchPolicyDraftForImage(trustpolicyDraftEditRequest.imageId);
 		} catch (DbException e) {
 			// TODO Handle Error
-			log.error("Error in editTrustPolicyDraft()");
+			log.error("Error in editTrustPolicyDraft()", e);			
+		}
+		
+		if(trustPolicyDraft == null){
+			return;
 		}
 
 		String draft = trustPolicyDraft.getTrust_policy_draft();
@@ -785,8 +791,8 @@ public class ImageServiceImpl implements ImageService {
 
 	public String createTrustPolicy(String image_id) throws DirectorException {
 
-		ImageAttributes image = null;
 		try {
+			ImageAttributes image = null;
 
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(image_id);
@@ -842,7 +848,6 @@ public class ImageServiceImpl implements ImageService {
 				}
 
 				policyXml = TdaasUtil.convertTrustPolicyToString(policy);
-				log.info("****** HASH : " + policyXml);
 				// Sign the policy with MtWilson
 				Extensions
 						.register(
@@ -854,8 +859,6 @@ public class ImageServiceImpl implements ImageService {
 				String signedPolicyXml = client.signTrustPolicy(policyXml);
 				log.info("****** SIGN : " + signedPolicyXml);
 
-				// /SignWithMtWilson mtw = new SignWithMtWilson();
-				// ///mtw.signManifest(image_id, policyXml);
 				String trustPolicyName = null;
 				File trustPolicyFile = null;
 				String mountPath = TdaasUtil.getMountPath(image_id);
@@ -867,18 +870,10 @@ public class ImageServiceImpl implements ImageService {
 						// Writing inside bare metal modified image
 
 						String remoteDirPath = mountPath + "/boot/trust";
-						if (!Files.exists(Paths.get(remoteDirPath)))
-							;
-						DirectorUtil.callExec("mkdir -p " + remoteDirPath);
-						// // String policyPath =
-						// remoteDirPath+"/"+"trustpolicy.xml";
+						if (!Files.exists(Paths.get(remoteDirPath))){							
+							DirectorUtil.callExec("mkdir -p " + remoteDirPath);
+						}
 						trustPolicyName = "trustpolicy.xml";
-						/*
-						 * if (image.getImage_format() == null) {
-						 * trustPolicyName = "policy.xml"; } else {
-						 * trustPolicyName = "policy_" +
-						 * trustPolicy.getDisplay_name() + ".xml"; }
-						 */
 						trustPolicyFile = new File(remoteDirPath
 								+ File.separator + trustPolicyName);
 
@@ -890,12 +885,26 @@ public class ImageServiceImpl implements ImageService {
 							manifestFile.createNewFile();
 						}
 
-						FileWriter fw = new FileWriter(
-								manifestFile.getAbsoluteFile());
-						BufferedWriter bw = new BufferedWriter(fw);
-						bw.write(manifest);
-						bw.close();
-						fw.close();
+						FileWriter fw = null;
+						BufferedWriter bw = null;
+						try {
+							fw = new FileWriter(manifestFile.getAbsoluteFile());
+							bw = new BufferedWriter(fw);
+							bw.write(manifest);
+						} catch (IOException ioe) {
+							log.error("Error in writing manifest", ioe);
+						} finally {
+							try {
+								if (bw != null) {
+									bw.close();
+								}
+								if (fw != null) {
+									fw.close();
+								}
+							} catch (IOException e) {
+								log.error("Error closing streams ");
+							}
+						}
 
 					} else {
 
@@ -911,13 +920,26 @@ public class ImageServiceImpl implements ImageService {
 						trustPolicyFile.createNewFile();
 					}
 
-					FileWriter fw = new FileWriter(
-							trustPolicyFile.getAbsoluteFile());
-					BufferedWriter bw = new BufferedWriter(fw);
-					bw.write(signedPolicyXml);
-					bw.close();
-					fw.close();
-
+					FileWriter fw = null;
+					BufferedWriter bw = null;
+					try {
+						fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
+						bw = new BufferedWriter(fw);
+						bw.write(signedPolicyXml);
+					} catch (IOException ioe) {
+						log.error("Error in writing trustpolicy", ioe);
+					} finally {
+						try {
+							if (bw != null) {
+								bw.close();
+							}
+							if (fw != null) {
+								fw.close();
+							}
+						} catch (IOException e) {
+							log.error("Error closing streams ");
+						}
+					}
 				}
 
 				trustPolicy.setTrust_policy(signedPolicyXml);
@@ -1148,11 +1170,6 @@ public class ImageServiceImpl implements ImageService {
 	 * @param imageStoreManager
 	 * @return
 	 */
-	@Autowired
-	public ImageServiceImpl(IPersistService imagePersistenceManager) {
-		this.imagePersistenceManager = imagePersistenceManager;
-		this.imageStoreManager = imageStoreManager;
-	}
 
 	private void createListOfFileNamesForTree(
 			SearchFilesInImageRequest searchFilesInImageRequest,
@@ -1715,7 +1732,7 @@ public class ImageServiceImpl implements ImageService {
 					.fetchPolicyById(imageInfo.getTrust_policy_id());
 		} catch (DbException e) {
 			log.error("Cannot get policy by id existingTrustPolicyId::"
-					+ existingTrustPolicy, e);
+					+ imageInfo.getTrust_policy_id(), e);
 			throw new DirectorException("Cannot get policy by id", e);
 		}
 
@@ -1905,8 +1922,11 @@ public class ImageServiceImpl implements ImageService {
 		if (dirs != null) {
 			dirs.add(sDir);
 		}
-		Collection<File> faFiles = getFirstLevelFiles(sDir, imageId);// Arrays.asList(new
-																		// File(sDir).listFiles());
+		Collection<File> faFiles = getFirstLevelFiles(sDir, imageId);
+																	
+		if(faFiles == null){
+			return  files;
+		}
 		for (File file : faFiles) {
 			files.add(file);
 			

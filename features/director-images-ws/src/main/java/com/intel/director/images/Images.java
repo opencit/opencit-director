@@ -146,22 +146,28 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			@PathParam("image_id") String image_id,
-			InputStream filInputStream)
-			throws Exception {
+			InputStream filInputStream){
 		log.info("Uploading image to TDaaS");
-
 		imageService = new ImageServiceImpl();
-		long lStartTime = new Date().getTime();
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.uploadImageToTrustDirectorSingle(image_id, filInputStream);
-		log.info("Successfully uploaded image to location: "
-				+ uploadImageToTrustDirector.getLocation());
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector = null;
+		try {
+			long lStartTime = new Date().getTime();
 
-		long lEndTime = new Date().getTime();
+			uploadImageToTrustDirector = imageService
+					.uploadImageToTrustDirectorSingle(image_id, filInputStream);
+			log.info("Successfully uploaded image to location: "
+					+ uploadImageToTrustDirector.getLocation());
+			long lEndTime = new Date().getTime();
 
-		long difference = lEndTime - lStartTime;
+			long difference = lEndTime - lStartTime;
+			log.info("Time taken to upload image to TD: " + difference);
 
-		log.info("Time taken to upload image to TD: " + difference);
+		} catch (DirectorException e) {
+			log.error("Error while uploading image to Trust Director", e);
+			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+			uploadImageToTrustDirector.setStatus("Error while uploading image to Trust Director");
+		}
+
 
 		return uploadImageToTrustDirector;
 	}

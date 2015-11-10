@@ -160,7 +160,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             if (directorEnvelopePublicKey == null || directorEnvelopePublicKey.getEncoded() == null) {
                 log.error("New envelope public key is null");
                 validation("New envelope public key is null");
-            } else if (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null) {
+            } else if (user !=null && (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null)) {
                 //log.warn("Existing envelope public key is null");
                 validation("Existing envelope public key is null");
             } else if (! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded())) {

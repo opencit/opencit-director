@@ -195,8 +195,11 @@ public class DirectoryAndFileUtil {
 			filePath = symLink.toString();
 			if (filePath.startsWith(".") || filePath.startsWith("..")
 					|| !filePath.startsWith(File.separator)) {
-				filePath = path.toFile().getParent() + File.separator
-						+ filePath;
+				StringBuilder sb = new StringBuilder();
+				sb.append(path.toFile().getParent());
+				sb.append(File.separator);
+				sb.append(filePath);
+				filePath = sb.toString();
 			}
 			filePath = new java.io.File(filePath).getCanonicalPath();
 			log.trace("Symbolic link value for '" + path.toString() + "' is: '"

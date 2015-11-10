@@ -2,6 +2,7 @@ package com.intel.director.async.task;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -134,8 +135,8 @@ public abstract class UploadTask extends ImageActionTask {
 
 	private boolean runUploadTask() {
 		boolean runFlag = false;
+		FileReader reader = null;
 		try {
-
 
 			/*
 			 * TODO:- Fetch classname from database based on imagestorename
@@ -144,11 +145,11 @@ public abstract class UploadTask extends ImageActionTask {
 			 * Fetch Glance parameters from property file
 			 */
 
-			File configfile = new File(
-					Folders.configuration() + File.separator + "director.properties");
+			File configfile = new File(Folders.configuration() + File.separator
+					+ "director.properties");
 			org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
 			Configuration configuration = new CommonsConfiguration(apacheConfig);
-			FileReader reader = new FileReader(configfile);
+			reader = new FileReader(configfile);
 
 			Properties prop = new Properties();
 
@@ -164,7 +165,8 @@ public abstract class UploadTask extends ImageActionTask {
 					prop.getProperty(Constants.GLANCE_IMAGE_STORE_PASSWORD));
 			configuration.set(Constants.GLANCE_TENANT_NAME,
 					prop.getProperty(Constants.GLANCE_TENANT_NAME));
-			ImageStoreManager imageStoreManager = new GlanceImageStoreManager(configuration);
+			ImageStoreManager imageStoreManager = new GlanceImageStoreManager(
+					configuration);
 
 			String glanceId = null;
 
@@ -174,7 +176,7 @@ public abstract class UploadTask extends ImageActionTask {
 					+ content.getName() + " imageProperties::"
 					+ imageProperties);
 			ImageActionActions imageActionTask = getImageActionTaskFromArray();
-			if (imageActionTask.getUri() == null) {
+			if (imageActionTask != null && imageActionTask.getUri() == null) {
 				glanceId = imageStoreManager.upload(content, imageProperties);
 
 				log.debug("Upload process started");
@@ -198,7 +200,7 @@ public abstract class UploadTask extends ImageActionTask {
 				imageUploadTransferObject.setImage_size(size);
 
 				imageUploadTransferObject.setSent(sent);
-				updateImageActionContentSent(sent, size) ;
+				updateImageActionContentSent(sent, size);
 				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
 				imageUploadTransferObject.setDate(new Date());
@@ -224,37 +226,34 @@ public abstract class UploadTask extends ImageActionTask {
 
 			}
 
-			if (size == sent) {
-				imgAttrs = new ImageAttributes();
-				imgAttrs.setId(imageActionObject.getImage_id());
-				imageUploadTransferObject.setImg(imgAttrs);
-				imageUploadTransferObject.setImage_size(size);
+			imgAttrs = new ImageAttributes();
+			imgAttrs.setId(imageActionObject.getImage_id());
+			imageUploadTransferObject.setImg(imgAttrs);
+			imageUploadTransferObject.setImage_size(size);
 
-				imageUploadTransferObject.setSent(sent);
-				updateImageActionContentSent(sent, size) ;
-				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
+			imageUploadTransferObject.setSent(sent);
+			updateImageActionContentSent(sent, size);
+			imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
-				imageUploadTransferObject.setDate(new Date());
-				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-						.getChecksum());
-				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-						.getImage_uri());
-				imageUploadTransferObject.setStatus(Constants.COMPLETE);
-				if (firstTime) {
+			imageUploadTransferObject.setDate(new Date());
+			imageUploadTransferObject.setChecksum(imageStoreUploadResponse
+					.getChecksum());
+			imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
+					.getImage_uri());
+			imageUploadTransferObject.setStatus(Constants.COMPLETE);
+			if (firstTime) {
 
-					ImageStoreUploadTransferObject imgTransaferObject = persistService
-							.saveImageUpload(imageUploadTransferObject);
-					uploadid = imgTransaferObject.getId();
-					// /firstTime = false;
-				} else {
+				ImageStoreUploadTransferObject imgTransaferObject = persistService
+						.saveImageUpload(imageUploadTransferObject);
+				uploadid = imgTransaferObject.getId();
+				// /firstTime = false;
+			} else {
 
-					imageUploadTransferObject.setId(uploadid);
-					persistService.updateImageUpload(imageUploadTransferObject);
-				}
-
+				imageUploadTransferObject.setId(uploadid);
+				persistService.updateImageUpload(imageUploadTransferObject);
 			}
+
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
-			reader.close();
 			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -262,6 +261,14 @@ public abstract class UploadTask extends ImageActionTask {
 					"runUploadtask failed for::"
 							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
+		} finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException e) {
+				log.error("Error closing streams ");
+			}
 		}
 		return runFlag;
 	}
