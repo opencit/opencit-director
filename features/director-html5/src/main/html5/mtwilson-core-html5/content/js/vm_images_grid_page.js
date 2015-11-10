@@ -32,6 +32,12 @@ function refresh_vm_images_Grid() {
 				pageButtonCount : 15,
 				data : images,
 				fields : [ {
+					title : "Delete",
+					name : "image_delete",
+					type : "text",
+					width : 50,
+					align : "center"
+				}, {
 					title : "Image Name",
 					name : "image_name",
 					type : "text",

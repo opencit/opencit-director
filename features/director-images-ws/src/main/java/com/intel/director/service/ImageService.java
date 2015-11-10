@@ -113,6 +113,8 @@ public interface ImageService {
 
 	public void deletePasswordForHost(String image_id) throws DirectorException;
 
+	public void deleteImage(String imageId) throws DirectorException;
+
 
 }
 

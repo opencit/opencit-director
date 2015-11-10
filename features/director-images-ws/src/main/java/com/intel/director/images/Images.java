@@ -14,6 +14,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -801,6 +802,30 @@ public class Images {
 				monitor.details = e.getMessage();
 			}
 			return monitor;
+	}
+	
+	/**
+	 * 
+	 * Mark image as deleted. We turn the disabled flag=true in the MW_IMAGE table 
+	 * 
+	 * @param imageId Id of the image to be deleted
+	 * @return Response stating status of the operation - Success/Error
+	 * @throws DirectorException
+	 */
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
+	@DELETE
+	@Produces(MediaType.TEXT_PLAIN)
+	public String deleteImage(
+			@PathParam("imageId") String imageId){
+		String ret = Constants.SUCCESS;
+		try {
+			imageService.deleteImage(imageId);
+		} catch (DirectorException e) {
+			log.error("Error deleting image : "+ imageId);
+			ret = Constants.ERROR;
+		}
+		return ret;
 	}
 
 }

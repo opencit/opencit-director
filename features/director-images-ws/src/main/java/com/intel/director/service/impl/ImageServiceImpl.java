@@ -1619,8 +1619,14 @@ public class ImageServiceImpl implements ImageService {
 			imgResponse.setImage_name(imageInfo.getName());
 			imgResponse.setImage_format(imageInfo.getImage_format());
 
+			String image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" onclick=\"deleteImage('"+ imageInfo.getId() + "')\"/></a>";
+			imgResponse.setImage_delete(image_delete);
+			
+			
 			String trust_policy = "<div id=\"trust_policy_vm_column"
 					+ imageInfo.id + "\">";
+			
+			
 			if (imageInfo.getTrust_policy_draft_id() == null
 					&& imageInfo.getTrust_policy_id() == null) {
 
@@ -2319,6 +2325,20 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Error in deleting SSh Password",e);
 		}
 		
+	}
+
+	@Override
+	public void deleteImage(String imageId) throws DirectorException {
+		try{
+			ImageInfo imageInfo = imagePersistenceManager.fetchImageById(imageId);
+			log.debug("image fetched for id: "+imageId);
+			imageInfo.setDeleted(true);
+			imagePersistenceManager.updateImage(imageInfo);
+			log.info("Image "+imageId + "deleted successfully");
+		}catch(DbException e){
+			log.error("Error deleteing image: "+imageId, e);
+			throw new DirectorException("Error deleting image", e);
+		}		
 	}
 
 }

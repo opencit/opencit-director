@@ -191,6 +191,7 @@ public class DbServiceImpl implements IPersistService {
 		if (img.getImage_format() != null) {
 			mwImage.setImageFormat(img.getImage_format());
 		}
+		mwImage.setDeleted(img.isDeleted());
 
 		imgDao.updateImage(mwImage);
 

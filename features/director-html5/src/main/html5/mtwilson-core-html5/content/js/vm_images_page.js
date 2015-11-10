@@ -243,3 +243,16 @@ function deletePolicyVM(imageid, trust_policy_id, imagename) {
 
 	
 }
+
+function deleteImage(imageid) {
+	$.ajax({
+		type : "DELETE",
+		url : "/v1/images/" + imageid + "/delete",
+		dataType : "text",
+		success : function(result) {
+			refresh_vm_images_Grid();			
+		}
+	});
+
+	
+}
