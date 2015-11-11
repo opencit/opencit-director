@@ -84,6 +84,11 @@ fi
 
 ###################################################################################################
 
+# stored master password
+if [ -z "$DIRECTOR_PASSWORD" ] && [ -f $DIRECTOR_CONFIGURATION/.director_password ]; then
+  export DIRECTOR_PASSWORD=$(cat $DIRECTOR_CONFIGURATION/.director_password)
+fi
+
 # all other variables with defaults
 DIRECTOR_APPLICATION_LOG_FILE=${DIRECTOR_APPLICATION_LOG_FILE:-$DIRECTOR_LOGS/director.log}
 touch "$DIRECTOR_APPLICATION_LOG_FILE"
