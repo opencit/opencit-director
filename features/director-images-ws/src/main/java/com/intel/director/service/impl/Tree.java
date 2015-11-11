@@ -55,16 +55,13 @@ public class Tree {
 
 	}
 
-	public List<String> printTree() {
+	public void printTree() {
 		// I move the tree common root to the current common root because I
 		// don't mind about initial folder
 		// that has only 1 child (and no leaf)
 		List<TreeNode> nodesList = getCommonRoot();
-		List<String> treeHtmlElementsList = null;
 		TreeNode treeNode = nodesList.get(0) ;
-		treeNode.printNode(false, false);
-		
-		return treeHtmlElementsList;
+		treeNode.printNode(false, false);		
 	}
 
 	public List<TreeNode> getCommonRoot() {

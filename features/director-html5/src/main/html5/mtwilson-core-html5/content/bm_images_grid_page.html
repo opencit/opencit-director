@@ -1,66 +1,55 @@
 <!DOCTYPE html>
 <html>
-<head>
+	<head>
+		
+		
+		<title>Non-Virtualized Server</title>
+		<meta name="author" content="vivek">
+	</head>
+	<body>
 
-
-<title>BM Images</title>
-<meta name="author" content="vivek">
-</head>
-<body>
-
-
-
-
-
-	</br>
-	</br>
-	</br>
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h1>Bare Metal Online</h1>
-		</div>
-		<div class="panel-body">
-
-			<div class="row">
-				<div class="col-md-1"></div>
-				<div class="col-md-10" style="margin-top: 10px;">
-					<div id="bmGridOnline"></div>
-				</div>
-				<div class="col-md-1"></div>
+</br>
+		<h4><span class="label label-primary">
+		<a href="#" style=" text-decoration:none; color:white;" onClick="goToVMPage()" >Virtualized Server</a>
+  		</span>
+		<span class="label label-default">
+			<a href="#"  style=" text-decoration:none; color:white;  cursor:text;">Non Virtualized Server</a>
+		</span></h4>
+		
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h1>Non-Virtualized Server</h1>
 			</div>
-
-		</div>
-	</div>
-	</br>
-	</br>
-	</br>
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h1>Bare Metal Images</h1>
-		</div>
-		<div class="panel-body">
-
-			<div class="row">
-				<div class="col-md-1"></div>
-				<div class="col-md-10" style="margin-top: 10px;">
-					<div id="bmGridImages"></div>
+			<div class="panel-body">
+				
+				<div class="row">
+					<div class="col-md-1"></div>
+					<div class="col-md-8"></div>
+					<div class="col-md-3" style="margin-top: 8px;">
+						<button type="button" class="btn btn-primary" onclick="addHost()">Add
+						New Policy</button>
+					</div>
 				</div>
-				<div class="col-md-1"></div>
+				
+				
+				<div class="row">
+					<div class="col-md-1"></div>
+					<div class="col-md-10" style="margin-top: 10px;">
+						<div id="bmGridOnline"></div>
+					</div>
+					<div class="col-md-1"></div>
+				</div>
 			</div>
-
+			
 		</div>
-	</div>
+		<script type="text/javascript">
+			console.log("createimage.html script");
+			resourceLoader.loadJS([ 'js/knockout.js', 'js/jquery.js' ], function() {
+				console.log("vm_images_grid_page.html: loaded scripts");
 
-	<script type="text/javascript">
-		console.log("createimage.html script");
-		resourceLoader.loadJS([ 'js/knockout.js', 'js/jquery.js' ], function() {
-			console.log("vm_images_grid_page.html: loaded scripts");
-			// add our view models to the main view model defined by index.html
-
-			/// alert(!!ko.dataFor(document.getElementById("imgeId"));  
-			///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
-		});
-	</script>
-	<script src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/bm_images_grid_page.js"></script>
-</body>
+			});
+		</script>
+		<script
+		src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/bm_images_grid_page.js"></script>
+	</body>
 </html>

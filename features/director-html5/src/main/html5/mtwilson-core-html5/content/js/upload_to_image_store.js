@@ -19,9 +19,9 @@ function displayImageStore() {
 
 					imageStores = data.imageStoreNames;
 
-					option = "<option value='0'>Select</option>";
+					//option = "<option value='0'>Select</option>";
 
-					option += '<option value="Glance">Glance</option>';
+					option = '<option value="Glance">Glance</option>';
 
 					$('#upload_image_name').val(current_image_name);
 					if (currentFlow && (currentFlow == "Upload")

@@ -24,7 +24,18 @@
 		            contentType:"application/json",
 		            headers: {'Accept': 'application/json'},
 		            success: function(data){
-		        		ssh.renderdata();
+				if (data.status == "Error") {
+							$('#error_modal_body_ssh_create_1').text(data.details);
+							$("#error_modal_ssh_create_1").modal({
+								backdrop : "static"
+							});
+								$('body').removeClass("modal-open");
+							return;
+						}else{
+
+
+		        			ssh.renderdata();
+						}
 		        		
 		        	}
 		        });
@@ -39,6 +50,15 @@
 		            contentType:"application/json",
 		            headers: {'Accept': 'application/json'},
 		        	success: function(data){
+if (data.status == "Error") {
+							$('#error_modal_body_ssh_create_1').text(data.details);
+							$("#error_modal_ssh_create_1").modal({
+								backdrop : "static"
+							});
+								$('body').removeClass("modal-open");
+							return;
+						}
+
 		        		ssh.displaydata();
 		        	}
 		        });
@@ -66,13 +86,16 @@
 		    
 		    displaydata: function() {
 		    	return $("#jsGrid").jsGrid("refresh");
+			refreshSSHSetting();
 		    	
 		    },
 		    
 		    renderdata: function(){
 		    	return $("#jsGrid").jsGrid("render").done(function() {
 		    	    console.log("rendering completed and data loaded");
+			   refreshSSHSetting();	
 		    	});
+refreshSSHSetting();
 		    }
 		    
 		    

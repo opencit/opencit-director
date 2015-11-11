@@ -11,7 +11,12 @@ package com.intel.director.images.exception;
  */
 public class ImageMountException extends DirectorException {
 
-    public ImageMountException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ImageMountException() {
     }
 
     public ImageMountException(String message) {

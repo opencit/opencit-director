@@ -2,24 +2,33 @@ package com.intel.director.api;
 
 
 public class SshSettingRequest extends AuditFields {
-	String ipAddress;
+	String ip_address;
 	String username;
 	String password;
 	String name;
 	String id;
 	String key;
 	String image_id;
+	String policy_name;
+
+	public String getPolicy_name() {
+		return policy_name;
+	}
+
+	public void setPolicy_name(String policy_name) {
+		this.policy_name = policy_name;
+	}
 
 	public SshSettingRequest() {
 
 	}
 
 	public String getIpAddress() {
-		return ipAddress;
+		return ip_address;
 	}
 
 	public void setIpAddress(String ipAddress) {
-		this.ipAddress = ipAddress;
+		this.ip_address = ipAddress;
 	}
 
 	public String getUsername() {

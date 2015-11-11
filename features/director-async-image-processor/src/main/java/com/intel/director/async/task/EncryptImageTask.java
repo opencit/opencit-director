@@ -34,7 +34,8 @@ public class EncryptImageTask extends ImageActionTask {
 	 * Entry method for executing the task
 	 */
 	@Override
-	public void run() {
+	public boolean run() {
+		boolean runFlag = false;
 		// Call to update the task status
 		log.debug("Running encrypt image task : " + taskAction.getStatus());
 		if (taskAction.getStatus().equals(Constants.INCOMPLETE)) {
@@ -47,6 +48,7 @@ public class EncryptImageTask extends ImageActionTask {
 						Constants.COMPLETE,
 						"Completed encrypting image : "
 								+ imageActionObject.getImage_id());
+				runFlag = true;
 			} catch (DirectorException e) {
 				log.error("Error in EnryptImageTask", e);
 				updateImageActionState(
@@ -55,8 +57,9 @@ public class EncryptImageTask extends ImageActionTask {
 								+ imageActionObject.getImage_id() + " Error: "
 								+ e.getMessage());
 			}
+			
 		}
-
+		return runFlag;
 	}
 
 	/**
@@ -71,15 +74,13 @@ public class EncryptImageTask extends ImageActionTask {
 					.getImage_id());
 			log.debug("EncryptImageTask: Got the trust policy ");
 		} catch (DbException e1) {
-			// TODO Auto-generated catch block
-			log.error("Error while creating Trustpolicy", e1);
+			log.error("Error while fetching Trustpolicy for image : "+imageActionObject.getImage_id(), e1);
 			throw new DirectorException(
 					"Error while encrypting image. DB Error while fetching policy from DB",
 					e1);
 		}
 		log.debug("Policy in DB for image : " + tp.getId());
 
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		try {
 			ImageInfo imageInfo = persistService
 					.fetchImageById(imageActionObject.getImage_id());
@@ -91,7 +92,7 @@ public class EncryptImageTask extends ImageActionTask {
 			
 			imageLocation += imageInfo.getName();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
-			policy = TdaasUtil.getPolicy(tp.getTrust_policy());
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(tp.getTrust_policy());
 			if (policy.getEncryption() == null) {
 				log.debug("EncryptImageTask: No encryption required,. retun");
 				return;
@@ -113,6 +114,10 @@ public class EncryptImageTask extends ImageActionTask {
 			}
 			//TODO: Get actual key from KMS
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
+			if(keyFromKMS == null){
+				log.error("Null key retrieved for keyId : " + keyId);
+				throw new DirectorException("Null key retrieved for keyId : " + keyId);
+			}
 			log.debug("EncryptImageTask: Key from  KMS : "+keyFromKMS);
 			log.debug("Got the trust policy with encrypt URL : "
 					+ policy.getEncryption().getKey().getURL());

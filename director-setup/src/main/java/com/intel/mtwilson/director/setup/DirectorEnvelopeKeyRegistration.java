@@ -4,21 +4,28 @@
  */
 package com.intel.mtwilson.director.setup;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.crypto.key.password.Password;
 import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.director.api.SettingsKMSObject;
+import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorUtil;
 import com.intel.kms.client.jaxrs2.Users;
 import com.intel.kms.user.User;
 import com.intel.mtwilson.Folders;
-import com.intel.mtwilson.setup.AbstractSetupTask;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Arrays;
-import java.util.Properties;
 import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.setup.AbstractSetupTask;
 import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 /**
@@ -27,6 +34,8 @@ import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
  */
 public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectorEnvelopeKeyRegistration.class);
+    
+    Map<String, String> kmsprops;
     
     // configuration keys
     private static final String DIRECTOR_ENVELOPE_ALIAS = "director.envelope.alias";
@@ -50,6 +59,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
     
     @Override
     protected void configure() throws Exception {
+    	kmsprops = new Gson().fromJson(DirectorUtil.getProperties(Constants.KMS_PROP_FILE), new TypeToken<HashMap<String, Object>>() {}.getType());
         String directorEnvelopeAlias = getConfiguration().get(DIRECTOR_ENVELOPE_ALIAS, "director-envelope");
         if( directorEnvelopeAlias == null || directorEnvelopeAlias.isEmpty() ) {
             configuration("Trust Director Envelope alias not configured");
@@ -97,17 +107,17 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             configuration("Invalid certificate");
         }
         
-        kmsEndpointUrl = getConfiguration().get(KMS_ENDPOINT_URL, null);
+        kmsEndpointUrl = kmsprops.get(KMS_ENDPOINT_URL.replace('.', '_'));
         if( kmsEndpointUrl == null || kmsEndpointUrl.isEmpty() ) {
             configuration("KMS endpoint URL not configured");
         }
         
-        kmsTlsPolicyCertificateSha1 = getConfiguration().get(KMS_TLS_POLICY_CERTIFICATE_SHA1, null);
+        kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
         if( kmsTlsPolicyCertificateSha1 == null || kmsTlsPolicyCertificateSha1.isEmpty() ) {
             configuration("KMS TLS policy certificate digest not configured");
         }
         
-        kmsLoginBasicUsername = getConfiguration().get(KMS_LOGIN_BASIC_USERNAME, null);
+        kmsLoginBasicUsername = kmsprops.get(KMS_LOGIN_BASIC_USERNAME.replace('.', '_'));
         if( kmsLoginBasicUsername == null || kmsLoginBasicUsername.isEmpty() ) {
             configuration("KMS API username not configured");
         }
@@ -150,7 +160,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             if (directorEnvelopePublicKey == null || directorEnvelopePublicKey.getEncoded() == null) {
                 log.error("New envelope public key is null");
                 validation("New envelope public key is null");
-            } else if (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null) {
+            } else if (user !=null && (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null)) {
                 //log.warn("Existing envelope public key is null");
                 validation("Existing envelope public key is null");
             } else if (! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded())) {
@@ -172,9 +182,15 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
         }
         
         // save the settings in configuration;  DO NOT SAVE MASTER KEY
-        getConfiguration().set(KMS_ENDPOINT_URL, kmsEndpointUrl);
-        getConfiguration().set(KMS_TLS_POLICY_CERTIFICATE_SHA1, kmsTlsPolicyCertificateSha1);
-        getConfiguration().set(KMS_LOGIN_BASIC_USERNAME, kmsLoginBasicUsername);
+//        getConfiguration().set(KMS_ENDPOINT_URL, kmsEndpointUrl);
+//        getConfiguration().set(KMS_TLS_POLICY_CERTIFICATE_SHA1, kmsTlsPolicyCertificateSha1);
+//        getConfiguration().set(KMS_LOGIN_BASIC_USERNAME, kmsLoginBasicUsername);
+        
+        SettingsKMSObject settingskms= new SettingsKMSObject();
+        settingskms.setKms_endpoint_url(kmsEndpointUrl);
+        settingskms.setKms_login_basic_username(kmsLoginBasicUsername);
+        settingskms.setKms_tls_policy_certificate_sha1(kmsTlsPolicyCertificateSha1);
+        DirectorUtil.editProperties(Constants.KMS_PROP_FILE, settingskms.toString());
         
         try {
             if (user == null) {

@@ -8,7 +8,6 @@ package com.intel.director.async.task;
 import java.io.File;
 
 import com.intel.director.common.Constants;
-import com.intel.director.util.TdaasUtil;
 
 /**
  * Task to upload the tar of image and policy
@@ -32,15 +31,16 @@ public class UploadTarTask extends UploadTask {
 	 * Entry method for running task. Checks if the previous task was completed
 	 */
 	@Override
-	public void run() {
-
+	public boolean run() {
+		boolean runFlag = false;
 		if (previousTasksCompleted(taskAction.getTask_name())) {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
 				super.initProperties();
-				runUploadTarTask();
+				runFlag  = runUploadTarTask();
 			}
 		}
+		return runFlag;
 
 	}
 
@@ -49,40 +49,26 @@ public class UploadTarTask extends UploadTask {
 	 */
 	@Override
 	public String getTaskName() {
-		// TODO Auto-generated method stub
 		return Constants.TASK_NAME_UPLOAD_TAR;
 	}
 
-	public void runUploadTarTask() {
+	public boolean runUploadTarTask() {
+		boolean runFlag = false;
 		log.debug("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		try {
-			String imagePathDelimiter = "/";
-			String imageName;
 			String imageLocation = imageInfo.getLocation();
-			boolean encrypt = false;
-			if (trustPolicy != null) {
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
-						.getPolicy(trustPolicy.getTrust_policy());
-				if (policy != null && policy.getEncryption() != null) {
-					imageName = imageInfo.getName() + "-enc";
-					encrypt = true;
-				}
-			}
 
-			if (!encrypt) {
-				imageName = imageInfo.getName();
-			}
+			String tarName = trustPolicy.getDisplay_name() + ".tar";
 
-			String tarName = "tar_" + trustPolicy.getDisplay_name();
-
-			imageProperties.put(Constants.NAME, tarName);
+			imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
 			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;
 			log.debug("runUploadTarTask tarname::" + tarName
 					+ " ,tarLocation ::" + tarLocation);
 			content = new File(tarLocation + tarName);
-
+			super.run();
+			runFlag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(
@@ -90,7 +76,7 @@ public class UploadTarTask extends UploadTask {
 							+ imageActionObject.getImage_id(), e);
 
 		}
-		super.run();
+		return runFlag;
 
 	}
 

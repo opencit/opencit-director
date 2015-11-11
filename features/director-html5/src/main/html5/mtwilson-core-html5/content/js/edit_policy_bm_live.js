@@ -1,127 +1,152 @@
 endpoint = "/v1/images/";
 var imageFormats = new Array();
 var image_policies = new Array();
-
-$.ajax({
-	type : "GET",
-	url : endpoint + current_image_id + "/getpolicymetadataforimage",
-	contentType : "application/json",
-	headers : {
-		'Accept' : 'application/json'
-	},
-	dataType : "json",
-	success : function(data, status, xhr) {
-		showBMImageLaunchPolicies(data);
-
-	}
-});
-
-function EditBMLiveMetaData(data) {
-
+showBMLiveMetaData();
+function EditBMLiveMetaData() {
+	
 	this.imageid = current_image_id;
 	this.image_name = current_image_name;
-	this.display_name = current_display_name;
+	this.display_name = $("#display_name_host_edit").val();
+	
+}
+
+
+function show_error_in_editbmlivemodal(message){
+
+$('#error_modal_body_edit_bm_live_1').text(message);
+				$("#error_modal_edit_bm_live_1").modal({
+					backdrop : "static"
+				});
+				$('body').removeClass("modal-open");
+
+
 
 }
 
-function EditBMLiveViewModel(data) {
+function editandNext() {
 	var self = this;
+	$("#host_name_live_edit").val(current_image_name);
+	self.editBMLiveMetaData = new EditBMLiveMetaData();
+	self.data = {};
 
-	self.editBMLiveMetaData = new EditBMLiveMetaData(data);
 
-	self.editBMLive = function(loginFormElement) {
 
-		self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
-		self.editBMLiveMetaData.isEncrypted = false;
-		self.editBMLiveMetaData.display_name = current_display_name;
-		$.ajax({
-			type : "POST",
-			url : endpoint + "trustpoliciesmetadata",
-			contentType : "application/json",
-			headers : {
-				'Accept' : 'application/json'
-			},
-			data : ko.toJSON(self.editBMLiveMetaData),
-			success : function(data, status, xhr) {
-				if (data.status == "Error") {
-					$('#error_modal_body_edit_bm_live_1').text(data.details);
-					$("#error_modal_edit_bm_live_1").modal({
-						backdrop : "static"
-					});
-					return;
-				}
-				$.ajax({
-					type : "POST",
-					url : endpoint + current_image_id + "/mount",
-					contentType : "application/json",
-					headers : {
-						'Accept' : 'application/json'
-					},
-					data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
-					success : function(data, status, xhr) {
-						if (data.status == "Error") {
-							$('#error_modal_body_edit_bm_live_1').text(data.details);
-							$("#error_modal_edit_bm_live_1").modal({
-								backdrop : "static"
-							});
-							return;
-						}
-						nextButtonLiveBM();
-					}
-				});
-			}
-		});
+	
+if(!$.trim($("#display_name_host_edit").val())==false){
+	self.data.policy_name = $("#display_name_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Policy name is mandatory");
+return;
+}
 
-	}
 
-};
 
-function showBMImageLaunchPolicies(policydata) {
+
+if(!$.trim($("#host_ip_edit").val())==false){
+	self.data.ip_address = $("#host_ip_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Host Ip/Name is mandatory");
+return;
+}
+
+
+if(!$.trim($("#username_for_host_edit").val())==false){
+	self.data.username = $("#username_for_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Username is mandatory");
+return;
+}
+
+
+	
+	if(!$.trim($("#password_for_host_edit").val())==false){
+	self.data.password = $("#password_for_host_edit").val();
+}else{
+	show_error_in_editbmlivemodal("Password is mandatory");
+return;
+}
+
+
+
+
+
+	
+	self.data.key = $("#key_edit").val();
+	self.data.image_id = current_image_id;
+	
+
+
+
 
 	$.ajax({
-		type : "GET",
-		url : endpoint + current_image_id + "/trustpolicymetadata",
-		dataType : "json",
-		success : function(data, status, xhr) {
+		type : "PUT",
+		url : "/v1/setting/updatehost",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : JSON.stringify(data), 
+		success : function (data, status, xhr) {
+						if (data.status == "Error") {
 
-			current_display_name = data.display_name;
-			console.log(current_display_name);
-			$("#display_name_live_edit").val(current_display_name);
-
-			image_policies = data.image_launch_policies;
-			// addRadios(image_policies);
-			$(
-					"input[name=launch_control_policy][value='"
-							+ policydata.launch_control_policy + "']").attr(
-					'checked', 'checked');
-
-			// / $("input[name=asset_tag_policy][value='Trust
-			// Only']").attr('checked', 'checked');
-			if (policydata.isEncrypted == true) {
-				$("input[name=isEncrypted]").prop('checked', 'true');
+				show_error_in_editbmlivemodal(data.details);
+				return;
 			}
-			mainViewModel.editBMLiveViewModel = new EditBMLiveViewModel(
-					policydata);
-			// /] ko.cleanNode(mainViewModel);
+			;
+			self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
+			self.editBMLiveMetaData.isEncrypted = false;
+			self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
 
-			ko.applyBindings(mainViewModel, document
-					.getElementById("edit_policy_bm_live_content_step_1"));
+			$.ajax({
+				type : "POST",
+				url : endpoint + "trustpoliciesmetadata",
+				contentType : "application/json",
+				headers : {
+					'Accept' : 'application/json'
+				},
+				data : ko.toJSON(self.editBMLiveMetaData),
+				success : function (data, status, xhr) {
+					if (data.status == "Error") {
+						show_error_in_editbmlivemodal(data.details);
+						return;
+					}
+					$.ajax({
+						type : "POST",
+						url : endpoint + current_image_id + "/mount",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
+						success : function (data, status, xhr) {
+							if (data.status == "Error") {
+								show_error_in_editbmlivemodal(data.details);
+								return;
+							}
+							nextButtonLiveBM();
+						}
+					});
+				}
+			});
+			
 		}
+		
 	});
-
 };
 
-function addRadios(arr) {
-
-	var temp = "";
-	for ( var i = 0; i < arr.length; i++) {
-
-		temp = temp
-				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i].key + '" >' + arr[i].value + '</label>';
-
+function showBMLiveMetaData() {
+	
+	$.ajax({
+		type : "GET",
+		url : endpoint + current_image_id + "/getbmlivemetadata",
+		dataType : "json",
+		success : function (data, status, xhr) {
+			current_display_name = data.ssh_setting_request.display_name;
+			console.log(current_display_name);
+			$("#display_name_host_edit").val(data.ssh_setting_request.policy_name);
+						$("#host_ip_edit").val(data.ssh_setting_request.ip_address);
+			$("#username_for_host_edit").val(data.ssh_setting_request.username);
 	}
+});
 
-	$('#launch_control_policy').html(temp);
 };
-

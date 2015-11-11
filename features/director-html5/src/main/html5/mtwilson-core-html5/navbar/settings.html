@@ -47,81 +47,6 @@ function fetchMtwilsonSetting() {
 	});
 }
 
-
-		function refreshSSHSetting() {
-			console.log("HERE 2");
-			$("#jsGrid").jsGrid({
-				height :"500%",
-				width : "100%",
-				editing : true,
-				inserting : true,
-				
-				sorting : true,
-				paging : true,
-				autoload : true,
-				pageSize : 10,
-				pageButtonCount : 5,
-				deleteConfirm : "Do you really want to delete the client?",
-				controller : db,
-				fields : [ {
-					title : "Id",
-					name : "id",
-					type : "text",
-					editing : false,
-					inserting : false,
-					align : "center",
-
-					width : 75
-				}, {
-					title : "Name",
-					name : "name",
-					align : "center",
-					type : "text",
-
-					width : 75
-				}, {
-					title : "IP Address",
-					name : "ip_address",
-					filtering:true,
-					align : "center",
-
-					type : "text",
-					width : 75
-				}, {
-					title : "Username",
-					name : "username",
-					align : "center",
-
-					type : "text",
-					width : 75
-				}, {
-					title : "Password",
-					name : "password",
-					type : "text",
-					align : "center",
-
-					width : 75
-				}, {
-					title : "Key",
-					name : "key",
-					type : "text",
-					align : "center",
-
-					width : 75
-				}, {
-					type : "control"
-				} ]
-			});
-			var delay = 1000; 
-				setTimeout(function() {
-					$("#jsGrid").show();
-					$("#jsGrid").jsGrid("refresh");
-				}, delay);
-
-
-		};
-
-
 </script>
 
 
@@ -134,9 +59,8 @@ so the ul itself is not copied -->
 <li class="dropdown">
 	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Settings</a>
 	<ul id="g-settings-menu" class="dropdown-menu" role="menu">
-		<li><a href="#setting_create_ssh" data-toggle="tab" onclick="refreshSSHSetting();" >Ssh Settings</a></li>
 		<li><a href="#setting_kms" data-toggle="tab" onclick="fetchKMSSetting()" >KMS Setting</a></li>
-		<li><a href="#setting_mtwilson" data-toggle="tab" onclick="fetchMtwilsonSetting()" >Mt Wilson Setting</a></li>
+		<li><a href="#setting_mtwilson" data-toggle="tab" onclick="fetchMtwilsonSetting()" >Attestation Service Setting</a></li>
 	</ul>                
 </li>
 </ul>

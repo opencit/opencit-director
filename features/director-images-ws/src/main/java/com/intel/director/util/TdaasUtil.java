@@ -36,6 +36,7 @@ import javax.xml.bind.Unmarshaller;
 import net.schmizz.sshj.SSHClient;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 
@@ -65,6 +66,7 @@ import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
+import com.intel.director.service.impl.SSHManager;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
@@ -145,6 +147,7 @@ public class TdaasUtil {
 
 	public static void getParentDirectory(String imageId, String filePath,
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
+		String mountPath = TdaasUtil.getMountPath(imageId);
 		File parent = new File(filePath).getParentFile();
 		if (parent == null
 				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
@@ -156,8 +159,8 @@ public class TdaasUtil {
 			if (parentPath.equals(root)) {
 				return;
 			}
-			parentsList.put(parentPath, recursive);
-			getParentDirectory(imageId, parentPath, root, parentsList, true);			
+			parentsList.put(parentPath.replace(mountPath, ""), recursive);
+			getParentDirectory(imageId, parentPath, root, parentsList, true);
 		}
 
 	}
@@ -253,8 +256,9 @@ public class TdaasUtil {
 		return policy;
 
 	}
-	
-	public static Manifest convertStringToManifest(String manifestStr) throws JAXBException {
+
+	public static Manifest convertStringToManifest(String manifestStr)
+			throws JAXBException {
 		JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
 		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
 				.createUnmarshaller();
@@ -264,7 +268,6 @@ public class TdaasUtil {
 		return manifest;
 
 	}
-
 
 	public static String convertTrustPolicyToString(TrustPolicy policy)
 			throws JAXBException {
@@ -330,7 +333,8 @@ public class TdaasUtil {
 			while ((line = reader.readLine()) != null) {
 				result.append(line + "\n");
 			}
-			if (result.toString().length() != 0) {				excludeList = result.toString();
+			if (result.toString().length() != 0) {
+				excludeList = result.toString();
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
@@ -449,7 +453,9 @@ public class TdaasUtil {
 		img.setCreated_date(new Date());
 		img.setEdited_date(new Date());
 		img.setDeleted(false);
-		img.setId(id);
+		if(StringUtils.isNotBlank(id)){
+			img.setId(id);
+		}
 		img.setImage_deployments("BareMetal");
 		img.setImage_format(null);
 		img.setImage_size(null);
@@ -520,27 +526,6 @@ public class TdaasUtil {
 		return unmountHostResponse;
 	}
 
-	// save file to new location
-	public static void writeImageToFile(InputStream uploadedInputStream,
-			ImageAttributes imageAttributes) throws IOException {
-		OutputStream out = null;
-		try {
-			int read = 0;
-			byte[] bytes = new byte[1024];
-
-			out = new FileOutputStream(new File(imageAttributes.location));
-			while ((read = uploadedInputStream.read(bytes)) != -1) {
-				out.write(bytes, 0, read);
-			}
-		} finally {
-			if (out != null) {
-				out.flush();
-				out.close();
-			}
-		}
-		imageAttributes.image_size = new Long(
-				new File(imageAttributes.location).length()).intValue();
-	}
 
 	public static void getParentDirectory(String filePath, String root,
 			Map<String, Boolean> parentsList, boolean recursive) {
@@ -559,8 +544,8 @@ public class TdaasUtil {
 				parentsList.put(parentPath, recursive);
 				getParentDirectory(parentPath, root, parentsList, true);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// TODO Handle Error
+				log.error("Error occured at getParentDirectory" + e);
 			}
 		}
 
@@ -606,29 +591,63 @@ public class TdaasUtil {
 	}
 
 	public static boolean addSshKey(String ip, String username, String password)
-			throws IOException {
-		boolean flag = false;
-		if (checkSshConnection(ip, username, password)) {
-			log.debug("User home is {}", System.getProperty("user.home"));
-			if (!Files.exists(Paths.get(System.getProperty("user.home")
-					+ "/.ssh"))) {
-				ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
-			}
-			String addHostKey = "ssh-keyscan -Ht rsa " + ip
-					+ " >> ~/.ssh/known_hosts";
-			Result executeQuoted = ExecUtil.executeQuoted("/bin/bash", "-c",
-					addHostKey);
-			log.debug("addHostKey exit code is {}", executeQuoted.getExitCode());
-			flag = (executeQuoted.getExitCode() == 0);
+			throws DirectorException {
 
+		boolean flag = false;
+		try {
+
+			SSHManager instance = new SSHManager(username, password, ip, "~/.ssh/known_hosts");
+			String message = instance.connect();
+
+			if (Constants.SUCCESS.equals(message) ) {
+				log.debug("User home is {}", System.getProperty("user.home"));
+				if (!Files.exists(Paths.get(System.getProperty("user.home")
+						+ "/.ssh"))) {
+					ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
+				}		
+				
+				if (!Files.exists(Paths.get(System.getProperty("user.home")
+						+ "/.ssh/known_hosts"))) {
+					ExecUtil.executeQuoted("/bin/bash", "-c", "touch ~/.ssh/known_hosts");
+					ExecUtil.executeQuoted("/bin/bash", "-c", "chmod 666 ~/.ssh/known_hosts");
+				}
+
+				Result result = ExecUtil.executeQuoted("/bin/sh", "-c",
+						"ssh-keygen -H  -F " + ip);
+				if (result.getStderr() != null
+						&& StringUtils.isNotEmpty(result.getStderr())) {
+					log.error(result.getStderr());
+				}
+				String stdout = result.getStdout();
+				if (StringUtils.isNotBlank(stdout)
+						&& StringUtils.isNotEmpty(stdout)) {
+					return true;
+				}
+
+				String addHostKey = "ssh-keyscan -Ht rsa " + ip
+						+ " >> ~/.ssh/known_hosts";
+				Result executeQuoted = ExecUtil.executeQuoted("/bin/bash",
+						"-c", addHostKey);
+				log.debug("addHostKey exit code is {}",
+						executeQuoted.getExitCode());
+				flag = (executeQuoted.getExitCode() == 0);
+			} else {
+				log.error(message);
+				throw new DirectorException(message);
+			}
+
+		} catch (Exception e) {
+			log.error("Unable to add SSh key to remot host, addSshKey method",
+					e);
+			throw new DirectorException("Unable to connect to remote host", e);
 		}
 		return flag;
+
 	}
 
 	private static boolean checkSshConnection(String ipaddress,
 			String username, String password) throws IOException {
 		SSHClient ssh = new SSHClient();
-
 		log.debug("Trying to connect IP :: " + ipaddress);
 		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
 		ssh.connect(ipaddress);
@@ -642,7 +661,6 @@ public class TdaasUtil {
 
 	public static String getManifestForPolicy(String policyXml)
 			throws JAXBException {
-		// TODO Auto-generated method stub
 
 		Manifest manifest = new Manifest();
 		TrustPolicy trustpolicy = getPolicy(policyXml);
@@ -674,7 +692,7 @@ public class TdaasUtil {
 		if (!file.exists()) {
 			return null;
 		}
-	
+
 		md.reset();
 		byte[] bytes = new byte[2048];
 		int numBytes;
@@ -685,9 +703,15 @@ public class TdaasUtil {
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
+		is.close();
 		return result;
-		
+
 	}
-	
+
+	public static SshSettingRequest convertSshInfoToRequest(SshSettingInfo info) {
+		SshSettingRequest setting = new SshSettingRequest();
+		setting.setImage_id(info.getImage_id().getId());
+		return setting;
+	}
 
 }

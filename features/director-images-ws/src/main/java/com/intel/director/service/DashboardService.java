@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageUploadRequest;
-
 import com.intel.director.api.ImagesReadyToDeployResponse;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftRequest;

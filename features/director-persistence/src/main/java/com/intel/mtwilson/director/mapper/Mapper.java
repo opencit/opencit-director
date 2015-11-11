@@ -519,15 +519,14 @@ public class Mapper {
 			actions = actions.replace("[", "").replace("]", "");
 			String[] split = actions.split("},");
 			ObjectMapper mapper = new ObjectMapper();
-			for (String s : split) {
+			for (String s : split) {				
 				if (!s.endsWith("}")) {
-					s = s + "}";
+					s = s.concat("}");
 				}
-				log.info("TASK : " + s);
 				ImageActionActions fromJson = null;
 				try {
 					fromJson = mapper.readValue(s, ImageActionActions.class);
-					log.info("TASK CREATED : " + fromJson.toString());
+					log.debug("TASK CREATED : " + fromJson.toString());
 					taskList.add(fromJson);
 
 				} catch (Exception e) {
@@ -536,10 +535,7 @@ public class Mapper {
 
 			}
 		}
-		log.info("No of tasks : " + taskList.size());
-		for (ImageActionActions temp : taskList) {
-			log.info("************************ " + temp.toString());
-		}
+		log.debug("No of tasks : " + taskList.size());
 		//
 		imageActionObject.setAction(taskList);
 		return imageActionObject;
@@ -574,6 +570,7 @@ public class Mapper {
 		mwHost.setSshPassword(toData(sshSetting.getPassword()));
 		mwHost.setSshKey(toData(sshSetting.getSshKeyId()));
 		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.getImageId().setName(sshSetting.getName());
 		if (sshSetting.getCreated_date() != null) {
 			mwHost.setCreatedByUserId(sshSetting.getCreated_by_user_id());
 		}
@@ -620,6 +617,7 @@ public class Mapper {
 			mwHost.setEditedByUserId(sshSetting.getEdited_by_user_id());
 		}
 		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.getImageId().setName(sshSetting.getName());
 		mwHost.setCreatedDate(sqlDate);
 		mwHost.setEditedDate(sqlDate);
 		return mwHost;

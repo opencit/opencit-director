@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 
 ## Ret codes
 ## 0 : Operation successful
@@ -11,6 +11,7 @@
 
 LOOP_DEVICE=""
 NBD_DEVICE=""
+MOUNT_OPT="-r"
 
 function free_loop_device() {
 	LOOP_DEVICE=$(losetup -f)
@@ -218,7 +219,7 @@ function mount_lvm_partition() {
 		vgchange -an $new_vgname
 		return 1
 	fi
-	mount -t $lvm_fs_type /dev/${new_vgname}/${lvm_part_name} $mountPath
+	mount ${MOUNT_OPT} -t $lvm_fs_type /dev/${new_vgname}/${lvm_part_name} $mountPath
 	if [ $? -eq 0 ]
 	then
 		echo >&2 "mounted successfully $imagePath to $mountPath"
@@ -287,14 +288,13 @@ function mount_raw_image() {
 	fi
 	if [ -n "$sector" ]
 	then
-		mount -o loop,offset=$(($sector*$sector_size)) $imagePath $mountPath
+		mount ${MOUNT_OPT} -o loop,offset=$(($sector*$sector_size)) $imagePath $mountPath
 		if [ $? -eq 0 ]
 	    	then
     			echo >&2 "successfully mounted $imagePath to $mountPath"
 			return 0
 		else
     		    	echo >&2 "Mounting failed"			
-			return 1	
 	        fi
 	fi
 	echo >&2 "Will try to mount with guestmount"
@@ -327,7 +327,7 @@ function mount_qcow2_image() {
 		mount_disk_guestmount
 		return
 	fi
-        qemu-nbd -r -c $NBD_DEVICE $imagePath
+        qemu-nbd -c $NBD_DEVICE $imagePath
         sleep 0.5
 	#check for number of partition
 	num_of_partition=`blkid | grep -c "${NBD_DEVICE}p\?[0-9]\?:"`
@@ -356,9 +356,9 @@ function mount_qcow2_image() {
 			#mount using qemu-nbd
         		if [ -b ${NBD_DEVICE}p1 ]
 	        	then
-	                	mount ${NBD_DEVICE}p1 $mountPath
+	                	mount ${MOUNT_OPT} ${NBD_DEVICE}p1 $mountPath
         		else
-                		mount $NBD_DEVICE $mountPath
+                		mount ${MOUNT_OPT} $NBD_DEVICE $mountPath
 		        fi
 			if [ $? -eq 0 ]
 			then

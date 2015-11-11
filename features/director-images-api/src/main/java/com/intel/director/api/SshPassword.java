@@ -11,7 +11,6 @@ public class SshPassword {
 	}
 
 	public SshPassword() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getId() {

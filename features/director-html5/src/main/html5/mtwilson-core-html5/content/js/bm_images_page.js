@@ -28,7 +28,6 @@ function createPolicy2(imageid, imagename) {
 }
 
 function goToCreatePolicyWizard2() {
-	bm_images_grid_page
 	$("#bm_images_grid_page").hide();
 	$("#create_policy_wizard2_").show();
 
@@ -63,28 +62,25 @@ function editPolicyForBMLive(hostid, hostname) {
 	goToEditPolicyWizardForBMLive();
 }
 
-function uploadToImageStorePageForBMImage(imageid, imagename, trust_policy_id) {
+function pushPolicyToHost(imageid, imagename, trust_policy_id) {
 
 	currentFlow = "Upload";
 	current_image_id = imageid;
 	current_image_name = imagename;
 	current_trust_policy_id = trust_policy_id;
-	goToUploadToImageStorePageForBMImage();
+	goToPushPolicyToHost();
 }
 
-function goToUploadToImageStorePageForBMImage() {
+function goToPushPolicyToHost() {
 	$("#bm_images_grid_page").hide();
-	$("#upload_to_image_store_redirect_bm_image").show();
-	var isEmpty = !$.trim($("#upload_to_image_store_redirect_bm_image").html());
+	$("#push_to_specific_host").show();
+	var isEmpty = !$.trim($("#push_to_specific_host").html());
 
 	if (isEmpty == false) {
-		$("#upload_to_image_store_redirect_bm_image").html("");
+		$("#push_to_specific_host").html("");
 	}
 
-	$("#upload_to_image_store_redirect_bm_image")
-			.load(
-					"/v1/html5/features/director-html5/mtwilson-core-html5/content/upload_imagestore_bm_image_direct.html");
-
+	$("#push_to_specific_host").load("/v1/html5/features/director-html5/mtwilson-core-html5/content/push_to_specific_host.html");
 }
 
 function goToCreatePolicyWizardForBMImage() {
@@ -171,6 +167,7 @@ function backToHostsPage() {
 }
 
 function backToHostsPageWithoutUnmount() {
+
 	$("#create_policy_wizard2_").html("");
 	$("#create_policy_wizard2_").hide("");
 	$("#create_policy_wizard_bm_image").html("");
@@ -181,6 +178,7 @@ function backToHostsPageWithoutUnmount() {
 	$("#edit_policy_wizard_bm_image").hide("");
 	$("#bm_images_grid_page").show();
 	$('body').removeClass("modal-open");
+current_image_id='';
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
 }
@@ -348,7 +346,7 @@ function nextButtonImagesBM() {
 }
 
 function downloadPolicyFromLastPage() {
-	downloadPolicy(current_image_id,null);
+	downloadPolicyAndManifest(current_image_id,null);
 }
 function downloadImageFromLastPage() {
 	downloadImage(current_image_id);
@@ -358,6 +356,23 @@ function downloadPolicy(imageid, trust_policy_id) {
 	window.location = "/v1/images/" + imageid + "/downloadPolicy";
 }
 
+function downloadPolicyAndManifest(imageid, trust_policy_id) {
+	window.location = "/v1/images/" + imageid + "/downloadPolicyAndManifest";
+}
+
 function downloadImage(imageid) {
 	window.location = "/v1/images/" + imageid + "/downloadImage?modified=true";
+}
+
+function deletePolicy(imageid, trust_policy_id, imagename) {
+	$.ajax({
+		type : "GET",
+		url : "/v1/images/" + imageid + "/deletePolicy",
+		dataType : "text",
+		success : function(result) {
+			refreshBMOnlineGrid();
+		}
+	});
+
+	
 }
