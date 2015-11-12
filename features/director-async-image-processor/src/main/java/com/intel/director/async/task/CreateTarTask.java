@@ -57,9 +57,6 @@ public class CreateTarTask extends ImageActionTask {
 		String trustPolicyName = null;
 		boolean runFlag = false;
 
-		FileWriter fw = null;
-		BufferedWriter bw = null;
-
 		try {
 
 			log.info("Inside runCreateTartask for ::"
@@ -98,6 +95,7 @@ public class CreateTarTask extends ImageActionTask {
 			DirectorUtil.callExec("mkdir -p " + newLocation);
 			DirectorUtil.createCopy(imageLocation + imageName, newLocation
 					+ imageName);
+			
 
 			log.info("Create Tar : Create policy file start");
 			trustPolicyName = "trustpolicy.xml";
@@ -108,11 +106,7 @@ public class CreateTarTask extends ImageActionTask {
 						+ trustPolicyFile.getName());
 				trustPolicyFile.createNewFile();
 			}
-
-			fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
-			bw = new BufferedWriter(fw);
-			bw.write(trustPolicy.getTrust_policy());
-			log.info("Create Tar : Create policy file End");
+			writeTrustPolicyToImageFolder(trustPolicyFile, trustPolicy);
 
 			String tarLocation = newLocation;
 			String tarName = trustPolicy.getDisplay_name() + ".tar";
@@ -131,6 +125,24 @@ public class CreateTarTask extends ImageActionTask {
 					"CreateTar task failed for"
 							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
+		} 
+		return runFlag;
+	}
+	
+
+	private void writeTrustPolicyToImageFolder(File trustPolicyFile,
+			TrustPolicy trustPolicy) throws Exception {
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+
+		try {
+			fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
+			bw = new BufferedWriter(fw);
+			bw.write(trustPolicy.getTrust_policy());
+			log.info("Create Tar : Create policy file End");
+		} catch (Exception e) {
+			log.error("Error writing policy to UUID folder", e);
+			throw e;
 		} finally {
 			try {
 				if (bw != null) {
@@ -144,7 +156,7 @@ public class CreateTarTask extends ImageActionTask {
 			}
 
 		}
-		return runFlag;
+
 	}
 
 	/**

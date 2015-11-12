@@ -203,6 +203,31 @@ public class Images {
 				deployment_type);
 
 	}
+	
+	
+	/**
+	 * Method similar to the getImages, but which only returns the image related details without
+	 * the HTML content which is specific to TDaaS
+	 * 
+	 * 
+	 * @param deployment_type - VM/BareMetal
+	 * @return List of image details
+	 * @throws DirectorException
+	 * @throws DbException
+	 */
+	@Path("/list/{image_deployment: [a-zA-Z_-]+}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public SearchImagesResponse getImagesByDeploymentType(
+			@PathParam("image_deployment") String deployment_type)
+			throws DirectorException {
+		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
+		searchImagesRequest.deploymentType = deployment_type;
+		SearchImagesResponse searchImagesResponse = imageService
+				.searchImages(searchImagesRequest);
+		return searchImagesResponse;
+
+	}
 
 	/**
 	 * Method to mount the image. This call is invoked in all types of

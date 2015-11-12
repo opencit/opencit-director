@@ -334,23 +334,28 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public SearchImagesResponse searchImages(
-			SearchImagesRequest searchImagesRequest) throws DbException {
+			SearchImagesRequest searchImagesRequest) throws DirectorException {
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
-		List<ImageInfo> fetchImages = null;
-		// Fetch all images
-		if (searchImagesRequest.deploymentType == null) {
-			fetchImages = imagePersistenceManager.fetchImages(null);
-		} else {
-
-			// Fetch images for the deployment type
-			ImageInfoFilter filter = new ImageInfoFilter();
-			filter.image_deployments = searchImagesRequest.deploymentType;
-			if (searchImagesRequest.deploymentType.equals("BareMetalLive")) {
-				filter.image_deployments = Constants.DEPLOYMENT_TYPE_BAREMETAL;
+		try{
+			List<ImageInfo> fetchImages = null;
+			// Fetch all images
+			if (searchImagesRequest.deploymentType == null) {
+				fetchImages = imagePersistenceManager.fetchImages(null);
+			} else {
+	
+				// Fetch images for the deployment type
+				ImageInfoFilter filter = new ImageInfoFilter();
+				filter.image_deployments = searchImagesRequest.deploymentType;
+				if (searchImagesRequest.deploymentType.equals("BareMetalLive")) {
+					filter.image_deployments = Constants.DEPLOYMENT_TYPE_BAREMETAL;
+				}
+				fetchImages = imagePersistenceManager.fetchImages(filter, null);
 			}
-			fetchImages = imagePersistenceManager.fetchImages(filter, null);
+			searchImagesResponse.images = fetchImages;
+		}catch(DbException de){
+			log.error("Error while retrieving list of images", de);
+			throw new DirectorException("Error while retrieving list of images", de);
 		}
-		searchImagesResponse.images = fetchImages;
 		return searchImagesResponse;
 	}
 

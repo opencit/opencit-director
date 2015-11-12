@@ -256,10 +256,7 @@ public abstract class UploadTask extends ImageActionTask {
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.debug(
-					"runUploadtask failed for::"
-							+ imageActionObject.getImage_id(), e);
+			log.error("Error in uploading artifact to Glance for image action :"+imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		} finally {
 			try {

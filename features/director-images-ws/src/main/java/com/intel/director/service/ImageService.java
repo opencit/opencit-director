@@ -53,7 +53,7 @@ public interface ImageService {
 
 
 	public SearchImagesResponse searchImages(
-			SearchImagesRequest searchImagesRequest) throws DbException;
+			SearchImagesRequest searchImagesRequest) throws DirectorException;
 
 	public SearchFilesInImageResponse searchFilesInImage(
 			SearchFilesInImageRequest searchFilesInImageRequest) throws DirectorException;;
