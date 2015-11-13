@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Settings</title>
+		<meta name="author" content="vivek">
+		<script src="/v1/html5/public/director-html5/js/setting_kms.js">
+		</script>
+	</head>
+	<body>
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-8" style="margin-top: 10px;">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h1>Key Management Server Settings</h1>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="form-group">
+								
+								<label class="control-label col-md-4" for="KMS_IP"><span class="pull-right">KMS
+								Server IP:</span></label>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="KMS_IP">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">
+								
+								<label class="control-label col-md-4" for="KMS_USERNAME"><span class="pull-right">Username</span></label>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="KMS_USERNAME">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+<!-- 						<br />
+						<div class="row">
+							<div class="form-group">
+								
+								<label class="control-label col-md-4" for="KMS_PASSWORD"><span class="pull-right">Password</span></label>
+								<div class="col-md-4">
+									<input type="password" class="form-control" id="KMS_PASSWORD">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div> -->
+						<br />
+						<div class="row">
+							<div class="form-group">
+								
+								<label class="control-label col-md-4" for="KMS_RSAKEY"><span class="pull-right">RSA Key:</span></label>
+								<div class="col-md-4">
+									<textarea rows="4" cols="50" class="form-control" id="KMS_RSAKEY"></textarea>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">
+								
+								<div class="col-md-4"></div>
+								<div class="col-md-4">
+									<button class="btn btn-primary" onclick="saveKMSSetting()">Save</button>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-md-2"></div>
+			
+		</div>
+	</body>
+</html>
