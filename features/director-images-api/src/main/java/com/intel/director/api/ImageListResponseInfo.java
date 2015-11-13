@@ -10,7 +10,18 @@ public class ImageListResponseInfo extends ImageInfo{
 	public String image_format;
 	public String trust_policy;
 	public String image_upload;
+	public String image_delete;
+
 	public Date created_date;
+	
+	public String display_name;
+	public String getDisplay_name() {
+		return display_name;
+	}
+	public void setDisplay_name(String display_name) {
+		this.display_name = display_name;
+	}
+	
 	
 	public String getImage_name() {
 		return image_name;
@@ -42,5 +53,10 @@ public class ImageListResponseInfo extends ImageInfo{
 	public void setCreated_date(Date created_date) {
 		this.created_date = created_date;
 	}
-
+	public String getImage_delete() {
+		return image_delete;
+	}
+	public void setImage_delete(String image_delete) {
+		this.image_delete = image_delete;
+	}
 }

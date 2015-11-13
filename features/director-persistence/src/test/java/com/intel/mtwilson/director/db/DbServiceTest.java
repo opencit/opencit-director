@@ -555,8 +555,6 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 		ImageStoreUploadTransferObject imgUpload1= new ImageStoreUploadTransferObject("http://imageuri1", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId, persistedImgAttributesList.get(0));
 		
 		
-		TrustPolicyDraft trustPolicyDraft1= new TrustPolicyDraft(createdUserId, sevenDaysBackDate, createdUserId, sevenDaysBackDate,"<abc>TrustPolicyDraft xml1 field</abc>","TrustPolicyDraft1_"+sevenDaysBackDate, persistedImgAttributesList.get(0));
-	////	deleteTrustPoliciesList.add(trustPolicyDraft1);
 		ImageStoreUploadTransferObject imageStoreUploadCreated=dBServiceImpl.saveImageUpload(imgUpload1);
 		Assert.assertTrue("Create image upload operation fail", imageStoreUploadCreated.getId() != null);
 		

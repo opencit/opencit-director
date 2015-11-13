@@ -3,21 +3,21 @@
  * All rights reserved.
  */
 
-import com.intel.dcsg.cpg.crypto.key.password.Password;
 import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
-import com.intel.mtwilson.core.PasswordVaultFactory;
-import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import com.intel.dcsg.cpg.crypto.key.password.Password;
+import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
 
 /**
  *

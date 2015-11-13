@@ -274,4 +274,6 @@ public interface IPersistService {
 			String deployment_type,String deployment_type_identifier) throws DbException;
 	
 	public List<PolicyTemplateInfo> fetchPolicyTemplate(PolicyTemplateInfo filter) throws DbException;
+
+	public abstract void destroySshPassword(String id) throws DbException;
 }

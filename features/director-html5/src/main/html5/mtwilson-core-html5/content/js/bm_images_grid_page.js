@@ -9,6 +9,12 @@ $(document).ready(function() {
 
 	pageInitialized = true;
 });
+function addHost() {
+
+current_image_id='';
+	goToCreatePolicyWizard2();
+}
+
 
 function refreshBMOnlineGrid() {
 	endpoint = "/v1/images/";
@@ -30,31 +36,37 @@ function refreshBMOnlineGrid() {
 				pageButtonCount : 15,
 				data : result.images,
 				fields : [ {
-					title : "Host Name",
-					name : "image_name",
+					title : "Trust Policy Name",
+					name : "display_name",
 					type : "text",
 					width : 250,
 					align : "center"
-				},  {
+				}, {
+					title : "Source Host",
+					name : "image_name",
+					type : "text",
+					width : 100,
+					align : "center"
+				}, {
 					title : "Trust Policy",
 					name : "trust_policy",
 					type : "text",
 					width : 100,
 					align : "center"
 				},/* {
-					title : "Status/Push",
+					title : "Push Policy",
 					name : "image_upload",
 					type : "text",
 					width : 100,
 					align : "center"
-				},*/ {
-					title : "Created Date",
+				}, */{
+					title : "Policy Created Date",
 					name : "created_date",
 					type : "text",
 					width : 150,
 					align : "center"
 				} ]
-			})
+			});
 		}
 
 	});

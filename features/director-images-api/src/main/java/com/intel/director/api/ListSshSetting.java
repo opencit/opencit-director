@@ -1,7 +1,6 @@
 package com.intel.director.api;
 
 import java.util.List;
-import com.intel.director.api.SshSettingRequest;
 
 public class ListSshSetting extends MonitorStatus{
 	

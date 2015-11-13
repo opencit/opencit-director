@@ -6,6 +6,7 @@
 package com.intel.director.images;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,29 +27,26 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GetImageStoresResponse;
+import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
+import com.intel.director.api.MonitorStatus;
 import com.intel.director.api.MountImageResponse;
-import com.intel.director.api.PolicyToMountedImageRequest;
-import com.intel.director.api.PolicyToMountedImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
+import com.intel.director.api.SshSettingResponse;
+import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -59,10 +58,7 @@ import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
-import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.features.director.kms.KeyContainer;
-import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.ShiroUtil;
 
@@ -80,51 +76,98 @@ public class Images {
 
 	LookupService lookupService = new LookupServiceImpl();
 
-	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(Images.class);
 
 	/**
-	 * Method invoked while uploading image from the console to the TD.
-	 * 
-	 * @param request
-	 * @param image_format
-	 *            Format of the image being deployed
-	 * @param image_deployments
-	 *            Deployment type of the image
-	 * @return TrustDirectorImageUploadResponse in response
+	 * API for uploading image metadata like image format,
+	 * deployment type(VM, BareMetal, Docker), image file name,
+	 * image size, etc.
+	 * Creates image upload metadata with specified parameters and returns
+	 * metadata along with image id.
+	 * @param TrustDirectorImageUploadRequest object which includes metadata information
+	 * @return TrustDirectorImageUploadResponse object contains newly created image metadata along with image_id
 	 * @throws Exception
+	 * @TDMethodType POST
+	 * @TDSampleRestCall
+     * <pre>
+     * https://server.com:8443/v1/images/uploads/content/uploadMetadata
+     * Input: {"name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
+     * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+     * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+     * 			"image_format":"qcow2","image_deployments":"VM","status":"Incomplete","image_size":407552,
+     * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
+     * </pre>
 	 */
-	@Path("/uploads/content/upload")
+	@Path("/uploads/content/uploadMetadata")
 	@POST
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-
-	@Context HttpServletRequest request,
-			@QueryParam("image_format") String image_format,
-			@QueryParam("image_deployments") String image_deployments)
+	public TrustDirectorImageUploadResponse createUploadImageMetadata(
+			TrustDirectorImageUploadRequest uploadRequest)
 			throws Exception {
-		log.info("Inside upload image to TDAAS web service");
-		if (!ServletFileUpload.isMultipartContent(request)) {
-			TrustDirectorImageUploadResponse directorImageUploadResponse = new TrustDirectorImageUploadResponse();
-			directorImageUploadResponse.status = "Error";
-			return directorImageUploadResponse;
-		}
 
 		imageService = new ImageServiceImpl();
-		long lStartTime = new Date().getTime();
+
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.uploadImageToTrustDirectorSingle(image_deployments,
-						image_format, request);
-		log.info("Inside upload image to TDAAS web service. completed upload : "
+				.createUploadImageMetadataImpl(uploadRequest.image_deployments,
+						uploadRequest.image_format, uploadRequest.name, uploadRequest.image_size);
+		log.info("Successfully uploaded image to location: "
 				+ uploadImageToTrustDirector.getLocation());
+	
+		return uploadImageToTrustDirector;
+	}
+	
+	
+	/**
+	 * API for uploading image data for the given image id.
+	 * Before Uploading image it is divided in chunks
+	 * and sent to server one by one. Once the chunk is received
+	 * location to save image is retrieved from DB using given image id
+	 * and chunk is saved to that location.
+	 * @param image_id - id received as response of https://server.com:8443/v1/images/uploads/content/uploadMetadata request
+	 * @param filInputStream - image data sent as chunk
+	 * @return TrustDirectorImageUploadResponse object with updated image upload metadata
+	 * @throws Exception
+	 * @TDMethodType POST
+	 * @TDSampleRestCall
+     * <pre>
+     * https://server.com:8443/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
+     * Input: chunk for image upload
+     * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+     * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+     * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
+     * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+     * </pre>
+	 */
+	@Path("/uploads/content/upload/{image_id: [0-9a-zA-Z_-]+}")
+	@POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
+			@PathParam("image_id") String image_id,
+			InputStream filInputStream){
+		log.info("Uploading image to TDaaS");
+		imageService = new ImageServiceImpl();
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector = null;
+		try {
+			long lStartTime = new Date().getTime();
 
-		long lEndTime = new Date().getTime();
+			uploadImageToTrustDirector = imageService
+					.uploadImageToTrustDirectorSingle(image_id, filInputStream);
+			log.info("Successfully uploaded image to location: "
+					+ uploadImageToTrustDirector.getLocation());
+			long lEndTime = new Date().getTime();
 
-		long difference = lEndTime - lStartTime;
+			long difference = lEndTime - lStartTime;
+			log.info("Time taken to upload image to TD: " + difference);
 
-		log.info("Time taken to upload image to TD: " + difference);
+		} catch (DirectorException e) {
+			log.error("Error while uploading image to Trust Director", e);
+			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+			uploadImageToTrustDirector.setStatus("Error while uploading image to Trust Director");
+		}
+
 
 		return uploadImageToTrustDirector;
 	}
@@ -158,6 +201,31 @@ public class Images {
 				.searchImages(searchImagesRequest);
 		return imageService.getImages(searchImagesResponse.images,
 				deployment_type);
+
+	}
+	
+	
+	/**
+	 * Method similar to the getImages, but which only returns the image related details without
+	 * the HTML content which is specific to TDaaS
+	 * 
+	 * 
+	 * @param deployment_type - VM/BareMetal
+	 * @return List of image details
+	 * @throws DirectorException
+	 * @throws DbException
+	 */
+	@Path("/list/{image_deployment: [a-zA-Z_-]+}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public SearchImagesResponse getImagesByDeploymentType(
+			@PathParam("image_deployment") String deployment_type)
+			throws DirectorException {
+		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
+		searchImagesRequest.deploymentType = deployment_type;
+		SearchImagesResponse searchImagesResponse = imageService
+				.searchImages(searchImagesRequest);
+		return searchImagesResponse;
 
 	}
 
@@ -207,12 +275,10 @@ public class Images {
 		log.info("inside mounting image in web service");
 		String user = getLoginUsername();
 		log.info("User mounting image : " + user);
-
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		try {
 			mountImageResponse = imageService.mountImage(imageId, user);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
 			log.error("Error while Mounting the Image");
 			mountImageResponse.status = Constants.ERROR;
 			mountImageResponse.details = e.getMessage();
@@ -369,13 +435,13 @@ public class Images {
 			filesInImageResponse = imageService
 					.searchFilesInImage(searchFilesInImageRequest);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
+			// TODO Handle Error
 			log.error("Error while searching for files in image : " + imageId,
 					e);
 			try {
 				imageService.unMountImage(imageId, null);
 			} catch (DirectorException e1) {
-				// TODO Auto-generated catch block
+				// TODO Handle Error
 				log.error("Error while unmounting image  : " + imageId, e);
 			}
 		}
@@ -384,29 +450,6 @@ public class Images {
 
 		// return join;
 		return filesInImageResponse;
-	}
-
-	/**
-	 * Adds the policy to the mounted image. Used in case of live host only. In
-	 * case of live host, the asynchronous processing does not take place as the
-	 * host is already mounted that needs to be modified. This method copies the
-	 * created policy to the /boot/trust as a trustpolicy.xml and also copies a
-	 * manifest.xml file in the same location
-	 * 
-	 * @param policyToMountedImageRequest
-	 * @return PolicyToMountedImageResponse
-	 * @throws DirectorException
-	 */
-	@Path("/pushpolicy")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public PolicyToMountedImageResponse pushToMountedImage(
-			PolicyToMountedImageRequest policyToMountedImageRequest)
-			throws DirectorException {
-		// System.out.println(policyToMountedImageRequest.getHost_Id());
-		return imageService
-				.pushPolicyToMountedImage(policyToMountedImageRequest);
 	}
 
 	/**
@@ -453,9 +496,10 @@ public class Images {
 
 	/**
 	 * Returns the data required for the first step of the wizard. If the user
-	 * has previously created a policy, the text field on the screen would show the name picked 
-	 * by the user. If not, it will pick the name of the image for which the policy is being created.
-	 *
+	 * has previously created a policy, the text field on the screen would show
+	 * the name picked by the user. If not, it will pick the name of the image
+	 * for which the policy is being created.
+	 * 
 	 * 
 	 * @param image_id
 	 *            Image for which the draft is created
@@ -475,7 +519,6 @@ public class Images {
 		return trustpolicymetadata;
 	}
 
-	
 	/**
 	 * 
 	 * 
@@ -493,10 +536,9 @@ public class Images {
 	}
 
 	/**
-	 * When the user has finished selecting files and dirs and clicks on the Next button 
-	 * for creating a policy, we call this method to :
-	 * 1) Sign with MTW
-	 * 2) Generate Hashes
+	 * When the user has finished selecting files and dirs and clicks on the
+	 * Next button for creating a policy, we call this method to : 1) Sign with
+	 * MTW 2) Generate Hashes
 	 * 
 	 * 
 	 * @param image_id
@@ -510,7 +552,7 @@ public class Images {
 		try {
 			return imageService.createTrustPolicy(image_id);
 		} catch (DirectorException | JAXBException de) {
-			log.error("Error creating policy from dtaft for image : "
+			log.error("Error creating policy from draft for image : "
 					+ image_id, de);
 			return "ERROR";
 		}
@@ -546,8 +588,8 @@ public class Images {
 
 	/**
 	 * 
-	 * Creates an initial draft of policy. This method is invoked when the
-	 * user, navigates from the grid, where there is a "plus" icon for the trust
+	 * Creates an initial draft of policy. This method is invoked when the user,
+	 * navigates from the grid, where there is a "plus" icon for the trust
 	 * policy icon, indicating that there is no draft currently associated. When
 	 * the user navigates from the first screen of wizard to second, we create a
 	 * default trust policy, with no files in whitelist.
@@ -578,17 +620,17 @@ public class Images {
 		return createTrustPolicyMetadataResponse;
 	}
 
-	
 	/**
 	 * 
-	 * This call is made during policy create flow for Live host. 
-	 * We have templates defined in the database. Depending on the type
-	 * of the live host (with vrtm installed or not), a certain template is picked and applied during
-	 * creating a new blank policy draft. 
+	 * This call is made during policy create flow for Live host. We have
+	 * templates defined in the database. Depending on the type of the live host
+	 * (with vrtm installed or not), a certain template is picked and applied
+	 * during creating a new blank policy draft.
 	 * 
 	 * 
-	 * @param image_id the image for which the template needs to be applied
-	 * @return Response that sends back the status of the function. 
+	 * @param image_id
+	 *            the image for which the template needs to be applied
+	 * @return Response that sends back the status of the function.
 	 */
 	@Path("/{image_id: [0-9a-zA-Z_-]+}/importpolicytemplate")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -610,11 +652,10 @@ public class Images {
 		return createTrustPolicyMetadataResponse;
 	}
 
-	
-	
 	/**
-	 * After the user has finalized the list of files and dirs and created a policy, if he chooses to revisit the 
-	 * files/dirs selection we need to recreate the policy draft. this method does the same. 
+	 * After the user has finalized the list of files and dirs and created a
+	 * policy, if he chooses to revisit the files/dirs selection we need to
+	 * recreate the policy draft. this method does the same.
 	 * 
 	 * 
 	 * @param imageId
@@ -633,22 +674,23 @@ public class Images {
 			return imageService.createPolicyDraftFromPolicy(imageId,
 					image_action_id);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
+			log.error("Unable to download Policy");
 			throw new DirectorException(
 					"Error in creating draft again from policy", e);
 		}
 
 	}
 
-	
 	/**
 	 * 
-	 * Method lets the user download the policy from the grids page.
-	 * The user can visit the grid any time and download the policy. This method looks into the 
-	 * MW_TRUST_POLICY table and gets the policy string and sends it as an xml content to the user
+	 * Method lets the user download the policy from the grids page. The user
+	 * can visit the grid any time and download the policy. This method looks
+	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
+	 * an xml content to the user
 	 * 
 	 * 
-	 * @param imageId the image for which the policy is downloaded
+	 * @param imageId
+	 *            the image for which the policy is downloaded
 	 * @return XML content of the policy
 	 * @throws DirectorException
 	 */
@@ -666,19 +708,21 @@ public class Images {
 
 			return response.build();
 		} catch (DbException e) {
-			// TODO Auto-generated catch block
+			log.error("Unable to download Policy");
 			throw new DirectorException("Unable to download Policy", e);
 		}
 	}
 
-	
 	/**
-	 * Method that downloads the BM image which has been modified to push the trust policy 
-	 * in the /boot/trust folder.  
-	 * The user, on the third step of the wizard, gets a link which downlods the modified image
+	 * Method that downloads the BM image which has been modified to push the
+	 * trust policy in the /boot/trust folder. The user, on the third step of
+	 * the wizard, gets a link which downlods the modified image
 	 * 
-	 * @param imageId Id of the image which needs to be downloaded
-	 * @param isModified Flag to check if we need to download the image itself or the modified image, which is with the embedded policy
+	 * @param imageId
+	 *            Id of the image which needs to be downloaded
+	 * @param isModified
+	 *            Flag to check if we need to download the image itself or the
+	 *            modified image, which is with the embedded policy
 	 * @return Sends back the image file
 	 * @throws DirectorException
 	 */
@@ -701,10 +745,118 @@ public class Images {
 									.lastIndexOf(File.separator) + 1));
 			return response.build();
 		} catch (DbException e) {
-			// TODO Auto-generated catch block
+			log.error("Unable to download Image");
 			throw new DirectorException("Unable to download Image", e);
 		}
 
+	}
+
+
+	/**
+	 * 
+	 * Method lets the user download the policy and manifest as a tarball from the grids page. The user
+	 * can visit the grid any time and download the policy and manifest as it was created in the wizrd. 
+	 * This method looks
+	 * into the MW_TRUST_POLICY table and gets the policy string, creates a manifest and sends it as
+	 * an tarball content to the user
+	 * 
+	 * 
+	 * @param imageId
+	 *            the image for which the policy and manifest is downloaded
+	 * @return TAR ball  content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/downloadPolicyAndManifest")
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadPolicyAndManifestForImageId(
+			@PathParam("imageId") String imageId) throws DirectorException {
+		File tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
+		
+		ResponseBuilder response = Response.ok(tarBall);
+
+		response.header("Content-Disposition", "attachment; filename="
+				+ tarBall.getName());
+
+		return response.build();
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/deletePolicy")
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String deletePolicy(@PathParam("imageId") String imageId)
+	{
+		String response = "Success";
+		try {
+			imageService.deleteTrustPolicy(imageId);
+		} catch (DirectorException e) {
+			response = Constants.ERROR;
+		}
+		return response;
+
+	}
+
+	@Path("/uploads")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public ImageStoreResponse uploadImageToImageStore(
+			ImageStoreUploadRequest imageStoreUploadRequest)
+			throws DirectorException {
+
+		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
+			throws DirectorException {
+		SshSettingResponse settingResponse = new SshSettingResponse();
+		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
+		return settingResponse;
+	}
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public MonitorStatus deletePasswordForHost(@PathParam("imageId") String image_id) throws DirectorException
+			 {
+			MonitorStatus monitor = new MonitorStatus();
+			try {
+				imageService.deletePasswordForHost(image_id);
+			} catch (DirectorException e) {
+				log.error("Error in deleting password",e);
+				monitor.status = Constants.ERROR;
+				monitor.details = e.getMessage();
+			}
+			return monitor;
+	}
+	
+	/**
+	 * 
+	 * Mark image as deleted. We turn the disabled flag=true in the MW_IMAGE table 
+	 * 
+	 * @param imageId Id of the image to be deleted
+	 * @return Response stating status of the operation - Success/Error
+	 * @throws DirectorException
+	 */
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
+	@DELETE
+	@Produces(MediaType.TEXT_PLAIN)
+	public String deleteImage(
+			@PathParam("imageId") String imageId){
+		String ret = Constants.SUCCESS;
+		try {
+			imageService.deleteImage(imageId);
+		} catch (DirectorException e) {
+			log.error("Error deleting image : "+ imageId);
+			ret = Constants.ERROR;
+		}
+		return ret;
 	}
 
 }

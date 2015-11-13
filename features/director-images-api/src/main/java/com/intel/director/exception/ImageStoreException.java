@@ -11,7 +11,12 @@ package com.intel.director.exception;
  */
 public class ImageStoreException extends Exception {
 
-    public ImageStoreException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public ImageStoreException() {
     }
 
     public ImageStoreException(String message) {

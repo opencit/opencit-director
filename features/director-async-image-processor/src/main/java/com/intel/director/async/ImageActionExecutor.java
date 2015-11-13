@@ -8,7 +8,6 @@ package com.intel.director.async;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.intel.director.async.task.ImageActionTask;
 
 /**
  *
@@ -29,7 +28,7 @@ public class ImageActionExecutor {
      * 
      * @param actionTask ImageAction task instance
      */
-    public static void submitTask(ImageActionTask actionTask) {
+    public static void submitTask(Runnable actionTask) {
               
         executorService.execute(actionTask);
     }

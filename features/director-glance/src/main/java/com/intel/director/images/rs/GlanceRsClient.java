@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
@@ -37,7 +38,9 @@ import com.intel.director.constants.Constants;
  * @author GS-0681
  */
 public class GlanceRsClient {
-	;
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(GlanceRsClient.class);
+
 	public WebTarget webTarget;
 	public Client client;
 	public String authToken;
@@ -52,48 +55,69 @@ public class GlanceRsClient {
 
 	public void uploadImage(File file, Map<String, String> imageProperties,
 			String glanceId) throws IOException {
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		HttpPut putRequest = new HttpPut(webTarget.getUri().toString()
-				+ "/v1/images/" + glanceId);
+		long start = new Date().getTime();
+		BufferedReader br = null;
+		InputStream ist =  null;
+		try {
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			HttpPut putRequest = new HttpPut(webTarget.getUri().toString()
+					+ "/v1/images/" + glanceId);
 
-		putRequest.setHeader("X-Auth-Token", authToken);
-		// / postRequest.setHeader("x-image-meta-id", uuid);
-		/*
-		 * putRequest.setHeader("x-image-meta-container_format", "bare");
-		 * putRequest.setHeader("x-image-meta-disk_format", "qcow2");
-		 */
-		putRequest.setHeader("Content-Type", "application/octet-stream");
-		InputStream ist = new FileInputStream(file);
+			putRequest.setHeader("X-Auth-Token", authToken);
+			// / postRequest.setHeader("x-image-meta-id", uuid);
+			/*
+			 * putRequest.setHeader("x-image-meta-container_format", "bare");
+			 * putRequest.setHeader("x-image-meta-disk_format", "qcow2");
+			 */
+			putRequest.setHeader("Content-Type", "application/octet-stream");
+			ist = new FileInputStream(file);
 
-		HttpEntity inputHttp = new InputStreamEntity(ist);
-		putRequest.setEntity(inputHttp);
+			HttpEntity inputHttp = new InputStreamEntity(ist);
+			putRequest.setEntity(inputHttp);
 
-		HttpResponse response = httpClient.execute(putRequest);
+			HttpResponse response = httpClient.execute(putRequest);
 
-		// // Response response =
-		// webTarget.path("/v1/images/"+glanceId).request().header("X-Auth-Token",
-		// authToken).put(Entity.entity(f, MediaType.TEXT_PLAIN_TYPE));
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				(response.getEntity().getContent())));
+			// // Response response =
+			// webTarget.path("/v1/images/"+glanceId).request().header("X-Auth-Token",
+			// authToken).put(Entity.entity(f, MediaType.TEXT_PLAIN_TYPE));
+			br = new BufferedReader(new InputStreamReader(
+					(response.getEntity().getContent())));
 
-		String output;
-		StringBuffer sb = new StringBuffer();
+			String output;
+			StringBuffer sb = new StringBuffer();
 
-		while ((output = br.readLine()) != null) {
-			sb.append(output);
-			// log.debug(output);
+			while ((output = br.readLine()) != null) {
+				sb.append(output);
+				// log.debug(output);
+			}
+			JSONObject obj = new JSONObject(sb.toString());
+			log.debug("obj::" + obj);
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			try {
+				if (br != null) {
+					br.close();
+				}
+				if (ist != null) {
+					ist.close();
+				}
+			} catch (IOException e) {
+				log.error("Error closing streams ");
+			}
 		}
-		JSONObject obj = new JSONObject(sb.toString());
+		long end = new Date().getTime();
+		printTimeDiff("uploadImage", start, end);
 	}
 
 	public ImageStoreUploadResponse fetchDetails(
 			Map<String, String> imageProperties, String glanceId)
 			throws IOException {
+		long start = new Date().getTime();
 
 		Response response = webTarget.path("/v1/images/" + glanceId).request()
 				.header("X-Auth-Token", authToken).get();
 
-		InputStream inputStream = (InputStream) response.getEntity();
 		ImageStoreUploadResponse imageStoreResponse = new ImageStoreUploadResponse();
 		imageStoreResponse.setId(glanceId);
 		imageStoreResponse.setImage_uri(response
@@ -102,34 +126,20 @@ public class GlanceRsClient {
 				.getHeaderString(Constants.CONTENT_LENGTH)));
 		imageStoreResponse.setChecksum(response
 				.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
-		// / imageStoreResponse.setImage_id(Constants.GL);
-		// / String type = response.getHeaderString("Content-Type");
-		/*
-		 * BufferedReader br = new BufferedReader(new InputStreamReader(
-		 * inputStream));
-		 * 
-		 * String output; StringBuffer sb = new StringBuffer();
-		 * 
-		 * while ((output = br.readLine()) != null) { sb.append(output); //
-		 * log.debug(output); }
-		 */
+
+		long end = new Date().getTime();
+		printTimeDiff("fetchDetails", start, end);
 
 		return imageStoreResponse;
 	}
 
 	public String uploadImageMetaData(Map<String, String> imageProperties)
 			throws IOException {
-
-		/*
-		 * File f = new File("C:/MysteryHill/DirectorAll/Docs/vm_launch.txt");
-		 * InputStream is = new FileInputStream(f);
-		 * 
-		 * HttpEntity input = new InputStreamEntity(is);
-		 */
+		long start = new Date().getTime();
 
 		String uuid = (new UUID()).toString();
 		Response response;
-		if(imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION)!=null){
+		if (imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION) != null) {
 			response = webTarget
 					.path("/v1/images")
 					.request()
@@ -144,10 +154,11 @@ public class GlanceRsClient {
 					.header("x-image-meta-name",
 							imageProperties.get(Constants.NAME))
 					.header("x-image-meta-property-mtwilson_trustpolicy_location",
-							imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION))		
+							imageProperties
+									.get(Constants.MTWILSON_TRUST_POLICY_LOCATION))
 					.post(Entity.json(null));
-		}else{
-			
+		} else {
+
 			response = webTarget
 					.path("/v1/images")
 					.request()
@@ -162,9 +173,8 @@ public class GlanceRsClient {
 					.header("x-image-meta-name",
 							imageProperties.get(Constants.NAME))
 					.post(Entity.json(null));
-			
+
 		}
-	
 
 		InputStream inputStream = (InputStream) response.getEntity();
 
@@ -181,14 +191,19 @@ public class GlanceRsClient {
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");
+		long end = new Date().getTime();
+		printTimeDiff("uploadImageMetaData", start, end);
+
 		return id;
 	}
 
 	private void createAuthToken(String glanceIP, String tenantName,
 			String userName, String password) {
-
+		long start = new Date().getTime();
+		DefaultHttpClient httpClient = null;
+		BufferedReader br = null;
 		try {
-			DefaultHttpClient httpClient = new DefaultHttpClient();
+			httpClient = new DefaultHttpClient();
 			HttpPost postRequest = new HttpPost("http://" + glanceIP
 					+ ":5000/v2.0/tokens");
 
@@ -201,14 +216,7 @@ public class GlanceRsClient {
 			postRequest.setHeader("Content-Type", "application/json");
 			postRequest.setHeader("Accept", "application/json");
 			HttpResponse response = httpClient.execute(postRequest);
-			if (response.getStatusLine().getStatusCode() != 200) {
-				/*
-				 * log.error(null, new
-				 * RuntimeException("Failed : HTTP error code : " +
-				 * response.getStatusLine().getStatusCode()));
-				 */
-			}
-			BufferedReader br = new BufferedReader(new InputStreamReader(
+			br = new BufferedReader(new InputStreamReader(
 					(response.getEntity().getContent())));
 
 			String output;
@@ -222,15 +230,26 @@ public class GlanceRsClient {
 					"token");
 			authToken = property.getString("id");
 			httpClient.getConnectionManager().shutdown();
-			br.close();
 		} catch (MalformedURLException e) {
-			// / log.error(null, e);
+			log.error("Error while creating auth token", e);
 		} catch (IOException e) {
-			// / log.error(null, e);
-		} /*
-		 * catch (JSONException ex) { /// log.error(null, ex); }
-		 */
-		// / return authToken;
+			log.error("Error while creating auth token", e);
+		}
+		finally{
+			if(httpClient != null){
+				httpClient.close();
+			}		
+			if(br != null){
+				try {
+					br.close();
+				} catch (IOException e) {
+					log.error("Error closing reader", e);
+				}
+			}
+
+		}
+		long end = new Date().getTime();
+		printTimeDiff("createAuthToken", start, end);
 	}
 
 	public void getImageMetaData() {
@@ -239,4 +258,7 @@ public class GlanceRsClient {
 	public void deleteImage() {
 	}
 
+	private void printTimeDiff(String method, long start, long end) {
+		log.info(method + " took " + (end - start) + " ms");
+	}
 }

@@ -1,6 +1,5 @@
 package com.intel.director.api;
 
-import java.util.Date;
 
 public class ImagesReadyToDeployResponse extends AuditFields {
 	String id;

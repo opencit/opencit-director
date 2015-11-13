@@ -12,6 +12,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
@@ -45,9 +46,11 @@ public class CreateTrustPolicy {
 	 *            contains information about what is selected by user from UI
 	 *            such as launch control and encryption policy, files and
 	 *            directories.
+	 * @throws Exception 
+	 * @throws CryptographyException 
 	 */
 	public static void createTrustPolicy(TrustPolicy trustPolicy)
-			throws IOException, JAXBException, XMLStreamException, Exception {
+			throws CryptographyException, Exception {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
 
@@ -57,16 +60,22 @@ public class CreateTrustPolicy {
 		}
 	}
 
-
 	/**
 	 * Adds encryption information such as dek URL and checksum in trust policy
 	 * 
 	 * @param inputPolicy
 	 * @return
+	 * @throws Exception 
+	 * @throws XMLStreamException 
+	 * @throws JAXBException 
+	 * @throws IOException 
+	 * @throws CryptographyException 
 	 */
-	private static void addEncryption(TrustPolicy trustPolicy) throws Exception {
+	private static void addEncryption(TrustPolicy trustPolicy) throws CryptographyException, IOException, JAXBException, XMLStreamException, Exception {
 		// get DEK
-		KeyContainer key = new KmsUtil().createKey();		
+
+		KeyContainer key = new KmsUtil().createKey();
+			
 		DecryptionKey decryptionKey = new DecryptionKey();
 		decryptionKey.setURL("uri");
 		decryptionKey.setValue(key.url.toString());
@@ -80,7 +89,6 @@ public class CreateTrustPolicy {
         checksum.setValue("1");
         encryption.setChecksum(checksum);
 		trustPolicy.setEncryption(encryption);
-		// Get checksum
 	}
 
 	/**

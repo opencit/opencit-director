@@ -13,6 +13,8 @@ import java.net.URLDecoder;
  * @author soakx
  */
 public class SearchFilesInImageRequest {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(SearchFilesInImageRequest.class);
 
     public String dir;
     public String include;
@@ -27,7 +29,8 @@ public class SearchFilesInImageRequest {
 		try {
 			return URLDecoder.decode(dir, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
+			// TODO Handle Error
+			log.error("Error in decoding dir" + e);
 			return null;
 		}
 	}

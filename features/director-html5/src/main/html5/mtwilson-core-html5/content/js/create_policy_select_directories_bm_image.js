@@ -131,6 +131,12 @@ function ApplyRegExViewModel() {
 		var include = loginFormElement.create_policy_regex_include.value;
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
+		if((include == "" || include == null || include ==  undefined) && (exclude == "" || exclude == null || exclude ==  undefined))
+		{
+			$("#regex_error_bm_image").html("<font color='red'>Provide atleast one filter</font>");
+			return;
+		}
+		$("#regex_error_bm_image").html("");
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
@@ -176,7 +182,7 @@ function toggleState(str) {
 	var id = str.id;
 	var n = id.indexOf("_");
 	var path = id.substring(n + 1);
-
+	$("#regex_error_bm_image").html("");
 	$('#dir_path').val(path);
 	$('#folderPathDiv').text(path);
 	$('#sel_dir').val(path);

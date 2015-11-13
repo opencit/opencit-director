@@ -3,7 +3,6 @@ package com.intel.director.service.impl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,8 +60,9 @@ public class TreeNode implements Comparable{
 
 		// Avoid first element that can be an empty string if you split a string
 		// that has a starting slash as /sd/card/
-		while (list[0] == null || list[0].equals(""))
+		while (StringUtils.isBlank(list[0])){
 			list = Arrays.copyOfRange(list, 1, list.length);
+		}
 		if (!currentPath.endsWith("/")) {
 			currentPath = currentPath + "/";
 		}
@@ -100,7 +100,7 @@ public class TreeNode implements Comparable{
 		} else {
 			int index = childs.indexOf(currentChild);
 			if (index == -1) {
-				childs.add(currentChild);	
+				childs.add(currentChild);
 				currentChild.addElement(currentChild.incrementalPath,
 						Arrays.copyOfRange(list, 1, list.length));
 			} else {
@@ -206,8 +206,8 @@ public class TreeNode implements Comparable{
 			builder.append(ulEnd);
 			addToTree(ulEnd, add);
 		}
-		int noOfChildren = childs.size();
-		int childCnt = 0;
+//		int noOfChildren = childs.size();
+//		int childCnt = 0;
 		List<TreeNode> combined = new ArrayList<>();
 		combined.addAll(childs);
 		combined.addAll(leafs);
@@ -230,8 +230,8 @@ public class TreeNode implements Comparable{
 				}
 
 			}else{
-				int noOfLeafElements = leafs.size();
-				int leaftCnt = 0;
+//				int noOfLeafElements = leafs.size();
+//				int leaftCnt = 0;
 
 				boolean showULBegin = false;
 				boolean showULEnd = false;
@@ -287,8 +287,7 @@ public class TreeNode implements Comparable{
 //		}
 	}
 
-	private boolean isDirectory() {
-		// TODO Auto-generated method stub
+	public boolean isDirectory() {
 		return (childs.size() > 0 || leafs.size() > 0);
 	}
 
@@ -301,6 +300,12 @@ public class TreeNode implements Comparable{
 	public int compareTo(Object o) {
 		TreeNode other = (TreeNode)o;
 		return this.incrementalPath.compareTo(other.incrementalPath);		
+	}
+
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return incrementalPath.hashCode();
 	}
 	
 	

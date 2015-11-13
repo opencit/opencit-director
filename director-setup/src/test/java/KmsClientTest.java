@@ -3,21 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import com.intel.dcsg.cpg.crypto.file.RsaPublicKeyProtectedPemKeyEnvelopeOpener;
-import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.io.pem.Pem;
-import com.intel.kms.api.CreateKeyRequest;
-import com.intel.kms.client.jaxrs2.Keys;
-import com.intel.kms.ws.v2.api.Key;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import java.util.Properties;
-import javax.crypto.SecretKey;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.kms.api.CreateKeyRequest;
+import com.intel.kms.client.jaxrs2.Keys;
+import com.intel.kms.ws.v2.api.Key;
+import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 
 /**
  *
@@ -61,7 +59,6 @@ public class KmsClientTest {
         createKeyRequest.setMode("OFB");
         Key createKeyResponse = keys.createKey(createKeyRequest);
         // Request server to transfer the new key to us (encrypted)
-        String transferKeyPemResponse = keys.transferKey(createKeyResponse.getId().toString());
         // decrypt the requested key
 //        RsaPublicKeyProtectedPemKeyEnvelopeOpener opener = new RsaPublicKeyProtectedPemKeyEnvelopeOpener(wrappingKeyCertificate.getPrivateKey(), kmsLoginBasicUsername);
 //        SecretKey secretKey = (SecretKey) opener.unseal(Pem.valueOf(transferKeyPemResponse));

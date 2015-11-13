@@ -45,11 +45,11 @@
 			<version>0.1-SNAPSHOT</version>
 			<artifactId>director-images-api</artifactId>
 		</dependency>
-		
+
 		<dependency>
-				<groupId>org.json</groupId>
-					<artifactId>json</artifactId>
-		<version>20140107</version>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
 		</dependency>
 
 
@@ -69,11 +69,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	<dependency>
-	<groupId>org.json</groupId>
-	<artifactId>json</artifactId>
-	<version>20140107</version>
-</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
+		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
 			<version>0.1-SNAPSHOT</version>
@@ -98,6 +98,12 @@
 			<artifactId>director-glance</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-trust-policy</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-configuration</artifactId>
