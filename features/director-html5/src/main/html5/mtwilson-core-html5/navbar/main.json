@@ -2,7 +2,6 @@
     "items": [
 	 { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/td_images.html" },
 	 { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/trustpolicy.html" },
-        { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/settings.html" },
-	 { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/td_dashboard.html" }
+        { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/settings.html" }
     ]
 }
