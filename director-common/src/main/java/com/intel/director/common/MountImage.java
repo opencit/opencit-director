@@ -56,12 +56,12 @@ public class MountImage {
 					Constants.mountRemoteFileSystemScript, ipAddress, userName,
 					password, mountpath);
 		} catch (IOException e) {
-			// TODO Handle Error
-			if(exitcode == 0){
-				exitcode = 1;
-			}
 			log.error("Error in mounting remote host" + e);
 		}
+		if(exitcode == 0){
+			exitcode = 1;
+		}
+		log.error("Error in mounting remote host");
 		return exitcode;
 	}
 

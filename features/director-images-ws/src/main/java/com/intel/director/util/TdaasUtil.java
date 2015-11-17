@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -593,6 +592,7 @@ public class TdaasUtil {
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
+		//TODO Unused after assignment
 		boolean flag = false;
 		try {
 
@@ -645,7 +645,7 @@ public class TdaasUtil {
 
 	}
 
-	private static boolean checkSshConnection(String ipaddress,
+	public static boolean checkSshConnection(String ipaddress,
 			String username, String password) throws IOException {
 		SSHClient ssh = new SSHClient();
 		log.debug("Trying to connect IP :: " + ipaddress);
