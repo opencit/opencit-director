@@ -58,8 +58,9 @@ public class GlanceRsClient {
 		long start = new Date().getTime();
 		BufferedReader br = null;
 		InputStream ist =  null;
+		DefaultHttpClient httpClient = null;
 		try {
-			DefaultHttpClient httpClient = new DefaultHttpClient();
+			httpClient = new DefaultHttpClient();
 			HttpPut putRequest = new HttpPut(webTarget.getUri().toString()
 					+ "/v1/images/" + glanceId);
 
@@ -92,16 +93,22 @@ public class GlanceRsClient {
 			}
 			JSONObject obj = new JSONObject(sb.toString());
 			log.debug("obj::" + obj);
+			
 		} catch (IOException e) {
 			throw e;
 		} finally {
 			try {
+				
+				if (httpClient != null) {
+					httpClient.close();
+				}
 				if (br != null) {
 					br.close();
 				}
 				if (ist != null) {
 					ist.close();
 				}
+				
 			} catch (IOException e) {
 				log.error("Error closing streams ");
 			}
@@ -200,6 +207,7 @@ public class GlanceRsClient {
 	private void createAuthToken(String glanceIP, String tenantName,
 			String userName, String password) {
 		long start = new Date().getTime();
+		//TODO not used after being assigned
 		DefaultHttpClient httpClient = null;
 		BufferedReader br = null;
 		try {

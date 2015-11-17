@@ -20,7 +20,6 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
 
-
 public class FileUtilityOperation {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -51,7 +50,7 @@ public class FileUtilityOperation {
 		if (file != null) {
 			if (file.isDirectory()) {
 				// directory is empty, then delete it
-				if (file.list().length == 0) {
+				if (file.list() == null || file.list().length == 0) {
 					file.delete();
 				} else {
 					// list all the directory contents
@@ -85,7 +84,7 @@ public class FileUtilityOperation {
 			bw = new BufferedWriter(fw);
 			bw.write(value);
 		} catch (IOException e) {
-			log.error("Error writing to file "+path, e);
+			log.error("Error writing to file " + path, e);
 			status = false;
 		} finally {
 			try {
@@ -106,7 +105,6 @@ public class FileUtilityOperation {
 
 	}
 
-
 	public void writeToFile(File file, String value, boolean append) {
 		// File passFile = new File("/tmp/vmpass.txt");
 		try {
@@ -116,10 +114,11 @@ public class FileUtilityOperation {
 			bufferWriter.write(value);
 			bufferWriter.newLine();
 			bufferWriter.close();
+			writer.close();
 			file.setExecutable(true);
 		} catch (IOException e) {
 			// TODO Handle Error
-			log.error("Error in writing to files");
+			log.error("Error in writing propeties to files");
 		}
 	}
 
@@ -176,7 +175,7 @@ public class FileUtilityOperation {
 			try {
 				ret = f.createNewFile();
 			} catch (IOException e) {
-				log.error("Error creating new file at path "+path, e);
+				log.error("Error creating new file at path " + path, e);
 				ret = false;
 			}
 		}

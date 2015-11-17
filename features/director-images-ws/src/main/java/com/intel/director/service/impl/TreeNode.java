@@ -162,7 +162,7 @@ public class TreeNode implements Comparable{
 			}
 		}
 		
-		if(regexIdentifier != ""){
+		if(StringUtils.isNotEmpty(regexIdentifier)){
 			iconName = "locked.png";
 		}
 		

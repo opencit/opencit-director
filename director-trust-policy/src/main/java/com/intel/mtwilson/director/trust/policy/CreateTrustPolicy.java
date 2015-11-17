@@ -46,17 +46,24 @@ public class CreateTrustPolicy {
 	 *            contains information about what is selected by user from UI
 	 *            such as launch control and encryption policy, files and
 	 *            directories.
-	 * @throws Exception 
-	 * @throws CryptographyException 
+	 * @throws CryptographyException
+	 * @throws IOException
 	 */
 	public static void createTrustPolicy(TrustPolicy trustPolicy)
-			throws CryptographyException, Exception {
+			throws CryptographyException, IOException {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
 
 		// if encryption policy is set
 		if (trustPolicy.getEncryption() != null) {
-			addEncryption(trustPolicy);
+			try {
+				addEncryption(trustPolicy);
+			} catch (Exception e) {
+				// TODO Handle Error
+				log.error(
+						"Error in createTrustPolicy() in CreateTrustPolicy.java",
+						e);
+			}
 		}
 	}
 
@@ -65,30 +72,37 @@ public class CreateTrustPolicy {
 	 * 
 	 * @param inputPolicy
 	 * @return
-	 * @throws Exception 
-	 * @throws XMLStreamException 
-	 * @throws JAXBException 
-	 * @throws IOException 
-	 * @throws CryptographyException 
+	 * @throws Exception
+	 * @throws XMLStreamException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws CryptographyException
 	 */
-	private static void addEncryption(TrustPolicy trustPolicy) throws CryptographyException, IOException, JAXBException, XMLStreamException, Exception {
+	private static void addEncryption(TrustPolicy trustPolicy)
+			throws CryptographyException, IOException, JAXBException,
+			XMLStreamException {
 		// get DEK
 
-		KeyContainer key = new KmsUtil().createKey();
-			
-		DecryptionKey decryptionKey = new DecryptionKey();
-		decryptionKey.setURL("uri");
-		decryptionKey.setValue(key.url.toString());
-		Encryption encryption = trustPolicy.getEncryption();
-		if(encryption == null){
-			encryption = new Encryption();
-		}		
-		encryption.setKey(decryptionKey);
-        Checksum checksum = new Checksum();
-        checksum.setDigestAlg(DigestAlgorithm.MD_5);
-        checksum.setValue("1");
-        encryption.setChecksum(checksum);
-		trustPolicy.setEncryption(encryption);
+		KeyContainer key;
+		try {
+			key = new KmsUtil().createKey();
+			DecryptionKey decryptionKey = new DecryptionKey();
+			decryptionKey.setURL("uri");
+			decryptionKey.setValue(key.url.toString());
+			Encryption encryption = trustPolicy.getEncryption();
+			if (encryption == null) {
+				encryption = new Encryption();
+			}
+			encryption.setKey(decryptionKey);
+			Checksum checksum = new Checksum();
+			checksum.setDigestAlg(DigestAlgorithm.MD_5);
+			checksum.setValue("1");
+			encryption.setChecksum(checksum);
+			trustPolicy.setEncryption(encryption);
+		} catch (Exception e) {
+			// TODO Handle Error
+			log.error("Error in KmsUtil().createKey() in addEncryption() in CreateTrustPolicy.java", e);
+		}
 	}
 
 	/**

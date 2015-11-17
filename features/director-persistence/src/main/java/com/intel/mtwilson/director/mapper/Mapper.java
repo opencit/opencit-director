@@ -523,7 +523,8 @@ public class Mapper {
 				if (!s.endsWith("}")) {
 					s = s.concat("}");
 				}
-				ImageActionActions fromJson = null;
+				//TODO Removed null assignment //ImageActionActions fromJson;
+				ImageActionActions fromJson;
 				try {
 					fromJson = mapper.readValue(s, ImageActionActions.class);
 					log.debug("TASK CREATED : " + fromJson.toString());
