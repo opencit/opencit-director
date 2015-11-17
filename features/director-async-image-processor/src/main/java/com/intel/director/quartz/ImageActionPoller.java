@@ -10,14 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.async.ImageActionExecutor;
-import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.async.task.ExecuteActionsTask;
-import com.intel.director.async.task.ImageActionTask;
 import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;

@@ -177,9 +177,7 @@ public class KmsUtil {
 		return key;
 	}
 
-	@SuppressWarnings("restriction")
 	public String getKeyFromKMS(String id) {
-		String password = null;
 		try {
 			//new String(TransferKey.getKey(id), "UTF-8");
 			byte[] key = transferKey(id);
@@ -188,7 +186,7 @@ public class KmsUtil {
 			// TODO Handle Error
 			log.error("Error in getKeyFromKMS() method" + e);
 		}
-		return password;
+		return null;
 	}
 
 }

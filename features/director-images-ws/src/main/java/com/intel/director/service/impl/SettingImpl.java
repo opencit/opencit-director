@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
-import com.intel.director.api.SshSettingResponse;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -85,14 +84,14 @@ public class SettingImpl {
 				sshSettingRequest.getPassword());
 		log.info("Inside addHost,After execution of addSshKey ");
 		log.debug("Going to save sshSetting info in database");
-		SshSettingInfo info=null;
+		SshSettingInfo info;
 		if( StringUtils.isNotBlank(sshSettingRequest.getImage_id())){
 			
 			SshSettingInfo existingSsh;
 			try {
 				existingSsh = settingsPersistenceManager
 						.fetchSshByImageId(sshSettingRequest.getImage_id());
-				if (existingSsh.getId() != null && !"".equals(existingSsh)) {
+				if (existingSsh.getId() != null && StringUtils.isNotEmpty(existingSsh.getId())) {
 					sshSettingInfo.setId(existingSsh.getId());
 					sshSettingInfo.setImage_id(existingSsh.getImage_id());
 					sshSettingInfo.setName(sshSettingRequest.getIpAddress());
@@ -144,7 +143,7 @@ public class SettingImpl {
 					.fromSshSettingRequest(sshSettingRequest);
 			SshSettingInfo existingSsh = settingsPersistenceManager
 					.fetchSshByImageId(sshSettingRequest.getImage_id());
-			if (existingSsh.getId() != null && !"".equals(existingSsh)) {
+			if (existingSsh.getId() != null && StringUtils.isNotEmpty(existingSsh.getId())) {
 				sshSettingInfo.setId(existingSsh.getId());
 				sshSettingInfo.setImage_id(existingSsh.getImage_id());
 				///sshSettingRequest.setId(existingSsh.getId());

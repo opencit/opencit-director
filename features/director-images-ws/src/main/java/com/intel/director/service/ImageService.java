@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;

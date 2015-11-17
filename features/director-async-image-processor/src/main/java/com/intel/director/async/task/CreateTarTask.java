@@ -14,6 +14,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 
 /**
@@ -54,7 +55,7 @@ public class CreateTarTask extends ImageActionTask {
 	 * and policy
 	 */
 	public boolean runCreateTarTask() {
-		String trustPolicyName = null;
+		String trustPolicyName;
 		boolean runFlag = false;
 
 		try {
@@ -131,7 +132,7 @@ public class CreateTarTask extends ImageActionTask {
 	
 
 	private void writeTrustPolicyToImageFolder(File trustPolicyFile,
-			TrustPolicy trustPolicy) throws Exception {
+			TrustPolicy trustPolicy) throws DirectorException {
 		FileWriter fw = null;
 		BufferedWriter bw = null;
 
@@ -142,7 +143,7 @@ public class CreateTarTask extends ImageActionTask {
 			log.info("Create Tar : Create policy file End");
 		} catch (Exception e) {
 			log.error("Error writing policy to UUID folder", e);
-			throw e;
+			throw new DirectorException("Error writing policy to UUID folder", e);
 		} finally {
 			try {
 				if (bw != null) {
