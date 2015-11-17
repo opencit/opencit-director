@@ -506,9 +506,7 @@ fi
 # register linux startup script
 register_startup_script $DIRECTOR_HOME/bin/director.sh director
 
-
-
-
+disable_tcp_timestamps
 
 # setup the director, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then
