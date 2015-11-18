@@ -91,7 +91,7 @@ public class SettingImpl {
 			try {
 				existingSsh = settingsPersistenceManager
 						.fetchSshByImageId(sshSettingRequest.getImage_id());
-				if (existingSsh.getId() != null && StringUtils.isNotEmpty(existingSsh.getId())) {
+				if (existingSsh.getId() != null && StringUtils.isNotBlank(existingSsh.getId())) {
 					sshSettingInfo.setId(existingSsh.getId());
 					sshSettingInfo.setImage_id(existingSsh.getImage_id());
 					sshSettingInfo.setName(sshSettingRequest.getIpAddress());
@@ -143,7 +143,7 @@ public class SettingImpl {
 					.fromSshSettingRequest(sshSettingRequest);
 			SshSettingInfo existingSsh = settingsPersistenceManager
 					.fetchSshByImageId(sshSettingRequest.getImage_id());
-			if (existingSsh.getId() != null && StringUtils.isNotEmpty(existingSsh.getId())) {
+			if (existingSsh.getId() != null && StringUtils.isNotBlank(existingSsh.getId())) {
 				sshSettingInfo.setId(existingSsh.getId());
 				sshSettingInfo.setImage_id(existingSsh.getImage_id());
 				///sshSettingRequest.setId(existingSsh.getId());

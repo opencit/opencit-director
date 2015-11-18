@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>mtwilson</title>
+
+</head>
+<body>
+	
+				            <div>	
+						<form class="form-horizontal" role="form" >
+						 
+						 <div >	
+						
+						 <div class="row">
+				            
+				 
+				            
+				            <div class="col-md-2"></div>
+				            <div class="col-md-8 " style="margin-top: 10px;" >    
+				                
+				                <div class="panel panel-default" data-bind="with: mainViewModel.mtWilsonSettingViewModel">
+				                    <div class="panel-heading">
+				                        <h1>Mount Wilson Settings</h1>
+				                    </div>
+				                    <div class="panel-body">
+																					
+											<div class="form-group">
+											      <label class="control-label col-md-4" for="image_name">Username:</label>
+											      <div class="col-md-4">          
+											        <input type="text" class="form-control" id="username" data-bind="value: json_obj.username, valueUpdate: 'afterkeydown'" placeholder="Enter Username" required>
+											      </div>
+											</div> 
+						                    
+	  				   		  				<div class="form-group">
+                        						<label class="control-label col-md-4" for="mtwilsonPassword">Password</label>
+                        						<div class="col-md-4 "> 
+                        							<input type="password" id="mtwilsonPassword" class="form-control" placeholder="Password" data-bind="value: json_obj.password, valueUpdate: 'afterkeydown'" required>
+                    							</div>
+                    						</div> 
+											
+	  				   		  				<div class="form-group">
+												<label class="control-label col-md-4" for="image_name">IP Address:</label>
+											    <div class="col-md-4">          
+											    	<input type="text" class="form-control" id="ipAddress" data-bind="value: json_obj.ipAddress, valueUpdate: 'afterkeydown'" placeholder="Enter IP Address" required>
+											    </div>
+										  	</div> 
+										  	
+	  				   		  				<div class="form-group">
+												<label class="control-label col-md-4" for="image_name">Port :</label>
+											    <div class="col-md-4">          
+											    	<input type="text" class="form-control" id="port" data-bind="value: json_obj.port, valueUpdate: 'afterkeydown'" placeholder="Enter Port Number" required>
+											    </div>
+										  	</div>
+										  	
+										  	
+										  	<div class="col-md-offset-4 col-md-1" >
+										        <button type="submit" class="btn btn-primary" data-bind="click: postData">Save </button>
+										    </div>
+										    
+ 										
+											    
+									</div>
+								  </div>
+			                    </div>
+				      <div class="col-md-2"></div>
+					        </div>
+	               
+	     </div>
+		</form>
+		</div>
+		
+		<script type="text/javascript">
+            resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js', 'js/settings_mtwilson.js'], function() { 
+                console.log("settings_mtwilson.html: loaded scripts");
+                mainViewModel.mtWilsonSettingViewModel = new MtWilsonSettingViewModel();
+                ko.applyBindings(mainViewModel, document.getElementById("settings_mtwilson"));
+               
+            });
+            
+            
+        </script>
+		
+</body>
+</html>

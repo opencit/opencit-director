@@ -1042,6 +1042,10 @@ public class ImageServiceImpl implements ImageService {
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageid);
 
+			if (doesPolicyNameExist(createTrustPolicyMetaDataRequest
+					.getDisplay_name(),imageid)) {
+				throw new DirectorException("Policy Name Already Exists");
+			}
 			if (existingDraft == null) {
 				TrustPolicy existingPolicy = imagePersistenceManager
 						.fetchPolicyForImage(imageid);
@@ -1398,6 +1402,10 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		try {
 
+			if (doesPolicyNameExist(imageStoreUploadRequest
+					.getDisplay_name(),imageStoreUploadRequest.image_id)) {
+				throw new DirectorException("Policy Name Already Exists");
+			}
 			log.debug("Inside  imageStoreUploadRequest::"
 					+ imageStoreUploadRequest);
 			// Updating Or Creating ImageAction
@@ -2383,6 +2391,46 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error deleteing image: " + imageId, e);
 			throw new DirectorException("Error deleting image", e);
 		}
+	}
+
+	public boolean doesPolicyNameExist(String display_name, String image_id)
+			throws DirectorException {
+		try {
+			List<TrustPolicyDraft> trustPolicyDraftList = imagePersistenceManager
+					.fetchPolicyDrafts(null);
+			if (trustPolicyDraftList != null) {
+				for (TrustPolicyDraft tpd : trustPolicyDraftList) {
+					if (!tpd.getImgAttributes().isDeleted() && tpd.getDisplay_name() != null
+							&& tpd.getDisplay_name().equalsIgnoreCase(
+									display_name)
+							&& !tpd.getImgAttributes().getId().equals(image_id)) {
+						return true;
+					}
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException(
+					"Error in fetching trustpolicydrafts list", e);
+		}
+		try {
+			List<TrustPolicy> trustPolicyList = imagePersistenceManager
+					.fetchPolicies(null);
+			if (trustPolicyList != null) {
+				for (TrustPolicy tpd : trustPolicyList) {
+					if (!tpd.getImgAttributes().isDeleted() && tpd.getDisplay_name() != null
+							&& tpd.getDisplay_name().equalsIgnoreCase(
+									display_name)
+							&& !tpd.getImgAttributes().getId().equals(image_id)) {
+						return true;
+					}
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException(
+					"Error in fetching trustpolicy list", e);
+		}
+
+		return false;
 	}
 
 }

@@ -59,6 +59,8 @@ function EditImageViewModel(data) {
 			data : ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
 				if (data.status == "Error") {
+					$('#for_mount_edit_vm').hide();
+					$('#default_edit_vm').show();
 					$('#error_modal_body_edit_vm_1').text(data.details);
 					$("#error_modal_edit_vm_1").modal({
 						backdrop : "static"
@@ -76,6 +78,8 @@ function EditImageViewModel(data) {
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
+							$('#for_mount_edit_vm').show();
+							$('#default_edit_vm').hide();
 							$('#error_modal_body_edit_vm_1').text(data.details);
 							$("#error_modal_edit_vm_1").modal({
 								backdrop : "static"
