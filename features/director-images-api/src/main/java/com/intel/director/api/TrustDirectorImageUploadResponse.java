@@ -11,5 +11,7 @@ package com.intel.director.api;
  */
 public class TrustDirectorImageUploadResponse extends ImageAttributes {
 	public String imageUploadUrl;
+	public String details;
+	public String state;
 	
 }

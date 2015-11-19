@@ -112,9 +112,16 @@ public class Images {
 
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
 		try {
+			if(imageService.doesImageNameExist(uploadRequest.name)){
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
+				return uploadImageToTrustDirector;
+			}
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(uploadRequest.image_deployments,
 							uploadRequest.image_format, uploadRequest.name, uploadRequest.image_size);
+			uploadImageToTrustDirector.state = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 		
