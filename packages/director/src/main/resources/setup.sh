@@ -518,9 +518,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
   director config mtwilson.extensions.packageIncludeFilter.startsWith "${MTWILSON_EXTENSIONS_PACKAGEINCLUDEFILTER_STARTSWITH:-com.intel,org.glassfish.jersey.media.multipart}" >/dev/null
 
-  #TODO:  customize for director tabs (using feature-id)  and default/home tab (use element id of the target tab)
- director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
- director config mtwilson.navbar.hometab director-trust-policy >/dev/null
+  director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
+  director config mtwilson.navbar.hometab director-trust-policy >/dev/null
 
   director config jetty.port ${JETTY_PORT:-80} >/dev/null
   director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
