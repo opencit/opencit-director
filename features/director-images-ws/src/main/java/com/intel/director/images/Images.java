@@ -6,6 +6,7 @@
 package com.intel.director.images;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,7 +33,6 @@ import org.apache.commons.lang.StringUtils;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GetImageStoresResponse;
-import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadRequest;
@@ -87,6 +87,7 @@ public class Images {
 	 * metadata along with image id.
 	 * @param TrustDirectorImageUploadRequest object which includes metadata information
 	 * @return TrustDirectorImageUploadResponse object contains newly created image metadata along with image_id
+	 * @throws DirectorException 
 	 * @throws Exception
 	 * @TDMethodType POST
 	 * @TDSampleRestCall
@@ -104,18 +105,25 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustDirectorImageUploadResponse createUploadImageMetadata(
-			TrustDirectorImageUploadRequest uploadRequest)
-			throws Exception {
+			TrustDirectorImageUploadRequest uploadRequest) throws DirectorException
+	{
 
 		imageService = new ImageServiceImpl();
 
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector = imageService
-				.createUploadImageMetadataImpl(uploadRequest.image_deployments,
-						uploadRequest.image_format, uploadRequest.name, uploadRequest.image_size);
-		log.info("Successfully uploaded image to location: "
-				+ uploadImageToTrustDirector.getLocation());
-	
-		return uploadImageToTrustDirector;
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
+		try {
+			uploadImageToTrustDirector = imageService
+					.createUploadImageMetadataImpl(uploadRequest.image_deployments,
+							uploadRequest.image_format, uploadRequest.name, uploadRequest.image_size);
+			log.info("Successfully uploaded image to location: "
+					+ uploadImageToTrustDirector.getLocation());
+		
+			return uploadImageToTrustDirector;
+		} catch (DirectorException e) {
+			log.error("Error in Saving Image metadata",e);
+			throw new DirectorException("Error in Saving Image metadata",e);
+		}
+		
 	}
 	
 	
@@ -149,7 +157,7 @@ public class Images {
 			InputStream filInputStream){
 		log.info("Uploading image to TDaaS");
 		imageService = new ImageServiceImpl();
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector = null;
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
 		try {
 			long lStartTime = new Date().getTime();
 
@@ -161,15 +169,15 @@ public class Images {
 
 			long difference = lEndTime - lStartTime;
 			log.info("Time taken to upload image to TD: " + difference);
+			filInputStream.close();
+			return uploadImageToTrustDirector;
 
-		} catch (DirectorException e) {
+		} catch (DirectorException | IOException e) {
 			log.error("Error while uploading image to Trust Director", e);
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 			uploadImageToTrustDirector.setStatus("Error while uploading image to Trust Director");
-		}
-
-
-		return uploadImageToTrustDirector;
+			return uploadImageToTrustDirector;
+		} 		
 	}
 
 	/**
@@ -278,6 +286,7 @@ public class Images {
 		MountImageResponse mountImageResponse = new MountImageResponse();
 		try {
 			mountImageResponse = imageService.mountImage(imageId, user);
+			deletePasswordForHost(imageId);
 		} catch (DirectorException e) {
 			log.error("Error while Mounting the Image");
 			mountImageResponse.status = Constants.ERROR;
@@ -803,20 +812,22 @@ public class Images {
 	public ImageStoreResponse uploadImageToImageStore(
 			ImageStoreUploadRequest imageStoreUploadRequest)
 			throws DirectorException {
-
-		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
+		ImageStoreResponse imageStoreResponse;
+		try {
+			imageStoreResponse = imageService.uploadImageToImageStore(imageStoreUploadRequest);
+			imageStoreResponse.status = Constants.SUCCESS;
+		} catch (DirectorException e) {
+			imageStoreResponse = new ImageStoreResponse();
+			imageStoreResponse.status = Constants.ERROR;
+			imageStoreResponse.details = e.getMessage();
+			if(e.getMessage().contains("Policy Name Already Exists")){
+				imageStoreResponse.details = "Policy Name Already Exists";	
+			}
+			
+		}
+		return imageStoreResponse;
 	}
 	
-	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
-			throws DirectorException {
-		SshSettingResponse settingResponse = new SshSettingResponse();
-		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
-		return settingResponse;
-	}
 	
 	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -827,6 +838,7 @@ public class Images {
 			MonitorStatus monitor = new MonitorStatus();
 			try {
 				imageService.deletePasswordForHost(image_id);
+				monitor.setStatus(Constants.SUCCESS);
 			} catch (DirectorException e) {
 				log.error("Error in deleting password",e);
 				monitor.status = Constants.ERROR;
@@ -857,6 +869,18 @@ public class Images {
 			ret = Constants.ERROR;
 		}
 		return ret;
+	}
+
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
+			throws DirectorException {
+		SshSettingResponse settingResponse = new SshSettingResponse();
+		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
+		return settingResponse;
 	}
 
 }

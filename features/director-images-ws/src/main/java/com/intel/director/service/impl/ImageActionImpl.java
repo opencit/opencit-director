@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;

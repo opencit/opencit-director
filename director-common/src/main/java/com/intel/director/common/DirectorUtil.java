@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,7 +73,6 @@ public class DirectorUtil {
 
 	}
 
-
 	public static String getMountPath(String imageId) {
 		StringBuilder sb = new StringBuilder(Constants.mountPath);
 		sb.append(imageId);
@@ -104,51 +104,79 @@ public class DirectorUtil {
 	public static String executeShellCommand(String command) {
 		log.debug("Command to execute is:" + command);
 		String[] cmd = { "/bin/sh", "-c", command };
-		Process p;
+		Process p = null;
+		BufferedReader reader = null ;
 		// / int exitCode=1;
 		String excludeList = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			StringBuffer result = new StringBuffer();
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				result.append(line + "\n");
 			}
-			
-			if (!StringUtils.isEmpty(result.toString())) {
+
+			if (StringUtils.isNotEmpty(result.toString())) {
 				excludeList = result.toString();
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
-			reader.close();
-		} catch (InterruptedException ex) {
+
+		} catch (InterruptedException | IOException  ex) {
 			log.error(null, ex);
-		} catch (IOException ex) {
-			log.error(null, ex);
+		} finally{
+			if(reader != null)
+			{
+				try {
+					reader.close();
+				} catch (IOException e) {
+					log.error("error in closing reader in executeShellCommand()",e);
+				}
+			}
+			if(p != null && p.getInputStream() != null)
+			{
+				try {
+					p.getInputStream().close();
+				} catch (IOException e) {
+					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+				}
+			}
 		}
 		return excludeList;
 	}
 
-	public static int callExec(String command) {
+	public static int callExec(String command) throws IOException {
 
 		StringBuilder output = new StringBuilder();
+		BufferedReader reader = null;
 		int exitCode = 12345;
-		Process p;
+		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(command);
 			exitCode = p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
 			}
 			reader.close();
+			p.getInputStream().close();
+
 		} catch (InterruptedException | IOException ex) {
+			if (reader != null) {
+				reader.close();
+			}
+			if (p != null && p.getInputStream() != null) {
+				p.getInputStream().close();
+			}
+
 			log.error(null, ex);
+		} finally {
+
 		}
 		log.debug(output.toString());
 		log.trace("Exec command output : " + output.toString());
@@ -156,22 +184,19 @@ public class DirectorUtil {
 
 	}
 
-
-	public static int executeCommandInExecUtil(String command,
-			String... args) throws IOException {
+	public static int executeCommandInExecUtil(String command, String... args)
+			throws IOException {
 		Result result = ExecUtil.execute(command, args);
 		return result.getExitCode();
 	}
-	
-	
+
 	public static Properties getPropertiesFile(String path) {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
 			input = new FileInputStream(Constants.configurationPath + path);
 			File file = new File(Constants.configurationPath + path);
-			if(!file.exists())
-			{
+			if (!file.exists()) {
 				file.createNewFile();
 			}
 			prop.load(input);
@@ -179,9 +204,17 @@ public class DirectorUtil {
 			// TODO Handle Error
 			log.error("Error while getting the file .....");
 		}
+		try {
+			if (input != null) {
+				input.close();
+			}
+		} catch (IOException e) {
+			// TODO Handle Error
+			log.error("Error while closing the stream at getPropertiesFile() .....");
+		}
 		return prop;
 	}
-	
+
 	public static String getProperties(String path) {
 		Properties prop = getPropertiesFile(path);
 		Map<String, String> map = new HashMap<String, String>();
@@ -195,34 +228,50 @@ public class DirectorUtil {
 
 	public static String editProperties(String path, String data)
 			throws JsonMappingException, JsonParseException {
-		Map<String, Object> map = new Gson().fromJson(data, new TypeToken<HashMap<String, Object>>() {}.getType());
+		Map<String, Object> map = new Gson().fromJson(data,
+				new TypeToken<HashMap<String, Object>>() {
+				}.getType());
 		try {
 			File file = new File(Constants.configurationPath + path);
-			if(!file.exists())
-			{
+			if (!file.exists()) {
 				file.createNewFile();
 			}
-			writeToFile(map,Constants.configurationPath + path);
+			writeToFile(map, Constants.configurationPath + path);
 		} catch (Exception e) {
 			// TODO Handle Error
 			log.error("Error while editing the file .....");
 		}
 		return data;
 	}
-	
-	  public static  void writeToFile(Map<String, Object> map,String fileName) throws Exception{  
-	        Properties properties = new Properties();  
-	        Set<String> set = map.keySet();  
-	        Iterator<String> itr = set.iterator();  
-	        while(itr.hasNext()){  
-	            String key = (String)itr.next();  
-	            String value = (String) map.get(key);  
-	            properties.setProperty(key.replace('_', '.'), value);  
-	        }  
-	        properties.store(new FileOutputStream(fileName),fileName);  
-	  
-	  
-	    } 
-	  
-	  
+
+	public static void writeToFile(Map<String, Object> map, String fileName) {
+		Properties properties = new Properties();
+		Set<String> set = map.keySet();
+		Iterator<String> itr = set.iterator();
+		OutputStream output = null;
+		while (itr.hasNext()) {
+			String key = (String) itr.next();
+			String value = (String) map.get(key);
+			properties.setProperty(key.replace('_', '.'), value);
+		}
+		try {
+			output = new FileOutputStream(fileName);
+			properties.store(output, fileName);
+			
+		} catch (IOException e) {
+			// TODO Handle Error
+			log.error("Error while writing into the file in writeToFile().....");
+		}finally{
+			if(output != null){
+				try {
+					output.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error("Error closing stream", e);
+				}
+			}
+		}
+		
+	}
+
 }

@@ -10,7 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -321,12 +321,13 @@ public class TdaasUtil {
 	public static String executeShellCommand(String command) {
 		// log.debug("Command to execute is:"+command);
 		String[] cmd = { "/bin/sh", "-c", command };
-		Process p;
+		Process p = null;
+		BufferedReader reader = null;
 		String excludeList = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			StringBuffer result = new StringBuffer();
 			String line = "";
@@ -338,13 +339,29 @@ public class TdaasUtil {
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
-			reader.close();
 		} catch (InterruptedException ex) {
 			// log.error(null, ex);
-			ex.printStackTrace();
+			log.error("error in executeShellCommand()",ex);
 		} catch (IOException ex) {
 			// log.error(null, ex);
-			ex.printStackTrace();
+			log.error("error in executeShellCommand()",ex);
+		}finally{
+			if(reader != null)
+			{
+				try {
+					reader.close();
+				} catch (IOException e) {
+					log.error("error in closing reader in executeShellCommand()",e);
+				}
+			}
+			if(p != null && p.getInputStream() != null)
+			{
+				try {
+					p.getInputStream().close();
+				} catch (IOException e) {
+					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+				}
+			}
 		}
 		return excludeList;
 	}
@@ -593,6 +610,7 @@ public class TdaasUtil {
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
+		//TODO Unused after assignment
 		boolean flag = false;
 		try {
 
@@ -645,7 +663,7 @@ public class TdaasUtil {
 
 	}
 
-	private static boolean checkSshConnection(String ipaddress,
+	public static boolean checkSshConnection(String ipaddress,
 			String username, String password) throws IOException {
 		SSHClient ssh = new SSHClient();
 		log.debug("Trying to connect IP :: " + ipaddress);
@@ -687,8 +705,8 @@ public class TdaasUtil {
 		return result;
 	}
 
-	public static String computeHash(MessageDigest md, File file)
-			throws IOException {
+	public static String computeHash(MessageDigest md, File file) throws IOException
+			  {
 		if (!file.exists()) {
 			return null;
 		}
@@ -696,14 +714,36 @@ public class TdaasUtil {
 		md.reset();
 		byte[] bytes = new byte[2048];
 		int numBytes;
-		FileInputStream is = new FileInputStream(file);
+		FileInputStream is;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			log.error("error :: input file doesn't exists",e);
+			throw new IOException("input file doesn't exists",e);
+		}
 
-		while ((numBytes = is.read(bytes)) != -1) {
-			md.update(bytes, 0, numBytes);
+		try {
+			while ((numBytes = is.read(bytes)) != -1) {
+				md.update(bytes, 0, numBytes);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error("error in reading from file",e);
+			
+			throw new IOException("error in reading from file",e);
+		}finally{
+			try {
+				is.close();
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				log.error("error in closing stream",ioe);
+				throw new IOException("error in closing stream",ioe);
+			}
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
-		is.close();
+	
 		return result;
 
 	}

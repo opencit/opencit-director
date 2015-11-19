@@ -20,8 +20,17 @@ public class ImageStoreResponse {
     public String id;
     public String checksum;
     public int size;
+    public String details;
 
-    public String getStatus() {
+    public String getDetails() {
+		return details;
+	}
+
+	public void setDetails(String details) {
+		this.details = details;
+	}
+
+	public String getStatus() {
         return status;
     }
 

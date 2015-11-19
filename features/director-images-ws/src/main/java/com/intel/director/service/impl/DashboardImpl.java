@@ -173,7 +173,6 @@ public class DashboardImpl implements DashboardService {
 		List<ImageActionObject> imageactions = imgAction.getdata();
 		List<ImageStoreUploadTransferObject> images_upload = dashboardImplPersistenceManager
 				.fetchImageUploads(null);
-		ImagesReadyToDeployResponse result = null;
 
 		for (ImageInfo image : images) {
 			if(image.getTrust_policy_id()==null || image.getImage_format()==null){
@@ -197,7 +196,7 @@ public class DashboardImpl implements DashboardService {
 					}
 				}
 
-				result = tdaasUtil.toImageReadyToDeploy(image);
+				ImagesReadyToDeployResponse result = tdaasUtil.toImageReadyToDeploy(image);
 				resultList.add(result);
 
 			}

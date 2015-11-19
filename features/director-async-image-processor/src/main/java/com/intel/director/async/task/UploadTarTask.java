@@ -69,6 +69,7 @@ public class UploadTarTask extends UploadTask {
 			content = new File(tarLocation + tarName);
 			super.run();
 			runFlag = true;
+			return runFlag;
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.debug(

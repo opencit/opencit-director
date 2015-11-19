@@ -20,7 +20,6 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
 
-
 public class FileUtilityOperation {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -48,29 +47,30 @@ public class FileUtilityOperation {
 
 	// Delete the directory with its contents
 	public void deleteDir(File file) {
-		if (file != null) {
-			if (file.isDirectory()) {
-				// directory is empty, then delete it
-				if (file.list().length == 0) {
-					file.delete();
-				} else {
-					// list all the directory contents
-					String files[] = file.list();
-					for (String temp : files) {
-						File fileDelete = new File(file, temp);
-						deleteDir(fileDelete);
-					}
-					// check the directory again, if empty then delete it
-					if (file.list().length == 0) {
-						file.delete();
-						log.info("Directory is deleted : "
-								+ file.getAbsolutePath());
-					}
-				}
-			} else {
-				file.delete();
-			}
+		if (file == null) {
+			return;
 		}
+		if (file.isDirectory()) {
+			// directory is empty, then delete it
+			if (file.list() == null || file.list().length == 0) {
+				file.delete();
+			} else {
+				// list all the directory contents
+				String files[] = file.list();
+				for (String temp : files) {
+					File fileDelete = new File(file, temp);
+					deleteDir(fileDelete);
+				}
+				// check the directory again, if empty then delete it
+				if (file.list() == null || file.list().length == 0) {
+					file.delete();
+					log.info("Directory is deleted : " + file.getAbsolutePath());
+				}
+			}
+		} else {
+			file.delete();
+		}
+
 	}
 
 	public boolean writeToFile(String path, String value) {
@@ -85,7 +85,7 @@ public class FileUtilityOperation {
 			bw = new BufferedWriter(fw);
 			bw.write(value);
 		} catch (IOException e) {
-			log.error("Error writing to file "+path, e);
+			log.error("Error writing to file " + path, e);
 			status = false;
 		} finally {
 			try {
@@ -106,20 +106,30 @@ public class FileUtilityOperation {
 
 	}
 
-
 	public void writeToFile(File file, String value, boolean append) {
 		// File passFile = new File("/tmp/vmpass.txt");
+		FileWriter writer = null;
 		try {
-			FileWriter writer = new FileWriter(file, append);
+			writer = new FileWriter(file, append);
 
 			BufferedWriter bufferWriter = new BufferedWriter(writer);
 			bufferWriter.write(value);
 			bufferWriter.newLine();
 			bufferWriter.close();
+			writer.close();
 			file.setExecutable(true);
 		} catch (IOException e) {
 			// TODO Handle Error
-			log.error("Error in writing to files");
+			try {
+				if(writer != null)
+				{
+					writer.close();
+				}	
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				log.error("Error in closing writer in writeToFile()",e1);
+			}
+			log.error("Error in writing propeties to files");
 		}
 	}
 
@@ -176,7 +186,7 @@ public class FileUtilityOperation {
 			try {
 				ret = f.createNewFile();
 			} catch (IOException e) {
-				log.error("Error creating new file at path "+path, e);
+				log.error("Error creating new file at path " + path, e);
 				ret = false;
 			}
 		}

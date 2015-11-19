@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Settings</title>
+        <meta name="author" content="jbuhacoff">
+        
+        <script>
+     
+        $(document).ready(function () {
+        	$("#gotoUploadWindow").click(function () {
+        		var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
+        		OpenWindow.image_deployments_parent = $("#image_type").val();
+        		OpenWindow.image_format_parent = $("#image_format").val();
+                OpenWindow.auth_token_parent=mainViewModel.loginViewModel.userProfile.authorizationToken();
+
+
+        	});
+        });
+
+alert("mainViewModel.loginViewModel.UserProfile.authorizationToken::"+mainViewModel.loginViewModel.UserProfile.authorizationToken);
+        </script>
+
+	</head>
+    <body>
+		
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8" style="margin-top: 10px;">        
+                <div class="panel panel-default" data-bind="with: settingsViewModel">
+                    <div class="panel-heading">
+                        <h1>Upload To Trust Director</h1>
+					</div>
+                    <div class="panel-body">
+						<div class="row">
+							<div class="form-group">
+								<label class="control-label col-md-4" for="image_type"><span class="pull-right">Image Type:</span></label>
+								<div class="col-md-4">
+									<select class="form-control" id="image_type">
+										<option value="VM">Virtualized Server</option>
+
+									</select>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">
+								<label class="control-label col-md-4" for="image_format"><span class="pull-right">Image Formats:</span></label>
+								<div class="col-md-4">
+									<select class="form-control" id="image_format">
+										<option value="qcow2">qcow2</option>
+									</select>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">
+								<div class="col-md-4"></div>
+								<div class="col-md-4">
+									<button id="gotoUploadWindow" class="btn btn-primary">Next</button>
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>      
+					</div>
+				</div>
+			</div>
+			
+            <div class="col-md-2"></div>
+			
+		</div>
+		
+	</body>
+</html>

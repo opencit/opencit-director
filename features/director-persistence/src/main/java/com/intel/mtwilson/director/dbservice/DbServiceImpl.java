@@ -12,10 +12,8 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.lang.StringUtils;
 
-import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
@@ -80,8 +78,7 @@ public class DbServiceImpl implements IPersistService {
 		String filePath=Folders.configuration() + File.separator + "director.properties";
 		log.info("Inside DbServiceImpl filePath::"+filePath);
 		File configfile = new File(filePath);
-		org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
-		Configuration configuration = new CommonsConfiguration(apacheConfig);
+
 		FileReader reader=null;
 		try {
 			reader = new FileReader(configfile);
@@ -119,6 +116,16 @@ public class DbServiceImpl implements IPersistService {
 		sshDao = new SshSettingDao(emf);
 		settingFileProperties = new SettingFileProperties();
 		policyTemplateDao = new PolicyTemplateDao(emf);
+		try {
+			if(reader != null)
+			{
+				reader.close();
+			}			
+		} catch (IOException e) {
+			// TODO Handle Error
+			log.error("Unable to close reader",e);
+		}
+
 	}
 
 	/*
@@ -1613,11 +1620,15 @@ public class DbServiceImpl implements IPersistService {
 	}
 
 	public SshSettingInfo fetchSshByImageId(String image_id) throws DbException {
+		if(image_id == null){
+			throw new DbException("No image id provided");
+		}
 		MwHost mwHost = sshDao.getMwHostByImageId(image_id);
-		if( mwHost.getId()!=null &&! "".equals(mwHost.getId())){
-		return mapper.toTransferObject(mwHost);
-		}else{
-		return new 	SshSettingInfo();
+		if (mwHost != null && mwHost.getId() != null
+				&& StringUtils.isNotBlank(mwHost.getId())) {
+			return mapper.toTransferObject(mwHost);
+		} else {
+			return new SshSettingInfo();
 		}
 	}
 
@@ -1674,8 +1685,7 @@ public class DbServiceImpl implements IPersistService {
 		List<PolicyTemplateInfo> policyTemplateList = new ArrayList<PolicyTemplateInfo>();
 		if (mwPolicyTemplateList != null) {
 			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
-				PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
-				policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
+				PolicyTemplateInfo policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
 				policyTemplateList.add(policyTemplateInfo);
 			}
 		}
@@ -1693,8 +1703,7 @@ public class DbServiceImpl implements IPersistService {
 			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
 				if (deployment_type_identifier.equals(mwPolicyTemplate
 						.getDeployment_type_identifier())) {
-					PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
-					policyTemplateInfo = mapper
+					PolicyTemplateInfo policyTemplateInfo = mapper
 							.toTransferObject(mwPolicyTemplate);
 					policyTemplateList.add(policyTemplateInfo);
 				}
@@ -1718,8 +1727,7 @@ public class DbServiceImpl implements IPersistService {
 		List<PolicyTemplateInfo> policyTemplateList = new ArrayList<PolicyTemplateInfo>();
 		if (mwPolicyTemplateList != null) {
 			for (MwPolicyTemplate mwPolicyTemplate : mwPolicyTemplateList) {
-				PolicyTemplateInfo policyTemplateInfo = new PolicyTemplateInfo();
-				policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
+				PolicyTemplateInfo policyTemplateInfo = mapper.toTransferObject(mwPolicyTemplate);
 				policyTemplateList.add(policyTemplateInfo);
 
 			}

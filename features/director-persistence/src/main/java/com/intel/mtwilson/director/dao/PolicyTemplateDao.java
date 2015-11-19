@@ -35,7 +35,7 @@ public class PolicyTemplateDao {
 			em.persist(policytemplate);
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			throw new DbException("PolicyTemplateDao,createImage method", e);
+			throw new DbException("PolicyTemplateDao,createPolicyTemplate method", e);
 		}
 
 		finally {
@@ -52,7 +52,7 @@ public class PolicyTemplateDao {
 			em.merge(policytemplate);
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			throw new DbException("PolicyTemplateDao,updateImage failed", e);
+			throw new DbException("PolicyTemplateDao,updatePolicyTemplate failed", e);
 		} finally {
 			em.close();
 		}
@@ -70,7 +70,7 @@ public class PolicyTemplateDao {
 
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			throw new DbException("PolicyTemplateDao,destroyImage failed", e);
+			throw new DbException("PolicyTemplateDao,destroyPolicyTemplate failed", e);
 		} finally {
 			em.close();
 		}
@@ -88,7 +88,7 @@ public class PolicyTemplateDao {
 						+ deployment_type + "'";
 			}
 			Query query = emf.createEntityManager().createNativeQuery(
-					queryString.toString());
+					queryString);
 			List<MwPolicyTemplate> mwPolicyTemplate = new ArrayList<MwPolicyTemplate>();
 			if (query.getResultList() != null) {
 				List<Object[]> policyTemplateObjList = query.getResultList();
@@ -143,7 +143,7 @@ public class PolicyTemplateDao {
 			}
 			
 			Query query = emf.createEntityManager().createNativeQuery(
-					queryString.toString());
+					queryString);
 
 			if (query.getResultList() != null) {
 				List<Object[]> policyTemplateObjList = query.getResultList();
