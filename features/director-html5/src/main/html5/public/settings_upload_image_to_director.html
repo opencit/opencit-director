@@ -5,14 +5,19 @@
         <meta name="author" content="jbuhacoff">
         
         <script>
-        
+     
         $(document).ready(function () {
         	$("#gotoUploadWindow").click(function () {
         		var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
         		OpenWindow.image_deployments_parent = $("#image_type").val();
         		OpenWindow.image_format_parent = $("#image_format").val();
+                OpenWindow.auth_token_parent=mainViewModel.loginViewModel.userProfile.authorizationToken();
+
+
         	});
         });
+
+alert("mainViewModel.loginViewModel.UserProfile.authorizationToken::"+mainViewModel.loginViewModel.UserProfile.authorizationToken);
         </script>
 
 	</head>

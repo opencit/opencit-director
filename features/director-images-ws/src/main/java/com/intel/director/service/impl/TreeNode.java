@@ -170,11 +170,11 @@ public class TreeNode implements Comparable{
 			checkbox = "<input type=\"checkbox\" name=\"directory_"
 					+ incrementalPath + "\" id=\"" + incrementalPath + "\""
 					+ checked + regexIdentifier + " style=\"float:left;\"/>";
-
+			
 			liClass = "directory "
 					+ ((!checked.isEmpty() ? "expanded"
 							: parent.directoryCollapsed));
-			toggleIcon = "<img src=\"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/"+iconName+"\" title=\""
+			toggleIcon = "<img src=\"/v1/html5/public/director-html5/images/"+iconName+"\" title=\""
 					+ incrementalPath
 					+ "\"  id=\"toggle_"
 					+ incrementalPath

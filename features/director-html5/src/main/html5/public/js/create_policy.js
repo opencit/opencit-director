@@ -62,11 +62,13 @@ function CreateImageViewModel() {
 			data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 			success : function(data, status, xhr) {
 				if (data.status == "Error") {
+					$('#for_mount').hide();
+					$('#default').show();
 					$('#error_modal_body_vm_1').text(data.details);
 					$("#error_modal_vm_1").modal({
 						backdrop : "static"
 					});
-						$('body').removeClass("modal-open");
+					$('body').removeClass("modal-open");
 					return;
 				}
 				$.ajax({
@@ -80,6 +82,8 @@ function CreateImageViewModel() {
 					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
+							$('#default').hide();
+							$('#for_mount').show();
 							$('#error_modal_body_vm_1').text(data.details);
 							$("#error_modal_vm_1").modal({
 								backdrop : "static"

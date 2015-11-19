@@ -104,13 +104,14 @@ public class DirectorUtil {
 	public static String executeShellCommand(String command) {
 		log.debug("Command to execute is:" + command);
 		String[] cmd = { "/bin/sh", "-c", command };
-		Process p;
+		Process p = null;
+		BufferedReader reader = null ;
 		// / int exitCode=1;
 		String excludeList = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 			p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			StringBuffer result = new StringBuffer();
 			String line = "";
@@ -123,25 +124,40 @@ public class DirectorUtil {
 				excludeList = excludeList.replaceAll("\\n$", "");
 			}
 			// log.debug("Result of execute command: "+result);
-			reader.close();
-			p.getInputStream().close();
-		} catch (InterruptedException ex) {
+
+		} catch (InterruptedException | IOException  ex) {
 			log.error(null, ex);
-		} catch (IOException ex) {
-			log.error(null, ex);
+		} finally{
+			if(reader != null)
+			{
+				try {
+					reader.close();
+				} catch (IOException e) {
+					log.error("error in closing reader in executeShellCommand()",e);
+				}
+			}
+			if(p != null && p.getInputStream() != null)
+			{
+				try {
+					p.getInputStream().close();
+				} catch (IOException e) {
+					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+				}
+			}
 		}
 		return excludeList;
 	}
 
-	public static int callExec(String command) {
+	public static int callExec(String command) throws IOException {
 
 		StringBuilder output = new StringBuilder();
+		BufferedReader reader = null;
 		int exitCode = 12345;
-		Process p;
+		Process p = null;
 		try {
 			p = Runtime.getRuntime().exec(command);
 			exitCode = p.waitFor();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
@@ -149,8 +165,18 @@ public class DirectorUtil {
 			}
 			reader.close();
 			p.getInputStream().close();
+
 		} catch (InterruptedException | IOException ex) {
+			if (reader != null) {
+				reader.close();
+			}
+			if (p != null && p.getInputStream() != null) {
+				p.getInputStream().close();
+			}
+
 			log.error(null, ex);
+		} finally {
+
 		}
 		log.debug(output.toString());
 		log.trace("Exec command output : " + output.toString());
@@ -218,24 +244,34 @@ public class DirectorUtil {
 		return data;
 	}
 
-	public static void writeToFile(Map<String, Object> map, String fileName)
-			 {
+	public static void writeToFile(Map<String, Object> map, String fileName) {
 		Properties properties = new Properties();
 		Set<String> set = map.keySet();
 		Iterator<String> itr = set.iterator();
+		OutputStream output = null;
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
 			String value = (String) map.get(key);
 			properties.setProperty(key.replace('_', '.'), value);
 		}
 		try {
-			OutputStream output = new FileOutputStream(fileName);
+			output = new FileOutputStream(fileName);
 			properties.store(output, fileName);
-			output.close();
+			
 		} catch (IOException e) {
 			// TODO Handle Error
 			log.error("Error while writing into the file in writeToFile().....");
+		}finally{
+			if(output != null){
+				try {
+					output.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					log.error("Error closing stream", e);
+				}
+			}
 		}
+		
 	}
 
 }

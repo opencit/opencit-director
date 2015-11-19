@@ -67,6 +67,8 @@
 		<script type="text/javascript">
 			var image_deployments = window.image_deployments_parent;
 			var image_format = window.image_format_parent;
+			var authorizationToken=window.auth_token_parent;
+
 			var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata";
 			var   blob ,BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
 			/*
@@ -92,7 +94,7 @@
 			xhrmdt.open('POST', urlToUploadMetadata, true); 
 			//xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			xhrmdt.setRequestHeader("Content-Type", "application/json");
-			xhrmdt.setRequestHeader("Accept", "application/json");
+			xhrmdt.setRequestHeader("Authorization", "Token "+authorizationToken);			
 			//xhrmdt.send();
 			upload_data = {
 							'image_deployments': image_deployments,
@@ -137,6 +139,7 @@
 		var urlToUpload = "/v1/images/uploads/content/upload/" + image_id ;
 		xhr.open('POST', urlToUpload, true); 
 		xhr.setRequestHeader("Content-type", "application/octet-stream");
+		xhr.setRequestHeader("Authorization", "Token "+authorizationToken);		
 		xhr.send(blobslice);
 		
 		xhr.onreadystatechange  = function (e) {

@@ -47,29 +47,30 @@ public class FileUtilityOperation {
 
 	// Delete the directory with its contents
 	public void deleteDir(File file) {
-		if (file != null) {
-			if (file.isDirectory()) {
-				// directory is empty, then delete it
+		if (file == null) {
+			return;
+		}
+		if (file.isDirectory()) {
+			// directory is empty, then delete it
+			if (file.list() == null || file.list().length == 0) {
+				file.delete();
+			} else {
+				// list all the directory contents
+				String files[] = file.list();
+				for (String temp : files) {
+					File fileDelete = new File(file, temp);
+					deleteDir(fileDelete);
+				}
+				// check the directory again, if empty then delete it
 				if (file.list() == null || file.list().length == 0) {
 					file.delete();
-				} else {
-					// list all the directory contents
-					String files[] = file.list();
-					for (String temp : files) {
-						File fileDelete = new File(file, temp);
-						deleteDir(fileDelete);
-					}
-					// check the directory again, if empty then delete it
-					if (file.list().length == 0) {
-						file.delete();
-						log.info("Directory is deleted : "
-								+ file.getAbsolutePath());
-					}
+					log.info("Directory is deleted : " + file.getAbsolutePath());
 				}
-			} else {
-				file.delete();
 			}
+		} else {
+			file.delete();
 		}
+
 	}
 
 	public boolean writeToFile(String path, String value) {
@@ -107,8 +108,9 @@ public class FileUtilityOperation {
 
 	public void writeToFile(File file, String value, boolean append) {
 		// File passFile = new File("/tmp/vmpass.txt");
+		FileWriter writer = null;
 		try {
-			FileWriter writer = new FileWriter(file, append);
+			writer = new FileWriter(file, append);
 
 			BufferedWriter bufferWriter = new BufferedWriter(writer);
 			bufferWriter.write(value);
@@ -118,6 +120,15 @@ public class FileUtilityOperation {
 			file.setExecutable(true);
 		} catch (IOException e) {
 			// TODO Handle Error
+			try {
+				if(writer != null)
+				{
+					writer.close();
+				}	
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				log.error("Error in closing writer in writeToFile()",e1);
+			}
 			log.error("Error in writing propeties to files");
 		}
 	}

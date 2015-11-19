@@ -812,20 +812,22 @@ public class Images {
 	public ImageStoreResponse uploadImageToImageStore(
 			ImageStoreUploadRequest imageStoreUploadRequest)
 			throws DirectorException {
-
-		return imageService.uploadImageToImageStore(imageStoreUploadRequest);
+		ImageStoreResponse imageStoreResponse;
+		try {
+			imageStoreResponse = imageService.uploadImageToImageStore(imageStoreUploadRequest);
+			imageStoreResponse.status = Constants.SUCCESS;
+		} catch (DirectorException e) {
+			imageStoreResponse = new ImageStoreResponse();
+			imageStoreResponse.status = Constants.ERROR;
+			imageStoreResponse.details = e.getMessage();
+			if(e.getMessage().contains("Policy Name Already Exists")){
+				imageStoreResponse.details = "Policy Name Already Exists";	
+			}
+			
+		}
+		return imageStoreResponse;
 	}
 	
-	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
-			throws DirectorException {
-		SshSettingResponse settingResponse = new SshSettingResponse();
-		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
-		return settingResponse;
-	}
 	
 	@Path("/{imageId: [0-9a-zA-Z_-]+}/delete")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -836,6 +838,7 @@ public class Images {
 			MonitorStatus monitor = new MonitorStatus();
 			try {
 				imageService.deletePasswordForHost(image_id);
+				monitor.setStatus(Constants.SUCCESS);
 			} catch (DirectorException e) {
 				log.error("Error in deleting password",e);
 				monitor.status = Constants.ERROR;
@@ -866,6 +869,18 @@ public class Images {
 			ret = Constants.ERROR;
 		}
 		return ret;
+	}
+
+	
+	@Path("/{imageId: [0-9a-zA-Z_-]+}/getbmlivemetadata")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public SshSettingResponse getBareMetalLiveMetalData(@PathParam("imageId") String image_id)
+			throws DirectorException {
+		SshSettingResponse settingResponse = new SshSettingResponse();
+		settingResponse.setSshSettingRequest(imageService.getBareMetalMetaData(image_id));
+		return settingResponse;
 	}
 
 }

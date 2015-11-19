@@ -272,6 +272,9 @@ public class Mapper {
 	}
 
 	public ImageInfo toTransferObject(MwImage mwImage) {
+		if(mwImage == null){
+			return null;
+		}
 		ImageInfo imgInfo = new ImageInfo();
 		imgInfo.setId(mwImage.getId());
 		imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
@@ -637,6 +640,9 @@ public class Mapper {
 	}
 
 	public SshPassword toTransferObject(MwSshPassword mwSshPassword) {
+		if(mwSshPassword == null){
+			return null;
+		}
 		SshPassword sshPassword = new SshPassword();
 		sshPassword.setId(mwSshPassword.getId());
 		if (mwSshPassword.getSshKey() != null) {
@@ -681,6 +687,9 @@ public class Mapper {
 	}
 
 	public SshKey toTransferObject(MwSshKey mwSshKey) {
+		if(mwSshKey == null){
+			return null;
+		}
 		SshKey sshKey = new SshKey();
 		sshKey.setId(mwSshKey.getId());
 		if (mwSshKey.getSshKey() != null) {

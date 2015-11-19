@@ -160,10 +160,10 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             if (directorEnvelopePublicKey == null || directorEnvelopePublicKey.getEncoded() == null) {
                 log.error("New envelope public key is null");
                 validation("New envelope public key is null");
-            } else if (user !=null && (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null)) {
+            } else if (user != null && (user.getTransferKey() == null || user.getTransferKey().getEncoded() == null)) {
                 //log.warn("Existing envelope public key is null");
                 validation("Existing envelope public key is null");
-            } else if (! Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded())) {
+            } else if (user != null && !Arrays.equals(user.getTransferKey().getEncoded(), directorEnvelopePublicKey.getEncoded())) {
                 log.warn("New director envelope public key does not match the existing KMS user public key");
                 validation("New director envelope public key does not match the existing KMS user public key");
             }   

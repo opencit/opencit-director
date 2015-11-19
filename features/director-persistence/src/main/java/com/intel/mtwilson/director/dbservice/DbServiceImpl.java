@@ -12,6 +12,8 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
@@ -1618,11 +1620,15 @@ public class DbServiceImpl implements IPersistService {
 	}
 
 	public SshSettingInfo fetchSshByImageId(String image_id) throws DbException {
+		if(image_id == null){
+			throw new DbException("No image id provided");
+		}
 		MwHost mwHost = sshDao.getMwHostByImageId(image_id);
-		if(mwHost!=null && mwHost.getId()!=null &&! "".equals(mwHost.getId())){
-		return mapper.toTransferObject(mwHost);
-		}else{
-		return new 	SshSettingInfo();
+		if (mwHost != null && mwHost.getId() != null
+				&& StringUtils.isNotBlank(mwHost.getId())) {
+			return mapper.toTransferObject(mwHost);
+		} else {
+			return new SshSettingInfo();
 		}
 	}
 

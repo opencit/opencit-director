@@ -24,7 +24,7 @@ public class ExecuteActionsTask implements Runnable {
 				+ imageActionObj.getId() + "): "
 				+ imageActionObj.getAction().size());
 		// iterate over tasks from each image action object
-		for (ImageActionActions imageActionsActions : imageActions) {
+		for (int i = 0; i < imageActions.size(); i++) {
 			ImageActionActions taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
 				return;
@@ -35,6 +35,9 @@ public class ExecuteActionsTask implements Runnable {
 
 			ImageActionTask task = ImageActionTaskFactory.getImageActionTask(
 					task_name, imageStore);
+			if(task == null){
+				return;
+			}
 			log.info("Task instance from factory : " + task.getTaskName());
 			task.setImageActionObject(imageActionObj);
 			task.setTaskAction(taskToBeExecuted);

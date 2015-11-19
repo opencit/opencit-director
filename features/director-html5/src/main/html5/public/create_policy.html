@@ -23,22 +23,7 @@
 									<h1>Create Trust Policy Page</h1>
 								</div>
 								<div class="panel-body">
-									
-									
-									<!-- 	
-										<div class="form-group">
-										<label class="control-label col-md-4" for="image_format">Image Format:</label>
-										<div class="col-md-4">
-										<select class="form-control" id="image_format" data-bind="value: selected_image_format,
-										optionsCaption: 'Choose...'" required >
-										
-										</select>
-										</div>
-									</div> -->
-									
-									
-									
-									
+	
 									<div class="form-group">
 										<label class="control-label col-md-4" for="display_name">Policy Name:</label>
 										<div class="col-md-4">          
@@ -61,29 +46,7 @@
 										<div id="launch_control_policy" class="col-md-8">          
 										</div>
 									</div>
-									
-									
-									
-									
-									
-									<!-- 
-										
-										<div class="form-group">
-										<label class="control-label col-md-4" for="asset_tag_policy">Trust
-										Policy:</label>
-										<div id="asset_tag_policy" class="col-md-8">
-										<label class="radio-inline"> <input type="radio"
-										value="Trust Only" name="asset_tag_policy" />Trust Only
-										</label> <label class="radio-inline"> <input type="radio" na
-										value="Trust and Location" name="asset_tag_policy" />Trust
-										and Location
-										</label>
-										</div>
-									</div> -->
-									
-									
-									
-									
+				
 									
 									
 									<div class="form-group" id="encryptRow">        
@@ -119,10 +82,16 @@
 												</div>
 												
 												<div class="modal-footer">
-													<button type="button" class="btn btn-default"
-													data-dismiss="modal" onclick="backToVmImagesPageWithountUnmount()">Okay</button>
-													<button type="button" class="btn btn-default"
-													data-dismiss="modal" onclick="backToVmImagesPage()">Force Unmount</button>
+													<div id="for_mount">
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal" onclick="backToVmImagesPageWithountUnmount()">Okay</button>
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal" onclick="backToVmImagesPage()">Force Unmount</button>
+													</div>
+													<div id="default">
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal">Okay</button>
+													</div>
 												</div>
 											</div>
 											
