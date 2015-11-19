@@ -22,7 +22,7 @@
 		var checkImageActionId = false;
 	</script>
 	<script
-		src="/v1/html5/features/director-html5/mtwilson-core-html5/content/js/upload_to_image_store.js"></script>
+		src="/v1/html5/public/director-html5/js/upload_to_image_store.js"></script>
 
 
 
@@ -46,7 +46,7 @@
 
 								<div class="form-group">
 									<label class="control-label col-md-4"
-										for="display_name_last_direct">Image Name:</label>
+										for="display_name_last_direct">'Policy Name:</label>
 									<div class="col-md-4">
 										<input type="text" class="form-control"
 											id="display_name_last_direct" placeholder="Enter Image Name"
@@ -118,11 +118,10 @@
 
 
 								<div class="col-md-offset-6 col-md-1">
-									<button type="button" class="btn btn-primary" data-toggle="modal" onclick="uploadToStore()"
-										data-target="#redirect">Upload</button>
+									<button type="button" class="btn btn-primary" onclick="uploadToStore()">Upload</button>
 								</div>
 								<!-- Modal -->
-								<div class="modal fade" id="redirect" role="dialog">
+								<div class="modal fade" id="redirect_direct" role="dialog">
 									<div class="modal-dialog">
 
 										<!-- Modal content-->
@@ -132,11 +131,32 @@
 												<h4 class="modal-title">Task successfully Queued</h4>
 											</div>
 											<div class="modal-body">
-												<p>Task has been queued for asynchronus execution</p>
+												<p>Task has been queued for asynchronous execution</p>
 											</div>
 											<div class="modal-footer">
 												<button type="button" class="btn btn-default"
 													data-dismiss="modal" onclick="backToVmImagesPage()">Close</button>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="error_vm_3_direct" role="dialog">
+									<div class="modal-dialog">
+
+										<!-- Modal content-->
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">
+													<div id="error_vm_body_3_direct"></div>
+												</h4>
+											</div>
+
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default"
+													data-dismiss="modal">Okay</button>
 											</div>
 										</div>
 

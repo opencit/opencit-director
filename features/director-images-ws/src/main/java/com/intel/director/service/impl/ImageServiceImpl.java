@@ -376,14 +376,14 @@ public class ImageServiceImpl implements ImageService {
 			int fileSize) throws DirectorException {
 
 		String loggedinUser = ShiroUtil.subjectUsername();
-
+		
 		ImageAttributes imageAttributes = new ImageAttributes();
 		imageAttributes.name = fileName;
 		imageAttributes.image_deployments = image_deployments;
 		imageAttributes.setCreated_by_user_id(loggedinUser);
 		imageAttributes.setEdited_by_user_id(loggedinUser);
 		imageAttributes.setStatus(Constants.INCOMPLETE);
-		imageAttributes.setDeleted(false);
+		imageAttributes.setDeleted(true);
 		int sizen_kb = fileSize;
 		imageAttributes.setSent(0);
 		imageAttributes.setImage_size(sizen_kb);
@@ -400,6 +400,7 @@ public class ImageServiceImpl implements ImageService {
 			log.debug("Saving metadata of uploaded file");
 			createdImageMetadata = imagePersistenceManager
 					.saveImageMetadata(imageAttributes);
+			log.info("Image is hidden :: " + createdImageMetadata.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while saving metadata for uploaded file : "
 					+ e.getMessage());
@@ -469,16 +470,19 @@ public class ImageServiceImpl implements ImageService {
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
+			imageInfo.setDeleted(false);
+			
 			log.info("Image upload COMPLETE..");
 		}
 		try {
 			imagePersistenceManager.updateImage(imageInfo);
+			log.info("Image is hidden :: " +  imageInfo.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while updating metadata for uploaded image : "
 					+ e.getMessage());
 			throw new DirectorException("Cannot update image meta data", e);
 		}
-		try {
+		try {	
 			fileInputStream.close();
 		} catch (IOException e) {
 			log.error("Error in closing stream: ", e);
@@ -1042,6 +1046,10 @@ public class ImageServiceImpl implements ImageService {
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageid);
 
+			if (doesPolicyNameExist(createTrustPolicyMetaDataRequest
+					.getDisplay_name(),imageid)) {
+				throw new DirectorException("Policy Name Already Exists");
+			}
 			if (existingDraft == null) {
 				TrustPolicy existingPolicy = imagePersistenceManager
 						.fetchPolicyForImage(imageid);
@@ -1398,6 +1406,10 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		try {
 
+			if (doesPolicyNameExist(imageStoreUploadRequest
+					.getDisplay_name(),imageStoreUploadRequest.image_id)) {
+				throw new DirectorException("Policy Name Already Exists");
+			}
 			log.debug("Inside  imageStoreUploadRequest::"
 					+ imageStoreUploadRequest);
 			// Updating Or Creating ImageAction
@@ -1644,6 +1656,9 @@ public class ImageServiceImpl implements ImageService {
 
 		imageListresponse.images = new ArrayList<ImageListResponseInfo>();
 		for (ImageInfo imageInfo : imageList) {
+			if(imageInfo.deleted){
+				continue;
+			}
 			ImageListResponseInfo imgResponse = new ImageListResponseInfo();
 			imgResponse.setImage_name(imageInfo.getName());
 			imgResponse.setImage_format(imageInfo.getImage_format());
@@ -2383,6 +2398,64 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error deleteing image: " + imageId, e);
 			throw new DirectorException("Error deleting image", e);
 		}
+	}
+
+	@Override
+	public boolean doesPolicyNameExist(String display_name, String image_id)
+			throws DirectorException {
+		try {
+			List<TrustPolicyDraft> trustPolicyDraftList = imagePersistenceManager
+					.fetchPolicyDrafts(null);
+			if (trustPolicyDraftList != null) {
+				for (TrustPolicyDraft tpd : trustPolicyDraftList) {
+					if (!tpd.getImgAttributes().isDeleted() && tpd.getDisplay_name() != null
+							&& tpd.getDisplay_name().equalsIgnoreCase(
+									display_name)
+							&& !tpd.getImgAttributes().getId().equals(image_id)) {
+						return true;
+					}
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException(
+					"Error in fetching trustpolicydrafts list", e);
+		}
+		try {
+			List<TrustPolicy> trustPolicyList = imagePersistenceManager
+					.fetchPolicies(null);
+			if (trustPolicyList != null) {
+				for (TrustPolicy tpd : trustPolicyList) {
+					if (!tpd.getImgAttributes().isDeleted() && tpd.getDisplay_name() != null
+							&& tpd.getDisplay_name().equalsIgnoreCase(
+									display_name)
+							&& !tpd.getImgAttributes().getId().equals(image_id)) {
+						return true;
+					}
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException(
+					"Error in fetching trustpolicy list", e);
+		}
+
+		return false;
+	}
+	
+	@Override
+	public boolean doesImageNameExist(String fileName) throws DirectorException {
+		try {
+			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
+			for(ImageInfo image : imagesList)
+			{
+				if(!image.isDeleted() && image.getName() != null && image.getName().equalsIgnoreCase(fileName))
+				{
+					return true;
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch Images",e);
+		}
+		return false;
 	}
 
 }

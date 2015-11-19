@@ -114,6 +114,11 @@ public interface ImageService {
 
 	public void deleteImage(String imageId) throws DirectorException;
 
+	boolean doesPolicyNameExist(String display_name, String image_id)
+			throws DirectorException;
+
+	boolean doesImageNameExist(String fileName) throws DirectorException;
+
 
 }
 

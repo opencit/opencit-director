@@ -257,6 +257,7 @@ public class Mapper {
 		mwImage.setName(imgAttributes.getName());
 		mwImage.setId(imgAttributes.getId());
 		mwImage.setStatus(imgAttributes.getStatus());
+		mwImage.setDeleted(imgAttributes.isDeleted());
 		mwImage.setSent(imgAttributes.getSent());
 		mwImage.setCreatedByUserId(imgAttributes.getCreated_by_user_id());
 		mwImage.setEditedByUserId(imgAttributes.getEdited_by_user_id());
@@ -272,6 +273,9 @@ public class Mapper {
 	}
 
 	public ImageInfo toTransferObject(MwImage mwImage) {
+		if(mwImage == null){
+			return null;
+		}
 		ImageInfo imgInfo = new ImageInfo();
 		imgInfo.setId(mwImage.getId());
 		imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
@@ -523,7 +527,6 @@ public class Mapper {
 				if (!s.endsWith("}")) {
 					s = s.concat("}");
 				}
-				//TODO Removed null assignment //ImageActionActions fromJson;
 				ImageActionActions fromJson;
 				try {
 					fromJson = mapper.readValue(s, ImageActionActions.class);
@@ -637,6 +640,9 @@ public class Mapper {
 	}
 
 	public SshPassword toTransferObject(MwSshPassword mwSshPassword) {
+		if(mwSshPassword == null){
+			return null;
+		}
 		SshPassword sshPassword = new SshPassword();
 		sshPassword.setId(mwSshPassword.getId());
 		if (mwSshPassword.getSshKey() != null) {
@@ -681,6 +687,9 @@ public class Mapper {
 	}
 
 	public SshKey toTransferObject(MwSshKey mwSshKey) {
+		if(mwSshKey == null){
+			return null;
+		}
 		SshKey sshKey = new SshKey();
 		sshKey.setId(mwSshKey.getId());
 		if (mwSshKey.getSshKey() != null) {
