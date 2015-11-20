@@ -353,15 +353,79 @@ function downloadImageFromLastPage() {
 }
 
 function downloadPolicy(imageid, trust_policy_id) {
-	window.location = "/v1/images/" + imageid + "/downloadPolicy";
+
+var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+            type: "POST",
+            url: "/v1/login/tokens",
+            accept: "application/json",
+            contentType: "application/json",
+            headers: {'Accept': 'application/json'},
+     		data: token_request_json,
+            success: function(data, status, xhr) {
+		var authtoken= authtoken=data.data[0].token;
+		window.location = encodeURI("/v1/images/" + imageid + "/downloadPolicy?Authorization="+authtoken);
+                   
+            },
+            error: function(xhr, status, errorMessage) {
+              alert("error in downloading");
+            }
+        });
+
+
+	///window.location = "/v1/images/" + imageid + "/downloadPolicy";
 }
 
+
+
 function downloadPolicyAndManifest(imageid, trust_policy_id) {
-	window.location = "/v1/images/" + imageid + "/downloadPolicyAndManifest";
+
+var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+            type: "POST",
+            url: "/v1/login/tokens",
+            accept: "application/json",
+            contentType: "application/json",
+            headers: {'Accept': 'application/json'},
+     		data: token_request_json,
+            success: function(data, status, xhr) {
+		var authtoken= authtoken=data.data[0].token;
+		var url="/v1/images/" + imageid + "/downloadPolicyAndManifest?Authorization="+encodeURIComponent(authtoken);
+		window.location = url;                  
+            },
+            error: function(xhr, status, errorMessage) {
+              alert("error in downloading");
+            }
+        });
+
+
+	
 }
 
 function downloadImage(imageid) {
-	window.location = "/v1/images/" + imageid + "/downloadImage?modified=true";
+
+var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+            type: "POST",
+            url: "/v1/login/tokens",
+            accept: "application/json",
+            contentType: "application/json",
+            headers: {'Accept': 'application/json'},
+     		data: token_request_json,
+            success: function(data, status, xhr) {
+		var authtoken= authtoken=data.data[0].token;
+		var url="/v1/images/" + imageid + "/downloadImage?modified=true&Authorization="+encodeURIComponent(authtoken);
+		window.location = url;            
+            },
+            error: function(xhr, status, errorMessage) {
+              alert("error in downloading");
+            }
+        });
+
+	
 }
 
 function deletePolicy(imageid, trust_policy_id, imagename) {

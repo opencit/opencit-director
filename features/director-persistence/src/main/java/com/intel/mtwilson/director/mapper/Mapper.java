@@ -257,6 +257,7 @@ public class Mapper {
 		mwImage.setName(imgAttributes.getName());
 		mwImage.setId(imgAttributes.getId());
 		mwImage.setStatus(imgAttributes.getStatus());
+		mwImage.setDeleted(imgAttributes.isDeleted());
 		mwImage.setSent(imgAttributes.getSent());
 		mwImage.setCreatedByUserId(imgAttributes.getCreated_by_user_id());
 		mwImage.setEditedByUserId(imgAttributes.getEdited_by_user_id());
@@ -526,7 +527,6 @@ public class Mapper {
 				if (!s.endsWith("}")) {
 					s = s.concat("}");
 				}
-				//TODO Removed null assignment //ImageActionActions fromJson;
 				ImageActionActions fromJson;
 				try {
 					fromJson = mapper.readValue(s, ImageActionActions.class);

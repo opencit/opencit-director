@@ -376,14 +376,14 @@ public class ImageServiceImpl implements ImageService {
 			int fileSize) throws DirectorException {
 
 		String loggedinUser = ShiroUtil.subjectUsername();
-
+		
 		ImageAttributes imageAttributes = new ImageAttributes();
 		imageAttributes.name = fileName;
 		imageAttributes.image_deployments = image_deployments;
 		imageAttributes.setCreated_by_user_id(loggedinUser);
 		imageAttributes.setEdited_by_user_id(loggedinUser);
 		imageAttributes.setStatus(Constants.INCOMPLETE);
-		imageAttributes.setDeleted(false);
+		imageAttributes.setDeleted(true);
 		int sizen_kb = fileSize;
 		imageAttributes.setSent(0);
 		imageAttributes.setImage_size(sizen_kb);
@@ -400,6 +400,7 @@ public class ImageServiceImpl implements ImageService {
 			log.debug("Saving metadata of uploaded file");
 			createdImageMetadata = imagePersistenceManager
 					.saveImageMetadata(imageAttributes);
+			log.info("Image is hidden :: " + createdImageMetadata.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while saving metadata for uploaded file : "
 					+ e.getMessage());
@@ -469,16 +470,19 @@ public class ImageServiceImpl implements ImageService {
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
+			imageInfo.setDeleted(false);
+			
 			log.info("Image upload COMPLETE..");
 		}
 		try {
 			imagePersistenceManager.updateImage(imageInfo);
+			log.info("Image is hidden :: " +  imageInfo.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while updating metadata for uploaded image : "
 					+ e.getMessage());
 			throw new DirectorException("Cannot update image meta data", e);
 		}
-		try {
+		try {	
 			fileInputStream.close();
 		} catch (IOException e) {
 			log.error("Error in closing stream: ", e);
@@ -1652,6 +1656,9 @@ public class ImageServiceImpl implements ImageService {
 
 		imageListresponse.images = new ArrayList<ImageListResponseInfo>();
 		for (ImageInfo imageInfo : imageList) {
+			if(imageInfo.deleted){
+				continue;
+			}
 			ImageListResponseInfo imgResponse = new ImageListResponseInfo();
 			imgResponse.setImage_name(imageInfo.getName());
 			imgResponse.setImage_format(imageInfo.getImage_format());
@@ -2393,6 +2400,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
+	@Override
 	public boolean doesPolicyNameExist(String display_name, String image_id)
 			throws DirectorException {
 		try {
@@ -2430,6 +2438,23 @@ public class ImageServiceImpl implements ImageService {
 					"Error in fetching trustpolicy list", e);
 		}
 
+		return false;
+	}
+	
+	@Override
+	public boolean doesImageNameExist(String fileName) throws DirectorException {
+		try {
+			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
+			for(ImageInfo image : imagesList)
+			{
+				if(!image.isDeleted() && image.getName() != null && image.getName().equalsIgnoreCase(fileName))
+				{
+					return true;
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch Images",e);
+		}
 		return false;
 	}
 
