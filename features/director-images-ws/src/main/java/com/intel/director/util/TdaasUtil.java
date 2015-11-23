@@ -124,7 +124,8 @@ public class TdaasUtil {
 		return DirectorUtil.getMountPath(imageId) + File.separator + "mount";
 	}
 
-	public static String patch(String src, String patch) {
+	public static String patch(String src, String patch) throws DirectorException{
+		String patched = null;
 		try {
 			InputStream inputStream = new ByteArrayInputStream(
 					src.getBytes(StandardCharsets.UTF_8));
@@ -134,15 +135,14 @@ public class TdaasUtil {
 			OutputStream outputStream = new ByteArrayOutputStream();
 
 			Patcher.patch(inputStream, patchStream, outputStream);
-			String patched = ((ByteArrayOutputStream) outputStream)
+			patched = ((ByteArrayOutputStream) outputStream)
 					.toString("UTF-8");
-			return patched;
 		} catch (IOException e) {
-			System.err.println("ERROR: Could not access file: "
-					+ e.getMessage());
-			System.exit(1);
+			log.error("Could not apply patch ", e);	
+			throw new DirectorException("Unable to apply patch", e);
 		}
-		return "";
+		return patched;
+
 	}
 
 	public static void getParentDirectory(String imageId, String filePath,
@@ -687,16 +687,18 @@ public class TdaasUtil {
 		manifest.setDigestAlg(trustpolicy.getWhitelist().getDigestAlg().value());
 		List<MeasurementType> manifestList = manifest.getManifest();
 
-		MeasurementType measurementType = null;
 		for (Measurement measurement : measurements) {
 			if (measurement instanceof DirectoryMeasurement) {
-				measurementType = new DirectoryMeasurementType();
+				DirectoryMeasurementType directoryMeasurementType = new DirectoryMeasurementType();
+				directoryMeasurementType.setPath(measurement.getPath());
+				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude());
+				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
+				manifestList.add(directoryMeasurementType);
+				
 			} else if (measurement instanceof FileMeasurement) {
-				measurementType = new FileMeasurementType();
-			}
-			if (measurementType != null) {
-				measurementType.setPath(measurement.getPath());
-				manifestList.add(measurementType);
+				FileMeasurementType fileMeasurementType = new FileMeasurementType();
+				fileMeasurementType.setPath(measurement.getPath());
+				manifestList.add(fileMeasurementType);
 			}
 		}
 		JAXB jaxb = new JAXB();

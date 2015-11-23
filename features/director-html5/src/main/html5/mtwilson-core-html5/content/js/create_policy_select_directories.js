@@ -55,7 +55,7 @@ function SelectDirectoriesViewModel() {
 						data : ko.toJSON(self.createImageMetaData),
 						success : function(data, status, xhr) {
 		
-							console.log("Unmount successfully")
+							console.log("Unmount successfully")							
 							editPolicyDraft();
 							nextButton();
 						}
@@ -85,10 +85,8 @@ function ApplyRegExViewModel() {
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
 
     self.resetRegEx = function(event) {
-        console.log("Yeah !!!");
 		var sel_dir = $("#sel_dir").val();
 		
-        console.log("DIR : "+sel_dir);
 
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
@@ -138,7 +136,6 @@ function ApplyRegExViewModel() {
 			return;
 		}
 		$("#regex_error_vm").html("");
-		console.log("Exclude ::: " + exclude);
 		var sel_dir = loginFormElement.sel_dir.value;
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
@@ -209,11 +206,13 @@ function toggleState(str) {
 
 var pageInitialized = false;
 var patches = [];
+var temp_patches = [];
 var canPushPatch = true;
 
 setInterval(function() {
 	editPolicyDraft();
 }, 10000);
+
 function editPatchWithDataFromServer(patch) {
 	var cnt = 0;
 	for (cnt in patch) {
@@ -222,15 +221,30 @@ function editPatchWithDataFromServer(patch) {
 			patches.push(addRemovePatch);
 		}
 	}
-	canPushPatch = true;
-
 	editPolicyDraft();
-
 }
+
+
+
 var editPolicyDraft = function() {
-	if (patches.length == 0) {
+	if(canPushPatch == false){
+		return;
+	}else{
+		canPushPatch = false;
+	}
+
+	if (patches.length == 0 && temp_patches.length == 0) {
+		canPushPatch = true;
 		return;
 	}
+	
+	for (i = 0; i < temp_patches.length; i++) {
+		patches.push(temp_patches[i]);		
+	}
+	if(temp_patches.length > 0){
+		temp_patches.length = 0;		
+	}
+	
 
 	var patchBegin = "<patch>";
 	var patchEnd = "</patch>";
@@ -252,6 +266,7 @@ var editPolicyDraft = function() {
 		data : formData,
 		contentType : "application/json",
 		success : function(data, status) {
+			canPushPatch = true;
 			patches.length = 0;
 			// Show message in div
 			var $messageDiv = $('#saveMessage'); // get the reference of the
@@ -260,10 +275,16 @@ var editPolicyDraft = function() {
 			setTimeout(function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
-			// and clear the message
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			// / alert("ERROR in saving to draft");
+			canPushPatch = true;
+			temp_patches.length=0;
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
+			$messageDiv.show().html('Error saving draft'); // show and set the message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
 		}
 	});
 }
@@ -300,6 +321,10 @@ $(document)
 /* Patches processing */
 
 function editPatch(file, checkedStatus, rootRegexDir) {
+	var whichPatchToUse = patches;
+	if(canPushPatch == false){
+		whichPatchToUse = temp_patches;
+	}
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
@@ -323,7 +348,7 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 		addRemoveXml = "<remove sel=" + removePath
 				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
-	patches.push(addRemoveXml);
+	whichPatchToUse.push(addRemoveXml);
 }
 
 function backToFirstPage()

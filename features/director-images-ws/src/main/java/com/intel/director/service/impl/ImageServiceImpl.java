@@ -685,7 +685,7 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public void editTrustPolicyDraft(
-			TrustPolicyDraftEditRequest trustpolicyDraftEditRequest) {
+			TrustPolicyDraftEditRequest trustpolicyDraftEditRequest) throws DirectorException{
 		TrustPolicyDraft trustPolicyDraft = null;
 		try {
 			trustPolicyDraft = imagePersistenceManager
@@ -704,6 +704,7 @@ public class ImageServiceImpl implements ImageService {
 		draft = TdaasUtil.patch(draft, trustpolicyDraftEditRequest.patch);
 		Date currentDate = new Date();
 		trustPolicyDraft.setEdited_date(currentDate);
+		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		trustPolicyDraft.setTrust_policy_draft(draft);
 		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 
@@ -712,6 +713,7 @@ public class ImageServiceImpl implements ImageService {
 		} catch (DbException e) {
 			// TODO Handle Error
 			log.error("Error in editTrustPolicyDraft()");
+			throw new DirectorException("Error in editTrustPolicyDraft ", e);
 		}
 
 	}
@@ -830,7 +832,7 @@ public class ImageServiceImpl implements ImageService {
 			ImageAttributes imgAttrs = new ImageAttributes();
 			imgAttrs.setId(image_id);
 			trustPolicy.setImgAttributes(imgAttrs);
-			log.debug("Going to save trust policy for image_id::" + image_id);
+			log.info("Going to save trust policy for image_id::" + image_id);
 			try {
 				image = imagePersistenceManager.fetchImageById(image_id);
 			} catch (DbException ex) {
@@ -843,7 +845,7 @@ public class ImageServiceImpl implements ImageService {
 				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
 						.getPolicy(policyXml);
 				CreateTrustPolicy.createTrustPolicy(policy);
-
+				log.info("Got the hashes for the selected files ::" + image_id);
 				// Calculate image hash and add to encryption tag
 				if (policy.getEncryption() != null) {
 					File imgFile = new File(image.getLocation()
@@ -862,6 +864,7 @@ public class ImageServiceImpl implements ImageService {
 				}
 
 				policyXml = TdaasUtil.convertTrustPolicyToString(policy);
+				log.info("Convert policy in string format");
 				// Sign the policy with MtWilson
 				Extensions
 						.register(
@@ -877,10 +880,7 @@ public class ImageServiceImpl implements ImageService {
 				File trustPolicyFile = null;
 				String mountPath = TdaasUtil.getMountPath(image_id);
 				if (trustPolicy != null) {
-					if ((Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
-							.getImage_deployments()) && image.getImage_format() != null)
-							|| (image.getImage_format() == null)) {
-
+					if ((Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image.getImage_deployments()) && image.getImage_format() != null) || (image.getImage_format() == null)) {
 						// Writing inside bare metal modified image
 
 						String remoteDirPath = mountPath + "/boot/trust";
@@ -896,7 +896,10 @@ public class ImageServiceImpl implements ImageService {
 						String manifest = TdaasUtil
 								.getManifestForPolicy(policyXml);
 						if (!manifestFile.exists()) {
+							log.info("Create new manifest on host");
 							manifestFile.createNewFile();
+						}else{
+							log.info("manifest.xml already exists. So overwriting");
 						}
 
 						FileWriter fw = null;
@@ -905,6 +908,7 @@ public class ImageServiceImpl implements ImageService {
 							fw = new FileWriter(manifestFile.getAbsoluteFile());
 							bw = new BufferedWriter(fw);
 							bw.write(manifest);
+							log.info("Complete writing manifest");
 						} catch (IOException ioe) {
 							log.error("Error in writing manifest", ioe);
 						} finally {
@@ -915,6 +919,7 @@ public class ImageServiceImpl implements ImageService {
 								if (fw != null) {
 									fw.close();
 								}
+								log.info("Complete writing manifest after closing stream");
 							} catch (IOException e) {
 								log.error("Error closing streams ");
 							}
@@ -940,6 +945,7 @@ public class ImageServiceImpl implements ImageService {
 						fw = new FileWriter(trustPolicyFile.getAbsoluteFile());
 						bw = new BufferedWriter(fw);
 						bw.write(signedPolicyXml);
+						log.info("Complete writing policy");
 					} catch (IOException ioe) {
 						log.error("Error in writing trustpolicy", ioe);
 					} finally {
@@ -950,6 +956,8 @@ public class ImageServiceImpl implements ImageService {
 							if (fw != null) {
 								fw.close();
 							}
+							
+							log.info("Complete writing policy after stream");
 						} catch (IOException e) {
 							log.error("Error closing streams ");
 						}
@@ -964,14 +972,14 @@ public class ImageServiceImpl implements ImageService {
 
 				TrustPolicy createdPolicy = imagePersistenceManager
 						.savePolicy(trustPolicy);
-				log.debug("deleting draft after policy created existingDraftId::"
+				log.info("deleting draft after policy created existingDraftId::"
 						+ existingDraft.getId());
 				imagePersistenceManager.destroyPolicyDraft(existingDraft);
-				log.debug("trust policy succesfylly created , createdPolicyId::"
+				log.info("trust policy succesfylly created , createdPolicyId::"
 						+ createdPolicy.getId());
 
 				// Creating an ImageAction
-				if (TdaasUtil.isImageEncryptStatus(policyXml)) {
+				if (TdaasUtil.isImageEncryptStatus(policyXml) && Constants.DEPLOYMENT_TYPE_VM.equals(image.getImage_deployments())) {
 					return createImageActionById(image_id, trustPolicy, true);
 				}
 
@@ -2124,13 +2132,19 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		// Check if mounted live BM has /opt/vrtm
-
 		String idendifier = "NV";
-		String dirPath = "/opt/vrtm";
-		File vrtmDir = new File(TdaasUtil.getMountPath(imageId) + dirPath);
+		String vrtmDirPath = "/opt/vrtm";
+		String tbootDirPath = "/opt/tbootxm";
+		File vrtmDir = new File(TdaasUtil.getMountPath(imageId) + vrtmDirPath);
+		File tbootDir = new File(TdaasUtil.getMountPath(imageId) + tbootDirPath);
 		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
 			idendifier = "V";
+		}else if (tbootDir.exists() && tbootDir.isDirectory()) {
+			idendifier = "NV";
+		}else{
+			throw new DirectorException("At least tboot must be installed");
 		}
+
 		String content = null;
 		Manifest manifest;
 

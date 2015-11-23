@@ -64,7 +64,7 @@ public interface ImageService {
 	public String getTrustPolicyForImage(String imageId);
 
 	public void editTrustPolicyDraft(
-			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest);
+			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
