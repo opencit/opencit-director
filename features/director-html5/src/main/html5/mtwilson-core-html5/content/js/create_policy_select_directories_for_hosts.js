@@ -206,7 +206,10 @@ function toggleState(str) {
 
 var pageInitialized = false;
 var patches = [];
+var temp_patches = [];
 var canPushPatch = true;
+
+
 
 setInterval(function() {
 	editPolicyDraft();
@@ -219,15 +222,29 @@ function editPatchWithDataFromServer(patch) {
 			patches.push(addRemovePatch);
 		}
 	}
-	canPushPatch = true;
 
 	editPolicyDraft();
 
 }
 var editPolicyDraft = function() {
-	if (patches.length == 0) {
+	if(canPushPatch == false){
+		return;
+	}else{
+		canPushPatch = false;
+	}
+
+	if (patches.length == 0 && temp_patches.length == 0) {
+		canPushPatch = true;
 		return;
 	}
+	
+	for (i = 0; i < temp_patches.length; i++) {
+		patches.push(temp_patches[i]);		
+	}
+	if(temp_patches.length > 0){
+		temp_patches.length = 0;		
+	}
+		
 
 	var patchBegin = "<patch>";
 	var patchEnd = "</patch>";
@@ -249,6 +266,7 @@ var editPolicyDraft = function() {
 		data : formData,
 		contentType : "application/json",
 		success : function(data, status) {
+			canPushPatch = true;
 			patches.length = 0;
 			// Show message in div
 			var $messageDiv = $('#saveMessage'); // get the reference of the
@@ -258,16 +276,27 @@ var editPolicyDraft = function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
 			// and clear the message
+			console.log("success after edit draft");
+			//removeDuplicates(data);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			// / alert("ERROR in saving to draft");
+			canPushPatch = true;
+			temp_patches.length=0;
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
+			$messageDiv.show().html('Error saving draft'); // show and set the message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
 		}
 	});
 }
 
 $(document)
 		.ready(
+				
 				function() {
+					patches.length = 0;
 					if (pageInitialized)
 						return;
 					$('#jstree2').fileTree(
@@ -297,6 +326,11 @@ $(document)
 /* Patches processing */
 
 function editPatch(file, checkedStatus, rootRegexDir) {
+	var whichPatchToUse = patches;
+	if(canPushPatch == false){
+		whichPatchToUse = temp_patches;
+	}
+
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
@@ -320,7 +354,7 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 		addRemoveXml = "<remove sel=" + removePath
 				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
-	patches.push(addRemoveXml);
+	whichPatchToUse.push(addRemoveXml);
 }
 
 function backToBMLiveFirstPage()
@@ -341,3 +375,16 @@ function backToBMLiveFirstPage()
 		});
 	}
 }
+
+/*
+function removeDuplicates(data){
+	console.log("removeDuplicates ******* :: "+data);
+	
+    $(data).find('File').each(function(){
+        var $entry = $(this);
+        var path = $entry.attr('Path');
+        console.log("&&& : "+ path);
+    })
+
+}
+*/
