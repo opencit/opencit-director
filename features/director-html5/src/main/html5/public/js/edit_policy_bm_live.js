@@ -1,13 +1,27 @@
 endpoint = "/v1/images/";
 var imageFormats = new Array();
 var image_policies = new Array();
-showBMLiveMetaData();
+
+
+$.ajax({
+	type : "GET",
+	url : "/v1/trust-policy-drafts/?imageId="+ current_image_id + "&imageArchive=false",
+	// accept: "application/json",
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function(data, status, xhr) {
+		showBMLiveMetaData(data);
+	}
+});
+
 function EditBMLiveMetaData() {
 	
 	this.imageid = current_image_id;
 	this.image_name = current_image_name;
 	this.display_name = $("#display_name_host_edit").val();
-	
 }
 
 
@@ -99,25 +113,30 @@ return;
 
 			$.ajax({
 				type : "POST",
-				url : endpoint + "trustpoliciesmetadata",
+				url : "/v1/trust-policy-drafts",
 				contentType : "application/json",
 				headers : {
 					'Accept' : 'application/json'
 				},
 				data : ko.toJSON(self.editBMLiveMetaData),
 				success : function (data, status, xhr) {
+
 					if (data.status == "Error") {
 						show_error_in_editbmlivemodal(data.details);
 						return;
 					}
+					current_trust_policy_draft_id=data.id;
+					var mountimage = {
+						"id" : current_image_id
+					}
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/mount",
+						url : "/v1/rpc/mount-image",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
+						data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
 								show_error_in_editbmlivemodal(data.details);
@@ -134,7 +153,7 @@ return;
 	});
 };
 
-function showBMLiveMetaData() {
+function showBMLiveMetaData(policydata) {
 	
 	$.ajax({
 		type : "GET",
@@ -144,9 +163,8 @@ function showBMLiveMetaData() {
 			current_display_name = data.ssh_setting_request.display_name;
 			console.log(current_display_name);
 			$("#display_name_host_edit").val(data.ssh_setting_request.policy_name);
-						$("#host_ip_edit").val(data.ssh_setting_request.ip_address);
+			$("#host_ip_edit").val(data.ssh_setting_request.ip_address);
 			$("#username_for_host_edit").val(data.ssh_setting_request.username);
-	}
-});
-
+		}
+	});
 };

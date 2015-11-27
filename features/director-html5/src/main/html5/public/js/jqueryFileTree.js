@@ -36,7 +36,7 @@ if(jQuery) (function($){
 		fileTree: function(o, h) {
 			// Defaults
 			if( !o ) var o = {};
-			if( o.root == undefined ) o.root = 'C:/Temp';
+			if( o.root == undefined ) o.root = '/';
 			if( o.script == undefined ) o.script = 'jqueryFileTree.php';
 			if( o.folderEvent == undefined ) o.folderEvent = 'click';
 			if( o.expandSpeed == undefined ) o.expandSpeed= 500;
@@ -55,10 +55,15 @@ if(jQuery) (function($){
 					$(c).addClass('wait');
 
 					$(".jqueryFileTree.start").remove();
-					canPushPatch = false;
-					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude, reset_regex:treeOptions.reset_regex });
+					var formData = "dir="+escape(treeOptions.dir==undefined?'/':treeOptions.dir)+"&recursive="+(treeOptions.recursive==undefined?false:treeOptions.recursive)+"&files_for_policy="+(treeOptions.files_for_policy==undefined?false:treeOptions.files_for_policy)+"&init="+(treeOptions.init==undefined?false:treeOptions.init)+"&include_recursive="+(treeOptions.include_recursive==undefined?false:treeOptions.include_recursive)+"&reset_regex="+(treeOptions.reset_regex==undefined?false:treeOptions.reset_regex);
+					if(treeOptions.include!=undefined && treeOptions.include!=null){
+						formData+="&include="+escape(treeOptions.include);
+					}
+					if(treeOptions.exclude!=undefined && treeOptions.exclude!=null){
+						formData+="&exclude="+escape(treeOptions.exclude);
+					}
 					$.ajax({
-					  type: "POST",
+					  type: "GET",
 					  url: o.script,
 					  data: formData,
 					contentType: "application/json",
@@ -113,7 +118,7 @@ if(jQuery) (function($){
 								treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
 								treeOptions.files_for_policy = false;
-								//if($(this).attr('checked')){
+								// if($(this).attr('checked')){
 								if(this.checked){
 									treeOptions.files_for_policy = true;
 								}
@@ -130,7 +135,8 @@ if(jQuery) (function($){
 								console.log("*rootRegexDir : "+rootRegexDir);
 								h($(this).attr('id'), this.checked, rootRegexDir);
 							}
-							var isChecked = this.checked;//$(this).attr('checked') ;
+							var isChecked = this.checked;// $(this).attr('checked')
+															// ;
 							if(isChecked){
 								$(this).parent().addClass('selected');
 							}else{

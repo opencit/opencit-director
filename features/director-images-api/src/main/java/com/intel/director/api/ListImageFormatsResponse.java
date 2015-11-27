@@ -5,6 +5,7 @@
  */
 package com.intel.director.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,5 +14,5 @@ import java.util.List;
  */
 public class ListImageFormatsResponse {
 
-    public List<String> image_formats;
+    public List<ImageFormatsResponse> image_formats = new ArrayList<ImageFormatsResponse>();;
 }

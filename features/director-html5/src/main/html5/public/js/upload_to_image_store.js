@@ -2,6 +2,9 @@ var imageStores = new Array();
 
 var option;
 
+function mountMetaData(){
+	
+}
 displayImageStore();
 function displayImageStore() {
 	$.ajax({
@@ -10,12 +13,12 @@ function displayImageStore() {
 		dataType : "json",
 		success : function(data) {
 			
-				if(data.display_name != undefined &&  data.display_name != null && data.display_name != ""){
-					current_display_name = data.display_name;
-					$('#display_name_last').val(current_display_name);
-					$('#display_name_last_direct')
-					.val(current_display_name);
-				}
+			if(data.display_name != undefined &&  data.display_name != null && data.display_name != ""){
+				current_display_name = data.display_name;
+				$('#display_name_last').val(current_display_name);
+				$('#display_name_last_direct')
+				.val(current_display_name);
+			}
 		}
 	});
 	
@@ -138,7 +141,6 @@ function UploadStoreViewModel() {
 		$.ajax({
 			type : "POST",
 			url : endpoint + "uploads",
-			// accept: "application/json",
 			contentType : "application/json",
 			dataType : "json",
 			headers : {
@@ -158,15 +160,46 @@ function UploadStoreViewModel() {
 					$('body').removeClass("modal-open");
 					return;
 				}
-				console.log("uploadToStore success" + data);
-				current_image_action_id = "";
-				current_image_id = "";
-				$("#redirect").modal({
-					backdrop : "static"
-				});
-				$("#redirect_direct").modal({
-					backdrop : "static"
-				});
+				var imageActionData = {
+					"image_id" : current_image_id,
+					"actions" : [{ "task_name" : "Create Tar", "status" : "Incomplete" },
+						{"task_name" : "Upload Tar", "status" : "Incomplete" , "storename" : $('#tarball_upload_combo').val()}
+					]
+				}
+				$.ajax({
+					type : "POST",
+					url : "/v1/image-actions",
+					contentType : "application/json",
+					dataType : "json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					data : JSON.stringify(imageActionData),
+					success : function(data) {
+						if (data.status == "Error") {
+							$('#error_vm_body_3_direct').text(data.details);
+							$("#error_vm_3_direct").modal({
+								backdrop : "static"
+							});
+							$('#error_vm_body_3').text(data.details);
+							$("#error_vm_3").modal({
+								backdrop : "static"
+							});
+							$('body').removeClass("modal-open");
+							return false;
+						}
+						console.log("uploadToStore success" + data);
+						current_image_action_id = "";
+						current_image_id = "";
+						$("#redirect").modal({
+							backdrop : "static"
+						});
+						$("#redirect_direct").modal({
+							backdrop : "static"
+						});
+					}
+				});	
+				
 			}
 		});
 		
@@ -174,35 +207,26 @@ function UploadStoreViewModel() {
 	
 };
 
+
 function createPolicyDraftFromPolicy() {
-	if (current_image_action_id != "") {
-		$.ajax({
-			type : "GET",
-			url : endpoint + current_image_id + "/recreatedraft?action_id="
-			+ current_image_action_id,
-			success : function(data, status, xhr) {
-				console.log("Draft Created Successfully");
-				
-			}
-		});
-		} else {
-		$.ajax({
-			type : "GET",
-			url : endpoint + current_image_id + "/recreatedraft",
-			success : function(data, status, xhr) {
-				console.log("Draft Created Successfully");
-				
-			}
-		});
+	var mountimage = {
+		"id" : current_image_id
 	}
 	$.ajax({
+		type : "GET",
+		url : "/v1/rpc/" + current_image_id + "/recreatedraft",
+		success : function(data, status, xhr) {
+			console.log("Draft Created Successfully");
+		}
+	});
+	$.ajax({
 		type : "POST",
-		url : endpoint + current_image_id + "/mount",
+		url : "/v1/rpc/mount-image",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
 		},
-		data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
+		data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 		success : function(data, status, xhr) {
 			backButton();
 		}

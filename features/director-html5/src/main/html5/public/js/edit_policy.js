@@ -3,25 +3,14 @@ var image_policies = new Array();
 
 $.ajax({
 	type : "GET",
-	url : endpoint + current_image_id + "/getpolicymetadataforimage",
-	// accept: "application/json",
+	url : "/v1/trust-policy-drafts/?imageId=" + current_image_id + "&imageArchive=false",
 	contentType : "application/json",
 	headers : {
 		'Accept' : 'application/json'
 	},
 	dataType : "json",
-	success : function(data, status, xhr) {
-		// / alert("getmetadata data::"+data);
+	success : function (data, status, xhr) {
 		showImageLaunchPolicies(data);
-
-		/*
-		 * imageFormats=data.image_formats;
-		 * 
-		 * var option=""; for (var i=0;i<imageFormats.length;i++){ option += '<option
-		 * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>'; }
-		 * $('#image_format').append(option);
-		 */
-
 	}
 });
 
@@ -38,7 +27,7 @@ function EditImageViewModel(data) {
 
 	self.editImageMetaData = new EditImageMetaData(data);
 
-	self.editImage = function(loginFormElement) {
+	self.editImage = function (loginFormElement) {
 		console.log(current_image_id);
 		self.editImageMetaData.launch_control_policy = $(
 				'input[name=launch_control_policy]:checked').val();
@@ -46,18 +35,20 @@ function EditImageViewModel(data) {
 		// self.editImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
 		self.editImageMetaData.encrypted = $('input[name=isEncrypted]').is(
 				':checked')
-		self.editImageMetaData.display_name = $('#display_name').val();
+			self.editImageMetaData.display_name = $('#display_name').val();
 		current_display_name = $('#display_name').val();
+
 		$.ajax({
 			type : "POST",
-			url : endpoint + "trustpoliciesmetadata",
+			url : "/v1/trust-policy-drafts",
 			// accept: "application/json",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
 			data : ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
-			success : function(data, status, xhr) {
+			success : function (data, status, xhr) {
+
 				if (data.status == "Error") {
 					$('#for_mount_edit_vm').hide();
 					$('#default_edit_vm').show();
@@ -67,16 +58,20 @@ function EditImageViewModel(data) {
 					});
 					return;
 				}
+				current_trust_policy_draft_id = data.id;
+				var mountimage = {
+					"id" : current_image_id
+				}
 				$.ajax({
 					type : "POST",
-					url : endpoint + current_image_id + "/mount",
+					url : "/v1/rpc/mount-image",
 					// accept: "application/json",
 					contentType : "application/json",
 					headers : {
 						'Accept' : 'application/json'
 					},
-					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
-					success : function(data, status, xhr) {
+					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
+					success : function (data, status, xhr) {
 						if (data.status == "Error") {
 							$('#for_mount_edit_vm').show();
 							$('#default_edit_vm').hide();
@@ -98,35 +93,25 @@ function EditImageViewModel(data) {
 };
 
 function showImageLaunchPolicies(policydata) {
-
+	current_display_name = policydata.display_name;
+	$("#display_name").val(current_display_name);
 	$.ajax({
 		type : "GET",
-		url : endpoint + current_image_id + "/trustpolicymetadata",
+		url : "/v1/image-launch-policies?deploymentType=VM",
 		dataType : "json",
-		success : function(data, status, xhr) {
-
-			current_display_name = data.display_name;
-			console.log(current_display_name);
-			$("#display_name").val(current_display_name);
-
+		success : function (data, status, xhr) {
 			image_policies = data.image_launch_policies;
 			addRadios(image_policies);
-			$(
-					"input[name=launch_control_policy][value='"
-							+ policydata.launch_control_policy + "']").attr(
-					'checked', 'checked');
+			$("input[name=launch_control_policy][value='" + policydata.launch_control_policy + "']").attr('checked', 'checked');
 
-			// / $("input[name=asset_tag_policy][value='Trust
-			// Only']").attr('checked', 'checked');
 			if (policydata.encrypted == true) {
 				$("input[name=isEncrypted]").prop('checked', 'true');
 			}
 			mainViewModel.editImageViewModel = new EditImageViewModel(
 					policydata);
-			// /] ko.cleanNode(mainViewModel);
 
 			ko.applyBindings(mainViewModel, document
-					.getElementById("edit_policy_content_step_1"));
+				.getElementById("edit_policy_content_step_1"));
 		}
 	});
 
@@ -135,12 +120,13 @@ function showImageLaunchPolicies(policydata) {
 function addRadios(arr) {
 
 	var temp = "";
-	for ( var i = 0; i < arr.length; i++) {
-
+	for (var i = 0; i < arr.length; i++) {
+		if(arr[i].name == 'encrypted'){
+			continue;
+		}
 		temp = temp
-				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i].key + '" >' + arr[i].value + '</label>';
-
+			 + '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
+			 + arr[i].name + '" >' + arr[i].value + '</label>';
 	}
 
 	$('#launch_control_policy').html(temp);
@@ -148,20 +134,16 @@ function addRadios(arr) {
 		type : 'GET',
 		url : '/v1/setting/kms/getproperties',
 		contentType : "application/json",
-		success : function(data) {
-			
-			if(data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha1 == "" ||
+		success : function (data) {
+
+			if (data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha1 == "" ||
 				data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha1 == null ||
-				data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha1 == undefined )
-			{
+				data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha1 == undefined) {
 				$('#encryptRow').hide();
-			}
-		else
-			{
+			} else {
 				$('#encryptRow').show();
 			}
-			
+
 		}
 	});
 };
-

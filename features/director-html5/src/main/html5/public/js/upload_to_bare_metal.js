@@ -2,6 +2,7 @@ var imageStores = new Array();
 
 var option;
 
+
 displayBMImageStore();
 function displayBMImageStore() {
 	
@@ -48,6 +49,7 @@ function pushPolicy(data) {
 }
 
 function createPolicyDraftFromPolicy() {
+	var self = this;
 	$.ajax({
 		type : "GET",
 		url : endpoint + current_image_id + "/recreatedraft?action_id="+current_image_action_id,
@@ -56,14 +58,18 @@ function createPolicyDraftFromPolicy() {
 			current_image_action_id = "";
 		}
 	});
+					var mountimage = {
+						"id" : current_image_id
+					}
+
 	$.ajax({
 		type : "POST",
-		url : endpoint + current_image_id + "/mount",
+		url : "/v1/rpc/mount-image",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
 		},
-		data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
+		data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 		success : function(data, status, xhr) {
 			backButtonImagesBM();
 		}

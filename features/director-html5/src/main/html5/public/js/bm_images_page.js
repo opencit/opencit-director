@@ -15,6 +15,7 @@ $(document)
 function createPolicyForBMImage(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
+	current_trust_policy_draft_id='';
 	current_image_name = imagename;
 	goToCreatePolicyWizardForBMImage();
 }
@@ -22,6 +23,7 @@ function createPolicyForBMImage(imageid, imagename) {
 function createPolicy2(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
+	current_trust_policy_draft_id='';
 	current_image_name = imagename;
 
 	goToCreatePolicyWizard2();
@@ -146,14 +148,17 @@ function backToHostsPage() {
 	$("#bm_images_grid_page").show();
 	if(current_image_id != "" && current_image_id !=null)
 	{
+		var mountimage = {
+			"id" : current_image_id
+		}
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/unmount",
+			url : "/v1/rpc/unmount-image",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.createImageMetaData),
+			data : ko.toJSON(self.mountimage),
 			success : function(data, status, xhr) {
 				current_image_id = "";
 				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOHOSTPAGES");
@@ -161,6 +166,7 @@ function backToHostsPage() {
 		});
 
 	}
+	current_trust_policy_draft_id='';
 	$('body').removeClass("modal-open");
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
@@ -179,6 +185,7 @@ function backToHostsPageWithoutUnmount() {
 	$("#bm_images_grid_page").show();
 	$('body').removeClass("modal-open");
 current_image_id='';
+current_trust_policy_draft_id='';
 	refreshBMOnlineGrid();
 	refresh_bm_images_Grid();
 }

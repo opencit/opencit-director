@@ -89,7 +89,6 @@ public class UploadImageTask extends UploadTask {
 			super.run();
 			runFlag = true;
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error(
 					" runCreateImageTask failed for ::"
 							+ imageActionObject.getImage_id(), e);

@@ -34,6 +34,7 @@ function CreateBMImageMetaData(data) {
 	this.display_name = current_display_name;
 }
 
+
 function CreateBMImageViewModel() {
 	var self = this;
 	endpoint = "/v1/images/";
@@ -66,14 +67,17 @@ function CreateBMImageViewModel() {
 						$('body').removeClass("modal-open");
 					return;
 				}
+				var mountimage = {
+					"id" : current_image_id
+				}
 				$.ajax({
 					type : "POST",
-					url : endpoint + current_image_id + "/mount",
+					url : "/v1/rpc/mount-image",
 					contentType : "application/json",
 					headers : {
 						'Accept' : 'application/json'
 					},
-					data : ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
+					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.status == "Error") {
 							$('#error_modal_body_bm_image_2').text(data.details);
@@ -94,50 +98,19 @@ function CreateBMImageViewModel() {
 
 function fetchBMImageLaunchPolicies() {
 	endpoint = "/v1/images/";
-	// $
-	// .ajax({
-	// type : "GET",
-	// url : endpoint + "image-launch-policies",
-	//
-	// contentType : "application/json",
-	// headers : {
-	// 'Accept' : 'application/json'
-	// },
-	// dataType : "json",
-	// success : function(data, status, xhr) {
-	//
-	// image_policies = data.image_launch_policies;
-	// addRadios(image_policies);
-	// mainViewModel.createBMImageViewModel = new CreateBMImageViewModel();
-	//
-	// ko
-	// .applyBindings(
-	// mainViewModel,
-	// document
-	// .getElementById("create_policy_bm_image_content_step_1"));
-	// }
-	// });
-	$
-			.ajax({
-				type : "GET",
-				url : endpoint + current_image_id + "/trustpolicymetadata",
-				dataType : "json",
-				success : function(data, status, xhr) {
-
-					$("#display_name_bm").val(data.display_name);
-					current_display_name = data.display_name;
-					image_policies = data.image_launch_policies;
-					addRadios(image_policies);
-					mainViewModel.createBMImageViewModel = new CreateBMImageViewModel();
-
-					ko
-							.applyBindings(
-									mainViewModel,
-									document
-											.getElementById("create_policy_bm_image_content_step_1"));
-				}
-			});
-
+	$.ajax({
+		type : "GET",
+		url : endpoint + current_image_id + "/trustpolicymetadata",
+		dataType : "json",
+		success : function(data, status, xhr) {
+			$("#display_name_bm").val(data.display_name);
+			current_display_name = data.display_name;
+			image_policies = data.image_launch_policies;
+			addRadios(image_policies);
+			mainViewModel.createBMImageViewModel = new CreateBMImageViewModel();
+			ko.applyBindings(mainViewModel,document.getElementById("create_policy_bm_image_content_step_1"));
+		}
+	);
 };
 
 function addRadios(arr) {

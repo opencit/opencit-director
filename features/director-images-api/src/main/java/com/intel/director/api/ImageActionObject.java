@@ -2,7 +2,7 @@ package com.intel.director.api;
 
 import java.util.List;
 
-public class ImageActionObject {
+public class ImageActionObject extends MonitorStatus {
 	
 	private String id;
 	private String image_id;

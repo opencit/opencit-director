@@ -8,7 +8,7 @@ function mount_remote_file_system(){
       echo "Mount Path exists: $mountPathCheck"
       #Mount a remote system
       #echo P@ssw0rd  | sshfs -o password_stdin root@10.1.68.118:/ /tmp/mount
-      echo $password | sshfs -o reconnect -o password_stdin $userName@$ipAddress:$fileSystemPath $mountPath
+      echo $password | sshfs  -o ro -o reconnect -o password_stdin $userName@$ipAddress:$fileSystemPath $mountPath
     if [ $? -ne 0 ]
     then
         echo "Error in mounting the remote File System"

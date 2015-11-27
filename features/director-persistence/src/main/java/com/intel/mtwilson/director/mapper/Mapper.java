@@ -628,12 +628,15 @@ public class Mapper {
 	}
 
 	public MwSshPassword toData(SshPassword sshPassword) {
+		if(sshPassword == null){
+			return null;
+		}
 		MwSshPassword mwSshPassword = new MwSshPassword();
 		mwSshPassword.setId(sshPassword.getId());
-		if (sshPassword.getKey() != null) {
-			mwSshPassword.setSshKey(toCharacterArray(sshPassword.getKey()));
-		} else {
+		if(sshPassword == null || sshPassword.getKey() == null){
 			mwSshPassword.setSshKey(null);
+		} else if (sshPassword.getKey() != null) {
+			mwSshPassword.setSshKey(toCharacterArray(sshPassword.getKey()));
 		}
 
 		return mwSshPassword;

@@ -104,14 +104,11 @@ public class EncryptImageTask extends ImageActionTask {
 			String keyId = TdaasUtil.getKeyIdFromUrl(url);
 			log.debug("EncryptImageTask: Key id for KMS : "+keyId);
 			if (keyId == null) {
-				log.debug("EncryptImageTask: Returning since no key for encryption");
-				return;
+				log.error("Null key retrieved for url : " + url);
+				throw new DirectorException("Null key retrieved for url : " + url);
 			}
 
 			String encryptFileName = imageInfo.getName();
-			if(policy.getEncryption() != null){				
-				log.debug("Adding -enc since its encrypted : "+encryptFileName);
-			}
 			//TODO: Get actual key from KMS
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
 			if(keyFromKMS == null){

@@ -3,6 +3,7 @@ package com.intel.director.service;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
+import com.intel.director.api.ListImageLaunchPolicyResponse;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -23,5 +24,8 @@ public interface LookupService {
     public ListImageFormatsResponse getImageFormats();
 
     public ListImageLaunchPoliciesResponse getImageLaunchPolicies();
+
+    public ListImageLaunchPolicyResponse getImageLaunchPolicies(
+			String deployment_type);
 
 }

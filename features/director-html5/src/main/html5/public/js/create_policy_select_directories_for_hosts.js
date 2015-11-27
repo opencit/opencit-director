@@ -6,34 +6,47 @@ function SelectDirectoriesMetaData(data) {
 
 }
 
+
+
 function SelectDirectoriesViewModel() {
 	var self = this;
 
 	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 
 	self.selectDirectoriesSubmit = function(loginFormElement) {
+		clearInterval(refreshIntervalId );
+		editPolicyDraft();
+		while(canPushPatch == false){
+			console.log("Waiting for edit to complete");
+		}
 
+		var createTrustPolicyMetaData = {
+			"imageid" : current_image_id
+		}
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/createpolicy",
+			url : "/v1/rpc/trust-policies",
 			contentType : "application/json",
 			dataType : "text",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
+			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
+				var mountimage = {
+					"id" : current_image_id
+				}
 				if(data == "ERROR")
 				{
 					current_image_action_id = "";
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/unmount",
+						url : "/v1/rpc/unmount-image",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.createImageMetaData),
+						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
 							$("#error_modal_bm_live_2").modal({backdrop: "static"});
 								$('body').removeClass("modal-open");
@@ -47,16 +60,15 @@ function SelectDirectoriesViewModel() {
 					current_image_action_id = data;
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/unmount",
+						url : "/v1/rpc/unmount-image",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.createImageMetaData),
+						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
 		
 							console.log("Unmount successfully")
-							editPolicyDraft();
 							nextButtonLiveBM();
 						}
 					});
@@ -93,7 +105,7 @@ function ApplyRegExViewModel() {
 		var config = {
 			root : '/',
 			dir : sel_dir,
-			script : '/v1/images/browse/' + current_image_id + '/search',
+			script : '/v1/images/' + current_image_id + '/search',
 			expandSpeed : 1000,
 			collapseSpeed : 1000,
 			multiFolder : true,
@@ -117,7 +129,7 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -141,7 +153,7 @@ function ApplyRegExViewModel() {
 		var config = {
 			root : '/',
 			dir : sel_dir,
-			script : '/v1/images/browse/' + current_image_id + '/search',
+			script : '/v1/images/' + current_image_id + '/search',
 			expandSpeed : 1000,
 			collapseSpeed : 1000,
 			multiFolder : true,
@@ -168,7 +180,7 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
-						"/v1/html5/public/director-html5/images/locked.png");
+						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
 
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -206,11 +218,19 @@ function toggleState(str) {
 
 var pageInitialized = false;
 var patches = [];
+var temp_patches = [];
 var canPushPatch = true;
 
-setInterval(function() {
+
+var refreshIntervalId = setInterval(function() {
+var d = new Date();
+var n = d.getTime();
+
+	console.log("TImer - EDIT -- "+n);
+
 	editPolicyDraft();
 }, 10000);
+
 function editPatchWithDataFromServer(patch) {
 	var cnt = 0;
 	for (cnt in patch) {
@@ -219,15 +239,29 @@ function editPatchWithDataFromServer(patch) {
 			patches.push(addRemovePatch);
 		}
 	}
-	canPushPatch = true;
 
 	editPolicyDraft();
 
 }
 var editPolicyDraft = function() {
-	if (patches.length == 0) {
+	if(canPushPatch == false){
+		return;
+	}else{
+		canPushPatch = false;
+	}
+
+	if (patches.length == 0 && temp_patches.length == 0) {
+		canPushPatch = true;
 		return;
 	}
+	
+	for (i = 0; i < temp_patches.length; i++) {
+		patches.push(temp_patches[i]);		
+	}
+	if(temp_patches.length > 0){
+		temp_patches.length = 0;		
+	}
+		
 
 	var patchBegin = "<patch>";
 	var patchEnd = "</patch>";
@@ -244,11 +278,12 @@ var editPolicyDraft = function() {
 	});
 
 	$.ajax({
-		type : "POST",
-		url : "/v1/images/policydraft/" + current_image_id + "/edit",
+		type : "PUT",
+		url : "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
 		data : formData,
 		contentType : "application/json",
 		success : function(data, status) {
+			canPushPatch = true;
 			patches.length = 0;
 			// Show message in div
 			var $messageDiv = $('#saveMessage'); // get the reference of the
@@ -258,23 +293,34 @@ var editPolicyDraft = function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
 			// and clear the message
+			console.log("success after edit draft");
+			//removeDuplicates(data);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			// / alert("ERROR in saving to draft");
+			canPushPatch = true;
+			temp_patches.length=0;
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
+			$messageDiv.show().html('Error saving draft'); // show and set the message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
 		}
 	});
 }
 
 $(document)
 		.ready(
+				
 				function() {
+					patches.length = 0;
 					if (pageInitialized)
 						return;
 					$('#jstree2').fileTree(
 							{
 								root : '/',
 								dir : '/',
-								script : '/v1/images/browse/'
+								script : '/v1/images/'
 										+ current_image_id + '/search',
 								expandSpeed : 1000,
 								collapseSpeed : 1000,
@@ -297,6 +343,11 @@ $(document)
 /* Patches processing */
 
 function editPatch(file, checkedStatus, rootRegexDir) {
+	var whichPatchToUse = patches;
+	if(canPushPatch == false){
+		whichPatchToUse = temp_patches;
+	}
+
 	var addRemoveXml;
 	var node = $("input[name='" + file + "']");
 	var parent = node.parent();
@@ -320,24 +371,40 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 		addRemoveXml = "<remove sel=" + removePath
 				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
-	patches.push(addRemoveXml);
+	whichPatchToUse.push(addRemoveXml);
 }
 
 function backToBMLiveFirstPage()
 {
+					var mountimage = {
+						"id" : current_image_id
+					}
 	if(current_image_id != "" && current_image_id !=null)
 	{
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/unmount",
+			url : "/v1/rpc/unmount-image",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.createImageMetaData),
+			data : JSON.stringify(mountimage),
 			success : function(data, status, xhr) {
 				backButtonLiveBM();
 			}
 		});
 	}
 }
+
+/*
+function removeDuplicates(data){
+	console.log("removeDuplicates ******* :: "+data);
+	
+    $(data).find('File').each(function(){
+        var $entry = $(this);
+        var path = $entry.attr('Path');
+        console.log("&&& : "+ path);
+    })
+
+}
+*/

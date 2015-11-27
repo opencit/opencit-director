@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -52,6 +53,7 @@ import com.intel.director.api.MountHostResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.PolicyToHostResponse;
 import com.intel.director.api.PolicyToMountedImageResponse;
+import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SshKey;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
@@ -59,6 +61,7 @@ import com.intel.director.api.SshSettingRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftRequest;
+import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountHostResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
@@ -341,25 +344,27 @@ public class TdaasUtil {
 			// log.debug("Result of execute command: "+result);
 		} catch (InterruptedException ex) {
 			// log.error(null, ex);
-			log.error("error in executeShellCommand()",ex);
+			log.error("error in executeShellCommand()", ex);
 		} catch (IOException ex) {
 			// log.error(null, ex);
-			log.error("error in executeShellCommand()",ex);
-		}finally{
-			if(reader != null)
-			{
+			log.error("error in executeShellCommand()", ex);
+		} finally {
+			if (reader != null) {
 				try {
 					reader.close();
 				} catch (IOException e) {
-					log.error("error in closing reader in executeShellCommand()",e);
+					log.error(
+							"error in closing reader in executeShellCommand()",
+							e);
 				}
 			}
-			if(p != null && p.getInputStream() != null)
-			{
+			if (p != null && p.getInputStream() != null) {
 				try {
 					p.getInputStream().close();
 				} catch (IOException e) {
-					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+					log.error(
+							"error in closing p.getInputStream() in executeShellCommand()",
+							e);
 				}
 			}
 		}
@@ -470,7 +475,7 @@ public class TdaasUtil {
 		img.setCreated_date(new Date());
 		img.setEdited_date(new Date());
 		img.setDeleted(false);
-		if(StringUtils.isNotBlank(id)){
+		if (StringUtils.isNotBlank(id)) {
 			img.setId(id);
 		}
 		img.setImage_deployments("BareMetal");
@@ -543,7 +548,6 @@ public class TdaasUtil {
 		return unmountHostResponse;
 	}
 
-
 	public static void getParentDirectory(String filePath, String root,
 			Map<String, Boolean> parentsList, boolean recursive) {
 		File parent = new File(filePath).getParentFile();
@@ -610,24 +614,27 @@ public class TdaasUtil {
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
-		//TODO Unused after assignment
+		// TODO Unused after assignment
 		boolean flag = false;
 		try {
 
-			SSHManager instance = new SSHManager(username, password, ip, "~/.ssh/known_hosts");
-			String message = instance.connect();
+			SSHManager instance = new SSHManager(username, password, ip,
+					"~/.ssh/known_hosts");
+			String message = instance.testConnect();
 
-			if (Constants.SUCCESS.equals(message) ) {
+			if (Constants.SUCCESS.equals(message)) {
 				log.debug("User home is {}", System.getProperty("user.home"));
 				if (!Files.exists(Paths.get(System.getProperty("user.home")
 						+ "/.ssh"))) {
 					ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
-				}		
-				
+				}
+
 				if (!Files.exists(Paths.get(System.getProperty("user.home")
 						+ "/.ssh/known_hosts"))) {
-					ExecUtil.executeQuoted("/bin/bash", "-c", "touch ~/.ssh/known_hosts");
-					ExecUtil.executeQuoted("/bin/bash", "-c", "chmod 666 ~/.ssh/known_hosts");
+					ExecUtil.executeQuoted("/bin/bash", "-c",
+							"touch ~/.ssh/known_hosts");
+					ExecUtil.executeQuoted("/bin/bash", "-c",
+							"chmod 666 ~/.ssh/known_hosts");
 				}
 
 				Result result = ExecUtil.executeQuoted("/bin/sh", "-c",
@@ -663,8 +670,8 @@ public class TdaasUtil {
 
 	}
 
-	public static boolean checkSshConnection(String ipaddress,
-			String username, String password) throws IOException {
+	public static boolean checkSshConnection(String ipaddress, String username,
+			String password) throws IOException {
 		SSHClient ssh = new SSHClient();
 		log.debug("Trying to connect IP :: " + ipaddress);
 		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
@@ -707,8 +714,8 @@ public class TdaasUtil {
 		return result;
 	}
 
-	public static String computeHash(MessageDigest md, File file) throws IOException
-			  {
+	public static String computeHash(MessageDigest md, File file)
+			throws IOException {
 		if (!file.exists()) {
 			return null;
 		}
@@ -721,8 +728,8 @@ public class TdaasUtil {
 			is = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			log.error("error :: input file doesn't exists",e);
-			throw new IOException("input file doesn't exists",e);
+			log.error("error :: input file doesn't exists", e);
+			throw new IOException("input file doesn't exists", e);
 		}
 
 		try {
@@ -731,21 +738,21 @@ public class TdaasUtil {
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("error in reading from file",e);
-			
-			throw new IOException("error in reading from file",e);
-		}finally{
+			log.error("error in reading from file", e);
+
+			throw new IOException("error in reading from file", e);
+		} finally {
 			try {
 				is.close();
 			} catch (IOException ioe) {
 				// TODO Auto-generated catch block
-				log.error("error in closing stream",ioe);
-				throw new IOException("error in closing stream",ioe);
+				log.error("error in closing stream", ioe);
+				throw new IOException("error in closing stream", ioe);
 			}
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
-	
+
 		return result;
 
 	}
@@ -755,5 +762,92 @@ public class TdaasUtil {
 		setting.setImage_id(info.getImage_id().getId());
 		return setting;
 	}
+
+	public SearchFilesInImageRequest mapUriParamsToSearchFilesInImageRequest(
+			UriInfo uriInfo) {
+		SearchFilesInImageRequest searchFilesInImageRequest = new SearchFilesInImageRequest();
+
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("dir")))) {
+			searchFilesInImageRequest.dir = uriInfo.getQueryParameters()
+					.getFirst(("dir"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("include")))) {
+			searchFilesInImageRequest.include = uriInfo.getQueryParameters()
+					.getFirst(("include"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("exclude")))) {
+			searchFilesInImageRequest.exclude = uriInfo.getQueryParameters()
+					.getFirst(("exclude"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("recursive")))) {
+			searchFilesInImageRequest.recursive = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("recursive")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("include_recursive")))) {
+			searchFilesInImageRequest.include_recursive = Boolean
+					.parseBoolean(uriInfo.getQueryParameters().getFirst(
+							("include_recursive")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("files_for_policy")))) {
+			searchFilesInImageRequest.files_for_policy = Boolean
+					.parseBoolean(uriInfo.getQueryParameters().getFirst(
+							("files_for_policy")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("reset_regex")))) {
+			searchFilesInImageRequest.reset_regex = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("reset_regex")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("init")))) {
+			searchFilesInImageRequest.init = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("init")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters()
+				.getFirst(("id")))) {
+			searchFilesInImageRequest.id = uriInfo.getQueryParameters()
+					.getFirst(("id"));
+		}
+		return searchFilesInImageRequest;
+	}
+
+	public static TrustPolicyResponse convertTrustPolicyToTrustPolicyResponse(
+			com.intel.director.api.TrustPolicy trustPolicy) throws JAXBException {
+		TrustPolicyResponse tpr = new TrustPolicyResponse();
+		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
+		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+				.createUnmarshaller();
+
+		StringReader reader = new StringReader(trustPolicy.getTrust_policy());
+		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+		
+		tpr.setCreated_by_user_id(trustPolicy.getCreated_by_user_id());
+		tpr.setCreated_date(trustPolicy.getCreated_date());
+		tpr.setDescription(trustPolicy.getDescription());
+		tpr.setDisplay_name(trustPolicy.getDisplay_name());
+		tpr.setEdited_by_user_id(trustPolicy.getEdited_by_user_id());
+		tpr.setEdited_date(trustPolicy.getEdited_date());
+		if(policy.getEncryption() == null )	{
+			tpr.setEncrypted(false);
+		}
+		else{
+			tpr.setEncrypted(true);
+		}
+		tpr.setId(trustPolicy.getId());
+		tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+		tpr.setImgAttributes(trustPolicy.getImgAttributes());
+		tpr.setName(trustPolicy.getName());
+		tpr.setTrust_policy(trustPolicy.getTrust_policy());
+
+		return tpr;
+		
+	}
+	
 
 }

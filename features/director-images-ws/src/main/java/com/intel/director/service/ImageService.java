@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageListResponse;
@@ -21,6 +19,7 @@ import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
+import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.images.exception.DirectorException;
@@ -63,7 +62,7 @@ public interface ImageService {
 
 	public String getTrustPolicyForImage(String imageId);
 
-	public void editTrustPolicyDraft(
+	public TrustPolicyDraft editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -79,11 +78,11 @@ public interface ImageService {
 			String image_id) throws DirectorException;
 
 	public String createTrustPolicy(String image_id)
-			throws DirectorException, JAXBException;
+			throws DirectorException;
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DirectorException;
+	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId) throws DirectorException;
 
 	public String getDisplayNameForImage(String image_id) throws DirectorException;
 
@@ -118,6 +117,10 @@ public interface ImageService {
 			throws DirectorException;
 
 	boolean doesImageNameExist(String fileName) throws DirectorException;
+
+	void deleteTrustPolicyDraft(String trust_policy_draft_id)
+			throws DirectorException;
+	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id) throws DirectorException;
 
 
 }

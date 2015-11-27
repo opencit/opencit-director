@@ -9,12 +9,16 @@ $(document).ready(function() {
 
 	pageInitialized = true;
 });
-
+function ImageData(){
+	
+}
 function refresh_vm_images_Grid() {
+	var self = this;
+	
 	$("#vmGrid").html("")
 	$.ajax({
 		type : "GET",
-		url : endpoint + "imagesList/VM",
+		url : "/v1/images?deploymentType=VM",
 		accept : "application/json",
 		headers : {
 			'Accept' : 'application/json'
@@ -22,6 +26,87 @@ function refresh_vm_images_Grid() {
 		success : function(data, status, xhr) {
 			console.log("vm grid refreshed");
 			images = data.images;
+			var grid = [];
+			var tpid = "";
+			var tpdid = "";
+			for (i = 0; i < images.length; i++) { 
+				if(images[i].deleted){
+					continue;
+				}
+
+				tpid = "";
+				tpdid = "";
+				
+				self.gridData = new ImageData();
+				self.gridData.image_name = images[i].name;
+				self.gridData.policy_name = images[i].policy_name;
+				self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" onclick=\"deleteImage('"
+					+ images[i].id + "')\"/></a>";
+				
+				self.gridData.trust_policy = "<div id=\"trust_policy_vm_column"
+					+ images[i].id + "\">";
+
+				if (images[i].trust_policy_draft_id == null
+					&& images[i].trust_policy_id == null) {
+
+				self.gridData.trust_policy = self.gridData.trust_policy
+						+ "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicy('"
+						+ images[i].id + "','" + images[i].name
+						+ "')\"></span></a>";
+
+				}
+
+				if (images[i].trust_policy_draft_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicy('"
+						+ images[i].id + "','" + images[i].name
+						+ "')\"></span></a>";
+					tpdid = images[i].trust_policy_draft_id; 
+				} else if (images[i].trust_policy_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicy('"
+						+ images[i].id + "','" + images[i].name
+						+ "')\"></span></a>";
+				}
+
+				if (images[i].trust_policy_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicy('"
+						+ images[i].id + "','"
+						+ images[i].trust_policy_id + "')\"></span></a>";
+				}
+
+				if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyVM('"
+						+ images[i].trust_policy_id + "','"
+						+ images[i].trust_policy_draft_id+ "','"
+						+ images[i].id + "','" 
+						+ images[i].name
+						+ "')\"></span></a>";
+				}
+				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+				
+				self.gridData.image_upload = "";
+				if (images[i].uploads_count != 0) {
+					self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
+				} else {
+					self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
+				}
+
+				self.gridData.image_upload += "&nbsp;"
+					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" onclick=\"uploadToImageStorePage('"
+					+ images[i].id + "','" + images[i].name + "','"
+					+ images[i].trust_policy_id + "')\" ></span></a>";
+
+				self.gridData.created_date = images[i].created_date;
+
+				
+				
+				self.gridData.image_format = images[i].image_format;
+				grid.push(self.gridData);
+
+			}
 			$("#vmGrid").jsGrid({
 
 				height : "auto",
@@ -30,7 +115,7 @@ function refresh_vm_images_Grid() {
 				paging : true,
 				pageSize : 10,
 				pageButtonCount : 15,
-				data : images,
+				data : grid,
 				fields : [ {
 					title : "Delete",
 					name : "image_delete",
@@ -45,7 +130,7 @@ function refresh_vm_images_Grid() {
 					align : "center"
 				}, {
 					title : "Policy Name",
-					name : "display_name",
+					name : "policy_name",
 					type : "text",
 					width : 200,
 					align : "center"
@@ -83,7 +168,9 @@ function refresh_vm_images_Grid() {
 
 		},
 		error : function(jqXHR, exception) {
-			alert("Failed to get images list");
+		show_error_trust_policy_tab("Failed to get images list");
+
+			
 		}
 	});
 
