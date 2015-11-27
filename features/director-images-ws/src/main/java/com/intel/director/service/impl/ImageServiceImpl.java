@@ -1366,9 +1366,9 @@ public class ImageServiceImpl implements ImageService {
 						.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
 								+ patchFile
 								+ "\" Include=\""
-								+ searchFilesInImageRequest.include
+								+ (searchFilesInImageRequest.include == null ? "":searchFilesInImageRequest.include)
 								+ "\" Exclude=\""
-								+ searchFilesInImageRequest.exclude
+								+ (searchFilesInImageRequest.exclude == null? "":searchFilesInImageRequest.exclude)
 								+ "\""
 								+ recursiveAttr + "/></add>");
 
@@ -2083,16 +2083,20 @@ public class ImageServiceImpl implements ImageService {
 					e1);
 		}
 
-		Measurement measurement = null;
 		Collection<Measurement> measurements = new ArrayList<>();
 		for (MeasurementType measurementType : manifest.getManifest()) {
 			if (measurementType instanceof DirectoryMeasurementType) {
-				measurement = new DirectoryMeasurement();
+				DirectoryMeasurement measurement = new DirectoryMeasurement();
+				measurement.setPath(measurementType.getPath());
+				measurement.setExclude(((DirectoryMeasurementType) measurementType).getExclude());
+				measurement.setInclude(((DirectoryMeasurementType) measurementType).getInclude());
+				measurement.setRecursive(((DirectoryMeasurementType) measurementType).isRecursive());				
+				measurements.add(measurement);
 			} else if (measurementType instanceof FileMeasurementType) {
-				measurement = new FileMeasurement();
+				FileMeasurement measurement = new FileMeasurement();
+				measurement.setPath(measurementType.getPath());
+				measurements.add(measurement);
 			}
-			measurement.setPath(measurementType.getPath());
-			measurements.add(measurement);
 		}
 		policy.getWhitelist().getMeasurements().addAll(measurements);
 		String policyXmlWithImports = null;
