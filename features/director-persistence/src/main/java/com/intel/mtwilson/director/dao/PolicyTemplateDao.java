@@ -99,7 +99,9 @@ public class PolicyTemplateDao {
 					info.setName((String) imageObj[1]);
 					info.setDeployment_type((String) imageObj[2]);
 					info.setPolicy_type((String) imageObj[3]);
-					info.setContent((String) imageObj[4]);
+					if(imageObj[4]!=null){
+					info.setContent((new Mapper()).toCharacterArray((String)imageObj[4]));
+					}
 					info.setActive((boolean) imageObj[5]);
 					info.setDeployment_type_identifier((String)imageObj[6]);
 					mwPolicyTemplate.add(info);
@@ -154,7 +156,9 @@ public class PolicyTemplateDao {
 					info.setName((String) imageObj[1]);
 					info.setDeployment_type((String) imageObj[2]);
 					info.setPolicy_type((String) imageObj[3]);
-					info.setContent((String) imageObj[4]);
+					if(imageObj[4]!=null){
+						info.setContent((new Mapper()).toCharacterArray((String)imageObj[4]));
+					}					
 					info.setActive((boolean) imageObj[5]);
 					mwPolicyTemplate.add(info);
 				}

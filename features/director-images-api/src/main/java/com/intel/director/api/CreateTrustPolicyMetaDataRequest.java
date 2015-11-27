@@ -14,7 +14,7 @@ public class CreateTrustPolicyMetaDataRequest {
 	
 	public String deployment_type;
 	
-public boolean encrypted=false;
+	public boolean encrypted=false;
 
     public String image_name;
 

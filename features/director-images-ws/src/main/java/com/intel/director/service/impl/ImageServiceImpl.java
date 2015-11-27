@@ -512,15 +512,17 @@ public class ImageServiceImpl implements ImageService {
 
 		String mountPath = DirectorUtil
 				.getMountPath(searchFilesInImageRequest.id);
-		log.info("Browsing files for on image mounted at : " + mountPath);
+		
 
 		mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
-		log.info("NOW Browsing files for on image mounted at : " + mountPath);
+		log.info("Browsing files for on image mounted at : " + mountPath);
 
 		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
 		Collection<File> listFilesAndDirs = getFirstLevelFiles(searchFilesInImageRequest);
+		log.info("Get first level files");
 
 		List<Measurement> measurements = getMeasurements(searchFilesInImageRequest.id);
+		log.info("Get existing measurements");
 		// this map contains the directory paths as key. the value - boolean
 		// indicates whether all
 		// the sub files of these directory need to be fetched.
@@ -529,15 +531,18 @@ public class ImageServiceImpl implements ImageService {
 		Set<String> directoryListContainingRegex = new HashSet<String>();
 		init(trustPolicyElementsList, directoryListContainingPolicyFiles,
 				directoryListContainingRegex, searchFilesInImageRequest);
+		log.info("after init");
 
 		// Fetch the files
 		if (searchFilesInImageRequest.recursive) {
 			treeFiles = getFilesAndDirectories(
 					searchFilesInImageRequest.getDir(), null,
 					searchFilesInImageRequest.id);
+			log.info("calc treefiles in recursive");
 		} else {
 			if (listFilesAndDirs != null) {
 				treeFiles = listFilesAndDirs;
+				log.info("calc treefiles w/o recursive");
 			}
 		}
 
@@ -551,17 +556,21 @@ public class ImageServiceImpl implements ImageService {
 
 		createListOfFileNamesForTree(searchFilesInImageRequest, treeFiles,
 				fileNames, directoryListContainingPolicyFiles.keySet());
+		log.info("create list of file name for tree");
 
 		// Now add the exploded file view in case of edit
 		Set<String> dirsForEdit = new HashSet<String>();
 
 		for (String dirPath : directoryListContainingPolicyFiles.keySet()) {
+			log.info("calc treefiles for dir : "+dirPath);
+			
 			if (directoryListContainingPolicyFiles.get(dirPath)) {
-				List<File> filesAndDirectories = getFilesAndDirectories(
+				List<File> filesAndDirectories = getFilesAndDirectoriesForEdit(
 						dirPath, dirsForEdit, searchFilesInImageRequest.id);
 				createListOfFileNamesForTree(searchFilesInImageRequest,
 						filesAndDirectories, fileNames,
 						directoryListContainingPolicyFiles.keySet());
+				log.info("calc treefiles in recursive edit mode");
 			} else {
 
 				Collection<File> firstLevelFiles = getFirstLevelFiles(dirPath,
@@ -570,14 +579,16 @@ public class ImageServiceImpl implements ImageService {
 					createListOfFileNamesForTree(searchFilesInImageRequest,
 							firstLevelFiles, fileNames);
 				}
+				log.info("calc treefiles in recursive edit mode else");
 			}
 		}
 
 		String parent = searchFilesInImageRequest.getDir();
 		TreeNode root = new TreeNode(parent, parent);
-
+		log.info("Create root node");
 		Tree tree = new Tree(root, searchFilesInImageRequest.recursive,
 				searchFilesInImageRequest.files_for_policy);
+		log.info("Create tree");
 		root.parent = tree;
 		tree.mountPath = mountPath;
 		tree.directoryListContainingRegex = directoryListContainingRegex;
@@ -633,19 +644,22 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		tree.setTrustPolicyElementsList(trustPolicyElementsList);
+		log.info("set seleceted files for tree");
 		tree.setDirPathsForEdit(dirsForEdit);
-
+		log.info("set dirs for edit");
 		for (String data : fileNames) {
 			tree.addElement(data);
 		}
 
 		tree.printTree();
+		log.info("print tree");
 
 		// Create patch to be sent in case of directory selection or regex
 		buildPatch(patchDirAddSet, patchFileAddSet, patchFileRemoveSet,
 				measurements, searchFilesInImageRequest, filesInImageResponse);
-
+		log.info("build patch");
 		filesInImageResponse.files = tree.treeElementsHtml;
+		log.info("return");
 		return filesInImageResponse;
 
 	}
@@ -858,6 +872,12 @@ public class ImageServiceImpl implements ImageService {
 		log.info("Got the hashes for the selected files ::" + image_id);
 		// Calculate image hash and add to encryption tag
 		if (policy != null && policy.getEncryption() != null) {
+			if(!policy.getEncryption().getKey().getValue().contains("keys")){
+				throw new DirectorException("Unable to fetch key from KMS");
+			}
+			if(!policy.getEncryption().getKey().getValue().contains("keys")){
+				throw new DirectorException("Unable to fetch key from KMS");
+			}
 			File imgFile = new File(image.getLocation() + image.getName());
 			log.info("Calculating MD5 of file : " + image.getLocation()
 					+ image.getName());
@@ -1121,6 +1141,9 @@ public class ImageServiceImpl implements ImageService {
 							.savePolicyDraft(trustPolicyDraft);
 					log.debug("policy draft created from existing policy, policyDraftCreatedId::"
 							+ policyDraftCreated.getId());
+					createPolicyMetadataResponse.setId(policyDraftCreated.getId());
+					createPolicyMetadataResponse.setTrustPolicy(policyDraftCreated
+							.getTrust_policy_draft());
 				}
 
 			} else {
@@ -1833,6 +1856,25 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return files;
 	}
+	
+	private List<File> getFilesAndDirectoriesForEdit(String sDir, Set<String> dirs,
+			String imageId) throws DirectorException {
+		if (files == null) {
+			files = new ArrayList<>();
+		}
+		if (dirs != null) {
+			dirs.add(sDir);
+		}
+		Collection<File> faFiles = getFirstLevelFiles(sDir, imageId);
+
+		if (faFiles == null) {
+			return files;
+		}
+		for (File file : faFiles) {
+			files.add(file);
+		}
+		return files;
+	}
 
 	private Collection<File> getFilesAndDirectoriesWithFilter(
 			SearchFilesInImageRequest searchFilesInImageRequest) {
@@ -1995,11 +2037,13 @@ public class ImageServiceImpl implements ImageService {
 		String idendifier = "NV";
 		String vrtmDirPath = "/opt/vrtm";
 		String tbootDirPath = "/opt/tbootxm";
+		String trustagentDirPath = "/opt/trustagent";
 		File vrtmDir = new File(TdaasUtil.getMountPath(imageId) + vrtmDirPath);
 		File tbootDir = new File(TdaasUtil.getMountPath(imageId) + tbootDirPath);
+		File trustagentDir = new File(TdaasUtil.getMountPath(imageId) + trustagentDirPath);
 		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
 			idendifier = "V";
-		}else if (tbootDir.exists() && tbootDir.isDirectory()) {
+		}else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists() && trustagentDir.isDirectory() ) {
 			idendifier = "NV";
 		}else{
 			throw new DirectorException("At least tboot must be installed");
@@ -2067,7 +2111,7 @@ public class ImageServiceImpl implements ImageService {
 		policyDraftForImage.setCreated_by_user_id(ShiroUtil.subjectUsername());
 
 		try {
-			imagePersistenceManager.savePolicyDraft(policyDraftForImage);
+			imagePersistenceManager.updatePolicyDraft(policyDraftForImage);
 		} catch (DbException e) {
 			log.error("Error saving policy draft for image after adding imports for IMAGE:  "
 					+ imageId);

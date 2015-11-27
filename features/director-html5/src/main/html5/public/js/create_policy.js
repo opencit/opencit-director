@@ -58,7 +58,7 @@ function CreateImageViewModel() {
 					$('body').removeClass("modal-open");
 					return;
 				}
-				current_trust_policy_draft_id=data.id;
+				current_trust_policy_draft_id = data.id;
 				var mountimage = {
 					"id" : current_image_id
 				}

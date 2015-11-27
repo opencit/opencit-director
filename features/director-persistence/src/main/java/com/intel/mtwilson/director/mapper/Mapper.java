@@ -710,7 +710,10 @@ public class Mapper {
 		if (policytemplate.getId() != null) {
 			mwpolicytemplate.setId(policytemplate.getId());
 		}
-		mwpolicytemplate.setContent(policytemplate.getContent());
+		mwpolicytemplate
+		.setContent(toCharacterArray(policytemplate.getContent()));
+		
+		
 		mwpolicytemplate
 				.setDeployment_type(policytemplate.getDeployment_type());
 		mwpolicytemplate.setActive(policytemplate.isActive());
@@ -723,7 +726,7 @@ public class Mapper {
 	public PolicyTemplateInfo toTransferObject(MwPolicyTemplate mwpolicytemplate) {
 		PolicyTemplateInfo policytemplate = new PolicyTemplateInfo();
 		policytemplate.setId(mwpolicytemplate.getId());
-		policytemplate.setContent(mwpolicytemplate.getContent());
+		policytemplate.setContent(fromCharacterArray(mwpolicytemplate.getContent()));
 		policytemplate.setDeployment_type(mwpolicytemplate.getDeployment_type());
 		policytemplate.setActive(mwpolicytemplate.isActive());
 		policytemplate.setName(mwpolicytemplate.getName());

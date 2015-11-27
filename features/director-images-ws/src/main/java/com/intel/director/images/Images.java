@@ -237,11 +237,35 @@ public class Images {
 	/**
 	 * Method similar to the getImages, but which only returns the image related
 	 * details without the HTML content which is specific to TDaaS
-	 *
-	 *
+	 * 
+	 * 
 	 * @param deployment_type
 	 *            - VM/BareMetal
 	 * @return List of image details
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/images
+	 * Input: deploymentType : VM
+	 * Output: {
+	 * "images": [
+	 * {
+	 * "created_by_user_id": "admin",
+	 * "created_date": "2015-11-10",
+	 * "edited_by_user_id": "admin",
+	 * "edited_date": "2015-11-12",
+	 * "id": "F9E2C446-2AA3-4620-8A76-60F43721FE10",
+	 * "name": "CIRROS_S_2.img",
+	 * "image_format": "qcow2",
+	 * "image_deployments": "VM",
+	 * "status": "Complete",
+	 * "sent": 13312,
+	 * "deleted": false,
+	 * "location": "/mnt/images/",
+	 * "trust_policy_id": "247d041e-f2ae-4746-9b9d-68c75a8834c3",
+	 * "uploads_count": 1
+	 * }
+	 * }]}
+	 * </pre>
 	 * @throws DirectorException
 	 * @throws DbException
 	 */
@@ -445,6 +469,13 @@ public class Images {
 	 *            filter, select all flag, init flag for first time load
 	 * @return returns HTML representation of the tree and the patch in some
 	 *         cases like regex and select all.
+	 *         
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/search
+	 * Input: QueryPAram : dir=/boot/&recursive=false&files_for_policy=false&init=false&include_recursive=false&reset_regex=false
+	 * Output: dir=/boot/&recursive=false&files_for_policy=false&init=false&include_recursive=false&reset_regex=false
+	 * </pre>
 	 * @throws DirectorException
 	 */
 
@@ -483,6 +514,13 @@ public class Images {
 	 * returned as JSON
 	 *
 	 * @return list of deployment types
+	 * 
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-deployments
+	 * Input: None
+	 * Output: {"image_deployments": [ {"name": "VM", "display_name": "Virtualized Server"}]}
+	 * </pre>
 	 */
 	@Path("image-deployments")
 	@GET
@@ -497,6 +535,13 @@ public class Images {
 	 * qcow2 as JSON
 	 *
 	 * @return list of image formats
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-formats
+	 * Input: None
+	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"}]}
+	 * </pre>
+
 	 */
 	@Path("image-formats")
 	@GET
@@ -508,8 +553,17 @@ public class Images {
 	/**
 	 * lookup method to fetch the launch policies. The current launch policies
 	 * that are returned are MeasureOnly and MeasureAndEnforce
-	 *
+	 * @param deployment_type
 	 * @return launch policy list
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-launch-policies
+	 * Input: QueryParam String deploymentType=VM
+	 * Output: { "image_launch_policies": [
+	 * {"name":"MeasureOnly","value":"Hash Only","image_deployments":["VM","BareMetal"]},
+	 * {"name":"MeasureAndEnforce","value":"Hash and enforce","image_deployments":["VM"]},
+	 * {"name":"encrypted","value":"Encryption","image_deployments":["VM"]}]}
+	 * </pre>
 	 */
 	@Path("image-launch-policies")
 	@GET
@@ -915,6 +969,30 @@ public class Images {
 		return trustpolicyresponse;
 	}
 	
+	/**
+	 * This method will fetch an image-action which has image_id on which actions are performed, 
+	 * list of actions to be performed, etc.
+	 * 
+	 * @param action_id
+	 * @return ImageActionObject.
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-actions
+	 * Input: action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
+	 * Output: {
+	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * "action_count": 2,
+	 * "action_completed": 2,
+	 * "action_size": 66570,
+	 * "action_size_max": 66570,
+	 * "action": [ { "status": "Complete","task_name": "Create Tar",  "execution_details": "Complete" },
+	 * { "status": "Complete", "storename": "Glance", "task_name": "Upload Tar", "execution_details": "Complete" }],
+	 * "current_task_status": "Complete",
+	 * "current_task_name": "Upload Tar" }
+	 * </pre>
+	 */
+	
 	@Path("image-actions/{action_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -923,6 +1001,24 @@ public class Images {
 		
 		return actionService.fetchImageAction(action_id);
 	}
+	
+	/**
+	 * This method will create an image-action.
+	 * Data required by this method is action_id and list of task and other parameter associated with it(Ex. store_name in case of Upload Tar task). 
+	 * Output will contain action_id.
+	 * 
+	 * @param ImageActionRequest
+	 * @return Output will contain action_id.
+	 * @TDMethodType POST
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-actions
+	 * Input: { "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
+	 * "actions":[ {"task_name":"Create Tar","status":"Incomplete"},
+	 * {"task_name":"Upload Tar","status":"Incomplete","storename":"Glance"}]
+	 * }
+	 * Output: { "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057", "image_id": "08EB37D7-2678-495D-B485-59233EB51996", "status": "success"}
+	 * </pre>
+	 */
 	
 	@Path("image-actions")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -943,6 +1039,24 @@ public class Images {
 		imageActionResponse.setImage_id(imageActionObject.getImage_id());
 		return imageActionResponse;
 	}
+	/**
+	 * This method will update existing image-action.
+	 * Data required by this method is action_id and list of task and other parameter associated with it(Ex. store_name in case of Upload Tar task). 
+	 * Output will contain updated action_id.
+	 * 
+	 * @param ImageActionRequest
+	 * @return Status of update operation
+	 * @TDMethodType PUT
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-actions
+	 * Input: { “action_id”: “CF0A8FA3-F73E-41E9-8421-112FB22BB057”
+	 * "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
+	 * "actions":[ {"task_name":"Create Tar","status":"Incomplete"},
+	 * {"task_name":"Upload Tar","status":"Incomplete","storename":"Glance"}]
+	 * }
+	 * Output: { "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057", "image_id": "08EB37D7-2678-495D-B485-59233EB51996", "status": "success"}
+	 * </pre>
+	 */
 	
 	@Path("image-actions")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -963,7 +1077,20 @@ public class Images {
 		imageActionResponse.setImage_id(imageActionObject.getImage_id());
 		return imageActionResponse;
 	}
-	
+	/**
+	 * This method will delete existing image-action. Data required by this method is action_id. 
+	 * Output will contain status of delete task initated.
+	 * 
+	 * @param imageActionRequest
+	 * @return Status of delete operation
+	 * @TDMethodType DELETE
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-actions
+	 * Input: {"action_id":"CF0A8FA3-F73E-41E9-8421-112FB22BB057","image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
+	 * Output: { "status": "success"}
+	 * </pre>
+
+	 */
 	@Path("image-actions")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

@@ -62,7 +62,6 @@ public class MountImage {
 
 			log.error("Error in mounting remote host" + e);
 		}
-		log.error("Error in mounting remote host");
 		return exitcode;
 	}
 

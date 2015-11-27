@@ -185,11 +185,13 @@ public abstract class UploadTask extends ImageActionTask {
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
 			int size = (int) (content.length() / 1024);
+			double dataSize =  (content.length() / 1024);
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = imageStoreUploadResponse.getSent() / 1024;
-			while (sent != size) {
+			int sent = (int)imageStoreUploadResponse.getSent() / 1024;
+			double dataSent =  imageStoreUploadResponse.getSent() / 1024;
+			while (dataSent != dataSize) {
 
 				log.debug("##################Inside while loop size::" + size
 						+ " sent::" + sent);
@@ -221,9 +223,8 @@ public abstract class UploadTask extends ImageActionTask {
 				}
 				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
 						glanceId);
-				sent = imageStoreUploadResponse.getSent() / 1024;
-				// / Thread.sleep(2000);
-
+				dataSent = imageStoreUploadResponse.getSent() / 1024;
+				sent = (int)imageStoreUploadResponse.getSent() / 1024;
 			}
 
 			imgAttrs = new ImageAttributes();

@@ -15,67 +15,8 @@ function SelectDirectoriesViewModel() {
 
 	self.selectDirectoriesSubmit = function(loginFormElement) {
 		clearInterval(refreshIntervalId );
+		nextButtonClicked = true;
 		editPolicyDraft();
-		while(canPushPatch == false){
-			console.log("Waiting for edit to complete");
-		}
-
-		var createTrustPolicyMetaData = {
-			"imageid" : current_image_id
-		}
-		$.ajax({
-			type : "POST",
-			url : "/v1/rpc/trust-policies",
-			contentType : "application/json",
-			dataType : "text",
-			headers : {
-				'Accept' : 'application/json'
-			},
-			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
-			success : function(data) {
-				var mountimage = {
-					"id" : current_image_id
-				}
-				if(data == "ERROR")
-				{
-					current_image_action_id = "";
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-							$("#error_modal_bm_live_2").modal({backdrop: "static"});
-								$('body').removeClass("modal-open");
-							console.log("Unmount successfully")
-
-						}
-					});
-				}
-				else
-				{
-					current_image_action_id = data;
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-		
-							console.log("Unmount successfully")
-							nextButtonLiveBM();
-						}
-					});
-				}
-			}
-		});
-
 	}
 
 };
@@ -129,7 +70,7 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
-						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png");
+						"/v1/html5/public/director-html5/images/arrow-right.png");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -180,7 +121,7 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
-						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
+						"/v1/html5/public/director-html5/images/arrow-right.png");
 
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -220,14 +161,14 @@ var pageInitialized = false;
 var patches = [];
 var temp_patches = [];
 var canPushPatch = true;
+var nextButtonClicked = false;
+
 
 
 var refreshIntervalId = setInterval(function() {
-var d = new Date();
-var n = d.getTime();
-
+	var d = new Date();
+	var n = d.getTime();
 	console.log("TImer - EDIT -- "+n);
-
 	editPolicyDraft();
 }, 10000);
 
@@ -252,6 +193,9 @@ var editPolicyDraft = function() {
 
 	if (patches.length == 0 && temp_patches.length == 0) {
 		canPushPatch = true;
+		if(nextButtonClicked){
+			createPolicy();
+		}
 		return;
 	}
 	
@@ -294,7 +238,7 @@ var editPolicyDraft = function() {
 			}, 3000); // 3 seconds later, hide
 			// and clear the message
 			console.log("success after edit draft");
-			//removeDuplicates(data);
+			createPolicy();
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			canPushPatch = true;
@@ -305,6 +249,7 @@ var editPolicyDraft = function() {
 			setTimeout(function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
+			createPolicy();
 		}
 	});
 }
@@ -396,15 +341,71 @@ function backToBMLiveFirstPage()
 	}
 }
 
-/*
-function removeDuplicates(data){
-	console.log("removeDuplicates ******* :: "+data);
+function createPolicy(){
+	if(nextButtonClicked == false){
+		return;
+	}else{
+		nextButtonClicked = false;
+		patches.length = 0;	
+	}
 	
-    $(data).find('File').each(function(){
-        var $entry = $(this);
-        var path = $entry.attr('Path');
-        console.log("&&& : "+ path);
-    })
+		var createTrustPolicyMetaData = {
+			"imageid" : current_image_id
+		}
+		$.ajax({
+			type : "POST",
+			url : "/v1/rpc/trust-policies",
+			contentType : "application/json",
+			dataType : "text",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
+			success : function(data) {
+				var mountimage = {
+					"id" : current_image_id
+				}
+				if(data == "ERROR")
+				{
+					current_image_action_id = "";
+					$.ajax({
+						type : "POST",
+						url : "/v1/rpc/unmount-image",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : JSON.stringify(mountimage),
+						success : function(data, status, xhr) {
+							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+								$('body').removeClass("modal-open");
+							console.log("Unmount successfully")
+
+						}
+					});
+				}
+				else
+				{
+					current_image_action_id = data;
+					$.ajax({
+						type : "POST",
+						url : "/v1/rpc/unmount-image",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : JSON.stringify(mountimage),
+						success : function(data, status, xhr) {
+		
+							console.log("Unmount successfully")
+							nextButtonLiveBM();
+						}
+					});
+				}
+			}
+		});
+
 
 }
-*/
+
+

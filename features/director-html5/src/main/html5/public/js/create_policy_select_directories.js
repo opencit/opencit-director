@@ -1,84 +1,22 @@
 var endpoint = "/v1/images/";
 
 function SelectDirectoriesMetaData(data) {
-
+	
 	this.imageid = current_image_id;
-
+	
 }
 
 function SelectDirectoriesViewModel() {
 	var self = this;
-
+	
 	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
-
+	
 	self.selectDirectoriesSubmit = function(loginFormElement) {
-		var createTrustPolicyMetaData = {
-			"imageid" : current_image_id
-		}
-clearInterval(refreshIntervalId );
-		console.log("SUBMIT - EDIT");
+		clearInterval(refreshIntervalId );
+		navButtonClicked = true;
 		editPolicyDraft();
-console.log("AFTER- EDIT");
-		while(canPushPatch == false){
-			console.log("Waiting for edit to complete");
-		}
-
-		$.ajax({
-			type : "POST",
-			url : "/v1/rpc/trust-policies",
-			contentType : "application/json",
-			dataType : "text",
-			headers : {
-				'Accept' : 'application/json'
-			},
-			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
-			success : function(data) {
-					var mountimage = {
-						"id" : current_image_id
-						}
-				
-				if(data.toUpperCase() == "ERROR")
-				{
-					current_image_action_id = "";
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-							$("#error_modal_vm_2").modal({backdrop: "static"});
-								$('body').removeClass("modal-open");
-							console.log("ERROR and Unmount successfully")
-
-						}
-					});
-				}
-				else
-				{
-					current_image_action_id = data;
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-		
-							console.log("Unmount successfully")							
-							nextButton();
-						}
-					});
-				}
-			}
-		});
-
 	}
-
+	
 };
 
 function ApplyRegexMetaData(data) {
@@ -87,20 +25,20 @@ function ApplyRegexMetaData(data) {
 	this.create_policy_regex_exclude = ko.observable("");
 	this.create_policy_regex_include = ko.observable("");
 	this.create_policy_regex_includeRecursive = ko.observable("");
-
+	
 	this.selected_image_format = ko.observable();
-
+	
 }
 
 function ApplyRegExViewModel() {
 	var self = this;
-
+	
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
-
+	
     self.resetRegEx = function(event) {
 		var sel_dir = $("#sel_dir").val();
 		
-
+		
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
 			root : '/',
@@ -114,7 +52,7 @@ function ApplyRegExViewModel() {
 			filesForPolicy : false,
 			reset_regex : true
 		};
-
+		
 		var len = node.parent().children().length;
 		var counter = 0;
 		node.parent().children().each(function() {
@@ -122,21 +60,21 @@ function ApplyRegExViewModel() {
 				$(this).remove();
 			}
 		});
-
+		
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
-				'selected');
-
+		'selected');
+		
 		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/arrow-right.png");
-
+		.attr(
+		"src",
+		"/v1/html5/public/director-html5/images/arrow-right.png");
+		
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
-				rootRegexDir) {
+		rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});        
-    }
+	}
     
 	self.applyRegEx = function(loginFormElement) {
 		var include = loginFormElement.create_policy_regex_include.value;
@@ -166,7 +104,7 @@ function ApplyRegExViewModel() {
 			include_recursive : includeRecursive,
 			exclude : exclude
 		};
-
+		
 		var len = node.parent().children().length;
 		var counter = 0;
 		node.parent().children().each(function() {
@@ -174,22 +112,22 @@ function ApplyRegExViewModel() {
 				$(this).remove();
 			}
 		});
-
+		
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
-				'selected');
-
+		'selected');
+		
 		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/features/director-html5/mtwilson-core-html5/content/images/locked.png");
-
+		.attr(
+		"src",
+		"/v1/html5/public/director-html5/images/locked.png");
+		
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
-				rootRegexDir) {
+		rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
 	}
-
+	
 };
 
 function toggleState(str) {
@@ -207,7 +145,7 @@ function toggleState(str) {
 		$('#regexPanel').addClass('hidden');
 		$('#directoryTree').addClass('col-md-12');
 		$('#directoryTree').removeClass('col-md-8');
-	} else {
+		} else {
 		$('#regexPanel').addClass('col-md-4');
 		$('#regexPanel').addClass('open');
 		$('#regexPanel').removeClass('hidden');
@@ -221,13 +159,14 @@ var pageInitialized = false;
 var patches = [];
 var temp_patches = [];
 var canPushPatch = true;
+var navButtonClicked = false;
 
 var refreshIntervalId = setInterval(function() {
-var d = new Date();
-var n = d.getTime();
-
+	var d = new Date();
+	var n = d.getTime();
+	
 	console.log("TImer - EDIT -- "+n);
-
+	
 	editPolicyDraft();
 }, 10000);
 
@@ -240,21 +179,25 @@ function editPatchWithDataFromServer(patch) {
 		}
 	}
 	console.log("Server patch - EDIT");
-
+	
 	editPolicyDraft();
 }
 
 
 
 var editPolicyDraft = function() {
+console.log("interval Id : "+refreshIntervalId);
 	if(canPushPatch == false){
 		return;
 	}else{
 		canPushPatch = false;
 	}
-
+	
 	if (patches.length == 0 && temp_patches.length == 0) {
 		canPushPatch = true;
+		if(navButtonClicked){
+			createPolicy();
+		}
 		return;
 	}
 	
@@ -265,7 +208,7 @@ var editPolicyDraft = function() {
 		temp_patches.length = 0;		
 	}
 	
-
+	
 	var patchBegin = "<patch>";
 	var patchEnd = "</patch>";
 	var patchesStr = "";
@@ -273,20 +216,20 @@ var editPolicyDraft = function() {
 		var addRemoveXml = patches[i];
 		patchesStr = patchesStr.concat(addRemoveXml);
 	}
-
+	
 	var finalPatch = patchBegin.concat(patchesStr, patchEnd);
-
+	
 	var formData = JSON.stringify({
 		patch : finalPatch
-		});
-
+	});
+	
 	$.ajax({
 		type : "PUT",
 		url : "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
 		data : formData,
 		contentType : "application/json",
 		success : function(data, status) {
-console.log("Patch applied");
+			console.log("Patch applied");
 			canPushPatch = true;
 			patches.length = 0;
 			// Show message in div
@@ -296,6 +239,7 @@ console.log("Patch applied");
 			setTimeout(function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
+			createPolicy();
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			canPushPatch = true;
@@ -306,38 +250,39 @@ console.log("Patch applied");
 			setTimeout(function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
+			createPolicy();
 		}
 	});
 }
 
 $(document)
-		.ready(
-				function() {
-					if (pageInitialized)
-						return;
-					$('#jstree2').fileTree(
-							{
-								root : '/',
-								dir : '/',
-								script : '/v1/images/'
-										+ current_image_id + '/search',
-								expandSpeed : 1000,
-								collapseSpeed : 1000,
-								multiFolder : true,
-								init : true,
-								loadMessage : "Loading..."
-							}, function(file, checkedStatus, rootRegexDir) {
-								editPatch(file, checkedStatus, rootRegexDir);
-							});
-
-					mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
-					mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
-
-					ko.applyBindings(mainViewModel, document
-							.getElementById("select_directories_page"));
-
-					pageInitialized = true;
-				});
+.ready(
+function() {
+	if (pageInitialized)
+	return;
+	$('#jstree2').fileTree(
+	{
+		root : '/',
+		dir : '/',
+		script : '/v1/images/'
+		+ current_image_id + '/search',
+		expandSpeed : 1000,
+		collapseSpeed : 1000,
+		multiFolder : true,
+		init : true,
+		loadMessage : "Loading..."
+		}, function(file, checkedStatus, rootRegexDir) {
+		editPatch(file, checkedStatus, rootRegexDir);
+	});
+	
+	mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
+	mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
+	
+	ko.applyBindings(mainViewModel, document
+	.getElementById("select_directories_page"));
+	
+	pageInitialized = true;
+});
 
 /* Patches processing */
 
@@ -352,28 +297,30 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 	var addPath = "'//*[local-name()=\"Whitelist\"]'";
 	var removePath = "'//*[local-name()=\"Whitelist\"]";
 	var pos = "prepend";
-
+	
 	if (rootRegexDir != "") {
 		if (checkedStatus == true) {
 			pos = "after";
 		}
 		addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-				+ rootRegexDir + "\"]'";
+		+ rootRegexDir + "\"]'";
 	}
-
+	
 	if (checkedStatus == true) {
-
+		
 		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
-				+ "><File Path=\"" + file + "\"/></add>";
-	} else {
+		+ "><File Path=\"" + file + "\"/></add>";
+		} else {
 		addRemoveXml = "<remove sel=" + removePath
-				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
+		+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
 	}
 	whichPatchToUse.push(addRemoveXml);
 }
 
 function backToFirstPage()
 {
+	clearInterval(refreshIntervalId );
+
 	var mountimage = {
 		"id" : current_image_id
 	}
@@ -393,3 +340,73 @@ function backToFirstPage()
 		});
 	}
 }
+
+
+
+function createPolicy(){
+	if(navButtonClicked == false){
+		return;
+	} else {
+		navButtonClicked = false;
+	}
+	var createTrustPolicyMetaData = {
+		"imageid" : current_image_id
+	}
+	$.ajax({
+		type : "POST",
+		url : "/v1/rpc/trust-policies",
+		contentType : "application/json",
+		dataType : "text",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
+		success : function(data) {
+			var mountimage = {
+				"id" : current_image_id
+			}
+			
+			if(data.toUpperCase() == "ERROR")
+			{
+				current_image_action_id = "";
+				$.ajax({
+					type : "POST",
+					url : "/v1/rpc/unmount-image",
+					contentType : "application/json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					data : JSON.stringify(mountimage),
+					success : function(data, status, xhr) {
+						$("#error_modal_vm_2").modal({backdrop: "static"});
+						$('body').removeClass("modal-open");
+						console.log("ERROR and Unmount successfully")
+						
+					}
+				});
+			}
+			else
+			{
+				current_image_action_id = data;
+				$.ajax({
+					type : "POST",
+					url : "/v1/rpc/unmount-image",
+					contentType : "application/json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					data : JSON.stringify(mountimage),
+					success : function(data, status, xhr) {
+						
+						console.log("Unmount successfully")							
+						nextButton();
+					}
+				});
+			}
+		}
+	});
+	
+	
+}
+
+

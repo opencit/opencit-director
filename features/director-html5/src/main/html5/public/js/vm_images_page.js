@@ -322,7 +322,8 @@ function deleteImage(imageid) {
 		url : "/v1/images/" + imageid,
 		dataType : "text",
 		success : function(result) {
-			refresh_vm_images_Grid();			
+			refresh_vm_images_Grid();	
+			refreshBMOnlineGrid();
 		}
 	});
 

@@ -152,6 +152,9 @@ public class TdaasUtil {
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
 		String mountPath = TdaasUtil.getMountPath(imageId);
 		File parent = new File(filePath).getParentFile();
+		if(parentsList.containsKey(parent.getAbsolutePath().replace(mountPath, ""))){
+			return;
+		}
 		if (parent == null
 				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
 			return;
@@ -696,10 +699,12 @@ public class TdaasUtil {
 
 		for (Measurement measurement : measurements) {
 			if (measurement instanceof DirectoryMeasurement) {
+				DirectoryMeasurement directoryMeasurement = (DirectoryMeasurement) measurement;
 				DirectoryMeasurementType directoryMeasurementType = new DirectoryMeasurementType();
 				directoryMeasurementType.setPath(measurement.getPath());
-				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude());
+				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude()); 
 				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
+				directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
 				manifestList.add(directoryMeasurementType);
 				
 			} else if (measurement instanceof FileMeasurement) {
