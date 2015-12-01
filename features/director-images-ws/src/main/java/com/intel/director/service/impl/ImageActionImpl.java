@@ -8,7 +8,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.TrustPolicy;
@@ -127,9 +127,9 @@ public class ImageActionImpl implements ImageActionService {
 		imageAction.setAction_size(0);
 		imageAction.setAction_size_max(1);
 
-		List<ImageActionActions> list = new ArrayList<ImageActionActions>();
+		List<ImageActionTask> list = new ArrayList<ImageActionTask>();
 		if (policy != null && policy.getEncryption() != null) {
-			ImageActionActions imageActions = new ImageActionActions();
+			ImageActionTask imageActions = new ImageActionTask();
 			imageActions.setTask_name(Constants.TASK_NAME_ENCRYPT_IMAGE);
 			imageActions.setStatus(Constants.INCOMPLETE);
 			imageAction.setAction_count(imageAction.getAction_count() + 1);
@@ -137,16 +137,17 @@ public class ImageActionImpl implements ImageActionService {
 			list.add(imageActions);
 		}
 
-		for (ImageActionActions action : imageActionRequest.getActions()) {
-			ImageActionActions imageActions = new ImageActionActions();
+		for (ImageActionTask action : imageActionRequest.getActions()) {
+			ImageActionTask imageActions = new ImageActionTask();
 			if (action.getTask_name() != null) {
 				imageActions.setTask_name(action.getTask_name());
 			}
 			if (action.getStatus() != null) {
-				imageActions.setStatus(StringUtils.isNotBlank(action.getStatus()) ? action
-						.getStatus() : Constants.INCOMPLETE);
+				imageActions.setStatus(StringUtils.isNotBlank(action
+						.getStatus()) ? action.getStatus()
+						: Constants.INCOMPLETE);
 			}
-			if(action.getStorename() != null){
+			if (action.getStorename() != null) {
 				imageActions.setStorename(action.getStorename());
 			}
 
@@ -176,9 +177,9 @@ public class ImageActionImpl implements ImageActionService {
 		}
 		imageAction.setAction_count(imageAction.getAction_count()
 				+ imageActionRequest.getActions().size());
-		List<ImageActionActions> list = new ArrayList<ImageActionActions>();
-		for (ImageActionActions action : imageActionRequest.getActions()) {
-			ImageActionActions imageActions = new ImageActionActions();
+		List<ImageActionTask> list = new ArrayList<ImageActionTask>();
+		for (ImageActionTask action : imageActionRequest.getActions()) {
+			ImageActionTask imageActions = new ImageActionTask();
 			imageActions.setTask_name(action.getTask_name());
 			imageActions
 					.setStatus(StringUtils.isNotBlank(action.getStatus()) ? action
@@ -195,13 +196,8 @@ public class ImageActionImpl implements ImageActionService {
 			throw new DirectorException("Error while updating image action", e);
 		}
 
-		try {
-			return persistService
-					.fetchImageActionById(imageActionRequest.action_id);
-		} catch (DbException e) {
-			log.error("Error while fetching image action" + e);
-			throw new DirectorException("Error while fetching image action", e);
-		}
+		return imageAction;
+
 	}
 
 	@Override

@@ -25,7 +25,7 @@ import com.intel.mtwilson.director.features.director.kms.KmsUtil;
  * 
  * @author GS-0681
  */
-public class EncryptImageTask extends ImageActionTask {
+public class EncryptImageTask extends ImageActionAsyncTask {
 
 	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(EncryptImageTask.class);

@@ -49,7 +49,7 @@ public class CreateTrustPolicy {
 	 * @throws CryptographyException
 	 * @throws IOException
 	 */
-	public static void createTrustPolicy(TrustPolicy trustPolicy)
+	public void createTrustPolicy(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
@@ -78,7 +78,7 @@ public class CreateTrustPolicy {
 	 * @throws IOException
 	 * @throws CryptographyException
 	 */
-	private static void addEncryption(TrustPolicy trustPolicy)
+	private void addEncryption(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException, JAXBException,
 			XMLStreamException {
 		// get DEK
@@ -114,20 +114,21 @@ public class CreateTrustPolicy {
 	 * @param trustPolicy
 	 * @return
 	 */
-	private static void addWhitelistValue(TrustPolicy trustPolicy)
+	private void addWhitelistValue(TrustPolicy trustPolicy)
 			throws IOException {
 		Whitelist whitelist = trustPolicy.getWhitelist();
 		List<Measurement> measurements = whitelist.getMeasurements();
 		String imageId = trustPolicy.getImage().getImageId();
 		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil();
-		List<String> invalidFiles = new ArrayList<>();
+		//List<String> invalidFiles = new ArrayList<>();
 		// Initialize cumulative hash
 		Digest cumulativeDigest = Digest.algorithm(
 				whitelist.getDigestAlg().value()).zero();
 
 		// Get file and directory hash and extend value to cumulative hash
+		Digest hash=null;
 		for (Measurement measurement : measurements) {
-			Digest hash;
+			hash=null;
 			if (measurement instanceof DirectoryMeasurement) {
 				hash = dirFileUtil.getDirectoryHash(imageId,
 						(DirectoryMeasurement) measurement, whitelist
@@ -137,7 +138,7 @@ public class CreateTrustPolicy {
 						(FileMeasurement) measurement, whitelist.getDigestAlg()
 								.value());
 				if (hash == null) {
-					invalidFiles.add(measurement.getPath());
+					//invalidFiles.add(measurement.getPath());
 					continue;
 				}
 

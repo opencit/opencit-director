@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
@@ -517,7 +517,7 @@ public class Mapper {
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
 
-		List<ImageActionActions> taskList = new ArrayList<>();
+		List<ImageActionTask> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();
 		if (actions != null) {
 			actions = actions.replace("[", "").replace("]", "");
@@ -527,9 +527,9 @@ public class Mapper {
 				if (!s.endsWith("}")) {
 					s = s.concat("}");
 				}
-				ImageActionActions fromJson;
+				ImageActionTask fromJson;
 				try {
-					fromJson = mapper.readValue(s, ImageActionActions.class);
+					fromJson = mapper.readValue(s, ImageActionTask.class);
 					log.debug("TASK CREATED : " + fromJson.toString());
 					taskList.add(fromJson);
 

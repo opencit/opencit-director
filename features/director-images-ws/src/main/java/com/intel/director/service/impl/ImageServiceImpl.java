@@ -821,7 +821,7 @@ public class ImageServiceImpl implements ImageService {
 
 	}
 
-	public String createTrustPolicy(String image_id) throws DirectorException {
+	public void createTrustPolicy(String image_id) throws DirectorException {
 
 		ImageAttributes image;
 
@@ -852,10 +852,15 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + image_id,
 					ex);
 		}
+		log.info("After saving trust policy for image_id::" + image_id);
+
 		// Get the hash
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		try {
+			log.info("Going to convert trust policy into string");
+
 			policy = TdaasUtil.getPolicy(policyXml);
+			log.info("After convert trust policy into string");
 		} catch (JAXBException e2) {
 			log.error("Unable to convert string into policy object : ",
 					policyXml);
@@ -863,7 +868,9 @@ public class ImageServiceImpl implements ImageService {
 					"Unable to convert policy string into object ", e2);
 		}
 		try {
-			CreateTrustPolicy.createTrustPolicy(policy);
+			log.info("Before calculating hashes");
+			new CreateTrustPolicy().createTrustPolicy(policy);
+			log.info("After calculating hashes");
 		} catch (CryptographyException | IOException e1) {
 			log.error("Unable to create trust policy- create hashes");
 			throw new DirectorException(
@@ -1035,7 +1042,6 @@ public class ImageServiceImpl implements ImageService {
 		}
 		log.info("trust policy succesfylly created , createdPolicyId::"
 				+ createdPolicy.getId());		
-		return "";
 	}
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -1043,8 +1049,15 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		CreateTrustPolicyMetaDataResponse createPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
 		try {
+				String imageid = createTrustPolicyMetaDataRequest.getImageid();
+			ImageAttributes img=imagePersistenceManager.fetchImageById(imageid);
+			if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
+					.getImage_deployments())) {
+				TdaasUtil.checkInstalledComponents(imageid);
+			}
+			
 			Date currentDate = new Date();
-			String imageid = createTrustPolicyMetaDataRequest.getImageid();
+		
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageid);
 
@@ -1764,8 +1777,13 @@ public class ImageServiceImpl implements ImageService {
 					+ imageInfo.getTrust_policy_id(), e);
 			throw new DirectorException("Cannot get policy by id", e);
 		}
-
-		TrustPolicyDraft trustPolicyDraft = trustPolicyToTrustPolicyDraft(existingTrustPolicy);
+		TrustPolicyDraft trustPolicyDraft=null ;
+		try {
+		trustPolicyDraft = trustPolicyToTrustPolicyDraft(existingTrustPolicy);
+		}catch(JAXBException e){
+			log.error("Unable convert policy to draft", e);
+			throw new DirectorException("Unable convert policy to draft ", e);
+		}
 		TrustPolicyDraft savePolicyDraft;
 		try {
 			trustPolicyDraft.setEdited_date(new Date());
@@ -1787,8 +1805,22 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	public TrustPolicyDraft trustPolicyToTrustPolicyDraft(
-			TrustPolicy existingTrustPolicy) {
+			TrustPolicy existingTrustPolicy) throws JAXBException {
 		TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
+		String policyXml = existingTrustPolicy.getTrust_policy();
+		
+
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+				.getPolicy(policyXml);
+		policy.setSignature(null);
+		List<Measurement> measurements = policy.getWhitelist()
+				.getMeasurements();
+		for (Measurement measurement : measurements) {
+			measurement.setValue(null);
+		}
+
+		policyXml = TdaasUtil.convertTrustPolicyToString(policy);
+
 		trustPolicyDraft.setCreated_by_user_id(existingTrustPolicy
 				.getCreated_by_user_id());
 		trustPolicyDraft.setCreated_date(existingTrustPolicy.getCreated_date());
@@ -1798,8 +1830,7 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyDraft.setName(existingTrustPolicy.getName());
 		trustPolicyDraft.setImgAttributes(existingTrustPolicy
 				.getImgAttributes());
-		trustPolicyDraft.setTrust_policy_draft(existingTrustPolicy
-				.getTrust_policy());
+		trustPolicyDraft.setTrust_policy_draft(policyXml);
 		trustPolicyDraft.setDisplay_name(existingTrustPolicy.getDisplay_name());
 		return trustPolicyDraft;
 	}
@@ -2034,20 +2065,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		// Check if mounted live BM has /opt/vrtm
-		String idendifier = "NV";
-		String vrtmDirPath = "/opt/vrtm";
-		String tbootDirPath = "/opt/tbootxm";
-		String trustagentDirPath = "/opt/trustagent";
-		File vrtmDir = new File(TdaasUtil.getMountPath(imageId) + vrtmDirPath);
-		File tbootDir = new File(TdaasUtil.getMountPath(imageId) + tbootDirPath);
-		File trustagentDir = new File(TdaasUtil.getMountPath(imageId) + trustagentDirPath);
-		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
-			idendifier = "V";
-		}else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists() && trustagentDir.isDirectory() ) {
-			idendifier = "NV";
-		}else{
-			throw new DirectorException("At least tboot must be installed");
-		}
+		String idendifier=TdaasUtil.checkInstalledComponents(imageId);
 
 		String content = null;
 		Manifest manifest;

@@ -166,7 +166,7 @@ public class PolicyTemplateDao {
 			}
 			return mwPolicyTemplate;
 		} catch (Exception e) {
-			throw new DbException("ImageDao,findMwImage() failed", e);
+			throw new DbException("PolicyTemplateDao,findDeploymentTypeByFilter() failed", e);
 		}
 
 		finally {

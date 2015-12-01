@@ -12,7 +12,7 @@ import org.apache.commons.configuration.BaseConfiguration;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -29,7 +29,7 @@ import com.intel.mtwilson.Folders;
  * @author Siddharth
  * 
  */
-public abstract class UploadTask extends ImageActionTask {
+public abstract class UploadTask extends ImageActionAsyncTask {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(UploadTask.class);
 	public File content = null;
@@ -175,7 +175,7 @@ public abstract class UploadTask extends ImageActionTask {
 			System.out.println("Inside runUpload Task filename::"
 					+ content.getName() + " imageProperties::"
 					+ imageProperties);
-			ImageActionActions imageActionTask = getImageActionTaskFromArray();
+			ImageActionTask imageActionTask = getImageActionTaskFromArray();
 			if (imageActionTask != null && imageActionTask.getUri() == null) {
 				glanceId = imageStoreManager.upload(content, imageProperties);
 

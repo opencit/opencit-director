@@ -104,7 +104,7 @@ function backToVmImagesPage() {
 	$("#upload_to_image_store_redirect").hide("");
 	$("#vm_images_grid_page").show();
 	var self = this;
-		var mountimage = { 
+	var mountimage = { 
 		"id" : current_image_id
 	};
 	current_trust_policy_draft_id='';

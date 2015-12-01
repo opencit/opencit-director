@@ -23,7 +23,7 @@ import com.intel.director.util.TdaasUtil;
  * 
  * @author GS-0681
  */
-public class CreateTarTask extends ImageActionTask {
+public class CreateTarTask extends ImageActionAsyncTask {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(CreateTarTask.class);

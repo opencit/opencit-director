@@ -90,36 +90,55 @@ function addhostandnext() {
 			self.createBMLiveMetaData.encrypted = false;
 			self.createBMLiveMetaData.display_name = $("#display_name_host").val();
 			self.createBMLiveMetaData.imageid = current_image_id ;
+			var mountimage = {
+						"id" : current_image_id
+					}
+
+
 			$.ajax({
 				type : "POST",
-				url : "/v1/trust-policy-drafts",
+				url : "/v1/rpc/mount-image",
 				contentType : "application/json",
 				headers : {
 					'Accept' : 'application/json'
 				},
-				data : ko.toJSON(self.createBMLiveMetaData), // $("#loginForm").serialize(),
+				data : JSON.stringify(mountimage),
 				success : function (data, status, xhr) {
 					if (data.status == "Error") {
 						show_error_in_bmlivemodal(data.details);
 						return;
 					}
-					current_trust_policy_draft_id=data.id;	
-					var mountimage = {
-						"id" : current_image_id
-					}
+					
 					$.ajax({
 						type : "POST",
-						url : "/v1/rpc/mount-image",
+						url : "/v1/trust-policy-drafts",
+
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
+						data : ko.toJSON(self.createBMLiveMetaData), 
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
 								show_error_in_bmlivemodal(data.details);
+								$.ajax({
+									type : "POST",
+									url : "/v1/rpc/unmount-image",
+									contentType : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									data : JSON.stringify(mountimage),
+									success : function(data, status, xhr) {
+										console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+										}
+									});
+		
+								
 								return;
 							}
+							current_trust_policy_draft_id=data.id;	
+
 							$.ajax({
 								type : "POST",
 								url : "/v1/rpc/policy-templates/" + current_image_id + "/apply",

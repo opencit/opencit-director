@@ -214,7 +214,7 @@ function createPolicyDraftFromPolicy() {
 	}
 	$.ajax({
 		type : "GET",
-		url : "/v1/rpc/" + current_image_id + "/recreatedraft",
+		url : "/v1/rpc/" + current_image_id + "/createDraftFromPolicy",
 		success : function(data, status, xhr) {
 			console.log("Draft Created Successfully");
 		}

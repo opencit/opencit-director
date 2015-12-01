@@ -110,38 +110,54 @@ return;
 			self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.editBMLiveMetaData.isEncrypted = false;
 			self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
-
+			var mountimage = {
+						"id" : current_image_id
+					}
 			$.ajax({
 				type : "POST",
-				url : "/v1/trust-policy-drafts",
+				url : "/v1/rpc/mount-image",
+
 				contentType : "application/json",
 				headers : {
 					'Accept' : 'application/json'
 				},
-				data : ko.toJSON(self.editBMLiveMetaData),
+				data :   JSON.stringify(mountimage),
 				success : function (data, status, xhr) {
 
 					if (data.status == "Error") {
 						show_error_in_editbmlivemodal(data.details);
 						return;
 					}
-					current_trust_policy_draft_id=data.id;
-					var mountimage = {
-						"id" : current_image_id
-					}
+					
+					
 					$.ajax({
 						type : "POST",
-						url : "/v1/rpc/mount-image",
+						url : "/v1/trust-policy-drafts",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
+						data : ko.toJSON(self.editBMLiveMetaData), 
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
 								show_error_in_editbmlivemodal(data.details);
+
+								$.ajax({
+									type : "POST",
+									url : "/v1/rpc/unmount-image",
+									contentType : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									data : JSON.stringify(mountimage),
+									success : function(data, status, xhr) {
+										console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+										}
+									});
+	
 								return;
 							}
+							current_trust_policy_draft_id=data.id;
 							nextButtonLiveBM();
 						}
 					});

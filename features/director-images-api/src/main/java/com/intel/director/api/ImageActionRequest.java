@@ -5,7 +5,7 @@ import java.util.List;
 public class ImageActionRequest {
 	public String image_id;
 	public String action_id;
-	List<ImageActionActions> actions ;
+	List<ImageActionTask> actions ;
 	public String getImage_id() {
 		return image_id;
 	}
@@ -18,10 +18,10 @@ public class ImageActionRequest {
 	public void setAction_id(String action_id) {
 		this.action_id = action_id;
 	}
-	public List<ImageActionActions> getActions() {
+	public List<ImageActionTask> getActions() {
 		return actions;
 	}
-	public void setActions(List<ImageActionActions> actions) {
+	public void setActions(List<ImageActionTask> actions) {
 		this.actions = actions;
 	}
 	

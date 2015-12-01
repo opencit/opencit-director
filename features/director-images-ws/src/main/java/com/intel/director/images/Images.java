@@ -138,7 +138,8 @@ public class Images {
 					+ uploadImageToTrustDirector.getLocation());
 
 			return uploadImageToTrustDirector;
-		} catch (DirectorException e) {
+		}
+		catch (DirectorException e) {
 			log.error("Error in Saving Image metadata", e);
 			throw new DirectorException("Error in Saving Image metadata", e);
 		}
@@ -174,8 +175,8 @@ public class Images {
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			@PathParam("image_id") String image_id, InputStream filInputStream) {
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector (
+			@PathParam("image_id") String image_id, InputStream filInputStream)  throws DirectorException{
 		log.info("Uploading image to TDaaS");
 		imageService = new ImageServiceImpl();
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
@@ -193,12 +194,10 @@ public class Images {
 			filInputStream.close();
 			return uploadImageToTrustDirector;
 
-		} catch (DirectorException | IOException e) {
+		}
+		catch (DirectorException | IOException e) {
 			log.error("Error while uploading image to Trust Director", e);
-			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-			uploadImageToTrustDirector
-					.setStatus("Error while uploading image to Trust Director");
-			return uploadImageToTrustDirector;
+			throw new DirectorException("Error in uploading image", e);
 		}
 	}
 
@@ -634,16 +633,15 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@POST
 	public String createTrustPolicy(CreateTrustPolicyMetaDataRequest createPolicyRequest) {
-		String ret = null;
 		try {
-			ret = imageService.createTrustPolicy(createPolicyRequest.imageid);
+			imageService.createTrustPolicy(createPolicyRequest.imageid);
 			imageService.deletePasswordForHost(createPolicyRequest.imageid);
 		} catch (DirectorException de) {
 			log.error("Error creating policy from draft for image : "
 					+ createPolicyRequest.imageid, de);
 			return "ERROR";
 		}
-		return ret;
+		return Constants.SUCCESS;
 	}
 
 	/**
@@ -750,12 +748,11 @@ public class Images {
 	 * @return
 	 * @throws DirectorException
 	 */
-	@Path("rpc/{imageId: [0-9a-zA-Z_-]+}/recreatedraft")
+	@Path("rpc/{imageId: [0-9a-zA-Z_-]+}/createDraftFromPolicy")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustPolicyDraft createPolicyDraftFromPolicy(
-			@PathParam("imageId") String imageId,
-			@QueryParam("action_id") String image_action_id)
+			@PathParam("imageId") String imageId)
 			throws DirectorException {
 		try {
 			return imageService.createPolicyDraftFromPolicy(imageId);
@@ -998,7 +995,6 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
 	public ImageActionObject fetchImageAction(@PathParam("action_id") String action_id ) throws DirectorException {
-		
 		return actionService.fetchImageAction(action_id);
 	}
 	

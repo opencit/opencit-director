@@ -10,15 +10,15 @@ public class ImageActionObject extends MonitorStatus {
 	private int action_completed;
 	private int action_size;
 	private int action_size_max;
-	private List<ImageActionActions> action;
+	private List<ImageActionTask> action;
 	private String current_task_status;
 	private String current_task_name;
 	
 	
-	public List<ImageActionActions> getAction() {
+	public List<ImageActionTask> getAction() {
 		return action;
 	}
-	public void setAction(List<ImageActionActions> action) {
+	public void setAction(List<ImageActionTask> action) {
 		this.action = action;
 	}
 	public String getId() {

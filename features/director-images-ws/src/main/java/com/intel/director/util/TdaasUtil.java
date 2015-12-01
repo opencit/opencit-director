@@ -614,6 +614,22 @@ public class TdaasUtil {
 
 	}
 
+	public static String checkInstalledComponents(String imageid) throws DirectorException{
+		String idendifier = "NV";
+		String vrtmDirPath = "/opt/vrtm";
+		String tbootDirPath = "/opt/tbootxm";
+		File vrtmDir = new File(getMountPath(imageid) +File.separator+ vrtmDirPath);
+		File tbootDir = new File(getMountPath(imageid) +File.separator+ tbootDirPath);
+		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
+			idendifier = "V";
+		}else if (tbootDir.exists() && tbootDir.isDirectory()) {
+			idendifier = "NV";
+		}else{
+			throw new DirectorException("Expected CIT components not present");
+		}
+		return idendifier;
+	}
+	
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
@@ -853,6 +869,4 @@ public class TdaasUtil {
 		return tpr;
 		
 	}
-	
-
 }

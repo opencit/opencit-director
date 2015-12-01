@@ -9,7 +9,7 @@ import javax.persistence.Query;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -82,9 +82,9 @@ public class ImageActionDao {
 
 				imgAction.setId((String) imageObj[0]);
 				imgAction.setImage_id((String) imageObj[1]);
-				TypeToken<List<ImageActionActions>> token = new TypeToken<List<ImageActionActions>>() {
+				TypeToken<List<ImageActionTask>> token = new TypeToken<List<ImageActionTask>>() {
 				};
-				List<ImageActionActions> actionlist = gson.fromJson(
+				List<ImageActionTask> actionlist = gson.fromJson(
 						(String) imageObj[2], token.getType());
 				imgAction.setAction(actionlist);
 				imgAction.setAction_count(Integer.parseInt(imageObj[3]

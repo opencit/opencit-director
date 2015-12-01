@@ -11,7 +11,7 @@ $(document).ready(function() {
 });
 function addHost() {
 
-current_image_id='';
+	current_image_id='';
 	goToCreatePolicyWizard2();
 }
 function ImageData(){

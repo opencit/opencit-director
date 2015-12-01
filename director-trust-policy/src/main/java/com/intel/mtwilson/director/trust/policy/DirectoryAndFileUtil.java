@@ -166,8 +166,9 @@ public class DirectoryAndFileUtil {
 		String filePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"
 				+ fileMeasurement.getPath();
 		filePath = getSymlinkValue(filePath);
-		if (filePath == null || !new File(filePath).exists())
+		if (filePath == null || !new File(filePath).exists()){
 			return null;
+		}
 		Digest digest = Digest.algorithm(measurementType).digest(
 				FileUtils.readFileToByteArray(new File(filePath)));
 		return digest;

@@ -72,22 +72,30 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
+        
+        
+        
         imagelaunchpolicy = new ImageLaunchPolicy();
         imagelaunchpolicy.image_deployments = new ArrayList<String>();
         imagelaunchpolicy.name = Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE;
         imagelaunchpolicy.value = "Hash and enforce";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
+        
+        
         imagelaunchpolicy = new ImageLaunchPolicy();
         imagelaunchpolicy.image_deployments = new ArrayList<String>();
         imagelaunchpolicy.name = "encrypted";
         imagelaunchpolicy.value = "Encryption";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
+        
+        
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         if(StringUtils.isEmpty(deployment_type)){
         	return imageLaunchPoliciesResponse;
         }
         ListImageLaunchPolicyResponse result = new ListImageLaunchPolicyResponse();
+        
         result.image_launch_policies = new ArrayList<ImageLaunchPolicy>();
         for(ImageLaunchPolicy image : imageLaunchPoliciesResponse.image_launch_policies){
         	if(image.image_deployments.contains(deployment_type)){
