@@ -11,16 +11,7 @@ $.ajax({
 	},
 	dataType : "json",
 	success : function(data, status, xhr) {
-		// / alert("getmetadata data::"+data);
 		showImageLaunchPolicies(data);
-
-		/*
-		 * imageFormats=data.image_formats;
-		 * 
-		 * var option=""; for (var i=0;i<imageFormats.length;i++){ option += '<option
-		 * value="'+ imageFormats[i] + '">' + imageFormats[i] + '</option>'; }
-		 * $('#image_format').append(option);
-		 */
 
 	}
 });

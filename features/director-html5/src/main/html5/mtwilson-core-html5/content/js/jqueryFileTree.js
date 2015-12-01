@@ -55,7 +55,6 @@ if(jQuery) (function($){
 					$(c).addClass('wait');
 
 					$(".jqueryFileTree.start").remove();
-					canPushPatch = false;
 					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude, reset_regex:treeOptions.reset_regex });
 					$.ajax({
 					  type: "POST",
