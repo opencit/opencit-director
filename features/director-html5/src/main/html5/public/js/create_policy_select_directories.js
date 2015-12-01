@@ -362,6 +362,7 @@ function createPolicy(){
 		},
 		data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 		success : function(data) {
+			current_trust_policy_id = data;
 			var mountimage = {
 				"id" : current_image_id
 			}

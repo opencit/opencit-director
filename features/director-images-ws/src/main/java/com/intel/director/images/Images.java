@@ -39,11 +39,11 @@ import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
-import com.intel.director.api.ImageStoreUploadRequest;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPoliciesResponse;
 import com.intel.director.api.ListImageLaunchPolicyResponse;
+import com.intel.director.api.MonitorStatus;
 import com.intel.director.api.MountImageRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
@@ -58,6 +58,7 @@ import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageActionService;
@@ -633,16 +634,52 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@POST
 	public String createTrustPolicy(CreateTrustPolicyMetaDataRequest createPolicyRequest) {
+		String ret = null;
 		try {
-			imageService.createTrustPolicy(createPolicyRequest.imageid);
+			ret = imageService.createTrustPolicy(createPolicyRequest.imageid);
 			imageService.deletePasswordForHost(createPolicyRequest.imageid);
 		} catch (DirectorException de) {
 			log.error("Error creating policy from draft for image : "
 					+ createPolicyRequest.imageid, de);
-			return "ERROR";
+			ret = Constants.ERROR;
 		}
-		return Constants.SUCCESS;
+		return ret;
 	}
+
+	/**
+	 * On the step 3/3 of the wizard for VM, when the user clicks on the “Upload
+	 * now” button, we accept the last moment changes in the name of the policy
+	 * and update it. This method just validates that the name given by the user
+	 * is unique
+	 * <pre>
+	 * https://<host>/v1/trust-policies/7897-232321-432423-4322
+	 * Input: UUID of trust policy in path {“display_name”:”Name of policy”}
+	 * Output: {“status”:”<success/Error>”, “details”:”Error details”}
+	 * </pre>
+	 * @param createPolicyRequest
+	 * @return
+	 */
+	@Path("trust-policies/{trust_policy_id: [0-9a-zA-Z_-]+|}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@PUT
+	public MonitorStatus updateTrustPolicy(@PathParam("trust_policy_id") String trust_policy_id, UpdateTrustPolicyRequest updateTrustPolicyRequest) {
+		MonitorStatus monitorStatus = new MonitorStatus();
+		monitorStatus.status = Constants.SUCCESS;
+		if(StringUtils.isBlank(trust_policy_id)){
+			return monitorStatus;
+		}
+		try {
+			imageService.updateTrustPolicy(updateTrustPolicyRequest, trust_policy_id);
+		} catch (DirectorException de) {
+			log.error("Error updating policy name for : "
+					+ trust_policy_id, de);
+			monitorStatus.status = Constants.ERROR;
+			monitorStatus.details = de.getMessage();
+		}
+		return monitorStatus;
+	}
+
 
 	/**
 	 * List configured image stores
@@ -891,32 +928,6 @@ public class Images {
 		return response;
 
 	}
-
-
-	@Path("images/uploads")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public ImageStoreResponse uploadImageToImageStore(
-			ImageStoreUploadRequest imageStoreUploadRequest)
-			throws DirectorException {
-		ImageStoreResponse imageStoreResponse;
-		try {
-			imageStoreResponse = imageService
-					.uploadImageToImageStore(imageStoreUploadRequest);
-			imageStoreResponse.status = Constants.SUCCESS;
-		} catch (DirectorException e) {
-			imageStoreResponse = new ImageStoreResponse();
-			imageStoreResponse.status = Constants.ERROR;
-			imageStoreResponse.details = e.getMessage();
-			if (e.getMessage().contains("Policy Name Already Exists")) {
-				imageStoreResponse.details = "Policy Name Already Exists";
-			}
-
-		}
-		return imageStoreResponse;
-	}
-	
 	
 	/**
 	 *

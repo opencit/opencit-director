@@ -97,6 +97,7 @@ if(jQuery) (function($){
 							treeOptions.dir = escape($(this).attr('rel').match( /.*\// ));
 							treeOptions.recursive = false;
 							treeOptions.files_for_policy = false;
+							treeOptions.init=true;
 
 							showTree( $(this).parent(), treeOptions );
 							$(this).parent().removeClass('collapsed').addClass('expanded');

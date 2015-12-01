@@ -104,7 +104,7 @@ function backToVmImagesPage() {
 	$("#upload_to_image_store_redirect").hide("");
 	$("#vm_images_grid_page").show();
 	var self = this;
-	var mountimage = { 
+		var mountimage = { 
 		"id" : current_image_id
 	};
 	current_trust_policy_draft_id='';
@@ -251,7 +251,7 @@ var url="/v1/images/" + imageid + "/downloadPolicy?Authorization="+encodeURIComp
                  window.location = url;                   
             },
             error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
+              show_error_in_trust_policy_tab("error in downloading");
             }
         });
 
@@ -280,7 +280,7 @@ var uri="/v1/images/" + imageid + "/downloadImage?modified=true&Authorization="+
                                    
             },
             error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
+              show_error_in_trust_policy_tab("error in downloading");
             }
         });
 

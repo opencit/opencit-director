@@ -34,7 +34,7 @@ import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageListResponseInfo;
 import com.intel.director.api.ImageStoreResponse;
-import com.intel.director.api.ImageStoreUploadRequest;
+import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.PolicyTemplateInfo;
 import com.intel.director.api.SearchFilesInImageRequest;
@@ -821,7 +821,7 @@ public class ImageServiceImpl implements ImageService {
 
 	}
 
-	public void createTrustPolicy(String image_id) throws DirectorException {
+	public String createTrustPolicy(String image_id) throws DirectorException {
 
 		ImageAttributes image;
 
@@ -1042,6 +1042,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 		log.info("trust policy succesfylly created , createdPolicyId::"
 				+ createdPolicy.getId());		
+		return createdPolicy.getId();
 	}
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -1419,50 +1420,47 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
-	public ImageStoreResponse uploadImageToImageStore(
-			ImageStoreUploadRequest imageStoreUploadRequest)
+	public void updateTrustPolicy(
+			UpdateTrustPolicyRequest updateTrustPolicyRequest, String policyId)
 			throws DirectorException {
-		try {
 
-			if (doesPolicyNameExist(imageStoreUploadRequest
-					.getDisplay_name(),imageStoreUploadRequest.image_id)) {
+		try {
+			if (isPolicyNameNotUnique(
+					updateTrustPolicyRequest.getDisplay_name(), policyId)) {
 				throw new DirectorException("Policy Name Already Exists");
 			}
-			log.debug("Inside  imageStoreUploadRequest::"
-					+ imageStoreUploadRequest);
-
-			if (imageStoreUploadRequest.display_name != null) {
-				// Updating Name in case name is changed
-
-				ImageInfo image_info = imagePersistenceManager
-						.fetchImageById(imageStoreUploadRequest.getImage_id());
-				if (image_info.getTrust_policy_draft_id() != null) {
-					TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
-							.fetchPolicyDraftById(image_info
-									.getTrust_policy_draft_id());
-					trustPolicyDraft.setDisplay_name(imageStoreUploadRequest
-							.getDisplay_name());
-					trustPolicyDraft.setEdited_date(new Date());
-					trustPolicyDraft.setEdited_by_user_id(ShiroUtil
-							.subjectUsername());
-					imagePersistenceManager.updatePolicyDraft(trustPolicyDraft);
-				} else if (image_info.getTrust_policy_id() != null) {
-					TrustPolicy trustPolicy = imagePersistenceManager
-							.fetchPolicyById(image_info.getTrust_policy_id());
-					trustPolicy.setDisplay_name(imageStoreUploadRequest
-							.getDisplay_name());
-					trustPolicy.setEdited_date(new Date());
-					trustPolicy.setEdited_by_user_id(ShiroUtil
-							.subjectUsername());
-					imagePersistenceManager.updatePolicy(trustPolicy);
-				}
-			}
-
-		} catch (Exception e) {
-			log.error("", e);
-			throw new DirectorException(e);
+		} catch (DbException e1) {
+			throw new DirectorException(
+					"Unable to check uniqueness of policy name : "
+							+ updateTrustPolicyRequest.display_name);
 		}
-		return new ImageStoreResponse();
+		log.debug("Inside  imageStoreUploadRequest::"
+				+ updateTrustPolicyRequest);
+
+		if (StringUtils.isBlank(updateTrustPolicyRequest.display_name)) {
+			log.error("No policy name provided");
+			throw new DirectorException(
+					"Policy name is empty");
+		}
+		// Updating Name in case name is changed
+
+		TrustPolicy trustPolicy;
+		try {
+			trustPolicy = imagePersistenceManager.fetchPolicyById(policyId);
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch policy with id : "
+					+ policyId);
+		}
+		trustPolicy.setDisplay_name(updateTrustPolicyRequest.getDisplay_name());
+		trustPolicy.setEdited_date(new Date());
+		trustPolicy.setEdited_by_user_id(ShiroUtil.subjectUsername());
+		try {
+			imagePersistenceManager.updatePolicy(trustPolicy);
+		} catch (DbException e) {
+			throw new DirectorException("Unable to update policy with id : "
+					+ policyId);
+		}
+
 	}
 
 	public ImageStoreManager getImageStoreImpl(String className)
@@ -2479,6 +2477,14 @@ public class ImageServiceImpl implements ImageService {
 
 		return false;
 	}
+	
+
+	private boolean isPolicyNameNotUnique(String display_name, String trustPolicyId) throws DbException, DirectorException {
+		TrustPolicy fetchPolicyById = imagePersistenceManager.fetchPolicyById(trustPolicyId);
+		String imageId = fetchPolicyById.getImgAttributes().id;
+		return doesPolicyNameExist(display_name, imageId);
+	}
+
 	
 	@Override
 	public boolean doesImageNameExist(String fileName) throws DirectorException {

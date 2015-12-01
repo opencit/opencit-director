@@ -11,7 +11,7 @@ $(document).ready(function() {
 });
 function addHost() {
 
-	current_image_id='';
+current_image_id='';
 	goToCreatePolicyWizard2();
 }
 function ImageData(){
@@ -189,7 +189,7 @@ function refresh_bm_images_Grid() {
 			});
 		},
 		error : function(jqXHR, exception) {
-			alert("Failed to get images list");
+			show_error_trust_policy_tab("Failed to get images list");
 		}
 	});
 

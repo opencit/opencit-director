@@ -1,3 +1,13 @@
+function show_error_in_trust_policy_tab(message){
+	
+	$('#error_modal_body_trust_policy_tab').text(message);
+	$("#error_modal_trust_policy_tab").modal({
+		backdrop : "static"
+	});
+	$('body').removeClass("modal-open");
+	
+	
+}
 
      
 function goToVMPage() {
@@ -216,7 +226,7 @@ function refresh_vm_images_Grid() {
 
 		},
 		error : function(jqXHR, exception) {
-			alert("Failed to get images list");
+			show_error_in_trust_policy_tab("Failed to get images list");
 		}
 	});
 
@@ -399,7 +409,7 @@ alert("inside bm");
 			});
 		},
 		error : function(jqXHR, exception) {
-			alert("Failed to get images list");
+			show_error_in_trust_policy_tab("Failed to get images list");
 		}
 	});
 

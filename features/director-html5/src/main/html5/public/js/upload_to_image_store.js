@@ -136,17 +136,19 @@ function UploadStoreViewModel() {
 			}
 		}
 		
-		
-		
+		if(current_trust_policy_id == undefined || current_trust_policy_id == 'undefined'){
+			current_trust_policy_id = "";
+		}
+		var displayNameFormData = {"display_name":current_display_name};
 		$.ajax({
-			type : "POST",
-			url : endpoint + "uploads",
+			type : "PUT",
+			url : "/v1/trust-policies/"+current_trust_policy_id,
 			contentType : "application/json",
 			dataType : "json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.uploadStoreMetaData),
+			data : JSON.stringify(displayNameFormData),
 			success : function(data) {
 				if (data.status == "Error") {
 					$('#error_vm_body_3_direct').text(data.details);
@@ -160,11 +162,20 @@ function UploadStoreViewModel() {
 					$('body').removeClass("modal-open");
 					return;
 				}
-				var imageActionData = {
-					"image_id" : current_image_id,
-					"actions" : [{ "task_name" : "Create Tar", "status" : "Incomplete" },
-						{"task_name" : "Upload Tar", "status" : "Incomplete" , "storename" : $('#tarball_upload_combo').val()}
-					]
+				
+				var imageActionData = {};
+				if(current_trust_policy_id == undefined || current_trust_policy_id == 'undefined' || current_trust_policy_id == ''){
+					imageActionData = {
+							"image_id" : current_image_id,
+							"actions" : [{"task_name" : "Upload Image", "status" : "Incomplete" , "storename" : $('#tarball_upload_combo').val()}]
+							}
+				}else{
+						imageActionData = {
+						"image_id" : current_image_id,
+						"actions" : [{ "task_name" : "Create Tar", "status" : "Incomplete" },
+							{"task_name" : "Upload Tar", "status" : "Incomplete" , "storename" : $('#tarball_upload_combo').val()}
+						]
+						}
 				}
 				$.ajax({
 					type : "POST",
@@ -190,6 +201,7 @@ function UploadStoreViewModel() {
 						}
 						console.log("uploadToStore success" + data);
 						current_image_action_id = "";
+						current_trust_policy_id = "";
 						current_image_id = "";
 						$("#redirect").modal({
 							backdrop : "static"

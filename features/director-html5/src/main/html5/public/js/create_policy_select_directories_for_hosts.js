@@ -37,11 +37,8 @@ function ApplyRegExViewModel() {
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
     self.resetRegEx = function(event) {
-        console.log("Yeah !!!");
 		var sel_dir = $("#sel_dir").val();
 		
-        console.log("DIR : "+sel_dir);
-
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
 			root : '/',
@@ -365,7 +362,7 @@ function createPolicy(){
 				var mountimage = {
 					"id" : current_image_id
 				}
-				if(data == "ERROR")
+				if(data == "Error")
 				{
 					current_image_action_id = "";
 					$.ajax({

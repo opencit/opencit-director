@@ -12,6 +12,11 @@ $(document).ready(function() {
 function ImageData(){
 	
 }
+
+
+
+
+
 function refresh_vm_images_Grid() {
 	var self = this;
 	
@@ -168,7 +173,8 @@ function refresh_vm_images_Grid() {
 
 		},
 		error : function(jqXHR, exception) {
-		show_error_trust_policy_tab("Failed to get images list");
+
+		show_error_in_trust_policy_tab("Failed to get images list");
 
 			
 		}
