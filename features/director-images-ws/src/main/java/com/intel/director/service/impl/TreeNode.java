@@ -23,6 +23,8 @@ public class TreeNode implements Comparable{
 	public int renderedCount = 0;
 	public String checked = "";
 	public String rootDirWithRegex = null;
+	private final String lockHover = "To unselect files/dirs click on the icon to Reset";
+	private final String unlockHover = "To lock the directory and specific files click on the icon to apply regex";
 
 	public TreeNode(String nodeValue, String incrementalPath) {
 		childs = new ArrayList<TreeNode>();
@@ -146,6 +148,7 @@ public class TreeNode implements Comparable{
 		String toggleStyle = "";
 		String regexIdentifier = "";
 		String iconName = "arrow-right.png";
+		String hoverText = null;
 		if (!checked.isEmpty()) {
 			liColorClass = "selected";
 		}
@@ -162,8 +165,10 @@ public class TreeNode implements Comparable{
 			}
 		}
 		
+		hoverText = unlockHover;
 		if(StringUtils.isNotEmpty(regexIdentifier)){
 			iconName = "locked.png";
+			hoverText = lockHover;
 		}
 		
 		if (isDirectory) {
@@ -175,7 +180,7 @@ public class TreeNode implements Comparable{
 					+ ((!checked.isEmpty() ? "expanded"
 							: parent.directoryCollapsed));
 			toggleIcon = "<img src=\"/v1/html5/public/director-html5/images/"+iconName+"\" title=\""
-					+ incrementalPath
+					+ hoverText
 					+ "\"  id=\"toggle_"
 					+ incrementalPath
 					+ "\"   onclick=\"toggleState(this)\" />";

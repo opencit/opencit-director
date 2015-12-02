@@ -74,6 +74,9 @@ function ApplyRegExViewModel() {
 		rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});        
+		
+		//hide the ApplyRegex panel
+		closeRegexPanel();
 	}
     
 	self.applyRegEx = function(loginFormElement) {
@@ -134,25 +137,48 @@ function toggleState(str) {
 	var id = str.id;
 	var n = id.indexOf("_");
 	var path = id.substring(n + 1);
+	var oldSelDir = "";
+	if ($('#regexPanel').hasClass('open')) {
+		oldSelDir = $('#sel_dir').val();
+	}
 	$("#regex_error_vm").html("");
 	$('#dir_path').val(path);
 	$('#folderPathDiv').text(path);
 	$('#sel_dir').val(path);
 	$('input[name=asset_tag_policy]').val(path);
-	if ($('#regexPanel').hasClass('open')) {
-		$('#regexPanel').removeClass('col-md-4');
-		$('#regexPanel').removeClass('open');
-		$('#regexPanel').addClass('hidden');
-		$('#directoryTree').addClass('col-md-12');
-		$('#directoryTree').removeClass('col-md-8');
-		} else {
-		$('#regexPanel').addClass('col-md-4');
-		$('#regexPanel').addClass('open');
-		$('#regexPanel').removeClass('hidden');
-		$('#directoryTree').removeClass('col-md-12');
-		$('#directoryTree').addClass('col-md-8');
+	if ($('#regexPanel').hasClass('open')) {		
+		//reset values
+		//check if it is open already, and user has clicked lock/unlock icon for a different dir
+		//close the current panel and open new
+		if(path == oldSelDir){
+			closeRegexPanel();		
+		}
+	} else {
+		openRegexPanel();
 	}
 	document.forms["form-horizontal"].reset();
+}
+
+function openRegexPanel(){
+	$('#regexPanel').addClass('col-md-4');
+	$('#regexPanel').addClass('open');
+	$('#regexPanel').removeClass('hidden');
+	$('#directoryTree').removeClass('col-md-12');
+	$('#directoryTree').addClass('col-md-8');
+}
+
+function closeRegexPanel(){
+	$('#regexPanel').removeClass('col-md-4');
+	$('#regexPanel').removeClass('open');
+	$('#regexPanel').addClass('hidden');
+	$('#directoryTree').addClass('col-md-12');
+	$('#directoryTree').removeClass('col-md-8');
+
+	//reset values et while opening toggle
+	$('#dir_path').val("");
+	$('#folderPathDiv').text("");
+	$('#sel_dir').val("");
+
 }
 
 var pageInitialized = false;
@@ -260,6 +286,7 @@ $(document)
 function() {
 	if (pageInitialized)
 	return;
+	$("#dirNextButton").prop('disabled', true);
 	$('#jstree2').fileTree(
 	{
 		root : '/',

@@ -52,6 +52,26 @@
 				});
 				
 			};
+
+			function goToTrustPolicyPage(){
+			$( "#upload-to-td" ).removeClass('active');
+			$( "#director-trust-policy" ).addClass('active');
+
+				$("#bm-dashboard-main-page").hide();
+				$("#vm-dashboard-main-page").show();
+
+	
+			var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
+
+			if (isEmpty == false) {
+				$("#vm-dashboard-main-page").html("");
+			}
+			hideLoading();
+			$("#vm-dashboard-main-page").load(
+					"/v1/html5/public/director-html5/vm_images_page.html");
+			umount_image();
+		
+			}
 		</script>
 		
 	</head>
@@ -91,13 +111,13 @@
 						<br />
 						<div class="row">
 							<div class="form-group">
-								<div class="col-md-4"></div>
-								<div class="col-md-4">
+								<div class="col-md-2"></div>
+								<div class="col-md-5">
 									<button id="gotoUploadWindow" class="btn btn-primary">Next</button>
 								</div>
-								<div class="col-md-4"></div>
-							</div>
-						</div>      
+								<div class="col-md-5">
+								<button id="gotoUploadWindow" class="btn btn-primary" onclick="goToTrustPolicyPage()" >Go to Trust Policy Page</button></div>
+							</div>						</div>      
 					</div>
 				</div>
 			</div>
