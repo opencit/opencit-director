@@ -50,7 +50,6 @@ if(jQuery) (function($){
 			if(o.reset_regex == undefined) o.reset_regex=false;
 			
 			$(this).each( function() {
-				console.log("Hello");
 				function showTree(c, treeOptions) {
 					$(c).addClass('wait');
 
@@ -71,6 +70,7 @@ if(jQuery) (function($){
 						$(c).find('.start').html('');
 						var response = data;	
 						$(c).removeClass('wait').append(data.tree_content);
+						$("#dirNextButton").prop('disabled', false);
 						if(!(response.patch_xml == null)){
 							editPatchWithDataFromServer(response.patch_xml);
 						}

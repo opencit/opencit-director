@@ -37,8 +37,11 @@ function ApplyRegExViewModel() {
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
     self.resetRegEx = function(event) {
+        console.log("Yeah !!!");
 		var sel_dir = $("#sel_dir").val();
 		
+        console.log("DIR : "+sel_dir);
+
 		var node = $("input[name='directory_" + sel_dir + "']");
 		var config = {
 			root : '/',
@@ -73,7 +76,8 @@ function ApplyRegExViewModel() {
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
-		});        
+		});
+		closeRegexPanel();
     }
 	self.applyRegEx = function(loginFormElement) {
 		var include = loginFormElement.create_policy_regex_include.value;
@@ -125,6 +129,12 @@ function ApplyRegExViewModel() {
 				rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
+		
+		//hide the ApplyRegex panel
+		$('#regexPanel').removeClass('col-md-4');
+		$('#regexPanel').removeClass('open');
+		$('#regexPanel').addClass('hidden');
+
 	}
 
 };
@@ -133,25 +143,48 @@ function toggleState(str) {
 	var id = str.id;
 	var n = id.indexOf("_");
 	var path = id.substring(n + 1);
+	var oldSelDir = "";
+	if ($('#regexPanel').hasClass('open')) {
+		oldSelDir = $('#sel_dir').val();
+	}
 	$("#regex_error_bm_live").html("");
 	$('#dir_path').val(path);
 	$('#folderPathDiv').text(path);
 	$('#sel_dir').val(path);
 	$('input[name=asset_tag_policy]').val(path);
-	if ($('#regexPanel').hasClass('open')) {
-		$('#regexPanel').removeClass('col-md-4');
-		$('#regexPanel').removeClass('open');
-		$('#regexPanel').addClass('hidden');
-		$('#directoryTree').addClass('col-md-12');
-		$('#directoryTree').removeClass('col-md-8');
+	if ($('#regexPanel').hasClass('open')) {		
+		//reset values
+		//check if it is open already, and user has clicked lock/unlock icon for a different dir
+		//close the current panel and open new
+		if(path == oldSelDir){
+			closeRegexPanel();		
+		}
 	} else {
-		$('#regexPanel').addClass('col-md-4');
-		$('#regexPanel').addClass('open');
-		$('#regexPanel').removeClass('hidden');
-		$('#directoryTree').removeClass('col-md-12');
-		$('#directoryTree').addClass('col-md-8');
+		openRegexPanel();
 	}
 	document.forms["form-horizontal"].reset();
+}
+
+function openRegexPanel(){
+	$('#regexPanel').addClass('col-md-4');
+	$('#regexPanel').addClass('open');
+	$('#regexPanel').removeClass('hidden');
+	$('#directoryTree').removeClass('col-md-12');
+	$('#directoryTree').addClass('col-md-8');
+}
+
+function closeRegexPanel(){
+	$('#regexPanel').removeClass('col-md-4');
+	$('#regexPanel').removeClass('open');
+	$('#regexPanel').addClass('hidden');
+	$('#directoryTree').addClass('col-md-12');
+	$('#directoryTree').removeClass('col-md-8');
+
+	//reset values et while opening toggle
+	$('#dir_path').val("");
+	$('#folderPathDiv').text("");
+	$('#sel_dir').val("");
+
 }
 
 var pageInitialized = false;
@@ -258,6 +291,9 @@ $(document)
 					patches.length = 0;
 					if (pageInitialized)
 						return;
+					$("#dirNextButton").prop('disabled', true);
+
+
 					$('#jstree2').fileTree(
 							{
 								root : '/',
@@ -345,7 +381,7 @@ function createPolicy(){
 		nextButtonClicked = false;
 		patches.length = 0;	
 	}
-	
+	showLoading();
 		var createTrustPolicyMetaData = {
 			"imageid" : current_image_id
 		}
@@ -362,7 +398,7 @@ function createPolicy(){
 				var mountimage = {
 					"id" : current_image_id
 				}
-				if(data == "Error")
+				if(data == "ERROR")
 				{
 					current_image_action_id = "";
 					$.ajax({
@@ -374,6 +410,7 @@ function createPolicy(){
 						},
 						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
+							hideLoading();
 							$("#error_modal_bm_live_2").modal({backdrop: "static"});
 								$('body').removeClass("modal-open");
 							console.log("Unmount successfully")
@@ -393,7 +430,7 @@ function createPolicy(){
 						},
 						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
-		
+							hideLoading();
 							console.log("Unmount successfully")
 							nextButtonLiveBM();
 						}

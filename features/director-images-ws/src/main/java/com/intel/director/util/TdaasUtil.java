@@ -618,11 +618,13 @@ public class TdaasUtil {
 		String idendifier = "NV";
 		String vrtmDirPath = "/opt/vrtm";
 		String tbootDirPath = "/opt/tbootxm";
+		String trustagentDirPath = "/opt/trustagent";
 		File vrtmDir = new File(getMountPath(imageid) +File.separator+ vrtmDirPath);
 		File tbootDir = new File(getMountPath(imageid) +File.separator+ tbootDirPath);
+		File trustagentDir = new File(getMountPath(imageid) +File.separator+ trustagentDirPath);
 		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
 			idendifier = "V";
-		}else if (tbootDir.exists() && tbootDir.isDirectory()) {
+		}else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists() && trustagentDir.isDirectory()) {
 			idendifier = "NV";
 		}else{
 			throw new DirectorException("Expected CIT components not present");
