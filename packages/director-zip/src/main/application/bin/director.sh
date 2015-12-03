@@ -326,12 +326,41 @@ scheduler_stop() {
 # they will not be removed, so you could configure DIRECTOR_CONFIGURATION=/etc/director
 # and DIRECTOR_REPOSITORY=/var/opt/director and then they would not be deleted by this.
 director_uninstall() {
-    remove_startup_script director
-    rm -f /usr/local/bin/director
-    rm -rf /opt/director
-    groupdel director > /dev/null 2>&1
-    userdel director > /dev/null 2>&1
-}
+
+DIRECTOR_PROPERTIES_FILE=
+
+${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
+
+DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' 
+
+-f2`
+
+remove_startup_script director
+rm -f /usr/local/bin/director
+rm -rf /opt/director
+groupdel director > /dev/null 2>&1
+userdel director > /dev/null 2>&1
+
+echo "Deleting database ${DIRECTOR_DB_NAME}"
+
+if [ "$2" = "-purge" ]; then
+	sudo -u postgres psql postgres -c "update pg_database set datallowconn = 
+
+'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM 
+
+pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > 
+
+/dev/null 2>&1
+	rm -rf /mnt/images
+	rm -rf /mnt/director
+fi
+
+
+
+		
+  }
 
 print_help() {
     echo "Usage: $0 start|stop|uninstall|version"

@@ -202,6 +202,7 @@ public class Images {
 		}
 	}
 
+
 	/**
 	 * Returns list of images in TD depending on the image deployment type
 	 * supplied. This call is made so that grids on the UI for VM and Hosts can
@@ -212,31 +213,6 @@ public class Images {
 	 * grid. For example in the VM grid, we have the download policy, upload to
 	 * store icons. Those are build inside the ImageService.getImages
 	 * implementation
-	 *
-	 * @param image_deployment
-	 *            : expected values BareMetal, VM
-	 * @return ImageListResponse containing list of images.
-	 * @throws DirectorException
-	 * @throws DbException
-	 */
-	@Path("images/imagesList/{image_deployment: [a-zA-Z_-]+}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public ImageListResponse getImages(
-			@PathParam("image_deployment") String deployment_type)
-			throws DirectorException, DbException {
-		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
-		searchImagesRequest.deploymentType = deployment_type;
-		SearchImagesResponse searchImagesResponse = imageService
-				.searchImages(searchImagesRequest);
-		return imageService.getImages(searchImagesResponse.images,
-				deployment_type);
-
-	}
-
-	/**
-	 * Method similar to the getImages, but which only returns the image related
-	 * details without the HTML content which is specific to TDaaS
 	 * 
 	 * 
 	 * @param deployment_type
@@ -372,11 +348,18 @@ public class Images {
 	@POST
 	public UnmountImageResponse unMountImage(MountImageRequest unmountimage,
 			@Context HttpServletRequest httpServletRequest,
-			@Context HttpServletResponse httpServletResponse)
-			throws DirectorException {
+			@Context HttpServletResponse httpServletResponse){
 		String user = getLoginUsername();
-		UnmountImageResponse unmountImageResponse = imageService.unMountImage(
-				unmountimage.id, user);
+		UnmountImageResponse unmountImageResponse;
+		try {
+			unmountImageResponse = imageService.unMountImage(
+					unmountimage.id, user);
+		} catch (Exception e) {
+			unmountImageResponse = new UnmountImageResponse();
+			log.error("Error while unmounting image ", e);
+			unmountImageResponse.status = Constants.ERROR;
+			unmountImageResponse.setId(unmountimage.id);
+		}
 		return unmountImageResponse;
 	}
 
@@ -403,19 +386,19 @@ public class Images {
 	 * @return Updated policy
 	 * @throws DirectorException
 	 */
-	@Path("trust-policy-drafts/{trust_policy_draft_id: [0-9a-zA-Z_-]+}")
+	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}")
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String editPolicyDraft(@PathParam("trust_policy_draft_id") String trust_policy_draft_id,
+	public String editPolicyDraft(@PathParam("trustPolicyDraftId") String trustPolicyDraftId,
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest)
 			throws DirectorException {
-		trustPolicyDraftEditRequest.trust_policy_draft_id = trust_policy_draft_id;
+		trustPolicyDraftEditRequest.trust_policy_draft_id = trustPolicyDraftId;
 
 		TrustPolicyDraft policyDraft=imageService.editTrustPolicyDraft(trustPolicyDraftEditRequest);
 		if (policyDraft == null) {
 			throw new DirectorException(
-					"Error with fetching policy draft id : " + trust_policy_draft_id);
+					"Error with fetching policy draft id : " + trustPolicyDraftId);
 		}
 		String trustPolicyDraftXML = policyDraft.getTrust_policy_draft();
 		log.debug("Updated policy draft trustPolicyXML : " + trustPolicyDraftXML);
@@ -567,7 +550,6 @@ public class Images {
 	 */
 	@Path("image-launch-policies")
 	@GET
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListImageLaunchPolicyResponse getImageLaunchPoliciesList(@QueryParam("deploymentType") String deploymentType){
 		return lookupService.getImageLaunchPolicies(deploymentType);
@@ -606,16 +588,16 @@ public class Images {
 	 * @return
 	 * @throws DirectorException
 	 */
-	@Path("trust-policy-drafts/{trust_policy_draft_id:  | [0-9a-zA-Z_-]+ }")
+	@Path("trust-policy-drafts/{trustPolicyDraftId:  | [0-9a-zA-Z_-]+ }")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public CreateTrustPolicyMetaDataRequest getPolicyMetadataForImage(
-			@PathParam("trust_policy_draft_id") String trust_policy_draft_id,
+			@PathParam("trustPolicyDraftId") String trustPolicyDraftId,
 			@QueryParam("imageId") String imageId,
 			@QueryParam("imageArchive") boolean imageArchive) throws DirectorException {
-		if(trust_policy_draft_id != null && StringUtils.isNotEmpty(trust_policy_draft_id)){
+		if(trustPolicyDraftId != null && StringUtils.isNotEmpty(trustPolicyDraftId)){
 
-			return imageService.getPolicyMetadata(trust_policy_draft_id);
+			return imageService.getPolicyMetadata(trustPolicyDraftId);
 		}
 		return imageService.getPolicyMetadataForImage(imageId);
 	}
@@ -632,6 +614,7 @@ public class Images {
 	 */
 	@Path("rpc/trust-policies")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
 	@POST
 	public String createTrustPolicy(CreateTrustPolicyMetaDataRequest createPolicyRequest) {
 		String ret = null;

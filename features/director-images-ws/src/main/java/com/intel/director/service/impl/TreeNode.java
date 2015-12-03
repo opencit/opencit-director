@@ -149,7 +149,7 @@ public class TreeNode implements Comparable{
 		String regexIdentifier = "";
 		String iconName = "arrow-right.png";
 		String hoverText = null;
-		if (!checked.isEmpty()) {
+		if (StringUtils.isNotBlank(checked)) {
 			liColorClass = "selected";
 		}
 		
@@ -253,43 +253,8 @@ public class TreeNode implements Comparable{
 				n.printNode(showULBegin, showULEnd);
 
 			}
-		}
-		
-//		for (TreeNode n : childs) {
-//			boolean showULBegin = false;
-//			if (!firstChildOrLeaf) {
-//				firstChildOrLeaf = true;
-//				showULBegin = true;
-//				;
-//			}
-//			renderedCount++;
-//			n.printNode(showULBegin, false);
-//			addToTree("</li>", true);
-//			// if (++childCnt == noOfChildren) {
-//			if (haveAllElementsOfNodeRendered()) {
-//				builder.append(ulEnd);
-//				addToTree(ulEnd, add);
-//			}
-//
-//		}
-//		int noOfLeafElements = leafs.size();
-//		int leaftCnt = 0;
-//		for (TreeNode n : leafs) {
-//			boolean showULBegin = false;
-//			boolean showULEnd = false;
-//			if (!firstChildOrLeaf) {
-//				firstChildOrLeaf = true;
-//				showULBegin = true;
-//			}
-//
-//			renderedCount++;
-//
-//			if (haveAllElementsOfNodeRendered()) {
-//				showULEnd = true;
-//			}
-//			n.printNode(showULBegin, showULEnd);
-//
-//		}
+		}		
+
 	}
 
 	public boolean isDirectory() {

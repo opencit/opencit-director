@@ -64,7 +64,7 @@ function ApplyRegExViewModel() {
 			}
 		});
 
-		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
 				'selected');
 
 		$("img[id='toggle_" + sel_dir + "']")
@@ -398,7 +398,7 @@ function createPolicy(){
 				var mountimage = {
 					"id" : current_image_id
 				}
-				if(data == "ERROR")
+				if(data == "Error")
 				{
 					current_image_action_id = "";
 					$.ajax({
