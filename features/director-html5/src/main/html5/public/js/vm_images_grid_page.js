@@ -55,7 +55,7 @@ function refresh_vm_images_Grid() {
 					&& images[i].trust_policy_id == null) {
 
 				self.gridData.trust_policy = self.gridData.trust_policy
-						+ "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicy('"
+						+ "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createTrustPolicy('"
 						+ images[i].id + "','" + images[i].name
 						+ "')\"></span></a>";
 
@@ -63,13 +63,13 @@ function refresh_vm_images_Grid() {
 
 				if (images[i].trust_policy_draft_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicy('"
+						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editTrustPolicy('"
 						+ images[i].id + "','" + images[i].name
 						+ "')\"></span></a>";
 					tpdid = images[i].trust_policy_draft_id; 
 				} else if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicy('"
+						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editTrustPolicy('"
 						+ images[i].id + "','" + images[i].name
 						+ "')\"></span></a>";
 				}

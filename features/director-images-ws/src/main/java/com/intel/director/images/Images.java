@@ -617,7 +617,7 @@ public class Images {
 	@Produces(MediaType.TEXT_PLAIN)
 	@POST
 	public String createTrustPolicy(CreateTrustPolicyMetaDataRequest createPolicyRequest) {
-		String ret = null;
+		String ret = Constants.SUCCESS;
 		try {
 			ret = imageService.createTrustPolicy(createPolicyRequest.imageid);
 			imageService.deletePasswordForHost(createPolicyRequest.imageid);
@@ -898,7 +898,7 @@ public class Images {
 	}
 
 
-	@Path("trust-policies/{trust_policy_id: [0-9a-zA-Z_-]+}")
+	@Path("trust-policy/{trust_policy_id: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	public String deletePolicy(@PathParam("trust_policy_id") String trust_policy_id) {
@@ -911,7 +911,8 @@ public class Images {
 		return response;
 
 	}
-	
+
+
 	/**
 	 *
 	 * Mark image as deleted. We turn the disabled flag=true in the MW_IMAGE

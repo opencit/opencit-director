@@ -344,15 +344,9 @@ userdel director > /dev/null 2>&1
 echo "Deleting database ${DIRECTOR_DB_NAME}"
 
 if [ "$2" = "-purge" ]; then
-	sudo -u postgres psql postgres -c "update pg_database set datallowconn = 
-
-'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
-	sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM 
-
-pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
-	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > 
-
-/dev/null 2>&1
+	sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > /dev/null 2>&1
 	rm -rf /mnt/images
 	rm -rf /mnt/director
 fi

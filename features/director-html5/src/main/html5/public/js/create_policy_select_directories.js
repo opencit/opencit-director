@@ -384,9 +384,6 @@ function createPolicy(){
 		url : "/v1/rpc/trust-policies",
 		contentType : "application/json",
 		dataType : "text",
-		headers : {
-			'Accept' : 'application/json'
-		},
 		data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 		success : function(data) {
 			current_trust_policy_id = data;
