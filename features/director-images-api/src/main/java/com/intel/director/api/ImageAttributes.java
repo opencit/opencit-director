@@ -7,6 +7,8 @@ package com.intel.director.api;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author soakx
@@ -24,6 +26,7 @@ public class ImageAttributes extends AuditFields {
     public Integer sent;
     public String mounted_by_user_id;
     public boolean deleted;
+    @JsonIgnore
     public String location;
 
     public ImageAttributes() {

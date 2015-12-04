@@ -5,7 +5,7 @@ $(document).ready(function() {
 		return;
 
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 
 	pageInitialized = true;
 });

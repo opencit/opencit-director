@@ -66,16 +66,20 @@ public class MountImage {
 	}
 
 	public static int unmountRemoteSystem(String mountPath) {
+		int exitcode = 0; 
+
 		log.debug("Unmounting the Remote File System in mount path : "
 				+ mountPath);
 		try {
-			return DirectorUtil.executeCommandInExecUtil(
+			exitcode = DirectorUtil.executeCommandInExecUtil(
 					Constants.mountRemoteFileSystemScript, mountPath);
 		} catch (IOException e) {
-			// TODO Handle Error
+			if(exitcode == 0){
+				exitcode = 1;
+			}
 			log.error("Error in unmounting remote host" + e);
 		}
-		return 0;
+		return exitcode;
 	}
 
 }

@@ -30,10 +30,16 @@ public class LookupServiceImpl implements LookupService {
     public ListImageDeploymentsResponse getImageDeployments() {
     	ListImageDeploymentsResponse deploymentsResponse = new ListImageDeploymentsResponse();
     	ImageDeploymentsResponse imageDeployment = new ImageDeploymentsResponse();
-    	imageDeployment.setName("VM");
+    	imageDeployment.setName(Constants.DEPLOYMENT_TYPE_VM);
     	imageDeployment.setDisplay_name("Virtualized Server");
     	deploymentsResponse.image_deployments.add(imageDeployment);
-        return deploymentsResponse;
+
+    	ImageDeploymentsResponse imageDeployment_bm = new ImageDeploymentsResponse();
+    	imageDeployment_bm.setName(Constants.DEPLOYMENT_TYPE_BAREMETAL);
+    	imageDeployment_bm.setDisplay_name("Non-Virtualized Server");
+    	deploymentsResponse.image_deployments.add(imageDeployment_bm);
+    	
+    	return deploymentsResponse;
     }
 
     @Override

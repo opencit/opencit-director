@@ -128,6 +128,11 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
+		
+		if(image.deleted){
+			log.error("Cannot launch an image marked as deleted");
+			throw new DirectorException("Cannot launch deleted image: " + imageId);
+		}
 
 		MountImageResponse mountImageResponse = TdaasUtil
 				.mapImageAttributesToMountImageResponse(image);
@@ -264,57 +269,57 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		log.info("inside unmounting image in service");
 		UnmountImageResponse unmountImageResponse = null;
+		ImageAttributes image = null;
 		try {
-			ImageAttributes image = imagePersistenceManager
-					.fetchImageById(imageId);
-			log.info("Unmounting image : " + image.id + " with name : "
-					+ image.name);
-			String mountPath = null;
-			if (image.getImage_format() == null) {
-				// BML flow
-				mountPath = TdaasUtil.getMountPath(image.id);
-			} else {
-				mountPath = DirectorUtil.getMountPath(image.id);
-			}
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			log.error("Error fetchign image "+imageId, e);
+			throw new DirectorException("Error fetching image:"+imageId);
+		}
+		log.info("Unmounting image : " + image.id + " with name : "
+				+ image.name);
+		String mountPath = null;
+		if (image.getImage_format() == null) {
+			// BML flow
+			mountPath = TdaasUtil.getMountPath(image.id);
+		} else {
+			mountPath = DirectorUtil.getMountPath(image.id);
+		}
 
-			if (image.getMounted_by_user_id() == null) {
-				unmountImageResponse = TdaasUtil
-						.mapImageAttributesToUnMountImageResponse(image);
-				return unmountImageResponse;
-			}
-
-			image.setMounted_by_user_id(null);
-			Date currentDate = new Date();
-			image.setEdited_date(currentDate);
-			image.setEdited_by_user_id(ShiroUtil.subjectUsername());
-			imagePersistenceManager.updateImage(image);
-
-			if (image.getImage_format() != null) {
-				// Throw an exception if different user than the mounted_by user
-				// tries to unmount
-
-				log.info("Updated DB with unmount data");
-				// Unmount the image
-
-				log.info("Unmounting from location : " + mountPath);
-				MountImage.unmountImage(mountPath);
-				log.info("Unmount script execution complete : " + mountPath);
-				log.info("*** unmount BM/VM complete");
-			} else {
-				MountImage.unmountRemoteSystem(mountPath);
-				log.info("*** unmount of BM LIVE complete");
-			}
+		if (image.getMounted_by_user_id() == null) {
 			unmountImageResponse = TdaasUtil
 					.mapImageAttributesToUnMountImageResponse(image);
-		} catch (DbException dbe) {
-			log.error("Error while updating DB with unmount data: "
-					+ dbe.getMessage());
-			throw new DirectorException(
-					"Error while updating DB with unmount data", dbe);
-		} catch (Exception e) {
-			log.error("Error while unmount : " + e.getMessage());
-			throw new DirectorException("Error while unmount ", e);
+			return unmountImageResponse;
 		}
+
+		image.setMounted_by_user_id(null);
+		Date currentDate = new Date();
+		image.setEdited_date(currentDate);
+		image.setEdited_by_user_id(ShiroUtil.subjectUsername());
+		try {
+			imagePersistenceManager.updateImage(image);
+		} catch (DbException e) {
+			log.error("Error updating image "+imageId, e);
+			throw new DirectorException("Error updating image:"+imageId);
+		}
+
+		if (image.getImage_format() != null) {
+			// Throw an exception if different user than the mounted_by user
+			// tries to unmount
+
+			log.info("Updated DB with unmount data");
+			// Unmount the image
+
+			log.info("Unmounting from location : " + mountPath);
+			MountImage.unmountImage(mountPath);
+			log.info("Unmount script execution complete : " + mountPath);
+			log.info("*** unmount BM/VM complete");
+		} else {
+			MountImage.unmountRemoteSystem(mountPath);
+			log.info("*** unmount of BM LIVE complete");
+		}
+		unmountImageResponse = TdaasUtil
+				.mapImageAttributesToUnMountImageResponse(image);
 		return unmountImageResponse;
 	}
 
@@ -1961,7 +1966,7 @@ public class ImageServiceImpl implements ImageService {
 				display_name += imagePersistenceManager.fetchPolicyById(
 						policy_id).getDisplay_name();
 			} else {
-				display_name += image_info.name;
+				display_name += "-";
 			}
 			return display_name;
 
@@ -2177,7 +2182,7 @@ public class ImageServiceImpl implements ImageService {
 				}
 
 				if (measurement instanceof FileMeasurement) {
-					if (start) {
+					if (start && measurement.getPath().startsWith(searchFilesInImageRequest.getDir())) {						
 						patchFilesRemoveSet.add(measurement.getPath());
 					}
 				}

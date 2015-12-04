@@ -64,7 +64,7 @@ function ApplyRegExViewModel() {
 			}
 		});
 
-		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
 				'selected');
 
 		$("img[id='toggle_" + sel_dir + "']")
@@ -130,7 +130,7 @@ function ApplyRegExViewModel() {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
 		
-		//hide the ApplyRegex panel
+		// hide the ApplyRegex panel
 		$('#regexPanel').removeClass('col-md-4');
 		$('#regexPanel').removeClass('open');
 		$('#regexPanel').addClass('hidden');
@@ -153,9 +153,10 @@ function toggleState(str) {
 	$('#sel_dir').val(path);
 	$('input[name=asset_tag_policy]').val(path);
 	if ($('#regexPanel').hasClass('open')) {		
-		//reset values
-		//check if it is open already, and user has clicked lock/unlock icon for a different dir
-		//close the current panel and open new
+		// reset values
+		// check if it is open already, and user has clicked lock/unlock icon
+		// for a different dir
+		// close the current panel and open new
 		if(path == oldSelDir){
 			closeRegexPanel();		
 		}
@@ -180,7 +181,7 @@ function closeRegexPanel(){
 	$('#directoryTree').addClass('col-md-12');
 	$('#directoryTree').removeClass('col-md-8');
 
-	//reset values et while opening toggle
+	// reset values et while opening toggle
 	$('#dir_path').val("");
 	$('#folderPathDiv').text("");
 	$('#sel_dir').val("");
@@ -275,7 +276,8 @@ var editPolicyDraft = function() {
 			temp_patches.length=0;
 			var $messageDiv = $('#saveMessage'); // get the reference of the
 			// div
-			$messageDiv.show().html('Error saving draft'); // show and set the message
+			$messageDiv.show().html('Error saving draft'); // show and set the
+															// message
 			setTimeout(function() {
 				$messageDiv.hide().html('');
 			}, 3000); // 3 seconds later, hide
@@ -390,52 +392,36 @@ function createPolicy(){
 			url : "/v1/rpc/trust-policies",
 			contentType : "application/json",
 			dataType : "text",
-			headers : {
-				'Accept' : 'application/json'
-			},
 			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
 				var mountimage = {
 					"id" : current_image_id
 				}
-				if(data == "ERROR")
-				{
-					current_image_action_id = "";
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-							hideLoading();
+				var createResponse = data;
+				current_image_action_id = "";
+				$.ajax({
+					type : "POST",
+					url : "/v1/rpc/unmount-image",
+					contentType : "application/json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					data : JSON.stringify(mountimage),
+					success : function(data, status, xhr) {
+						hideLoading();
+						console.log("Unmount successfully")
+
+						if(createResponse == "Error")
+						{
 							$("#error_modal_bm_live_2").modal({backdrop: "static"});
 								$('body').removeClass("modal-open");
-							console.log("Unmount successfully")
+						}else{
+							nextButtonLiveBM();	
+						}
 
-						}
-					});
-				}
-				else
-				{
-					current_image_action_id = data;
-					$.ajax({
-						type : "POST",
-						url : "/v1/rpc/unmount-image",
-						contentType : "application/json",
-						headers : {
-							'Accept' : 'application/json'
-						},
-						data : JSON.stringify(mountimage),
-						success : function(data, status, xhr) {
-							hideLoading();
-							console.log("Unmount successfully")
-							nextButtonLiveBM();
-						}
-					});
-				}
+					}
+				});
+				
 			}
 		});
 

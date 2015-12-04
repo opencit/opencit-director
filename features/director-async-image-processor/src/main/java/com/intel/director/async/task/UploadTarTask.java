@@ -69,6 +69,24 @@ public class UploadTarTask extends UploadTask {
 			content = new File(tarLocation + tarName);
 			super.run();
 			runFlag = true;
+			//Cleanup of folder
+			File uuidFolder = new File(tarLocation);
+			File[] listFiles = uuidFolder.listFiles();
+			boolean deleteFileFlag = true;
+			for (File file : listFiles) {
+				log.info("Deleteing file "+file.getAbsolutePath()+" after successful upload");
+				if(!file.delete()){
+					log.info("!!!!! File could not be deleted");
+					deleteFileFlag = false;
+				}
+				
+			}
+			if(deleteFileFlag){
+				deleteFileFlag = uuidFolder.delete();
+				log.info("Is folder deleted == "+deleteFileFlag);
+			}else{
+				log.info("UUID : "+tarLocation +" cannot be cleaned up");
+			}
 			return runFlag;
 		} catch (Exception e) {
 			e.printStackTrace();

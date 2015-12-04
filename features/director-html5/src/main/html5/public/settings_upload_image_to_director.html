@@ -27,8 +27,10 @@
 					dataType : "json",
 					success : function(data) {
 						var option=""; 
-						for (var i=0; i < data.image_deployments.length; i++){ 
-							option += '<option value="'+ data.image_deployments[i].name + '">' + data.image_deployments[i].display_name + '</option>'; 
+						for (var i=0; i < data.image_deployments.length; i++){
+							if(data.image_deployments[i].name != "BareMetal"){
+								option += '<option value="'+ data.image_deployments[i].name + '">' + data.image_deployments[i].display_name + '</option>';
+							}
 						}
 						$('#image_type').append(option);
 					}

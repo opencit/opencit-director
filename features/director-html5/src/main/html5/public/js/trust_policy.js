@@ -428,7 +428,7 @@ alert("inside bm");
 
 function refresh_all_trust_policy_grids(){
 refresh_vm_images_Grid();
-refresh_bm_images_Grid();
+//refresh_bm_images_Grid();
 refreshBMOnlineGrid();
 
 }

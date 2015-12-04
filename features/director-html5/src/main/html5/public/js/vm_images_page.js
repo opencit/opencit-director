@@ -13,7 +13,7 @@ $(document)
 					pageInitialized = true;
 				});
 
-function createPolicy(imageid, imagename) {
+function createTrustPolicy(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
 	current_image_name = imagename;
@@ -22,7 +22,7 @@ function createPolicy(imageid, imagename) {
 	goToCreatePolicyWizard();
 }
 
-function editPolicy(imageid, imagename) {
+function editTrustPolicy(imageid, imagename) {
 
 	currentFlow = "Edit";
 	current_image_id = imageid;
@@ -293,7 +293,7 @@ function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagena
 	if(trust_policy_id != "" && trust_policy_id != "null" && trust_policy_id !=null && trust_policy_id != undefined && trust_policy_id != "undefined"){
 		$.ajax({
 			type : "DELETE",
-			url : "/v1/trust-policies/" + trust_policy_id,
+			url : "/v1/trust-policy/" + trust_policy_id,
 			dataType : "text",
 			success : function(result) {
 				callComplete = true;
