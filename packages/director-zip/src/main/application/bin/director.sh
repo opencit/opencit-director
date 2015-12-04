@@ -340,6 +340,12 @@ if [ "$2" = "--purge" ]; then
 	echo "Drop database ${DIRECTOR_DB_NAME}"
 
 	rm -rf /mnt/images
+	m_arr=($(mount | grep "/mnt/director/" | awk '{print $3}' ))
+        for i in "${m_arr[@]}"
+           do
+                umount $i
+           done
+	
 	rm -rf /mnt/director
 fi
 

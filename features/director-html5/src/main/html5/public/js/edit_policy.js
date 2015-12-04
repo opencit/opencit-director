@@ -28,6 +28,7 @@ function EditImageViewModel(data) {
 	self.editImageMetaData = new EditImageMetaData(data);
 
 	self.editImage = function (loginFormElement) {
+		$("#editVMPolicyNext").prop('disabled', true);
 		console.log(current_image_id);
 		self.editImageMetaData.launch_control_policy = $(
 				'input[name=launch_control_policy]:checked').val();
@@ -56,6 +57,7 @@ function EditImageViewModel(data) {
 					$("#error_modal_edit_vm_1").modal({
 						backdrop : "static"
 					});
+					$("#editVMPolicyNext").prop('disabled', false);
 					return;
 				}
 				current_trust_policy_draft_id = data.id;
@@ -72,6 +74,7 @@ function EditImageViewModel(data) {
 					},
 					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 					success : function (data, status, xhr) {
+						$("#editVMPolicyNext").prop('disabled', false);
 						if (data.status == "Error") {
 							$('#for_mount_edit_vm').show();
 							$('#default_edit_vm').hide();

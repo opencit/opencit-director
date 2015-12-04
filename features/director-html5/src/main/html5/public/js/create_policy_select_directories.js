@@ -12,6 +12,7 @@ function SelectDirectoriesViewModel() {
 	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 	
 	self.selectDirectoriesSubmit = function(loginFormElement) {
+		$("#createVmPolicyDirNext").prop('disabled', true);
 		clearInterval(refreshIntervalId );
 		navButtonClicked = true;
 		editPolicyDraft();
@@ -268,6 +269,7 @@ console.log("interval Id : "+refreshIntervalId);
 			createPolicy();
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
+			$("#createVmPolicyDirNext").prop('disabled', false);
 			canPushPatch = true;
 			temp_patches.length=0;
 			var $messageDiv = $('#saveMessage'); // get the reference of the
@@ -386,6 +388,7 @@ function createPolicy(){
 		dataType : "text",
 		data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 		success : function(data) {
+			$("#createVmPolicyDirNext").prop('disabled', false);
 			current_trust_policy_id = data;
 			var mountimage = {
 				"id" : current_image_id

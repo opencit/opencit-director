@@ -90,6 +90,7 @@ return;
 	
 
 
+	$("#editBMLivePolicyNext").prop('disabled', true);
 
 
 	$.ajax({
@@ -101,12 +102,12 @@ return;
 		},
 		data : JSON.stringify(data), 
 		success : function (data, status, xhr) {
-						if (data.status == "Error") {
-
-				show_error_in_editbmlivemodal(data.details);
+			if (data.status == "Error") {
+				$("#editBMLivePolicyNext").prop('disabled', false);
+				show_error_in_editbmlivemodal(data.details);				
 				return;
 			}
-			;
+			
 			self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.editBMLiveMetaData.isEncrypted = false;
 			self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
@@ -125,6 +126,7 @@ return;
 				success : function (data, status, xhr) {
 
 					if (data.status == "Error") {
+						$("#editBMLivePolicyNext").prop('disabled', false);
 						show_error_in_editbmlivemodal(data.details);
 						return;
 					}
@@ -139,7 +141,9 @@ return;
 						},
 						data : ko.toJSON(self.editBMLiveMetaData), 
 						success : function (data, status, xhr) {
-							if (data.status == "Error") {
+							$("#editBMLivePolicyNext").prop('disabled', false);
+
+							if (data.status == "Error") {								
 								show_error_in_editbmlivemodal(data.details);
 
 								$.ajax({

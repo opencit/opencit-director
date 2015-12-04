@@ -20,13 +20,12 @@ function CreateImageMetaData(data) {
 
 function CreateImageViewModel() {
 	var self = this;
-
 	$("input[name=isEncrypted]").val(false);
 
 	self.createImageMetaData = new CreateImageMetaData({});
 
 	self.createImage = function(loginFormElement) {
-
+		$("#createVMPolicyNext").prop('disabled', true);
 		self.createImageMetaData.launch_control_policy = $(
 				'input[name=launch_control_policy]:checked').val();
 		// self.createImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
@@ -56,6 +55,7 @@ function CreateImageViewModel() {
 						backdrop : "static"
 					});
 					$('body').removeClass("modal-open");
+					$("#createVMPolicyNext").prop('disabled', false);
 					return;
 				}
 				current_trust_policy_draft_id = data.id;
@@ -72,6 +72,7 @@ function CreateImageViewModel() {
 					},
 					data : JSON.stringify(mountimage),
 					success : function(data, status, xhr) {
+						$("#createVMPolicyNext").prop('disabled', false);
 						if (data.status == "Error") {
 							$('#default').hide();
 							$('#for_mount').show();
@@ -79,9 +80,11 @@ function CreateImageViewModel() {
 							$("#error_modal_vm_1").modal({
 								backdrop : "static"
 							});
-								$('body').removeClass("modal-open");
+							$('body').removeClass("modal-open");
 							return;
+							
 						}
+						
 						nextButton();
 					}
 				});
