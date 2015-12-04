@@ -71,6 +71,9 @@ function addhostandnext() {
 	
 	self.data.key = $("#key").val();
 	
+	
+	$("#createBMLivePolicyNext").prop('disabled', true);
+
 	$.ajax({
 		type : "POST",
 		url : "/v1/setting/addHost",
@@ -82,6 +85,7 @@ function addhostandnext() {
 		success : function (data, status, xhr) {
 			if (data.status == "Error" || data.ssh_setting_request.image_id == null) {
 				show_error_in_bmlivemodal(data.details);
+				$("#createBMLivePolicyNext").prop('disabled', false);
 				return;
 			}
 			
@@ -106,6 +110,7 @@ function addhostandnext() {
 				success : function (data, status, xhr) {
 					if (data.status == "Error") {
 						show_error_in_bmlivemodal(data.details);
+						$("#createBMLivePolicyNext").prop('disabled', false);
 						return;
 					}
 					
@@ -120,6 +125,7 @@ function addhostandnext() {
 						data : ko.toJSON(self.createBMLiveMetaData), 
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
+								$("#createBMLivePolicyNext").prop('disabled', false);
 								show_error_in_bmlivemodal(data.details);
 								$.ajax({
 									type : "POST",
@@ -133,7 +139,6 @@ function addhostandnext() {
 										console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
 										}
 									});
-		
 								
 								return;
 							}
@@ -143,6 +148,8 @@ function addhostandnext() {
 								type : "POST",
 								url : "/v1/rpc/policy-templates/" + current_image_id + "/apply",
 								success : function (data) {
+									$("#createBMLivePolicyNext").prop('disabled', false);
+
 									if (data.status == "Error") {
 										show_error_in_bmlivemodal(data.details);
 										return;

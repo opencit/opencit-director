@@ -78,10 +78,18 @@ input[readonly] {
 		document.myform.action = urlToUploadMetadata;
 	}
 	 */
+
+	function validateName(fileName ){
+		fileName = fileName .split(' '); //we split the string in an array of strings using     whitespace as separator
+        	return (fileName.length == 1); //true when there is only one word, false else.
+	}
+	
 	function validateForm() {
+		$('#upload').prop('disabled', true);
 		var x = document.forms["myform"]["myfile"].value;
 		if (x == null || x == "") {
 			alert("First Choose File Please...");
+			$('#upload').prop('disabled', false);
 			return false;
 		}
 		currentFileName = document.getElementById('myfile').files[0].name;
@@ -90,6 +98,15 @@ input[readonly] {
 			fileName = $('#image_name_input').val();
 		} else {
 			fileName = currentFileName;
+		}
+		if(!validateName(fileName )){
+			$('#upload').prop('disabled', false);
+			$('#file_upload_window_modal_body').html("Provide correct file name");
+						$("#file_upload_window_modal").modal({
+							backdrop : "static"
+						});
+						$('body').removeClass("modal-open");
+						return false;
 		}
 		blob = document.getElementById('myfile').files[0];
 		SIZE = blob.size;
@@ -122,6 +139,7 @@ input[readonly] {
 							backdrop : "static"
 						});
 						$('body').removeClass("modal-open");
+						$('#upload').prop('disabled', false);
 						return false;
 					}
 					//alert(image_id);
@@ -131,11 +149,9 @@ input[readonly] {
 					end = BYTES_PER_CHUNK;
 					upload_chunks(image_id, start, end);
 
-					document.getElementById("upload").onclick = function() {
-						this.disabled = true;
-					}
 				} else {
 					alert("Failed to save image upload metdata.");
+					$('#upload').prop('disabled', false);
 				}
 			}
 		}
@@ -186,6 +202,7 @@ input[readonly] {
 
 					} else {
 						alert("File upload failed..");
+						$('#upload').prop('disabled', false);
 					}
 				}
 			}
@@ -199,7 +216,7 @@ input[readonly] {
 				this.disabled = false;
 			}
 			alert("Image upload successfully completed");
-
+			$('#upload').prop('disabled', false);
 			window.close();
 
 		}
