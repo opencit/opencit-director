@@ -1966,7 +1966,7 @@ public class ImageServiceImpl implements ImageService {
 				display_name += imagePersistenceManager.fetchPolicyById(
 						policy_id).getDisplay_name();
 			} else {
-				display_name += image_info.name;
+				display_name += "-";
 			}
 			return display_name;
 

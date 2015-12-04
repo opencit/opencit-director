@@ -326,15 +326,19 @@ scheduler_stop() {
 # they will not be removed, so you could configure DIRECTOR_CONFIGURATION=/etc/director
 # and DIRECTOR_REPOSITORY=/var/opt/director and then they would not be deleted by this.
 director_uninstall() {
-
+director_stop
+scheduler_stop
 remove_startup_script director
-if [ "$2" = "-purge" ]; then
+if [ "$2" = "--purge" ]; then
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
-	echo "Deleting database ${DIRECTOR_DB_NAME}"
 
-	sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+
+	#sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
 	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > /dev/null 2>&1
+	echo "Drop database ${DIRECTOR_DB_NAME}"
+
 	rm -rf /mnt/images
 	rm -rf /mnt/director
 fi
@@ -350,7 +354,7 @@ userdel director > /dev/null 2>&1
   }
 
 print_help() {
-    echo "Usage: $0 start|stop|uninstall|version"
+    echo "Usage: $0 start|stop|uninstall|uninstall --purge|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo $DIRECTOR_SETUP_TASKS | tr ' ' '\n'

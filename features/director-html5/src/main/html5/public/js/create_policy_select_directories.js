@@ -390,44 +390,30 @@ function createPolicy(){
 			var mountimage = {
 				"id" : current_image_id
 			}
-			
-			if(data.toUpperCase() == "ERROR")
-			{
-				current_image_action_id = "";
-				$.ajax({
-					type : "POST",
-					url : "/v1/rpc/unmount-image",
-					contentType : "application/json",
-					headers : {
-						'Accept' : 'application/json'
-					},
-					data : JSON.stringify(mountimage),
-					success : function(data, status, xhr) {
+			current_image_action_id = "";
+			var createResponse = data;
+
+			current_image_action_id = "";
+			$.ajax({
+				type : "POST",
+				url : "/v1/rpc/unmount-image",
+				contentType : "application/json",
+				headers : {
+					'Accept' : 'application/json'
+				},
+				data : JSON.stringify(mountimage),
+				success : function(data, status, xhr) {
+					if(createResponse == 'Error'){
 						$("#error_modal_vm_2").modal({backdrop: "static"});
 						$('body').removeClass("modal-open");
-						console.log("ERROR and Unmount successfully")
-						
-					}
-				});
-			}
-			else
-			{
-				current_image_action_id = data;
-				$.ajax({
-					type : "POST",
-					url : "/v1/rpc/unmount-image",
-					contentType : "application/json",
-					headers : {
-						'Accept' : 'application/json'
-					},
-					data : JSON.stringify(mountimage),
-					success : function(data, status, xhr) {
-						
-						console.log("Unmount successfully")							
+					}else{
 						nextButton();
 					}
-				});
-			}
+					console.log("ERROR and Unmount successfully")
+					
+				}
+			});
+		
 		}
 	});
 	
