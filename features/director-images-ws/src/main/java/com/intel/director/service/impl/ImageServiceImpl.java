@@ -1266,7 +1266,8 @@ public class ImageServiceImpl implements ImageService {
 				if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
 					for (Measurement measurement : trustPolicyDraftObj
 							.getWhitelist().getMeasurements()) {
-						if (searchFilesInImageRequest.init) {
+						log.info(measurement.getPath()+" **** "+searchFilesInImageRequest.getDir());
+						if (searchFilesInImageRequest.init && measurement.getPath().startsWith(searchFilesInImageRequest.getDir())) {
 							trustPolicyElementsList.add(measurement.getPath());
 
 							if (measurement instanceof FileMeasurement) {

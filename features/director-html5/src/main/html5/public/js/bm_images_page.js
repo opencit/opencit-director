@@ -169,7 +169,7 @@ function backToHostsPage() {
 	current_trust_policy_draft_id='';
 	$('body').removeClass("modal-open");
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backToHostsPageWithoutUnmount() {
@@ -187,7 +187,7 @@ function backToHostsPageWithoutUnmount() {
 current_image_id='';
 current_trust_policy_draft_id='';
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backButtonImagesBM() {
@@ -435,10 +435,11 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 	
 }
 
-function deletePolicy(imageid, trust_policy_id, imagename) {
+
+function deletePolicyBM(imageid) {
 	$.ajax({
-		type : "GET",
-		url : "/v1/images/" + imageid + "/deletePolicy",
+		type : "DELETE",
+		url : "/v1/images/" + imageid,
 		dataType : "text",
 		success : function(result) {
 			refreshBMOnlineGrid();
@@ -447,3 +448,6 @@ function deletePolicy(imageid, trust_policy_id, imagename) {
 
 	
 }
+
+
+
