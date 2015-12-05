@@ -169,7 +169,7 @@ function backToHostsPage() {
 	current_trust_policy_draft_id='';
 	$('body').removeClass("modal-open");
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backToHostsPageWithoutUnmount() {
@@ -187,7 +187,7 @@ function backToHostsPageWithoutUnmount() {
 current_image_id='';
 current_trust_policy_draft_id='';
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backButtonImagesBM() {
@@ -436,34 +436,18 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 }
 
 
-function deletePolicyBM(trust_policy_id, trust_policy_draft_id, imageid, imagename) {
-	var callComplete = false;
-	console.log("trust_policy_id :: " + trust_policy_id);
-	if(trust_policy_id != "" && trust_policy_id != "null" && trust_policy_id !=null && trust_policy_id != undefined && trust_policy_id != "undefined"){
-		$.ajax({
-			type : "DELETE",
-			url : "/v1/trust-policy/" + trust_policy_id,
-			dataType : "text",
-			success : function(result) {
-				callComplete = true;
-				}
-		});
-	}
-	console.log("trust_policy_draft_id :: " + trust_policy_draft_id);
-	if(trust_policy_draft_id != "" && trust_policy_draft_id != undefined && trust_policy_draft_id != null && trust_policy_draft_id != "null" && trust_policy_draft_id != "undefined"){
-		$.ajax({
-			type : "DELETE",
-			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id ,
-			dataType : "text",
-			success : function(result) {
-				callComplete = true;				
-			}		
-		});
-	}
-	refreshBMOnlineGrid();
+function deletePolicyBM(imageid) {
+	$.ajax({
+		type : "DELETE",
+		url : "/v1/images/" + imageid,
+		dataType : "text",
+		success : function(result) {
+			refreshBMOnlineGrid();
+		}
+	});
 
 	
 }
 
 
-}
+

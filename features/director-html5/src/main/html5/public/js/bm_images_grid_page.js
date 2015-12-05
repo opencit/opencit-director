@@ -67,11 +67,7 @@ function refreshBMOnlineGrid() {
 				if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
 						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyBM('"
-						+ images[i].trust_policy_id + "','"
-						+ images[i].trust_policy_draft_id+ "','"
-						+ images[i].id + "','" 
-						+ images[i].name
-						+ "')\"></span></a>";
+						+ images[i].id + "')\"></span></a>";
 				}
 
 				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
