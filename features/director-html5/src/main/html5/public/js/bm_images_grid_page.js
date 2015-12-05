@@ -64,11 +64,14 @@ function refreshBMOnlineGrid() {
 						+ images[i].trust_policy_id + "')\"></span></a>";
 				}
 
-				if (images[i].trust_policy_id != null
-					|| images[i].trust_policy_draft_id != null) {
+				if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicy('"
-						+ images[i].id + "')\"></span></a>";
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyBM('"
+						+ images[i].trust_policy_id + "','"
+						+ images[i].trust_policy_draft_id+ "','"
+						+ images[i].id + "','" 
+						+ images[i].name
+						+ "')\"></span></a>";
 				}
 
 				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";

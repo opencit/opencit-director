@@ -447,3 +447,34 @@ function deletePolicy(imageid, trust_policy_id, imagename) {
 
 	
 }
+
+
+
+function deletePolicyBM(trust_policy_id, trust_policy_draft_id, imageid, imagename) {
+	var callComplete = false;
+	console.log("trust_policy_id :: " + trust_policy_id);
+	if(trust_policy_id != "" && trust_policy_id != "null" && trust_policy_id !=null && trust_policy_id != undefined && trust_policy_id != "undefined"){
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/trust-policy/" + trust_policy_id,
+			dataType : "text",
+			success : function(result) {
+				callComplete = true;
+				}
+		});
+	}
+	console.log("trust_policy_draft_id :: " + trust_policy_draft_id);
+	if(trust_policy_draft_id != "" && trust_policy_draft_id != undefined && trust_policy_draft_id != null && trust_policy_draft_id != "null" && trust_policy_draft_id != "undefined"){
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id ,
+			dataType : "text",
+			success : function(result) {
+				callComplete = true;				
+			}		
+		});
+	}
+			refreshBMOnlineGrid();
+
+	
+}
