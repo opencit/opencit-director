@@ -435,20 +435,6 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 	
 }
 
-function deletePolicy(imageid, trust_policy_id, imagename) {
-	$.ajax({
-		type : "GET",
-		url : "/v1/images/" + imageid + "/deletePolicy",
-		dataType : "text",
-		success : function(result) {
-			refreshBMOnlineGrid();
-		}
-	});
-
-	
-}
-
-
 
 function deletePolicyBM(trust_policy_id, trust_policy_draft_id, imageid, imagename) {
 	var callComplete = false;
@@ -474,7 +460,10 @@ function deletePolicyBM(trust_policy_id, trust_policy_draft_id, imageid, imagena
 			}		
 		});
 	}
-			refreshBMOnlineGrid();
+	refreshBMOnlineGrid();
 
 	
+}
+
+
 }
