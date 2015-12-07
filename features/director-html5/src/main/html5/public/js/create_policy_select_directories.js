@@ -130,6 +130,7 @@ function ApplyRegExViewModel() {
 		rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
+		closeRegexPanel();
 	}
 	
 };

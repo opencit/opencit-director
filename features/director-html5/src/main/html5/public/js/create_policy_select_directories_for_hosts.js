@@ -122,19 +122,14 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 				.attr(
 						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+						"/v1/html5/public/director-html5/images/locked.png");
 
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
-		
-		// hide the ApplyRegex panel
-		$('#regexPanel').removeClass('col-md-4');
-		$('#regexPanel').removeClass('open');
-		$('#regexPanel').addClass('hidden');
-
+		closeRegexPanel();
 	}
 
 };

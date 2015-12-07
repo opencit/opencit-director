@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -466,6 +468,10 @@ public class Mapper {
 	}
 
 	public Character[] toCharacterArray(String str) {
+		if(StringUtils.isBlank(str)){
+			return null;
+		}
+
 		char[] chars = str.toCharArray();
 
 		Character[] characters = new Character[chars.length];
@@ -477,6 +483,10 @@ public class Mapper {
 	}
 
 	public String fromCharacterArray(Character[] chars) {
+		if(ArrayUtils.isEmpty(chars)){
+			return null;
+		}
+
 		StringBuilder sb = new StringBuilder(chars.length);
 		for (Character c : chars)
 			sb.append(c.charValue());

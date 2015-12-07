@@ -1333,9 +1333,10 @@ public class ImageServiceImpl implements ImageService {
 			filesInImageResponse.patchXml = new ArrayList<>();
 		}
 		boolean includeDir = false;
-		if (searchFilesInImageRequest.include != null) {
+		if (StringUtils.isNotBlank(searchFilesInImageRequest.include) || StringUtils.isNotBlank(searchFilesInImageRequest.exclude) ) {
 			includeDir = true;
 		}
+
 		// Remove patch
 		if (measurements != null) {
 			for (Measurement measurement : measurements) {
@@ -2090,7 +2091,7 @@ public class ImageServiceImpl implements ImageService {
 					e2);
 		}
 
-		if (content == null || StringUtils.isEmpty(content)) {
+		if (StringUtils.isBlank(content)) {
 			createTrustPolicyMetaDataResponse = new CreateTrustPolicyMetaDataResponse();
 			createTrustPolicyMetaDataResponse
 					.setTrustPolicy(policyDraftForImage.getTrust_policy_draft());
