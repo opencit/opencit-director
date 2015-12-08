@@ -68,7 +68,7 @@ function ApplyRegExViewModel() {
 		$("img[id='toggle_" + sel_dir + "']")
 		.attr(
 		"src",
-		"/v1/html5/public/director-html5/images/arrow-right.png");
+		"/v1/html5/public/director-html5/images/unlocked.png");
 		
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -380,24 +380,26 @@ function createPolicy(){
 		navButtonClicked = false;
 	}
 	var createTrustPolicyMetaData = {
-		"imageid" : current_image_id
+		"trust_policy_draft_id" : current_trust_policy_draft_id
 	}
 	$.ajax({
 		type : "POST",
 		url : "/v1/rpc/trust-policies",
 		contentType : "application/json",
-		dataType : "text",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		dataType : "json",
 		data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 		success : function(data) {
 			$("#createVmPolicyDirNext").prop('disabled', false);
-			current_trust_policy_id = data;
+			current_trust_policy_id = data.id;
 			var mountimage = {
 				"id" : current_image_id
 			}
 			current_image_action_id = "";
-			var createResponse = data;
+			var createResponse = data.status;
 
-			current_image_action_id = "";
 			$.ajax({
 				type : "POST",
 				url : "/v1/rpc/unmount-image",

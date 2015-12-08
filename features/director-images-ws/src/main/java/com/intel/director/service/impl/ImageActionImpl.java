@@ -84,10 +84,10 @@ public class ImageActionImpl implements ImageActionService {
 			imageInfo = persistService
 					.fetchImageById(imageActionRequest.image_id);
 		} catch (DbException e1) {
-			log.error("Unable to fetch image by id :"
-					+ imageActionRequest.image_id, e1);
-			throw new DirectorException("Unable to fetch image by id :"
-					+ imageActionRequest.image_id, e1);
+			log.error("Image with id :" + imageActionRequest.image_id
+					+ " does'nt exist", e1);
+			throw new DirectorException("Image with id :"
+					+ imageActionRequest.image_id + " does'nt exist", e1);
 		}
 
 		TrustPolicy trustPolicy = null;
@@ -154,7 +154,7 @@ public class ImageActionImpl implements ImageActionService {
 			list.add(imageActions);
 		}
 		if (list.size() != 0) {
-			imageAction.setAction(list);
+			imageAction.setActions(list);
 		}
 		try {
 			return persistService.createImageAction(imageAction);
@@ -187,7 +187,7 @@ public class ImageActionImpl implements ImageActionService {
 			list.add(imageActions);
 		}
 		if (list.size() != 0) {
-			imageAction.setAction(list);
+			imageAction.setActions(list);
 		}
 		try {
 			persistService.updateImageAction(imageAction);
@@ -201,10 +201,9 @@ public class ImageActionImpl implements ImageActionService {
 	}
 
 	@Override
-	public void deleteImageAction(ImageActionRequest imageActionRequest)
-			throws DirectorException {
+	public void deleteImageAction(String actionId) throws DirectorException {
 		try {
-			persistService.deleteImageActionById(imageActionRequest.action_id);
+			persistService.deleteImageActionById(actionId);
 		} catch (DbException e) {
 			log.error("Error while deleting image action" + e);
 			throw new DirectorException("Error while deleting image action", e);
@@ -212,10 +211,10 @@ public class ImageActionImpl implements ImageActionService {
 	}
 
 	@Override
-	public ImageActionObject fetchImageAction(String action_id)
+	public ImageActionObject fetchImageAction(String actionId)
 			throws DirectorException {
 		try {
-			return persistService.fetchImageActionById(action_id);
+			return persistService.fetchImageActionById(actionId);
 		} catch (DbException e) {
 			log.error("Error while fetching image action" + e);
 			throw new DirectorException("Error while fetching image action", e);

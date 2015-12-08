@@ -90,7 +90,7 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 				imageLocation += File.separator;
 			}
 			
-			imageLocation += imageInfo.getName();
+			imageLocation += imageInfo.getImage_name();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
 			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(tp.getTrust_policy());
 			if (policy.getEncryption() == null) {
@@ -108,7 +108,7 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 				throw new DirectorException("Null key retrieved for url : " + url);
 			}
 
-			String encryptFileName = imageInfo.getName();
+			String encryptFileName = imageInfo.getImage_name();
 			//TODO: Get actual key from KMS
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
 			if(keyFromKMS == null){

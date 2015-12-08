@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -256,7 +257,7 @@ public class Mapper {
 		mwImage.setImageFormat(imgAttributes.getImage_format());
 		mwImage.setLocation(imgAttributes.getLocation());
 		mwImage.setMountedByUserId(imgAttributes.getMounted_by_user_id());
-		mwImage.setName(imgAttributes.getName());
+		mwImage.setName(imgAttributes.getImage_name());
 		mwImage.setId(imgAttributes.getId());
 		mwImage.setStatus(imgAttributes.getStatus());
 		mwImage.setDeleted(imgAttributes.isDeleted());
@@ -282,7 +283,7 @@ public class Mapper {
 		imgInfo.setId(mwImage.getId());
 		imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
 		imgInfo.setImage_format(mwImage.getImageFormat());
-		imgInfo.setName(mwImage.getName());
+		imgInfo.setImage_name(mwImage.getName());
 		imgInfo.setMounted_by_user_id(mwImage.getMountedByUserId());
 		imgInfo.setLocation(mwImage.getLocation());
 		imgInfo.setDeleted(mwImage.isDeleted());
@@ -471,7 +472,6 @@ public class Mapper {
 		if(StringUtils.isBlank(str)){
 			return null;
 		}
-
 		char[] chars = str.toCharArray();
 
 		Character[] characters = new Character[chars.length];
@@ -486,7 +486,6 @@ public class Mapper {
 		if(ArrayUtils.isEmpty(chars)){
 			return null;
 		}
-
 		StringBuilder sb = new StringBuilder(chars.length);
 		for (Character c : chars)
 			sb.append(c.charValue());
@@ -503,8 +502,8 @@ public class Mapper {
 		mwImageAction.setAction_size(imageaction.getAction_size());
 		mwImageAction.setAction_count(imageaction.getAction_count());
 		mwImageAction.setAction_completed(imageaction.getAction_completed());
-		if (imageaction.getAction() != null) {
-			mwImageAction.setAction(gson.toJson(imageaction.getAction()));
+		if (imageaction.getActions() != null) {
+			mwImageAction.setAction(gson.toJson(imageaction.getActions()));
 		}
 		mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageaction
@@ -551,7 +550,7 @@ public class Mapper {
 		}
 		log.debug("No of tasks : " + taskList.size());
 		//
-		imageActionObject.setAction(taskList);
+		imageActionObject.setActions(taskList);
 		return imageActionObject;
 	}
 
@@ -560,7 +559,7 @@ public class Mapper {
 		Gson gson = new Gson();
 		mwImageAction.setId(imageActionObject.getId());
 		mwImageAction.setImage_id(imageActionObject.getImage_id());
-		mwImageAction.setAction(gson.toJson(imageActionObject.getAction()));
+		mwImageAction.setAction(gson.toJson(imageActionObject.getActions()));
 		mwImageAction.setAction_completed(imageActionObject
 				.getAction_completed());
 		mwImageAction.setAction_count(imageActionObject.getAction_count());

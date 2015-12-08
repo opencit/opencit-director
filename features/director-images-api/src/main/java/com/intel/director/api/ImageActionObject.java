@@ -2,7 +2,7 @@ package com.intel.director.api;
 
 import java.util.List;
 
-public class ImageActionObject extends MonitorStatus {
+public class ImageActionObject extends GenericResponse {
 	
 	private String id;
 	private String image_id;
@@ -10,16 +10,16 @@ public class ImageActionObject extends MonitorStatus {
 	private int action_completed;
 	private int action_size;
 	private int action_size_max;
-	private List<ImageActionTask> action;
+	private List<ImageActionTask> actions;
 	private String current_task_status;
 	private String current_task_name;
 	
 	
-	public List<ImageActionTask> getAction() {
-		return action;
+	public List<ImageActionTask> getActions() {
+		return actions;
 	}
-	public void setAction(List<ImageActionTask> action) {
-		this.action = action;
+	public void setActions(List<ImageActionTask> actions) {
+		this.actions = actions;
 	}
 	public String getId() {
 		return id;
@@ -74,7 +74,7 @@ public class ImageActionObject extends MonitorStatus {
 		return "ImageActionObject [id=" + id + ", image_id=" + image_id
 				+ ", action_count=" + action_count + ", action_completed="
 				+ action_completed + ", action_size=" + action_size
-				+ ", action_size_max=" + action_size_max + ", action=" + action
+				+ ", action_size_max=" + action_size_max + ", action=" + actions
 				+ ", current_task_status=" + current_task_status
 				+ ", current_task_name=" + current_task_name + "]";
 	}

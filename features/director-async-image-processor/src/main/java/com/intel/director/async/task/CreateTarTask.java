@@ -5,17 +5,13 @@
  */
 package com.intel.director.async.task;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 
 /**
@@ -68,7 +64,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 			String imageLocation = imageinfo.getLocation();
 			// Fetch the policy and write to a location. Move to common
 
-			String imageName = imageinfo.getName();
+			String imageName = imageinfo.getImage_name();
 			TrustPolicy trustPolicy = persistService
 					.fetchPolicyForImage(imageActionObject.getImage_id());
 			if (trustPolicy == null) {
@@ -83,7 +79,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 
 			if (policy != null && policy.getEncryption() != null) {
 				log.info("Create Tar has a trust policy which is encrypted");
-				imageName = imageinfo.getName() + "-enc";
+				imageName = imageinfo.getImage_name() + "-enc";
 			}
 
 			String newLocation = imageLocation

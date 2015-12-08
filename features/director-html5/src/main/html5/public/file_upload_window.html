@@ -61,9 +61,6 @@ input[readonly] {
 <script src="js/jquery.form.js"></script>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <script src="js/bootstrap.min.js"></script>
-
-
-<script src="js/file_upload_script.js"></script>
 <script type="text/javascript">
 	var image_deployments = window.image_deployments_parent;
 	var image_format = window.image_format_parent;
@@ -73,12 +70,6 @@ input[readonly] {
 	var blob, BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
 	var fileName = "";
 	var currentFileName = "";
-	/*
-	window.onload = function() {
-		document.myform.action = urlToUploadMetadata;
-	}
-	 */
-
 	function validateName(fileName ){
 		fileName = fileName .split(' '); //we split the string in an array of strings using     whitespace as separator
         	return (fileName.length == 1); //true when there is only one word, false else.
@@ -123,7 +114,7 @@ input[readonly] {
 		upload_data = {
 			'image_deployments' : image_deployments,
 			'image_format' : image_format,
-			'name' : fileName,
+			'image_name' : fileName,
 			'image_size' : upload_size
 		};
 		xhrmdt.send(JSON.stringify(upload_data));

@@ -332,11 +332,13 @@ remove_startup_script director
 if [ "$2" = "--purge" ]; then
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
-
+	DIRECTOR_DB_USER=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.username' | cut -d'=' -f2`
 
 	#sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
-	sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	#sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
 	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP USER ${DIRECTOR_DB_USER}" > /dev/null 2>&1
+
 	echo "Drop database ${DIRECTOR_DB_NAME}"
 
 	rm -rf /mnt/images

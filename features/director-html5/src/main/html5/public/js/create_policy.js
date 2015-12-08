@@ -8,7 +8,7 @@ $(document).ready(function() {
 
 function CreateImageMetaData(data) {
 
-	this.imageid = current_image_id;
+	this.image_id = current_image_id;
 
 	this.image_name = current_image_name;
 	this.display_name = current_display_name;

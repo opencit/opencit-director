@@ -147,7 +147,7 @@ public class TreeNode implements Comparable{
 		String toggleIcon = "";
 		String toggleStyle = "";
 		String regexIdentifier = "";
-		String iconName = "arrow-right.png";
+		String iconName = "unlocked.png";
 		String hoverText = null;
 		if (StringUtils.isNotBlank(checked)) {
 			liColorClass = "selected";

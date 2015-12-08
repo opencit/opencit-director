@@ -1,8 +1,14 @@
 $(document).ready(function () {
+	$("#image_format").hide();
 	$("#gotoUploadWindow").click(function () {
 		var OpenWindow = window.open("file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
+		
 		OpenWindow.image_deployments_parent = $("#image_type").val();
-		OpenWindow.image_format_parent = $("#image_format").val();
+		if($("#image_type").val() == 'VM'){
+			OpenWindow.image_format_parent = 'qcow2';
+		} else {
+			OpenWindow.image_format_parent = $("#image_format").val();
+		}
 	});
 	console.log("Before fetchDeploymentType");
 	

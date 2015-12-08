@@ -47,13 +47,13 @@ function refreshBMOnlineGrid() {
 				if (images[i].trust_policy_draft_id != null) {
 				self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicyForBMLive('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 
 				} else if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicyForBMLive('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 				}
 
@@ -75,11 +75,11 @@ function refreshBMOnlineGrid() {
 				self.gridData.image_upload = "";
 				self.gridData.image_upload += "&nbsp;"
 					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
-					+ images[i].id + "','" + images[i].name + "','"
+					+ images[i].id + "','" + images[i].image_name + "','"
 					+ images[i].trust_policy_id + "')\" ></span></a>";
 
-				self.gridData.image_name = images[i].name;
-				console.log("host name :: "+ images[i].name + "::" + self.gridData.image_name);
+				self.gridData.image_name = images[i].image_name;
+				console.log("host name :: "+ images[i].image_name + "::" + self.gridData.image_name);
 
 				self.gridData.created_date = images[i].created_date;
 				grid.push(self.gridData);
