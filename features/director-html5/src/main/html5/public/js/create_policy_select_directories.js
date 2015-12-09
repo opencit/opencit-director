@@ -37,8 +37,19 @@ function ApplyRegExViewModel() {
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
 	
     self.resetRegEx = function(event) {
+    	var include = $("input[id='create_policy_regex_include']").attr("value");
+    	var exclude = $("input[id='create_policy_regex_exclude']").attr("value");
+
+		if((include == "" || include == null || include ==  undefined) && (exclude == "" || exclude == null || exclude ==  undefined))
+		{
+			closeRegexPanel();
+			return;
+		}		
+
+		
 		var sel_dir = $("#sel_dir").val();
 		var node = $("input[name='directory_" + sel_dir + "']");
+		
 		console.log(node.attr("name"));
 		var config = {
 			root : '/',
