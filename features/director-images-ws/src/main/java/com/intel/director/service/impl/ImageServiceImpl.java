@@ -100,19 +100,7 @@ public class ImageServiceImpl implements ImageService {
 		imagePersistenceManager = new DbServiceImpl();
 	}
 
-	/*
-	 * @Override public String testCreatePolicy(String imageId) throws Exception
-	 * { TrustPolicyDraft policyDraft = imagePersistenceManager
-	 * .fetchPolicyDraftForImage(imageId);
-	 * com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null; try {
-	 * policy = TdaasUtil .getPolicy(policyDraft.getTrust_policy_draft());
-	 * CreateTrustPolicy.createTrustPolicy(policy); } catch (JAXBException |
-	 * IOException | XMLStreamException e) {
-	 * log.error("Error while creating Trustpolicy", e); } catch (Exception ex)
-	 * { log.error("Error while creating Trustpolicy", ex); } return "SUCCESS";
-	 * }
-	 */
-
+	
 	@Override
 	public MountImageResponse mountImage(String imageId, String user)
 			throws DirectorException {
@@ -562,7 +550,7 @@ public class ImageServiceImpl implements ImageService {
 		// the sub files of these directory need to be fetched.
 		// false - only first level files
 		Map<String, Boolean> directoryListContainingPolicyFiles = new HashMap<>();
-		Set<String> directoryListContainingRegex = new HashSet<String>();
+		Set<TreeNodeDetail> directoryListContainingRegex = new HashSet<TreeNodeDetail>();
 		init(trustPolicyElementsList, directoryListContainingPolicyFiles,
 				directoryListContainingRegex, searchFilesInImageRequest);
 		log.info("after init");
@@ -651,7 +639,13 @@ public class ImageServiceImpl implements ImageService {
 			}
 
 			patchDirAddSet.add(searchFilesInImageRequest.getDir());
-			root.rootDirWithRegex = parent;
+			TreeNodeDetail detail = new TreeNodeDetail();
+			detail.regexPath = searchFilesInImageRequest.getDir();
+			detail.regexExclude = searchFilesInImageRequest.exclude;
+			detail.regexInclude = searchFilesInImageRequest.include;
+			detail.isRegexRecursive = searchFilesInImageRequest.include_recursive;
+
+			root.rootDirWithRegex = detail;
 		}
 
 		// Select all on directory
@@ -1272,7 +1266,7 @@ public class ImageServiceImpl implements ImageService {
 
 	private void init(List<String> trustPolicyElementsList,
 			Map<String, Boolean> directoryListContainingPolicyFiles,
-			Set<String> directoryListContainingRegex,
+			Set<TreeNodeDetail> directoryListContainingRegex,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
 		/*
 		 * if (!searchFilesInImageRequest.init) { trustPolicyElementsList =
@@ -1312,8 +1306,12 @@ public class ImageServiceImpl implements ImageService {
 										true);
 							}
 							if (measurement instanceof DirectoryMeasurement) {
-								directoryListContainingRegex.add(measurement
-										.getPath());
+								TreeNodeDetail detail = new TreeNodeDetail();
+								detail.regexPath = measurement.getPath();
+								detail.regexExclude = ((DirectoryMeasurement) measurement).getExclude();
+								detail.regexInclude = ((DirectoryMeasurement) measurement).getInclude();
+								detail.isRegexRecursive = ((DirectoryMeasurement) measurement).isRecursive();
+								directoryListContainingRegex.add(detail);
 							}
 
 						}

@@ -4,6 +4,8 @@ do * To change this license header, choose License Headers in Project Properties
  * and open the template in the editor.
  */
 package com.intel.director.images;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
 
 import java.io.File;
 import java.io.IOException;
@@ -190,10 +192,12 @@ public class Images {
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			long lEndTime = new Date().getTime();
-
+			
 			long difference = lEndTime - lStartTime;
 			log.info("Time taken to upload image to TD: " + difference);
 			filInputStream.close();
+			Session session=SecurityUtils.getSubject().getSession();
+			session.touch();
 			return uploadImageToTrustDirector;
 
 		}
@@ -778,6 +782,7 @@ public class Images {
 	 */
 	protected String getLoginUsername() {
 		return ShiroUtil.subjectUsername();
+		
 	}
 
 	/**
@@ -806,6 +811,7 @@ public class Images {
 			createTrustPolicyMetadataResponse = imageService
 					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
+			log.error("createTrustPolicyMetaData failed",e);
 			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
 			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
 			return createTrustPolicyMetadataResponse;
@@ -838,6 +844,7 @@ public class Images {
 					.importPolicyTemplate(req.getImage_id());
 
 		} catch (DirectorException e) {
+			log.error("Error in importPolicyTemplate ", e);	
 			importPolicyTemplateResponse.setStatus(Constants.ERROR);
 			importPolicyTemplateResponse.setDetails(e.getMessage());
 			return importPolicyTemplateResponse;
@@ -866,7 +873,7 @@ public class Images {
 		try {
 			return imageService.createPolicyDraftFromPolicy(req.getImage_id());
 		} catch (DirectorException e) {
-			log.error("Unable to download Policy");
+			log.error("createPolicyDraftFromPolicy failed ");
 			throw new DirectorException(
 					"Error in creating draft again from policy", e);
 		}
@@ -1052,8 +1059,7 @@ public class Images {
 		try {
 			trustpolicyresponse = imageService.getTrustPolicyMetaData(trustPolicyId);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error in getTrustPoliciesData ", e);
 			trustpolicyresponse = new TrustPolicyResponse();
 			trustpolicyresponse.setId(null);
 		}

@@ -44,12 +44,20 @@ if [ -d $DIRECTOR_ENV ]; then
   done
 fi
 
+if [ -d /mnt ]; then
+  echo "Mount directory exists"
+else
+	mkdir /mnt	
+fi
+
+
 #Create upload dir and mount dir
 if [ -d /mnt/director ]; then
-  echo "Mount directory exists"
+  echo "Mount TD images directory exists"
 else
 	mkdir /mnt/director	
 fi
+
 
 if [ -d /mnt/images ]; then
   echo "Upload directory exists"

@@ -329,6 +329,15 @@ director_uninstall() {
 director_stop
 scheduler_stop
 remove_startup_script director
+
+#unmount any images if any
+m_arr=($(mount | grep "/mnt/director/" | awk '{print $3}' ))
+for i in "${m_arr[@]}"
+   do
+		umount $i
+done
+rm -rf /mnt/director
+
 if [ "$2" = "--purge" ]; then
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
@@ -342,13 +351,6 @@ if [ "$2" = "--purge" ]; then
 	echo "Drop database ${DIRECTOR_DB_NAME}"
 
 	rm -rf /mnt/images
-	m_arr=($(mount | grep "/mnt/director/" | awk '{print $3}' ))
-        for i in "${m_arr[@]}"
-           do
-                umount $i
-           done
-	
-	rm -rf /mnt/director
 fi
 
 rm -f /usr/local/bin/director
