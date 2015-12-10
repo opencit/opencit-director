@@ -1310,7 +1310,7 @@ public class ImageServiceImpl implements ImageService {
 								detail.regexPath = measurement.getPath();
 								detail.regexExclude = ((DirectoryMeasurement) measurement).getExclude();
 								detail.regexInclude = ((DirectoryMeasurement) measurement).getInclude();
-								detail.isRegexRecursive = ((DirectoryMeasurement) measurement).isRecursive();
+								detail.isRegexRecursive = ((DirectoryMeasurement) measurement).isRecursive() != null ? ((DirectoryMeasurement) measurement).isRecursive():false;
 								directoryListContainingRegex.add(detail);
 							}
 
