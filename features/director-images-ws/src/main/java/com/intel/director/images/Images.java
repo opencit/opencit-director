@@ -1111,7 +1111,17 @@ public class Images {
 	 * "actions":[ {"task_name":"Create Tar","status":"Incomplete"},
 	 * {"task_name":"Upload Tar","status":"Incomplete","storename":"Glance"}]
 	 * }
-	 * Output: { "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057", "image_id": "08EB37D7-2678-495D-B485-59233EB51996", "status": "success"}
+	 * Output:{
+	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * "action_count": 2,
+	 * "action_completed": 2,
+	 * "action_size": 66570,
+	 * "action_size_max": 66570,
+	 * "actions": [ { "status": "Incomplete","task_name": "Create Tar" },
+	 * { "status": "Incomplete", "storename": "Glance", "task_name": "Upload Tar" }],
+	 * "current_task_status": "Incomplete",
+	 * "current_task_name": "Create Tar" }
 	 * </pre>
 	 */
 	
@@ -1133,6 +1143,11 @@ public class Images {
 		}
 		imageActionResponse.setId(imageActionObject.getId());
 		imageActionResponse.setImage_id(imageActionObject.getImage_id());
+		imageActionResponse.setAction_completed(imageActionObject.getAction_completed());
+		imageActionResponse.setAction_count(imageActionObject.getAction_count());
+		imageActionResponse.setActions(imageActionObject.getActions());
+		imageActionResponse.setCurrent_task_name(imageActionObject.getCurrent_task_name());
+		imageActionResponse.setCurrent_task_status(imageActionObject.getCurrent_task_status());
 		return imageActionResponse;
 	}
 	/**

@@ -37,16 +37,6 @@ function ApplyRegExViewModel() {
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
     self.resetRegEx = function(event) { 
-    	
-    	var include = $("input[id='create_policy_regex_include']").attr("value");
-    	var exclude = $("input[id='create_policy_regex_exclude']").attr("value");
-
-		if((include == "" || include == null || include ==  undefined) && (exclude == "" || exclude == null || exclude ==  undefined))
-		{
-			closeRegexPanel();
-			return;
-		}		
-		
 		var sel_dir = $("#sel_dir").val();
 		var node = $("input[name='directory_" + sel_dir + "']");
 		
@@ -75,10 +65,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/unlocked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -134,10 +122,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/locked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,

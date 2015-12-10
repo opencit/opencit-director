@@ -183,11 +183,20 @@ public class TreeNode implements Comparable{
 			liClass = "directory "
 					+ ((!checked.isEmpty() ? "expanded"
 							: parent.directoryCollapsed));
-			toggleIcon = "<img src=\"/v1/html5/public/director-html5/images/"+iconName+"\" title=\""
-					+ hoverText
-					+ "\"  id=\"toggle_"
-					+ incrementalPath
-					+ "\"   onclick=\"toggleState(this)\" />";
+
+			if(iconName.contains("unlock")){
+				toggleIcon = "<i class='fa fa-unlock' style='color : blue; font-size : 1.6em' title='"
+				+ hoverText
+				+ "'  id='toggle_"
+				+ incrementalPath
+				+ "'   onclick='toggleState(this)'></i>";	
+			} else {
+				toggleIcon = "<i class='fa fa-lock' style='color : blue; font-size : 1.6em' title='"
+				+ hoverText
+				+ "'  id='toggle_"
+				+ incrementalPath
+				+ "'   onclick='toggleState(this)'></i>";
+			}		
 			toggleStyle = " style=\"float:left;\" ";
 
 		} else {

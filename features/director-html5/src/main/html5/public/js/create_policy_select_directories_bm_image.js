@@ -124,10 +124,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/unlocked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -173,10 +171,8 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/locked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {
