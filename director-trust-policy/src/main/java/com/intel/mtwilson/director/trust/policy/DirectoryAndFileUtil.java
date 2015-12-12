@@ -33,7 +33,20 @@ public class DirectoryAndFileUtil {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(DirectoryAndFileUtil.class);
 
+	private String imageId;
+
+	public DirectoryAndFileUtil(String imageId) {
+		this.imageId = imageId;
+	}
 	
+	public String getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(String imageId) {
+		this.imageId = imageId;
+	}
+
 	public String getFilesAndDirectories(String imageId, DirectoryMeasurement dirMeasurement)
 			throws FileNotFoundException, IOException {
 		// Create find command

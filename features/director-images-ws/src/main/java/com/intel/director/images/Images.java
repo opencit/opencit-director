@@ -306,16 +306,18 @@ public class Images {
 	 * In case the case of the user who has mounted the image, because of
 	 * inactivity, the session timed out; and the user logs back in. The image
 	 * will not be re-mounted.
+	 * 
+	 * <pre>
 	 *
-	 *In successful mount scenario, status is sent back as SUCCESS
-	 * Sample response: { “id”: “1eebe380-1a36-11e5-9472-0002a5d5c51b”, “name”:
-	 * “cirros-x86.img” “image_deployments”: “VM,Bare_Metal” “image_format”:
-	 * “qcow2” “mounted”: “true”, "status":"SUCCESS", details:"" }
+	 * Input: {id : "ACD7747D-79BE-43E3-BAA5-07DBEC13D272"} 
+	 * Output: { created_by_user_id: "admin", created_date: 1448217000000, deleted: false, 	edited_by_user_id: "admin", edited_date: 1448303400000, id: "ACD7747D-79BE-43E3-	BAA5-07DBEC13D272", image_deployments: "VM", image_format: "qcow2", image_size: 	13312, location: "/mnt/images/",	name: "cirrus_1811.img", sent: 13312, status: 	"SUCCESS"	}
+	 *
 	 *
 	 * If the user tries to mount an image which, for some reason, has been removed from the uploaded location, the response will look like :
-	 *	{"status":"Error", "details":" No image found with id: <UUID>"}
-	 *
-	 *
+	 * {"status":"Error", "details":" No image found with id: <UUID>"}
+	 * 
+	 * </pre>
+	 * 
 	 * @param imageId
 	 *            UUID: Image id of the image in MW_IMAGE to be mounted
 	 * @param httpServletRequest
@@ -356,16 +358,19 @@ public class Images {
 	 * As part of the unmount process, the MW_IMAGE.mounted_by_user_id field is
 	 * set to NULL again. the unmount process in the service, throws an
 	 * exception wrapped in DirectorException in case of any error.
-	 *
-	 *
-	 * Sample response: { “id”: “1eebe380-1a36-11e5-9472-0002a5d5c51b”, “name”:
-	 * “cirros-x86.img” “image_deployments”: “VM,Bare_Metal” “image_format”:
-	 * “qcow2” “mounted”: “false”, status:"Success", details:"" }
 	 * 
-	 * In case of error unmounting, the unmount script returned a non zero exit code:
-	 * { “id”: “1eebe380-1a36-11e5-9472-0002a5d5c51b”, “name”:
-	 * “cirros-x86.img” “image_deployments”: “VM,Bare_Metal” “image_format”:
-	 * “qcow2” “mounted”: “false”, status:"Error", details: "Unmount script executed with errors" }
+	 * <pre>
+	 *
+		*
+	*	
+	*	Input: {id : "ACD7747D-79BE-43E3-BAA5-07DBEC13D272"} 
+	*	Output: { created_by_user_id: "admin", created_date: 1448217000000, deleted: false, 	edited_by_user_id: "admin", edited_date: 1448303400000, id: "ACD7747D-79BE-43E3-	BAA5-07DBEC13D272", image_deployments: "VM", image_format: "qcow2", image_size: 	13312, location: "/mnt/images/",	name: "cirrus_1811.img", sent: 13312, status: 	"Success"}
+	*	
+	*	In case of error unmounting, the unmount script returned a non zero exit code:
+	*	{ "id": "1eebe380-1a36-11e5-9472-0002a5d5c51b", "name":	"cirros-x86.img" "image_deployments": "VM,Bare_Metal" "image_format":
+	*	"qcow2" "mounted": "false", status:"Error", details: "Unmount script executed with errors" }
+	 * 
+	 * </pre>
 	 *
 	 * @param imageId
 	 *            Id of the image to be un-mounted
@@ -379,13 +384,11 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public UnmountImageResponse unMountImage(MountImageRequest unmountimage,
-			@Context HttpServletRequest httpServletRequest,
-			@Context HttpServletResponse httpServletResponse){
+			@Context HttpServletRequest httpServletRequest, @Context HttpServletResponse httpServletResponse) {
 		String user = getLoginUsername();
 		UnmountImageResponse unmountImageResponse;
 		try {
-			unmountImageResponse = imageService.unMountImage(
-					unmountimage.id, user);
+			unmountImageResponse = imageService.unMountImage(unmountimage.id, user);
 		} catch (Exception e) {
 			unmountImageResponse = new UnmountImageResponse();
 			log.error("Error while unmounting image ", e);
@@ -402,9 +405,9 @@ public class Images {
 	 * sent to the server every 10 mins. this method does the job of merging the
 	 * patch/delta into the trust policy draft that is stored in the database.
 	 *
-	 * A sample patch looks like this: <patch> <add sel="<node selector>"><File
-	 * path="<file path>"></add> <remove sel="<node selector>"></remove>
-	 * </patch>
+	 * A sample patch looks like this: <patch> <add sel="<node selector>"
+	 * ><File path="<file path>"></add> <remove sel="<node selector>"
+	 * ></remove> </patch>
 	 *
 	 * We use https://github.com/dnault/xml-patch library to apply patches.
 	 *
@@ -412,6 +415,19 @@ public class Images {
 	 * patch application In case of error, a DirectorException is thrown. It is
 	 * caught in the failure section of the ajax call and shown as a pop up
 	 * message.
+	 * 
+	 * <pre>
+	 * 
+	 * Input: UUID of the image in path
+	 * {"patch":
+	 * "<patch></patch>"
+	 * }
+	 * Output: {"status":"Success", details:"<policy>"}
+	 *
+	 * In case of error:
+	 *  Output: {"status":"Error", details:"<Cause of error>"}
+	 * 
+	 * </pre>
 	 *
 	 * @param imageId
 	 *            Id of image whose draft is to be edited
@@ -719,14 +735,14 @@ public class Images {
 	}
 
 	/**
-	 * On the step 3/3 of the wizard for VM, when the user clicks on the “Upload
-	 * now” button, we accept the last moment changes in the name of the policy
+	 * On the step 3/3 of the wizard for VM, when the user clicks on the "Upload
+	 * now" button, we accept the last moment changes in the name of the policy
 	 * and update it. This method just validates that the name given by the user
 	 * is unique
 	 * <pre>
 	 * https://<host>/v1/trust-policies/7897-232321-432423-4322
-	 * Input: UUID of trust policy in path {“display_name”:“Name of policy”}
-	 * Output: {“status”:”<success/Error>”, “details”:”Error details”}
+	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
+	 * Output: {"status":"<success/Error>", "details":"Error details"}
 	 * </pre>
 	 * @param createPolicyRequest
 	 * @return
@@ -759,6 +775,7 @@ public class Images {
 	 * @return
 	 * @throws DirectorException
 	 */
+    @Deprecated
 	@Path("images/image-stores")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -794,6 +811,11 @@ public class Images {
 	 * default trust policy, with no files in whitelist.
 	 *
 	 *
+	 * <pre>
+	 *	Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
+	 *
+	 * Output: {"id":"50022e9c-577a-4bbd-9445-197a3e1a349f","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n <Director>\n <CustomerId>testId</CustomerId>\n </Director>\n <Image>\n <ImageId>08EB37D7-2678-495D-B485-59233EB51996</ImageId>\n <ImageHash>6413fccb72e36d2cd4b20efb5b5fe1be916ab60f0fe1d7e2aab1a2170be1ff40</ImageHash>\n </Image>\n <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n <Whitelist DigestAlg=\"sha256\">\n <File Path=\"/boot/grub/stage1\"></File>\n <File Path=\"/boot/grub/menu.lst\"></File>\n <File Path=\"/initrd.img\"></File>\n <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/config-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/initrd.img-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/grub/e2fs_stage1_5\"></File>\n <File Path=\"/boot/grub/stage2\"></File>\n </Whitelist>\n</TrustPolicy>\n"}
+	 * </pre>
 	 *
 	 *
 	 * @param createTrustPolicyMetaDataRequest
@@ -826,7 +848,13 @@ public class Images {
 	 * templates defined in the database. Depending on the type of the live host
 	 * (with vrtm installed or not), a certain template is picked and applied
 	 * during creating a new blank policy draft.
+	 * <pre>
+	 * 
+	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
 	 *
+	 *	Output: {"trust_policy":"<policy xml>", "status":"SUCCESS","details":"<In case of error>"}
+     *
+	 * </pre>
 	 *
 	 * @param image_id
 	 *            the image for which the template needs to be applied
@@ -858,6 +886,12 @@ public class Images {
 	 * policy, if he chooses to revisit the files/dirs selection we need to
 	 * recreate the policy draft. this method does the same.
 	 *
+	 * <pre>
+	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
+     *	
+	 *	Output: {"id":"<UUID of Policy draft>", "trust_policy_draft":"<XML representation of policy>", "display_name":"<name provided by user for the policy>", "imgAttributes":"{"id":"<UUID of image>", "image_format":"qcow2", ..... }"}
+	 *
+	 * </pre>
 	 *
 	 * @param imageId
 	 * @param image_action_id
@@ -887,7 +921,11 @@ public class Images {
 	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
 	 * an xml content to the user
 	 *
-	 *
+	 * <pre>
+	 * Input: Image id as path param
+	 *	Output: Content sent as stream
+     *
+	 * </pre>
 	 * @param imageId
 	 *            the image for which the policy is downloaded
 	 * @return XML content of the policy
@@ -958,7 +996,12 @@ public class Images {
 	 * policy and manifest as it was created in the wizrd. This method looks
 	 * into the MW_TRUST_POLICY table and gets the policy string, creates a
 	 * manifest and sends it as an tarball content to the user
-	 *
+	 * 
+	 * <pre>
+	 * 
+	 * Input: Image UUID
+	 * Output: Content of tarball as stream
+	 * </pre>
 	 *
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
@@ -988,6 +1031,15 @@ public class Images {
 		return response.build();
 	}
 
+	
+	/**
+	 * Delete the trust policy draft by the provided ID
+	 * <pre>
+	 * Input: UUID of the policy draft to be deleted
+	 * Output: Status of operation in json(Success/Error)
+	 * {"status":"success", details:""}
+	 * </pre> 
+	 */
 	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1005,6 +1057,15 @@ public class Images {
 	}
 
 
+	/**
+	 * Deletes the signed trust policy by the provided id
+	 * <pre>
+	 * 
+	 * Input: UUID of the policy to be deleted
+	* Output: Status(success/error) of operation in json
+	*	"status":"success"}
+	 * </pre>
+	 */
 	@Path("trust-policy/{trust_policy_id: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1027,6 +1088,11 @@ public class Images {
 	 * Mark image as deleted. We turn the disabled flag=true in the MW_IMAGE
 	 * table
 	 *
+	 * <pre>
+	 * Input: pass the UUID of the image as path param
+	 * Output: {"status": "success"}
+	 * </pre>
+	 * 
 	 * @param imageId
 	 *            Id of the image to be deleted
 	 * @return Response stating status of the operation - Success/Error
@@ -1160,7 +1226,7 @@ public class Images {
 	 * @TDMethodType PUT
 	 * @TDSampleRestCall <pre>
 	 * https://server.com:8443/v1/image-actions
-	 * Input: { “action_id”: “CF0A8FA3-F73E-41E9-8421-112FB22BB057”
+	 * Input: { "action_id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057"
 	 * "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
 	 * "actions":[ {"task_name":"Create Tar","status":"Incomplete"},
 	 * {"task_name":"Upload Tar","status":"Incomplete","storename":"Glance"}]

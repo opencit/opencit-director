@@ -899,7 +899,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 		try {
 			log.info("Before calculating hashes");
-			new CreateTrustPolicy().createTrustPolicy(policy);
+			new CreateTrustPolicy(image_id).createTrustPolicy(policy);
 			log.info("After calculating hashes");
 		} catch (CryptographyException | IOException e1) {
 			log.error("Unable to create trust policy- create hashes");
@@ -1885,7 +1885,7 @@ public class ImageServiceImpl implements ImageService {
 		if (!dir.endsWith(File.separator)) {
 			dir += File.separator;
 		}
-		DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil();
+		DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil(imageId);
 		DirectoryMeasurement dirMeasurement = new DirectoryMeasurement();
 		dirMeasurement.setPath(dir);
 		dirMeasurement.setRecursive(false);
@@ -1948,7 +1948,7 @@ public class ImageServiceImpl implements ImageService {
 		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
 
 		Collection<File> files = new HashSet<>();
-		DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil();
+		DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil(searchFilesInImageRequest.id);
 		DirectoryMeasurement dirMeasurement = new DirectoryMeasurement();
 		dirMeasurement.setPath(searchFilesInImageRequest.getDir());
 		dirMeasurement
