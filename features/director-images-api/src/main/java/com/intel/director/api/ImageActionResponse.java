@@ -1,8 +1,7 @@
 package com.intel.director.api;
 
-public class ImageActionResponse {
+public class ImageActionResponse extends ImageActionObject {
 	public String id;
-	public String image_id;
 	
 	public String status;
 	public String details;
@@ -29,10 +28,5 @@ public class ImageActionResponse {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public String getImage_id() {
-		return image_id;
-	}
-	public void setImage_id(String image_id) {
-		this.image_id = image_id;
-	}
+
 }

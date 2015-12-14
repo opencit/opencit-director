@@ -226,7 +226,7 @@ public class DashboardImpl implements DashboardService {
 					display_name = dashboardImplPersistenceManager.fetchPolicyById(
 							policy_id).getDisplay_name();
 				} else {
-					display_name = image_info.name;
+					display_name = image_info.image_name;
 				}
 
 			

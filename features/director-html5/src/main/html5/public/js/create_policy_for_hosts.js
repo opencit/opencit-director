@@ -4,7 +4,7 @@ var endpoint = "/v1/images/";
 
 function CreateBMLiveMetaData(data) {
 	
-	this.imageid = current_image_id;
+	this.image_id = current_image_id;
 	this.image_name = $("#image_name").val();
 	this.display_name = $("#display_name_host").val();
 	
@@ -93,11 +93,13 @@ function addhostandnext() {
 			self.createBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.createBMLiveMetaData.encrypted = false;
 			self.createBMLiveMetaData.display_name = $("#display_name_host").val();
-			self.createBMLiveMetaData.imageid = current_image_id ;
+			self.createBMLiveMetaData.image_id = current_image_id ;
 			var mountimage = {
 						"id" : current_image_id
 					}
-
+			var policyTemplateRequest={
+					"image_id" :current_image_id
+				}
 
 			$.ajax({
 				type : "POST",
@@ -146,7 +148,15 @@ function addhostandnext() {
 
 							$.ajax({
 								type : "POST",
-								url : "/v1/rpc/policy-templates/" + current_image_id + "/apply",
+
+
+								url : "/v1/rpc/apply-trust-policy-template/",
+								contentType : "application/json",
+								headers : {
+									'Accept' : 'application/json'
+									},
+								data : JSON.stringify(policyTemplateRequest),
+
 								success : function (data) {
 									$("#createBMLivePolicyNext").prop('disabled', false);
 

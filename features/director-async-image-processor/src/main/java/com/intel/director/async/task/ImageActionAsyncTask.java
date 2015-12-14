@@ -1,7 +1,7 @@
 package com.intel.director.async.task;
 
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.common.Constants;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
@@ -53,7 +53,7 @@ public abstract class ImageActionAsyncTask  {
 	 */
 	protected ImageActionTask getImageActionTaskFromArray() {
 		ImageActionTask iat = null;
-		for (ImageActionTask imageActionTask : imageActionObject.getAction()) {
+		for (ImageActionTask imageActionTask : imageActionObject.getActions()) {
 			if (imageActionTask.getTask_name().equals(getTaskName())) {
 				iat = imageActionTask;
 				break;
@@ -72,7 +72,7 @@ public abstract class ImageActionAsyncTask  {
 	 */
 	protected boolean previousTasksCompleted(String taskName) {
 		boolean completed = true;
-		for (ImageActionTask imageActionTask : imageActionObject.getAction()) {
+		for (ImageActionTask imageActionTask : imageActionObject.getActions()) {
 			if (imageActionTask.getTask_name().equals(getTaskName())) {
 				completed = true;
 				break;

@@ -23,10 +23,10 @@ public interface ImageActionService {
 	public ImageActionObject updateImageAction(
 			ImageActionRequest imageActionRequest) throws DirectorException;
 
-	public void deleteImageAction(ImageActionRequest imageActionRequest)
+	public void deleteImageAction(String actionId)
 			throws DirectorException;
 
-	ImageActionObject fetchImageAction(String action_id)
+	ImageActionObject fetchImageAction(String actionId)
 			throws DirectorException;
 
 }

@@ -5,7 +5,7 @@ var image_policies = new Array();
 
 $.ajax({
 	type : "GET",
-	url : "/v1/trust-policy-drafts/?imageId="+ current_image_id + "&imageArchive=false",
+	url : "/v1/trust-policy-drafts/?imageId="+ current_image_id + "&deploymentType=BareMetal",
 	// accept: "application/json",
 	contentType : "application/json",
 	headers : {
@@ -13,13 +13,15 @@ $.ajax({
 	},
 	dataType : "json",
 	success : function(data, status, xhr) {
-		showBMLiveMetaData(data);
+		$("#display_name_host_edit").val(data.display_name);
+		$("#host_ip_edit").val(data.ip_address);
+		$("#username_for_host_edit").val(data.username);
 	}
 });
 
 function EditBMLiveMetaData() {
 	
-	this.imageid = current_image_id;
+	this.image_id = current_image_id;
 	this.image_name = current_image_name;
 	this.display_name = $("#display_name_host_edit").val();
 }
@@ -170,21 +172,5 @@ return;
 			
 		}
 		
-	});
-};
-
-function showBMLiveMetaData(policydata) {
-	
-	$.ajax({
-		type : "GET",
-		url : endpoint + current_image_id + "/getbmlivemetadata",
-		dataType : "json",
-		success : function (data, status, xhr) {
-			current_display_name = data.ssh_setting_request.display_name;
-			console.log(current_display_name);
-			$("#display_name_host_edit").val(data.ssh_setting_request.policy_name);
-			$("#host_ip_edit").val(data.ssh_setting_request.ip_address);
-			$("#username_for_host_edit").val(data.ssh_setting_request.username);
-		}
 	});
 };

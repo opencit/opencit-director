@@ -18,22 +18,22 @@ function SelectDirectoriesViewModel() {
 		// //Code
 
 		var createTrustPolicyMetaData = {
-			"imageid" : current_image_id
+			"trust_policy_draft_id" : current_image_id
 		}
 		$.ajax({
 			type : "POST",
 			url : "/v1/rpc/trust-policies",
 			contentType : "application/json",
-			dataType : "text",
+			dataType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
 			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
-					var mountimage = {
-						"id" : current_image_id
-					}
-				if(data == "ERROR")
+				var mountimage = {
+					"id" : current_image_id
+				}
+				if(data.status == "Error")
 				{
 					current_image_action_id = "";
 					$.ajax({
@@ -124,10 +124,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -173,10 +171,8 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/locked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {

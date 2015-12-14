@@ -7,26 +7,28 @@ function mountMetaData(){
 }
 displayImageStore();
 function displayImageStore() {
-	$.ajax({
-		type : "GET",
-		url : endpoint + current_image_id + "/trustpolicymetadata",
-		dataType : "json",
-		success : function(data) {
+	if(current_trust_policy_id != "" && current_trust_policy_id != undefined && current_trust_policy_id != "undefined"){
+		$.ajax({
+			type : "GET",
+			url : "/v1/trust-policy/" + current_trust_policy_id,
+			headers : {
+				'Accept' : 'application/json'
+			},
+			dataType : "json",
+			success : function(data) {
 			
-			if(data.display_name != undefined &&  data.display_name != null && data.display_name != ""){
-				current_display_name = data.display_name;
-				$('#display_name_last').val(current_display_name);
-				$('#display_name_last_direct')
-				.val(current_display_name);
+				if(data.display_name != undefined &&  data.display_name != null && data.display_name != ""){
+					current_display_name = data.display_name;
+					$('#display_name_last').val(current_display_name);
+					$('#display_name_last_direct').val(current_display_name);
+				}
 			}
-		}
-	});
-	
+		});
+	}
 	$
 	.ajax({
 		type : "GET",
-		url : endpoint + "imagestores",
-		// accept: "application/json",
+		url : endpoint + "image-stores",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
@@ -34,7 +36,7 @@ function displayImageStore() {
 		dataType : "json",
 		success : function(data, status, xhr) {
 			
-			imageStores = data.imageStoreNames;
+			imageStores = data.image_stores;
 			
 			//option = "<option value='0'>Select</option>";
 			
@@ -224,11 +226,33 @@ function createPolicyDraftFromPolicy() {
 	var mountimage = {
 		"id" : current_image_id
 	}
+	var create_draft_request={
+		"image_id" :current_image_id
+	}
+
 	$.ajax({
-		type : "GET",
-		url : "/v1/rpc/" + current_image_id + "/createDraftFromPolicy",
+		type : "POST",
+		contentType : "application/json",
+		headers : {
+				'Accept' : 'application/json'
+			},
+		data : JSON.stringify(create_draft_request),
+
+		url : "/v1/rpc/createDraftFromPolicy",
 		success : function(data, status, xhr) {
-			console.log("Draft Created Successfully");
+			
+			if (data.status == "Error") {
+							$('#error_vm_body_3').text("Internal Error Occured");
+							$("#error_vm_3").modal({
+								backdrop : "static"
+							});
+
+							$('body').removeClass("modal-open");
+							return false;
+						}else{
+			current_trust_policy_draft_id = data.id;
+		    }
+
 		}
 	});
 	$.ajax({

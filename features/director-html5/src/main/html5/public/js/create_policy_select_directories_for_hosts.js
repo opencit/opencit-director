@@ -36,13 +36,11 @@ function ApplyRegExViewModel() {
 	var self = this;
 
 	self.applyRegexMetaData = new ApplyRegexMetaData({});
-    self.resetRegEx = function(event) {
-        console.log("Yeah !!!");
+    self.resetRegEx = function(event) { 
 		var sel_dir = $("#sel_dir").val();
-		
-        console.log("DIR : "+sel_dir);
-
 		var node = $("input[name='directory_" + sel_dir + "']");
+		
+
 		var config = {
 			root : '/',
 			dir : sel_dir,
@@ -67,16 +65,20 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
+		
+		node.removeAttr("rootregexdir");
+		node.removeAttr("include");
+		node.removeAttr("exclude");
+		node.removeAttr("recursive");
+
 		closeRegexPanel();
     }
 	self.applyRegEx = function(loginFormElement) {
@@ -84,6 +86,7 @@ function ApplyRegExViewModel() {
 		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
 		var exclude = loginFormElement.create_policy_regex_exclude.value;
 		
+	
 		if((include == "" || include == null || include ==  undefined) && (exclude == "" || exclude == null || exclude ==  undefined))
 		{
 			$("#regex_error_bm_live").html("<font color='red'>Provide atleast one filter</font>");
@@ -119,10 +122,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -130,10 +131,13 @@ function ApplyRegExViewModel() {
 			editPatch(file, checkedStatus, rootRegexDir);
 		});
 		
-		// hide the ApplyRegex panel
-		$('#regexPanel').removeClass('col-md-4');
-		$('#regexPanel').removeClass('open');
-		$('#regexPanel').addClass('hidden');
+		node.attr("rootregexdir",sel_dir);
+		node.attr("include", include);
+		node.attr("exclude", exclude);
+		node.attr("recursive", ""+includeRecursive+"");
+
+		
+		closeRegexPanel();
 
 	}
 
@@ -143,13 +147,33 @@ function toggleState(str) {
 	var id = str.id;
 	var n = id.indexOf("_");
 	var path = id.substring(n + 1);
+	
+	
+	var checkboxObj = $("input[name='directory_"+path + "']");
+	if(checkboxObj.attr("rootregexdir") == undefined || checkboxObj.attr("rootregexdir")=='undefined'){
+		console.log("checkboxObj.rootregexdir:"+checkboxObj.attr("rootregexdir"));
+		console.log("No regex");
+	}else{
+		path = checkboxObj.attr("rootregexdir") ; 
+		$('#create_policy_regex_includeRecursive').attr('checked', checkboxObj.attr("recursive")=="true");
+		var includeObj = $("input[id='create_policy_regex_include']");
+		var include = checkboxObj.attr("include");
+		includeObj.attr("value",include);		
+		
+		var excludeObj = $("input[id='create_policy_regex_exclude']");
+		var exclude = checkboxObj.attr("exclude");
+		excludeObj.attr("value",exclude);
+	}
+
+	
+	
 	var oldSelDir = "";
 	if ($('#regexPanel').hasClass('open')) {
 		oldSelDir = $('#sel_dir').val();
 	}
 	$("#regex_error_bm_live").html("");
 	$('#dir_path').val(path);
-	$('#folderPathDiv').text(path);
+	$('#folderPathDiv').text(id.substring(n + 1));
 	$('#sel_dir').val(path);
 	$('input[name=asset_tag_policy]').val(path);
 	if ($('#regexPanel').hasClass('open')) {		
@@ -185,6 +209,11 @@ function closeRegexPanel(){
 	$('#dir_path').val("");
 	$('#folderPathDiv').text("");
 	$('#sel_dir').val("");
+
+	
+	$("input[id='create_policy_regex_include']").attr("value","");
+	$("input[id='create_policy_regex_exclude']").attr("value","");
+	$("input[id='create_policy_regex_includeRecursive']").attr("checked",false);
 
 }
 
@@ -385,19 +414,22 @@ function createPolicy(){
 	}
 	showLoading();
 		var createTrustPolicyMetaData = {
-			"imageid" : current_image_id
+			"trust_policy_draft_id" : current_trust_policy_draft_id
 		}
 		$.ajax({
 			type : "POST",
 			url : "/v1/rpc/trust-policies",
 			contentType : "application/json",
-			dataType : "text",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			dataType : "json",
 			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
 				var mountimage = {
 					"id" : current_image_id
 				}
-				var createResponse = data;
+				var createResponse = data.status;
 				current_image_action_id = "";
 				$.ajax({
 					type : "POST",

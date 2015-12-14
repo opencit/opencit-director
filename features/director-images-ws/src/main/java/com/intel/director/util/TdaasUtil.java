@@ -179,7 +179,7 @@ public class TdaasUtil {
 		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
 				: DirectorUtil.getDirectorId());
 		Image image = new Image();
-		image.setImageId(createTrustPolicyMetaDataRequest.getImageid());
+		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
 		policy.setLaunchControlPolicy(LaunchControlPolicy
 				.fromValue(createTrustPolicyMetaDataRequest
@@ -294,7 +294,7 @@ public class TdaasUtil {
 		imageAttributes.image_size = 1000;
 		imageAttributes.location = "/opt/director/vm/" + imageId;
 		imageAttributes.mounted_by_user_id = null;
-		imageAttributes.name = "IMG_" + imageId;
+		imageAttributes.image_name = "IMG_" + imageId;
 		imageAttributes.status = null;
 
 		TrustDirectorImageUploadResponse directorImageUploadResponse = mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
@@ -485,7 +485,7 @@ public class TdaasUtil {
 		img.setImage_format(null);
 		img.setImage_size(null);
 		img.setLocation(null);
-		img.setName(ip);
+		img.setImage_name(ip);
 		img.setSent(null);
 		img.setStatus(null);
 		return img;
@@ -512,7 +512,7 @@ public class TdaasUtil {
 		DateFormat df = new SimpleDateFormat();
 		imageUploadRequest.setDate(df.format(obj.getDate()));
 		imageUploadRequest.setImage_format(obj.getImg().getImage_format());
-		imageUploadRequest.setName(obj.getImg().getName());
+		imageUploadRequest.setName(obj.getImg().getImage_name());
 
 		return imageUploadRequest;
 	}
@@ -587,7 +587,7 @@ public class TdaasUtil {
 		imagesReadyToDeploy.setEdited_by_user_id(img.getEdited_by_user_id());
 		imagesReadyToDeploy.setEdited_date(img.getEdited_date());
 		imagesReadyToDeploy.setImage_format(img.getImage_format());
-		imagesReadyToDeploy.setImage_name(img.getName());
+		imagesReadyToDeploy.setImage_name(img.getImage_name());
 		imagesReadyToDeploy.setUser(img.getCreated_by_user_id());
 		return imagesReadyToDeploy;
 	}

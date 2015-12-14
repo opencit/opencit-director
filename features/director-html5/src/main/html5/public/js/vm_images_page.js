@@ -235,7 +235,7 @@ function downloadPolicy(imageid, trust_policy_id) {
 
 var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 
-
+ 
 
  $.ajax({
             type: "POST",
@@ -246,7 +246,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-var url="/v1/images/" + imageid + "/downloadPolicy?Authorization="+encodeURIComponent(authtoken);
+var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
 
                  window.location = url;                   
             },
@@ -297,6 +297,7 @@ function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagena
 			dataType : "text",
 			success : function(result) {
 				callComplete = true;
+				refresh_vm_images_Grid();
 				}
 		});
 	}
@@ -307,13 +308,11 @@ function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagena
 			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id ,
 			dataType : "text",
 			success : function(result) {
-				callComplete = true;				
+				callComplete = true;
+				refresh_vm_images_Grid();	
 			}		
 		});
 	}
-	$("#trust_policy_vm_column" + imageid).html("<a href='#' ><span class='glyphicon glyphicon-plus-sign'  title='Create Policy' onclick='createPolicy(\""
-			+ imageid + '","' + imagename + "\")'></span></a>");
-	
 }
 
 function deleteImage(imageid) {

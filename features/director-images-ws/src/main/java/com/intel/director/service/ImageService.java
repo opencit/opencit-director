@@ -6,8 +6,10 @@ import java.util.List;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageStoreResponse;
+import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
@@ -65,12 +67,12 @@ public interface ImageService {
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
 			throws DirectorException;
 
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadata(String draftid)
+	public CreateTrustPolicyMetaDataResponse getPolicyMetadata(String draftid)
 			throws DirectorException;
 
 	public ImageListResponse getImagesForVM(List<ImageInfo> images) throws DirectorException;
 	
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadataForImage(
+	public CreateTrustPolicyMetaDataResponse getPolicyMetadataForImage(
 			String image_id) throws DirectorException;
 
 	public String createTrustPolicy(String image_id)
@@ -93,7 +95,7 @@ public interface ImageService {
 
 	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
 	
-	public CreateTrustPolicyMetaDataResponse importPolicyTemplate(String imageId) throws DirectorException;
+	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId) throws DirectorException;
 
 	public void deleteTrustPolicy(String imageId) throws DirectorException;
 
@@ -121,6 +123,6 @@ public interface ImageService {
 	public void updateTrustPolicy(
 			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
 
-
+	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
 }
 

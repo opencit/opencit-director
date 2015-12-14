@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-public class MonitorStatus {
+public class GenericResponse {
 
 	
 	public String status;

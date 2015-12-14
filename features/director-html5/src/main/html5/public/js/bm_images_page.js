@@ -372,7 +372,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-		window.location = encodeURI("/v1/images/" + imageid + "/downloadPolicy?Authorization="+authtoken);
+		window.location = encodeURI("/v1/images/" + imageid + "/downloads/policy?Authorization="+authtoken);
                    
             },
             error: function(xhr, status, errorMessage) {
@@ -381,7 +381,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
         });
 
 
-	///window.location = "/v1/images/" + imageid + "/downloadPolicy";
+	///window.location = "/v1/images/" + imageid + "/downloads/policy";
 }
 
 
@@ -399,7 +399,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-		var url="/v1/images/" + imageid + "/downloadPolicyAndManifest?Authorization="+encodeURIComponent(authtoken);
+		var url="/v1/images/" + imageid + "/downloads/policyAndManifest?Authorization="+encodeURIComponent(authtoken);
 		window.location = url;                  
             },
             error: function(xhr, status, errorMessage) {

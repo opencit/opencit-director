@@ -9,9 +9,9 @@ function show_error_in_trust_policy_tab(message){
 	
 }
 
-function show_dialog_content_trust_policy_tab(header,content){
-$('#dialog_box_body_trust_policy_tab').text(header);
-$('#dialog_box_content_trust_policy_tab p').text(content);
+function show_dialog_content_trust_policy_tab(){
+$('#dialog_box_body_trust_policy_tab').text("Select Files/Directories Help");
+$('#dialog_box_content_trust_policy_tab').html("Trust Policies are composed of a selection of one or more explicit files, and may also include one or more general rules applied to a folder through include/exclude regular expressions.<br/> <br/> Select explicit files and folders by putting a check in the checkbox.  If an individual file is selected, that specific file will be added to the Trust Policy.  If a directory is selected, that directory and all files and directories contained in the selected directory will be added explicitly to the Trust Policy.<br/> <br/> Explicitly added files will always be included in the attestation of the machine governed by the Policy, but new files may be added without changing the resulting Trust Status.<br/>  <br/> The &quot;lock&quot; icon next to each directory allows general rules to be applied to the folder using regular expressions.  These rules can control what files will be measured in a directory, even if they are added later.  For example, by locking a folder with the &quot;include&quot; expression &quot;*&quot; all files in the folder will be measured, including files added later.  Creating a new file in this folder will result in the protected host becoming &quot;Untrusted&quot; after its next reboot.<br/> <br/> Adding an &quot;exclude&quot; filter will exclude any files matching the &quot;exclude&quot; expression.  &quot;Exclude&quot; filters are applied after &quot;include&quot; filters, meaning a folder with an &quot;include&quot; filter of &quot;*&quot; and an exclude filter of &quot;*.txt&quot; will measure all files in the folder, with the exception of any files whose names contain the string &quot;*.txt&quot;.<br/> <br/> Folder &quot;lock&quot; rules can be applied to an individual folder, or can be applied recursively to all subfolders as well.<br/> Any combination of explicitly selected files and directory &quot;lock&quot; filters can be used, including within the same folder.<br/> <br/> Explicitly selected files are measured separately from &quot;lock&quot; filters.  If a file is selected explicitly in a &quot;locked&quot; folder, and the &quot;lock&quot; filters would normally not include the explicitly selected file in the attestation measurement, the file will still be measured and attested.<br/> <br/> IMPORTANT NOTE: Ensure that files are measured only if they are not expected to change between reboots or, in the case of VM Trust Policies, that the files will not change between the source image and any instances.  As an example, for a database workload, select the database executables, libraries, and configuration files, but do not select the actual database contents. ");
 	$("#dialog_box_trust_policy_tab").modal({
 		backdrop : "static"
 	});
@@ -108,7 +108,7 @@ function refresh_vm_images_Grid() {
 					continue;
 				}
 				self.gridData = new ImageData();
-				self.gridData.image_name = images[i].name;
+				self.gridData.image_name = images[i].image_name;
 				self.gridData.policy_name = images[i].policy_name;
 				self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" onclick=\"deleteImage('"
 					+ images[i].id + "')\"/></a>";
@@ -121,7 +121,7 @@ function refresh_vm_images_Grid() {
 
 				self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicy('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 
 				}
@@ -129,13 +129,13 @@ function refresh_vm_images_Grid() {
 				if (images[i].trust_policy_draft_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicy('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 
 				} else if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicy('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 				}
 
@@ -151,7 +151,7 @@ function refresh_vm_images_Grid() {
 						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyVM('"
 						+ images[i].id + "','"
 						+ images[i].trust_policy_id + "','"
-						+ images[i].name + "')\"></span></a>";
+						+ images[i].image_name + "')\"></span></a>";
 				}
 				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
 				
@@ -164,7 +164,7 @@ function refresh_vm_images_Grid() {
 
 				self.gridData.image_upload += "&nbsp;"
 					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" onclick=\"uploadToImageStorePage('"
-					+ images[i].id + "','" + images[i].name + "','"
+					+ images[i].id + "','" + images[i].image_name + "','"
 					+ images[i].trust_policy_id + "')\" ></span></a>";
 
 				self.gridData.created_date = images[i].created_date;
@@ -202,13 +202,13 @@ function refresh_vm_images_Grid() {
 					type : "text",
 					width : 200,
 					align : "center"
-				}, {
+				},/* {
 					title : "Image Format",
 					name : "image_format",
 					type : "text",
 					width : 120,
 					align : "center"
-				}, {
+				},*/ {
 					title : "Trust Policy",
 					name : "trust_policy",
 					type : "text",
@@ -273,13 +273,13 @@ function refreshBMOnlineGrid() {
 				if (images[i].trust_policy_draft_id != null) {
 				self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicyForBMLive('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 
 				} else if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
 						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicyForBMLive('"
-						+ images[i].id + "','" + images[i].name
+						+ images[i].id + "','" + images[i].image_name
 						+ "')\"></span></a>";
 				}
 
@@ -296,7 +296,7 @@ function refreshBMOnlineGrid() {
 						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicy('"
 						+ images[i].id + "','"
 						+ images[i].trust_policy_id + "','"
-						+ images[i].name + "')\"></span></a>";
+						+ images[i].image_name + "')\"></span></a>";
 				}
 
 				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
@@ -304,11 +304,11 @@ function refreshBMOnlineGrid() {
 				self.gridData.image_upload = "";
 				self.gridData.image_upload += "&nbsp;"
 					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
-					+ images[i].id + "','" + images[i].name + "','"
+					+ images[i].id + "','" + images[i].image_name + "','"
 					+ images[i].trust_policy_id + "')\" ></span></a>";
 
-				self.gridData.image_name = images[i].name;
-				console.log("host name :: "+ images[i].name + "::" + self.gridData.image_name);
+				self.gridData.image_name = images[i].image_name;
+				console.log("host name :: "+ images[i].image_name + "::" + self.gridData.image_name);
 
 				self.gridData.created_date = images[i].created_date;
 				grid.push(self.gridData);

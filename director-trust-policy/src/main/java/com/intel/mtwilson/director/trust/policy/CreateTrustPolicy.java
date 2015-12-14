@@ -6,7 +6,6 @@
 package com.intel.mtwilson.director.trust.policy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -34,6 +33,20 @@ import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 
 public class CreateTrustPolicy {
 
+	private String imageId;
+	
+	public String getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(String imageId) {
+		this.imageId = imageId;
+	}
+
+	public CreateTrustPolicy(String imageId){
+		this.imageId = imageId;
+	}
+	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(CreateTrustPolicy.class);
 
@@ -119,7 +132,7 @@ public class CreateTrustPolicy {
 		Whitelist whitelist = trustPolicy.getWhitelist();
 		List<Measurement> measurements = whitelist.getMeasurements();
 		String imageId = trustPolicy.getImage().getImageId();
-		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil();
+		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil(imageId);
 		//List<String> invalidFiles = new ArrayList<>();
 		// Initialize cumulative hash
 		Digest cumulativeDigest = Digest.algorithm(

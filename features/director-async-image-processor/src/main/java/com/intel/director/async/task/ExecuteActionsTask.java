@@ -2,8 +2,8 @@ package com.intel.director.async.task;
 
 import java.util.List;
 
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
 
@@ -19,10 +19,10 @@ public class ExecuteActionsTask implements Runnable {
 
 	@Override
 	public void run() {
-		List<ImageActionTask> imageActions = imageActionObj.getAction();
+		List<ImageActionTask> imageActions = imageActionObj.getActions();
 		log.info("Number of tasks for this image action ("
 				+ imageActionObj.getId() + "): "
-				+ imageActionObj.getAction().size());
+				+ imageActionObj.getActions().size());
 		// iterate over tasks from each image action object
 		for (int i = 0; i < imageActions.size(); i++) {
 			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);

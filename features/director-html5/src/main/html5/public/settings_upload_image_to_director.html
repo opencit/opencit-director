@@ -7,16 +7,20 @@
         <script>
 			
 			$(document).ready(function () {
+				$("#image_format").hide();
 				$("#gotoUploadWindow").click(function () {
 					var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
 					OpenWindow.image_deployments_parent = $("#image_type").val();
-					OpenWindow.image_format_parent = $("#image_format").val();
-					OpenWindow.auth_token_parent=mainViewModel.loginViewModel.userProfile.authorizationToken();
-					
-					
+					if($("#image_type").val() == 'VM'){
+						OpenWindow.image_format_parent = 'qcow2';
+						} else {
+						OpenWindow.image_format_parent = $("#image_format").val();
+					}
+					OpenWindow.auth_token_parent=mainViewModel.loginViewModel.userProfile.authorizationToken();	
 				});
+				
 				fetchDeploymentType();
-				fetchImageFormat();
+				//fetchImageFormat();
 			});
 			
 			function fetchDeploymentType() {
@@ -101,13 +105,19 @@
 						<br />
 						<div class="row">
 							<div class="form-group">
-								<label class="control-label col-md-4" for="image_format"><span class="pull-right">Image Formats:</span></label>
+								<div class="col-md-2"></div>
+								<div class="col-md-8">
+									Supported Image Formats : qcow2, vhd(vpc), vmdk, raw, vdi
+								</div>
+								<div class="col-md-2"></div>
+							<!--								<label class="control-label col-md-4" for="supported_format"><span class="pull-right">Supported  Image Formats:</span></label>
 								<div class="col-md-4">
+									<div id = "supported_format">QCOW2</div>
 									<select class="form-control" id="image_format">
 										
 									</select>
 								</div>
-								<div class="col-md-4"></div>
+							<div class="col-md-4"></div> -->
 							</div>
 						</div>
 						<br />

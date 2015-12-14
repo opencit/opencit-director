@@ -34,6 +34,7 @@ if(jQuery) (function($){
 	
 	$.extend($.fn, {
 		fileTree: function(o, h) {
+			console.log("filetree");
 			// Defaults
 			if( !o ) var o = {};
 			if( o.root == undefined ) o.root = '/';
@@ -51,6 +52,8 @@ if(jQuery) (function($){
 			
 			$(this).each( function() {
 				function showTree(c, treeOptions) {
+					console.log("inside show tree");
+
 					$(c).addClass('wait');
 
 					$(".jqueryFileTree.start").remove();
@@ -67,13 +70,15 @@ if(jQuery) (function($){
 					  data: formData,
 					contentType: "application/json",
 					  success: function(data, status) {
+						  console.log("success");
 						$(c).find('.start').html('');
-						var response = data;	
-						$(c).removeClass('wait').append(data.tree_content);
-						$("#dirNextButton").prop('disabled', false);
-						if(!(response.patch_xml == null)){
+						var response = data;
+						if(!(response.patch_xml == null)){							
 							editPatchWithDataFromServer(response.patch_xml);
 						}
+
+						$(c).removeClass('wait').append(data.tree_content);
+						$("#dirNextButton").prop('disabled', false);
 						if( o.root == treeOptions.dir ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
 							bindTree(c);
 						},
@@ -113,7 +118,15 @@ if(jQuery) (function($){
 			function bindTree(t) {
 				$(t).find('LI A').bind(o.folderEvent, eventHandlerFunction);
 				$(t).find('LI input').bind(o.folderEvent, function() {
-							if( $(this).parent().hasClass('directory') ) {							
+							if( $(this).parent().hasClass('directory') ) {
+								if(canPushPatch == false){
+									alert("Please wait for the last operation to complete.");
+									if(this.checked){
+										this.checked = false;
+									}else{
+										this.checked = true;
+									}
+								}
 								$(this).parent().find('UL').remove(); // cleanup
 								var treeOptions = {};
 								treeOptions.dir = escape($(this).attr('id'));
@@ -147,12 +160,16 @@ if(jQuery) (function($){
 				// Prevent A from triggering the # on non-click events
 				if( o.folderEvent.toLowerCase != 'click' ) $(t).find('LI A').bind('click', function() { return false; });
 			}
+			
+			console.log("INIt");
+
 				// Loading message
 				if(o.init){
 					$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + o.loadMessage + '<li></ul>');
 				}
 				// Get the initial file list
 				o.dir = escape(o.dir);
+				console.log("callong show tree");
 				showTree( $(this), o );
 			});
 		}
