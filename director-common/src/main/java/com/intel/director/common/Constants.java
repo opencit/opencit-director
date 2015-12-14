@@ -18,6 +18,11 @@ public class Constants {
 	public static final String defaultUploadPath = "/mnt/images/";
 	public static final String vmImagesPath = "/opt/kms/images/vm/";
 	public static final String configurationPath = "/opt/director/configuration/";
+	public static final String DOCKER_EXECUTABLES = "docker";
+	public static final String mountDockerScript = "/opt/director/bin/mount_docker_script.sh";
+	public static final String rmiDockerImage = "/opt/director/bin/rmi_docker_image.sh";
+	public static final String dockerPolicyInject = "/opt/director/bin/docker_policy_inject.sh";
+	
 
 	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
 	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
@@ -111,9 +116,10 @@ public class Constants {
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
 	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
-	public static final String TASK_NAME_UPLOAD_IMAGE = " Upload Image";
+	public static final String TASK_NAME_UPLOAD_IMAGE = "Upload Image";
 	public static final String TASK_NAME_ENCRYPT_IMAGE = "Encrypt Image";
 	public static final String TASK_NAME_UPLOAD_TAR = "Upload Tar";
+	public static final String TASK_NAME_CREATE_DOCKER_TAR = "Create Docker Tar";
 	public static final String COMPLETE = "Complete";
 	public static final String INCOMPLETE = "Incomplete";
 	public static final String IN_PROGRESS = "In Progress";
@@ -122,6 +128,7 @@ public class Constants {
 
 	public static final String DEPLOYMENT_TYPE_VM = "VM";
 	public static final String DEPLOYMENT_TYPE_BAREMETAL = "BareMetal";
+	public static final String DEPLOYMENT_TYPE_DOCKER = "Docker";
 	public static final String INCLUDE_LIST_VM="vm.include";
 	public static final String INCLUDE_LIST_BM="bm.include";
 	public static final String INCLUDE_LIST_BM_LIVE="bmlive.include";

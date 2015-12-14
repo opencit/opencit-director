@@ -5,6 +5,7 @@
  */
 package com.intel.director.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,5 +14,5 @@ import java.util.List;
  */
 public class ListImageDeploymentsResponse {
 
-    public List<String> image_deployments;
+    public List<ImageDeploymentsResponse> image_deployments = new ArrayList<ImageDeploymentsResponse>();;
 }

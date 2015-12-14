@@ -163,19 +163,18 @@ public class DirectorUtil {
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
 			}
-			reader.close();
-			p.getInputStream().close();
+			
 
 		} catch (InterruptedException | IOException ex) {
-			if (reader != null) {
+			log.error(null, ex);
+		} finally {
+			if(reader != null){
 				reader.close();
 			}
+			
 			if (p != null && p.getInputStream() != null) {
 				p.getInputStream().close();
 			}
-
-			log.error(null, ex);
-		} finally {
 
 		}
 		log.debug(output.toString());

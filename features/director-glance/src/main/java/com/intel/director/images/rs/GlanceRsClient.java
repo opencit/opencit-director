@@ -46,7 +46,7 @@ public class GlanceRsClient {
 	public String authToken;
 
 	public GlanceRsClient(WebTarget webTarget, Client client, String glanceIp,
-			String tenanatName, String username, String password) {
+			String tenanatName, String username, String password) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
 
@@ -91,23 +91,27 @@ public class GlanceRsClient {
 				sb.append(output);
 				// log.debug(output);
 			}
+			log.info("Response from glance : "+sb.toString());
 			JSONObject obj = new JSONObject(sb.toString());
 			log.debug("obj::" + obj);
 			
 		} catch (IOException e) {
 			throw e;
 		} finally {
+			
+			if (httpClient != null) {
+				httpClient.close();
+			}
+			if (ist != null) {
+				ist.close();
+			}
 			try {
 				
-				if (httpClient != null) {
-					httpClient.close();
-				}
+
 				if (br != null) {
 					br.close();
 				}
-				if (ist != null) {
-					ist.close();
-				}
+
 				
 			} catch (IOException e) {
 				log.error("Error closing streams ");
@@ -195,6 +199,7 @@ public class GlanceRsClient {
 			sb.append(output);
 			// log.debug(output);
 		}
+		log.info("Metadata Response: "+sb.toString());
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");
@@ -210,6 +215,8 @@ public class GlanceRsClient {
 		//TODO not used after being assigned
 		DefaultHttpClient httpClient = null;
 		BufferedReader br = null;
+		boolean responseHasError = false;
+
 		try {
 			httpClient = new DefaultHttpClient();
 			HttpPost postRequest = new HttpPost("http://" + glanceIP
@@ -234,10 +241,20 @@ public class GlanceRsClient {
 				sb.append(output);
 			}
 			JSONObject obj = new JSONObject(sb.toString());
-			JSONObject property = obj.getJSONObject("access").getJSONObject(
+			if(obj.has("access")){
+				JSONObject jsonObjectAccess = obj.getJSONObject("access");
+				if(jsonObjectAccess.has("token")){
+					JSONObject property = jsonObjectAccess.getJSONObject(
 					"token");
-			authToken = property.getString("id");
+					authToken = property.getString("id");
+				}else{
+					responseHasError = true;
+				}
+			}else{
+				responseHasError = true;
+			}
 			httpClient.getConnectionManager().shutdown();
+			
 		} catch (MalformedURLException e) {
 			log.error("Error while creating auth token", e);
 		} catch (IOException e) {
@@ -258,6 +275,9 @@ public class GlanceRsClient {
 		}
 		long end = new Date().getTime();
 		printTimeDiff("createAuthToken", start, end);
+		if(responseHasError){
+			throw new GlanceException("Unable to communicate with Glance at "+glanceIP);
+		}
 	}
 
 	public void getImageMetaData() {

@@ -60,7 +60,7 @@ public class ImageActionPoller {
 		for (ImageActionObject imageActionObj : incompleteImageActionObjects) {
 			log.info("ImageAction Object in poller (" + imageActionObj.getId()
 					+ "): Number of tasks: "
-					+ imageActionObj.getAction().size());
+					+ imageActionObj.getActions().size());
 			log.info("Current status of image action object:"+imageActionObj.getCurrent_task_status());
 			if (imageActionObj.getCurrent_task_status() != null && imageActionObj.getCurrent_task_status().equals(Constants.INCOMPLETE)) {
 				ExecuteActionsTask task = new ExecuteActionsTask(

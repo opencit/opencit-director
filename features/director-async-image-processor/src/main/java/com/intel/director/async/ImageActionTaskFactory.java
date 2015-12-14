@@ -1,8 +1,9 @@
 package com.intel.director.async;
 
+import com.intel.director.async.task.CreateDockerTarTask;
 import com.intel.director.async.task.CreateTarTask;
 import com.intel.director.async.task.EncryptImageTask;
-import com.intel.director.async.task.ImageActionTask;
+import com.intel.director.async.task.ImageActionAsyncTask;
 import com.intel.director.async.task.UploadImageTask;
 import com.intel.director.async.task.UploadPolicyTask;
 import com.intel.director.async.task.UploadTarTask;
@@ -17,9 +18,9 @@ public class ImageActionTaskFactory {
 	 * @param imageStoreName THe store name used for upload tasks
 	 * @return
 	 */
-	public static ImageActionTask getImageActionTask(String taskName,
+	public static ImageActionAsyncTask getImageActionTask(String taskName,
 			String imageStoreName) {
-		ImageActionTask actionTask = null;
+		ImageActionAsyncTask actionTask = null;
 		switch (taskName) {
 		case Constants.TASK_NAME_CREATE_TAR:
 			actionTask = new CreateTarTask();
@@ -32,6 +33,9 @@ public class ImageActionTaskFactory {
 			break;
 		case Constants.TASK_NAME_UPLOAD_POLICY:
 			actionTask = new UploadPolicyTask(imageStoreName);
+			break;			
+		case Constants.TASK_NAME_CREATE_DOCKER_TAR:
+			actionTask = new CreateDockerTarTask();
 			break;
 		case Constants.TASK_NAME_UPLOAD_TAR:
 			actionTask = new UploadTarTask(imageStoreName);

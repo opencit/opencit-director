@@ -33,16 +33,32 @@ public class DirectoryAndFileUtil {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(DirectoryAndFileUtil.class);
 
-	
-	public String getFilesAndDirectories(String imageId, DirectoryMeasurement dirMeasurement)
-			throws FileNotFoundException, IOException {
+	private String imageId;
+
+	public DirectoryAndFileUtil(String imageId) {
+		this.imageId = imageId;
+	}
+
+	public String getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(String imageId) {
+		this.imageId = imageId;
+	}
+
+	public DirectoryAndFileUtil() {
+	}
+
+	public String getFilesAndDirectories(String imageId,
+			DirectoryMeasurement dirMeasurement) throws FileNotFoundException,
+			IOException {
 		// Create find command
 		String command = createFindCommand(imageId, dirMeasurement, false);
 		// Execute find command and return result
 		return executeCommand(command);
 	}
-	
-	
+
 	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement)
 			throws FileNotFoundException, IOException {
 		// Create find command
@@ -50,6 +66,7 @@ public class DirectoryAndFileUtil {
 		// Execute find command and return result
 		return executeCommand(command);
 	}
+
 	/**
 	 * This method applies include and exclude criteria on a directory and
 	 * returns list of files that satisfies criteria
@@ -61,10 +78,11 @@ public class DirectoryAndFileUtil {
 	 * @throws FileNotFoundException
 	 *             if directory path is not valid it throws exception
 	 */
-	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement, boolean skipDirectories)
-			throws FileNotFoundException, IOException {
+	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement,
+			boolean skipDirectories) throws FileNotFoundException, IOException {
 		// Create find command
-		String command = createFindCommand(imageId, dirMeasurement, skipDirectories);
+		String command = createFindCommand(imageId, dirMeasurement,
+				skipDirectories);
 		// Execute find command and return result
 		return executeCommand(command);
 	}
@@ -85,19 +103,20 @@ public class DirectoryAndFileUtil {
 	 */
 	private String createFindCommand(String imageId,
 			DirectoryMeasurement dirMeasurement, boolean skipDirectories) {
-		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+dirMeasurement.getPath();
+		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)
+				+ File.separator + "mount" + dirMeasurement.getPath();
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		String command = "find " + directoryAbsolutePath;
-		
-		if(dirMeasurement.isRecursive() == null){
+
+		if (dirMeasurement.isRecursive() == null) {
 			dirMeasurement.setRecursive(false);
 		}
-		
-		if (dirMeasurement.isRecursive() == false){
+
+		if (dirMeasurement.isRecursive() == false) {
 			command += "  -maxdepth 1";
 		}
-		if(skipDirectories){
+		if (skipDirectories) {
 			command += " ! -type d";
 		}
 		// Exclude directory path from the result and provide list of relative
@@ -141,11 +160,11 @@ public class DirectoryAndFileUtil {
 		return digest;
 	}
 
-	
 	public Digest getDirectoryHash(String imageId,
-			DirectoryMeasurement directoryMeasurement, String measurementType, boolean skipDirectories)
-			throws IOException {
-		String fileList = getFiles(imageId, directoryMeasurement, skipDirectories);
+			DirectoryMeasurement directoryMeasurement, String measurementType,
+			boolean skipDirectories) throws IOException {
+		String fileList = getFiles(imageId, directoryMeasurement,
+				skipDirectories);
 		Digest digest = Digest.algorithm(measurementType).digest(
 				fileList.getBytes("UTF-8"));
 		return digest;
@@ -163,11 +182,12 @@ public class DirectoryAndFileUtil {
 	 */
 	public Digest getFileHash(String imageId, FileMeasurement fileMeasurement,
 			String measurementType) throws IOException {
-		String filePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"
-				+ fileMeasurement.getPath();
+		String filePath = DirectorUtil.getMountPath(imageId) + File.separator
+				+ "mount" + fileMeasurement.getPath();
 		filePath = getSymlinkValue(filePath);
-		if (filePath == null || !new File(filePath).exists())
+		if (filePath == null || !new File(filePath).exists()) {
 			return null;
+		}
 		Digest digest = Digest.algorithm(measurementType).digest(
 				FileUtils.readFileToByteArray(new File(filePath)));
 		return digest;
@@ -202,17 +222,25 @@ public class DirectoryAndFileUtil {
 				filePath = sb.toString();
 			}
 			filePath = new java.io.File(filePath).getCanonicalPath();
-			log.trace("Symbolic link value for '" + path.toString() + "' is: '"
+			if (!filePath.startsWith(DirectorUtil.getMountPath(imageId))) {
+				log.info("Appending mount path for filepath = " + filePath);
+				filePath = DirectorUtil.getMountPath(imageId) + File.separator
+						+ "mount" + filePath;
+			} else {
+				log.info("NOT Appending mount path for filepath = " + filePath);
+			}
+			log.info("Symbolic link value for '" + path.toString() + "' is: '"
 					+ filePath);
 			path = Paths.get(filePath);
 		}
 		return filePath;
 	}
-	
 
-	private String executeCommand(String command) throws ExecuteException, IOException{
+	private String executeCommand(String command) throws ExecuteException,
+			IOException {
 		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
-		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
+		if (result.getStderr() != null
+				&& StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
 		}
 		return result.getStdout();

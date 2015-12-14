@@ -15,6 +15,7 @@ $(document)
 function createPolicyForBMImage(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
+	current_trust_policy_draft_id='';
 	current_image_name = imagename;
 	goToCreatePolicyWizardForBMImage();
 }
@@ -22,6 +23,7 @@ function createPolicyForBMImage(imageid, imagename) {
 function createPolicy2(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
+	current_trust_policy_draft_id='';
 	current_image_name = imagename;
 
 	goToCreatePolicyWizard2();
@@ -146,14 +148,17 @@ function backToHostsPage() {
 	$("#bm_images_grid_page").show();
 	if(current_image_id != "" && current_image_id !=null)
 	{
+		var mountimage = {
+			"id" : current_image_id
+		}
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/unmount",
+			url : "/v1/rpc/unmount-image",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.createImageMetaData),
+			data : ko.toJSON(self.mountimage),
 			success : function(data, status, xhr) {
 				current_image_id = "";
 				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOHOSTPAGES");
@@ -161,9 +166,10 @@ function backToHostsPage() {
 		});
 
 	}
+	current_trust_policy_draft_id='';
 	$('body').removeClass("modal-open");
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backToHostsPageWithoutUnmount() {
@@ -179,8 +185,9 @@ function backToHostsPageWithoutUnmount() {
 	$("#bm_images_grid_page").show();
 	$('body').removeClass("modal-open");
 current_image_id='';
+current_trust_policy_draft_id='';
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 }
 
 function backButtonImagesBM() {
@@ -365,7 +372,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-		window.location = encodeURI("/v1/images/" + imageid + "/downloadPolicy?Authorization="+authtoken);
+		window.location = encodeURI("/v1/images/" + imageid + "/downloads/policy?Authorization="+authtoken);
                    
             },
             error: function(xhr, status, errorMessage) {
@@ -374,7 +381,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
         });
 
 
-	///window.location = "/v1/images/" + imageid + "/downloadPolicy";
+	///window.location = "/v1/images/" + imageid + "/downloads/policy";
 }
 
 
@@ -392,7 +399,7 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-		var url="/v1/images/" + imageid + "/downloadPolicyAndManifest?Authorization="+encodeURIComponent(authtoken);
+		var url="/v1/images/" + imageid + "/downloads/policyAndManifest?Authorization="+encodeURIComponent(authtoken);
 		window.location = url;                  
             },
             error: function(xhr, status, errorMessage) {
@@ -428,10 +435,11 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 	
 }
 
-function deletePolicy(imageid, trust_policy_id, imagename) {
+
+function deletePolicyBM(imageid) {
 	$.ajax({
-		type : "GET",
-		url : "/v1/images/" + imageid + "/deletePolicy",
+		type : "DELETE",
+		url : "/v1/images/" + imageid,
 		dataType : "text",
 		success : function(result) {
 			refreshBMOnlineGrid();

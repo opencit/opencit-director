@@ -53,6 +53,28 @@ public class MwImage extends MwAuditable {
 	
 	@Column(name = "SENT")
 	public Integer sent;
+	
+	@Column(name = "repository")
+	private String repository;
+	
+	@Column(name = "tag")
+	private String tag;
+
+	public String getRepository() {
+		return repository;
+	}
+
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
 
 	public MwImage() {
 		super();

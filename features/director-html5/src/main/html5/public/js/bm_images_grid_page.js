@@ -5,7 +5,7 @@ $(document).ready(function() {
 		return;
 
 	refreshBMOnlineGrid();
-	refresh_bm_images_Grid();
+	//refresh_bm_images_Grid();
 
 	pageInitialized = true;
 });
@@ -14,17 +14,77 @@ function addHost() {
 current_image_id='';
 	goToCreatePolicyWizard2();
 }
-
+function ImageData(){
+	
+}
 
 function refreshBMOnlineGrid() {
-	endpoint = "/v1/images/";
+	var self = this;
+	endpoint = "/v1/images";
 	$("#bmGridOnline").html("")
 	$.ajax({
 		type : "GET",
-		url : endpoint + "imagesList/BareMetalLive",
+		url : "/v1/images?deploymentType=BareMetalLive",
 		dataType : "json",
 		success : function(result) {
+			images = result.images;
+			var grid = [];
+			for (i = 0; i < images.length; i++) { 
+				if(images[i].deleted || images[i].image_format != null){
+					continue;
+				}
+				if (images[i].trust_policy_draft_id == null
+					&& images[i].trust_policy_id == null) {
+					continue;
+				}
+				self.gridData = new ImageData();
 
+				self.gridData.policy_name = "<div id='policy_name'" + images[i].id + ">" + images[i].policy_name + "</div>";
+				
+				self.gridData.trust_policy = "<div id=\"trust_policy_column"
+					+ images[i].id + "\">";
+
+				if (images[i].trust_policy_draft_id != null) {
+				self.gridData.trust_policy = self.gridData.trust_policy
+						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicyForBMLive('"
+						+ images[i].id + "','" + images[i].image_name
+						+ "')\"></span></a>";
+
+				} else if (images[i].trust_policy_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicyForBMLive('"
+						+ images[i].id + "','" + images[i].image_name
+						+ "')\"></span></a>";
+				}
+
+				if (images[i].trust_policy_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicyAndManifest('"
+						+ images[i].id + "','"
+						+ images[i].trust_policy_id + "')\"></span></a>";
+				}
+
+				if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
+					self.gridData.trust_policy = self.gridData.trust_policy
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyBM('"
+						+ images[i].id + "')\"></span></a>";
+				}
+
+				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+			
+				self.gridData.image_upload = "";
+				self.gridData.image_upload += "&nbsp;"
+					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
+					+ images[i].id + "','" + images[i].image_name + "','"
+					+ images[i].trust_policy_id + "')\" ></span></a>";
+
+				self.gridData.image_name = images[i].image_name;
+				console.log("host name :: "+ images[i].image_name + "::" + self.gridData.image_name);
+
+				self.gridData.created_date = images[i].created_date;
+				grid.push(self.gridData);
+
+			}
 			console.log("BM GRID REFRESHED");
 			$("#bmGridOnline").jsGrid({
 
@@ -34,10 +94,10 @@ function refreshBMOnlineGrid() {
 				paging : true,
 				pageSize : 10,
 				pageButtonCount : 15,
-				data : result.images,
+				data : grid,
 				fields : [ {
 					title : "Trust Policy Name",
-					name : "display_name",
+					name : "policy_name",
 					type : "text",
 					width : 250,
 					align : "center"
@@ -128,7 +188,7 @@ function refresh_bm_images_Grid() {
 			});
 		},
 		error : function(jqXHR, exception) {
-			alert("Failed to get images list");
+			show_error_trust_policy_tab("Failed to get images list");
 		}
 	});
 

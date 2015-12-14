@@ -4,4 +4,24 @@ $(document).ready(function () {
 		OpenWindow.image_deployments_parent = $("#image_type").val();
 		OpenWindow.image_format_parent = $("#image_format").val();
 	});
+	console.log("Before fetchDeploymentType");
+	
 });
+fetchDeploymentType();
+function fetchDeploymentType() {
+console.log("Inside fetchDeploymentType");
+	$.ajax({
+		type : "GET",
+		url : "/v1/image-deployments",
+		dataType : "json",
+		success : function(data) {
+			var deployment_type = data.image_deployment;
+			var option=""; 
+			for (var i=0; i < deployment_type.length; i++){ 
+				option += '<option value="'+ deployment_type[i].name + '">' + deployment_type[i].display_name + '</option>'; 
+			}
+			$('#image_type').append(option);
+		}
+	});
+
+};
