@@ -130,7 +130,7 @@ public class Images {
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return uploadImageToTrustDirector;
 			}
-			if (StringUtils.isNotBlank(uploadRequest.repository) && StringUtils.isNotBlank(uploadRequest.tag) && !imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.state = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";

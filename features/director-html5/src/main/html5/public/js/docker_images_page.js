@@ -47,7 +47,7 @@ function goToUploadToImageStoreDockerPage() {
         $("#upload_to_image_store_redirect_docker").html("");
     }
 
-    $("#upload_to_image_store_redirect_docker").load("/v1/html5/public/director-html5/upload_imagestore_direct_docker.html");
+    $("#upload_to_image_store_redirect_docker").load("/v1/html5/public/director-html5/upload_imagestore_docker_direct.html");
 
 }
 

@@ -78,8 +78,9 @@ public class CreateDockerTarTask extends ImageActionAsyncTask {
 					+ newLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
 			
-			
+			log.info("**********************####################@@@@@@@@@@@@@@@@@@@@@@@");
 			DirectorUtil.executeCommandInExecUtil(Constants.dockerPolicyInject, imageinfo.repository, imageinfo.tag , newLocation);
+			log.info("**********************####################@@@@@@@@@@@@@@@@@@@@@@@**********************");
 			log.info("Create Docker Tar : commplete");
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);

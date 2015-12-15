@@ -212,6 +212,7 @@
 
             } else {
                 if (image_deployments == 'Docker') {
+					$("#message").html("<font color='green'>Loading Image...</font>");
                     $.ajax({
                         type: "GET",
                         url: "/v1/rpc/docker-load/" + image_id,

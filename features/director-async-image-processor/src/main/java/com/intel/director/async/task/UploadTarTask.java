@@ -67,7 +67,7 @@ public class UploadTarTask extends UploadTask {
 			String tarLocation = imageLocation
 					+ imageActionObject.getImage_id() + File.separator;
 			
-			imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
+			imageProperties.put(Constants.NAME, tarName);
 			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
 					"glance_image_tar");
 

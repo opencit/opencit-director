@@ -328,7 +328,6 @@ public class ImageServiceImpl implements ImageService {
 				MountImage
 						.unmountDocker(mountPath, image.repository, image.tag);
 				log.info("Docker image unmounted successfully");
-				log.info("Removing Docker image using docker rmi");
 
 			} else {
 				log.info("Updated DB with unmount data");
@@ -2714,7 +2713,7 @@ public class ImageServiceImpl implements ImageService {
 			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
 			for(ImageInfo image : imagesList)
 			{
-				if(!image.isDeleted() && Constants.DEPLOYMENT_TYPE_DOCKER.equals(image.image_deployments) && image.repository.equalsIgnoreCase(repository) && image.repository.equalsIgnoreCase(tag))
+				if(!image.isDeleted() && Constants.DEPLOYMENT_TYPE_DOCKER.equals(image.image_deployments) && repository.equalsIgnoreCase(image.repository) && tag.equalsIgnoreCase(image.tag))
 				{
 					return true;
 				}
