@@ -130,6 +130,12 @@ public class Images {
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return uploadImageToTrustDirector;
 			}
+			if (StringUtils.isNotBlank(uploadRequest.repository) && StringUtils.isNotBlank(uploadRequest.tag) && !imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
+				return uploadImageToTrustDirector;
+			}
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
 							uploadRequest.image_deployments,

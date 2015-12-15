@@ -802,8 +802,8 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException(errorMsg, e);
 		} catch (JAXBException e) {
 			String errorMsg = "Unable to get policy metadata draftid::" + draftid;
-			log.error("Unable to get policy metadata draftid::" + draftid, e);
-			throw new DirectorException(e);
+			log.error(errorMsg, e);
+			throw new DirectorException(errorMsg,e);
 		}
 		return metadata;
 	}
@@ -2557,6 +2557,8 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return false;
 	}
+	
+	
 
 	@Override
 	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id) throws DirectorException {
@@ -2704,6 +2706,23 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error in Docker Tagging image", e);
 			throw new DirectorException("Error in Docker Tagging image", e);
 		}
+	}
+
+	@Override
+	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException {
+		try {
+			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
+			for(ImageInfo image : imagesList)
+			{
+				if(!image.isDeleted() && Constants.DEPLOYMENT_TYPE_DOCKER.equals(image.image_deployments) && image.repository.equalsIgnoreCase(repository) && image.repository.equalsIgnoreCase(tag))
+				{
+					return true;
+				}
+			}
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch Images",e);
+		}
+		return false;
 	}
 
 }

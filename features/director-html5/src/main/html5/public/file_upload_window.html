@@ -222,6 +222,7 @@
                         success: function(data) {
                             if (data.status == "Error") {
                                 alert("Error in loading docker image");
+								$('#upload').prop('disabled', false);
                                 return;
                             }
                             $("#message").html("<font color='blue'>Your file has been uploaded!</font>");

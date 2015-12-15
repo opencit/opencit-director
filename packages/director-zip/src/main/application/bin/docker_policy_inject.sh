@@ -4,11 +4,11 @@ function inject_policy_and_save_image(){
 	echo "Running Image..!!"
 	foo="$tag"
 	foo+="_source"
-	docker run "$repository:$foo" mkdir -p /trust
+	docker run "$repository:$foo"
 	containerId=`docker ps -aq --no-trunc | awk '{print $1; exit}'`
 	echo "Container ID is :: $containerId"
 	echo "Injecting Policy..!!"
-	docker cp "$trustPolicyPath/trustpolicy.xml" "$containerId:/trust/trustpolicy.xml"
+	docker cp "$trustPolicyPath/trustpolicy.xml" "$containerId:/tmp/trustpolicy.xml"
 	echo "Injecting Completed..!!"
 	echo "Committing Image..!!"
 	imageId=`docker commit $containerId "$repository:$tag"`
