@@ -46,6 +46,8 @@ public class DirectoryAndFileUtil {
 	public void setImageId(String imageId) {
 		this.imageId = imageId;
 	}
+	public DirectoryAndFileUtil() {
+	}
 
 	public String getFilesAndDirectories(String imageId, DirectoryMeasurement dirMeasurement)
 			throws FileNotFoundException, IOException {
@@ -54,8 +56,7 @@ public class DirectoryAndFileUtil {
 		// Execute find command and return result
 		return executeCommand(command);
 	}
-	
-	
+
 	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement)
 			throws FileNotFoundException, IOException {
 		// Create find command
@@ -154,7 +155,6 @@ public class DirectoryAndFileUtil {
 		return digest;
 	}
 
-	
 	public Digest getDirectoryHash(String imageId,
 			DirectoryMeasurement directoryMeasurement, String measurementType, boolean skipDirectories)
 			throws IOException {
@@ -216,13 +216,18 @@ public class DirectoryAndFileUtil {
 				filePath = sb.toString();
 			}
 			filePath = new java.io.File(filePath).getCanonicalPath();
-			log.trace("Symbolic link value for '" + path.toString() + "' is: '"
+			if(!filePath.startsWith(DirectorUtil.getMountPath(imageId))){
+				log.info("Appending mount path for filepath = "+filePath);
+				filePath = DirectorUtil.getMountPath(imageId) +File.separator+ "mount" + filePath;
+			}else{
+				log.info("NOT Appending mount path for filepath = "+filePath);
+			}
+			log.info("Symbolic link value for '" + path.toString() + "' is: '"
 					+ filePath);
 			path = Paths.get(filePath);
 		}
 		return filePath;
 	}
-	
 
 	private String executeCommand(String command) throws ExecuteException, IOException{
 		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);

@@ -11,8 +11,11 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
+import com.intel.director.common.DirectorUtil;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
@@ -95,10 +98,30 @@ public class CreateTrustPolicy {
 			throws CryptographyException, IOException, JAXBException,
 			XMLStreamException {
 		// get DEK
+		KmsUtil kmsUtil = null;
+		try {
+			kmsUtil = new KmsUtil();
+		} catch (Exception e1) {
+			log.error("Error in initialization of KMS Util");
+			return;
+		}
+		
+		//Check if a key already exists
+		//If so, check if the key is still valid
+		//If so, return
+		if(StringUtils.isNotBlank(trustPolicy.getEncryption().getKey().getValue()) && trustPolicy.getEncryption().getKey().getValue().contains("keys")){
+			String url = trustPolicy.getEncryption().getKey().getValue();
+			String keyIdFromUrl = DirectorUtil.getKeyIdFromUrl(url);
+			String keyFromKMS = kmsUtil.getKeyFromKMS(keyIdFromUrl);
+			if(StringUtils.isNotBlank(keyFromKMS)){
+				log.info("Existing key is still valid. Not creating a new one.");
+				return;
+			}
+		}
 
 		KeyContainer key;
 		try {
-			key = new KmsUtil().createKey();
+			key = kmsUtil.createKey();
 			DecryptionKey decryptionKey = new DecryptionKey();
 			decryptionKey.setURL("uri");
 			decryptionKey.setValue(key.url.toString());
