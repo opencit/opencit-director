@@ -87,6 +87,11 @@ public class UploadTarTask extends UploadTask {
 			}else{
 				log.info("UUID : "+tarLocation +" cannot be cleaned up");
 			}
+			String encImageFileName = imageInfo.getLocation()+File.separator+imageInfo.getImage_name() + "-enc";
+			File encImageFile = new File(encImageFileName);
+			if(encImageFile.exists()){
+				encImageFile.delete();
+			}
 			return runFlag;
 		} catch (Exception e) {
 			e.printStackTrace();

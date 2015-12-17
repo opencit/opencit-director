@@ -207,6 +207,10 @@ input[readonly] {
 				this.disabled = false;
 			}
 			alert("Image upload successfully completed");
+			var goToTPDiv = $("#goToTrustPolicyPageDiv",opener.document);
+			var uploadBtnDiv = $("#gotoUploadWindowDiv",opener.document);
+			//uploadBtnDiv.hide();
+			goToTPDiv.show();
 			$('#upload').prop('disabled', false);
 			window.close();
 

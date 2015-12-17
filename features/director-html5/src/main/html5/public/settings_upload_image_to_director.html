@@ -7,6 +7,7 @@
         <script>
 			
 			$(document).ready(function () {
+
 				$("#image_format").hide();
 				$("#gotoUploadWindow").click(function () {
 					var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
@@ -20,7 +21,7 @@
 				});
 				
 				fetchDeploymentType();
-				//fetchImageFormat();
+
 			});
 			
 			function fetchDeploymentType() {
@@ -60,6 +61,8 @@
 			};
 
 			function goToTrustPolicyPage(){
+			$('[data-navbar-feature-button-index="0"]').removeClass('active');	
+			$('[data-navbar-feature-button-index="1"]').addClass('active');
 			$( "#upload-to-td" ).removeClass('active');
 			$( "#director-trust-policy" ).addClass('active');
 
@@ -77,6 +80,11 @@
 					"/v1/html5/public/director-html5/vm_images_page.html");
 			umount_image();
 		
+			}
+			
+			function hideGoToTrustPolicyButton() {
+				var goToTPDiv = $("#goToTrustPolicyPageDiv");
+				goToTPDiv.hide();
 			}
 		</script>
 		
@@ -123,12 +131,12 @@
 						<br />
 						<div class="row">
 							<div class="form-group">
-								<div class="col-md-2"></div>
-								<div class="col-md-5">
-									<button id="gotoUploadWindow" class="btn btn-primary">Next</button>
+								<div class="col-md-4"></div>
+								<div class="col-md-4" id="gotoUploadWindowDiv">
+									<button id="gotoUploadWindow" class="btn btn-primary">Upload</button>
 								</div>
-								<div class="col-md-5">
-								<button id="gotoUploadWindow" class="btn btn-primary" onclick="goToTrustPolicyPage()" >Go to Trust Policy Page</button></div>
+								<div id ="goToTrustPolicyPageDiv" class="col-md-1">
+									<button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()" >Trust Policy Page</button></div>
 							</div>						</div>      
 					</div>
 				</div>

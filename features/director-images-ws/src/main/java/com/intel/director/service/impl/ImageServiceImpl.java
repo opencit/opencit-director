@@ -409,7 +409,7 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setCreated_by_user_id(loggedinUser);
 		imageAttributes.setEdited_by_user_id(loggedinUser);
 		imageAttributes.setStatus(Constants.INCOMPLETE);
-		imageAttributes.setDeleted(true);
+		imageAttributes.setDeleted(false);
 		int sizen_kb = fileSize;
 		imageAttributes.setSent(0);
 		imageAttributes.setImage_size(sizen_kb);
@@ -499,6 +499,8 @@ public class ImageServiceImpl implements ImageService {
 			imageInfo.setDeleted(false);
 			
 			log.info("Image upload COMPLETE..");
+		}else{
+			imageInfo.setStatus(Constants.IN_PROGRESS);
 		}
 		try {
 			imagePersistenceManager.updateImage(imageInfo);
@@ -2468,7 +2470,13 @@ public class ImageServiceImpl implements ImageService {
 			log.debug("image fetched for id: " + imageId);
 			imageInfo.setDeleted(true);
 			imagePersistenceManager.updateImage(imageInfo);
-			log.info("Image " + imageId + "deleted successfully");
+
+			// Now delete the image from disk
+			File toBeDeletedFile = new File(imageInfo.getLocation()
+					+ File.separator + imageInfo.getImage_name());
+			boolean deleteFlag = toBeDeletedFile.delete();
+			log.info("Image deleted from disk = " + deleteFlag);
+			log.info("Image " + imageId + " deleted successfully");
 		} catch (DbException e) {
 			log.error("Error deleteing image: " + imageId, e);
 			throw new DirectorException("Error deleting image", e);
@@ -2526,11 +2534,14 @@ public class ImageServiceImpl implements ImageService {
 	
 	@Override
 	public boolean doesImageNameExist(String fileName) throws DirectorException {
+		List<String> statusToBeCheckedList = new ArrayList<>(2);
+		statusToBeCheckedList.add(Constants.IN_PROGRESS);
+		statusToBeCheckedList.add(Constants.COMPLETE);
 		try {
 			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
 			for(ImageInfo image : imagesList)
 			{
-				if(!image.isDeleted() && image.getImage_name() != null && image.getImage_name().equalsIgnoreCase(fileName))
+				if(!image.isDeleted() && statusToBeCheckedList.contains(image.status) && StringUtils.isNotBlank(image.getImage_name()) && image.getImage_name().equalsIgnoreCase(fileName))
 				{
 					return true;
 				}

@@ -436,7 +436,7 @@ refreshBMOnlineGrid();
 
 function showLoading(){
 $( "#loader_body" ).html("");
-var html1="<div id='loading_icon_container' style='background-color: rgba(1, 1, 1, 0.3);bottom: 0;left: 0;position: fixed;right: 0;top: 0;text-align: center;z-index: 1;'><img id='director_loading_icon' src='/v1/html5/public/director-html5/images/ajax-loader.gif' style='position:absolute;top:30%;z-index: 1;display:none;text-align: center;'  width='75' height='75' /> </div>";   
+var html1="<div id='loading_icon_container' style='background-color: rgba(1, 1, 1, 0.3);bottom: 0;left: 0;position: fixed;right: 0;top: 0;text-align: center;z-index: 1;'><img id='director_loading_icon' src='/v1/html5/public/director-html5/images/ajax-loader.gif' style='position:absolute;top:30%;left:48%;z-index: 1;display:none;text-align: center;'  width='75' height='75' /> </div>";   
 
 $( "#loader_body" ).html(html1);
 //$( "#loading_icon_container" ).css('text-align','center');

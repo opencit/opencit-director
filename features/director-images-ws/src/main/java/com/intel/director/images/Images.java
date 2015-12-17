@@ -1,12 +1,9 @@
 /*
-do * To change this license header, choose License Headers in Project Properties.
+ * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.intel.director.images;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,17 +28,19 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
 import com.intel.director.api.ImageStoreObject;
-import com.intel.director.api.GenericRequest;
 import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
@@ -53,7 +52,6 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshSettingRequest;
-import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
@@ -96,16 +94,11 @@ public class Images {
 	 * API for uploading image metadata like image format, deployment type(VM,
 	 * BareMetal, Docker), image file name, image size, etc. Creates image
 	 * upload metadata with specified parameters and returns metadata along with
-	 * image id.
-	 *
-	 * @param TrustDirectorImageUploadRequest
-	 *            object which includes metadata information
-	 * @return TrustDirectorImageUploadResponse object contains newly created
-	 *         image metadata along with image_id
-	 * @throws DirectorException
-	 * @throws Exception
-	 * @TDMethodType POST
-	 * @TDSampleRestCall <pre>
+	 * image id.  
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
+	 * <pre>
 	 * https://server.com:8443/v1/images/uploads/content/uploadMetadata
 	 * Input: {"name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
@@ -113,6 +106,13 @@ public class Images {
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Incomplete","image_size":407552,
 	 * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
 	 * </pre>
+	 *
+	 * @param TrustDirectorImageUploadRequest
+	 *            object which includes metadata information
+	 * @return TrustDirectorImageUploadResponse object contains newly created
+	 *         image metadata along with image_id
+	 * @throws DirectorException
+	 * @throws Exception
 	 */
 	@Path("images")
 	@POST
@@ -156,6 +156,17 @@ public class Images {
 	 * chunk is received location to save image is retrieved from DB using given
 	 * image id and chunk is saved to that location.
 	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
+	 *  <pre>
+	 * https://server.com:8443/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
+	 * Input: chunk for image upload
+	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
+	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+	 * </pre>
 	 * @param imageId
 	 *            - id received as response of
 	 *            https://server.com:8443/v1/images/
@@ -164,16 +175,7 @@ public class Images {
 	 *            - image data sent as chunk
 	 * @return TrustDirectorImageUploadResponse object with updated image upload
 	 *         metadata
-	 * @throws Exception
-	 * @TDMethodType POST
-	 * @TDSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
-	 * Input: chunk for image upload
-	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
-	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
-	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
-	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
-	 * </pre>
+	 * @throws Exception	 
 	 */
 	@Path("rpc/images/content/{image_id: [0-9a-zA-Z_-]+}")
 	@POST
@@ -214,16 +216,16 @@ public class Images {
 	 * be populated. Each image has an image deployment type : BareMetal or VM.
 	 *
 	 * This method gets the list of images based on the deployment type provided as a query param.
-	 * Providing the deployment type is optional. If provided the value should be 
+	 * Providing the deployment type is optional. If provided the value should be either
 	 * VM or BareMetal. 
 	 * 
+	 * The edit_date date field is updated on only when the image is marked 
+	 * for deletion. 
 	 * 
-	 * 
-	 * @param deployment_type
-	 *            - VM/BareMetal
-	 * @return List of image details
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * <pre>
 	 * https://server.com:8443/v1/images
 	 * Input: deploymentType : VM
 	 * Output: {
@@ -266,8 +268,11 @@ public class Images {
 	 * "uploads_count": 
 	 * }
 	 * }]}
-
 	 * </pre>
+	 * 
+	 * @param deployment_type
+	 *            - VM/BareMetal
+	 * @return List of image details
 	 * @throws DirectorException
 	 * @throws DbException
 	 */
@@ -307,6 +312,9 @@ public class Images {
 	 * inactivity, the session timed out; and the user logs back in. The image
 	 * will not be re-mounted.
 	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall 
 	 * <pre>
 	 *
 	 * Input: {id : "ACD7747D-79BE-43E3-BAA5-07DBEC13D272"} 
@@ -349,29 +357,30 @@ public class Images {
 
 	/**
 	 * Method to unmount the mounted image.
-	 *
+	 * 
 	 * API will first check whether image is mounted by same user or not using
 	 * mw_image -> mounted_by_user_id field. If not then, it will throw
 	 * exception. Otherwise API should figure out mount point based on image Id
 	 * and unmount the image. The default mount path is /mnt/director/UUID
-	 *
+	 * 
 	 * As part of the unmount process, the MW_IMAGE.mounted_by_user_id field is
 	 * set to NULL again. the unmount process in the service, throws an
 	 * exception wrapped in DirectorException in case of any error.
 	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall 
 	 * <pre>
-	 *
-		*
-	*	
-	*	Input: {id : "ACD7747D-79BE-43E3-BAA5-07DBEC13D272"} 
-	*	Output: { created_by_user_id: "admin", created_date: 1448217000000, deleted: false, 	edited_by_user_id: "admin", edited_date: 1448303400000, id: "ACD7747D-79BE-43E3-	BAA5-07DBEC13D272", image_deployments: "VM", image_format: "qcow2", image_size: 	13312, location: "/mnt/images/",	name: "cirrus_1811.img", sent: 13312, status: 	"Success"}
-	*	
-	*	In case of error unmounting, the unmount script returned a non zero exit code:
-	*	{ "id": "1eebe380-1a36-11e5-9472-0002a5d5c51b", "name":	"cirros-x86.img" "image_deployments": "VM,Bare_Metal" "image_format":
-	*	"qcow2" "mounted": "false", status:"Error", details: "Unmount script executed with errors" }
+	 * Input: {id : "ACD7747D-79BE-43E3-BAA5-07DBEC13D272"} 
+	 * Output: { created_by_user_id: "admin", created_date: 1448217000000, deleted: false, 	edited_by_user_id: "admin", edited_date: 1448303400000, id: "ACD7747D-79BE-43E3-	BAA5-07DBEC13D272", image_deployments: "VM", image_format: "qcow2", image_size: 	13312, location: "/mnt/images/",	name: "cirrus_1811.img", sent: 13312, status: 	"Success"}
+	 * 
+	 * In case of error unmounting, the unmount script returned a non zero exit code:
+	 * { "id": "1eebe380-1a36-11e5-9472-0002a5d5c51b", "name":	"cirros-x86.img" "image_deployments": "VM,Bare_Metal" "image_format":
+	 * "qcow2" "mounted": "false", status:"Error", details: "Unmount script executed with errors" }
 	 * 
 	 * </pre>
-	 *
+	 * 
 	 * @param imageId
 	 *            Id of the image to be un-mounted
 	 * @param httpServletRequest
@@ -415,7 +424,11 @@ public class Images {
 	 * patch application In case of error, a DirectorException is thrown. It is
 	 * caught in the failure section of the ajax call and shown as a pop up
 	 * message.
+	 *
 	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PUT
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * 
 	 * Input: UUID of the image in path
@@ -509,8 +522,11 @@ public class Images {
 	 * @return returns HTML representation of the tree and the patch in some
 	 *         cases like regex and select all.
 	 *         
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall 
+	 * <pre>
 	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/search
 	 * Input: QueryPAram : dir=/boot/&recursive=false&files_for_policy=false&init=false&include_recursive=false&reset_regex=false
 	 * output: {"tree_content":"<Html containing the nested ul and li tags>", "patch_xml":"<pacth><list of add remove tags as per the operation></pacth>"}
@@ -561,8 +577,10 @@ public class Images {
 	 * 
 	 * @return list of deployment types
 	 * 
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * <pre>
 	 * https://server.com:8443/v1/image-deployments
 	 * Input: None
 	 * Output: {
@@ -592,8 +610,10 @@ public class Images {
 	 * qcow2 as JSON
 	 *
 	 * @return list of image formats
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall 
+	 * <pre>
 	 * https://server.com:8443/v1/image-formats
 	 * Input: None
 	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"}]}
@@ -636,6 +656,9 @@ public class Images {
 	 * by the user while creating a trust policy. The data includes the policy
 	 * xml, whether its encrypted, the launch policy
 	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall 
 	 * <pre>
 	 * Input: QueryParam String: imageId=ACD7747D-79BE-43E3-BAA5-7DBEC13D272&imageArchive=false
 	 * 
@@ -699,7 +722,10 @@ public class Images {
 	 * When the user has finished selecting files and dirs and clicks on the
 	 * Next button for creating a policy, we call this method to : 1) Sign with
 	 * MTW 2) Generate Hashes
-	 * 
+	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * Input
 	 * {"trust_policy_draft_id":"<UUID of trust policy draft>"}
@@ -739,6 +765,10 @@ public class Images {
 	 * now" button, we accept the last moment changes in the name of the policy
 	 * and update it. This method just validates that the name given by the user
 	 * is unique
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PUT
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * https://<host>/v1/trust-policies/7897-232321-432423-4322
 	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
@@ -772,6 +802,10 @@ public class Images {
 	/**
 	 * List configured image stores
 	 *
+	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 *  
 	 * @return
 	 * @throws DirectorException
 	 */
@@ -810,7 +844,9 @@ public class Images {
 	 * the user navigates from the first screen of wizard to second, we create a
 	 * default trust policy, with no files in whitelist.
 	 *
-	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
 	 * <pre>
 	 *	Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
 	 *
@@ -848,6 +884,10 @@ public class Images {
 	 * templates defined in the database. Depending on the type of the live host
 	 * (with vrtm installed or not), a certain template is picked and applied
 	 * during creating a new blank policy draft.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * 
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
@@ -886,6 +926,10 @@ public class Images {
 	 * policy, if he chooses to revisit the files/dirs selection we need to
 	 * recreate the policy draft. this method does the same.
 	 *
+	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
      *	
@@ -921,6 +965,10 @@ public class Images {
 	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
 	 * an xml content to the user
 	 *
+	 *
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * Input: Image id as path param
 	 *	Output: Content sent as stream
@@ -997,6 +1045,10 @@ public class Images {
 	 * into the MW_TRUST_POLICY table and gets the policy string, creates a
 	 * manifest and sends it as an tarball content to the user
 	 * 
+	 * 
+	 * @mtwContentTypeReturned File
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * 
 	 * Input: Image UUID
@@ -1012,28 +1064,32 @@ public class Images {
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadPolicyAndManifestForImageId(
-			@PathParam("imageId") String imageId)  {
-	
+			@PathParam("imageId") String imageId) {
+
 		File tarBall;
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
 			// TODO Auto-generated catch block
-		log.error("dowload policy and manifest failed",e);
-		return Response.noContent().build();
+			log.error("dowload policy and manifest failed", e);
+			return Response.noContent().build();
 		}
 		ResponseBuilder response = Response.ok(tarBall);
-	
 
 		response.header("Content-Disposition", "attachment; filename="
 				+ tarBall.getName());
 
-		return response.build();
+		Response downloadResponse = response.build();
+		return downloadResponse;
 	}
 
 	
 	/**
 	 * Delete the trust policy draft by the provided ID
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType DELETE
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * Input: UUID of the policy draft to be deleted
 	 * Output: Status of operation in json(Success/Error)
@@ -1056,14 +1112,16 @@ public class Images {
 
 	}
 
-
 	/**
 	 * Deletes the signed trust policy by the provided id
-	 * <pre>
 	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType DELETE
+	 * @mtwSampleRestCall 
+	 * <pre> 
 	 * Input: UUID of the policy to be deleted
-	* Output: Status(success/error) of operation in json
-	*	"status":"success"}
+	 * Output: Status(success/error) of operation in json
+	 * "status":"success"}
 	 * </pre>
 	 */
 	@Path("trust-policy/{trust_policy_id: [0-9a-zA-Z_-]+}")
@@ -1088,6 +1146,9 @@ public class Images {
 	 * Mark image as deleted. We turn the disabled flag=true in the MW_IMAGE
 	 * table
 	 *
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType DELETE
+	 * @mtwSampleRestCall
 	 * <pre>
 	 * Input: pass the UUID of the image as path param
 	 * Output: {"status": "success"}
@@ -1115,6 +1176,14 @@ public class Images {
 		
 	}
 
+	/**
+	 * Get trust policy for the provided ID
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @param trustPolicyId
+	 * @return 
+	 */
 
 	@Path("trust-policy/{trustPolicyId: [0-9a-zA-Z_-]+}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1138,8 +1207,10 @@ public class Images {
 	 * 
 	 * @param action_id
 	 * @return ImageActionObject.
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * <pre>
 	 * https://server.com:8443/v1/image-actions
 	 * Input: action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
 	 * Output: {
@@ -1170,8 +1241,10 @@ public class Images {
 	 * 
 	 * @param ImageActionRequest
 	 * @return Output will contain action_id.
-	 * @TDMethodType POST
-	 * @TDSampleRestCall <pre>
+ 	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall  
+	 * <pre>
 	 * https://server.com:8443/v1/image-actions
 	 * Input: { "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
 	 * "actions":[ {"task_name":"Create Tar","status":"Incomplete"},
@@ -1223,8 +1296,10 @@ public class Images {
 	 * 
 	 * @param ImageActionRequest
 	 * @return Status of update operation
-	 * @TDMethodType PUT
-	 * @TDSampleRestCall <pre>
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PUT
+	 * @mtwSampleRestCall 
+	 * <pre>
 	 * https://server.com:8443/v1/image-actions
 	 * Input: { "action_id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057"
 	 * "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
@@ -1263,8 +1338,11 @@ public class Images {
 	 * 
 	 * @param imageActionRequest
 	 * @return Status of delete operation
-	 * @TDMethodType DELETE
-	 * @TDSampleRestCall <pre>
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType DELETE
+	 * @mtwSampleRestCall  
+	 * <pre>
 	 * https://server.com:8443/v1/image-actions
 	 * Input: PathParam =  actionId : CF0A8FA3-F73E-41E9-8421-112FB22BB057
 	 * Output: { "status": "success"}
