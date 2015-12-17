@@ -487,7 +487,7 @@ public class TdaasUtil {
 		img.setLocation(null);
 		img.setImage_name(ip);
 		img.setSent(null);
-		img.setStatus(null);
+		img.setStatus(Constants.COMPLETE);
 		return img;
 	}
 

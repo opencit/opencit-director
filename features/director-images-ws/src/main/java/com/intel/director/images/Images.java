@@ -4,9 +4,6 @@
  * and open the template in the editor.
  */
 package com.intel.director.images;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,17 +28,19 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
 import com.intel.director.api.ImageStoreObject;
-import com.intel.director.api.GenericRequest;
 import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
@@ -53,7 +52,6 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshSettingRequest;
-import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
@@ -96,7 +94,7 @@ public class Images {
 	 * API for uploading image metadata like image format, deployment type(VM,
 	 * BareMetal, Docker), image file name, image size, etc. Creates image
 	 * upload metadata with specified parameters and returns metadata along with
-	 * image id.
+	 * image id.  
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
@@ -218,8 +216,12 @@ public class Images {
 	 * be populated. Each image has an image deployment type : BareMetal or VM.
 	 *
 	 * This method gets the list of images based on the deployment type provided as a query param.
-	 * Providing the deployment type is optional. If provided the value should be 
+	 * Providing the deployment type is optional. If provided the value should be either
 	 * VM or BareMetal. 
+	 * 
+	 * The edit_date date field is updated on only when the image is marked 
+	 * for deletion. 
+	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall
@@ -1062,23 +1064,23 @@ public class Images {
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadPolicyAndManifestForImageId(
-			@PathParam("imageId") String imageId)  {
-	
+			@PathParam("imageId") String imageId) {
+
 		File tarBall;
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
 			// TODO Auto-generated catch block
-		log.error("dowload policy and manifest failed",e);
-		return Response.noContent().build();
+			log.error("dowload policy and manifest failed", e);
+			return Response.noContent().build();
 		}
 		ResponseBuilder response = Response.ok(tarBall);
-	
 
 		response.header("Content-Disposition", "attachment; filename="
 				+ tarBall.getName());
 
-		return response.build();
+		Response downloadResponse = response.build();
+		return downloadResponse;
 	}
 
 	
