@@ -32,16 +32,11 @@ function refresh_vm_images_Grid() {
 			console.log("vm grid refreshed");
 			images = data.images;
 			var grid = [];
-			var tpid = "";
-			var tpdid = "";
 			for (i = 0; i < images.length; i++) { 
 				if(images[i].deleted){
 					continue;
 				}
 
-				tpid = "";
-				tpdid = "";
-				
 				self.gridData = new ImageData();
 				self.gridData.image_name = images[i].image_name;
 				self.gridData.policy_name = images[i].policy_name;
@@ -90,12 +85,14 @@ function refresh_vm_images_Grid() {
 							+ images[i].id + "','" 
 							+ images[i].image_name
 							+ "')\"></span></a>";
+						
 					}
+					self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+
 				}else{
 					//self.gridData.image_delete = "";
 					self.gridData.trust_policy = "";
 				}
-				self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
 				
 				self.gridData.image_upload = "";
 				if(images[i].status == 'Complete'){
