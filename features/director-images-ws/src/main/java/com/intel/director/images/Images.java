@@ -320,6 +320,9 @@ public class Images {
 	 * If the user tries to mount an image which, for some reason, has been removed from the uploaded location, the response will look like :
 	 * {"status":"Error", "details":" No image found with id: <UUID>"}
 	 * 
+	 * If user tres to mount deleted image, the response will look like:
+	 * {"status":"Error", "details":"Cannot launch deleted image"}
+	 * 
 	 * </pre>
 	 * 
 	 * @param imageId
@@ -503,7 +506,7 @@ public class Images {
 	 * In cases of regex and "select all" operation where user clicks on the
 	 * checkbox next to a directory in order to select all the contents, this
 	 * method created a patch as a list of strings and sends it in the
-	 * "patchXml" attribute. Once the UI receives it, it adds it to the current
+	 * "patch_xml" attribute. Once the UI receives it, it adds it to the current
 	 * selections on the UI and then sends back the consolidated patch to the
 	 * server
 	 *
@@ -632,6 +635,7 @@ public class Images {
 	 * @TDSampleRestCall <pre>
 	 * https://server.com:8443/v1/image-launch-policies
 	 * Input: QueryParam String deploymentType=VM
+	 * deploymentType can be VM , BareMetal or Docker
 	 * Output: { "image_launch_policies": [
 	 * {"name":"MeasureOnly","value":"Hash Only","image_deployments":["VM","BareMetal"]},
 	 * {"name":"MeasureAndEnforce","value":"Hash and enforce","image_deployments":["VM"]},
@@ -839,6 +843,9 @@ public class Images {
 	 * policy icon, indicating that there is no draft currently associated. When
 	 * the user navigates from the first screen of wizard to second, we create a
 	 * default trust policy, with no files in whitelist.
+	 * 
+	 * image_display_name,launch_control_policy, and encrypted are mandatory fields
+	 *
 	 *
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
@@ -847,6 +854,7 @@ public class Images {
 	 *	Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
 	 *
 	 * Output: {"id":"50022e9c-577a-4bbd-9445-197a3e1a349f","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n <Director>\n <CustomerId>testId</CustomerId>\n </Director>\n <Image>\n <ImageId>08EB37D7-2678-495D-B485-59233EB51996</ImageId>\n <ImageHash>6413fccb72e36d2cd4b20efb5b5fe1be916ab60f0fe1d7e2aab1a2170be1ff40</ImageHash>\n </Image>\n <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n <Whitelist DigestAlg=\"sha256\">\n <File Path=\"/boot/grub/stage1\"></File>\n <File Path=\"/boot/grub/menu.lst\"></File>\n <File Path=\"/initrd.img\"></File>\n <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/config-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/initrd.img-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/grub/e2fs_stage1_5\"></File>\n <File Path=\"/boot/grub/stage2\"></File>\n </Whitelist>\n</TrustPolicy>\n"}
+	 * 
 	 * </pre>
 	 *
 	 *
@@ -881,6 +889,7 @@ public class Images {
 	 * (with vrtm installed or not), a certain template is picked and applied
 	 * during creating a new blank policy draft.
 	 * 
+	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
@@ -889,6 +898,9 @@ public class Images {
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
 	 *
 	 *	Output: {"trust_policy":"<policy xml>", "status":"SUCCESS","details":"<In case of error>"}
+     *
+     * details attribute in output describes the error. If the image id provided does not exist, an error 
+     * "No image found during import of policy" would be returned in the details.
      *
 	 * </pre>
 	 *
