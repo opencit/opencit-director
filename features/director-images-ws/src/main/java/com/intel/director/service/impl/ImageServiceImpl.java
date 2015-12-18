@@ -408,7 +408,7 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.image_deployments = image_deployments;
 		imageAttributes.setCreated_by_user_id(loggedinUser);
 		imageAttributes.setEdited_by_user_id(loggedinUser);
-		imageAttributes.setStatus(Constants.INCOMPLETE);
+		imageAttributes.setStatus(Constants.IN_PROGRESS);
 		imageAttributes.setDeleted(false);
 		int sizen_kb = fileSize;
 		imageAttributes.setSent(0);

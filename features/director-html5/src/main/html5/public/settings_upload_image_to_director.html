@@ -5,6 +5,9 @@
         <meta name="author" content="jbuhacoff">
         
         <script>
+
+		var image_type_upload="VM";
+	var image_format_upload="qcow2";
 			
 			$(document).ready(function () {
 
@@ -12,6 +15,7 @@
 				$("#gotoUploadWindow").click(function () {
 					var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
 					OpenWindow.image_deployments_parent = $("#image_type").val();
+					image_type_upload=$("#image_type").val();
 					if($("#image_type").val() == 'VM'){
 						OpenWindow.image_format_parent = 'qcow2';
 						} else {
