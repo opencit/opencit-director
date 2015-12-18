@@ -94,7 +94,7 @@ public class Images {
 	 * API for uploading image metadata like image format, deployment type(VM,
 	 * BareMetal, Docker), image file name, image size, etc. Creates image
 	 * upload metadata with specified parameters and returns metadata along with
-	 * image id.  
+	 * image id.
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
@@ -216,12 +216,8 @@ public class Images {
 	 * be populated. Each image has an image deployment type : BareMetal or VM.
 	 *
 	 * This method gets the list of images based on the deployment type provided as a query param.
-	 * Providing the deployment type is optional. If provided the value should be either
+	 * Providing the deployment type is optional. If provided the value should be 
 	 * VM or BareMetal. 
-	 * 
-	 * The edit_date date field is updated on only when the image is marked 
-	 * for deletion. 
-	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall
