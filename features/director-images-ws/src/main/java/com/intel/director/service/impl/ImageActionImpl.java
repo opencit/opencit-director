@@ -141,16 +141,11 @@ public class ImageActionImpl implements ImageActionService {
 			ImageActionTask imageActions = new ImageActionTask();
 			if (action.getTask_name() != null) {
 				imageActions.setTask_name(action.getTask_name());
-			}
-			if (action.getStatus() != null) {
-				imageActions.setStatus(StringUtils.isNotBlank(action
-						.getStatus()) ? action.getStatus()
-						: Constants.INCOMPLETE);
-			}
+				imageActions.setStatus(Constants.INCOMPLETE);
+			}		
 			if (action.getStorename() != null) {
 				imageActions.setStorename(action.getStorename());
 			}
-
 			list.add(imageActions);
 		}
 		if (list.size() != 0) {
@@ -205,8 +200,8 @@ public class ImageActionImpl implements ImageActionService {
 		try {
 			persistService.deleteImageActionById(actionId);
 		} catch (DbException e) {
-			log.error("Error while deleting image action" + e);
-			throw new DirectorException("Error while deleting image action", e);
+			log.error("No image action with Id :: " + actionId + e);
+			throw new DirectorException("Error while deleting image action :: " + actionId, e);
 		}
 	}
 

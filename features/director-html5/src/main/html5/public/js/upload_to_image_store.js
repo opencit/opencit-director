@@ -28,7 +28,7 @@ function displayImageStore() {
 	$
 	.ajax({
 		type : "GET",
-		url : endpoint + "image-stores",
+		url : "/v1/image-stores",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
@@ -143,7 +143,7 @@ function UploadStoreViewModel() {
 		}
 		var displayNameFormData = {"display_name":current_display_name};
 		$.ajax({
-			type : "PUT",
+			type : "POST",
 			url : "/v1/trust-policies/"+current_trust_policy_id,
 			contentType : "application/json",
 			dataType : "json",
@@ -152,12 +152,12 @@ function UploadStoreViewModel() {
 			},
 			data : JSON.stringify(displayNameFormData),
 			success : function(data) {
-				if (data.status == "Error") {
-					$('#error_vm_body_3_direct').text(data.details);
+				if (data.error) {
+					$('#error_vm_body_3_direct').text(data.error);
 					$("#error_vm_3_direct").modal({
 						backdrop : "static"
 					});
-					$('#error_vm_body_3').text(data.details);
+					$('#error_vm_body_3').text(data.error);
 					$("#error_vm_3").modal({
 						backdrop : "static"
 					});
@@ -189,12 +189,12 @@ function UploadStoreViewModel() {
 					},
 					data : JSON.stringify(imageActionData),
 					success : function(data) {
-						if (data.status == "Error") {
-							$('#error_vm_body_3_direct').text(data.details);
+						if (data.error) {
+							$('#error_vm_body_3_direct').text(data.error);
 							$("#error_vm_3_direct").modal({
 								backdrop : "static"
 							});
-							$('#error_vm_body_3').text(data.details);
+							$('#error_vm_body_3').text(data.error);
 							$("#error_vm_3").modal({
 								backdrop : "static"
 							});

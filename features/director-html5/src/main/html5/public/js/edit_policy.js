@@ -50,10 +50,10 @@ function EditImageViewModel(data) {
 			data : ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
 			success : function (data, status, xhr) {
 
-				if (data.status == "Error") {
+				if (data.error) {
 					$('#for_mount_edit_vm').hide();
 					$('#default_edit_vm').show();
-					$('#error_modal_body_edit_vm_1').text(data.details);
+					$('#error_modal_body_edit_vm_1').text(data.error);
 					$("#error_modal_edit_vm_1").modal({
 						backdrop : "static"
 					});
@@ -75,10 +75,10 @@ function EditImageViewModel(data) {
 					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 					success : function (data, status, xhr) {
 						$("#editVMPolicyNext").prop('disabled', false);
-						if (data.status == "Error") {
+						if (data.error) {
 							$('#for_mount_edit_vm').show();
 							$('#default_edit_vm').hide();
-							$('#error_modal_body_edit_vm_1').text(data.details);
+							$('#error_modal_body_edit_vm_1').text(data.error);
 							$("#error_modal_edit_vm_1").modal({
 								backdrop : "static"
 							});
@@ -129,7 +129,7 @@ function addRadios(arr) {
 		}
 		temp = temp
 			 + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="edit_policy_'+ arr[i].name + '" value="'
-			 + arr[i].name + '" >' + arr[i].value + '</label>';
+			 + arr[i].name + '" >' + arr[i].display_name + '</label>';
 	}
 
 	$('#launch_control_policy').html(temp);

@@ -127,9 +127,9 @@ return;
 				data :   JSON.stringify(mountimage),
 				success : function (data, status, xhr) {
 
-					if (data.status == "Error") {
+					if (data.error) {
 						$("#editBMLivePolicyNext").prop('disabled', false);
-						show_error_in_editbmlivemodal(data.details);
+						show_error_in_editbmlivemodal(data.error);
 						return;
 					}
 					
@@ -145,8 +145,8 @@ return;
 						success : function (data, status, xhr) {
 							$("#editBMLivePolicyNext").prop('disabled', false);
 
-							if (data.status == "Error") {								
-								show_error_in_editbmlivemodal(data.details);
+							if (data.error) {								
+								show_error_in_editbmlivemodal(data.error);
 
 								$.ajax({
 									type : "POST",

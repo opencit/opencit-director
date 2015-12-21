@@ -779,7 +779,11 @@ public class DbServiceImpl implements IPersistService {
 	 * .lang.String)
 	 */
 	public TrustPolicy fetchPolicyById(String id) throws DbException {
-		return mapper.toTransferObject(policyDao.findMwTrustPolicy(id));
+		MwTrustPolicy findMwTrustPolicy = policyDao.findMwTrustPolicy(id);
+		if(findMwTrustPolicy == null){
+			return null;
+		}
+		return mapper.toTransferObject(findMwTrustPolicy);
 	}
 
 	/*

@@ -8,6 +8,7 @@ package com.intel.director.api;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
@@ -21,12 +22,13 @@ public class ImageAttributes extends AuditFields {
   
     public String image_format;
     public String image_deployments;
+    @JsonProperty("image_upload_status")
     public String status;
     public Integer image_size;
     public Integer sent;
     public String mounted_by_user_id;
     public boolean deleted;
-    @JsonIgnore
+    @JsonProperty("image_Location")
     public String location;
 
     public ImageAttributes() {

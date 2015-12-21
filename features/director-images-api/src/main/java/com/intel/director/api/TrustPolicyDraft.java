@@ -1,7 +1,7 @@
 package com.intel.director.api;
 
 import java.util.Date;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 public class TrustPolicyDraft extends AuditFields {
 
     protected String id;
@@ -10,12 +10,22 @@ public class TrustPolicyDraft extends AuditFields {
 
     protected String name;
 
+    @JsonProperty("image_attributes")
     protected ImageAttributes imgAttributes;
 
     protected String display_name;
     
+    protected String error;
     
-    public String getDisplay_name() {
+    public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	public String getDisplay_name() {
 		return display_name;
 	}
 

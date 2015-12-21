@@ -22,7 +22,7 @@ function SelectDirectoriesViewModel() {
 		}
 		$.ajax({
 			type : "POST",
-			url : "/v1/rpc/trust-policies",
+			url : "/v1/rpc/finalize-trust-policy-draft",
 			contentType : "application/json",
 			dataType : "application/json",
 			headers : {

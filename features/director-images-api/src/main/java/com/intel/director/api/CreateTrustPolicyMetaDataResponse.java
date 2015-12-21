@@ -6,6 +6,7 @@ public class CreateTrustPolicyMetaDataResponse extends
 	public String trustPolicy;// XML
 	public String status;
 	public String details;
+	public String error;
 	
 	//Changes for BM
 	public String ip_address;
@@ -59,6 +60,15 @@ public class CreateTrustPolicyMetaDataResponse extends
 	public void setUsername(String username) {
 		this.username = username;
 	}
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+	
 	
 
 }

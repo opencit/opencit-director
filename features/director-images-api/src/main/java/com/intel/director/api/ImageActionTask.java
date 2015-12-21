@@ -1,7 +1,15 @@
 package com.intel.director.api;
 
 public class ImageActionTask {
-	private String status,storename,task_name,location,uri,executionDetails;
+	private String status,storename,task_name,location,uri,executionDetails,error;
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
 
 	public String getStatus() {
 		return status;

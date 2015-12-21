@@ -288,7 +288,7 @@ var editPolicyDraft = function() {
 	});
 	
 	$.ajax({
-		type : "PUT",
+		type : "POST",
 		url : "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
 		data : formData,
 		contentType : "application/json",
@@ -423,7 +423,7 @@ function createPolicy(){
 	}
 	$.ajax({
 		type : "POST",
-		url : "/v1/rpc/trust-policies",
+		url : "/v1/rpc/finalize-trust-policy-draft",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
@@ -437,7 +437,7 @@ function createPolicy(){
 				"id" : current_image_id
 			}
 			current_image_action_id = "";
-			var createResponse = data.status;
+			var createResponse = data.error;
 
 			$.ajax({
 				type : "POST",
@@ -448,7 +448,7 @@ function createPolicy(){
 				},
 				data : JSON.stringify(mountimage),
 				success : function(data, status, xhr) {
-					if(createResponse == 'Error'){
+					if(createResponse){
 						$("#error_modal_vm_2").modal({backdrop: "static"});
 						$('body').removeClass("modal-open");
 					}else{

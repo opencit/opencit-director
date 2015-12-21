@@ -42,12 +42,11 @@ function refresh_vm_images_Grid() {
 				self.gridData.policy_name = images[i].policy_name;
 				self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"vm_remove_row_"+i+"\" onclick=\"deleteImage('"
 						+ images[i].id + "')\"/></a>";
-				if(images[i].status == 'Complete'){
+				if(images[i].image_upload_status== 'Complete'){
 					
 					self.gridData.trust_policy = "<div id=\"trust_policy_vm_column"
 						+ images[i].id + "\">";
-	
-					if (images[i].trust_policy_draft_id == null
+						if (images[i].trust_policy_draft_id == null
 						&& images[i].trust_policy_id == null) {
 	
 					self.gridData.trust_policy = self.gridData.trust_policy
@@ -95,7 +94,7 @@ function refresh_vm_images_Grid() {
 				}
 				
 				self.gridData.image_upload = "";
-				if(images[i].status == 'Complete'){
+				if(images[i].image_upload_status == 'Complete'){
 
 					if (images[i].uploads_count != 0) {
 						self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"vm_ok_row_"+i+"\" title=\"Uploaded Before\"></span></a>";

@@ -112,7 +112,7 @@ public class ImageDao {
 			StringBuffer queryString = new StringBuffer(
 					"select id,name,image_format,image_deployments,created_by_user_id,created_date,"
 							+ "location,mounted_by_user_id,sent,status,edited_by_user_id,edited_date,deleted,"
-							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
+							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,content_length from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
 
 			if (imgFilter != null) {
 				if (imgFilter.getId() != null) {
@@ -223,6 +223,7 @@ public class ImageDao {
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setUploads_count(((Long) imageObj[17]).intValue());
+					imgInfo.setImage_size(((Integer) imageObj[18]));
 					imageInfoList.add(imgInfo);
 				}
 			}
