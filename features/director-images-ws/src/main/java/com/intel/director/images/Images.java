@@ -1179,20 +1179,37 @@ public class Images {
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadPolicyAndManifestForImageId(
-			@PathParam("imageId") String imageId) {
+			@PathParam("imageId") final String imageId) {
 
 		File tarBall;
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
 			log.error("dowload policy and manifest failed", e);
 			tarBall = null;
 		}
 		if (tarBall == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		ResponseBuilder response = Response.ok(tarBall);
+		FileInputStream tarInputStream=null;
+		try {
+			tarInputStream = new FileInputStream(tarBall){
+				@Override
+				public void close() throws IOException {
+					log.info("Deleting temporary files " + Constants.TARBALL_PATH + imageId);
+					super.close();
+					final File dir = new File(Constants.TARBALL_PATH + imageId);
+					for (File file : dir.listFiles()) {
+						file.delete();
+					}
+					dir.delete();
+				}
+			};
+		} catch (FileNotFoundException e) {
+			log.error("Error while dowloading policy and manifest", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		ResponseBuilder response = Response.ok(tarInputStream);
 
 		response.header("Content-Disposition", "attachment; filename="
 				+ tarBall.getName());
