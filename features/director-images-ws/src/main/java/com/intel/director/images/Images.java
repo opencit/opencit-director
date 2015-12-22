@@ -104,7 +104,7 @@ public class Images {
 	 * Input: {"name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
-	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Incomplete","image_size":407552,
+	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
 	 * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
 	 * 
 	 * In Case of error such as image name already exists on the server :
@@ -171,6 +171,13 @@ public class Images {
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
 	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+	 * 
+	 * While the image upload is in progress:
+	 * {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
+	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Porgress","image_size":407552,
+	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+	 * 
 	 * </pre>
 	 * @param imageId
 	 *            - id received as response of
@@ -1049,7 +1056,7 @@ public class Images {
 	 * @return
 	 * @throws DirectorException
 	 */
-	@Path("rpc/createDraftFromPolicy")
+	@Path("rpc/create-trust-policy-draft")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustPolicyDraft createPolicyDraftFromPolicy(GenericRequest req)
@@ -1323,6 +1330,12 @@ public class Images {
 	/**
 	 * This method will fetch an image-action which has image_id on which
 	 * actions are performed, list of actions to be performed, etc.
+	 * 
+	 * action_count and action_completed are provided for convenience. 
+	 * These two attributes are guaranteed to have the right data corresponding to the actions collection.
+	 * 
+	 * The tasks in "action" attribute are processed sequentially. The current task holds the name of the task in the "action" array that is currently
+	 * being processed.
 	 * 
 	 * @param action_id
 	 * @return ImageActionObject.
