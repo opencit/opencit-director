@@ -1046,23 +1046,23 @@ public class Images {
 	}*/
 
 	/**
-	 *
+	 * 
 	 * Method lets the user download the policy and manifest as a tarball from
 	 * the grids page. The user can visit the grid any time and download the
 	 * policy and manifest as it was created in the wizrd. This method looks
 	 * into the MW_TRUST_POLICY table and gets the policy string, creates a
 	 * manifest and sends it as an tarball content to the user
 	 * 
+	 * In case the policy is not found for the image id, HTTP 404 is returned
 	 * 
 	 * @mtwContentTypeReturned File
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall
-	 * <pre>
+	 * @mtwSampleRestCall <pre>
 	 * 
 	 * Input: Image UUID
 	 * Output: Content of tarball as stream
 	 * </pre>
-	 *
+	 * 
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
 	 * @return TAR ball content of the policy
@@ -1072,17 +1072,37 @@ public class Images {
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public Response downloadPolicyAndManifestForImageId(
-			@PathParam("imageId") String imageId) {
+			@PathParam("imageId") final String imageId) {
 
 		File tarBall;
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
-			// TODO Auto-generated catch block
 			log.error("dowload policy and manifest failed", e);
-			return Response.noContent().build();
+			tarBall = null;
 		}
-		ResponseBuilder response = Response.ok(tarBall);
+		if (tarBall == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		FileInputStream tarInputStream=null;
+		try {
+			tarInputStream = new FileInputStream(tarBall){
+				@Override
+				public void close() throws IOException {
+					log.info("Deleting temporary files " + Constants.TARBALL_PATH + imageId);
+					super.close();
+					final File dir = new File(Constants.TARBALL_PATH + imageId);
+					for (File file : dir.listFiles()) {
+						file.delete();
+					}
+					dir.delete();
+				}
+			};
+		} catch (FileNotFoundException e) {
+			log.error("Error while dowloading policy and manifest", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		ResponseBuilder response = Response.ok(tarInputStream);
 
 		response.header("Content-Disposition", "attachment; filename="
 				+ tarBall.getName());
