@@ -64,7 +64,7 @@ function EditBMImageViewModel(data) {
 					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
 						if (data.error) {
-							$('#error_modal_body_edit_bm_image_1').text(data.details);
+							$('#error_modal_body_edit_bm_image_1').text(data.error);
 							$("#error_modal_edit_bm_image_1").modal({
 								backdrop : "static"
 							});

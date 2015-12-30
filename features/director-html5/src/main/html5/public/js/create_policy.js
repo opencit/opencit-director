@@ -2,7 +2,6 @@ var imageFormats = new Array();
 var image_policies = new Array();
 
 $(document).ready(function() {
-	// /alert("inside create js ready function");
 	fetchImageLaunchPolicies();
 });
 
@@ -12,10 +11,6 @@ function CreateImageMetaData(data) {
 
 	this.image_name = current_image_name;
 	this.display_name = current_display_name;
-	// / this.isEncrypted=ko.observable(false);
-	/* this.selected_image_format= ko.observable(); */
-
-
 }
 
 function CreateImageViewModel() {
@@ -26,15 +21,13 @@ function CreateImageViewModel() {
 
 	self.createImage = function(loginFormElement) {
 		$("#createVMPolicyNext").prop('disabled', true);
-		self.createImageMetaData.launch_control_policy = $(
-				'input[name=launch_control_policy]:checked').val();
+		self.createImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
 		// self.createImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
 		self.createImageMetaData.encrypted = $('input[name=isEncrypted]').is(
 				':checked');
 
 		self.createImageMetaData.display_name = $('#display_name').val();
 		current_display_name = $('#display_name').val();
-		console.log(self.createImageMetaData.display_name);
 
 		$.ajax({
 			type : "POST",
@@ -88,8 +81,6 @@ function CreateImageViewModel() {
 						nextButton();
 					}
 				});
-
-				// nextButton();
 			}
 		});
 

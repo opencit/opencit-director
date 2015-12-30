@@ -1,9 +1,33 @@
 var imageFormats = new Array();
 var image_policies = new Array();
 
+edit_policy_initialize();
+
+function edit_policy_initialize(){
+if(!current_trust_policy_draft_id){
+	var create_draft_request={
+			"image_id" :current_image_id
+		}
+
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			headers : {
+					'Accept' : 'application/json'
+				},
+			data : JSON.stringify(create_draft_request),
+
+			url : "/v1/rpc/create-draft-from-policy",
+			success : function(data, status, xhr) {
+				
+				if (data.status == "Error") {
+				///	show_error_in_trust_policy_tab("Internal error");
+								return false;
+							}else{
+				current_trust_policy_draft_id = data.id;
 $.ajax({
 	type : "GET",
-	url : "/v1/trust-policy-drafts/?imageId=" + current_image_id + "&imageArchive=false",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
 	contentType : "application/json",
 	headers : {
 		'Accept' : 'application/json'
@@ -13,6 +37,33 @@ $.ajax({
 		showImageLaunchPolicies(data);
 	}
 });
+
+
+
+			    }
+
+			}
+		});
+}else{
+$.ajax({
+	type : "GET",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function (data, status, xhr) {
+		showImageLaunchPolicies(data);
+	}
+});
+
+}
+
+
+
+}
+
 
 function EditImageMetaData(data) {
 

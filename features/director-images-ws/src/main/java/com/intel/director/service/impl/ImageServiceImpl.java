@@ -24,6 +24,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang.StringUtils;
+import org.dozer.DozerBeanMapper;
+import org.dozer.Mapper;
 import org.springframework.stereotype.Component;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
@@ -31,6 +33,7 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageListResponseInfo;
 import com.intel.director.api.ImportPolicyTemplateResponse;
@@ -52,6 +55,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
@@ -775,6 +779,9 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
 					.fetchPolicyDraftById(draftid);
+			if(trustPolicyDraft==null){
+				return null;
+			}
 			String trustPolicyDraftxml = trustPolicyDraft
 					.getTrust_policy_draft();
 			JAXBContext jaxbContext = JAXBContext
@@ -788,6 +795,10 @@ public class ImageServiceImpl implements ImageService {
 
 			metadata.setImage_name(trustPolicyDraft.getImgAttributes()
 					.getImage_name());
+			metadata.setDisplay_name(trustPolicyDraft.getDisplay_name());
+			if (policy.getEncryption() != null) {
+				metadata.setEncrypted(true);
+			}
 			// /metadata.setIsEncrypted(isEncrypted);
 			metadata.setLaunch_control_policy(policy.getLaunchControlPolicy()
 					.value());
@@ -2663,5 +2674,55 @@ public class ImageServiceImpl implements ImageService {
 		return existingDraft.getImgAttributes().id;
 
 	}
+	
+	public ImageInfoResponse getImageDetails(String imageId)
+			throws DirectorException {
+		ImageInfoResponse imageInfoResponse = null;
+		try {
+			ImageInfo imageInfo =  imagePersistenceManager
+					.fetchImageById(imageId);
+			if (imageInfo == null) {
+				return null;
+			}	
+			Mapper mapper = new DozerBeanMapper();
+			imageInfoResponse = mapper.map(imageInfo,
+					ImageInfoResponse.class);
+		
+		} catch (DbException e1) {
 
+			log.error("Error in fetchImageById for imageId::" + imageId);
+			throw new DirectorException("unable to fetchImageById", e1);
+		}
+		
+		if (StringUtils.isNotBlank(imageInfoResponse.getImage_deployments())
+				&& imageInfoResponse.getImage_deployments().equals(
+						Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
+			try {
+				SshSettingRequest bareMetalMetaData = getBareMetalMetaData(imageId);
+				imageInfoResponse.setUsername(bareMetalMetaData.getUsername());
+				imageInfoResponse.setIp_address(bareMetalMetaData
+						.getIpAddress());
+			} catch (DirectorException e) {
+				log.error("Error in getImageDetails for imageId::" + imageId);
+				throw new DirectorException("unable to get image details", e);
+
+			}
+		}
+		return imageInfoResponse;
+	}
+	
+	@Override	
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(TrustPolicyDraftFilter trustPolicyDraftFilter) throws DirectorException{
+		List<TrustPolicyDraft> fetchPolicyDrafts = null;
+		try {
+			if (trustPolicyDraftFilter == null) {
+				fetchPolicyDrafts = imagePersistenceManager.fetchPolicyDrafts(
+						null, null);
+			}
+			return fetchPolicyDrafts;
+		} catch (DbException e) {
+			throw new DirectorException("Error Fetching drafts", e);
+		}
+	}
+	
 }

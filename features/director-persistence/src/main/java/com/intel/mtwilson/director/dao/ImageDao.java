@@ -19,7 +19,6 @@ import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.mapper.Mapper;
 
 public class ImageDao {
@@ -259,6 +258,9 @@ public class ImageDao {
 		EntityManager em = getEntityManager();
 		try {
 			MwImage mwImage = em.find(MwImage.class, id);
+			if(mwImage==null){
+				return null;
+			}
 			ImageInfo imgInfo = new ImageInfo();
 
 			imgInfo.setId(mwImage.getId());

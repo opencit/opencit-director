@@ -238,7 +238,7 @@ function createPolicyDraftFromPolicy() {
 			},
 		data : JSON.stringify(create_draft_request),
 
-		url : "/v1/rpc/create-trust-policy-draft",
+		url : "/v1/rpc/create-draft-from-policy",
 		success : function(data, status, xhr) {
 			
 			if (data.status == "Error") {

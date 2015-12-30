@@ -60,13 +60,13 @@ function refresh_vm_images_Grid() {
 						self.gridData.trust_policy = self.gridData.trust_policy
 							+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\" id=\"vm_edit_row_"+i+"\" onclick=\"editTrustPolicy('"
 							+ images[i].id + "','" + images[i].image_name
-							+ "')\"></span></a>";
+							+ "','"+images[i].trust_policy_draft_id+"')\"></span></a>";
 						tpdid = images[i].trust_policy_draft_id; 
 					} else if (images[i].trust_policy_id != null) {
 						self.gridData.trust_policy = self.gridData.trust_policy
 							+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" id=\"vm_edit_row_"+i+"\" onclick=\"editTrustPolicy('"
 							+ images[i].id + "','" + images[i].image_name
-							+ "')\"></span></a>";
+							+ "','')\"></span></a>";
 					}
 	
 					if (images[i].trust_policy_id != null) {

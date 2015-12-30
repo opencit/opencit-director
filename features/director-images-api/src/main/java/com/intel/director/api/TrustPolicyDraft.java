@@ -1,6 +1,7 @@
 package com.intel.director.api;
 
 import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 public class TrustPolicyDraft extends AuditFields {
 

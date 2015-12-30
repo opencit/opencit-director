@@ -8,9 +8,9 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
