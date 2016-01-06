@@ -20,6 +20,9 @@ public class ImportPolicyTemplateResponse {
 		this.details = details;
 	}
 
+	public String trust_policy;
+	public String error;
+	
 	public String getTrust_policy() {
 		return trust_policy;
 	}
