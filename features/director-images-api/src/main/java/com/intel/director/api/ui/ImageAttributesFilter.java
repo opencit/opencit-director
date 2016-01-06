@@ -46,7 +46,7 @@ public class ImageAttributesFilter extends ImageAttributes {
     public String toString() {
         return "ImageAttributesFilter [from_created_date=" + from_created_date
                 + ", to_created_date=" + to_created_date + ", id=" + id
-                + ", name=" + name + ", format=" + image_format
+                + ", image_name=" + image_name + ", format=" + image_format
                 + ", image_deployments=" + image_deployments + ", status="
                 + status + ", image_size=" + image_size + ", sent=" + sent
                 + ", mounted_by_user_id=" + mounted_by_user_id + ", deleted="

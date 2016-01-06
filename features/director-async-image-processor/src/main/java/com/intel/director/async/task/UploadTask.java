@@ -12,7 +12,7 @@ import org.apache.commons.configuration.BaseConfiguration;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -29,7 +29,7 @@ import com.intel.mtwilson.Folders;
  * @author Siddharth
  * 
  */
-public abstract class UploadTask extends ImageActionTask {
+public abstract class UploadTask extends ImageActionAsyncTask {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(UploadTask.class);
 	public File content = null;
@@ -175,7 +175,7 @@ public abstract class UploadTask extends ImageActionTask {
 			System.out.println("Inside runUpload Task filename::"
 					+ content.getName() + " imageProperties::"
 					+ imageProperties);
-			ImageActionActions imageActionTask = getImageActionTaskFromArray();
+			ImageActionTask imageActionTask = getImageActionTaskFromArray();
 			if (imageActionTask != null && imageActionTask.getUri() == null) {
 				glanceId = imageStoreManager.upload(content, imageProperties);
 
@@ -185,73 +185,75 @@ public abstract class UploadTask extends ImageActionTask {
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
 			int size = (int) (content.length() / 1024);
+			double dataSize =  (content.length() / 1024);
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = imageStoreUploadResponse.getSent() / 1024;
-			while (sent != size) {
+			int sent = (int)imageStoreUploadResponse.getSent() / 1024;
+			double dataSent =  imageStoreUploadResponse.getSent() / 1024;
+			while (dataSent != dataSize) {
 
 				log.debug("##################Inside while loop size::" + size
 						+ " sent::" + sent);
 				// / Date currentTime = new Date();
 				imgAttrs = new ImageAttributes();
 				imgAttrs.setId(imageActionObject.getImage_id());
-				imageUploadTransferObject.setImg(imgAttrs);
-				imageUploadTransferObject.setImage_size(size);
+			///	imageUploadTransferObject.setImg(imgAttrs);
+			///	imageUploadTransferObject.setImage_size(size);
 
-				imageUploadTransferObject.setSent(sent);
+			///	imageUploadTransferObject.setSent(sent);
 				updateImageActionContentSent(sent, size);
-				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
+			///	imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
-				imageUploadTransferObject.setDate(new Date());
-				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-						.getChecksum());
-				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-						.getImage_uri());
-				if (firstTime) {
+			///	imageUploadTransferObject.setDate(new Date());
+			///	imageUploadTransferObject.setChecksum(imageStoreUploadResponse
+			///			.getChecksum());
+			///	imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
+			///			.getImage_uri());
+				///if (firstTime) {
 
-					ImageStoreUploadTransferObject imgTransaferObject = persistService
-							.saveImageUpload(imageUploadTransferObject);
-					uploadid = imgTransaferObject.getId();
-					firstTime = false;
-				} else {
+				///	ImageStoreUploadTransferObject imgTransaferObject = persistService
+				///			.saveImageUpload(imageUploadTransferObject);
+				///	uploadid = imgTransaferObject.getId();
+				//	firstTime = false;
+			//	} else {
 
-					imageUploadTransferObject.setId(uploadid);
-					persistService.updateImageUpload(imageUploadTransferObject);
-				}
+				///	imageUploadTransferObject.setId(uploadid);
+				///	persistService.updateImageUpload(imageUploadTransferObject);
+			//	}
 				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
 						glanceId);
-				sent = imageStoreUploadResponse.getSent() / 1024;
-				// / Thread.sleep(2000);
-
+				dataSent = imageStoreUploadResponse.getSent() / 1024;
+				sent = (int)imageStoreUploadResponse.getSent() / 1024;
 			}
 
 			imgAttrs = new ImageAttributes();
 			imgAttrs.setId(imageActionObject.getImage_id());
-			imageUploadTransferObject.setImg(imgAttrs);
-			imageUploadTransferObject.setImage_size(size);
-
-			imageUploadTransferObject.setSent(sent);
+			
 			updateImageActionContentSent(sent, size);
-			imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
+		///	imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
-			imageUploadTransferObject.setDate(new Date());
-			imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-					.getChecksum());
-			imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-					.getImage_uri());
+			
 			imageUploadTransferObject.setStatus(Constants.COMPLETE);
-			if (firstTime) {
+			if (size==sent) {
+				imageUploadTransferObject.setImg(imgAttrs);
+				imageUploadTransferObject.setImage_size(size);
 
+				imageUploadTransferObject.setSent(sent);
+				imageUploadTransferObject.setDate(new Date());
+				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
+					.getChecksum());
+				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
+						.getImage_uri());
 				ImageStoreUploadTransferObject imgTransaferObject = persistService
 						.saveImageUpload(imageUploadTransferObject);
-				uploadid = imgTransaferObject.getId();
+				///uploadid = imgTransaferObject.getId();
 				// /firstTime = false;
-			} else {
+			} /*else {
 
 				imageUploadTransferObject.setId(uploadid);
 				persistService.updateImageUpload(imageUploadTransferObject);
-			}
+			}*/
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;

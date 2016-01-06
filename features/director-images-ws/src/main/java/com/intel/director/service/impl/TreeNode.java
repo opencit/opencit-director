@@ -22,7 +22,9 @@ public class TreeNode implements Comparable{
 	public boolean firstChildOrLeaf = false;
 	public int renderedCount = 0;
 	public String checked = "";
-	public String rootDirWithRegex = null;
+	public TreeNodeDetail rootDirWithRegex = null;
+	private final String lockHover = "To unselect files/dirs click on the icon to Reset";
+	private final String unlockHover = "To lock the directory and specific files click on the icon to apply regex";
 
 	public TreeNode(String nodeValue, String incrementalPath) {
 		childs = new ArrayList<TreeNode>();
@@ -145,25 +147,32 @@ public class TreeNode implements Comparable{
 		String toggleIcon = "";
 		String toggleStyle = "";
 		String regexIdentifier = "";
-		String iconName = "arrow-right.png";
-		if (!checked.isEmpty()) {
+		String iconName = "unlocked.png";
+		String hoverText = null;
+		if (StringUtils.isNotBlank(checked)) {
 			liColorClass = "selected";
 		}
 		
 		if(parent.root.rootDirWithRegex != null){
-			regexIdentifier = " rootRegexDir=\""+ parent.root.rootDirWithRegex +"\"";
+			String include = StringUtils.isBlank(parent.root.rootDirWithRegex.regexInclude) ?"":parent.root.rootDirWithRegex.regexInclude;
+			String exclude = StringUtils.isBlank(parent.root.rootDirWithRegex.regexExclude)?"":parent.root.rootDirWithRegex.regexExclude;
+			regexIdentifier = " rootRegexDir=\""+ parent.root.rootDirWithRegex.filePath +"\" include=\""+ include +"\" exclude=\""+ exclude +"\" recursive=\""+ parent.root.rootDirWithRegex.isRegexRecursive +"\"";
 		}
 		
 		//in case of init we have a different flow for setting regex
-		for(String rootRegexPath : parent.directoryListContainingRegex){
-			if(incrementalPath.startsWith(rootRegexPath)){
-				regexIdentifier = " rootRegexDir=\""+ rootRegexPath +"\"";
+		for(TreeNodeDetail nodeDetail : parent.directoryListContainingRegex){
+			if(incrementalPath.startsWith(nodeDetail.regexPath)){
+				String include = StringUtils.isBlank(nodeDetail.regexInclude) ?"":nodeDetail.regexInclude;
+				String exclude = StringUtils.isBlank(nodeDetail.regexExclude)?"":nodeDetail.regexExclude;
+				regexIdentifier = " rootRegexDir=\""+ nodeDetail.regexPath +"\" include=\""+ include +"\" exclude=\""+ exclude +"\" recursive=\""+ nodeDetail.isRegexRecursive +"\"";
 				break;
 			}
 		}
 		
+		hoverText = unlockHover;
 		if(StringUtils.isNotEmpty(regexIdentifier)){
 			iconName = "locked.png";
+			hoverText = lockHover;
 		}
 		
 		if (isDirectory) {
@@ -174,11 +183,20 @@ public class TreeNode implements Comparable{
 			liClass = "directory "
 					+ ((!checked.isEmpty() ? "expanded"
 							: parent.directoryCollapsed));
-			toggleIcon = "<img src=\"/v1/html5/public/director-html5/images/"+iconName+"\" title=\""
-					+ incrementalPath
-					+ "\"  id=\"toggle_"
-					+ incrementalPath
-					+ "\"   onclick=\"toggleState(this)\" />";
+
+			if(iconName.contains("unlock")){
+				toggleIcon = "<i class='fa fa-unlock' style='color : blue; font-size : 1.6em' title='"
+				+ hoverText
+				+ "'  id='toggle_"
+				+ incrementalPath
+				+ "'   onclick='toggleState(this)'></i>";	
+			} else {
+				toggleIcon = "<i class='fa fa-lock' style='color : blue; font-size : 1.6em' title='"
+				+ hoverText
+				+ "'  id='toggle_"
+				+ incrementalPath
+				+ "'   onclick='toggleState(this)'></i>";
+			}		
 			toggleStyle = " style=\"float:left;\" ";
 
 		} else {
@@ -248,43 +266,8 @@ public class TreeNode implements Comparable{
 				n.printNode(showULBegin, showULEnd);
 
 			}
-		}
-		
-//		for (TreeNode n : childs) {
-//			boolean showULBegin = false;
-//			if (!firstChildOrLeaf) {
-//				firstChildOrLeaf = true;
-//				showULBegin = true;
-//				;
-//			}
-//			renderedCount++;
-//			n.printNode(showULBegin, false);
-//			addToTree("</li>", true);
-//			// if (++childCnt == noOfChildren) {
-//			if (haveAllElementsOfNodeRendered()) {
-//				builder.append(ulEnd);
-//				addToTree(ulEnd, add);
-//			}
-//
-//		}
-//		int noOfLeafElements = leafs.size();
-//		int leaftCnt = 0;
-//		for (TreeNode n : leafs) {
-//			boolean showULBegin = false;
-//			boolean showULEnd = false;
-//			if (!firstChildOrLeaf) {
-//				firstChildOrLeaf = true;
-//				showULBegin = true;
-//			}
-//
-//			renderedCount++;
-//
-//			if (haveAllElementsOfNodeRendered()) {
-//				showULEnd = true;
-//			}
-//			n.printNode(showULBegin, showULEnd);
-//
-//		}
+		}		
+
 	}
 
 	public boolean isDirectory() {

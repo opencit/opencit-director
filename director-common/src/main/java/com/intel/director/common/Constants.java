@@ -111,7 +111,7 @@ public class Constants {
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
 	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
-	public static final String TASK_NAME_UPLOAD_IMAGE = " Upload Image";
+	public static final String TASK_NAME_UPLOAD_IMAGE = "Upload Image";
 	public static final String TASK_NAME_ENCRYPT_IMAGE = "Encrypt Image";
 	public static final String TASK_NAME_UPLOAD_TAR = "Upload Tar";
 	public static final String COMPLETE = "Complete";

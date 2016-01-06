@@ -9,8 +9,8 @@ import javax.persistence.Query;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -22,6 +22,8 @@ public class ImageActionDao {
 	public ImageActionDao(EntityManagerFactory emf) {
 		this.emf = emf;
 	}
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageActionDao.class);
 
 	private EntityManagerFactory emf = null;
 
@@ -39,6 +41,7 @@ public class ImageActionDao {
 			em.persist(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("createImage failed",e);
 			throw new DbException("ImageActionDao,createImageAction method", e);
 		}
 
@@ -54,6 +57,7 @@ public class ImageActionDao {
 		try {
 			img = em.find(MwImageAction.class, id);
 		} catch (Exception e) {
+			log.error("createImage failed",e);
 			throw new DbException("ImageActionDao,getImageActionByID method", e);
 		}
 
@@ -82,11 +86,11 @@ public class ImageActionDao {
 
 				imgAction.setId((String) imageObj[0]);
 				imgAction.setImage_id((String) imageObj[1]);
-				TypeToken<List<ImageActionActions>> token = new TypeToken<List<ImageActionActions>>() {
+				TypeToken<List<ImageActionTask>> token = new TypeToken<List<ImageActionTask>>() {
 				};
-				List<ImageActionActions> actionlist = gson.fromJson(
+				List<ImageActionTask> actionlist = gson.fromJson(
 						(String) imageObj[2], token.getType());
-				imgAction.setAction(actionlist);
+				imgAction.setActions(actionlist);
 				imgAction.setAction_count(Integer.parseInt(imageObj[3]
 						.toString().trim()));
 				imgAction.setAction_completed(Integer.parseInt(imageObj[4]
@@ -98,8 +102,7 @@ public class ImageActionDao {
 				imageActionObjectList.add(imgAction);
 			}
 		} catch (Exception e) {
-			System.out.println("*****************************");
-			System.out.println(e);
+			log.error("getImageActionByImageID failed",e);
 			throw new DbException(
 					"ImageActionDao,getImageActionByImageID method", e);
 		}
@@ -117,7 +120,7 @@ public class ImageActionDao {
 			em.merge(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
-
+			log.error("updateImageAction failed",e);
 			throw new DbException("ImageDaoAction,updateImageAction failed", e);
 		} finally {
 			em.close();
@@ -132,6 +135,7 @@ public class ImageActionDao {
 			em.remove(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("deleteImageAction failed",e);
 			throw new DbException("ImageDaoAction, deleteImageAction failed", e);
 		} finally {
 			em.close();
@@ -148,6 +152,7 @@ public class ImageActionDao {
 			em.remove(mwImageAction);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("deleteImageActionByID failed",e);
 			throw new DbException("ImageDaoAction, deleteImageAction failed", e);
 		} finally {
 			em.close();
@@ -164,6 +169,7 @@ public class ImageActionDao {
 			li = query.getResultList();
 			System.out.println(li);
 		} catch (Exception e) {
+			log.error("showAllAction failed",e);
 			throw new DbException("Show All Image Action Object Failed", e);
 		}
 		return li;

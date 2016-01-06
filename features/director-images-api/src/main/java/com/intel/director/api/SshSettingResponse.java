@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-public class SshSettingResponse extends MonitorStatus {
+public class SshSettingResponse extends GenericResponse {
 	SshSettingRequest sshSettingRequest;
 	public SshSettingRequest getSshSettingRequest() {
 		return sshSettingRequest;

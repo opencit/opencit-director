@@ -25,7 +25,7 @@ import com.intel.mtwilson.director.features.director.kms.KmsUtil;
  * 
  * @author GS-0681
  */
-public class EncryptImageTask extends ImageActionTask {
+public class EncryptImageTask extends ImageActionAsyncTask {
 
 	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(EncryptImageTask.class);
@@ -90,7 +90,7 @@ public class EncryptImageTask extends ImageActionTask {
 				imageLocation += File.separator;
 			}
 			
-			imageLocation += imageInfo.getName();
+			imageLocation += imageInfo.getImage_name();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
 			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(tp.getTrust_policy());
 			if (policy.getEncryption() == null) {
@@ -104,14 +104,11 @@ public class EncryptImageTask extends ImageActionTask {
 			String keyId = TdaasUtil.getKeyIdFromUrl(url);
 			log.debug("EncryptImageTask: Key id for KMS : "+keyId);
 			if (keyId == null) {
-				log.debug("EncryptImageTask: Returning since no key for encryption");
-				return;
+				log.error("Null key retrieved for url : " + url);
+				throw new DirectorException("Null key retrieved for url : " + url);
 			}
 
-			String encryptFileName = imageInfo.getName();
-			if(policy.getEncryption() != null){				
-				log.debug("Adding -enc since its encrypted : "+encryptFileName);
-			}
+			String encryptFileName = imageInfo.getImage_name();
 			//TODO: Get actual key from KMS
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
 			if(keyFromKMS == null){
