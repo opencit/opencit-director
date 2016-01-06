@@ -34,22 +34,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
-import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
-import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
-import com.intel.director.api.CreateTrustPolicyResponse;
-import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
-import com.intel.director.api.ImageActionObject;
-import com.intel.director.api.ImageActionRequest;
-import com.intel.director.api.ImageActionResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageStoreObject;
-import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPolicyResponse;
-import com.intel.director.api.ListTrustPolicyDrafts;
 import com.intel.director.api.MountImageRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
@@ -59,17 +50,11 @@ import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
-import com.intel.director.api.TrustPolicyDraft;
-import com.intel.director.api.TrustPolicyDraftEditRequest;
-import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
-import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.service.ImageActionService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
-import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.util.TdaasUtil;
@@ -87,7 +72,6 @@ import com.intel.mtwilson.shiro.ShiroUtil;
 public class Images {
 
 	ImageService imageService = new ImageServiceImpl();
-	ImageActionService actionService = new ImageActionImpl();
 	LookupService lookupService = new LookupServiceImpl();
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -103,7 +87,7 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://server.com:8443/v1/images/uploads/content/uploadMetadata
-	 * Input: {"name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
+	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
@@ -235,7 +219,8 @@ public class Images {
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * https://server.com:8443/v1/images
-	 * Input: deploymentType : VM
+	 * Input: deploymentType=VM (Example : https://server.com:8443/v1/images?deploymentType=VM)
+	 * 
 	 * Output: {
 	 * "images": [
 	 * {
@@ -293,8 +278,7 @@ public class Images {
 		return searchImagesResponse;
 
 	}
-	
-	
+
 	/**
 	 * This method provides image details if image corresponding to the imageid
 	 * exists. In case of baremetallive it also returns host and user name along
@@ -335,25 +319,24 @@ public class Images {
 	 * </pre>
 	 * 
 	 * @param imageId
-	 * @return image details
+	 *            The id of the image for which the details are requested
+	 * @return image details in JSON format
 	 * @throws DirectorException
 	 */
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getImageDetails(
-			@PathParam("imageId")  String imageId)
+	public Response getImageDetails(@PathParam("imageId") String imageId)
 			throws DirectorException {
-		
-		ImageInfoResponse imageInfoResponse= imageService.getImageDetails(imageId);
-		if(imageInfoResponse==null){
+
+		ImageInfoResponse imageInfoResponse = imageService
+				.getImageDetails(imageId);
+		if (imageInfoResponse == null) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		return Response.ok(imageInfoResponse).build();
-		
+
 	}
-	
-	
 
 	/**
 	 * Method to mount the image. This call is invoked in all types of
@@ -380,7 +363,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * 
+	 * https://server.com:8443/v1/rpc/mount-image
 	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
 	 * {
@@ -407,7 +390,7 @@ public class Images {
 	 * If user tries to mount deleted image, the response will look like:
 	 * {"error":"Cannot launch deleted image"}
 	 * 
-	 * Unmount image with incorrent image id:
+	 * Mount image with incorrect image id:
 	 * {"id":"465A8B27-7CC8-4A3C-BBBC-26161Es3853CD","deleted":false,"error":"Error fetching image:465A8B27-7CC8-4A3C-BBBC-26161Es3853CD"}
 	 * </pre>
 	 * 
@@ -426,7 +409,7 @@ public class Images {
 			@Context HttpServletResponse httpServletResponse) {
 		MountImageResponse mountImageResponse = new MountImageResponse();
 
-		if(StringUtils.isBlank(mountImage.id)){
+		if (StringUtils.isBlank(mountImage.id)) {
 			mountImageResponse = new MountImageResponse();
 			mountImageResponse.setError("No image id provided for mount");
 			mountImageResponse.setId(mountImage.id);
@@ -461,6 +444,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
+	 * https://server.com:8443/v1/rpc/unmount-image
 	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
 	 * {
@@ -497,7 +481,7 @@ public class Images {
 			@Context HttpServletResponse httpServletResponse) {
 		String user = getLoginUsername();
 		UnmountImageResponse unmountImageResponse;
-		if(StringUtils.isBlank(unmountimage.id)){
+		if (StringUtils.isBlank(unmountimage.id)) {
 			unmountImageResponse = new UnmountImageResponse();
 			unmountImageResponse.setError("No image id provided for unnount");
 			unmountImageResponse.setId(unmountimage.id);
@@ -513,86 +497,6 @@ public class Images {
 			unmountImageResponse.setId(unmountimage.id);
 		}
 		return unmountImageResponse;
-	}
-
-	/**
-	 * Update the policy draft by applying the patch. Whenever an user selects
-	 * directories on the UI, a patch of the changes made to the selections is
-	 * sent to the server every 10 mins. this method does the job of merging the
-	 * patch/delta into the trust policy draft that is stored in the database.
-	 * 
-	 * A sample patch looks like this: <patch> <add sel="<node selector>" ><File
-	 * path="<file path>"></add> <remove sel="<node selector>" ></remove>
-	 * </patch>
-	 * 
-	 * We use https://github.com/dnault/xml-patch library to apply patches.
-	 * 
-	 * the method returns the patched trust policy as a response to successful
-	 * patch application In case of error, a DirectorException is thrown. It is
-	 * caught in the failure section of the ajax call and shown as a pop up
-	 * message.
-	 * 
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType PUT
-	 * @mtwSampleRestCall <pre>
-	 * 
-	 * Input: UUID of the image in path
-	 * {"patch":
-	 * "<patch></patch>"
-	 * }
-	 * Output: 
-	 * {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": "2015-12-21",
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": 1450686737378,
-	 *   "id": "97c4b9d2-d0e6-42b5-a4e2-1642b01db21f",
-	 *   "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TrustPolicy xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n    <Director>\n        <CustomerId>testId</CustomerId>\n    </Director>\n    <Image>\n        <ImageId>5A56C717-EF21-4A6E-8701-08EE0FF4C620</ImageId>\n        <ImageHash>6a749cfc57df53bd36b6ce1cb67c54632be4bc904d084ddd8dbeb79a30f44ccc</ImageHash>\n    </Image>\n    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n    <Encryption>\n        <Key URL=\"uri\">http://10.35.35.53/v1/keys/013890ed-9af3-4d87-bfe7-26a7f6605ee3/transfer</Key>\n        <Checksum DigestAlg=\"md5\">cd5b437a55ae166aecd8c2fe2cf4ce29</Checksum>\n    </Encryption>\n    <Whitelist DigestAlg=\"sha256\">\n        <File Path=\"/boot/grub/menu.lst\" />\n        <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\" />\n        <File Path=\"/boot/config-3.2.0-37-virtual\" />\n        <File Path=\"/boot/initrd.img-3.2.0-37-virtual\" />\n        <File Path=\"/boot/grub/stage1\" />\n        <File Path=\"/boot/grub/e2fs_stage1_5\" />\n        <File Path=\"/boot/grub/stage2\" />\n    </Whitelist>\n</TrustPolicy>\n",
-	 *   "display_name": "CIRROS_ETE_1.img"
-	 * }
-	 * 
-	 * In case of error:
-	 *  Output: {"status":"Error", details:"<Cause of error>"}
-	 * 
-	 * </pre>
-	 * 
-	 * @param imageId
-	 *            Id of image whose draft is to be edited
-	 * @param trustPolicyDraftEditRequest
-	 * @return Updated policy
-	 * @throws DirectorException
-	 */
-	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}")
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public TrustPolicyDraft editPolicyDraft(
-			@PathParam("trustPolicyDraftId") String trustPolicyDraftId,
-			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) {
-		trustPolicyDraftEditRequest.trust_policy_draft_id = trustPolicyDraftId;
-		TrustPolicyDraft policyDraft = null;
-		String trustPolicyDraftXML = null;
-		try {
-			policyDraft = imageService
-					.editTrustPolicyDraft(trustPolicyDraftEditRequest);
-			policyDraft.setImgAttributes(null);
-			/*
-			 * trustPolicyDraftXML= policyDraft.getTrust_policy_draft();
-			 * response.setStatus(Constants.SUCCESS);
-			 * response.setDetails(trustPolicyDraftXML);
-			 */
-			log.debug("Updated policy draft trustPolicyXML : "
-					+ trustPolicyDraftXML);
-		} catch (DirectorException e) {
-			// /response.setStatus(Constants.ERROR);
-			policyDraft = new TrustPolicyDraft();
-			policyDraft.setError(e.getMessage());
-			log.error("Error while updating policy draft : "
-					+ trustPolicyDraftId);
-		}
-
-		return policyDraft;
 	}
 
 	/**
@@ -631,16 +535,6 @@ public class Images {
 	 * server
 	 * 
 	 * 
-	 * @param imageId
-	 *            Id of the image which is mounted and whose files are being
-	 *            browsed
-	 * @param searchFilesInImageRequest
-	 *            Request containing the options selected by the user on the
-	 *            tree. It contains flags like include/exclude flags for regex
-	 *            filter, select all flag, init flag for first time load
-	 * @return returns HTML representation of the tree and the patch in some
-	 *         cases like regex and select all.
-	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
@@ -656,6 +550,18 @@ public class Images {
 	 * 4) include="<regex expression>" & exclude="<regex expression>" with optional include_regex=true
 	 * 
 	 * </pre>
+	 * 
+	 * @param imageId
+	 *            Id of the image which is mounted and whose files are being
+	 *            browsed
+	 * @param searchFilesInImageRequest
+	 *            Request containing the options selected by the user on the
+	 *            tree. It contains flags like include/exclude flags for regex
+	 *            filter, select all flag, init flag for first time load
+	 * @return returns HTML representation of the tree and the patch in some
+	 *         cases like regex and select all.
+	 * 
+	 * 
 	 * @throws DirectorException
 	 */
 
@@ -694,7 +600,6 @@ public class Images {
 	 * Retrieves list of deployment types - VM and BareMetal are the types
 	 * returned as JSON
 	 * 
-	 * @return list of deployment types
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
@@ -714,6 +619,8 @@ public class Images {
 	 *   ]
 	 * }
 	 * </pre>
+	 * 
+	 * @return list of deployment types
 	 */
 	@Path("image-deployments")
 	@GET
@@ -727,7 +634,6 @@ public class Images {
 	 * Lookup method to fetch the image formats. Currently we return vhd and
 	 * qcow2 as JSON
 	 * 
-	 * @return list of image formats
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
@@ -735,6 +641,7 @@ public class Images {
 	 * Input: None
 	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"}]}
 	 * </pre>
+	 * @return list of image formats
 	 */
 	@Path("image-formats")
 	@GET
@@ -796,224 +703,6 @@ public class Images {
 	}
 
 	/**
-	 * Retrieves all trust_policy_drafts
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * Input: NA
-	 * 
-	 * Output:
-	 * {
-	 *   "trust_policy_drafts": [
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-29",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "ac3044b0-e842-4fc1-a4b6-8b41a8be9b66",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>4439C209-6CD8-40DA-801B-E91DA0D3E639</ImageId><ImageHash>427b8344669ccd10697225768b2bbc9d9cad0517440f358112f8b6e8118c7ba4</ImageHash></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/menu.lst\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirros-pme",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-17",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-29",
-	 *         "id": "4439C209-6CD8-40DA-801B-E91DA0D3E639",
-	 *         "image_name": "cirros-gauri",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 12976,
-	 *         "sent": 12976,
-	 *         "deleted": false,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     },
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-17",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "5b287b2d-c8c2-4550-9d8e-6154b4e41b1f",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>BD14A8F7-4423-413E-B12E-13E9EBC37925</ImageId><ImageHash>6a749cfc57df53bd36b6ce1cb67c54632be4bc904d084ddd8dbeb79a30f44ccc</ImageHash>    </Image>    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/stage2\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirrus.img",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-16",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-16",
-	 *         "id": "BD14A8F7-4423-413E-B12E-13E9EBC37925",
-	 *         "image_name": "cirrus.img",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 13312,
-	 *         "sent": 13312,
-	 *         "deleted": true,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     }
-	 *   ]
-	 * }
-	 * </pre>
-	 * 
-	 * @return list of all trust policy drafts
-	 * @return List of trust policy drafts
-	 * @throws DirectorException
-	 */
-	@Path("trust-policy-drafts")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public ListTrustPolicyDrafts getPolicyDraftList() throws DirectorException {
-		ListTrustPolicyDrafts listTrustPolicyDrafts = new ListTrustPolicyDrafts();
-		listTrustPolicyDrafts.setTrust_policy_drafts(imageService
-				.getTrustPolicyDrafts(null));
-		return listTrustPolicyDrafts;
-	}
-	
-	/**
-	 * Retrieves trust policy draft based on uuid provided
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * Input: PathParam String: trustPolicyDraftId=ACD7747D-79BE-43E3-BAA5-7DBEC13D272
-	 * 
-	 * Output: {
-	 * "launch_control_policy":"MeasureAndEnforce",
-	 * "encrypted":true,
-	 * "image_name":"cirrus_1811.img",
-	 * "display_name":"111"
-	 * "trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TrustPolicy xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>05EECBC5-C8BA-4523-A891-7AF455FAFAAB</ImageId></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/lib/modules/3.2.0-37-virtual/modules.isapnpmap\" />    </Whitelist></TrustPolicy>"
-	 * }
-	 * 
-	 * If no draft exist for corresponding uuid HTTP 404 NOT Found is returned
-	 * 
-	 * </pre>
-	 * 
-	 * @param trustPolicyDraftId
-	 * @return trust policy draft 
-	 */
-	@Path("trust-policy-drafts/{trustPolicyDraftId:[0-9a-zA-Z_-]+ }")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getPolicyDraft(
-			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
-
-		CreateTrustPolicyMetaDataResponse createTrustPolicyMetaDataResponse = null;
-
-		try {
-			createTrustPolicyMetaDataResponse = imageService
-					.getPolicyMetadata(trustPolicyDraftId);
-			if (createTrustPolicyMetaDataResponse == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-		} catch (DirectorException e) {
-			createTrustPolicyMetaDataResponse = new CreateTrustPolicyMetaDataResponse();
-			createTrustPolicyMetaDataResponse.setStatus(Constants.ERROR);
-			createTrustPolicyMetaDataResponse.setDetails(e.getMessage());
-			log.error("Error in trust-policy-drafts/" + trustPolicyDraftId);
-			return Response.ok(createTrustPolicyMetaDataResponse).build();
-		}
-		return Response.ok(createTrustPolicyMetaDataResponse).build();
-
-	}
-
-	/**
-	 * When the user has finished selecting files and dirs and clicks on the
-	 * Next button for creating a policy, we call this method to : 1) Sign with
-	 * MTW 2) Generate Hashes
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * Input
-	 * {"trust_policy_draft_id":"<UUID of trust policy draft>"}
-	 * In case of a success, the response would be :
-	 * {"id":"14767a34-b5a4-4f84-be7a-7604670fe8b5"}
-	 * 
-	 * In case of error where signing with MTW fails: 
-	 * {"error":"Unable to sign the policy with MTW"}.
-	 * </pre>
-	 * 
-	 * 
-	 * @param image_id
-	 *            id of the image whose policy is being created
-	 * @return id of created trust policy
-	 */
-	@Path("rpc/finalize-trust-policy-draft")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public CreateTrustPolicyResponse createTrustPolicy(
-			CreateTrustPolicyMetaDataRequest createPolicyRequest) {
-		CreateTrustPolicyResponse response = new CreateTrustPolicyResponse();
-		try {
-			String imageId = imageService
-					.getImageByTrustPolicyDraftId(createPolicyRequest.trust_policy_draft_id);
-			String trustPolicyId = imageService
-					.createTrustPolicy(createPolicyRequest.trust_policy_draft_id);
-			response.setId(trustPolicyId);
-			imageService.deletePasswordForHost(imageId);
-			// / response.setStatus(Constants.SUCCESS);
-		} catch (DirectorException de) {
-			// //response.setStatus(Constants.ERROR);
-			response.setError(de.getMessage());
-			log.error("Error creating policy from draft for image : "
-					+ createPolicyRequest.image_id, de);
-		}
-		return response;
-	}
-
-	/**
-	 * On the step 3/3 of the wizard for VM, when the user clicks on the "Upload
-	 * now" button, we accept the last moment changes in the name of the policy
-	 * and update it. This method just validates that the name given by the user
-	 * is unique
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * https://<host>/v1/trust-policies/7897-232321-432423-4322
-	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
-	 * Output: 
-	 * In case of success : 
-	 * {"status":"success"}
-	 * 
-	 * In case of error such as policy name already exists:
-	 * {"error" : "Policy Name Already Exists"
-	 * }
-	 * 
-	 * </pre>
-	 * @param createPolicyRequest
-	 * @return GenericResponse
-	 */
-	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+|}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse updateTrustPolicy(
-			@PathParam("trustPolicyId") String trustPolicyId,
-			UpdateTrustPolicyRequest updateTrustPolicyRequest) {
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		if (StringUtils.isBlank(trustPolicyId)) {
-			return monitorStatus;
-		}
-		try {
-			imageService.updateTrustPolicy(updateTrustPolicyRequest,
-					trustPolicyId);
-		} catch (DirectorException de) {
-			log.error("Error updating policy name for : " + trustPolicyId, de);
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = de.getMessage();
-			monitorStatus.setError(de.getMessage());
-		}
-		return monitorStatus;
-	}
-
-	/**
 	 * List configured image stores
 	 * 
 	 * 
@@ -1022,6 +711,18 @@ public class Images {
 	 * 
 	 * @return GetImageStoresResponse
 	 * @throws DirectorException
+	 * @TDMethodType GET
+	 * @TDSampleRestCall <pre>
+	 * https://server.com:8443/v1/image-stores
+	 * Input: NA
+	 * Output:
+	 * {
+	 *   "image_stores": [
+	 *     { "name": "Glance" },
+	 *     { "name": "Swift" }
+	 *   ]
+	 * }
+	 * </pre>
 	 */
 	@Deprecated
 	@Path("image-stores")
@@ -1052,135 +753,6 @@ public class Images {
 
 	/**
 	 * 
-	 * Creates an initial draft of policy. This method is invoked when the user,
-	 * navigates from the grid, where there is a "plus" icon for the trust
-	 * policy icon, indicating that there is no draft currently associated. When
-	 * the user navigates from the first screen of wizard to second, we create a
-	 * default trust policy, with no files in whitelist.
-	 * 
-	 * image_display_name,launch_control_policy, and encrypted are mandatory
-	 * fields
-	 * 
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
-	 * 
-	 * Output: {"id":"50022e9c-577a-4bbd-9445-197a3e1a349f","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n <Director>\n <CustomerId>testId</CustomerId>\n </Director>\n <Image>\n <ImageId>08EB37D7-2678-495D-B485-59233EB51996</ImageId>\n <ImageHash>6413fccb72e36d2cd4b20efb5b5fe1be916ab60f0fe1d7e2aab1a2170be1ff40</ImageHash>\n </Image>\n <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n <Whitelist DigestAlg=\"sha256\">\n <File Path=\"/boot/grub/stage1\"></File>\n <File Path=\"/boot/grub/menu.lst\"></File>\n <File Path=\"/initrd.img\"></File>\n <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/config-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/initrd.img-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/grub/e2fs_stage1_5\"></File>\n <File Path=\"/boot/grub/stage2\"></File>\n </Whitelist>\n</TrustPolicy>\n"}
-	 * </pre>
-	 * 
-	 * 
-	 * @param createTrustPolicyMetaDataRequest
-	 * @return CreateTrustPolicyMetaDataResponse 
-	 */
-	@Path("trust-policy-drafts")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public CreateTrustPolicyMetaDataResponse createTrustPolicyDraft(
-			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) {
-
-		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
-		try {
-			createTrustPolicyMetadataResponse = imageService
-					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
-		} catch (DirectorException e) {
-			log.error("createTrustPolicyMetaData failed", e);
-			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
-			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
-			createTrustPolicyMetadataResponse.setError(e.getMessage());
-			return createTrustPolicyMetadataResponse;
-		}
-
-		return createTrustPolicyMetadataResponse;
-	}
-
-	/**
-	 * 
-	 * This call is made during policy create flow for Live host. We have
-	 * templates defined in the database. Depending on the type of the live host
-	 * (with vrtm installed or not), a certain template is picked and applied
-	 * during creating a new blank policy draft.
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * 
-	 *  Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
-	 *  
-	 *  Output: In case of success :: {"trust_policy":"<policy xml>"}
-	 *  
-	 *  In case of error::
-	 * {"error":"No image found during import of policy"}
-	 *  
-	 *  details attribute in output describes the error. If the image id provided does not exist, an error 
-	 *  "No image found during import of policy" would be returned in the details.
-	 * 
-	 * </pre>
-	 * 
-	 * @param image_id
-	 *            the image for which the template needs to be applied
-	 * @return Response that sends back the status of the function.
-	 */
-	@Path("rpc/apply-trust-policy-template/")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public ImportPolicyTemplateResponse importPolicyTemplate(GenericRequest req) {
-		ImportPolicyTemplateResponse importPolicyTemplateResponse = new ImportPolicyTemplateResponse();
-		try {
-			importPolicyTemplateResponse = imageService
-					.importPolicyTemplate(req.getImage_id());
-
-		} catch (DirectorException e) {
-			log.error("Error in importPolicyTemplate ", e);
-			// /importPolicyTemplateResponse.setStatus(Constants.ERROR);
-			importPolicyTemplateResponse.setError(e.getMessage());
-			return importPolicyTemplateResponse;
-		}
-
-		return importPolicyTemplateResponse;
-	}
-
-	/**
-	 * After the user has finalized the list of files and dirs and created a
-	 * policy, if he chooses to revisit the files/dirs selection we need to
-	 * recreate the policy draft. This method creates draft from existing policy . 
-	 * Unlike POST trust-policy-drafts method it does not
-	 * accepts launch control policy , encrytion details.
-	 * 
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
-	 * 
-	 * Output: {"id":"<UUID of Policy draft>", "trust_policy_draft":"<XML representation of policy>", "display_name":"<name provided by user for the policy>", "imgAttributes":"{"id":"<UUID of image>", "image_format":"qcow2", ..... }"}
-	 * 
-	 * </pre>
-	 * 
-	 * @param imageId
-	 * @return TrustPolicyDraft
-	 * @throws DirectorException
-	 */
-	@Path("rpc/create-draft-from-policy")
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public TrustPolicyDraft createPolicyDraftFromPolicy(GenericRequest req)
-			throws DirectorException {
-		try {
-			return imageService.createPolicyDraftFromPolicy(req.getImage_id());
-		} catch (DirectorException e) {
-			log.error("createPolicyDraftFromPolicy failed ");
-			throw new DirectorException(
-					"Error in creating draft again from policy", e);
-		}
-
-	}
-
-	/**
-	 * 
 	 * Method lets the user download the policy from the grids page. The user
 	 * can visit the grid any time and download the policy. This method looks
 	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
@@ -1191,6 +763,7 @@ public class Images {
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
+	 *  https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policy
 	 * Input: Image id as path param
 	 * Output: Content sent as stream
 	 * 
@@ -1273,7 +846,7 @@ public class Images {
 	 * @mtwContentTypeReturned File
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * 
+	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policyAndManifest
 	 * Input: Image UUID
 	 * Output: Content of tarball as stream
 	 * </pre>
@@ -1299,12 +872,13 @@ public class Images {
 		if (tarBall == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		FileInputStream tarInputStream=null;
+		FileInputStream tarInputStream = null;
 		try {
-			tarInputStream = new FileInputStream(tarBall){
+			tarInputStream = new FileInputStream(tarBall) {
 				@Override
 				public void close() throws IOException {
-					log.info("Deleting temporary files " + Constants.TARBALL_PATH + imageId);
+					log.info("Deleting temporary files "
+							+ Constants.TARBALL_PATH + imageId);
 					super.close();
 					final File dir = new File(Constants.TARBALL_PATH + imageId);
 					for (File file : dir.listFiles()) {
@@ -1327,74 +901,6 @@ public class Images {
 	}
 
 	/**
-	 * Delete the trust policy draft by the provided ID
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
-	 * Input: UUID of the policy draft to be deleted
-	 * Output: Status of operation in json(Success/Error)
-	 * Success: {"status":"Success", details:""}
-	 * Error: {"status":"Error", details:""}
-	 * </pre>
-	 * @param trustPolicyDraftId
-	 * @return GenericResponse
-	 */
-	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}")
-	@DELETE
-	@Produces(MediaType.APPLICATION_JSON)
-	public GenericResponse deletePolicyDraft(
-			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
-		GenericResponse response = new GenericResponse();
-		try {
-			imageService.deleteTrustPolicyDraft(trustPolicyDraftId);
-			response.setDeleted(true);
-		} catch (DirectorException e) {
-			log.error("Error in deletePolicyDraft", e);
-			response.setDeleted(false);
-			response.setError("Error in deletePolicyDraft");
-		}
-		return response;
-
-	}
-
-	/**
-	 * Deletes the signed trust policy by the provided id
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
-	 * Input: UUID of the policy to be deleted
-	 * Output: In case of successful deletion:
-	 * {"deleted":true}
-	 * 
-	 * In case of error:
-	 * {"deleted":false; "error":"Error in deleting trust policy: <UUID>"}
-	 * </pre>
-	 * 
-	 * @param trustPolicyId
-	 * @return GenericResponse
-	 * 
-	 */
-	@Path("trust-policy/{trustPolicyId: [0-9a-zA-Z_-]+}")
-	@DELETE
-	@Produces(MediaType.APPLICATION_JSON)
-	public GenericResponse deletePolicy(
-			@PathParam("trustPolicyId") String trustPolicyId) {
-		GenericResponse response = new GenericResponse();
-		try {
-			imageService.deleteTrustPolicy(trustPolicyId);
-			response.setDeleted(true);
-		} catch (DirectorException e) {
-			log.error("Error in deletePolicy ", e);
-			response.setDeleted(false);
-			response.setError("Error in deleting trust policy : "+trustPolicyId);
-		}
-		return response;
-
-	}
-
-	/**
 	 * 
 	 * Mark image as deleted. We turn the deleted flag=true in the MW_IMAGE
 	 * table
@@ -1402,6 +908,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
+	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: pass the UUID of the image as path param
 	 * Output: {"deleted": true}
 	 * In case of error:
@@ -1430,268 +937,4 @@ public class Images {
 		return response;
 
 	}
-
-	/**
-	 * Get trust policy for the provided trustPolicyId
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * Input: pass the UUID of the image as path param
-	 * Output: {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": "2015-12-29",
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": "2015-12-29",
-	 *   "id": "01e9fe36-5584-45d9-a644-60962976e54c",
-	 *   "trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>3645ACBB-1529-421D-A6DD-824BCD0002DE</ImageId><ImageHash>90bdb581df9f6869d2b4761d8b9f5708bd1b5a98715abc6e9afafca6866951ef</ImageHash></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/sbin/blkid\">1a33e58fd757e195a7919ca40d1e1eda19e9e2439d06b6efbe2006ae5e6ef865</File></Whitelist></TrustPolicy>",
-	 *   "img_attributes": {
-	 *     "created_by_user_id": "admin",
-	 *     "created_date": "2015-12-07",
-	 *     "edited_by_user_id": "admin",
-	 *     "edited_date": "2015-12-29",
-	 *     "id": "3645ACBB-1529-421D-A6DD-824BCD0002DE",
-	 *     "image_name": "cirros-0.3.1-x86_64-disk_1.img",
-	 *     "image_format": "qcow2",
-	 *     "image_deployments": "VM",
-	 *     "image_size": 13312,
-	 *     "sent": 13312,
-	 *     "deleted": false,
-	 *     "image_upload_status": "Complete",
-	 *     "image_Location": "/mnt/images/"
-	 *   },
-	 *   "display_name": "11_test_test1",
-	 *   "encrypted": false,
-	 *   "image_launch_policy": "MeasureAndEnforce"
-	 * }
-	 * 
-	 * 
-	 * In case of error:
-	 * HTTP 404: Not Found
-	 * </pre>
-	 * @param trustPolicyId
-	 * @return trustPolicy
-	 */
-	@Path("trust-policy/{trustPolicyId: [0-9a-zA-Z_-]+}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public Response getTrustPoliciesData(
-			@PathParam("trustPolicyId") String trustPolicyId) {
-		TrustPolicyResponse trustpolicyresponse = null;
-		try {
-			trustpolicyresponse = imageService
-					.getTrustPolicyMetaData(trustPolicyId);
-			if (trustpolicyresponse == null) {
-				return Response.status(Status.NOT_FOUND).build();
-			}
-		} catch (DirectorException e) {
-			log.error("Error in getTrustPoliciesData ", e);
-			trustpolicyresponse = new TrustPolicyResponse();
-			trustpolicyresponse.setId(null);
-			return Response.status(Status.NOT_FOUND).build();
-		}
-		return Response.ok(trustpolicyresponse).build();
-	}
-
-	/**
-	 * This method will fetch an image-action which has image_id on which
-	 * actions are performed, list of actions to be performed, etc.
-	 * 
-	 * action_count and action_completed are provided for convenience. 
-	 * These two attributes are guaranteed to have the right data corresponding to the actions collection.
-	 * 
-	 * The tasks in "action" attribute are processed sequentially. The current task holds the name of the task in the "action" array that is currently
-	 * being processed.
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
-	 * Input: action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
-	 * Output: {
-	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * "action_count": 2,
-	 * "action_completed": 2,
-	 * "action_size": 66570,
-	 * "action_size_max": 66570,
-	 * "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 *  "status": "Complete", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * "current_task_status": "Complete",
-	 * "current_task_name": "Upload Tar" }
-	 * 
-	 *  {
-	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * "action_count": 2,
-	 * "action_completed": 1,
-	 * "action_size": 66570,
-	 * "action_size_max": 66570,
-	 * "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 *  "status": "In Progress", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * "current_task_status": "Complete",
-	 * "current_task_name": "Create Tar" }
-	 * 
-	 * 
-	 * In case of error creating tar : 
-	 * {
-	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * "action_count": 2,
-	 * "action_completed": 0,
-	 * "action_size": 66570,
-	 * "action_size_max": 66570,
-	 * "action": [ { "status": "Error","task_name": "Create Tar","error":"Error Creating tar"},
-	 * "status": "Incomplete", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * "current_task_status": "Error : Error Creating tar ",
-	 * "current_task_name": "Create Tar" }
-	 * 
-	 * In case of error uploading tar : 
-	 * {
-	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * "action_count": 2,
-	 * "action_completed": 1,
-	 * "action_size": 66570,
-	 * "action_size_max": 66570,
-	 * "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 * "status": "Error", "storename": "Glance", "task_name": "Upload Tar","error":"Error Uploading tar"}],
-	 * "current_task_status": "Error : Error Uploading tar ",
-	 * "current_task_name": "Upload Tar" }
-	 * </pre>
-	 * 
-	 * @param actionId
-	 * @return ImageActionResponse
-	 */
-
-	@Path("image-actions/{actionId: [0-9a-zA-Z_-]+}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public Response fetchImageAction(@PathParam("actionId") String actionId) {
-		try {
-			return Response.ok(actionService.fetchImageAction(actionId))
-					.build();
-		} catch (DirectorException e) {
-			return Response.status(404)
-					.entity("No image action fouind for id: " + actionId)
-					.build();
-		}
-	}
-
-	/**
-	 * This method will create an image-action. Data required by this method is
-	 * action_id and list of task and other parameter associated with it(Ex.
-	 * store_name in case of Upload Tar task). Output will contain action_id.
-	 * 
-
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
-	 * Input: { "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
-	 * "actions":[ {"task_name":"Create Tar"},
-	 * {"task_name":"Upload Tar","storename":"Glance"}]
-	 * }
-	 * Output:
-	 * {
-	 * 	"id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	"image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	"action_count": 2,
-	 * 	"action_completed": 2,
-	 * 	"action_size": 66570,
-	 * 	"action_size_max": 66570,
-	 * 	"actions": [ 
-	 * 		{
-	 * 			"status": "Incomplete",
-	 * 			"task_name": "Create Tar"
-	 * 		}, {
-	 * 			"status": "Incomplete", 
-	 * 			"storename": "Glance", 
-	 * 			"task_name": "Upload Tar" 
-	 * 		}],
-	 * 	"current_task_status": "Incomplete",
-	 * 	"current_task_name": "Create Tar" 
-	 * }
-	 * 
-	 * In case of error:
-	 * {
-	 * 		"error" : "Error in create ImageAction"
-	 * }
-	 * 
-	 * </pre>
-	 * 
-	 * @param ImageActionRequest
-	 * @return ImageActionResponse containing action_id.
-	 */
-
-	@Path("image-actions")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public ImageActionResponse createImageAction(
-			ImageActionRequest imageActionRequest) {
-		ImageActionResponse imageActionResponse = new ImageActionResponse();
-		ImageActionObject imageActionObject;
-		try {
-			imageActionObject = actionService
-					.createImageAction(imageActionRequest);
-		} catch (DirectorException e) {
-			log.error("Error in createImageAction", e);
-			imageActionResponse.setStatus(Constants.ERROR);
-			imageActionResponse.setDetails(e.getMessage());
-			imageActionResponse.setError(e.getMessage());
-			return imageActionResponse;
-		}
-		imageActionResponse.setId(imageActionObject.getId());
-		imageActionResponse.setImage_id(imageActionObject.getImage_id());
-		imageActionResponse.setAction_completed(imageActionObject
-				.getAction_completed());
-		imageActionResponse
-				.setAction_count(imageActionObject.getAction_count());
-		imageActionResponse.setActions(imageActionObject.getActions());
-		imageActionResponse.setCurrent_task_name(imageActionObject
-				.getCurrent_task_name());
-		imageActionResponse.setCurrent_task_status(imageActionObject
-				.getCurrent_task_status());
-		return imageActionResponse;
-	}
-
-	/**
-	 * This method will delete existing image-action. Data required by this
-	 * method is action_id. Output will contain status of delete task initiated.
-	 * 
-
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
-	 * Input: PathParam =  actionId : CF0A8FA3-F73E-41E9-8421-112FB22BB057
-	 * Output: { "deleted": true}
-	 * In case of error:
-	 * 
-	 * {“deleted”: false, “error”: “No image action with id :: CF0A8FA3-F73E-41E9-8421-112FB22BB057” }
-	 * </pre>
-	 * 
-	 * @param imageActionRequest
-	 * @return Status of delete operation
-	 */
-	@Path("image-actions/{actionId: [0-9a-zA-Z_-]+}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@DELETE
-	public ImageActionResponse deleteImageAction(
-			@PathParam("actionId") String actionId) {
-		ImageActionResponse imageActionResponse = new ImageActionResponse();
-		imageActionResponse.setDeleted(true);
-		try {
-			actionService.deleteImageAction(actionId);
-		} catch (DirectorException e) {
-			log.error("Error in deleteImageAction", e);
-			imageActionResponse.setDeleted(false);
-			imageActionResponse.setDetails(e.getMessage());
-			return imageActionResponse;
-		}
-		return imageActionResponse;
-	}
-
 }
