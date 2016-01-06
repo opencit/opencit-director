@@ -79,7 +79,7 @@ function CreateBMImageViewModel() {
 					},
 					data : JSON.stringify(mountimage), // $("#loginForm").serialize(),
 					success : function(data, status, xhr) {
-						if (data.status == "Error") {
+						if (data.error) {
 							$('#error_modal_body_bm_image_2').text(data.details);
 							$("#error_modal_bm_image_2").modal({
 								backdrop : "static"
@@ -120,7 +120,7 @@ function addRadios(arr) {
 
 		temp = temp
 				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i].key + '">' + arr[i].value + '</label>';
+				+ arr[i].key + '">' + arr[i].display_name + '</label>';
 
 	}
 

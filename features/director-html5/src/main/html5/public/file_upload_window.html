@@ -200,6 +200,7 @@ input[readonly] {
 
 			if (xhrmdt.readyState === 4) {
 				if (xhrmdt.status === 200) {
+
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
 					if (myArr.state == "Error") {
@@ -216,6 +217,12 @@ input[readonly] {
 					end = BYTES_PER_CHUNK;
 					upload_chunks(image_id, start, end);
 
+				}else if(xhrmdt.status === 401){
+					alert("Session timed out");
+					window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+       					window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+					window.opener.location.reload();
+					window.close();
 				} else {
 					console.log("Clearing interval : "+refreshIntervalId );
 					clearInterval(refreshIntervalId );
@@ -268,6 +275,12 @@ input[readonly] {
 
 						upload_chunks(image_id, start, end);
 
+					}else if(xhrmdt.status === 401){
+						alert("Session timed out");
+						window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+       						window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+						window.opener.location.reload();
+						window.close();
 					} else {
 						console.log("Clearing interval : "+refreshIntervalId );
 						clearInterval(refreshIntervalId );

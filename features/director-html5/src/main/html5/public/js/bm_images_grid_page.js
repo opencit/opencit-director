@@ -12,7 +12,7 @@ $(document).ready(function() {
 function addHost() {
 
 current_image_id='';
-	goToCreatePolicyWizard2();
+	goToCreatePolicyWizardForBMLive();
 }
 function ImageData(){
 	
@@ -46,27 +46,27 @@ function refreshBMOnlineGrid() {
 
 				if (images[i].trust_policy_draft_id != null) {
 				self.gridData.trust_policy = self.gridData.trust_policy
-						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicyForBMLive('"
+						+ "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" id=\"bmlive_edit_row_"+i+"\" title=\"Edit Policy\"  onclick=\"editPolicyForBMLive('"
 						+ images[i].id + "','" + images[i].image_name
-						+ "')\"></span></a>";
+						+ "','"+images[i].trust_policy_draft_id+"')\"></span></a>";
 
 				} else if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicyForBMLive('"
+						+ "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\" id=\"bmlive_edit_row_"+i+"\"  title=\"Edit Policy\" onclick=\"editPolicyForBMLive('"
 						+ images[i].id + "','" + images[i].image_name
-						+ "')\"></span></a>";
+						+ "','')\"></span></a>";
 				}
 
 				if (images[i].trust_policy_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicyAndManifest('"
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\" id=\"bmlive_download_row_"+i+"\"  title=\"Download\" onclick=\"downloadPolicyAndManifest('"
 						+ images[i].id + "','"
 						+ images[i].trust_policy_id + "')\"></span></a>";
 				}
 
 				if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
 					self.gridData.trust_policy = self.gridData.trust_policy
-						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyBM('"
+						+ "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"bmlive_delete_row_"+i+"\"  title=\"Delete Policy\" onclick=\"deletePolicyBM('"
 						+ images[i].id + "')\"></span></a>";
 				}
 
@@ -74,7 +74,7 @@ function refreshBMOnlineGrid() {
 			
 				self.gridData.image_upload = "";
 				self.gridData.image_upload += "&nbsp;"
-					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
+					+ "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" id=\"bmlive_push_row_"+i+"\" title=\"Push To  Host\" onclick=\"pushPolicyToHost('"
 					+ images[i].id + "','" + images[i].image_name + "','"
 					+ images[i].trust_policy_id + "')\" ></span></a>";
 

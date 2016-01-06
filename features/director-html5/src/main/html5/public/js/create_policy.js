@@ -2,7 +2,6 @@ var imageFormats = new Array();
 var image_policies = new Array();
 
 $(document).ready(function() {
-	// /alert("inside create js ready function");
 	fetchImageLaunchPolicies();
 });
 
@@ -12,10 +11,6 @@ function CreateImageMetaData(data) {
 
 	this.image_name = current_image_name;
 	this.display_name = current_display_name;
-	// / this.isEncrypted=ko.observable(false);
-	/* this.selected_image_format= ko.observable(); */
-
-
 }
 
 function CreateImageViewModel() {
@@ -26,15 +21,13 @@ function CreateImageViewModel() {
 
 	self.createImage = function(loginFormElement) {
 		$("#createVMPolicyNext").prop('disabled', true);
-		self.createImageMetaData.launch_control_policy = $(
-				'input[name=launch_control_policy]:checked').val();
+		self.createImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
 		// self.createImageMetaData.asset_tag_policy=$('input[name=asset_tag_policy]:checked').val();
 		self.createImageMetaData.encrypted = $('input[name=isEncrypted]').is(
 				':checked');
 
 		self.createImageMetaData.display_name = $('#display_name').val();
 		current_display_name = $('#display_name').val();
-		console.log(self.createImageMetaData.display_name);
 
 		$.ajax({
 			type : "POST",
@@ -47,10 +40,10 @@ function CreateImageViewModel() {
 
 			success : function(data, status, xhr) {
 			
-				if (data.status == "Error") {
+				if (data.error) {
 					$('#for_mount').hide();
 					$('#default').show();
-					$('#error_modal_body_vm_1').text(data.details);
+					$('#error_modal_body_vm_1').text(data.error);
 					$("#error_modal_vm_1").modal({
 						backdrop : "static"
 					});
@@ -73,10 +66,10 @@ function CreateImageViewModel() {
 					data : JSON.stringify(mountimage),
 					success : function(data, status, xhr) {
 						$("#createVMPolicyNext").prop('disabled', false);
-						if (data.status == "Error") {
+						if (data.error) {
 							$('#default').hide();
 							$('#for_mount').show();
-							$('#error_modal_body_vm_1').text(data.details);
+							$('#error_modal_body_vm_1').text(data.error);
 							$("#error_modal_vm_1").modal({
 								backdrop : "static"
 							});
@@ -88,8 +81,6 @@ function CreateImageViewModel() {
 						nextButton();
 					}
 				});
-
-				// nextButton();
 			}
 		});
 
@@ -125,8 +116,8 @@ function addRadios(arr) {
 			continue;
 		}
 		temp = temp
-				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="'
-				+ arr[i].name + '">' + arr[i].value + '</label>';
+				+ '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="create_policy_'+ arr[i].name + '" value="'
+				+ arr[i].name + '">' + arr[i].display_name+ '</label>';
 
 	}
 

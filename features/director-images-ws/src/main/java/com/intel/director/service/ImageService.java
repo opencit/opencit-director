@@ -6,11 +6,9 @@ import java.util.List;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
-import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
-import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
-import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
@@ -23,7 +21,9 @@ import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -93,7 +93,7 @@ public interface ImageService {
 
 	public String getFilepathForImage(String imageId, boolean isModified) throws DbException;
 
-	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
+	public TrustPolicy getTrustPolicyByImageId(String imageId) throws  DirectorException;
 	
 	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId) throws DirectorException;
 
@@ -124,5 +124,11 @@ public interface ImageService {
 			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
 
 	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
+	
+	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
+
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(
+			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException;
 }
 
