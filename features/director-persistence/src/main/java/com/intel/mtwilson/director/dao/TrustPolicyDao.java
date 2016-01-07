@@ -29,7 +29,9 @@ public class TrustPolicyDao {
 	 
 	
 	Mapper mapper= new Mapper();
-
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(TrustPolicyDao.class);
+	
 	public TrustPolicyDao(EntityManagerFactory emf) {
 		this.emf = emf;
 	}
@@ -53,6 +55,7 @@ public class TrustPolicyDao {
 			em.merge(mwImage);
 			em.getTransaction().commit();
 		} catch(Exception e){
+			log.error("createTrustPolicy failed",e);
 			throw new DbException("TrustPolicyDao,createTrustPolicy method",e);
 		}
 		
@@ -74,6 +77,7 @@ public class TrustPolicyDao {
 			em.getTransaction().commit();
 		} 
 		catch(Exception e){
+			log.error("updateTrustPolicy failed",e);
 			throw new DbException("TrustPolicyDao,updateTrustPolicy failed",e);
 		}
 		finally {
@@ -95,6 +99,7 @@ public class TrustPolicyDao {
 			em.getTransaction().commit();
 		} 
 		catch(Exception e){
+			log.error("destroyTrustPolicy failed",e);
 			throw new DbException("TrustPolicyDao,destroyTrustPolicy failed",e);
 		}
 		finally {
@@ -238,6 +243,7 @@ public class TrustPolicyDao {
 			}
 			return trustPolicyList;
 		} catch(Exception e){
+			log.error("findMwTrustPolicyEntities failed",e);
 			throw new DbException("TrustPolicyDao,findMwTrustPolicyEntities failed",e);
 		}
 		
@@ -251,6 +257,7 @@ public class TrustPolicyDao {
 		try {
 			return em.find(MwTrustPolicy.class, id);
 		}catch(Exception e){
+			log.error("findMwTrustPolicy failed",e);
 			throw new DbException("TrustPolicyDao,findMwTrustPolicy() failed",e);
 		}
 		
@@ -269,6 +276,7 @@ public class TrustPolicyDao {
 			Query q = em.createQuery(cq);
 			return ((Long) q.getSingleResult()).intValue();
 		}catch(Exception e){
+			log.error("getMwTrustPolicyCount failed",e);
 			throw new DbException("TrustPolicyDao,getMwTrustPolicyCount() failed",e);
 		}
 		
@@ -361,6 +369,7 @@ public class TrustPolicyDao {
 			Query q = em.createQuery(cq);
 			return ((Long) q.getSingleResult()).intValue();
 		} catch(Exception e){
+			log.error("getMwTrustPolicyCount failed",e);
 			throw new DbException("TrustPolicyDao,getMwTrustPolicyCount(trustPolicyFilter) failed",e);
 		}
 		

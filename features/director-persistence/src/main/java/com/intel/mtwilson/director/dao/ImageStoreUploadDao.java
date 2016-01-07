@@ -30,6 +30,9 @@ public class ImageStoreUploadDao {
         this.emf = emf;
     }
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageStoreUploadDao.class);
+    
     private EntityManagerFactory emf = null;
 
     public EntityManager getEntityManager() {
@@ -45,6 +48,7 @@ public class ImageStoreUploadDao {
             em.persist(imgUpload);
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("createImageUpload failed",e);
             throw new DbException("ImageStoreUploadDao,createImageUpload method", e);
         } finally {
             em.close();
@@ -59,6 +63,7 @@ public class ImageStoreUploadDao {
             em.merge(imgUpload);
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("updateImageUpload failed",e);
             throw new DbException("ImageStoreUploadDao,updateImageUpload failed", e);
         } finally {
             em.close();
@@ -75,6 +80,7 @@ public class ImageStoreUploadDao {
 
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("destroyImageUpload failed",e);
             throw new DbException("ImageStoreUploadDao,destroyImageUpload failed", e);
         } finally {
             em.close();
@@ -191,6 +197,7 @@ public class ImageStoreUploadDao {
             return imageUploadList;
 
         } catch (Exception e) {
+        	log.error("findMwImageUploadEntities failed",e);
             throw new DbException("ImageStoreUploadDao,findMwImageUploadEntities failed", e);
         } finally {
             em.close();
@@ -202,6 +209,7 @@ public class ImageStoreUploadDao {
         try {
             return em.find(MwImageUpload.class, id);
         } catch (Exception e) {
+        	log.error("findMwImageUpload failed",e);
             throw new DbException("ImageStoreUploadDao,findMwImageUpload() failed", e);
         } finally {
             em.close();
@@ -218,6 +226,7 @@ public class ImageStoreUploadDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwImageUploadCount failed",e);
             throw new DbException("ImageStoreUploadDao,getMwImageUploadCount() failed", e);
         } finally {
             em.close();
@@ -279,6 +288,7 @@ public class ImageStoreUploadDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwImageUploadCount failed",e);
             throw new DbException("ImageStoreUploadDao,getMwImageUploadCount(imageUploadFilter) failed", e);
         } finally {
             em.close();

@@ -11,23 +11,15 @@ package com.intel.director.api;
  */
 public class MountImageResponse extends ImageAttributes {
 
-	public String status;
-	public String details;
-
-	public String getDetails() {
-		return details;
+	public String error;
+	
+	public String getError() {
+		return error;
+	}
+	public void setError(String error) {
+		this.error = error;
 	}
 
-	public void setDetails(String details) {
-		this.details = details;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
+	
 
 }

@@ -7,6 +7,8 @@ package com.intel.director.api;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  *
  * @author soakx
@@ -14,16 +16,18 @@ import java.util.Date;
 public class ImageAttributes extends AuditFields {
 
     public String id;
-    public String name;
+    public String image_name;
 
   
     public String image_format;
     public String image_deployments;
+    @JsonProperty("image_upload_status")
     public String status;
     public Integer image_size;
     public Integer sent;
     public String mounted_by_user_id;
     public boolean deleted;
+    @JsonProperty("image_Location")
     public String location;
 
     public ImageAttributes() {
@@ -31,13 +35,13 @@ public class ImageAttributes extends AuditFields {
     }
 
     public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id, String name,
+            String edited_by_user_id, Date edited_date, String id, String image_name,
             String format, String image_deployments, String status,
             Integer image_size, Integer sent, String mounted_by_user_id,
             boolean deleted, String location) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
         this.id = id;
-        this.name = name;
+        this.image_name = image_name;
         this.image_format = format;
         this.image_deployments = image_deployments;
         this.status = status;
@@ -51,13 +55,13 @@ public class ImageAttributes extends AuditFields {
     }
 
     public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String name,
+            String edited_by_user_id, Date edited_date, String image_name,
             String format, String image_deployments, String status,
             Integer image_size, Integer sent, String mounted_by_user_id,
             boolean deleted, String location) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
 
-        this.name = name;
+        this.image_name = image_name;
         this.image_format = format;
         this.image_deployments = image_deployments;
         this.status = status;
@@ -72,7 +76,7 @@ public class ImageAttributes extends AuditFields {
 
     @Override
     public String toString() {
-        return "ImageAttributes [id=" + id + ", name=" + name + ", format="
+        return "ImageAttributes [id=" + id + ", image_name=" + image_name + ", format="
                 + image_format + ", image_deployments=" + image_deployments
                 + ", status=" + status + ", image_size=" + image_size
                 + ", sent=" + sent + ", mounted_by_user_id="
@@ -93,15 +97,15 @@ public class ImageAttributes extends AuditFields {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getImage_name() {
+		return image_name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setImage_name(String image_name) {
+		this.image_name = image_name;
+	}
 
-    public String getImage_format() {
+	public String getImage_format() {
         return image_format;
     }
 

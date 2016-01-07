@@ -1,11 +1,9 @@
 {
     "items": [
-	  { "href": "/html5/public/director-html5/trust_policy_main.html", "target_tab": "director-trust-policy" },
-	{ "href": "/html5/public/director-html5/settings_upload_image_to_director.html", "target_tab": "upload-to-td" },
-	{ "href": "/html5/public/director-html5/setting_create_ssh.html", "target_tab": "setting_create_ssh" },
-	{ "href": "/html5/public/director-html5/director_dashboard.html", "target_tab": "director-dashboard" },
-	{ "href": "/html5/public/director-html5/setting_kms.html", "target_tab": "setting_kms" },
-	{ "href": "/html5/public/director-html5/setting_mtwilson.html", "target_tab": "setting_mtwilson" }
-
-    ]
+		{ "href": "/html5/public/director-html5/trust_policy_main.html", "target_tab": "director-trust-policy" },
+		{ "href": "/html5/public/director-html5/settings_upload_image_to_director.html", "target_tab": "upload-to-td" },
+		{ "href": "/html5/public/director-html5/director_dashboard.html", "target_tab": "director-dashboard" },
+		{ "href": "/html5/public/director-html5/setting_kms.html", "target_tab": "setting_kms" },
+		{ "href": "/html5/public/director-html5/setting_mtwilson.html", "target_tab": "setting_mtwilson" }
+	]
 }

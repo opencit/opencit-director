@@ -246,7 +246,7 @@ public class DbServiceTest {
 		}
 
 		ImageInfoFilter searchFilter = new ImageInfoFilter();
-		searchFilter.setName("ubun");
+		searchFilter.setImage_name("ubun");
 
 		searchFilter.setFrom_created_date(sevenDaysBackDate);
 		searchFilter.setTo_created_date(oneDaysBackDate);
@@ -268,7 +268,7 @@ public class DbServiceTest {
 		Assert.assertTrue(
 				"fetchImages(searchFilter, imgOrderBy) fail",
 				(searchImageList.size() == 7)
-						&& (searchImageList.get(0).getName()
+						&& (searchImageList.get(0).getImage_name()
 								.equalsIgnoreCase("ubuntu8")));
 		ImageInfoFilter searchFilterPolicyCriteria = new ImageInfoFilter();
 		searchFilterPolicyCriteria.setPolicyCriteria(SearchImageByPolicyCriteria.WITH);
@@ -294,7 +294,7 @@ public class DbServiceTest {
 		Assert.assertTrue(
 				"fetchImages(searchFilter, imgOrderBy,firstElement,maxelements method fail",
 				searchImagePaginatedList.size() == 2
-						&& searchImagePaginatedList.get(0).getName()
+						&& searchImagePaginatedList.get(0).getImage_name()
 								.equalsIgnoreCase("ubuntu4"));
 
 		
@@ -383,7 +383,7 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 		trustPolicyCreated.setDescription("Updated Description");
 		dBServiceImpl.updatePolicy(trustPolicyCreated);
 		TrustPolicy trustPolicyRetrieved = dBServiceImpl.fetchPolicyById(trustPolicyId);
-		System.out.println("Image Name::"+trustPolicyRetrieved.getImgAttributes().getName());
+		System.out.println("Image Name::"+trustPolicyRetrieved.getImgAttributes().getImage_name());
 		System.out.println("trustPolicyRetrieved.getDescription()::"+trustPolicyRetrieved.getDescription());
 		Assert.assertTrue("Update operation fail",
 				(trustPolicyRetrieved.getDescription().equals("Updated Description")));
@@ -417,7 +417,7 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 
 		for (TrustPolicy tp : searchPolicyList) {
 			System.out.println("### trust policy::" + tp);
-			System.out.println("### searchPolicyList imageName::" + tp.getImgAttributes().getName());
+			System.out.println("### searchPolicyList imageName::" + tp.getImgAttributes().getImage_name());
 		}
 		Assert.assertTrue(
 				"fetchPolicies(searchFilter, OrderBy) fail",
@@ -503,7 +503,7 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 
 		for (TrustPolicyDraft tpd : searchPolicyDraftList) {
 			System.out.println("### trust policy draft::" + tpd);
-			System.out.println("### searchPolicyDraftList imageName::" + tpd.getImgAttributes().getName());
+			System.out.println("### searchPolicyDraftList imageName::" + tpd.getImgAttributes().getImage_name());
 		}
 		Assert.assertTrue(
 				"fetchPolicyDrafts(searchFilter, OrderBy) fail",
@@ -585,7 +585,7 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 
 		for (ImageStoreUploadTransferObject tpd : searcImgList) {
 			System.out.println("### ImageStoreUploadOrderBy::" + tpd);
-			System.out.println("### ImageStoreUploadOrderBy imageName::" + tpd.getImg().getName());
+			System.out.println("### ImageStoreUploadOrderBy imageName::" + tpd.getImg().getImage_name());
 		}
 		Assert.assertTrue(
 				"fetchImageUploads(searchFilter, OrderBy) fail",

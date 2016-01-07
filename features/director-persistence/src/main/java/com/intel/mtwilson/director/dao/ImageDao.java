@@ -24,7 +24,9 @@ import com.intel.mtwilson.director.mapper.Mapper;
 public class ImageDao {
 
 	Mapper mapper = new Mapper();
-
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageDao.class);
+	
 	public ImageDao(EntityManagerFactory emf) {
 		this.emf = emf;
 	}
@@ -44,6 +46,7 @@ public class ImageDao {
 			em.persist(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("createImage failed",e);
 			throw new DbException("ImageDao,createImage method", e);
 		}
 
@@ -60,6 +63,7 @@ public class ImageDao {
 			em.merge(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("updateImage failed",e);
 			throw new DbException("ImageDao,updateImage failed", e);
 		} finally {
 			em.close();
@@ -76,6 +80,7 @@ public class ImageDao {
 
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("destroyImage failed",e);
 			throw new DbException("ImageDao,destroyImage failed", e);
 		} finally {
 			em.close();
@@ -106,7 +111,7 @@ public class ImageDao {
 			StringBuffer queryString = new StringBuffer(
 					"select id,name,image_format,image_deployments,created_by_user_id,created_date,"
 							+ "location,mounted_by_user_id,sent,status,edited_by_user_id,edited_date,deleted,"
-							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count from mw_image_info_view where deleted=false and 1=1");
+							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,content_length from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
 
 			if (imgFilter != null) {
 				if (imgFilter.getId() != null) {
@@ -118,9 +123,9 @@ public class ImageDao {
 					queryString.append(" and image_format like '%"
 							+ imgFilter.getImage_format() + "%'");
 				}
-				if (imgFilter.getName() != null) {
+				if (imgFilter.getImage_name() != null) {
 					queryString.append(" and name like '%"
-							+ imgFilter.getName() + "%'");
+							+ imgFilter.getImage_name() + "%'");
 				}
 				if (imgFilter.getImage_deployments() != null) {
 					queryString.append(" and image_deployments like '%"
@@ -199,7 +204,7 @@ public class ImageDao {
 					ImageInfo imgInfo = new ImageInfo();
 
 					imgInfo.setId((String) imageObj[0]);
-					imgInfo.setName((String) imageObj[1]);
+					imgInfo.setImage_name((String) imageObj[1]);
 					imgInfo.setImage_format((String) imageObj[2]);
 					imgInfo.setImage_deployments((String) imageObj[3]);
 					imgInfo.setCreated_by_user_id((String) imageObj[4]);
@@ -217,12 +222,14 @@ public class ImageDao {
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setUploads_count(((Long) imageObj[17]).intValue());
+					imgInfo.setImage_size(((Integer) imageObj[18]));
 					imageInfoList.add(imgInfo);
 				}
 			}
 			return imageInfoList;
 
 		} catch (Exception e) {
+			log.error("findMwImageEntities failed",e);
 			throw new DbException("ImageDao,findMwImageEntities failed", e);
 		}
 
@@ -237,6 +244,7 @@ public class ImageDao {
 			MwImage mwImage = em.find(MwImage.class, id);
 			return mwImage;
 		} catch (Exception e) {
+			log.error("findMwImage() failed",e);
 			throw new DbException("ImageDao,findMwImage() failed", e);
 		}
 
@@ -250,12 +258,15 @@ public class ImageDao {
 		EntityManager em = getEntityManager();
 		try {
 			MwImage mwImage = em.find(MwImage.class, id);
+			if(mwImage==null){
+				return null;
+			}
 			ImageInfo imgInfo = new ImageInfo();
 
 			imgInfo.setId(mwImage.getId());
 			imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
 			imgInfo.setImage_format(mwImage.getImageFormat());
-			imgInfo.setName(mwImage.getName());
+			imgInfo.setImage_name(mwImage.getName());
 			;
 			imgInfo.setMounted_by_user_id(mwImage.getMountedByUserId());
 			imgInfo.setLocation(mwImage.getLocation());
@@ -280,6 +291,7 @@ public class ImageDao {
 
 			return imgInfo;
 		} catch (Exception e) {
+			log.error("findMwImage() failed",e);
 			throw new DbException("ImageDao,findMwImage() failed", e);
 		}
 
@@ -296,6 +308,7 @@ public class ImageDao {
 
 			return mwImage;
 		} catch (Exception e) {
+			log.error("findMwImage() failed",e);
 			throw new DbException("ImageDao,findMwImage() failed", e);
 		}
 
@@ -315,6 +328,7 @@ public class ImageDao {
 			Query q = em.createQuery(cq);
 			return ((Long) q.getSingleResult()).intValue();
 		} catch (Exception e) {
+			log.error("getMwImageCount failed",e);
 			throw new DbException("ImageDao,getMwImageCount() failed", e);
 		}
 
@@ -339,9 +353,9 @@ public class ImageDao {
 					queryString.append(" and image_format like '%"
 							+ imgFilter.getImage_format() + "%'");
 				}
-				if (imgFilter.getName() != null) {
+				if (imgFilter.getImage_name() != null) {
 					queryString.append(" and name like '%"
-							+ imgFilter.getName() + "%'");
+							+ imgFilter.getImage_name() + "%'");
 				}
 				if (imgFilter.getImage_deployments() != null) {
 					queryString.append(" and image_deployments like '%"
@@ -396,6 +410,7 @@ public class ImageDao {
 			return ((Long) query.getSingleResult()).intValue();
 
 		} catch (Exception e) {
+			log.error("getMwImageCount failed",e);
 			throw new DbException(
 					"ImageDao,getMwImageCount(imageFilter) failed", e);
 		}

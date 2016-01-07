@@ -76,7 +76,7 @@ public class DbServiceImpl implements IPersistService {
 
 	public DbServiceImpl() {
 		String filePath=Folders.configuration() + File.separator + "director.properties";
-		log.info("Inside DbServiceImpl filePath::"+filePath);
+		
 		File configfile = new File(filePath);
 
 		FileReader reader=null;
@@ -189,8 +189,8 @@ public class DbServiceImpl implements IPersistService {
 		if (img.getSent() != null) {
 			mwImage.setSent(img.getSent());
 		}
-		if (img.getName() != null) {
-			mwImage.setName(img.getName());
+		if (img.getImage_name() != null) {
+			mwImage.setName(img.getImage_name());
 		}
 		if (img.getImage_size() != null) {
 			mwImage.setContentlength(img.getImage_size());
@@ -779,7 +779,11 @@ public class DbServiceImpl implements IPersistService {
 	 * .lang.String)
 	 */
 	public TrustPolicy fetchPolicyById(String id) throws DbException {
-		return mapper.toTransferObject(policyDao.findMwTrustPolicy(id));
+		MwTrustPolicy findMwTrustPolicy = policyDao.findMwTrustPolicy(id);
+		if(findMwTrustPolicy == null){
+			return null;
+		}
+		return mapper.toTransferObject(findMwTrustPolicy);
 	}
 
 	/*

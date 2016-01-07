@@ -72,24 +72,23 @@ public class UploadImageTask extends UploadTask {
 				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
 						.getPolicy(trustPolicy.getTrust_policy());
 				if (policy != null && policy.getEncryption() != null) {
-					imageFilePath = imageLocation + imageInfo.getName()
+					imageFilePath = imageLocation + imageInfo.getImage_name()
 							+ "-enc";
-					imageProperties.put(Constants.NAME, imageInfo.getName()
+					imageProperties.put(Constants.NAME, imageInfo.getImage_name()
 							+ "-enc");
 					encrypt = true;
 				}
 
 			}
 			if (!encrypt) {
-				imageFilePath = imageLocation + imageInfo.getName();
-				imageProperties.put(Constants.NAME, imageInfo.getName());
+				imageFilePath = imageLocation + imageInfo.getImage_name();
+				imageProperties.put(Constants.NAME, imageInfo.getImage_name());
 			}
 
 			content = new File(imageFilePath);
 			super.run();
 			runFlag = true;
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error(
 					" runCreateImageTask failed for ::"
 							+ imageActionObject.getImage_id(), e);

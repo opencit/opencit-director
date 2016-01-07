@@ -4,14 +4,14 @@ import java.util.List;
 
 public class GetImageStoresResponse {
 
-	List<String> imageStoreNames;
+	public List<ImageStoreObject> image_stores;
 
-	public List<String> getImageStoreNames() {
-		return imageStoreNames;
+	public List<ImageStoreObject> getImage_stores() {
+		return image_stores;
 	}
 
-	public void setImageStoreNames(List<String> imageStoreNames) {
-		this.imageStoreNames = imageStoreNames;
+	public void setImage_stores(List<ImageStoreObject> image_stores) {
+		this.image_stores = image_stores;
 	}
 	
 }

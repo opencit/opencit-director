@@ -20,7 +20,9 @@ import com.intel.mtwilson.director.mapper.Mapper;
 public class SshSettingDao {
 
 	Mapper mapper = new Mapper();
-
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(PolicyTemplateDao.class);
+	
 	public SshSettingDao(EntityManagerFactory emf) {
 		this.emf = emf;
 	}
@@ -40,6 +42,7 @@ public class SshSettingDao {
 			em.persist(mwHost);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("createSshSetting failed",e);
 			throw new DbException("SshSettingDao,createSshSetting method", e);
 		} finally {
 			em.close();
@@ -68,6 +71,7 @@ public class SshSettingDao {
 			em.merge(mwHost);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("updatesshUpload failed",e);
 			throw new DbException("SshSettingUploadDao,updatesshUpload failed",
 					e);
 		} finally {
@@ -85,6 +89,7 @@ public class SshSettingDao {
 
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("destroySshSetting failed",e);
 			throw new DbException("SshSettingDao,destroySshSetting failed", e);
 		} finally {
 			em.close();
@@ -101,6 +106,7 @@ public class SshSettingDao {
 
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("destroySshSetting failed",e);
 			throw new DbException("SshSettingDao,destroySshSetting failed", e);
 		} finally {
 			em.close();
@@ -114,6 +120,7 @@ public class SshSettingDao {
 
 			return mwHost;
 		} catch (Exception e) {
+			log.error("findMwImage failed",e);
 			throw new DbException("ImageDao,findMwImage() failed", e);
 		}
 
@@ -139,6 +146,7 @@ public class SshSettingDao {
 			
 			return mwHost;
 		} catch (Exception e) {
+			log.error("findMwImageByImageId failed",e);
 			throw new DbException("ImageDao,findMwImageByImageId() failed", e);
 		}
 
@@ -157,6 +165,7 @@ public class SshSettingDao {
 			em.remove(demo);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("destroyPassword failed",e);
 			throw new DbException("SshSettingDao,destroyPassword failed", e);
 		} finally {
 			em.close();
@@ -174,6 +183,7 @@ public class SshSettingDao {
 		}
 
 		catch (Exception e) {
+			log.error("ScalarSshSetting failed",e);
 			throw new DbException("SshSettingDao,ScalarSshSetting failed", e);
 		}
 		return list;

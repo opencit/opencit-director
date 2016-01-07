@@ -52,8 +52,8 @@ public class ImageInfoFilter extends ImageInfo {
                 + trust_policy_id + ", trust_policy_name=" + trust_policy_name
                 + ", trust_policy_draft_name=" + trust_policy_draft_name
                 + ", trust_policy_draft_id=" + trust_policy_draft_id
-                + ", uploads_count=" + uploads_count + ", id=" + id + ", name="
-                + name + ", format=" + image_format + ", image_deployments="
+                + ", uploads_count=" + uploads_count + ", id=" + id + ", image_name="
+                + image_name + ", format=" + image_format + ", image_deployments="
                 + image_deployments + ", status=" + status + ", image_size="
                 + image_size + ", sent=" + sent + ", mounted_by_user_id="
                 + mounted_by_user_id + ", deleted=" + deleted + ", location="

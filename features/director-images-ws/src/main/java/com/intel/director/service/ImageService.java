@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
-import com.intel.director.api.ImageStoreResponse;
-import com.intel.director.api.ImageStoreUploadRequest;
+import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
@@ -21,8 +19,11 @@ import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
+import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -57,33 +58,29 @@ public interface ImageService {
 	public SearchFilesInImageResponse searchFilesInImage(
 			SearchFilesInImageRequest searchFilesInImageRequest) throws DirectorException;;
 
-	public ImageStoreResponse uploadImageToImageStore(
-			ImageStoreUploadRequest imageStoreUploadRequest)
-			throws DirectorException;
-
 	public String getTrustPolicyForImage(String imageId);
 
-	public void editTrustPolicyDraft(
+	public TrustPolicyDraft editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
 			throws DirectorException;
 
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadata(String draftid)
+	public CreateTrustPolicyMetaDataResponse getPolicyMetadata(String draftid)
 			throws DirectorException;
 
 	public ImageListResponse getImagesForVM(List<ImageInfo> images) throws DirectorException;
 	
-	public CreateTrustPolicyMetaDataRequest getPolicyMetadataForImage(
+	public CreateTrustPolicyMetaDataResponse getPolicyMetadataForImage(
 			String image_id) throws DirectorException;
 
 	public String createTrustPolicy(String image_id)
-			throws DirectorException, JAXBException;
+			throws DirectorException;
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId, String image_action_id) throws DirectorException;
+	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId) throws DirectorException;
 
 	public String getDisplayNameForImage(String image_id) throws DirectorException;
 
@@ -96,9 +93,9 @@ public interface ImageService {
 
 	public String getFilepathForImage(String imageId, boolean isModified) throws DbException;
 
-	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
+	public TrustPolicy getTrustPolicyByImageId(String imageId) throws  DirectorException;
 	
-	public CreateTrustPolicyMetaDataResponse importPolicyTemplate(String imageId) throws DirectorException;
+	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId) throws DirectorException;
 
 	public void deleteTrustPolicy(String imageId) throws DirectorException;
 
@@ -119,6 +116,19 @@ public interface ImageService {
 
 	boolean doesImageNameExist(String fileName) throws DirectorException;
 
+	void deleteTrustPolicyDraft(String trust_policy_draft_id)
+			throws DirectorException;
+	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id) throws DirectorException;
 
+	public void updateTrustPolicy(
+			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
+
+	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
+	
+	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
+
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(
+			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException;
 }
 
