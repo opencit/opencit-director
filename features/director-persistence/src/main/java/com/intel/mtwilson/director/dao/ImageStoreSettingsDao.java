@@ -18,7 +18,8 @@ import com.intel.mtwilson.director.mapper.Mapper;
 public class ImageStoreSettingsDao {
 
 
-	 
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageDao.class);
 	
 	Mapper mapper= new Mapper();
 
@@ -41,6 +42,7 @@ public class ImageStoreSettingsDao {
 			em.persist(imgStoreSettings);
 			em.getTransaction().commit();
 		} catch(Exception e){
+			log.error("createImageStoreSettings failed",e);
 			throw new DbException("ImageStoreSettingsDao,createImage method",e);
 		}
 		
@@ -58,6 +60,7 @@ public class ImageStoreSettingsDao {
 			em.getTransaction().commit();
 		} 
 		catch(Exception e){
+			log.error("updateImageStoreSettings failed",e);
 			throw new DbException("ImageStoreSettingsDao,updateImage failed",e);
 		}
 		finally {
@@ -76,6 +79,7 @@ public class ImageStoreSettingsDao {
 			em.getTransaction().commit();
 		} 
 		catch(Exception e){
+			log.error("destroyImageStoreSettings failed",e);
 			throw new DbException("ImageStoreSettingsDao,destroyImage failed",e);
 		}
 		finally {

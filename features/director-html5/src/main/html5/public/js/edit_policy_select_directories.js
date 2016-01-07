@@ -152,7 +152,7 @@
 											.fileTree(
 													{
 														root : 'C:/Temp',
-														script : '/v1/images/browse/'+currentEditPolicyImageId+'/search',
+														script : '/v1/images/'+currentEditPolicyImageId+'/search',
 														expandSpeed : 1000,
 														collapseSpeed : 1000,
 														multiFolder : true,

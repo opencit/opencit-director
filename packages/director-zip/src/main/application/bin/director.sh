@@ -326,15 +326,45 @@ scheduler_stop() {
 # they will not be removed, so you could configure DIRECTOR_CONFIGURATION=/etc/director
 # and DIRECTOR_REPOSITORY=/var/opt/director and then they would not be deleted by this.
 director_uninstall() {
-    remove_startup_script director
-    rm -f /usr/local/bin/director
-    rm -rf /opt/director
-    groupdel director > /dev/null 2>&1
-    userdel director > /dev/null 2>&1
-}
+director_stop
+scheduler_stop
+remove_startup_script director
+
+#unmount any images if any
+m_arr=($(mount | grep "/mnt/director/" | awk '{print $3}' ))
+for i in "${m_arr[@]}"
+   do
+		umount $i
+done
+rm -rf /mnt/director
+
+if [ "$2" = "--purge" ]; then
+	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
+	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
+	DIRECTOR_DB_USER=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.username' | cut -d'=' -f2`
+
+	#sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	#sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP USER ${DIRECTOR_DB_USER}" > /dev/null 2>&1
+
+	echo "Drop database ${DIRECTOR_DB_NAME}"
+
+	rm -rf /mnt/images
+fi
+
+rm -f /usr/local/bin/director
+rm -rf /opt/director
+groupdel director > /dev/null 2>&1
+userdel director > /dev/null 2>&1
+
+
+
+		
+  }
 
 print_help() {
-    echo "Usage: $0 start|stop|uninstall|version"
+    echo "Usage: $0 start|stop|uninstall|uninstall --purge|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo $DIRECTOR_SETUP_TASKS | tr ' ' '\n'
@@ -378,11 +408,11 @@ case "$1" in
       director_setup $*
     else
       director_complete_setup
-    fi
+	fi
     ;;
   uninstall)
     director_stop
-    director_uninstall
+    director_uninstall $*
     ;;
   start-scheduler)
     scheduler_start

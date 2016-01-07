@@ -27,6 +27,9 @@ public class TrustPolicyDraftDao {
 
     Mapper mapper = new Mapper();
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(TrustPolicyDraftDao.class);
+    
     public TrustPolicyDraftDao(EntityManagerFactory emf) {
         this.emf = emf;
     }
@@ -52,6 +55,7 @@ public class TrustPolicyDraftDao {
             em.getTransaction().commit();
 
         } catch (Exception e) {
+        	log.error("createTrustPolicyDraft failed",e);
             throw new DbException("TrustPolicyDraftDao,createTrustPolicyDraft method", e);
         } finally {
             em.close();
@@ -72,6 +76,7 @@ public class TrustPolicyDraftDao {
             em.merge(trustPolicyDraft);
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("updateTrustPolicyDraft failed",e);
             throw new DbException("TrustPolicyDraftDao,updateTrustPolicyDraft failed", e);
         } finally {
             em.close();
@@ -91,6 +96,7 @@ public class TrustPolicyDraftDao {
 
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("destroyPolicyDraft failed",e);
             throw new DbException("TrustPolicyDraftDao,destroyPolicyDraft failed", e);
         } finally {
             em.close();
@@ -224,6 +230,7 @@ public class TrustPolicyDraftDao {
             }
             return trustPolicyDraftList;
         } catch (Exception e) {
+        	log.error("findMwTrustPolicyDraftEntities failed",e);
             throw new DbException("TrustPolicyDraftDao,findMwTrustPolicyDraftEntities failed", e);
         } finally {
             em.close();
@@ -235,6 +242,7 @@ public class TrustPolicyDraftDao {
         try {
             return em.find(MwTrustPolicyDraft.class, id);
         } catch (Exception e) {
+        	log.error("findMwTrustPolicyDraft failed",e);
             throw new DbException("TrustPolicyDraftDao,findMwTrustPolicyDraft() failed", e);
         } finally {
             em.close();
@@ -251,6 +259,7 @@ public class TrustPolicyDraftDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwTrustPolicyDraftCount failed",e);
             throw new DbException("TrustPolicyDraftDao,getMwTrustPolicyDraftCount() failed", e);
         } finally {
             em.close();
@@ -333,6 +342,7 @@ public class TrustPolicyDraftDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwTrustPolicyDraftCount failed",e);
             throw new DbException("TrustPolicyDraftDao,getMwTrustPolicyDraftCount(policyDraftFilter) failed", e);
         } finally {
             em.close();

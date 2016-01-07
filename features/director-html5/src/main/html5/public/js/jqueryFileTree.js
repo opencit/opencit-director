@@ -34,9 +34,10 @@ if(jQuery) (function($){
 	
 	$.extend($.fn, {
 		fileTree: function(o, h) {
+			console.log("filetree");
 			// Defaults
 			if( !o ) var o = {};
-			if( o.root == undefined ) o.root = 'C:/Temp';
+			if( o.root == undefined ) o.root = '/';
 			if( o.script == undefined ) o.script = 'jqueryFileTree.php';
 			if( o.folderEvent == undefined ) o.folderEvent = 'click';
 			if( o.expandSpeed == undefined ) o.expandSpeed= 500;
@@ -50,25 +51,34 @@ if(jQuery) (function($){
 			if(o.reset_regex == undefined) o.reset_regex=false;
 			
 			$(this).each( function() {
-				console.log("Hello");
 				function showTree(c, treeOptions) {
+					console.log("inside show tree");
+
 					$(c).addClass('wait');
 
 					$(".jqueryFileTree.start").remove();
-					canPushPatch = false;
-					var formData = JSON.stringify({dir: treeOptions.dir, recursive: treeOptions.recursive, files_for_policy: treeOptions.files_for_policy , init: treeOptions.init, include_recursive:treeOptions.include_recursive, include:treeOptions.include, exclude:treeOptions.exclude, reset_regex:treeOptions.reset_regex });
+					var formData = "dir="+escape(treeOptions.dir==undefined?'/':treeOptions.dir)+"&recursive="+(treeOptions.recursive==undefined?false:treeOptions.recursive)+"&files_for_policy="+(treeOptions.files_for_policy==undefined?false:treeOptions.files_for_policy)+"&init="+(treeOptions.init==undefined?false:treeOptions.init)+"&include_recursive="+(treeOptions.include_recursive==undefined?false:treeOptions.include_recursive)+"&reset_regex="+(treeOptions.reset_regex==undefined?false:treeOptions.reset_regex);
+					if(treeOptions.include!=undefined && treeOptions.include!=null){
+						formData+="&include="+escape(treeOptions.include);
+					}
+					if(treeOptions.exclude!=undefined && treeOptions.exclude!=null){
+						formData+="&exclude="+escape(treeOptions.exclude);
+					}
 					$.ajax({
-					  type: "POST",
+					  type: "GET",
 					  url: o.script,
 					  data: formData,
 					contentType: "application/json",
 					  success: function(data, status) {
+						  console.log("success");
 						$(c).find('.start').html('');
-						var response = data;	
-						$(c).removeClass('wait').append(data.tree_content);
-						if(!(response.patch_xml == null)){
+						var response = data;
+						if(!(response.patch_xml == null)){							
 							editPatchWithDataFromServer(response.patch_xml);
 						}
+
+						$(c).removeClass('wait').append(data.tree_content);
+						$("#dirNextButton").prop('disabled', false);
 						if( o.root == treeOptions.dir ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
 							bindTree(c);
 						},
@@ -92,6 +102,7 @@ if(jQuery) (function($){
 							treeOptions.dir = escape($(this).attr('rel').match( /.*\// ));
 							treeOptions.recursive = false;
 							treeOptions.files_for_policy = false;
+							treeOptions.init=true;
 
 							showTree( $(this).parent(), treeOptions );
 							$(this).parent().removeClass('collapsed').addClass('expanded');
@@ -107,13 +118,21 @@ if(jQuery) (function($){
 			function bindTree(t) {
 				$(t).find('LI A').bind(o.folderEvent, eventHandlerFunction);
 				$(t).find('LI input').bind(o.folderEvent, function() {
-							if( $(this).parent().hasClass('directory') ) {							
+							if( $(this).parent().hasClass('directory') ) {
+								if(canPushPatch == false){
+									alert("Please wait for the last operation to complete.");
+									if(this.checked){
+										this.checked = false;
+									}else{
+										this.checked = true;
+									}
+								}
 								$(this).parent().find('UL').remove(); // cleanup
 								var treeOptions = {};
 								treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
 								treeOptions.files_for_policy = false;
-								//if($(this).attr('checked')){
+								// if($(this).attr('checked')){
 								if(this.checked){
 									treeOptions.files_for_policy = true;
 								}
@@ -130,7 +149,8 @@ if(jQuery) (function($){
 								console.log("*rootRegexDir : "+rootRegexDir);
 								h($(this).attr('id'), this.checked, rootRegexDir);
 							}
-							var isChecked = this.checked;//$(this).attr('checked') ;
+							var isChecked = this.checked;// $(this).attr('checked')
+															// ;
 							if(isChecked){
 								$(this).parent().addClass('selected');
 							}else{
@@ -140,12 +160,16 @@ if(jQuery) (function($){
 				// Prevent A from triggering the # on non-click events
 				if( o.folderEvent.toLowerCase != 'click' ) $(t).find('LI A').bind('click', function() { return false; });
 			}
+			
+			console.log("INIt");
+
 				// Loading message
 				if(o.init){
 					$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + o.loadMessage + '<li></ul>');
 				}
 				// Get the initial file list
 				o.dir = escape(o.dir);
+				console.log("callong show tree");
 				showTree( $(this), o );
 			});
 		}

@@ -44,12 +44,20 @@ if [ -d $DIRECTOR_ENV ]; then
   done
 fi
 
+if [ -d /mnt ]; then
+  echo "Mount directory exists"
+else
+	mkdir /mnt	
+fi
+
+
 #Create upload dir and mount dir
 if [ -d /mnt/director ]; then
-  echo "Mount directory exists"
+  echo "Mount TD images directory exists"
 else
 	mkdir /mnt/director	
 fi
+
 
 if [ -d /mnt/images ]; then
   echo "Upload directory exists"
@@ -323,6 +331,10 @@ else
   echo_failure "Java $JAVA_REQUIRED_VERSION not found"
   exit 1
 fi
+
+# libguestfs packages has a custom prompt about installing supermin which ignores the “-y” option we provide to apt-get. Following code will help to avoid that prompt 
+export DEBIAN_FRONTEND=noninteractive
+echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
 
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"

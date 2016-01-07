@@ -2,7 +2,7 @@ package com.intel.director.api;
 
 import java.util.List;
 
-public class ListSshSetting extends MonitorStatus{
+public class ListSshSetting extends GenericResponse{
 	
 	  public List<SshSettingRequest> sshSettings;
 

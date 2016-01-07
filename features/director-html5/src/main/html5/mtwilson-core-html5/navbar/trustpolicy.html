@@ -3,54 +3,12 @@
     <head>
         <title>TrustPolicy Button</title>
         <meta name="author" content="soak">
+
+
+
  <script type="text/javascript">
-		 
-
-
-
-
-
-
-        
-function goToVMPage() {
-
-	$("#bm-dashboard-main-page").hide();
-	$("#vm-dashboard-main-page").show();
-
-	
-	var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
-
-	if (isEmpty == false) {
-		$("#vm-dashboard-main-page").html("");
-	}
-
-	$("#vm-dashboard-main-page")
-			.load(
-					"/v1/html5/public/director-html5/vm_images_page.html");
-
-}
-
-
-        
-function goToBMPage() {
-
-	$("#vm-dashboard-main-page").hide();
-	$("#bm-dashboard-main-page").show();
-
-	
-	var isEmpty = !$.trim($("#bm-dashboard-main-page").html());
-
-	if (isEmpty == false) {
-		$("#bm-dashboard-main-page").html("");
-	}
-
-	$("#vm-dashboard-main-page")
-			.load(
-					"/v1/html5/public/director-html5/bm_images_page.html");
-
-}
-
-
+	resourceLoader.loadJS(['js/jquery.js', '/v1/html5/public/director-html5/js/trust_policy.js'], function() { 
+                          });	 
 
 
         </script>
