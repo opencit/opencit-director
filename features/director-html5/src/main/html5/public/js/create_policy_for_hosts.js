@@ -1,6 +1,5 @@
 var imageFormats = new Array();
 var image_policies = new Array();
-var endpoint = "/v1/images/";
 
 function CreateBMLiveMetaData(data) {
 	

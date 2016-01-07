@@ -1,5 +1,5 @@
 var image_policies = new Array();
-endpoint = "/v1/images/";
+endpoint = "/v1";
 $.ajax({
 	type : "GET",
 	url : endpoint + "image-formats",
@@ -37,7 +37,7 @@ function CreateBMImageMetaData(data) {
 
 function CreateBMImageViewModel() {
 	var self = this;
-	endpoint = "/v1/images/";
+	endpoint = "/v1";
 	$("input[name=isEncryptedBM]").val(false);
 	$("#display_name_bm").val(current_display_name);
 	$('input[name=launch_control_policy]:checked').val("MeasureOnly");
@@ -97,7 +97,7 @@ function CreateBMImageViewModel() {
 };
 
 function fetchBMImageLaunchPolicies() {
-	endpoint = "/v1/images/";
+	endpoint = "/v1";
 	$.ajax({
 		type : "GET",
 		url : endpoint + current_image_id + "/trustpolicymetadata",

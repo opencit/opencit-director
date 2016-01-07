@@ -245,8 +245,8 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
             headers: {'Accept': 'application/json'},
      		data: token_request_json,
             success: function(data, status, xhr) {
-		var authtoken= authtoken=data.data[0].token;
-var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
+            	var authtoken= authtoken=data.data[0].token;
+            	var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
 
                  window.location = url;                   
             },
