@@ -309,6 +309,7 @@ update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
 update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
+update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 
 
 # director requires java 1.7 or later
@@ -453,8 +454,8 @@ if [ -z "$SKIP_DATABASE_INIT" ]; then
  
  
  
-DIRECTOR_PORT_HTTP=${JETTY_PORT:-80}
-DIRECTOR_PORT_HTTPS=${JETTY_SECURE_PORT:-443} 
+DIRECTOR_PORT_HTTP=${DIRECTOR_PORT_HTTP:-${JETTY_PORT:-80}}
+DIRECTOR_PORT_HTTPS=${DIRECTOR_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
 # setup authbind to allow non-root director to listen on ports 80 and 443
 if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTP" -lt "1024" ]; then
   touch /etc/authbind/byport/$DIRECTOR_PORT_HTTP
