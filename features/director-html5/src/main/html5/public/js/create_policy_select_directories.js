@@ -1,4 +1,4 @@
-var endpoint = "/v1/images/";
+var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 	

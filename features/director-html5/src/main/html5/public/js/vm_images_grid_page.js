@@ -1,4 +1,3 @@
-var endpoint = "/v1/images/";
 var pageInitialized = false;
 $(document).ready(function() {
 
