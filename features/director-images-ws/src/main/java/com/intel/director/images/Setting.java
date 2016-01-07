@@ -21,6 +21,8 @@ import com.intel.director.api.SshSettingResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ImageService;
+import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
 import com.intel.mtwilson.configuration.ConfigurationException;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -48,6 +50,13 @@ public class Setting {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SshSettingResponse postRecentSsh(SshSettingRequest sshSettingRequest) throws DirectorException {
 		SshSettingResponse sshResponse= new SshSettingResponse();
+		ImageService imageService = new ImageServiceImpl();
+		if(imageService.doesPolicyNameExist(sshSettingRequest.getPolicy_name(), sshSettingRequest.getImage_id())){
+			log.error("Policy Name Already Exists");
+			sshResponse.status = Constants.ERROR;
+			sshResponse.details = "Policy Name Already Exists";
+			return sshResponse;
+		}
 		try {
 			log.debug("Dashboard -> postRecentSsh");
 			sshResponse.setSshSettingRequest(impl.addHost(sshSettingRequest));

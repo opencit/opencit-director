@@ -24,6 +24,9 @@ public class UserDao {
 
     Mapper mapper = new Mapper();
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(UserDao.class);
+    
     public UserDao(EntityManagerFactory emf) {
         this.emf = emf;
     }
@@ -43,6 +46,7 @@ public class UserDao {
             em.persist(user);
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("createUser failed",e);
             throw new DbException("UserDao,createUser method", e);
         } finally {
             em.close();
@@ -57,6 +61,7 @@ public class UserDao {
             em.merge(user);
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("updateUser failed",e);
             throw new DbException("UserDao,updateUser failed", e);
         } finally {
             em.close();
@@ -73,6 +78,7 @@ public class UserDao {
 
             em.getTransaction().commit();
         } catch (Exception e) {
+        	log.error("destroyUser failed",e);
             throw new DbException("UserDao,destroyUser failed", e);
         } finally {
             em.close();
@@ -149,6 +155,7 @@ public class UserDao {
             }
             return q.getResultList();
         } catch (Exception e) {
+        	log.error("findMwUserEntities failed",e);
             throw new DbException("UserDao,findMwUserEntities failed", e);
         } finally {
             em.close();
@@ -160,6 +167,7 @@ public class UserDao {
         try {
             return em.find(MwUser.class, id);
         } catch (Exception e) {
+        	log.error("findMwUser failed",e);
             throw new DbException("UserDao,findMwUser() failed", e);
         } finally {
             em.close();
@@ -176,6 +184,7 @@ public class UserDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwUserCount failed",e);
             throw new DbException("UserDao,getMwUserCount() failed", e);
         } finally {
             em.close();
@@ -219,6 +228,7 @@ public class UserDao {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
+        	log.error("getMwUserCount failed",e);
             throw new DbException("UserDao,getMwUserCount(UserFilter) failed", e);
         } finally {
             em.close();

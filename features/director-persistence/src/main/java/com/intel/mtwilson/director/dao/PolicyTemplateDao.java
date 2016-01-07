@@ -15,6 +15,8 @@ import com.intel.mtwilson.director.mapper.Mapper;
 public class PolicyTemplateDao {
 	Mapper mapper = new Mapper();
 
+	 private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+				.getLogger(PolicyTemplateDao.class);
 	public PolicyTemplateDao(EntityManagerFactory emf) {
 		this.emf = emf;
 	}
@@ -35,6 +37,7 @@ public class PolicyTemplateDao {
 			em.persist(policytemplate);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("createPolicyTemplate failed",e);
 			throw new DbException("PolicyTemplateDao,createPolicyTemplate method", e);
 		}
 
@@ -52,6 +55,7 @@ public class PolicyTemplateDao {
 			em.merge(policytemplate);
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("updatePolicyTemplate failed",e);
 			throw new DbException("PolicyTemplateDao,updatePolicyTemplate failed", e);
 		} finally {
 			em.close();
@@ -70,12 +74,23 @@ public class PolicyTemplateDao {
 
 			em.getTransaction().commit();
 		} catch (Exception e) {
+			log.error("destroyPolicyTemplate failed",e);
 			throw new DbException("PolicyTemplateDao,destroyPolicyTemplate failed", e);
 		} finally {
 			em.close();
 		}
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public List<MwPolicyTemplate> findDeploymentType(String deployment_type)
 			throws DbException {
 		EntityManager em = getEntityManager();
@@ -99,7 +114,9 @@ public class PolicyTemplateDao {
 					info.setName((String) imageObj[1]);
 					info.setDeployment_type((String) imageObj[2]);
 					info.setPolicy_type((String) imageObj[3]);
-					info.setContent((String) imageObj[4]);
+					if(imageObj[4]!=null){
+						info.setContent((new Mapper()).toCharacterArray((String)imageObj[4]));
+					}
 					info.setActive((boolean) imageObj[5]);
 					info.setDeployment_type_identifier((String)imageObj[6]);
 					mwPolicyTemplate.add(info);
@@ -108,6 +125,7 @@ public class PolicyTemplateDao {
 			}
 			return mwPolicyTemplate;
 		} catch (Exception e) {
+			log.error("findDeploymentType failed",e);
 			throw new DbException(
 					"PolicyTemplateDao,findDeploymentType() failed", e);
 		}
@@ -154,7 +172,9 @@ public class PolicyTemplateDao {
 					info.setName((String) imageObj[1]);
 					info.setDeployment_type((String) imageObj[2]);
 					info.setPolicy_type((String) imageObj[3]);
-					info.setContent((String) imageObj[4]);
+					if(imageObj[4]!=null){
+						info.setContent((new Mapper()).toCharacterArray((String)imageObj[4]));
+					}					
 					info.setActive((boolean) imageObj[5]);
 					mwPolicyTemplate.add(info);
 				}
@@ -162,7 +182,8 @@ public class PolicyTemplateDao {
 			}
 			return mwPolicyTemplate;
 		} catch (Exception e) {
-			throw new DbException("ImageDao,findMwImage() failed", e);
+			log.error("findDeploymentTypeByFilter failed",e);
+			throw new DbException("PolicyTemplateDao,findDeploymentTypeByFilter() failed", e);
 		}
 
 		finally {

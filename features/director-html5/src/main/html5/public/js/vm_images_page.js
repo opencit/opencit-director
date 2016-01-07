@@ -13,19 +13,22 @@ $(document)
 					pageInitialized = true;
 				});
 
-function createPolicy(imageid, imagename) {
+function createTrustPolicy(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
 	current_image_name = imagename;
+	current_trust_policy_draft_id='';
 
 	goToCreatePolicyWizard();
 }
 
-function editPolicy(imageid, imagename) {
+function editTrustPolicy(imageid, imagename,trust_policy_draft_id) {
 
 	currentFlow = "Edit";
 	current_image_id = imageid;
 	current_image_name = imagename;
+	current_trust_policy_draft_id=trust_policy_draft_id;
+
 	// ///current_trust_policy_id=trust_policy_id;
 
 	goToEditPolicyWizard();
@@ -100,17 +103,22 @@ function backToVmImagesPage() {
 	$("#upload_to_image_store_redirect").html("");
 	$("#upload_to_image_store_redirect").hide("");
 	$("#vm_images_grid_page").show();
-
+	var self = this;
+		var mountimage = { 
+		"id" : current_image_id
+	};
+	current_trust_policy_draft_id='';
 	if(current_image_id != "" && current_image_id !=null)
 	{
+		
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/unmount",
+			url : "/v1/rpc/unmount-image",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.createImageMetaData),
+			data : JSON.stringify(mountimage),
 			success : function(data, status, xhr) {
 				current_image_id = "";
 				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
@@ -125,6 +133,7 @@ function backToVmImagesPage() {
 
 }
 
+	
 function backToVmImagesPageWithountUnmount() {
 	$("#create_policy_script").remove();
 	$("#edit_policy_wizard").html("");
@@ -226,7 +235,7 @@ function downloadPolicy(imageid, trust_policy_id) {
 
 var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
 
-
+ 
 
  $.ajax({
             type: "POST",
@@ -237,12 +246,12 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
      		data: token_request_json,
             success: function(data, status, xhr) {
 		var authtoken= authtoken=data.data[0].token;
-var url="/v1/images/" + imageid + "/downloadPolicy?Authorization="+encodeURIComponent(authtoken);
+var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
 
                  window.location = url;                   
             },
             error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
+              show_error_in_trust_policy_tab("error in downloading");
             }
         });
 
@@ -271,34 +280,49 @@ var uri="/v1/images/" + imageid + "/downloadImage?modified=true&Authorization="+
                                    
             },
             error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
+              show_error_in_trust_policy_tab("error in downloading");
             }
         });
 
 	
 }
 
-function deletePolicyVM(imageid, trust_policy_id, imagename) {
-	$.ajax({
-		type : "GET",
-		url : "/v1/images/" + imageid + "/deletePolicy",
-		dataType : "text",
-		success : function(result) {
-				$("#trust_policy_vm_column" + imageid).html("<a href='#' ><span class='glyphicon glyphicon-plus-sign'  title='Create Policy' onclick='createPolicy(\""
-					+ imageid + '","' + imagename + "\")'></span></a>");
-			}
-	});
-
-	
+function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagename) {
+	var callComplete = false;
+	console.log("trust_policy_id :: " + trust_policy_id);
+	if(trust_policy_id != "" && trust_policy_id != "null" && trust_policy_id !=null && trust_policy_id != undefined && trust_policy_id != "undefined"){
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/trust-policy/" + trust_policy_id,
+			dataType : "text",
+			success : function(result) {
+				callComplete = true;
+				refresh_vm_images_Grid();
+				}
+		});
+	}
+	console.log("trust_policy_draft_id :: " + trust_policy_draft_id);
+	if(trust_policy_draft_id != "" && trust_policy_draft_id != undefined && trust_policy_draft_id != null && trust_policy_draft_id != "null" && trust_policy_draft_id != "undefined"){
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id ,
+			dataType : "text",
+			success : function(result) {
+				callComplete = true;
+				refresh_vm_images_Grid();	
+			}		
+		});
+	}
 }
 
 function deleteImage(imageid) {
 	$.ajax({
 		type : "DELETE",
-		url : "/v1/images/" + imageid + "/delete",
+		url : "/v1/images/" + imageid,
 		dataType : "text",
 		success : function(result) {
-			refresh_vm_images_Grid();			
+			refresh_vm_images_Grid();	
+			refreshBMOnlineGrid();
 		}
 	});
 

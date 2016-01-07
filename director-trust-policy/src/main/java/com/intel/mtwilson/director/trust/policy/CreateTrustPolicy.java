@@ -6,14 +6,16 @@
 package com.intel.mtwilson.director.trust.policy;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
+import com.intel.director.common.DirectorUtil;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
@@ -34,6 +36,20 @@ import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 
 public class CreateTrustPolicy {
 
+	private String imageId;
+	
+	public String getImageId() {
+		return imageId;
+	}
+
+	public void setImageId(String imageId) {
+		this.imageId = imageId;
+	}
+
+	public CreateTrustPolicy(String imageId){
+		this.imageId = imageId;
+	}
+	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(CreateTrustPolicy.class);
 
@@ -49,7 +65,7 @@ public class CreateTrustPolicy {
 	 * @throws CryptographyException
 	 * @throws IOException
 	 */
-	public static void createTrustPolicy(TrustPolicy trustPolicy)
+	public void createTrustPolicy(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
@@ -78,14 +94,34 @@ public class CreateTrustPolicy {
 	 * @throws IOException
 	 * @throws CryptographyException
 	 */
-	private static void addEncryption(TrustPolicy trustPolicy)
+	private void addEncryption(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException, JAXBException,
 			XMLStreamException {
 		// get DEK
+		KmsUtil kmsUtil = null;
+		try {
+			kmsUtil = new KmsUtil();
+		} catch (Exception e1) {
+			log.error("Error in initialization of KMS Util");
+			return;
+		}
+		
+		//Check if a key already exists
+		//If so, check if the key is still valid
+		//If so, return
+		if(StringUtils.isNotBlank(trustPolicy.getEncryption().getKey().getValue()) && trustPolicy.getEncryption().getKey().getValue().contains("keys")){
+			String url = trustPolicy.getEncryption().getKey().getValue();
+			String keyIdFromUrl = DirectorUtil.getKeyIdFromUrl(url);
+			String keyFromKMS = kmsUtil.getKeyFromKMS(keyIdFromUrl);
+			if(StringUtils.isNotBlank(keyFromKMS)){
+				log.info("Existing key is still valid. Not creating a new one.");
+				return;
+			}
+		}
 
 		KeyContainer key;
 		try {
-			key = new KmsUtil().createKey();
+			key = kmsUtil.createKey();
 			DecryptionKey decryptionKey = new DecryptionKey();
 			decryptionKey.setURL("uri");
 			decryptionKey.setValue(key.url.toString());
@@ -114,20 +150,21 @@ public class CreateTrustPolicy {
 	 * @param trustPolicy
 	 * @return
 	 */
-	private static void addWhitelistValue(TrustPolicy trustPolicy)
+	private void addWhitelistValue(TrustPolicy trustPolicy)
 			throws IOException {
 		Whitelist whitelist = trustPolicy.getWhitelist();
 		List<Measurement> measurements = whitelist.getMeasurements();
 		String imageId = trustPolicy.getImage().getImageId();
-		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil();
-		List<String> invalidFiles = new ArrayList<>();
+		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil(imageId);
+		//List<String> invalidFiles = new ArrayList<>();
 		// Initialize cumulative hash
 		Digest cumulativeDigest = Digest.algorithm(
 				whitelist.getDigestAlg().value()).zero();
 
 		// Get file and directory hash and extend value to cumulative hash
+		Digest hash=null;
 		for (Measurement measurement : measurements) {
-			Digest hash;
+			hash=null;
 			if (measurement instanceof DirectoryMeasurement) {
 				hash = dirFileUtil.getDirectoryHash(imageId,
 						(DirectoryMeasurement) measurement, whitelist
@@ -137,7 +174,7 @@ public class CreateTrustPolicy {
 						(FileMeasurement) measurement, whitelist.getDigestAlg()
 								.value());
 				if (hash == null) {
-					invalidFiles.add(measurement.getPath());
+					//invalidFiles.add(measurement.getPath());
 					continue;
 				}
 

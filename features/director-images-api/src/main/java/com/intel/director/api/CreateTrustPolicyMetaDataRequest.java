@@ -2,7 +2,7 @@ package com.intel.director.api;
 
 public class CreateTrustPolicyMetaDataRequest {
 
-	public String imageid;
+	public String image_id;
 	
 	public String hostid;
 	
@@ -14,11 +14,21 @@ public class CreateTrustPolicyMetaDataRequest {
 	
 	public String deployment_type;
 	
-public boolean encrypted=false;
+	public boolean encrypted=false;
 
     public String image_name;
 
     public String display_name;
+    
+    public String trust_policy_draft_id;
+
+	public String getTrust_policy_draft_id() {
+		return trust_policy_draft_id;
+	}
+
+	public void setTrust_policy_draft_id(String trust_policy_draft_id) {
+		this.trust_policy_draft_id = trust_policy_draft_id;
+	}
 
 	public String getDisplay_name() {
 		return display_name;
@@ -28,18 +38,22 @@ public boolean encrypted=false;
 		this.display_name = display_name;
 	}
 
-	public String getImageid() {
-		return imageid;
-	}
+	
 	
 	public String getHostid() {
 		return hostid;
 	}
 
-	public void setImageid(String imageid) {
-		this.imageid = imageid;
-	}
 	
+	
+	public String getImage_id() {
+		return image_id;
+	}
+
+	public void setImage_id(String image_id) {
+		this.image_id = image_id;
+	}
+
 	public void setHostid(String hostid) {
 		this.hostid = hostid;
 	}

@@ -1,7 +1,5 @@
 package com.intel.director.quartz;
 
-import org.quartz.SchedulerException;
-
 import com.intel.dcsg.cpg.console.AbstractCommand;
 
 /**
@@ -31,7 +29,6 @@ public class ImageActionScheduler extends AbstractCommand {
 	 * 
 	 * @param args
 	 *            contains start or stop
-	 * @throws SchedulerException
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws InterruptedException {

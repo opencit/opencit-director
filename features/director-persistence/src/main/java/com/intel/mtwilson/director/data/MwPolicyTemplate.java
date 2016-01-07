@@ -27,7 +27,7 @@ public class MwPolicyTemplate {
 	private String policy_type;
 	
 	@Column(name = "CONTENT")
-	private String content;
+	private  Character[] content;
 
 	@Column(name = "ACTIVE")
 	public boolean 	active;
@@ -98,15 +98,16 @@ public class MwPolicyTemplate {
 	}
 
 
-	public String getContent() {
+	public Character[] getContent() {
 		return content;
 	}
 
 
-	public void setContent(String content) {
+	public void setContent(Character[] content) {
 		this.content = content;
 	}
-	
+
+
 
 
 

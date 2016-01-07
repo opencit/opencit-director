@@ -9,7 +9,23 @@ package com.intel.director.api;
  *
  * @author soakx
  */
-public class CreateTrustPolicyResponse {
+public class CreateTrustPolicyResponse extends GenericResponse {
+	private  String id;
+	public String error;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 	
-	
+	public String getError() {
+		return error;
+	}
+	public void setError(String error) {
+		this.error = error;
+	}
+		
 }

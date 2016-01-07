@@ -163,19 +163,18 @@ public class DirectorUtil {
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
 			}
-			reader.close();
-			p.getInputStream().close();
+			
 
 		} catch (InterruptedException | IOException ex) {
-			if (reader != null) {
+			log.error(null, ex);
+		} finally {
+			if(reader != null){
 				reader.close();
 			}
+			
 			if (p != null && p.getInputStream() != null) {
 				p.getInputStream().close();
 			}
-
-			log.error(null, ex);
-		} finally {
 
 		}
 		log.debug(output.toString());
@@ -272,6 +271,28 @@ public class DirectorUtil {
 			}
 		}
 		
+	}
+
+	public static String getKeyIdFromUrl(String url) {
+		log.debug("URL :: " + url);
+		String[] split = url.split("/");
+		int index = 0;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("keys")) {
+				log.debug("Keys index :: " + i);
+				index = ++i;
+				break;
+			}
+		}
+
+		log.debug("Index :: " + index);
+
+		if (index != 0) {
+			return split[index];
+		} else {
+			return null;
+		}
+
 	}
 
 }

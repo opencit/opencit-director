@@ -1,13 +1,114 @@
 endpoint = "/v1/images/";
 var imageFormats = new Array();
 var image_policies = new Array();
-showBMLiveMetaData();
+
+
+edit_policy_bmlive_initialize();
+
+function edit_policy_bmlive_initialize(){
+	
+if(!current_trust_policy_draft_id){
+	var create_draft_request={
+			"image_id" :current_image_id
+		}
+
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			headers : {
+					'Accept' : 'application/json'
+				},
+			data : JSON.stringify(create_draft_request),
+
+			url : "/v1/rpc/create-draft-from-policy",
+			success : function(data, status, xhr) {
+				
+				if (data.status == "Error") {
+				///	show_error_in_trust_policy_tab("Internal error");
+								return false;
+							}else{
+				current_trust_policy_draft_id = data.id;
+
+				$.ajax({
+	type : "GET",
+	url : "/v1/images/"+current_image_id,
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function (data, status, xhr) {
+		$("#host_ip_edit").val(data.ip_address);
+		$("#username_for_host_edit").val(data.username);
+	}
+});
+
+
+$.ajax({
+	type : "GET",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
+	// accept: "application/json",
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function(data, status, xhr) {
+		$("#display_name_host_edit").val(data.display_name);
+	}
+});
+
+
+			    }
+
+			}
+		});
+}else{
+
+$.ajax({
+	type : "GET",
+	url : "/v1/images/"+current_image_id,
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function (data, status, xhr) {
+		$("#host_ip_edit").val(data.ip_address);
+		$("#username_for_host_edit").val(data.username);
+	}
+});
+
+
+$.ajax({
+	type : "GET",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
+	// accept: "application/json",
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function(data, status, xhr) {
+		$("#display_name_host_edit").val(data.display_name);
+	}
+});
+
+}
+
+
+
+
+}
+
+
+
+
 function EditBMLiveMetaData() {
 	
-	this.imageid = current_image_id;
+	this.image_id = current_image_id;
 	this.image_name = current_image_name;
 	this.display_name = $("#display_name_host_edit").val();
-	
 }
 
 
@@ -76,6 +177,7 @@ return;
 	
 
 
+	$("#editBMLivePolicyNext").prop('disabled', true);
 
 
 	$.ajax({
@@ -87,42 +189,66 @@ return;
 		},
 		data : JSON.stringify(data), 
 		success : function (data, status, xhr) {
-						if (data.status == "Error") {
-
-				show_error_in_editbmlivemodal(data.details);
+			if (data.status == "Error") {
+				$("#editBMLivePolicyNext").prop('disabled', false);
+				show_error_in_editbmlivemodal(data.details);				
 				return;
 			}
-			;
+			
 			self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.editBMLiveMetaData.isEncrypted = false;
 			self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
-
+			var mountimage = {
+						"id" : current_image_id
+					}
 			$.ajax({
 				type : "POST",
-				url : endpoint + "trustpoliciesmetadata",
+				url : "/v1/rpc/mount-image",
+
 				contentType : "application/json",
 				headers : {
 					'Accept' : 'application/json'
 				},
-				data : ko.toJSON(self.editBMLiveMetaData),
+				data :   JSON.stringify(mountimage),
 				success : function (data, status, xhr) {
-					if (data.status == "Error") {
-						show_error_in_editbmlivemodal(data.details);
+
+					if (data.error) {
+						$("#editBMLivePolicyNext").prop('disabled', false);
+						show_error_in_editbmlivemodal(data.error);
 						return;
 					}
+					
+					
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/mount",
+						url : "/v1/trust-policy-drafts",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.editBMLiveMetaData), // $("#loginForm").serialize(),
+						data : ko.toJSON(self.editBMLiveMetaData), 
 						success : function (data, status, xhr) {
-							if (data.status == "Error") {
-								show_error_in_editbmlivemodal(data.details);
+							$("#editBMLivePolicyNext").prop('disabled', false);
+
+							if (data.error) {								
+								show_error_in_editbmlivemodal(data.error);
+
+								$.ajax({
+									type : "POST",
+									url : "/v1/rpc/unmount-image",
+									contentType : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									data : JSON.stringify(mountimage),
+									success : function(data, status, xhr) {
+										console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+										}
+									});
+	
 								return;
 							}
+							current_trust_policy_draft_id=data.id;
 							nextButtonLiveBM();
 						}
 					});
@@ -132,21 +258,4 @@ return;
 		}
 		
 	});
-};
-
-function showBMLiveMetaData() {
-	
-	$.ajax({
-		type : "GET",
-		url : endpoint + current_image_id + "/getbmlivemetadata",
-		dataType : "json",
-		success : function (data, status, xhr) {
-			current_display_name = data.ssh_setting_request.display_name;
-			console.log(current_display_name);
-			$("#display_name_host_edit").val(data.ssh_setting_request.policy_name);
-						$("#host_ip_edit").val(data.ssh_setting_request.ip_address);
-			$("#username_for_host_edit").val(data.ssh_setting_request.username);
-	}
-});
-
 };
