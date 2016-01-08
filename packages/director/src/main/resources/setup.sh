@@ -319,7 +319,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
 # check if java is readable to the non-root user
 if [ -z "$JAVA_HOME" ]; then
-  java_detect
+  java_detect > /dev/null
 fi
 if [ -n "$JAVA_HOME" ]; then
   if [ $(whoami) == "root" ]; then
@@ -327,10 +327,9 @@ if [ -n "$JAVA_HOME" ]; then
   else
     JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
   fi
-  if [ -z "$JAVA_USER_READABLE" ]; then
-    # current location not readable, so use home directory
-    JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
-  fi
+fi
+if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
+  JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
 fi
 mkdir -p $JAVA_HOME
 java_install_in_home $JAVA_PACKAGE
