@@ -332,7 +332,7 @@ else
   exit 1
 fi
 
-# libguestfs packages has a custom prompt about installing supermin which ignores the ‚Äú-y‚Äù option we provide to apt-get. Following code will help to avoid that prompt 
+# libguestfs packages has a custom prompt about installing supermin which ignores the ì-yî option we provide to apt-get. Following code will help to avoid that prompt 
 export DEBIAN_FRONTEND=noninteractive
 echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
 

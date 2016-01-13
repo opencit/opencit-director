@@ -75,20 +75,20 @@ function addhostandnext() {
 
 	$.ajax({
 		type : "POST",
-		url : "/v1/setting/addHost",
+		url : "/v1/images/host",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
 		},
 		data : JSON.stringify(data), 
 		success : function (data, status, xhr) {
-			if (data.status == "Error" || data.ssh_setting_request.image_id == null) {
-				show_error_in_bmlivemodal(data.details);
+			if (data.error) {
+				show_error_in_bmlivemodal(data.error);
 				$("#createBMLivePolicyNext").prop('disabled', false);
 				return;
 			}
 			
-			current_image_id = data.ssh_setting_request.image_id;
+			current_image_id = data.image_id;
 			self.createBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.createBMLiveMetaData.encrypted = false;
 			self.createBMLiveMetaData.display_name = $("#display_name_host").val();

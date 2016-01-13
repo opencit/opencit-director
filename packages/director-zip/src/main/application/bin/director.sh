@@ -153,7 +153,7 @@ director_complete_setup() {
   if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA1" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
   	director_run setup $DIRECTOR_KMS_SETUP_TASKS
   fi
-  
+
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order
@@ -233,7 +233,7 @@ scheduler_is_running() {
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # check the process list just in case the pid file is stale
-    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main image-action-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main trust-director-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # Scheduler is not running
@@ -285,7 +285,7 @@ scheduler_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main image-action-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main trust-director-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
       echo $! > $SCHEDULER_PID_FILE
     )
     if scheduler_is_running; then

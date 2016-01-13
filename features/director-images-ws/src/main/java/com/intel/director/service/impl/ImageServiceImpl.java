@@ -46,6 +46,7 @@ import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -2505,7 +2506,7 @@ public class ImageServiceImpl implements ImageService {
 					.fetchSshByImageId(image_id);
 			settingRequest.setId(ssh.getId());
 			settingRequest.setName(ssh.getName());
-			settingRequest.setPolicy_name(getDisplayNameForImage(image_id));
+		////	settingRequest.setPolicy_name(getDisplayNameForImage(image_id));
 			settingRequest.setIpAddress(ssh.getIpAddress());
 			settingRequest.setUsername(ssh.getUsername());
 		} catch (DbException e) {
@@ -2731,6 +2732,154 @@ public class ImageServiceImpl implements ImageService {
 			return fetchPolicyDrafts;
 		} catch (DbException e) {
 			throw new DirectorException("Error Fetching drafts", e);
+		}
+	}
+	
+	public List<SshSettingRequest> sshData() throws DirectorException {
+		TdaasUtil tdaasUtil = new TdaasUtil();
+		List<SshSettingInfo> fetchSsh;
+		List<SshSettingRequest> responseSsh = new ArrayList<SshSettingRequest>();
+
+		try {
+
+			fetchSsh = imagePersistenceManager.showAllSsh();
+
+			for (SshSettingInfo sshSettingInfo : fetchSsh) {
+
+				responseSsh.add(tdaasUtil.toSshSettingRequest(sshSettingInfo));
+			}
+
+		} catch (Exception e) {
+			log.error("ssddata method failed", e);
+			throw new DirectorException(e);
+		}
+
+		return responseSsh;
+
+	}
+
+	public void postSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+
+		TdaasUtil tdaasUtil = new TdaasUtil();
+		SshSettingInfo sshSetingInfo = tdaasUtil.fromSshSettingRequest(sshSettingRequest);
+
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+
+		log.debug("Going to save sshSetting info in database");
+		try {
+			imagePersistenceManager.saveSshMetadata(sshSetingInfo);
+		} catch (DbException e) {
+			log.error("unable to save ssh info in database", e);
+			throw new DirectorException(
+					"Unable to save sshsetting info in database", e);
+		}
+
+	}
+
+
+	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+
+		TdaasUtil tdaasUtil = new TdaasUtil();
+
+		SshSettingInfo sshSettingInfo = tdaasUtil
+				.fromSshSettingRequest(sshSettingRequest);
+		log.info("Inside addHost, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
+		log.debug("Going to save sshSetting info in database");
+		SshSettingInfo info;
+		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
+			log.info("AddHost can't take image_id as parameter");
+			;
+			throw new DirectorException(
+					"AddHost can't take image_id as parameter");
+		} else {
+			try {
+
+				info = imagePersistenceManager.saveSshMetadata(sshSettingInfo);
+
+			} catch (DbException e) {
+				log.error("unable to save ssh info in database", e);
+				throw new DirectorException("Unable to create policy draft", e);
+			}
+		}
+		return TdaasUtil.convertSshInfoToResponse(info);
+
+	}
+
+	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+		// SshSettingInfo updateSsh=new SshSettingInfo();
+
+		TdaasUtil tdaasUtil = new TdaasUtil();
+
+		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
+
+		log.info("Inside updateSshData, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.info("Inside updateSshData,After execution of addSshKey ");
+		try {
+
+			SshSettingInfo sshSettingInfo = tdaasUtil
+					.fromSshSettingRequest(sshSettingRequest);
+			SshSettingInfo existingSsh = imagePersistenceManager
+					.fetchSshByImageId(sshSettingRequest.getImage_id());
+			if (existingSsh.getId() != null
+					&& StringUtils.isNotBlank(existingSsh.getId())) {
+				sshSettingInfo.setId(existingSsh.getId());
+				sshSettingInfo.setImage(existingSsh.getImage());
+				// /sshSettingRequest.setId(existingSsh.getId());
+			}
+			imagePersistenceManager.updateSsh(sshSettingInfo);
+			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
+		} catch (DbException e) {
+			log.error("unable to update ssh info in database", e);
+			throw new DirectorException(
+					"Unable to update sshsetting info in database", e);
+		} catch (Exception e) {
+			throw new DirectorException("updateSshdata failed", e);
+		}
+
+	}
+	public void updateSshDataById(String sshId) throws DirectorException {
+				try{
+		imagePersistenceManager.updateSshById(sshId);
+		}catch(Exception e){
+			throw new DirectorException(
+					"Unable to updateSshDataById", e);
+		}
+	}
+
+	public void deleteSshSetting(String sshId) throws DirectorException {
+		try {
+			imagePersistenceManager.destroySshById(sshId);
+		} catch (DbException e) {
+			log.error("unable to delete ssh info in database", e);
+			throw new DirectorException(
+					"Unable to delete sshsetting info in database", e);
+		}
+
+	}
+
+	public SshSettingRequest fetchSshInfoByImageId(String image_id)
+			throws DirectorException {
+		try{	
+		TdaasUtil tdaasUtil = new TdaasUtil();
+		SshSettingInfo sshInfo = imagePersistenceManager
+				.fetchSshByImageId(image_id);
+
+		return tdaasUtil.toSshSettingRequest(sshInfo);
+		}catch(Exception e){
+			throw new DirectorException(
+					"Unable to updateSshDataById", e);
 		}
 	}
 	

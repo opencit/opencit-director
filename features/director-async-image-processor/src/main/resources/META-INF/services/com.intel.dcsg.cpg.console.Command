@@ -1,1 +1,1 @@
-com.intel.director.quartz.ImageActionScheduler
+com.intel.director.quartz.TrustDirectorScheduler
