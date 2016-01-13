@@ -1005,7 +1005,7 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
-		SshSettingResponse sshResponse = sshSettingRequest.validate();
+		SshSettingResponse sshResponse = sshSettingRequest.validate("add");
 		
 		if (StringUtils.isNotBlank(sshResponse.getError())) {
 			return sshResponse;
@@ -1065,7 +1065,7 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public SshSettingResponse updateHost(SshSettingRequest sshSettingRequest) {
-		SshSettingResponse sshResponse = sshSettingRequest.validate();
+		SshSettingResponse sshResponse = sshSettingRequest.validate("update");
 		if (StringUtils.isNotBlank(sshResponse.getError())) {
 			return sshResponse;
 		}
