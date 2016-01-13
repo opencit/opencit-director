@@ -81,17 +81,22 @@ public class SshSettingRequest extends AuditFields {
 		this.key = key;
 	}
 
-	public SshSettingResponse validate(String operation) {		
+	public SshSettingResponse validate(String operation) {
 		SshSettingResponse sshResponse = new SshSettingResponse();
-		if (StringUtils.isBlank(getImage_id())) {
-			sshResponse.setError("image_id not provided");			
-		} if (StringUtils.isBlank(getIpAddress()) && "update".equals(operation)) {			
+		if (StringUtils.isBlank(getIpAddress())) {
 			sshResponse.setError("No Ip adress provided");
 		} else if (StringUtils.isBlank(getUsername())) {
 			sshResponse.setError("No username provided");
 		} else if (StringUtils.isBlank(getPassword())) {
 			sshResponse.setError("No password provided");
 		}
+
+		if ("update".equals(operation)) {
+			if (StringUtils.isBlank(getImage_id())) {
+				sshResponse.setError("No image id provided");
+			}
+		}
+
 		return sshResponse;
 	}
 
