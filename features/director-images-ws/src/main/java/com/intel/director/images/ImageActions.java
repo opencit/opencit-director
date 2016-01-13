@@ -55,7 +55,7 @@ public class ImageActions {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
+	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * Input: action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
 	 * Output: {
 	 * "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
@@ -138,7 +138,7 @@ public class ImageActions {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
+	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * Input: { "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
 	 * "actions":[ {"task_name":"Create Tar"},
 	 * {"task_name":"Upload Tar","storename":"Glance"}]
@@ -214,7 +214,7 @@ public class ImageActions {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-actions
+	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * Input: PathParam =  actionId : CF0A8FA3-F73E-41E9-8421-112FB22BB057
 	 * Output: {"deleted": true}
 	 * 

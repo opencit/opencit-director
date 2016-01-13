@@ -313,36 +313,24 @@ update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
-echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
-# check if java is readable to the non-root user
-if [ -z "$JAVA_HOME" ]; then
-  java_detect
-fi
-if [ -n "$JAVA_HOME" ]; then
-  if [ $(whoami) == "root" ]; then
-    JAVA_USER_READABLE=$(sudo -u $DIRECTOR_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  else
-    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  fi
-  if [ -z "$JAVA_USER_READABLE" ]; then
-    # current location not readable, so use home directory
-    JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
+java_detect
+if ! java_ready; then
+  # java not installed, check if we have the bundle
+  JAVA_INSTALL_REQ_BUNDLE=$(ls -1 jdk-*.tar.gz 2>/dev/null | head -n 1)
+  if [ -n "$JAVA_INSTALL_REQ_BUNDLE" ]; then
+    director_java_install
+    java_detect
   fi
 fi
-mkdir -p $JAVA_HOME
-java_install_in_home $JAVA_PACKAGE
-echo "# $(date)" > $DIRECTOR_ENV/director-java
-echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
-echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
-echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
-
-
-
-# libguestfs-tools package has a custom prompt about installing supermin which ignores the “-y” option we provide to apt-get. Following code will help to avoid that prompt 
-export DEBIAN_FRONTEND=noninteractive
-echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
+if java_ready_report; then
+  echo "# $(date)" > $DIRECTOR_ENV/director-java
+  echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
+  echo "export JAVA_CMD=$java" >> $DIRECTOR_ENV/director-java
+else
+  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
+  exit 1
+fi
 
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
@@ -453,18 +441,17 @@ if [ -z "$SKIP_DATABASE_INIT" ]; then
  
  
  
-DIRECTOR_PORT_HTTP=${JETTY_PORT:-80}
-DIRECTOR_PORT_HTTPS=${JETTY_SECURE_PORT:-443} 
+ 
+ 
+
+
+
+ 
 # setup authbind to allow non-root director to listen on ports 80 and 443
-if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTP" -lt "1024" ]; then
-  touch /etc/authbind/byport/$DIRECTOR_PORT_HTTP
-  chmod 500 /etc/authbind/byport/$DIRECTOR_PORT_HTTP
-  chown $DIRECTOR_USERNAME /etc/authbind/byport/$DIRECTOR_PORT_HTTP
-fi
-if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTPS" -lt "1024" ]; then
-  touch /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
-  chmod 500 /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
-  chown $DIRECTOR_USERNAME /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
+if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
+  touch /etc/authbind/byport/80 /etc/authbind/byport/443
+  chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
+  chown $DIRECTOR_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
 fi
 
 # delete existing java files, to prevent a situation where the installer copies
@@ -543,8 +530,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
  director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
  director config mtwilson.navbar.hometab director-trust-policy >/dev/null
 
-  director config jetty.port $DIRECTOR_PORT_HTTP >/dev/null
-  director config jetty.secure.port $DIRECTOR_PORT_HTTPS >/dev/null
+  director config jetty.port ${JETTY_PORT:-80} >/dev/null
+  director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
 
   director setup
 fi

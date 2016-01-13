@@ -15,6 +15,7 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -129,6 +130,24 @@ public interface ImageService {
 
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException;
+	
+	public List<SshSettingRequest> sshData() throws DirectorException;
+
+	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
+			throws DirectorException ;
+	
+	public void postSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException;
+
+	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException;
+
+	public void updateSshDataById(String sshId) throws DirectorException;
+
+	public void deleteSshSetting(String sshId) throws DirectorException;
+
+	public SshSettingRequest fetchSshInfoByImageId(String image_id)
 			throws DirectorException;
 }
 

@@ -19,6 +19,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -47,6 +48,8 @@ import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
+import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
@@ -57,6 +60,7 @@ import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
+import com.intel.director.service.impl.SettingImpl;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.ShiroUtil;
@@ -73,7 +77,7 @@ public class Images {
 
 	ImageService imageService = new ImageServiceImpl();
 	LookupService lookupService = new LookupServiceImpl();
-
+	SettingImpl settingimpl = new SettingImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(Images.class);
 
@@ -86,10 +90,10 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/uploads/content/uploadMetadata
+	 * https://{IP/HOST_NAME}/v1/images
 	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
-	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
+	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","image_name":"test.img",
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
 	 * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
 	 * 
@@ -150,7 +154,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
+	 * https://{IP/HOST_NAME}/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
 	 * Input: chunk for image upload
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
@@ -166,7 +170,7 @@ public class Images {
 	 * </pre>
 	 * @param imageId
 	 *            - id received as response of
-	 *            https://server.com:8443/v1/images/
+	 *            https://{IP/HOST_NAME}/v1/images/
 	 *            uploads/content/uploadMetadata request
 	 * @param filInputStream
 	 *            - image data sent as chunk
@@ -213,13 +217,17 @@ public class Images {
 	 * 
 	 * This method gets the list of images based on the deployment type provided
 	 * as a query param. Providing the deployment type is optional. If provided
-	 * the value should be VM or BareMetal.
+	 * the value should be VM or BareMetal. edited_date field is updated in case of 
+	 * mounting and delete.image_upload_status can have values Incomplete and Complete. 
+	 * Since the upload happens in multiple steps, the status is Incomplete till the
+	 * sent field is equal to image_size. image_location is for internal server use and 
+       it can't accessed it directly. 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images
-	 * Input: deploymentType=VM (Example : https://server.com:8443/v1/images?deploymentType=VM)
+	 * https://{IP/HOST_NAME}/v1/images
+	 * Input: deploymentType=VM (Example : https://{IP/HOST_NAME}/v1/images?deploymentType=VM)
 	 * 
 	 * Output: {
 	 * "images": [
@@ -289,7 +297,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/465A8B27-7CC8-4A3C-BBBC-26161E3853CD
+	 * https://{IP/HOST_NAME}/v1/images/465A8B27-7CC8-4A3C-BBBC-26161E3853CD
 	 * Input: imageId : 465A8B27-7CC8-4A3C-BBBC-26161E3853CD
 	 * Output:
 	 * {
@@ -363,7 +371,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/rpc/mount-image
+	 * https://{IP/HOST_NAME}/v1/rpc/mount-image
 	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
 	 * {
@@ -437,14 +445,13 @@ public class Images {
 	 * and unmount the image. The default mount path is /mnt/director/UUID
 	 * 
 	 * As part of the unmount process, the MW_IMAGE.mounted_by_user_id field is
-	 * set to NULL again. the unmount process in the service, throws an
-	 * exception wrapped in DirectorException in case of any error.
+	 * set to NULL again. the unmount process in the service.
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/rpc/unmount-image
+	 * https://{IP/HOST_NAME}/v1/rpc/unmount-image
 	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
 	 * {
@@ -462,6 +469,9 @@ public class Images {
 	 *   "image_upload_status": "success",
 	 *   "image_Location": "/mnt/images/"
 	 * }
+	 * 
+	 * In case of error:
+	 * { “error”: “error message ” } 
 	 * 
 	 * </pre>
 	 * 
@@ -539,9 +549,9 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/search
+	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/search
 	 * Input: QueryPAram : dir=/boot/&recursive=false&files_for_policy=false&init=false&include_recursive=false&reset_regex=false
-	 * output: {"tree_content":"<Html containing the nested ul and li tags>", "patch_xml":"<pacth><list of add remove tags as per the operation></pacth>"}
+	 * output: {"tree_content":"<Html containing the nested ul and li tags>", "patch_xml":"<patch><list of add remove tags as per the operation></patch>"}
 	 * 
 	 * The output tag has the patch_xml set only in case in the following cases of the query parameters:
 	 * 1) recursive=true and files_for_policy=true
@@ -604,7 +614,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-deployments
+	 * https://{IP/HOST_NAME}/v1/image-deployments
 	 * Input: None
 	 * Output: {
 	 *   "image_deployments": [
@@ -637,7 +647,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-formats
+	 * https://{IP/HOST_NAME}/v1/image-formats
 	 * Input: None
 	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"}]}
 	 * </pre>
@@ -662,7 +672,7 @@ public class Images {
 	 * @return launch policy list
 	 * @TDMethodType GET
 	 * @TDSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-launch-policies
+	 * https://{IP/HOST_NAME}/v1/image-launch-policies
 	 * Input: QueryParam String deploymentType=VM
 	 * deploymentType can be VM , BareMetal or Docker
 	 * Output:
@@ -713,7 +723,7 @@ public class Images {
 	 * @throws DirectorException
 	 * @TDMethodType GET
 	 * @TDSampleRestCall <pre>
-	 * https://server.com:8443/v1/image-stores
+	 * https://{IP/HOST_NAME}/v1/image-stores
 	 * Input: NA
 	 * Output:
 	 * {
@@ -763,7 +773,7 @@ public class Images {
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 *  https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policy
+	 *  https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policy
 	 * Input: Image id as path param
 	 * Output: Content sent as stream
 	 * 
@@ -846,7 +856,7 @@ public class Images {
 	 * @mtwContentTypeReturned File
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policyAndManifest
+	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policyAndManifest
 	 * Input: Image UUID
 	 * Output: Content of tarball as stream
 	 * </pre>
@@ -908,7 +918,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/images/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: pass the UUID of the image as path param
 	 * Output: {"deleted": true}
 	 * In case of error:
@@ -937,4 +947,118 @@ public class Images {
 		return response;
 
 	}
+
+	/**
+	 * This method adds the host related details provided by the user. The
+	 * connection details are used to verify whether connection can be
+	 * established with the remote host.
+	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images/host
+	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * 
+	 * Output: {"deleted":false,"ip_address":"10.35.35.182","username":"root","image_name":"10.35.35.182","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"}
+	 * 
+	 * In case of error:
+	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Lets say the user does not provide the IP:
+	 * 
+	 * {
+	 *   "error": "No Ip address provided",
+	 *   "deleted": false
+	 * }
+	 * 
+	 * In case of any back end error, the error would contain the error occurred at the backed. 
+	 * 
+	 * </pre>
+	 * 
+	 * @param sshSettingRequest JSON representation of the connection details
+	 * @return Response containing the ID of the image created for the host 
+	 * @throws DirectorException
+	 */
+
+	@POST
+	@Path("images/host")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+		SshSettingResponse sshResponse = sshSettingRequest.validate();
+		
+		if (StringUtils.isNotBlank(sshResponse.getError())) {
+			return sshResponse;
+		}
+		try {
+			sshResponse = imageService.addHost(sshSettingRequest);
+		} catch (DirectorException e) {
+			log.error("Error while adding shh settings");
+			sshResponse.setError(e.getMessage());
+		}
+		return sshResponse;
+	}
+
+	/**
+	 * This method updates the host related details provided by the user. The
+	 * connection details are used to verify whether connection can be
+	 * established with the remote host. This call acts similar to the POST
+	 * call, only difference being it expects an image id for update. If that is
+	 * not provided the method returns an error.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PUT
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images/host
+	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9","name":"10.35.35.182"}
+	 * 
+	 * Output: 
+	 * {
+	 *   "deleted": false,
+	 *   "ip_address": "10.35.35.182",
+	 *   "username": "root",
+	 *   "image_name": "10.35.35.182",
+	 *   "image_id": "FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"
+	 * }
+	 * 
+	 * In case of error:
+	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Lets say the user does not provide the correct details to connect to the remote host :
+	 * 
+	 * {
+	 *   "error": "Unable to connect to remote host",
+	 *   "deleted": false
+	 * }
+	 * 
+	 * In case of any back end error, the error would contain the error occurred at the backed.
+	 * 
+	 * </pre>
+	 * 
+	 * @param sshSettingRequest
+	 *            JSON representation of the connection details
+	 * @return Response containing the ID of the image created for the host
+	 * @throws DirectorException
+	 */
+
+	@PUT
+	@Path("images/host")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public SshSettingResponse updateHost(SshSettingRequest sshSettingRequest) {
+		SshSettingResponse sshResponse = sshSettingRequest.validate();
+		if (StringUtils.isNotBlank(sshResponse.getError())) {
+			return sshResponse;
+		}
+
+		try {
+			sshResponse = imageService.updateSshData(sshSettingRequest);
+		} catch (DirectorException e) {
+			log.error("Error in updateHost");
+			sshResponse.setError(e.getMessage());
+		}
+		return sshResponse;
+
+	}
+
 }

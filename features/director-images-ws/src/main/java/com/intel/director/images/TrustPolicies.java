@@ -50,7 +50,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * 
 	 * Input: pass the UUID of the image as path param
 	 * Output: {
@@ -118,7 +118,7 @@ public class TrustPolicies {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * 
-	 * https://server.com:8443/v1/trust-policies/7897-232321-432423-4322
+	 * https://{IP/HOST_NAME}/v1/trust-policies/7897-232321-432423-4322
 	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
 	 * Output: 
 	 * In case of success : 
@@ -131,7 +131,7 @@ public class TrustPolicies {
 	 * @param createPolicyRequest
 	 * @return GenericResponse
 	 */
-	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+|}")
+	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -165,7 +165,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/rpc/apply-trust-policy-template
+	 * https://{IP/HOST_NAME}/v1/rpc/apply-trust-policy-template
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
 	 *  
 	 * Output: In case of success :: {"trust_policy":"<policy xml>"}
@@ -208,7 +208,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: UUID of the policy to be deleted
 	 * Output: In case of successful deletion:
 	 * {"deleted":true}
