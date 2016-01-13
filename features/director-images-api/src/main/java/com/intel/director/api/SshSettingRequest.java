@@ -81,11 +81,11 @@ public class SshSettingRequest extends AuditFields {
 		this.key = key;
 	}
 
-	public SshSettingResponse validate() {		
+	public SshSettingResponse validate(String operation) {		
 		SshSettingResponse sshResponse = new SshSettingResponse();
 		if (StringUtils.isBlank(getImage_id())) {
-			sshResponse.setError("image_id not provided");
-		} else if (StringUtils.isBlank(getIpAddress())) {
+			sshResponse.setError("image_id not provided");			
+		} if (StringUtils.isBlank(getIpAddress()) && "update".equals(operation)) {			
 			sshResponse.setError("No Ip adress provided");
 		} else if (StringUtils.isBlank(getUsername())) {
 			sshResponse.setError("No username provided");
