@@ -309,6 +309,7 @@ update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
 update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
+update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 
 
 # director requires java 1.7 or later
@@ -318,7 +319,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
 # check if java is readable to the non-root user
 if [ -z "$JAVA_HOME" ]; then
-  java_detect
+  java_detect > /dev/null
 fi
 if [ -n "$JAVA_HOME" ]; then
   if [ $(whoami) == "root" ]; then
@@ -326,10 +327,9 @@ if [ -n "$JAVA_HOME" ]; then
   else
     JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
   fi
-  if [ -z "$JAVA_USER_READABLE" ]; then
-    # current location not readable, so use home directory
-    JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
-  fi
+fi
+if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
+  JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
 fi
 mkdir -p $JAVA_HOME
 java_install_in_home $JAVA_PACKAGE
@@ -453,8 +453,8 @@ if [ -z "$SKIP_DATABASE_INIT" ]; then
  
  
  
-DIRECTOR_PORT_HTTP=${JETTY_PORT:-80}
-DIRECTOR_PORT_HTTPS=${JETTY_SECURE_PORT:-443} 
+DIRECTOR_PORT_HTTP=${DIRECTOR_PORT_HTTP:-${JETTY_PORT:-80}}
+DIRECTOR_PORT_HTTPS=${DIRECTOR_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
 # setup authbind to allow non-root director to listen on ports 80 and 443
 if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTP" -lt "1024" ]; then
   touch /etc/authbind/byport/$DIRECTOR_PORT_HTTP
