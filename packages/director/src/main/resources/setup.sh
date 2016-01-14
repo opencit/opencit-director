@@ -314,6 +314,7 @@ update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
 # check if java is readable to the non-root user
