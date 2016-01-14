@@ -45,7 +45,7 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy-drafts
+	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts
 	 * Input: NA
 	 * 
 	 * Output:
@@ -122,7 +122,7 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 *  https://server.com:8443/v1/trust-policy-drafts/ACD7747D-79BE-43E3-BAA5-7DBEC13D272
+	 *  https://{IP/HOST_NAME}/v1/trust-policy-drafts/ACD7747D-79BE-43E3-BAA5-7DBEC13D272
 	 *  
 	 * Input: PathParam String: trustPolicyDraftId=ACD7747D-79BE-43E3-BAA5-7DBEC13D272
 	 * 
@@ -190,7 +190,7 @@ public class TrustPolicyDrafts {
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
-	 * https://server.com:8443/v1/trust-policy-drafts/97c4b9d2-d0e6-42b5-a4e2-1642b01db21f
+	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts/97c4b9d2-d0e6-42b5-a4e2-1642b01db21f
 	 * Input: UUID of the image in path
 	 * {"patch":
 	 * "<patch></patch>"
@@ -259,7 +259,7 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 *  https://server.com:8443/v1/rpc/finalize-trust-policy-draft
+	 *  https://{IP/HOST_NAME}/v1/rpc/finalize-trust-policy-draft
 	 *  
 	 * Input
 	 * {"trust_policy_draft_id":"<UUID of trust policy draft>"}
@@ -271,8 +271,8 @@ public class TrustPolicyDrafts {
 	 * </pre>
 	 * 
 	 * 
-	 * @param image_id
-	 *            id of the image whose policy is being created
+	 * @param CreateTrustPolicyMetaDataRequest
+	 *            CreateTrustPolicyMetaDataRequest containing trust_policy_draft_id 
 	 * @return id of created trust policy
 	 */
 	@Path("rpc/finalize-trust-policy-draft")
@@ -314,7 +314,7 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy-drafts
+	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
 	 * 
 	 * Output: {"id":"50022e9c-577a-4bbd-9445-197a3e1a349f","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n <Director>\n <CustomerId>testId</CustomerId>\n </Director>\n <Image>\n <ImageId>08EB37D7-2678-495D-B485-59233EB51996</ImageId>\n <ImageHash>6413fccb72e36d2cd4b20efb5b5fe1be916ab60f0fe1d7e2aab1a2170be1ff40</ImageHash>\n </Image>\n <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n <Whitelist DigestAlg=\"sha256\">\n <File Path=\"/boot/grub/stage1\"></File>\n <File Path=\"/boot/grub/menu.lst\"></File>\n <File Path=\"/initrd.img\"></File>\n <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/config-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/initrd.img-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/grub/e2fs_stage1_5\"></File>\n <File Path=\"/boot/grub/stage2\"></File>\n </Whitelist>\n</TrustPolicy>\n"}
@@ -357,10 +357,10 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/rpc/create-draft-from-policy
+	 * https://{IP/HOST_NAME}/v1/rpc/create-draft-from-policy
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
 	 * 
-	 * Output: {"id":"<UUID of Policy draft>", "trust_policy_draft":"<XML representation of policy>", "display_name":"<name provided by user for the policy>", "imgAttributes":"{"id":"<UUID of image>", "image_format":"qcow2", ..... }"}
+	 * Output: {"id":"<UUID of Policy draft>", "trust_policy_draft":"<XML representation of policy>", "display_name":"<name provided by user for the policy>", "image_attributes":"{"id":"<UUID of image>", "image_format":"qcow2", ..... }"}
 	 * 
 	 * </pre>
 	 * 
@@ -390,11 +390,13 @@ public class TrustPolicyDrafts {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: UUID of the policy draft to be deleted
-	 * Output: Status of operation in json(Success/Error)
-	 * Success: {"status":"Success", details:""}
-	 * Error: {"status":"Error", details:""}
+	 * Output: In case of successful deletion:
+	 * {"deleted":true}
+	 * 
+	 * In case of error:
+	 * {"deleted":false; "error":"Error in deleting policy draft"}
 	 * </pre>
 	 * @param trustPolicyDraftId
 	 * @return GenericResponse

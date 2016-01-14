@@ -1,5 +1,7 @@
 package com.intel.director.api;
 
+import org.apache.commons.lang.StringUtils;
+
 
 public class SshSettingRequest extends AuditFields {
 	String ip_address;
@@ -9,15 +11,15 @@ public class SshSettingRequest extends AuditFields {
 	String id;
 	String key;
 	String image_id;
-	String policy_name;
+	///String policy_name;
 
-	public String getPolicy_name() {
+	/*public String getPolicy_name() {
 		return policy_name;
 	}
 
 	public void setPolicy_name(String policy_name) {
 		this.policy_name = policy_name;
-	}
+	}*/
 
 	public SshSettingRequest() {
 
@@ -77,6 +79,25 @@ public class SshSettingRequest extends AuditFields {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public SshSettingResponse validate(String operation) {
+		SshSettingResponse sshResponse = new SshSettingResponse();
+		if (StringUtils.isBlank(getIpAddress())) {
+			sshResponse.setError("No Ip adress provided");
+		} else if (StringUtils.isBlank(getUsername())) {
+			sshResponse.setError("No username provided");
+		} else if (StringUtils.isBlank(getPassword())) {
+			sshResponse.setError("No password provided");
+		}
+
+		if ("update".equals(operation)) {
+			if (StringUtils.isBlank(getImage_id())) {
+				sshResponse.setError("No image id provided");
+			}
+		}
+
+		return sshResponse;
 	}
 
 }

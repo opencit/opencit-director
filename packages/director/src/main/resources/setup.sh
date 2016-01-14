@@ -314,7 +314,6 @@ update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
-echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
 # check if java is readable to the non-root user
@@ -337,12 +336,6 @@ echo "# $(date)" > $DIRECTOR_ENV/director-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
-
-
-
-# libguestfs-tools package has a custom prompt about installing supermin which ignores the “-y” option we provide to apt-get. Following code will help to avoid that prompt 
-export DEBIAN_FRONTEND=noninteractive
-echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
 
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
