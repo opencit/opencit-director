@@ -61,6 +61,8 @@ public class UnmountImageHandler {
 				try {
 					ImageInfo imageInfo = persistService.fetchImageById(imageId);
 					imageInfo.setMounted_by_user_id(null);
+					imageInfo.setEdited_date(new Date());
+					imageInfo.setEdited_by_user_id("poller");
 					persistService.updateImage(imageInfo);
 				} catch (DbException e) {
 					log.error("Unable to set the mounted by user to null for image "+imageId, e);

@@ -459,7 +459,11 @@ public class TdaasUtil {
 		sshSettingInfo.setId(sshSettingRequest.getId());
 		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
 		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
-		sshSettingInfo.setName(sshSettingRequest.getName());
+		if (!StringUtils.isBlank(sshSettingRequest.getName())) {
+			sshSettingInfo.setName(sshSettingRequest.getName());
+		} else {
+			sshSettingInfo.setName(sshSettingRequest.getIpAddress());
+		}
 		sshSettingInfo
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());

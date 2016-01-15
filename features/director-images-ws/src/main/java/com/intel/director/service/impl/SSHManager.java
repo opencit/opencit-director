@@ -7,14 +7,12 @@ package com.intel.director.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
 import com.intel.director.common.Constants;
-import com.intel.mtwilson.Folders;
+import com.intel.director.common.DirectorUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -116,29 +114,13 @@ public class SSHManager {
 	
 	private String getSessionTimeout() {
 		log.info("inside getting session timeout");
-		FileReader reader = null;
 		String timeout = "30";
 
-		File configfile = new File(Folders.configuration() + File.separator
-				+ "director.properties");				
-		try {
-			reader = new FileReader(configfile);
-			Properties prop = new Properties();
-			prop.load(reader);
-			timeout = prop.getProperty("login.token.expires.minutes", "30");
-			log.info("session timeout in happy path = "+timeout);
-		} catch (IOException e) {
-			log.error("Error in reading config file", e);
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {
-				log.error("Error closing streams ");
-			}
-		}
-		log.info("session timeout in default path = "+timeout);
+		Properties prop = DirectorUtil.getPropertiesFile("director.properties");
+		timeout = prop.getProperty("login.token.expires.minutes", "30");
+		log.info("session timeout in happy path = " + timeout);
+
+		log.info("session timeout in default path = " + timeout);
 		return timeout;
 
 	}

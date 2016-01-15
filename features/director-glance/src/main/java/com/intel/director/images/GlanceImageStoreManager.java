@@ -37,51 +37,59 @@ public class GlanceImageStoreManager implements ImageStoreManager {
         glanceRsClient = GlanceRsClientBuilder.build(configuration);
     }
 
-    @Override
-    public String upload(File file, Map<String, String> imageProperties) throws ImageStoreException {
-    	String glanceid;
-        try {
-            //this is a 2 step process
-            //1) We will push the metadata and create an image id, which would be used later on for checking the status
-            //http://docs.openstack.org/developer/glance/glanceapi.html#reserve-a-new-image
-            glanceid = glanceRsClient.uploadImageMetaData(imageProperties);
-          ///  glanceResponse.id = "123";
-            //2) The actual transfer of image. This is an async process
-            //http://docs.openstack.org/developer/glance/glanceapi.html#add-a-new-image
-            uploadImage(file,imageProperties, glanceid);
-          return glanceid;
-            ////startPolling(file.geimageProperties, glanceid);
-        } catch (Exception e) {
-            throw new ImageStoreException("Error while uploading image to Glance", e);
-        }
-      
-    }
+	@Override
+	public String upload(File file, Map<String, String> imageProperties)
+			throws ImageStoreException {
+		String glanceid;
+		try {
+			// this is a 2 step process
+			// 1) We will push the metadata and create an image id, which would
+			// be used later on for checking the status
+			// http://docs.openstack.org/developer/glance/glanceapi.html#reserve-a-new-image
+			glanceid = glanceRsClient.uploadImageMetaData(imageProperties);
+			// / glanceResponse.id = "123";
+			// 2) The actual transfer of image. This is an async process
+			// http://docs.openstack.org/developer/glance/glanceapi.html#add-a-new-image
+			uploadImage(file, imageProperties, glanceid);
+			return glanceid;
+			// //startPolling(file.geimageProperties, glanceid);
+		} catch (Exception e) {
+			throw new ImageStoreException(
+					"Error while uploading image to Glance", e);
+		}
+
+	}
 
 
     
-    public ImageStoreUploadResponse fetchDetails(Map<String, String> imageProperties,String glanceId) throws ImageStoreException {
-    	
-    	try{
-    	return glanceRsClient.fetchDetails(imageProperties, glanceId);
-    	
-    	}catch(Exception e){
-    	 
-             throw new ImageStoreException("Error while fetchDetails if upload from Glance", e);
-         
-    	}
-    }
+	public ImageStoreUploadResponse fetchDetails(
+			Map<String, String> imageProperties, String glanceId)
+			throws ImageStoreException {
+
+		try {
+			return glanceRsClient.fetchDetails(imageProperties, glanceId);
+
+		} catch (Exception e) {
+
+			throw new ImageStoreException(
+					"Error while fetchDetails if upload from Glance", e);
+
+		}
+	}
     
     
 
-    private void uploadImage(File file, Map<String, String> imageProperties, String id) throws IOException {
-    	//  glanceRsClient.uploadImage(file,imageProperties,id);
-    	
-        System.out.println("Inside async uploadImage");
-        ImageTransferTask imageTransferTask = new ImageTransferTask(file,imageProperties,id, glanceRsClient);
-        System.out.println("Created TASK");
-        GlanceImageExecutor.submitTask(imageTransferTask);
-        System.out.println("Task submitted");
-    }
+	private void uploadImage(File file, Map<String, String> imageProperties,
+			String id) throws IOException {
+		// glanceRsClient.uploadImage(file,imageProperties,id);
+
+		System.out.println("Inside async uploadImage");
+		ImageTransferTask imageTransferTask = new ImageTransferTask(file,
+				imageProperties, id, glanceRsClient);
+		System.out.println("Created TASK");
+		GlanceImageExecutor.submitTask(imageTransferTask);
+		System.out.println("Task submitted");
+	}
     
     
     
