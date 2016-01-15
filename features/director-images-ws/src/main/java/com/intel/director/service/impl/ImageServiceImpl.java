@@ -105,6 +105,18 @@ public class ImageServiceImpl implements ImageService {
 		imagePersistenceManager = new DbServiceImpl();
 	}
 
+	public ImageInfo fetchImageById(String imageId) throws DirectorException{
+		ImageInfo image;
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException ex) {
+			log.error("Error in mounting image  ", ex);
+			throw new DirectorException("No image found with id: " + imageId,
+					ex);
+		}
+		return image;
+	}
+	
 	@Override
 	public MountImageResponse mountImage(String imageId, String user)
 			throws DirectorException {
@@ -1848,7 +1860,10 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Cannot fetch imageid imageId::" + imageId, e);
 			throw new DirectorException("Cannot fetch image by id", e);
 		}
-
+		if(imageInfo==null){
+			throw new DirectorException("Image does not exist");
+		}
+		
 		TrustPolicy existingTrustPolicy;
 		try {
 			existingTrustPolicy = imagePersistenceManager
@@ -2108,15 +2123,21 @@ public class ImageServiceImpl implements ImageService {
 	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId)
 			throws DirectorException {
 		ImportPolicyTemplateResponse importPolicyTemplateResponse;
-		ImageAttributes image;
-		try {
-			image = imagePersistenceManager.fetchImageById(imageId);
-		} catch (DbException ex) {
-			log.error("No image found during import of policy", ex);
-			throw new DirectorException("No image found with id: " + imageId,
-					ex);
-		}
-
+		ImageAttributes image=null;
+		
+			try {
+				image = imagePersistenceManager.fetchImageById(imageId);
+			} catch (DbException e3) {
+				log.error("Internal error occurred in fetching image");
+				throw new DirectorException(
+						"Internal error occurred in fetching image " + imageId,
+						e3);
+			}
+			if(image==null){
+			log.info("No image found during import of policy");
+			throw new DirectorException("No image found with id: " + imageId);
+		
+			}
 		if (image != null
 				&& !(image.getImage_deployments().equals(
 						Constants.DEPLOYMENT_TYPE_BAREMETAL) && image
@@ -2540,6 +2561,7 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			ImageInfo imageInfo = imagePersistenceManager
 					.fetchImageById(imageId);
+			
 			log.debug("image fetched for id: " + imageId);
 			imageInfo.setDeleted(true);
 			imagePersistenceManager.updateImage(imageInfo);

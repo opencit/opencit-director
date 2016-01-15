@@ -515,6 +515,9 @@ public class Mapper {
 	}
 
 	public ImageActionObject toTransferObject(MwImageAction mwImageAction) {
+		if(mwImageAction==null){
+			return null;
+		}
 		ImageActionObject imageActionObject = new ImageActionObject();
 		imageActionObject.setId(mwImageAction.getId());
 		imageActionObject.setImage_id(mwImageAction.getImage_id());
