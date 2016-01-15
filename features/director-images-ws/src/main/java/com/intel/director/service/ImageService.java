@@ -149,5 +149,7 @@ public interface ImageService {
 
 	public SshSettingRequest fetchSshInfoByImageId(String image_id)
 			throws DirectorException;
+	
+	public ImageInfo fetchImageById(String imageId) throws DirectorException;
 }
 

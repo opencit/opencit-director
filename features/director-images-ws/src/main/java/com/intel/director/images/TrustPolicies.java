@@ -109,23 +109,23 @@ public class TrustPolicies {
 	}
 
 	/**
+	 * This method is used to update the trust policy display name.
+	 * 
 	 * On the step 3/3 of the wizard for VM, when the user clicks on the "Upload
 	 * now" button, we accept the last moment changes in the name of the policy
-	 * and update it. This method just validates that the name given by the user
-	 * is unique
+	 * and update it. 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * 
-	 * https://{IP/HOST_NAME}/v1/trust-policies/7897-232321-432423-4322
-	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
+	 * https://{IP/HOST_NAME}/v1/trust-policies/d80ce469-39fd-4940-bb67-c0573551ce4c2
+	 * Input: UUID of trust policy in path {"display_name":"policy_renamed"}
 	 * Output: 
 	 * In case of success : 
-	 * { "status" : "success"}
+	 * {"status":"success","deleted":false}
 	 * 
 	 * In case of error such as policy name already exists:
-	 * { "error" : "Policy Name Already Exists" }
+	 * { "error" : "Policy Name Already Exists","deleted":false }
 	 * 
 	 * </pre>
 	 * @param createPolicyRequest
@@ -148,8 +148,8 @@ public class TrustPolicies {
 					trustPolicyId);
 		} catch (DirectorException de) {
 			log.error("Error updating policy name for : " + trustPolicyId, de);
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = de.getMessage();
+			//monitorStatus.status = Constants.ERROR;
+			//monitorStatus.details = de.getMessage();
 			monitorStatus.setError(de.getMessage());
 		}
 		return monitorStatus;

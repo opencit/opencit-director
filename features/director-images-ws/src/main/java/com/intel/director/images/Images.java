@@ -156,7 +156,7 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/images/uploads/content/upload/B79EDFE9-4690-42B7-B4F0-71C53E36368C
+	 * https://{IP/HOST_NAME}/v1/rpc/images/content/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * Input: chunk for image upload
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
@@ -375,7 +375,7 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/mount-image
-	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
+	 * Input: {"id" : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
 	 * {
 	 *   "created_by_user_id": "admin",
@@ -554,6 +554,9 @@ public class Images {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/search
 	 * Input: QueryPAram : dir=/boot/&recursive=false&files_for_policy=false&init=false&include_recursive=false&reset_regex=false
+	 * 
+	 * https://10.35.35.133/v1/images/E4770A39-024D-4A2A-989E-7EE1123E8204/search?dir=/&recursive=false&files_for_policy=false&init=true&include_recursive=false&reset_regex=false
+	 * 
 	 * output: {"tree_content":"<Html containing the nested ul and li tags>", "patch_xml":"<patch><list of add remove tags as per the operation></patch>"}
 	 * 
 	 * The output tag has the patch_xml set only in case in the following cases of the query parameters:
@@ -644,15 +647,16 @@ public class Images {
 	}
 
 	/**
-	 * Lookup method to fetch the image formats. Currently we return vhd and
-	 * qcow2 as JSON
+	 * Lookup method to fetch the image formats. Currently we return qcow2, vhd, vmdk, raw, vdi
+	 *  as JSON
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-formats
 	 * Input: None
-	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"}]}
+	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"},{"name": "vhd","display_name": "vhd"}
+	 * ,{"name": "vmdk","display_name": "vmdk"},{"name": "raw","display_name": "raw"},{"name": "vdi","display_name": "vdi"}]}
 	 * </pre>
 	 * @return list of image formats
 	 */
@@ -934,6 +938,8 @@ public class Images {
 	 * Output: {"deleted": true}
 	 * In case of error:
 	 * {"deleted": false , "error":"Error in deleteImage"}
+	 * 
+	 * 
 	 * </pre>
 	 * 
 	 * @mtwContentTypeReturned JSON
@@ -946,24 +952,28 @@ public class Images {
 	 * 
 	 * @param imageId
 	 *            Id of the image to be deleted
-	 * @return GenericResponse
+	 * @return Response
 	 */
 
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	public GenericResponse deleteImage(@PathParam("imageId") String imageId) {
+	public Response deleteImage(@PathParam("imageId") String imageId) {
 		GenericResponse response = new GenericResponse();
 		try {
-			imageService.deleteImage(imageId);
-			response.setDeleted(true);
+			if (imageService.fetchImageById(imageId) != null) {
+				imageService.deleteImage(imageId);
+				response.setDeleted(true);
+			} else {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
 		} catch (DirectorException e) {
 			log.error("Error in deleteImage ", e);
 			response.setDeleted(false);
-			response.setDetails(e.getMessage());
-			response.setError(e.getMessage());
+			///response.setDetails(e.getMessage());
+			response.setError("Error in deleteImage");
 		}
-		return response;
+		return Response.ok(response).build();
 
 	}
 

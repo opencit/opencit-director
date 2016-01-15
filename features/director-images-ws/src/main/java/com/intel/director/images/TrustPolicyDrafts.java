@@ -10,6 +10,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
@@ -186,7 +188,7 @@ public class TrustPolicyDrafts {
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType PUT
+	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
@@ -195,6 +197,19 @@ public class TrustPolicyDrafts {
 	 * {"patch":
 	 * "<patch></patch>"
 	 * }
+	 * 
+	 * Patch examples:-
+	 * 
+	 * i)Selecting initrd.img file
+	 * {"patch":"<patch><add pos=\"prepend\" sel='//*[local-name()=\"Whitelist\"]'><File Path=\"/initrd.img\"/></add></patch>"}
+	 * 
+	 * ii)Applying regex on boot folder :-
+	 * Include filter:- *.gz
+	 * 
+	 * {"patch":"<patch><add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\"/boot\" Include=\"*.gz\" Exclude=\"\" Recursive=\"false\"/>
+	 * </add><add pos=\"after\" sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\"/boot\"]'><File Path=\"/boot/tboot.gz\"/>
+	 * </add></patch>"}
+	 * 
 	 * Output: 
 	 * {
 	 *   "created_by_user_id": "admin",
@@ -240,7 +255,7 @@ public class TrustPolicyDrafts {
 			 */
 			log.debug("Updated policy draft trustPolicyXML : "
 					+ trustPolicyDraftXML);
-		} catch (DirectorException e) {
+		} catch (Exception e) {
 			// /response.setStatus(Constants.ERROR);
 			policyDraft = new TrustPolicyDraft();
 			policyDraft.setError(e.getMessage());
@@ -265,6 +280,8 @@ public class TrustPolicyDrafts {
 	 * {"trust_policy_draft_id":"<UUID of trust policy draft>"}
 	 * In case of a success, the response would be :
 	 * {"id":"14767a34-b5a4-4f84-be7a-7604670fe8b5"}
+	 * id returned in case of success response is id of trust policy created 
+	 * by this call by signing draft and generating hashes 
 	 * 
 	 * In case of error where signing with MTW fails: 
 	 * {"error":"Unable to sign the policy with MTW"}.
@@ -301,14 +318,9 @@ public class TrustPolicyDrafts {
 
 	/**
 	 * 
-	 * Creates an initial draft of policy. This method is invoked when the user,
-	 * navigates from the grid, where there is a "plus" icon for the trust
-	 * policy icon, indicating that there is no draft currently associated. When
-	 * the user navigates from the first screen of wizard to second, we create a
-	 * default trust policy, with no files in whitelist.
+	 * Creates an initial trust policy draft for image. 
 	 * 
-	 * image_display_name,launch_control_policy, and encrypted are mandatory
-	 * fields
+	 * image_id,display_name and launch_control_policy are mandatory fields
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
@@ -332,15 +344,24 @@ public class TrustPolicyDrafts {
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) {
 
 		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
-		try {
-			createTrustPolicyMetadataResponse = imageService
-					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
-		} catch (DirectorException e) {
-			log.error("createTrustPolicyMetaData failed", e);
-			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
-			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
-			createTrustPolicyMetadataResponse.setError(e.getMessage());
-			return createTrustPolicyMetadataResponse;
+		if (StringUtils.isBlank(createTrustPolicyMetaDataRequest
+				.getDisplay_name())) {
+			createTrustPolicyMetadataResponse.setError("Display Name is mandatory");
+		} else if (StringUtils.isBlank(createTrustPolicyMetaDataRequest.getLaunch_control_policy())) {
+			createTrustPolicyMetadataResponse.setError("Launch_control_policy is mandatory");
+		} else if (StringUtils.isBlank(createTrustPolicyMetaDataRequest.getImage_id())) {
+			createTrustPolicyMetadataResponse.setError("image_id is mandatory");
+		} else {
+			try {
+				createTrustPolicyMetadataResponse = imageService
+						.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
+			} catch (DirectorException e) {
+				log.error("createTrustPolicyMetaData failed", e);
+				// createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
+				// createTrustPolicyMetadataResponse.setDetails(e.getMessage());
+				createTrustPolicyMetadataResponse.setError("Unable to create policy draft");
+				return createTrustPolicyMetadataResponse;
+			}
 		}
 
 		return createTrustPolicyMetadataResponse;
@@ -365,7 +386,7 @@ public class TrustPolicyDrafts {
 	 * </pre>
 	 * 
 	 * @param imageId
-	 *            id of the imeage for which policy draft is being created
+	 *            id of the image for which policy draft is being created
 	 * @return TrustPolicyDraft - the created policy draft
 	 * @throws DirectorException
 	 */
@@ -373,15 +394,17 @@ public class TrustPolicyDrafts {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public TrustPolicyDraft createPolicyDraftFromPolicy(GenericRequest req)
-			throws DirectorException {
+			 {
+		TrustPolicyDraft trustPolicyDraft= new TrustPolicyDraft();
 		try {
-			return imageService.createPolicyDraftFromPolicy(req.getImage_id());
+			
+			trustPolicyDraft= imageService.createPolicyDraftFromPolicy(req.getImage_id());
 		} catch (DirectorException e) {
-			log.error("createPolicyDraftFromPolicy failed ");
-			throw new DirectorException(
-					"Error in creating draft again from policy", e);
+			log.error("createPolicyDraftFromPolicy failed ",e);
+			trustPolicyDraft.setError(e.getMessage());
+			
 		}
-
+		return trustPolicyDraft;
 	}
 
 	/**
