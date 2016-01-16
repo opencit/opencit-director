@@ -551,6 +551,9 @@ for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_JAVA $DIRECTOR
   chown -R $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $directory
 done
 
+director import-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
+director import-config --in=/opt/director/configuration/kms.properties --out=/opt/director/configuration/kms.properties
+director import-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
 # start the server, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"
