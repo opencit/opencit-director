@@ -13,14 +13,14 @@
 		<a href="#" style=" text-decoration:none; color:white; cursor:text;">Virtualized Server</a>
   		</span>
 		<span class="label label-primary">
-			<a href="#" onClick="goToBMPage()" style=" text-decoration:none; color:white;  ">Non Virtualized Server</a>
+			<a href="#" onClick="goToBMPage()" id="bmonline_dashboard_button" style=" text-decoration:none; color:white;  ">Non Virtualized Server</a>
 		</span></h4>
 		
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h1>Virtualized Server&nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh" title="Refresh" onclick="refresh_vm_images_Grid();"></span></a></h1>
+		<div class="panel-heading" id="vmgrid_panel_heading" >
+			<h1>Virtualized Server&nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh"  id="vmgrid_panel_refresh" title="Refresh" onclick="refresh_vm_images_Grid();"></span></a></h1>
 		</div>
-		<div class="panel-body">
+		<div class="panel-body" id="vmgrid_panel_body" >
 
 			<div class="row">
 				<div class="col-md-1"></div>

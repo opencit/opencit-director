@@ -18,6 +18,10 @@ import com.intel.director.exception.ImageStoreException;
  */
 public interface ImageStoreManager {
 
-	  public String upload(File file, Map<String, String> imageProperties) throws ImageStoreException;
-	    public ImageStoreUploadResponse fetchDetails(Map<String, String> imageProperties,String glanceId) throws ImageStoreException ;
+	public String upload(File file, Map<String, String> imageProperties)
+			throws ImageStoreException;
+
+	public ImageStoreUploadResponse fetchDetails(
+			Map<String, String> imageProperties, String glanceId)
+			throws ImageStoreException;
 }

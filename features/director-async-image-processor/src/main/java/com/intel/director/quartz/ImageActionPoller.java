@@ -8,7 +8,9 @@ package com.intel.director.quartz;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.async.ImageActionExecutor;
@@ -40,10 +42,12 @@ public class ImageActionPoller {
 		// Set the ImageActionObject
 		// Submit the task to the executor
 		ImageActionService imageActionImpl = new ImageActionImpl();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		log.info("*** Executing poller at : "+dateFormat.format(new Date()));
+		SimpleDateFormat dateFormat = new SimpleDateFormat(
+				"dd/MM/yyyy HH:mm:ss");
+		log.info("*** Executing poller at : " + dateFormat.format(new Date()));
 		List<ImageActionObject> incompleteImageActionObjects = new ArrayList<ImageActionObject>();
 		// Fetching the 10 records from DB
+		Set<String> imageIdsInProcess = new HashSet<>();
 		try {
 			incompleteImageActionObjects = imageActionImpl
 					.searchIncompleteImageAction(5);
@@ -60,11 +64,19 @@ public class ImageActionPoller {
 		for (ImageActionObject imageActionObj : incompleteImageActionObjects) {
 			log.info("ImageAction Object in poller (" + imageActionObj.getId()
 					+ "): Number of tasks: "
-					+ imageActionObj.getAction().size());
-			log.info("Current status of image action object:"+imageActionObj.getCurrent_task_status());
-			if (imageActionObj.getCurrent_task_status() != null && imageActionObj.getCurrent_task_status().equals(Constants.INCOMPLETE)) {
-				ExecuteActionsTask task = new ExecuteActionsTask(
-						imageActionObj);
+					+ imageActionObj.getActions().size());
+			log.info("Current status of image action object:"
+					+ imageActionObj.getCurrent_task_status());
+			if (imageIdsInProcess.contains(imageActionObj.getImage_id())) {
+				continue;
+			} else {
+				imageIdsInProcess.add(imageActionObj.getImage_id());
+			}
+
+			if (imageActionObj.getCurrent_task_status() != null
+					&& imageActionObj.getCurrent_task_status().equals(
+							Constants.INCOMPLETE)) {
+				ExecuteActionsTask task = new ExecuteActionsTask(imageActionObj);
 				ImageActionExecutor.submitTask(task);
 				log.info("Submitted task for ExecuteActions for id: "
 						+ imageActionObj.getId());

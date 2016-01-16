@@ -5,10 +5,13 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreSettings;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -254,7 +257,7 @@ public class Mapper {
 		mwImage.setImageFormat(imgAttributes.getImage_format());
 		mwImage.setLocation(imgAttributes.getLocation());
 		mwImage.setMountedByUserId(imgAttributes.getMounted_by_user_id());
-		mwImage.setName(imgAttributes.getName());
+		mwImage.setName(imgAttributes.getImage_name());
 		mwImage.setId(imgAttributes.getId());
 		mwImage.setStatus(imgAttributes.getStatus());
 		mwImage.setDeleted(imgAttributes.isDeleted());
@@ -280,7 +283,7 @@ public class Mapper {
 		imgInfo.setId(mwImage.getId());
 		imgInfo.setImage_deployments(mwImage.getImageDeploymentType());
 		imgInfo.setImage_format(mwImage.getImageFormat());
-		imgInfo.setName(mwImage.getName());
+		imgInfo.setImage_name(mwImage.getName());
 		imgInfo.setMounted_by_user_id(mwImage.getMountedByUserId());
 		imgInfo.setLocation(mwImage.getLocation());
 		imgInfo.setDeleted(mwImage.isDeleted());
@@ -387,23 +390,26 @@ public class Mapper {
 
 	public TrustPolicyDraft toTransferObject(
 			MwTrustPolicyDraft mwTrustPolicyDraft) {
-		TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
-		trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
-		trustPolicyDraft
-				.setTrust_policy_draft(fromCharacterArray(mwTrustPolicyDraft
-						.getTrustPolicyDraft()));
-		trustPolicyDraft.setName(mwTrustPolicyDraft.getName());
-		ImageAttributes imgAttributes = toTransferObject(mwTrustPolicyDraft
-				.getImage());
-		trustPolicyDraft.setImgAttributes(imgAttributes);
-		trustPolicyDraft.setCreated_by_user_id(mwTrustPolicyDraft
-				.getCreatedByUserId());
-		trustPolicyDraft.setEdited_by_user_id(mwTrustPolicyDraft
-				.getEditedByUserId());
-		trustPolicyDraft.setCreated_date(mwTrustPolicyDraft.getCreatedDate());
-		trustPolicyDraft.setEdited_date(mwTrustPolicyDraft.getEditedDate());
-		trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft.getDisplay_name());
-		return trustPolicyDraft;
+		if(mwTrustPolicyDraft!=null){
+			TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
+			trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
+			trustPolicyDraft
+					.setTrust_policy_draft(fromCharacterArray(mwTrustPolicyDraft
+							.getTrustPolicyDraft()));
+			trustPolicyDraft.setName(mwTrustPolicyDraft.getName());
+			ImageAttributes imgAttributes = toTransferObject(mwTrustPolicyDraft
+					.getImage());
+			trustPolicyDraft.setImgAttributes(imgAttributes);
+			trustPolicyDraft.setCreated_by_user_id(mwTrustPolicyDraft
+					.getCreatedByUserId());
+			trustPolicyDraft.setEdited_by_user_id(mwTrustPolicyDraft
+					.getEditedByUserId());
+			trustPolicyDraft.setCreated_date(mwTrustPolicyDraft.getCreatedDate());
+			trustPolicyDraft.setEdited_date(mwTrustPolicyDraft.getEditedDate());
+			trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft.getDisplay_name());
+			return trustPolicyDraft;
+		}
+		return null;
 	}
 
 	public MwImageUpload toData(
@@ -466,6 +472,9 @@ public class Mapper {
 	}
 
 	public Character[] toCharacterArray(String str) {
+		if(StringUtils.isBlank(str)){
+			return null;
+		}
 		char[] chars = str.toCharArray();
 
 		Character[] characters = new Character[chars.length];
@@ -477,6 +486,9 @@ public class Mapper {
 	}
 
 	public String fromCharacterArray(Character[] chars) {
+		if(ArrayUtils.isEmpty(chars)){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder(chars.length);
 		for (Character c : chars)
 			sb.append(c.charValue());
@@ -493,8 +505,8 @@ public class Mapper {
 		mwImageAction.setAction_size(imageaction.getAction_size());
 		mwImageAction.setAction_count(imageaction.getAction_count());
 		mwImageAction.setAction_completed(imageaction.getAction_completed());
-		if (imageaction.getAction() != null) {
-			mwImageAction.setAction(gson.toJson(imageaction.getAction()));
+		if (imageaction.getActions() != null) {
+			mwImageAction.setAction(gson.toJson(imageaction.getActions()));
 		}
 		mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageaction
@@ -503,6 +515,9 @@ public class Mapper {
 	}
 
 	public ImageActionObject toTransferObject(MwImageAction mwImageAction) {
+		if(mwImageAction==null){
+			return null;
+		}
 		ImageActionObject imageActionObject = new ImageActionObject();
 		imageActionObject.setId(mwImageAction.getId());
 		imageActionObject.setImage_id(mwImageAction.getImage_id());
@@ -517,7 +532,7 @@ public class Mapper {
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
 
-		List<ImageActionActions> taskList = new ArrayList<>();
+		List<ImageActionTask> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();
 		if (actions != null) {
 			actions = actions.replace("[", "").replace("]", "");
@@ -527,9 +542,9 @@ public class Mapper {
 				if (!s.endsWith("}")) {
 					s = s.concat("}");
 				}
-				ImageActionActions fromJson;
+				ImageActionTask fromJson;
 				try {
-					fromJson = mapper.readValue(s, ImageActionActions.class);
+					fromJson = mapper.readValue(s, ImageActionTask.class);
 					log.debug("TASK CREATED : " + fromJson.toString());
 					taskList.add(fromJson);
 
@@ -541,7 +556,7 @@ public class Mapper {
 		}
 		log.debug("No of tasks : " + taskList.size());
 		//
-		imageActionObject.setAction(taskList);
+		imageActionObject.setActions(taskList);
 		return imageActionObject;
 	}
 
@@ -550,7 +565,7 @@ public class Mapper {
 		Gson gson = new Gson();
 		mwImageAction.setId(imageActionObject.getId());
 		mwImageAction.setImage_id(imageActionObject.getImage_id());
-		mwImageAction.setAction(gson.toJson(imageActionObject.getAction()));
+		mwImageAction.setAction(gson.toJson(imageActionObject.getActions()));
 		mwImageAction.setAction_completed(imageActionObject
 				.getAction_completed());
 		mwImageAction.setAction_count(imageActionObject.getAction_count());
@@ -573,7 +588,7 @@ public class Mapper {
 		mwHost.setUsername(sshSetting.getUsername());
 		mwHost.setSshPassword(toData(sshSetting.getPassword()));
 		mwHost.setSshKey(toData(sshSetting.getSshKeyId()));
-		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
 		if (sshSetting.getCreated_date() != null) {
 			mwHost.setCreatedByUserId(sshSetting.getCreated_by_user_id());
@@ -599,7 +614,7 @@ public class Mapper {
 		sshSetting.setEdited_by_user_id(mwHost.getEditedByUserId());
 		sshSetting.setCreated_date(mwHost.getCreatedDate());
 		sshSetting.setEdited_date(mwHost.getEditedDate());
-		sshSetting.setImage_id(toTransferObject(mwHost.getImageId()));
+		sshSetting.setImage(toTransferObject(mwHost.getImageId()));
 		return sshSetting;
 	}
 
@@ -620,7 +635,7 @@ public class Mapper {
 		if (sshSetting.getEdited_date() != null) {
 			mwHost.setEditedByUserId(sshSetting.getEdited_by_user_id());
 		}
-		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
 		mwHost.setCreatedDate(sqlDate);
 		mwHost.setEditedDate(sqlDate);
@@ -628,12 +643,15 @@ public class Mapper {
 	}
 
 	public MwSshPassword toData(SshPassword sshPassword) {
+		if(sshPassword == null){
+			return null;
+		}
 		MwSshPassword mwSshPassword = new MwSshPassword();
 		mwSshPassword.setId(sshPassword.getId());
-		if (sshPassword.getKey() != null) {
-			mwSshPassword.setSshKey(toCharacterArray(sshPassword.getKey()));
-		} else {
+		if(sshPassword == null || sshPassword.getKey() == null){
 			mwSshPassword.setSshKey(null);
+		} else if (sshPassword.getKey() != null) {
+			mwSshPassword.setSshKey(toCharacterArray(sshPassword.getKey()));
 		}
 
 		return mwSshPassword;
@@ -707,7 +725,10 @@ public class Mapper {
 		if (policytemplate.getId() != null) {
 			mwpolicytemplate.setId(policytemplate.getId());
 		}
-		mwpolicytemplate.setContent(policytemplate.getContent());
+		mwpolicytemplate
+		.setContent(toCharacterArray(policytemplate.getContent()));
+		
+		
 		mwpolicytemplate
 				.setDeployment_type(policytemplate.getDeployment_type());
 		mwpolicytemplate.setActive(policytemplate.isActive());
@@ -720,7 +741,7 @@ public class Mapper {
 	public PolicyTemplateInfo toTransferObject(MwPolicyTemplate mwpolicytemplate) {
 		PolicyTemplateInfo policytemplate = new PolicyTemplateInfo();
 		policytemplate.setId(mwpolicytemplate.getId());
-		policytemplate.setContent(mwpolicytemplate.getContent());
+		policytemplate.setContent(fromCharacterArray(mwpolicytemplate.getContent()));
 		policytemplate.setDeployment_type(mwpolicytemplate.getDeployment_type());
 		policytemplate.setActive(mwpolicytemplate.isActive());
 		policytemplate.setName(mwpolicytemplate.getName());

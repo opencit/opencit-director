@@ -8,7 +8,6 @@
 </head>
 <body>
 	<script type="text/javascript">
-		var endpoint = "/v1/images/";
 		/*
 		var endpoint = "/v1";
 		function MainViewModel() {
@@ -38,7 +37,7 @@
 					<div class="col-md-8" style="margin-top: 10px;">
 						<div class="panel panel-default">
 							<div class="panel-heading">
-								<h1>Upload to Store Page</h1>
+								<h1>Upload to Image Store</h1>
 							</div>
 							<div class="panel-body">
 
@@ -112,16 +111,16 @@
 
 								<div class="col-md-offset-1 col-md-1">
 									<button type="button" onclick="createPolicyDraftFromPolicy()"
-										class="btn btn-primary">Previous</button>
+										class="btn btn-primary" id="vm_upload_previous">Previous</button>
 								</div>
 
 								<div class="col-md-offset-3 col-md-1">
 									<button type="button" class="btn btn-primary"
-										onclick="backToVmImagesPage()">Upload Later</button>
+										onclick="backToVmImagesPage()" id="vm_upload_later">Upload Later</button>
 								</div>
 
 								<div class="col-md-offset-3 col-md-1">
-									<button type="button" class="btn btn-primary" onclick="uploadToStore()">Upload
+									<button type="button" class="btn btn-primary" id="vm_upload_now" onclick="uploadToStore()">Upload
 										Now</button>
 								</div>
 								<!-- Modal -->

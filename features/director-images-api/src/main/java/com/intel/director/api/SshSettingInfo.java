@@ -11,9 +11,17 @@ public class SshSettingInfo extends AuditFields {
 	public String name;
 	public String id;
 	public SshKey ssh_key_id;
-	public ImageAttributes image_id;
+	public ImageAttributes image;
 	
 
+
+	public ImageAttributes getImage() {
+		return image;
+	}
+
+	public void setImage(ImageAttributes image) {
+		this.image = image;
+	}
 
 	public SshPassword getSshPassword() {
 		return sshPassword;
@@ -31,13 +39,7 @@ public class SshSettingInfo extends AuditFields {
 		this.ssh_key_id = ssh_key_id;
 	}
 
-	public ImageAttributes getImage_id() {
-		return image_id;
-	}
 
-	public void setImage_id(ImageAttributes image_id) {
-		this.image_id = image_id;
-	}
 
 	public SshSettingInfo() {
 
@@ -45,14 +47,14 @@ public class SshSettingInfo extends AuditFields {
 
 	public SshSettingInfo(String created_by_user_id, Date created_date,
 			String edited_by_user_id, Date edited_date, String ipAddress,
-			String username, SshPassword sshPassword, String name, SshKey ssh_key_id,ImageAttributes image_id) {
+			String username, SshPassword sshPassword, String name, SshKey ssh_key_id,ImageAttributes image) {
 		super(created_by_user_id, created_date, edited_by_user_id, edited_date);
 		this.ipAddress = ipAddress;
 		this.username = username;
 		this.sshPassword = sshPassword;
 		this.name = name;
 		this.ssh_key_id = ssh_key_id;
-		this.image_id = image_id;
+		this.image= image;
 	}
 
 	public String getId() {

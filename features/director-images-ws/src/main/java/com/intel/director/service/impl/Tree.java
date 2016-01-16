@@ -15,7 +15,7 @@ public class Tree {
 	public boolean explodedView = false;
 	public Set<String> dirPathsForEdit = null;
 	public String mountPath = null; 
-	public Set<String> directoryListContainingRegex = null;
+	public Set<TreeNodeDetail> directoryListContainingRegex = null;
 	
 	
 	public void setDirPathsForEdit(Set<String> dirPathsForEdit) {

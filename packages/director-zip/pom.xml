@@ -58,6 +58,13 @@
 			<classifier>feature</classifier>
 			<type>zip</type>
 		</dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.core</groupId>
+            <artifactId>mtwilson-core-html5-login-token</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <classifier>feature</classifier>
+            <type>zip</type>
+        </dependency>
 
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>

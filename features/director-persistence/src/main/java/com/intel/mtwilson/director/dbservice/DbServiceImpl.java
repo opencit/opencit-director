@@ -1,8 +1,6 @@
 package com.intel.mtwilson.director.dbservice;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +35,8 @@ import com.intel.director.api.ui.UserOrderBy;
 import com.intel.director.common.Constants;
 import com.intel.director.common.SettingFileProperties;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.director.dao.ImageActionDao;
 import com.intel.mtwilson.director.dao.ImageDao;
 import com.intel.mtwilson.director.dao.ImageStoreSettingsDao;
@@ -75,33 +75,21 @@ public class DbServiceImpl implements IPersistService {
 	SettingFileProperties settingFileProperties;
 
 	public DbServiceImpl() {
-		String filePath=Folders.configuration() + File.separator + "director.properties";
-		log.info("Inside DbServiceImpl filePath::"+filePath);
-		File configfile = new File(filePath);
-
-		FileReader reader=null;
-		try {
-			reader = new FileReader(configfile);
-		} catch (FileNotFoundException e) {
-			// TODO Handle Error
-			log.error("Unable to find director properties",e);
-		}
-
-		Properties prop = new Properties();
-
-		try {
-			prop.load(reader);
-		} catch (IOException e) {
-			// TODO Handle Error
-			log.error("Unable to read director properties",e);
-		}
 		
+		File customFile = new File( Folders.configuration() + File.separator + "director.properties" );
+		ConfigurationProvider provider;
 		Properties jpaProperties=new Properties();
-		jpaProperties.put("javax.persistence.jdbc.driver", prop.get(Constants.DIRECTOR_DB_DRIVER));
-		jpaProperties.put("javax.persistence.jdbc.url",prop.get(Constants.DIRECTOR_DB_URL) );
-		jpaProperties.put("javax.persistence.jdbc.user" ,prop.get(Constants.DIRECTOR_DB_USERNAME));
-		jpaProperties.put("javax.persistence.jdbc.password", prop.get(Constants.DIRECTOR_DB_PASSWORD));
+		try {
+		provider = ConfigurationFactory.createConfigurationProvider(customFile);
+		com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider.load();
+		jpaProperties.put("javax.persistence.jdbc.driver", loadedConfiguration.get(Constants.DIRECTOR_DB_DRIVER));
+		jpaProperties.put("javax.persistence.jdbc.url",loadedConfiguration.get(Constants.DIRECTOR_DB_URL) );
+		jpaProperties.put("javax.persistence.jdbc.user" ,loadedConfiguration.get(Constants.DIRECTOR_DB_USERNAME));
+		jpaProperties.put("javax.persistence.jdbc.password", loadedConfiguration.get(Constants.DIRECTOR_DB_PASSWORD));
 		
+		} catch (IOException e1) {
+			log.error("Failed to fetch database properties form director.properties",e1);
+		}
 		
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory("director_data_pu",jpaProperties);
@@ -116,15 +104,7 @@ public class DbServiceImpl implements IPersistService {
 		sshDao = new SshSettingDao(emf);
 		settingFileProperties = new SettingFileProperties();
 		policyTemplateDao = new PolicyTemplateDao(emf);
-		try {
-			if(reader != null)
-			{
-				reader.close();
-			}			
-		} catch (IOException e) {
-			// TODO Handle Error
-			log.error("Unable to close reader",e);
-		}
+		
 
 	}
 
@@ -189,8 +169,8 @@ public class DbServiceImpl implements IPersistService {
 		if (img.getSent() != null) {
 			mwImage.setSent(img.getSent());
 		}
-		if (img.getName() != null) {
-			mwImage.setName(img.getName());
+		if (img.getImage_name() != null) {
+			mwImage.setName(img.getImage_name());
 		}
 		if (img.getImage_size() != null) {
 			mwImage.setContentlength(img.getImage_size());
@@ -779,7 +759,11 @@ public class DbServiceImpl implements IPersistService {
 	 * .lang.String)
 	 */
 	public TrustPolicy fetchPolicyById(String id) throws DbException {
-		return mapper.toTransferObject(policyDao.findMwTrustPolicy(id));
+		MwTrustPolicy findMwTrustPolicy = policyDao.findMwTrustPolicy(id);
+		if(findMwTrustPolicy == null){
+			return null;
+		}
+		return mapper.toTransferObject(findMwTrustPolicy);
 	}
 
 	/*
@@ -1598,7 +1582,7 @@ public class DbServiceImpl implements IPersistService {
 	}
 
 	public void updateSsh(SshSettingInfo ssh) throws DbException {
-		MwImage mwImage = imgDao.getMwImage(ssh.getImage_id().getId());
+		MwImage mwImage = imgDao.getMwImage(ssh.getImage().getId());
 		mwImage.setName(ssh.getIpAddress());
 		
 		MwHost mwSsh = mapper.toDataUpdate(ssh);

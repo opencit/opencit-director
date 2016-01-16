@@ -98,7 +98,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logback.xml"}
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
-DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore director-envelope-key"}
+DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port director-envelope-key"}
 DIRECTOR_KMS_SETUP_TASKS=${DIRECTOR_KMS_SETUP_TASKS:-"director-envelope-key-registration"}
 
 # the standard PID file location /var/run is typically owned by root;
@@ -153,17 +153,7 @@ director_complete_setup() {
   if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA1" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
   	director_run setup $DIRECTOR_KMS_SETUP_TASKS
   fi
-  ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
-  if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
-    openssl s_client -connect ${MTWILSON_SERVER}:${MTWILSON_SERVER_PORT} 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/mtwcert.pem
-    $JAVA_HOME/jre/bin/keytool -import -noprompt -trustcacerts -alias mtwcert -file /tmp/mtwcert.pem -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass "$JAVA_KEYSTORE_PASSWORD"
-    rm /tmp/mtwcert.pem
-  else
-    echo_failure "Mtwilson server address or server port not defined"
-    return -1
-  fi
-  
-  
+
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order
@@ -243,7 +233,7 @@ scheduler_is_running() {
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # check the process list just in case the pid file is stale
-    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main image-action-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main trust-director-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # Scheduler is not running
@@ -295,7 +285,7 @@ scheduler_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main image-action-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main trust-director-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
       echo $! > $SCHEDULER_PID_FILE
     )
     if scheduler_is_running; then
@@ -326,15 +316,47 @@ scheduler_stop() {
 # they will not be removed, so you could configure DIRECTOR_CONFIGURATION=/etc/director
 # and DIRECTOR_REPOSITORY=/var/opt/director and then they would not be deleted by this.
 director_uninstall() {
-    remove_startup_script director
-    rm -f /usr/local/bin/director
-    rm -rf /opt/director
-    groupdel director > /dev/null 2>&1
-    userdel director > /dev/null 2>&1
-}
+director_stop
+scheduler_stop
+remove_startup_script director
+
+#unmount any images if any
+m_arr=($(mount | grep "/mnt/director/" | awk '{print $3}' ))
+for i in "${m_arr[@]}"
+   do
+		umount $i
+done
+rm -rf /mnt/director
+
+if [ "$2" = "--purge" ]; then
+	director export-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
+
+	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
+	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
+	DIRECTOR_DB_USER=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.username' | cut -d'=' -f2`
+
+	#sudo -u postgres psql postgres -c "update pg_database set datallowconn = 'false' where datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	#sudo -u postgres psql postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DIRECTOR_DB_NAME}';" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP DATABASE ${DIRECTOR_DB_NAME}" > /dev/null 2>&1
+	sudo -u postgres psql postgres -c "DROP USER ${DIRECTOR_DB_USER}" > /dev/null 2>&1
+
+	echo "Drop database ${DIRECTOR_DB_NAME}"
+
+	rm -rf /mnt/images
+fi
+
+rm -f /usr/local/bin/director
+rm -rf /opt/director
+groupdel director > /dev/null 2>&1
+userdel director > /dev/null 2>&1
+
+
+
+		
+  }
 
 print_help() {
-    echo "Usage: $0 start|stop|uninstall|version"
+    echo "Usage: $0 start|stop|uninstall|uninstall --purge|version"
     echo "Usage: $0 setup [--force|--noexec] [task1 task2 ...]"
     echo "Available setup tasks:"
     echo $DIRECTOR_SETUP_TASKS | tr ' ' '\n'
@@ -378,11 +400,11 @@ case "$1" in
       director_setup $*
     else
       director_complete_setup
-    fi
+	fi
     ;;
   uninstall)
     director_stop
-    director_uninstall
+    director_uninstall $*
     ;;
   start-scheduler)
     scheduler_start

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -52,13 +53,16 @@ import com.intel.director.api.MountHostResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.PolicyToHostResponse;
 import com.intel.director.api.PolicyToMountedImageResponse;
+import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SshKey;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftRequest;
+import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountHostResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
@@ -149,6 +153,9 @@ public class TdaasUtil {
 			String root, Map<String, Boolean> parentsList, boolean recursive) {
 		String mountPath = TdaasUtil.getMountPath(imageId);
 		File parent = new File(filePath).getParentFile();
+		if(parentsList.containsKey(parent.getAbsolutePath().replace(mountPath, ""))){
+			return;
+		}
 		if (parent == null
 				|| parent.getAbsolutePath().equals(getMountPath(imageId))) {
 			return;
@@ -173,7 +180,7 @@ public class TdaasUtil {
 		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
 				: DirectorUtil.getDirectorId());
 		Image image = new Image();
-		image.setImageId(createTrustPolicyMetaDataRequest.getImageid());
+		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
 		policy.setLaunchControlPolicy(LaunchControlPolicy
 				.fromValue(createTrustPolicyMetaDataRequest
@@ -288,7 +295,7 @@ public class TdaasUtil {
 		imageAttributes.image_size = 1000;
 		imageAttributes.location = "/opt/director/vm/" + imageId;
 		imageAttributes.mounted_by_user_id = null;
-		imageAttributes.name = "IMG_" + imageId;
+		imageAttributes.image_name = "IMG_" + imageId;
 		imageAttributes.status = null;
 
 		TrustDirectorImageUploadResponse directorImageUploadResponse = mapImageAttributesToTrustDirectorImageUploadResponse(imageAttributes);
@@ -341,25 +348,27 @@ public class TdaasUtil {
 			// log.debug("Result of execute command: "+result);
 		} catch (InterruptedException ex) {
 			// log.error(null, ex);
-			log.error("error in executeShellCommand()",ex);
+			log.error("error in executeShellCommand()", ex);
 		} catch (IOException ex) {
 			// log.error(null, ex);
-			log.error("error in executeShellCommand()",ex);
-		}finally{
-			if(reader != null)
-			{
+			log.error("error in executeShellCommand()", ex);
+		} finally {
+			if (reader != null) {
 				try {
 					reader.close();
 				} catch (IOException e) {
-					log.error("error in closing reader in executeShellCommand()",e);
+					log.error(
+							"error in closing reader in executeShellCommand()",
+							e);
 				}
 			}
-			if(p != null && p.getInputStream() != null)
-			{
+			if (p != null && p.getInputStream() != null) {
 				try {
 					p.getInputStream().close();
 				} catch (IOException e) {
-					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+					log.error(
+							"error in closing p.getInputStream() in executeShellCommand()",
+							e);
 				}
 			}
 		}
@@ -423,7 +432,7 @@ public class TdaasUtil {
 		sshSettingRequest.setEdited_by_user_id(sshSettingInfo
 				.getEdited_by_user_id());
 		sshSettingRequest.setEdited_date(sshSettingInfo.getEdited_date());
-		sshSettingRequest.setImage_id(sshSettingInfo.getImage_id().getId());
+		sshSettingRequest.setImage_id(sshSettingInfo.getImage().getId());
 		return sshSettingRequest;
 
 	}
@@ -450,11 +459,15 @@ public class TdaasUtil {
 		sshSettingInfo.setId(sshSettingRequest.getId());
 		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
 		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
-		sshSettingInfo.setName(sshSettingRequest.getName());
+		if (!StringUtils.isBlank(sshSettingRequest.getName())) {
+			sshSettingInfo.setName(sshSettingRequest.getName());
+		} else {
+			sshSettingInfo.setName(sshSettingRequest.getIpAddress());
+		}
 		sshSettingInfo
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
-		sshSettingInfo.setImage_id(toImage(sshSettingRequest.getImage_id(),
+		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
 				sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername()));
 		return sshSettingInfo;
@@ -470,16 +483,16 @@ public class TdaasUtil {
 		img.setCreated_date(new Date());
 		img.setEdited_date(new Date());
 		img.setDeleted(false);
-		if(StringUtils.isNotBlank(id)){
+		if (StringUtils.isNotBlank(id)) {
 			img.setId(id);
 		}
 		img.setImage_deployments("BareMetal");
 		img.setImage_format(null);
 		img.setImage_size(null);
 		img.setLocation(null);
-		img.setName(ip);
+		img.setImage_name(ip);
 		img.setSent(null);
-		img.setStatus(null);
+		img.setStatus(Constants.COMPLETE);
 		return img;
 	}
 
@@ -504,7 +517,7 @@ public class TdaasUtil {
 		DateFormat df = new SimpleDateFormat();
 		imageUploadRequest.setDate(df.format(obj.getDate()));
 		imageUploadRequest.setImage_format(obj.getImg().getImage_format());
-		imageUploadRequest.setName(obj.getImg().getName());
+		imageUploadRequest.setName(obj.getImg().getImage_name());
 
 		return imageUploadRequest;
 	}
@@ -543,7 +556,6 @@ public class TdaasUtil {
 		return unmountHostResponse;
 	}
 
-
 	public static void getParentDirectory(String filePath, String root,
 			Map<String, Boolean> parentsList, boolean recursive) {
 		File parent = new File(filePath).getParentFile();
@@ -580,7 +592,7 @@ public class TdaasUtil {
 		imagesReadyToDeploy.setEdited_by_user_id(img.getEdited_by_user_id());
 		imagesReadyToDeploy.setEdited_date(img.getEdited_date());
 		imagesReadyToDeploy.setImage_format(img.getImage_format());
-		imagesReadyToDeploy.setImage_name(img.getName());
+		imagesReadyToDeploy.setImage_name(img.getImage_name());
 		imagesReadyToDeploy.setUser(img.getCreated_by_user_id());
 		return imagesReadyToDeploy;
 	}
@@ -607,27 +619,48 @@ public class TdaasUtil {
 
 	}
 
+	public static String checkInstalledComponents(String imageid) throws DirectorException{
+		String idendifier = "NV";
+		String vrtmDirPath = "/opt/vrtm";
+		String tbootDirPath = "/opt/tbootxm";
+		String trustagentDirPath = "/opt/trustagent";
+		File vrtmDir = new File(getMountPath(imageid) +File.separator+ vrtmDirPath);
+		File tbootDir = new File(getMountPath(imageid) +File.separator+ tbootDirPath);
+		File trustagentDir = new File(getMountPath(imageid) +File.separator+ trustagentDirPath);
+		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
+			idendifier = "V";
+		}else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists() && trustagentDir.isDirectory()) {
+			idendifier = "NV";
+		}else{
+			throw new DirectorException("Expected CIT components not present");
+		}
+		return idendifier;
+	}
+	
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
-		//TODO Unused after assignment
+		// TODO Unused after assignment
 		boolean flag = false;
 		try {
 
-			SSHManager instance = new SSHManager(username, password, ip, "~/.ssh/known_hosts");
-			String message = instance.connect();
+			SSHManager instance = new SSHManager(username, password, ip,
+					"~/.ssh/known_hosts");
+			String message = instance.testConnect();
 
-			if (Constants.SUCCESS.equals(message) ) {
+			if (Constants.SUCCESS.equals(message)) {
 				log.debug("User home is {}", System.getProperty("user.home"));
 				if (!Files.exists(Paths.get(System.getProperty("user.home")
 						+ "/.ssh"))) {
 					ExecUtil.executeQuoted("/bin/bash", "-c", "mkdir ~/.ssh");
-				}		
-				
+				}
+
 				if (!Files.exists(Paths.get(System.getProperty("user.home")
 						+ "/.ssh/known_hosts"))) {
-					ExecUtil.executeQuoted("/bin/bash", "-c", "touch ~/.ssh/known_hosts");
-					ExecUtil.executeQuoted("/bin/bash", "-c", "chmod 666 ~/.ssh/known_hosts");
+					ExecUtil.executeQuoted("/bin/bash", "-c",
+							"touch ~/.ssh/known_hosts");
+					ExecUtil.executeQuoted("/bin/bash", "-c",
+							"chmod 666 ~/.ssh/known_hosts");
 				}
 
 				Result result = ExecUtil.executeQuoted("/bin/sh", "-c",
@@ -663,8 +696,8 @@ public class TdaasUtil {
 
 	}
 
-	public static boolean checkSshConnection(String ipaddress,
-			String username, String password) throws IOException {
+	public static boolean checkSshConnection(String ipaddress, String username,
+			String password) throws IOException {
 		SSHClient ssh = new SSHClient();
 		log.debug("Trying to connect IP :: " + ipaddress);
 		ssh.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
@@ -689,10 +722,12 @@ public class TdaasUtil {
 
 		for (Measurement measurement : measurements) {
 			if (measurement instanceof DirectoryMeasurement) {
+				DirectoryMeasurement directoryMeasurement = (DirectoryMeasurement) measurement;
 				DirectoryMeasurementType directoryMeasurementType = new DirectoryMeasurementType();
 				directoryMeasurementType.setPath(measurement.getPath());
-				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude());
+				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude()); 
 				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
+				directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
 				manifestList.add(directoryMeasurementType);
 				
 			} else if (measurement instanceof FileMeasurement) {
@@ -707,8 +742,8 @@ public class TdaasUtil {
 		return result;
 	}
 
-	public static String computeHash(MessageDigest md, File file) throws IOException
-			  {
+	public static String computeHash(MessageDigest md, File file)
+			throws IOException {
 		if (!file.exists()) {
 			return null;
 		}
@@ -721,8 +756,8 @@ public class TdaasUtil {
 			is = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			log.error("error :: input file doesn't exists",e);
-			throw new IOException("input file doesn't exists",e);
+			log.error("error :: input file doesn't exists", e);
+			throw new IOException("input file doesn't exists", e);
 		}
 
 		try {
@@ -731,29 +766,118 @@ public class TdaasUtil {
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("error in reading from file",e);
-			
-			throw new IOException("error in reading from file",e);
-		}finally{
+			log.error("error in reading from file", e);
+
+			throw new IOException("error in reading from file", e);
+		} finally {
 			try {
 				is.close();
 			} catch (IOException ioe) {
 				// TODO Auto-generated catch block
-				log.error("error in closing stream",ioe);
-				throw new IOException("error in closing stream",ioe);
+				log.error("error in closing stream", ioe);
+				throw new IOException("error in closing stream", ioe);
 			}
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
-	
+
 		return result;
 
 	}
 
-	public static SshSettingRequest convertSshInfoToRequest(SshSettingInfo info) {
-		SshSettingRequest setting = new SshSettingRequest();
-		setting.setImage_id(info.getImage_id().getId());
-		return setting;
+	public static SshSettingResponse convertSshInfoToResponse(SshSettingInfo info) {
+		SshSettingResponse sshResponse = new SshSettingResponse();
+		sshResponse.setImage_id(info.getImage().getId());
+		sshResponse.setImage_name(info.getImage().getImage_name());
+		sshResponse.setIp_address(info.getIpAddress());
+		///sshResponse.setKey(info.getK);
+		sshResponse.setUsername(info.getUsername());
+		return sshResponse;
 	}
 
+	public SearchFilesInImageRequest mapUriParamsToSearchFilesInImageRequest(
+			UriInfo uriInfo) {
+		SearchFilesInImageRequest searchFilesInImageRequest = new SearchFilesInImageRequest();
+
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("dir")))) {
+			searchFilesInImageRequest.dir = uriInfo.getQueryParameters()
+					.getFirst(("dir"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("include")))) {
+			searchFilesInImageRequest.include = uriInfo.getQueryParameters()
+					.getFirst(("include"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("exclude")))) {
+			searchFilesInImageRequest.exclude = uriInfo.getQueryParameters()
+					.getFirst(("exclude"));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("recursive")))) {
+			searchFilesInImageRequest.recursive = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("recursive")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("include_recursive")))) {
+			searchFilesInImageRequest.include_recursive = Boolean
+					.parseBoolean(uriInfo.getQueryParameters().getFirst(
+							("include_recursive")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("files_for_policy")))) {
+			searchFilesInImageRequest.files_for_policy = Boolean
+					.parseBoolean(uriInfo.getQueryParameters().getFirst(
+							("files_for_policy")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("reset_regex")))) {
+			searchFilesInImageRequest.reset_regex = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("reset_regex")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters().getFirst(
+				("init")))) {
+			searchFilesInImageRequest.init = Boolean.parseBoolean(uriInfo
+					.getQueryParameters().getFirst(("init")));
+		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters()
+				.getFirst(("id")))) {
+			searchFilesInImageRequest.id = uriInfo.getQueryParameters()
+					.getFirst(("id"));
+		}
+		return searchFilesInImageRequest;
+	}
+
+	public static TrustPolicyResponse convertTrustPolicyToTrustPolicyResponse(
+			com.intel.director.api.TrustPolicy trustPolicy) throws JAXBException {
+		TrustPolicyResponse tpr = new TrustPolicyResponse();
+		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
+		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+				.createUnmarshaller();
+
+		StringReader reader = new StringReader(trustPolicy.getTrust_policy());
+		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+		
+		tpr.setCreated_by_user_id(trustPolicy.getCreated_by_user_id());
+		tpr.setCreated_date(trustPolicy.getCreated_date());
+		tpr.setDescription(trustPolicy.getDescription());
+		tpr.setDisplay_name(trustPolicy.getDisplay_name());
+		tpr.setEdited_by_user_id(trustPolicy.getEdited_by_user_id());
+		tpr.setEdited_date(trustPolicy.getEdited_date());
+		if(policy.getEncryption() == null )	{
+			tpr.setEncrypted(false);
+		}
+		else{
+			tpr.setEncrypted(true);
+		}
+		tpr.setId(trustPolicy.getId());
+		tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+		tpr.setImgAttributes(trustPolicy.getImgAttributes());
+		tpr.setName(trustPolicy.getName());
+		tpr.setTrust_policy(trustPolicy.getTrust_policy());
+
+		return tpr;
+		
+	}
 }

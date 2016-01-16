@@ -2,8 +2,8 @@ package com.intel.director.async.task;
 
 import java.util.List;
 
-import com.intel.director.api.ImageActionActions;
 import com.intel.director.api.ImageActionObject;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
 
@@ -19,13 +19,13 @@ public class ExecuteActionsTask implements Runnable {
 
 	@Override
 	public void run() {
-		List<ImageActionActions> imageActions = imageActionObj.getAction();
+		List<ImageActionTask> imageActions = imageActionObj.getActions();
 		log.info("Number of tasks for this image action ("
 				+ imageActionObj.getId() + "): "
-				+ imageActionObj.getAction().size());
+				+ imageActionObj.getActions().size());
 		// iterate over tasks from each image action object
 		for (int i = 0; i < imageActions.size(); i++) {
-			ImageActionActions taskToBeExecuted = getNextActionToBeExecuted(imageActions);
+			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
 				return;
 			}
@@ -33,7 +33,7 @@ public class ExecuteActionsTask implements Runnable {
 			String imageStore = taskToBeExecuted.getStorename();
 			log.info("Task being executed: " + task_name);
 
-			ImageActionTask task = ImageActionTaskFactory.getImageActionTask(
+			ImageActionAsyncTask task = ImageActionTaskFactory.getImageActionTask(
 					task_name, imageStore);
 			if(task == null){
 				return;
@@ -46,6 +46,11 @@ public class ExecuteActionsTask implements Runnable {
 				log.info("Processing stopped for action: "+imageActionObj.getId());
 				return;
 			}
+			
+			if(i == (imageActions.size() - 1)){
+				imageActionObj.setCurrent_task_name(null);
+				imageActionObj.setCurrent_task_status(null);
+			}
 		}
 	}
 
@@ -56,10 +61,10 @@ public class ExecuteActionsTask implements Runnable {
 	 *            List of tasks to be executed
 	 * @return The task to be executed. This task is in INCOMPLETE status
 	 */
-	private ImageActionActions getNextActionToBeExecuted(
-			List<ImageActionActions> list) {
-		ImageActionActions ret = null;
-		for (ImageActionActions imageActionsActions : list) {
+	private ImageActionTask getNextActionToBeExecuted(
+			List<ImageActionTask> list) {
+		ImageActionTask ret = null;
+		for (ImageActionTask imageActionsActions : list) {
 			log.info("imageActionsActions.getStatus() : "
 					+ imageActionsActions.getStatus());
 			if (imageActionsActions.getStatus().equals(Constants.INCOMPLETE)) {

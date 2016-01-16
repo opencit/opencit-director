@@ -10,18 +10,18 @@
 
 </br>
 		<h4><span class="label label-primary">
-		<a href="#" style=" text-decoration:none; color:white;" onClick="goToVMPage()" >Virtualized Server</a>
+		<a href="#" style=" text-decoration:none; color:white;" id="vm_dashboard_button" onClick="goToVMPage()" >Virtualized Server</a>
   		</span>
 		<span class="label label-default">
 			<a href="#"  style=" text-decoration:none; color:white;  cursor:text;">Non Virtualized Server</a>
 		</span></h4>
 		
 		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h1>Non-Virtualized Server &nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh" title="Refresh" onclick="refreshBMOnlineGrid();"></span></a></h1>
+			<div class="panel-heading" id="bmonlinegrid_panel_heading" >
+				<h1>Non-Virtualized Server &nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh" id="bmonlinegrid_panel_refresh" title="Refresh" onclick="refreshBMOnlineGrid();"></span></a></h1>
 </h1>
 			</div>
-			<div class="panel-body">
+			<div class="panel-body" id="bmonlinegrid_panel_body">
 				
 				<div class="row">
 					<div class="col-md-1"></div>

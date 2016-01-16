@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.configuration.BaseConfiguration;
 
 import com.intel.dcsg.cpg.configuration.CommonsConfiguration;
 import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.api.ImageActionActions;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -22,6 +21,8 @@ import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.imagestore.ImageStoreManager;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 
 /**
  * Superclass for all upload tasks
@@ -29,7 +30,7 @@ import com.intel.mtwilson.Folders;
  * @author Siddharth
  * 
  */
-public abstract class UploadTask extends ImageActionTask {
+public abstract class UploadTask extends ImageActionAsyncTask {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(UploadTask.class);
 	public File content = null;
@@ -136,35 +137,49 @@ public abstract class UploadTask extends ImageActionTask {
 	private boolean runUploadTask() {
 		boolean runFlag = false;
 		FileReader reader = null;
+
+		/*
+		 * TODO:- Fetch classname from database based on imagestorename
+		 * imageStoreManager=getImageStoreImpl(classname);
+		 * 
+		 * Fetch Glance parameters from property file
+		 */
+
+		org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
+		Configuration configuration = new CommonsConfiguration(apacheConfig);
+
+		File customFile = new File(Folders.configuration() + File.separator
+				+ "director.properties");
+		ConfigurationProvider provider;
+
 		try {
-
-			/*
-			 * TODO:- Fetch classname from database based on imagestorename
-			 * imageStoreManager=getImageStoreImpl(classname);
-			 * 
-			 * Fetch Glance parameters from property file
-			 */
-
-			File configfile = new File(Folders.configuration() + File.separator
-					+ "director.properties");
-			org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
-			Configuration configuration = new CommonsConfiguration(apacheConfig);
-			reader = new FileReader(configfile);
-
-			Properties prop = new Properties();
-
-			prop.load(reader);
+			provider = ConfigurationFactory
+					.createConfigurationProvider(customFile);
+			com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider
+					.load();
 
 			configuration.set(Constants.GLANCE_IP,
-					prop.getProperty(Constants.GLANCE_IP));
+					loadedConfiguration.get(Constants.GLANCE_IP));
 			configuration.set(Constants.GLANCE_PORT,
-					prop.getProperty(Constants.GLANCE_PORT));
+					loadedConfiguration.get(Constants.GLANCE_PORT));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_USERNAME,
-					prop.getProperty(Constants.GLANCE_IMAGE_STORE_USERNAME));
+					loadedConfiguration
+							.get(Constants.GLANCE_IMAGE_STORE_USERNAME));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_PASSWORD,
-					prop.getProperty(Constants.GLANCE_IMAGE_STORE_PASSWORD));
+					loadedConfiguration
+							.get(Constants.GLANCE_IMAGE_STORE_PASSWORD));
 			configuration.set(Constants.GLANCE_TENANT_NAME,
-					prop.getProperty(Constants.GLANCE_TENANT_NAME));
+					loadedConfiguration.get(Constants.GLANCE_TENANT_NAME));
+		} catch (IOException e1) {
+			log.error(
+					"Failed to fetch glance properties form director.properties",
+					e1);
+			updateImageActionState(Constants.ERROR,
+					"Failed to fetch glance properties form director.properties");
+			return false;
+		}
+
+		try {
 			ImageStoreManager imageStoreManager = new GlanceImageStoreManager(
 					configuration);
 
@@ -175,7 +190,7 @@ public abstract class UploadTask extends ImageActionTask {
 			System.out.println("Inside runUpload Task filename::"
 					+ content.getName() + " imageProperties::"
 					+ imageProperties);
-			ImageActionActions imageActionTask = getImageActionTaskFromArray();
+			ImageActionTask imageActionTask = getImageActionTaskFromArray();
 			if (imageActionTask != null && imageActionTask.getUri() == null) {
 				glanceId = imageStoreManager.upload(content, imageProperties);
 
@@ -185,78 +200,86 @@ public abstract class UploadTask extends ImageActionTask {
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
 			int size = (int) (content.length() / 1024);
+			double dataSize = (content.length() / 1024);
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = imageStoreUploadResponse.getSent() / 1024;
-			while (sent != size) {
+			int sent = (int) imageStoreUploadResponse.getSent() / 1024;
+			double dataSent = imageStoreUploadResponse.getSent() / 1024;
+			while (dataSent != dataSize) {
 
 				log.debug("##################Inside while loop size::" + size
 						+ " sent::" + sent);
 				// / Date currentTime = new Date();
 				imgAttrs = new ImageAttributes();
 				imgAttrs.setId(imageActionObject.getImage_id());
+				// / imageUploadTransferObject.setImg(imgAttrs);
+				// / imageUploadTransferObject.setImage_size(size);
+
+				// / imageUploadTransferObject.setSent(sent);
+				updateImageActionContentSent(sent, size);
+				// / imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
+
+				// / imageUploadTransferObject.setDate(new Date());
+				// /
+				// imageUploadTransferObject.setChecksum(imageStoreUploadResponse
+				// / .getChecksum());
+				// /
+				// imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
+				// / .getImage_uri());
+				// /if (firstTime) {
+
+				// / ImageStoreUploadTransferObject imgTransaferObject =
+				// persistService
+				// / .saveImageUpload(imageUploadTransferObject);
+				// / uploadid = imgTransaferObject.getId();
+				// firstTime = false;
+				// } else {
+
+				// / imageUploadTransferObject.setId(uploadid);
+				// /
+				// persistService.updateImageUpload(imageUploadTransferObject);
+				// }
+				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
+						glanceId);
+				dataSent = imageStoreUploadResponse.getSent() / 1024;
+				sent = (int) imageStoreUploadResponse.getSent() / 1024;
+			}
+
+			imgAttrs = new ImageAttributes();
+			imgAttrs.setId(imageActionObject.getImage_id());
+
+			updateImageActionContentSent(sent, size);
+			// / imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
+
+			imageUploadTransferObject.setStatus(Constants.COMPLETE);
+			if (size == sent) {
 				imageUploadTransferObject.setImg(imgAttrs);
 				imageUploadTransferObject.setImage_size(size);
 
 				imageUploadTransferObject.setSent(sent);
-				updateImageActionContentSent(sent, size);
-				imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
-
 				imageUploadTransferObject.setDate(new Date());
 				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
 						.getChecksum());
 				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
 						.getImage_uri());
-				if (firstTime) {
-
-					ImageStoreUploadTransferObject imgTransaferObject = persistService
-							.saveImageUpload(imageUploadTransferObject);
-					uploadid = imgTransaferObject.getId();
-					firstTime = false;
-				} else {
-
-					imageUploadTransferObject.setId(uploadid);
-					persistService.updateImageUpload(imageUploadTransferObject);
-				}
-				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
-						glanceId);
-				sent = imageStoreUploadResponse.getSent() / 1024;
-				// / Thread.sleep(2000);
-
-			}
-
-			imgAttrs = new ImageAttributes();
-			imgAttrs.setId(imageActionObject.getImage_id());
-			imageUploadTransferObject.setImg(imgAttrs);
-			imageUploadTransferObject.setImage_size(size);
-
-			imageUploadTransferObject.setSent(sent);
-			updateImageActionContentSent(sent, size);
-			imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
-
-			imageUploadTransferObject.setDate(new Date());
-			imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-					.getChecksum());
-			imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-					.getImage_uri());
-			imageUploadTransferObject.setStatus(Constants.COMPLETE);
-			if (firstTime) {
-
 				ImageStoreUploadTransferObject imgTransaferObject = persistService
 						.saveImageUpload(imageUploadTransferObject);
-				uploadid = imgTransaferObject.getId();
+				// /uploadid = imgTransaferObject.getId();
 				// /firstTime = false;
-			} else {
-
-				imageUploadTransferObject.setId(uploadid);
-				persistService.updateImageUpload(imageUploadTransferObject);
-			}
+			} /*
+			 * else {
+			 * 
+			 * imageUploadTransferObject.setId(uploadid);
+			 * persistService.updateImageUpload(imageUploadTransferObject); }
+			 */
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;
 		} catch (Exception e) {
-			log.error("Error in uploading artifact to Glance for image action :"+imageActionObject.getImage_id(), e);
+			log.error(
+					"Error in uploading artifact to Glance for image action :"
+							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		} finally {
 			try {

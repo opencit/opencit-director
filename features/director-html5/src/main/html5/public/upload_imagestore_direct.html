@@ -8,18 +8,13 @@
 </head>
 <body>
 	<script type="text/javascript">
-		var endpoint = "/v1/images/";
-		/*
-		var endpoint = "/v1";
-		function MainViewModel() {
-		    var self = this;
-		    self.keysViewModel = new KeyListViewModel();
-		    self.settingsViewModel = new SettingListViewModel();
-		}
 		
-		 */
-
 		var checkImageActionId = false;
+		if(current_trust_policy_id == undefined || current_trust_policy_id == 'undefined' || current_trust_policy_id == ''){
+			$("#policy_display_name").hide();
+			$("#label_tarball").text("Image Upload");
+			
+		}
 	</script>
 	<script
 		src="/v1/html5/public/director-html5/js/upload_to_image_store.js"></script>
@@ -38,13 +33,13 @@
 					<div class="col-md-8" style="margin-top: 10px;">
 						<div class="panel panel-default">
 							<div class="panel-heading">
-								<h1>Upload to Store Page</h1>
+								<h1>Upload to Image Store</h1>
 							</div>
 							<div class="panel-body">
 
 
 
-								<div class="form-group">
+								<div class="form-group" id="policy_display_name">
 									<label class="control-label col-md-4"
 										for="display_name_last_direct">Policy Name:</label>
 									<div class="col-md-4">
@@ -71,7 +66,7 @@
 
 
 								<div id="tarball_upload_div" class="form-group">
-									<label class="control-label col-md-4"
+									<label  id="label_tarball" class="control-label col-md-4"
 										for="tarball_upload_combo">Tarball Upload:</label>
 									<div class="col-md-4">
 										<select class="form-control" id="tarball_upload_combo"
@@ -112,13 +107,13 @@
 
 
 								<div class="col-md-offset-1 col-md-1">
-									<button type="button" onclick="backToVmImagesPage()"
+									<button type="button" onclick="backToVmImagesPage()" id="vm_upload_direct_back_to_images"
 										class="btn btn-primary">Back To Images</button>
 								</div>
 
 
 								<div class="col-md-offset-6 col-md-1">
-									<button type="button" class="btn btn-primary" data-toggle="modal" onclick="uploadToStore()"
+									<button type="button" class="btn btn-primary" data-toggle="modal" id="vm_upload_direct_button" onclick="uploadToStore()"
 										data-target="#redirect">Upload</button>
 								</div>
 								<!-- Modal -->

@@ -1,10 +1,12 @@
-var endpoint = "/v1/images/";
+var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 
 	this.imageid = current_image_id;
 
 }
+
+
 
 function SelectDirectoriesViewModel() {
 	var self = this;
@@ -15,27 +17,33 @@ function SelectDirectoriesViewModel() {
 
 		// //Code
 
+		var createTrustPolicyMetaData = {
+			"trust_policy_draft_id" : current_image_id
+		}
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/createpolicy",
+			url : "/v1/rpc/finalize-trust-policy-draft",
 			contentType : "application/json",
-			dataType : "text",
+			dataType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
 			},
-			data : ko.toJSON(self.selectDirectoriesMetaData), // $("#loginForm").serialize(),
+			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
 			success : function(data) {
-				if(data == "ERROR")
+				var mountimage = {
+					"id" : current_image_id
+				}
+				if(data.status == "Error")
 				{
 					current_image_action_id = "";
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/unmount",
+						url : "/v1/rpc/unmount-image",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.createImageMetaData),
+						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
 							$("#error_modal_bm_image_2").modal({backdrop: "static"});
 								$('body').removeClass("modal-open");
@@ -49,12 +57,12 @@ function SelectDirectoriesViewModel() {
 					current_image_action_id = data;
 					$.ajax({
 						type : "POST",
-						url : endpoint + current_image_id + "/unmount",
+						url : "/v1/rpc/unmount-image",
 						contentType : "application/json",
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.createImageMetaData),
+						data : JSON.stringify(mountimage),
 						success : function(data, status, xhr) {
 		
 							console.log("Unmount successfully")
@@ -95,7 +103,7 @@ function ApplyRegExViewModel() {
 		var config = {
 			root : '/',
 			dir : sel_dir,
-			script : '/v1/images/browse/' + current_image_id + '/search',
+			script : '/v1/images/' + current_image_id + '/search',
 			expandSpeed : 1000,
 			collapseSpeed : 1000,
 			multiFolder : true,
@@ -116,10 +124,8 @@ function ApplyRegExViewModel() {
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
 
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/arrow-right.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
 		node.attr('checked', false);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
@@ -142,7 +148,7 @@ function ApplyRegExViewModel() {
 		var config = {
 			root : '/',
 			dir : sel_dir,
-			script : '/v1/images/browse/' + current_image_id + '/search',
+			script : '/v1/images/' + current_image_id + '/search',
 			expandSpeed : 1000,
 			collapseSpeed : 1000,
 			multiFolder : true,
@@ -165,10 +171,8 @@ function ApplyRegExViewModel() {
 
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 				'selected');
-		$("img[id='toggle_" + sel_dir + "']")
-				.attr(
-						"src",
-						"/v1/html5/public/director-html5/images/locked.png");
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 		node.attr('checked', true);
 		(node.parent()).fileTree(config, function(file, checkedStatus,
 				rootRegexDir) {
@@ -273,7 +277,7 @@ $(document)
 							{
 								root : '/',
 								dir : '/',
-								script : '/v1/images/browse/'
+								script : '/v1/images/'
 										+ current_image_id + '/search',
 								expandSpeed : 1000,
 								collapseSpeed : 1000,
@@ -328,7 +332,7 @@ function backToBMFirstPage()
 	{
 		$.ajax({
 			type : "POST",
-			url : endpoint + current_image_id + "/unmount",
+			url : "/v1/rpc/unmount-image",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'

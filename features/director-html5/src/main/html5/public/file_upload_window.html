@@ -59,29 +59,115 @@ input[readonly] {
 </style>
 <script src="js/jquery.js"></script>
 <script src="js/jquery.form.js"></script>
+<script src="js/date.js"></script>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <script src="js/bootstrap.min.js"></script>
-
-
-<script src="js/file_upload_script.js"></script>
 <script type="text/javascript">
-	var image_deployments = window.image_deployments_parent;
-	var image_format = window.image_format_parent;
-	var authorizationToken = window.auth_token_parent;
+	var authorizationToken = window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken();
+	var authorizationTokenExpires = window.opener.mainViewModel.loginViewModel.userProfile.authorizationTokenExpires();
 
-	var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata";
+	var image_deployments=window.opener.image_type_upload;
+	var image_format=window.opener.image_format_upload;
+
+
+	var urlToUploadMetadata = "/v1/images";
 	var blob, BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
 	var fileName = "";
 	var currentFileName = "";
-	/*
-	window.onload = function() {
-		document.myform.action = urlToUploadMetadata;
+	var refreshIntervalId = 0;
+	var defaultSessionExtensionInterval = 20*60*1000; 
+
+
+	function validateName(fileName ){
+		fileName = fileName .split(' '); //we split the string in an array of strings using     whitespace as separator
+        	return (fileName.length == 1); //true when there is only one word, false else.
 	}
-	 */
-	function validateForm() {
+	
+	function convertServerTimeToClientTime(serverDateIso8601, timediff) { 
+       	 var date = new Date(serverDateIso8601);
+	        date.addMilliseconds(timediff);
+	        return date;
+	};
+
+
+	function extendSession(){
+		var cd = new Date();
+		console.log("Refreshing token at : "+cd);
+		var formData = {"authorization_token" : authorizationToken}
+
+		$.ajax({
+			type : "POST",
+			url : "/v1/login/tokens/extend",
+			data : JSON.stringify(formData),
+			contentType : "application/json",
+			dataType: 'json',			
+			headers : {
+				'Accept' : 'application/json',
+				'Authorization':"Token "+authorizationToken
+			},
+			success : function(data, status) {
+				console.log("YAY !!! Got extended date from server for token : "+authorizationToken);				
+				console.log("Scheduling session extend poller");
+				var authorization_date_str = data.authorization_date;
+				var not_after_str = data.not_after;					
+				console.log("authorization_date_str ="+authorization_date_str +" :: not_after_str="+not_after_str );
+				
+				var authorization_date = new Date(authorization_date_str);
+				var not_after_date = new Date(not_after_str);
+				
+				var sessionTimeoutInterval = not_after_date.getTime() - authorization_date.getTime();
+				console.log("sessionTimeoutInterval = "+ sessionTimeoutInterval +"ms");
+				var sessionRefreshInterval = 0;
+				if(sessionTimeoutInterval > 10000){
+					sessionRefreshInterval = sessionTimeoutInterval;
+				}else{
+					sessionRefreshInterval = sessionTimeoutInterval - 10000;
+	
+				}
+				if(refreshIntervalId == 0){
+					refreshIntervalId = setInterval(function() {							
+						extendSession();
+					}, sessionRefreshInterval );
+					console.log("Scheduled session extender with ID : "+refreshIntervalId);				
+				}else{
+					console.log("Scheduler already set");		
+				}				
+
+				var clientNow = new Date();
+                		var timediff = clientNow.getTime() - authorization_date.getTime();
+			       var tokenExpiresDate = convertServerTimeToClientTime(not_after_str, timediff ); // input: ISO8601 date string,  output: Date object
+				console.log("New tokenExpiresDate for client "+tokenExpiresDate+". Now setting user profile's token expires date");
+			       window.opener.mainViewModel.loginViewModel.userProfile.authorizationTokenExpires(tokenExpiresDate.getTime()); // now it's in client time, useful for scheduling timers, because it's adjusted for any time difference between client and server
+			       console.log("After setting user profile's token expires date");
+			},
+			error : function(jqXHR, textStatus, errorThrown) {
+				console.log("Expiry date for token "+authorizationToken+" extension failed");
+			}
+		});		
+	}
+	
+	function scheduleSessionRefresh(upload_size){
+		var numberOfCallsRequired = (upload_size/1048576)/ 10;
+		var timeTakenForCalls = numberOfCallsRequired * 5;
+		
+		console.log("Size of file being uploaded = "+numberOfCallsRequired);
+		console.log("Number of calls required : "+numberOfCallsRequired);
+		console.log("Time taken for calls :"+timeTakenForCalls);		
+		var now = new Date();
+		var tokenExtendTimeout = Math.max(authorizationTokenExpires - now.getTime(), 0);
+		var timeToExpiry = authorizationTokenExpires - now.getTime();
+		if(tokenExtendTimeout <= (1000 * timeTakenForCalls)){
+			extendSession();
+		}
+	}
+	
+	
+	function validateForm() {		
+		$('#upload').prop('disabled', true);
 		var x = document.forms["myform"]["myfile"].value;
 		if (x == null || x == "") {
 			alert("First Choose File Please...");
+			$('#upload').prop('disabled', false);
 			return false;
 		}
 		currentFileName = document.getElementById('myfile').files[0].name;
@@ -91,22 +177,31 @@ input[readonly] {
 		} else {
 			fileName = currentFileName;
 		}
+		if(!validateName(fileName )){
+			$('#upload').prop('disabled', false);
+			$('#file_upload_window_modal_body').html("Provide correct file name");
+						$("#file_upload_window_modal").modal({
+							backdrop : "static"
+						});
+						$('body').removeClass("modal-open");
+						return false;
+		}
+		
 		blob = document.getElementById('myfile').files[0];
 		SIZE = blob.size;
-		var upload_size = Math.floor(SIZE / 1024);
-		/*var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata?image_deployments="
-		+ image_deployments + "&image_format=" + image_format + "&fileName=" + fileName + "&fileSize=" + upload_size;*/
+		scheduleSessionRefresh(SIZE);
+	
 		var image_id;
+		var upload_size = Math.floor(SIZE / 1024);
+
 		var xhrmdt = new XMLHttpRequest();
 		xhrmdt.open('POST', urlToUploadMetadata, true);
-		//xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		xhrmdt.setRequestHeader("Content-Type", "application/json");
 		xhrmdt.setRequestHeader("Authorization", "Token " + authorizationToken);
-		//xhrmdt.send();
 		upload_data = {
 			'image_deployments' : image_deployments,
 			'image_format' : image_format,
-			'name' : fileName,
+			'image_name' : fileName,
 			'image_size' : upload_size
 		};
 		xhrmdt.send(JSON.stringify(upload_data));
@@ -114,6 +209,7 @@ input[readonly] {
 
 			if (xhrmdt.readyState === 4) {
 				if (xhrmdt.status === 200) {
+
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
 					if (myArr.state == "Error") {
@@ -122,24 +218,28 @@ input[readonly] {
 							backdrop : "static"
 						});
 						$('body').removeClass("modal-open");
+						$('#upload').prop('disabled', false);
 						return false;
 					}
-					//alert(image_id);
-					//alert(SIZE);
-					BYTES_PER_CHUNK = 1048576 * 10;
+					BYTES_PER_CHUNK = 1048576 * 10; //10MB
 					start = 0;
 					end = BYTES_PER_CHUNK;
 					upload_chunks(image_id, start, end);
 
-					document.getElementById("upload").onclick = function() {
-						this.disabled = true;
-					}
+				}else if(xhrmdt.status === 401){
+					alert("Session timed out");
+					window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+       					window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+					window.opener.location.reload();
+					window.close();
 				} else {
+					console.log("Clearing interval : "+refreshIntervalId );
+					clearInterval(refreshIntervalId );
 					alert("Failed to save image upload metdata.");
+					$('#upload').prop('disabled', false);
 				}
 			}
 		}
-
 		//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
 	}
 
@@ -149,7 +249,7 @@ input[readonly] {
 			//alert(image_id);		
 			var blobslice = blob.slice(start, end);
 			var xhr = new XMLHttpRequest();
-			var urlToUpload = "/v1/images/uploads/content/upload/" + image_id;
+			var urlToUpload = "/v1/rpc/images/content/" + image_id;
 			xhr.open('POST', urlToUpload, true);
 			xhr.setRequestHeader("Content-type", "application/octet-stream");
 			xhr
@@ -184,23 +284,41 @@ input[readonly] {
 
 						upload_chunks(image_id, start, end);
 
+					}else if(xhrmdt.status === 401){
+						alert("Session timed out");
+						window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+       						window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+						window.opener.location.reload();
+						window.close();
 					} else {
+						console.log("Clearing interval : "+refreshIntervalId );
+						clearInterval(refreshIntervalId );
 						alert("File upload failed..");
+						$('#upload').prop('disabled', false);
 					}
 				}
 			}
 
 		} else {
-
+			console.log("Clearing interval : "+refreshIntervalId );
+			clearInterval(refreshIntervalId );
+			
 			$("#message").html(
 					"<font color='blue'>Your file has been uploaded!</font>");
 
 			document.getElementById("upload").onclick = function() {
 				this.disabled = false;
 			}
-			alert("Image upload successfully completed");
-
+			var goToTPDiv = $("#goToTrustPolicyPageDiv",opener.document);
+			
+			
+			alert("Image upload successfully completed");	
+			$('#upload').prop('disabled', false);
+			goToTPDiv.css("display","block");
+			
+			
 			window.close();
+			
 
 		}
 	}

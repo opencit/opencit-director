@@ -15,33 +15,35 @@ public class MountImage {
 	private static final Logger log = LoggerFactory.getLogger(MountImage.class);
 
 	public static int mountImage(String imagePath, String mountpath) {
+		int exitcode = 0; 
 		String command = Constants.mountScript + " " + imagePath + " "
 				+ mountpath;
 		log.debug("\n" + "Mounting the vm image : " + imagePath);
 		log.trace("Command:" + command);
 		try {
-			return DirectorUtil.executeCommandInExecUtil(Constants.mountScript,
+			exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountScript,
 					imagePath, mountpath);
 		} catch (IOException e) {
-			// TODO Handle Error
+			exitcode = 1;
 			log.error("Error in unmounting image" + e);
 		}
-		return 0;
+		return exitcode;
 	}
 
 	public static int unmountImage(String mountPath) {
+		int exitcode = 0; 
 		String command = Constants.mountScript + " " + mountPath;
 		log.debug("Unmounting the vm image with mount path : " + mountPath);
 		log.debug("\n" + "unmounting the vm image : " + mountPath);
 		log.trace("Command:" + command);
 		try {
-			return DirectorUtil.executeCommandInExecUtil(Constants.mountScript,
+			exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountScript,
 					mountPath);
 		} catch (IOException e) {
-			// TODO Handle Error
+			exitcode = 1;
 			log.error("Error in unmounting image" + e);
 		}
-		return 0;
+		return exitcode;
 	}
 
 	public static int mountRemoteSystem(String ipAddress, String userName,
@@ -56,27 +58,25 @@ public class MountImage {
 					Constants.mountRemoteFileSystemScript, ipAddress, userName,
 					password, mountpath);
 		} catch (IOException e) {
-			if(exitcode == 0){
-				exitcode = 1;
-			}
-
+			exitcode = 1;
 			log.error("Error in mounting remote host" + e);
 		}
-		log.error("Error in mounting remote host");
 		return exitcode;
 	}
 
 	public static int unmountRemoteSystem(String mountPath) {
+		int exitcode = 0; 
+
 		log.debug("Unmounting the Remote File System in mount path : "
 				+ mountPath);
 		try {
-			return DirectorUtil.executeCommandInExecUtil(
+			exitcode = DirectorUtil.executeCommandInExecUtil(
 					Constants.mountRemoteFileSystemScript, mountPath);
 		} catch (IOException e) {
-			// TODO Handle Error
+			exitcode = 1;
 			log.error("Error in unmounting remote host" + e);
 		}
-		return 0;
+		return exitcode;
 	}
 
 }

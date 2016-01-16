@@ -9,8 +9,17 @@ public class ImageInfo extends ImageAttributes {
     protected String trust_policy_draft_name;
     protected String trust_policy_draft_id;
     protected Integer uploads_count;
+    protected String policy_name;
 
-    public String getTrust_policy_id() {
+    public String getPolicy_name() {
+		return policy_name;
+	}
+
+	public void setPolicy_name(String policy_name) {
+		this.policy_name = policy_name;
+	}
+
+	public String getTrust_policy_id() {
         return trust_policy_id;
     }
 
@@ -56,8 +65,8 @@ public class ImageInfo extends ImageAttributes {
                 + ", trust_policy_name=" + trust_policy_name
                 + ", trust_policy_draft_name=" + trust_policy_draft_name
                 + ", trust_policy_draft_id=" + trust_policy_draft_id
-                + ", uploads_count=" + uploads_count + ", id=" + id + ", name="
-                + name + ", format=" + image_format + ", image_deployments="
+                + ", uploads_count=" + uploads_count + ", id=" + id + ", image_name="
+                + image_name + ", format=" + image_format + ", image_deployments="
                 + image_deployments + ", status=" + status + ", image_size="
                 + image_size + ", sent=" + sent + ", mounted_by_user_id="
                 + mounted_by_user_id + ", deleted=" + deleted + ", location="
