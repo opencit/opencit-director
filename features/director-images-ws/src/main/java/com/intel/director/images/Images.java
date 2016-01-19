@@ -173,7 +173,7 @@ public class Images {
 	 * @param imageId
 	 *            - id received as response of
 	 *            https://{IP/HOST_NAME}/v1/images/
-	 *            uploads/content/uploadMetadata request
+	 *            request
 	 * @param filInputStream
 	 *            - image data sent as chunk
 	 * @return TrustDirectorImageUploadResponse object with updated image upload
