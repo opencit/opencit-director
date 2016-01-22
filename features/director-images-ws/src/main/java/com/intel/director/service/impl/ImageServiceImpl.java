@@ -351,7 +351,6 @@ public class ImageServiceImpl implements ImageService {
 		unmountImageResponse = TdaasUtil
 				.mapImageAttributesToUnMountImageResponse(image);
 
-		unmountImageResponse.setStatus(Constants.SUCCESS);
 		if (exitCode != 0) {
 			unmountImageResponse
 					.setError("Unmount script executed with errors");
