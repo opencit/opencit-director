@@ -21,7 +21,7 @@ function ImageData(){
 function refreshBMOnlineGrid() {
 	var self = this;
 	endpoint = "/v1";
-	$("#bmGridOnline").html("")
+	$("#bmGridOnline").html("");
 	$.ajax({
 		type : "GET",
 		url : "/v1/images?deploymentType=BareMetalLive",
@@ -125,7 +125,15 @@ function refreshBMOnlineGrid() {
 					type : "text",
 					width : 150,
 					align : "center"
-				} ]
+				} ],
+				onRefreshed: function(args) {
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				     }
 			});
 		}
 
@@ -134,7 +142,7 @@ function refreshBMOnlineGrid() {
 
 function refresh_bm_images_Grid() {
 	endpoint = "/v1";
-	$("#bmGridImages").html("")
+	$("#bmGridImages").html("");
 	$.ajax({
 		type : "GET",
 		url : endpoint + "imagesList/BareMetal",
@@ -184,7 +192,15 @@ function refresh_bm_images_Grid() {
 					type : "text",
 					width : 150,
 					align : "center"
-				} ]
+				} ],
+				onRefreshed: function(args) {
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				     }
 			});
 		},
 		error : function(jqXHR, exception) {
