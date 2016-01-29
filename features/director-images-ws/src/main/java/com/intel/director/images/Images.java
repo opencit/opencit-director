@@ -194,7 +194,7 @@ public class Images {
 			long lStartTime = new Date().getTime();
 
 			uploadImageToTrustDirector = imageService
-					.uploadImageToTrustDirectorSingle(imageId, filInputStream);
+					.uploadImageToTrustDirector(imageId, filInputStream);
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			long lEndTime = new Date().getTime();
@@ -784,7 +784,7 @@ public class Images {
 	 * Input: Image id as path param
 	 * Output: Content sent as stream
 	 * 
-	 * </pre>
+	 * </pre>	 
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall
@@ -822,41 +822,6 @@ public class Images {
 		return response.build();
 	}
 
-	/*
-	 * Method that downloads the BM image which has been modified to push the
-	 * trust policy in the /boot/trust folder. The user, on the third step of
-	 * the wizard, gets a link which downlods the modified image
-	 * 
-	 * @param imageId Id of the image which needs to be downloaded
-	 * 
-	 * @param isModified Flag to check if we need to download the image itself
-	 * or the modified image, which is with the embedded policy
-	 * 
-	 * @return Sends back the image file
-	 * 
-	 * @throws DirectorException
-	 *//*
-	/*
-	 * @Path("images/{imageId: [0-9a-zA-Z_-]+}/downloadImage")
-	 * 
-	 * @GET
-	 * 
-	 * @Produces(MediaType.APPLICATION_XML) public Response
-	 * downloadImage(@PathParam("imageId") String imageId,
-	 * 
-	 * @QueryParam("modified") boolean isModified) throws DirectorException {
-	 * try { String pathname;
-	 * 
-	 * pathname = imageService.getFilepathForImage(imageId, isModified); File
-	 * imagefile = new File(pathname); ResponseBuilder response =
-	 * Response.ok(imagefile); response.header( "Content-Disposition",
-	 * "attachment; filename=" + pathname.substring(pathname
-	 * .lastIndexOf(File.separator) + 1)); return response.build(); } catch
-	 * (DbException e) { log.error("Unable to download Image"); throw new
-	 * DirectorException("Unable to download Image", e); }
-	 * 
-	 * }
-	 */
 
 	/**
 	 * 
@@ -942,13 +907,6 @@ public class Images {
 	 * 
 	 * </pre>
 	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall
-	 * <pre>
-	 * Input: pass the UUID of the image as path param
-	 * Output: {"status": "success"}
-	 * </pre>
 	 * 
 	 * @param imageId
 	 *            Id of the image to be deleted
