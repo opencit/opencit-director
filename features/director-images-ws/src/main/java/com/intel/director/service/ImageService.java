@@ -49,7 +49,7 @@ public interface ImageService {
 	public UnmountImageResponse unMountImage(String imageId, String user)
 			throws DirectorException;
 
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			String image_id, InputStream filInputStream) throws DirectorException;
 
 
