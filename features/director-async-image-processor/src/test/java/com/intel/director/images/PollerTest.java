@@ -20,8 +20,7 @@ public class PollerTest {
     public static void main(String[] args) throws Exception {
         org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
         Configuration configuration = new CommonsConfiguration(apacheConfig);
-        configuration.set(Constants.GLANCE_IP, "10.35.35.136");
-        configuration.set(Constants.GLANCE_PORT,"9292");
+        configuration.set(Constants.GLANCE_API_ENDPOINT, "http://10.35.35.136:9292");
         configuration.set(Constants.GLANCE_IMAGE_STORE_USERNAME,"admin");
         configuration.set(Constants.GLANCE_IMAGE_STORE_PASSWORD,"intelmh");
         configuration.set(Constants.GLANCE_TENANT_NAME,"admin");

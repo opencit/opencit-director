@@ -158,10 +158,10 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 			com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider
 					.load();
 
-			configuration.set(Constants.GLANCE_IP,
-					loadedConfiguration.get(Constants.GLANCE_IP));
-			configuration.set(Constants.GLANCE_PORT,
-					loadedConfiguration.get(Constants.GLANCE_PORT));
+			configuration.set(Constants.GLANCE_API_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_API_ENDPOINT));
+			configuration.set(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_USERNAME,
 					loadedConfiguration
 							.get(Constants.GLANCE_IMAGE_STORE_USERNAME));
