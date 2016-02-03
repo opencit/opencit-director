@@ -202,7 +202,7 @@ input[readonly] {
 			'image_deployments' : image_deployments,
 			'image_format' : image_format,
 			'image_name' : fileName,
-			'image_size' : upload_size
+			'image_size' : SIZE
 		};
 		xhrmdt.send(JSON.stringify(upload_data));
 		xhrmdt.onreadystatechange = function(e) {

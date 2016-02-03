@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package com.intel.director.images;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -83,7 +82,7 @@ public class Images {
 
 	/**
 	 * API for uploading image metadata like image format, deployment type(VM,
-	 * BareMetal, Docker), image file name, image size, etc. Creates image
+	 * BareMetal, Docker), image file name, image size ( in bytes ), etc. Creates image
 	 * upload metadata with specified parameters and returns metadata along with
 	 * image id.
 	 * 
@@ -91,7 +90,7 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/images
-	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
+	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":(13631488 }
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","image_name":"test.img",
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
@@ -151,6 +150,7 @@ public class Images {
 	 * chunk is received location to save image is retrieved from DB using given
 	 * image id and chunk is saved to that location.
 	 * 
+	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
@@ -192,11 +192,11 @@ public class Images {
 			long lStartTime = new Date().getTime();
 
 			uploadImageToTrustDirector = imageService
-					.uploadImageToTrustDirectorSingle(imageId, filInputStream);
+					.uploadImageToTrustDirector(imageId, filInputStream);
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			long lEndTime = new Date().getTime();
-
+			
 			long difference = lEndTime - lStartTime;
 			log.info("Time taken to upload image to TD: " + difference);
 			filInputStream.close();
@@ -209,6 +209,7 @@ public class Images {
 			throw new DirectorException("Error in uploading image", e);
 		}
 	}
+
 
 	/**
 	 * Returns list of images in TD depending on the image deployment type
@@ -781,7 +782,7 @@ public class Images {
 	 * Input: Image id as path param
 	 * Output: Content sent as stream
 	 * 
-	 * </pre>
+	 * </pre>	 
 	 * @param imageId
 	 *            the image for which the policy is downloaded
 	 * @return XML content of the policy
@@ -811,41 +812,6 @@ public class Images {
 		return response.build();
 	}
 
-	/*
-	 * Method that downloads the BM image which has been modified to push the
-	 * trust policy in the /boot/trust folder. The user, on the third step of
-	 * the wizard, gets a link which downlods the modified image
-	 * 
-	 * @param imageId Id of the image which needs to be downloaded
-	 * 
-	 * @param isModified Flag to check if we need to download the image itself
-	 * or the modified image, which is with the embedded policy
-	 * 
-	 * @return Sends back the image file
-	 * 
-	 * @throws DirectorException
-	 */
-	/*
-	 * @Path("images/{imageId: [0-9a-zA-Z_-]+}/downloadImage")
-	 * 
-	 * @GET
-	 * 
-	 * @Produces(MediaType.APPLICATION_XML) public Response
-	 * downloadImage(@PathParam("imageId") String imageId,
-	 * 
-	 * @QueryParam("modified") boolean isModified) throws DirectorException {
-	 * try { String pathname;
-	 * 
-	 * pathname = imageService.getFilepathForImage(imageId, isModified); File
-	 * imagefile = new File(pathname); ResponseBuilder response =
-	 * Response.ok(imagefile); response.header( "Content-Disposition",
-	 * "attachment; filename=" + pathname.substring(pathname
-	 * .lastIndexOf(File.separator) + 1)); return response.build(); } catch
-	 * (DbException e) { log.error("Unable to download Image"); throw new
-	 * DirectorException("Unable to download Image", e); }
-	 * 
-	 * }
-	 */
 
 	/**
 	 * 
@@ -930,6 +896,7 @@ public class Images {
 	 * 
 	 * 
 	 * </pre>
+	 * 
 	 * 
 	 * @param imageId
 	 *            Id of the image to be deleted

@@ -19,7 +19,8 @@ function ImageData(){
 function refresh_vm_images_Grid() {
 	var self = this;
 	
-	$("#vmGrid").html("")
+	$("#vmGrid").html("");
+	$("#vmGrid").empty();
 	$.ajax({
 		type : "GET",
 		url : "/v1/images?deploymentType=VM",
@@ -166,12 +167,20 @@ function refresh_vm_images_Grid() {
 					type : "text",
 					width : 150,
 					align : "center"
-				} ]
+				} ],
+				onRefreshed: function(args) {
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				     }
 			});
 			var delay = 1000; 
 			setTimeout(function() {
-				$("#vmGrid").show();
-				$("#vmGrid").jsGrid("refresh");
+				$("#vmGrid").show();						
+				$("#vmGrid").jsGrid("refresh");				
 			}, delay);
 
 		},

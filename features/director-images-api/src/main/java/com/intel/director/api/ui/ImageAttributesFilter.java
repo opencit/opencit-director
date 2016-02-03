@@ -12,7 +12,7 @@ public class ImageAttributesFilter extends ImageAttributes {
     public ImageAttributesFilter(String created_by_user_id, Date created_date,
             String edited_by_user_id, Date edited_date, String id, String name,
             String format, String image_deployments, String status,
-            Integer image_size, Integer sent, String mounted_by_user_id,
+            Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location, Date from_created_date,
             Date to_created_date) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date,

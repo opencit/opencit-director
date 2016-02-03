@@ -56,7 +56,7 @@ public class ImageActions {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	  https://{IP/HOST_NAME}/v1/image-actions
+	  https://{IP/HOST_NAME}/v1/image-actions/<action_id>
 	  Input: PathParam : action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
 	  Output: {
 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",

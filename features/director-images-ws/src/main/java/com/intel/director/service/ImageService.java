@@ -49,7 +49,7 @@ public interface ImageService {
 	public UnmountImageResponse unMountImage(String imageId, String user)
 			throws DirectorException;
 
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			String image_id, InputStream filInputStream) throws DirectorException;
 
 
@@ -102,7 +102,7 @@ public interface ImageService {
 
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			int fileSize) throws DirectorException;
+			long fileSize) throws DirectorException;
 	
 	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException;
 
