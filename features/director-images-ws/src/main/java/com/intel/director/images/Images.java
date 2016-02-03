@@ -85,7 +85,7 @@ public class Images {
 
 	/**
 	 * API for uploading image metadata like image format, deployment type(VM,
-	 * BareMetal, Docker), image file name, image size, etc. Creates image
+	 * BareMetal, Docker), image file name, image size ( in bytes ), etc. Creates image
 	 * upload metadata with specified parameters and returns metadata along with
 	 * image id.
 	 * 
@@ -93,7 +93,7 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/images
-	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":202354}
+	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":(13631488 }
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
 	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","image_name":"test.img",
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
@@ -152,6 +152,7 @@ public class Images {
 	 * image it is divided in chunks and sent to server one by one. Once the
 	 * chunk is received location to save image is retrieved from DB using given
 	 * image id and chunk is saved to that location.
+	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST

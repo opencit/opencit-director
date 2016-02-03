@@ -135,7 +135,7 @@ public class DbServiceTest {
 	
 		ImageAttributes imgAttrs = new ImageAttributes(createdUserId,
 				new Date(), createdUserId, new Date(), "img1", "qcow", "VM",
-				"ACTIVE", 512, 24, null, false, "C://temp");
+				"ACTIVE", 512L, 24L, null, false, "C://temp");
 
 	
 
@@ -157,88 +157,88 @@ public class DbServiceTest {
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "img2", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "img3", "qcow", "VM", "ACTIVE",
-				512, 24, null, false, "C://temp"));
+				512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				oneDaysBackDate, createdUserId, oneDaysBackDate, "img4",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "img5", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu1",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu2",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "ubuntu3", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu4",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "ubuntu5", "qcow", "VM",
-				"UPLOADED", 512, 24, null, false, "C://temp"));
+				"UPLOADED", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "ubuntu6", "vhd", "VM", "UPLOADED",
-				512, 24, null, false, "C://temp"));
+				512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate, "ubuntu7",
-				"vhd", "BareMetal", "UPLOADED", 512, 24, null, false,
+				"vhd", "BareMetal", "UPLOADED", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu8",
-				"qcow", "VM", "ACTIVE", 1024, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 1024L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate, "ubuntu9",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate,
-				"ubuntu10", "test", "BareMetal", "ACTIVE", 512, 24, null,
+				"ubuntu10", "test", "BareMetal", "ACTIVE", 512L, 24L, null,
 				false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate,
-				"ubuntu11", "test", "VM", "ACTIVE", 512, 24, null, false,
+				"ubuntu11", "test", "VM", "ACTIVE", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate,
-				"ubuntu12", "qcow", "VM", "ACTIVE", 512, 24, null, false,
+				"ubuntu12", "qcow", "VM", "ACTIVE", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "fedora1", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "fedora2",
-				"test", "VM", "UPLOADED", 512, 24, null, false, "C://temp"));
+				"test", "VM", "UPLOADED", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, sevenDaysBackDate,
 						createdUserId, sevenDaysBackDate, "fedora3", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "fedora4", "qcow", "VM",
-				"UPLOADED", 512, 24, null, false, "C://temp"));
+				"UPLOADED", 512L, 24L, null, false, "C://temp"));
 
 	
 		for(int i=0;i<imgAttributesList.size();i++){

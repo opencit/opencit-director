@@ -173,7 +173,7 @@ public class DbServiceImpl implements IPersistService {
 			mwImage.setName(img.getImage_name());
 		}
 		if (img.getImage_size() != null) {
-			mwImage.setContentlength(img.getImage_size());
+			mwImage.setContentLength(img.getImage_size());
 		}
 		if (img.getImage_format() != null) {
 			mwImage.setImageFormat(img.getImage_format());
