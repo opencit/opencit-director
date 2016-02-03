@@ -211,7 +211,7 @@ public class ImageDao {
 					imgInfo.setCreated_date((java.sql.Date) imageObj[5]);
 					imgInfo.setLocation((String) imageObj[6]);
 					imgInfo.setMounted_by_user_id((String) imageObj[7]);
-					imgInfo.setSent((Integer) imageObj[8]);
+					imgInfo.setSent((Long) imageObj[8]);
 					imgInfo.setStatus((String) imageObj[9]);
 					imgInfo.setEdited_by_user_id((String) imageObj[10]);
 					imgInfo.setEdited_date((java.sql.Date) imageObj[11]);
@@ -222,7 +222,7 @@ public class ImageDao {
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setUploads_count(((Long) imageObj[17]).intValue());
-					imgInfo.setImage_size(((Integer) imageObj[18]));
+					imgInfo.setImage_size(((Long) imageObj[18]));
 					imageInfoList.add(imgInfo);
 				}
 			}
@@ -275,7 +275,7 @@ public class ImageDao {
 			imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 			imgInfo.setCreated_date(mwImage.getCreatedDate());
 			imgInfo.setEdited_date(mwImage.getEditedDate());
-			imgInfo.setImage_size(mwImage.getContentlength());
+			imgInfo.setImage_size(mwImage.getContentLength());
 			imgInfo.setStatus(mwImage.getStatus());
 			imgInfo.setSent(mwImage.getSent());
 			if (mwImage.getTrustPolicy() != null) {

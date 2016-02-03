@@ -46,13 +46,13 @@ public class MwImage extends MwAuditable {
 	private MwTrustPolicyDraft trustPolicyDraft;
 
 	@Column(name = "STATUS")
-	public String status;
+	private String status;
 
 	@Column(name = "CONTENT_LENGTH")
-	public Integer contentlength;
+	private Long  contentLength;
 	
 	@Column(name = "SENT")
-	public Integer sent;
+	private Long  sent;
 
 	public MwImage() {
 		super();
@@ -115,12 +115,12 @@ public class MwImage extends MwAuditable {
 		this.tblMwimageUploadCollection = tblMwimageUploadCollection;
 	}
 
-	public Integer getContentlength() {
-		return contentlength;
+	public Long getContentLength() {
+		return contentLength;
 	}
 
-	public void setContentlength(Integer contentlength) {
-		this.contentlength = contentlength;
+	public void setContentLength(Long contentlength) {
+		this.contentLength = contentlength;
 	}
 
 	public MwTrustPolicy getTrustPolicy() {
@@ -147,11 +147,11 @@ public class MwImage extends MwAuditable {
 		this.status = status;
 	}
 
-	public Integer getSent() {
+	public Long getSent() {
 		return sent;
 	}
 
-	public void setSent(Integer sent) {
+	public void setSent(Long sent) {
 		this.sent = sent;
 	}
 

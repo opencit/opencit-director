@@ -292,7 +292,7 @@ public class TdaasUtil {
 		imageAttributes.id = imageId;
 		imageAttributes.image_deployments = "VM";
 		imageAttributes.image_format = "qcow2";
-		imageAttributes.image_size = 1000;
+		imageAttributes.image_size = 1000L;
 		imageAttributes.location = "/opt/director/vm/" + imageId;
 		imageAttributes.mounted_by_user_id = null;
 		imageAttributes.image_name = "IMG_" + imageId;

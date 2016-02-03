@@ -421,7 +421,7 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			int fileSize) throws DirectorException {
+			long fileSize) throws DirectorException {
 
 		String loggedinUser = ShiroUtil.subjectUsername();
 
@@ -432,9 +432,9 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setEdited_by_user_id(loggedinUser);
 		imageAttributes.setStatus(Constants.IN_PROGRESS);
 		imageAttributes.setDeleted(false);
-		int sizen_kb = fileSize;
-		imageAttributes.setSent(0);
-		imageAttributes.setImage_size(sizen_kb);
+		long sizeInBytes = fileSize;
+		imageAttributes.setSent(0L);
+		imageAttributes.setImage_size(sizeInBytes);
 		imageAttributes.location = Constants.defaultUploadPath;
 		imageAttributes.image_format = image_format;
 		Date currentDate = new Date();
@@ -525,8 +525,8 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 
-		imageInfo.setSent(imageInfo.getSent() + (int) (bytesread / 1024));
-		log.info("Sent in KB New: " + imageInfo.getSent());
+		imageInfo.setSent(imageInfo.getSent() + bytesread );
+		log.info("Sent in bytes New: " + imageInfo.getSent());
 		log.info("image size: " + imageInfo.getImage_size());
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
