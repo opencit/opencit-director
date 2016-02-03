@@ -351,7 +351,6 @@ public class ImageServiceImpl implements ImageService {
 		unmountImageResponse = TdaasUtil
 				.mapImageAttributesToUnMountImageResponse(image);
 
-		unmountImageResponse.setStatus(Constants.SUCCESS);
 		if (exitCode != 0) {
 			unmountImageResponse
 					.setError("Unmount script executed with errors");
@@ -474,7 +473,7 @@ public class ImageServiceImpl implements ImageService {
 	 * @throws DirectorException
 	 */
 	@Override
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			String image_id, InputStream fileInputStream)
 			throws DirectorException {
 
@@ -495,26 +494,39 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Failed to load image metdata", e);
 		}
 		int bytesread = 0;
+		OutputStream out = null;
 		try {
 			int read;
 			byte[] bytes = new byte[1024];
 
-			OutputStream out = new FileOutputStream(new File(
+			 out = new FileOutputStream(new File(
 					imageInfo.getLocation() + imageInfo.getImage_name()), true);
 			while ((read = fileInputStream.read(bytes)) != -1) {
 				bytesread += read;
 				out.write(bytes, 0, read);
 			}
-
-			out.flush();
-			out.close();
 		} catch (IOException e) {
 			log.error("Error while writing uploaded image: " + e.getMessage());
 			throw new DirectorException("Cannot write the uploaded image", e);
 		}
+		finally{
+			if(out != null){
+				try {
+					out.flush();
+					out.close();
+				} catch (IOException e) {
+					log.error("Unable to close file output stream while uploading image to TD", e);
+				}
+			}
+			try {
+				fileInputStream.close();
+			} catch (IOException e) {
+				log.error("Error in closing stream: ", e);
+			}
+		}
 
 		imageInfo.setSent(imageInfo.getSent() + (int) (bytesread / 1024));
-		log.info("Sent in KB Neww: " + imageInfo.getSent());
+		log.info("Sent in KB New: " + imageInfo.getSent());
 		log.info("image size: " + imageInfo.getImage_size());
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
@@ -532,11 +544,6 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error while updating metadata for uploaded image : "
 					+ e.getMessage());
 			throw new DirectorException("Cannot update image meta data", e);
-		}
-		try {
-			fileInputStream.close();
-		} catch (IOException e) {
-			log.error("Error in closing stream: ", e);
 		}
 		log.info("Updated Image upload metadata.");
 

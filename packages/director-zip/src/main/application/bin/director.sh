@@ -176,9 +176,9 @@ director_start() {
     fi
 
     # check if we need to use authbind or if we can start java directly
-    prog="java"
+    prog="$JAVA_CMD"
     if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
-      prog="authbind java"
+      prog="authbind $JAVA_CMD"
       JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
     fi
 
@@ -274,9 +274,9 @@ scheduler_start() {
     fi
 
     # check if we need to use authbind or if we can start java directly
-    prog="java"
+    prog="$JAVA_CMD"
     if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
-      prog="authbind java"
+      prog="authbind $JAVA_CMD"
       JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
     fi
 
