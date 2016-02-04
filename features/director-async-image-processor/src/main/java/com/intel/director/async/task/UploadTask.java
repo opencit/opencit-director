@@ -158,10 +158,10 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 			com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider
 					.load();
 
-			configuration.set(Constants.GLANCE_IP,
-					loadedConfiguration.get(Constants.GLANCE_IP));
-			configuration.set(Constants.GLANCE_PORT,
-					loadedConfiguration.get(Constants.GLANCE_PORT));
+			configuration.set(Constants.GLANCE_API_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_API_ENDPOINT));
+			configuration.set(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_USERNAME,
 					loadedConfiguration
 							.get(Constants.GLANCE_IMAGE_STORE_USERNAME));
@@ -199,12 +199,12 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 			ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
-			int size = (int) (content.length() / 1024);
+			long size = (long) (content.length() / 1024);
 			double dataSize = (content.length() / 1024);
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = (int) imageStoreUploadResponse.getSent() / 1024;
+			long sent = (long) imageStoreUploadResponse.getSent() / 1024;
 			double dataSent = imageStoreUploadResponse.getSent() / 1024;
 			while (dataSent != dataSize) {
 

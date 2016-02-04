@@ -552,18 +552,18 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 		try{
 		
 	
-		ImageStoreUploadTransferObject imgUpload1= new ImageStoreUploadTransferObject("http://imageuri1", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId, persistedImgAttributesList.get(0));
+		ImageStoreUploadTransferObject imgUpload1= new ImageStoreUploadTransferObject("http://imageuri1", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId, persistedImgAttributesList.get(0));
 		
 		
 		ImageStoreUploadTransferObject imageStoreUploadCreated=dBServiceImpl.saveImageUpload(imgUpload1);
 		Assert.assertTrue("Create image upload operation fail", imageStoreUploadCreated.getId() != null);
 		
 		List<ImageStoreUploadTransferObject> imageUploadList= new ArrayList<ImageStoreUploadTransferObject>();
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri2", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(1)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri3", threeDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(2)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri4", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(3)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri5", oneDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(4)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri6", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(5)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri2", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(1)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri3", threeDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(2)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri4", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(3)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri5", oneDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(4)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri6", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(5)));
 		
 		for(ImageStoreUploadTransferObject imgU: imageUploadList){
 			dBServiceImpl.saveImageUpload(imgU);

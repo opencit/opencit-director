@@ -508,11 +508,17 @@ public class ImageServiceImpl implements ImageService {
 			int read;
 			byte[] bytes = new byte[1024];
 
-			 out = new FileOutputStream(new File(
+			out = new FileOutputStream(new File(
 					imageInfo.getLocation() + imageInfo.getImage_name()), true);
+			int bufferForFlush = 0;
 			while ((read = fileInputStream.read(bytes)) != -1) {
 				bytesread += read;
+				bufferForFlush += read; 
 				out.write(bytes, 0, read);
+		        if (bufferForFlush >= 1024 * 1024 * 10) { //flush after 10MB
+		        	bufferForFlush = 0;
+		            out.flush();
+		        }
 			}
 		} catch (IOException e) {
 			log.error("Error while writing uploaded image: " + e.getMessage());
@@ -1078,8 +1084,7 @@ public class ImageServiceImpl implements ImageService {
 			String password = existingSsh.getPassword().getKey();
 			String ip = existingSsh.getIpAddress();
 
-			log.info("Connecting to remote host : " + ip + " with user " + user
-					+ " and paswd : " + password);
+			log.info("Connecting to remote host : " + ip + " with user " + user);
 
 			SSHManager sshManager = new SSHManager(user, password, ip);
 			try {

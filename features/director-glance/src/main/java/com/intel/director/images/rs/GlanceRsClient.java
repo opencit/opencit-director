@@ -45,12 +45,12 @@ public class GlanceRsClient {
 	public Client client;
 	public String authToken;
 
-	public GlanceRsClient(WebTarget webTarget, Client client, String glanceIp,
+	public GlanceRsClient(WebTarget webTarget, Client client, String glanceKeystonePublicEndpoint,
 			String tenanatName, String username, String password) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
 
-		createAuthToken(glanceIp, tenanatName, username, password);
+		createAuthToken(glanceKeystonePublicEndpoint, tenanatName, username, password);
 	}
 
 	public void uploadImage(File file, Map<String, String> imageProperties,
@@ -207,7 +207,7 @@ public class GlanceRsClient {
 		return id;
 	}
 
-	private void createAuthToken(String glanceIP, String tenantName,
+	private void createAuthToken(String glanceKeystonePublicEndpoint, String tenantName,
 			String userName, String password) {
 		long start = new Date().getTime();
 		//TODO not used after being assigned
@@ -217,8 +217,8 @@ public class GlanceRsClient {
 
 		try {
 			httpClient = new DefaultHttpClient();
-			HttpPost postRequest = new HttpPost("http://" + glanceIP
-					+ ":5000/v2.0/tokens");
+			HttpPost postRequest = new HttpPost( glanceKeystonePublicEndpoint
+					+ "/v2.0/tokens");
 
 			String body = "{\"auth\": {\"tenantName\": \"" + tenantName
 					+ "\", \"passwordCredentials\": {\"username\": \""
@@ -274,7 +274,7 @@ public class GlanceRsClient {
 		long end = new Date().getTime();
 		printTimeDiff("createAuthToken", start, end);
 		if(responseHasError){
-			throw new GlanceException("Unable to communicate with Glance at "+glanceIP);
+			throw new GlanceException("Unable to communicate with Glance at "+glanceKeystonePublicEndpoint);
 		}
 	}
 
