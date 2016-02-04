@@ -234,8 +234,8 @@ update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 #------------------ Glance properties
 
-update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-update_property_in_file "glance.port" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
+update_property_in_file "glance.api.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_API_ENDPOINT"
+update_property_in_file "glance.keystone.public.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_KEYSTONE_PUBLIC_ENDPOINT"
 update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
 update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
 update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
