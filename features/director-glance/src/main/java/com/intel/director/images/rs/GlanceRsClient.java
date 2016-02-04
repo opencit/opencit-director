@@ -132,7 +132,7 @@ public class GlanceRsClient {
 		imageStoreResponse.setId(glanceId);
 		imageStoreResponse.setImage_uri(response
 				.getHeaderString(Constants.GLANCE_HEADER_LOCATION));
-		imageStoreResponse.setSent(new Integer(response
+		imageStoreResponse.setSent(new Long(response
 				.getHeaderString(Constants.CONTENT_LENGTH)));
 		imageStoreResponse.setChecksum(response
 				.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));

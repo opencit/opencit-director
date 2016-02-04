@@ -243,7 +243,7 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
 						glanceId);
 				dataSent = imageStoreUploadResponse.getSent() / 1024;
-				sent = (int) imageStoreUploadResponse.getSent() / 1024;
+				sent = (long) imageStoreUploadResponse.getSent() / 1024;
 			}
 
 			imgAttrs = new ImageAttributes();
