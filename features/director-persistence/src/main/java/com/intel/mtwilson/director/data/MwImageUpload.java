@@ -50,10 +50,10 @@ public class MwImageUpload {
 		private boolean isTarballUpload;
 		
 		@Column(name = "CONTENT_LENGTH")
-		public Integer contentlength;
+		private Long contentlength;
 		
 		@Column(name = "SENT")
-		public Integer sent;
+		private Long sent;
 
 
 		public MwImageUpload(){
@@ -128,19 +128,19 @@ public class MwImageUpload {
 			this.isTarballUpload = isTarballUpload;
 		}
 
-		public Integer getContentlength() {
+		public Long getContentlength() {
 			return contentlength;
 		}
 
-		public void setContentlength(Integer contentlength) {
+		public void setContentlength(Long contentlength) {
 			this.contentlength = contentlength;
 		}
 
-		public Integer getSent() {
+		public Long getSent() {
 			return sent;
 		}
 
-		public void setSent(Integer sent) {
+		public void setSent(Long sent) {
 			this.sent = sent;
 		}
 
