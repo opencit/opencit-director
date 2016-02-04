@@ -67,8 +67,8 @@ public class UploadTarTask extends UploadTask {
 			log.debug("runUploadTarTask tarname::" + tarName
 					+ " ,tarLocation ::" + tarLocation);
 			content = new File(tarLocation + tarName);
-			super.run();
-			runFlag = true;
+			boolean parentRunStatus = super.run();
+			runFlag = parentRunStatus;
 			//Cleanup of folder
 			File uuidFolder = new File(tarLocation);
 			File[] listFiles = uuidFolder.listFiles();

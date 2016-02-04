@@ -20,8 +20,8 @@ public class ImageStoreUploadResponse {
     public String tmp_location;
     public String checksum;
     public String status;
-    public Integer image_size;
-    public Integer sent;
+    public Long image_size;
+    public Long sent;
     public String uploaded_by_user_id;
 
     public ImageStoreUploadResponse() {
@@ -30,7 +30,7 @@ public class ImageStoreUploadResponse {
 
     public ImageStoreUploadResponse(String image_id,
             String image_uri, Date date, String tmp_location,
-            String checksum, String status, Integer image_size, Integer sent) {
+            String checksum, String status, Long image_size, Long sent) {
         super();
         this.image_id = image_id;
 
@@ -46,7 +46,7 @@ public class ImageStoreUploadResponse {
     public ImageStoreUploadResponse(String id, String image_id,
             String image_uri, Date date,
             String tmp_location, String checksum, String status,
-            Integer image_size, Integer sent) {
+            Long image_size, Long sent) {
         super();
         this.id = id;
         this.image_id = image_id;
@@ -116,19 +116,19 @@ public class ImageStoreUploadResponse {
         this.status = status;
     }
 
-    public Integer getImage_size() {
+    public Long getImage_size() {
         return image_size;
     }
 
-    public void setImage_size(Integer image_size) {
+    public void setImage_size(Long image_size) {
         this.image_size = image_size;
     }
 
-    public Integer getSent() {
+    public Long getSent() {
         return sent;
     }
 
-    public void setSent(Integer sent) {
+    public void setSent(Long sent) {
         this.sent = sent;
     }
 

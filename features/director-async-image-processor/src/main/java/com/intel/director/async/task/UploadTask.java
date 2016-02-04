@@ -199,12 +199,12 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 			ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
-			int size = (int) (content.length() / 1024);
+			long size = (long) (content.length() / 1024);
 			double dataSize = (content.length() / 1024);
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = (int) imageStoreUploadResponse.getSent() / 1024;
+			long sent = (long) imageStoreUploadResponse.getSent() / 1024;
 			double dataSent = imageStoreUploadResponse.getSent() / 1024;
 			while (dataSent != dataSize) {
 
@@ -243,7 +243,7 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
 						glanceId);
 				dataSent = imageStoreUploadResponse.getSent() / 1024;
-				sent = (int) imageStoreUploadResponse.getSent() / 1024;
+				sent = (long) imageStoreUploadResponse.getSent() / 1024;
 			}
 
 			imgAttrs = new ImageAttributes();
