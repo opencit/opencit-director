@@ -285,6 +285,6 @@ public class GlanceRsClient {
 	}
 
 	private void printTimeDiff(String method, long start, long end) {
-		log.info(method + " took " + (end - start) + " ms");
+		log.debug(method + " took " + (end - start) + " ms");
 	}
 }
