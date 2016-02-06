@@ -10,9 +10,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Cacheable;
+
+import org.eclipse.persistence.annotations.UuidGenerator;
 
 
 @Entity
+@Cacheable(false)
 @Table(name = "MW_TRUST_POLICY")
 public class MwTrustPolicy extends MwAuditable{
 		

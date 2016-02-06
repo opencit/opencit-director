@@ -20,6 +20,7 @@ import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ListTrustPolicyDrafts;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
@@ -300,10 +301,10 @@ public class TrustPolicyDrafts {
 			CreateTrustPolicyMetaDataRequest createPolicyRequest) {
 		CreateTrustPolicyResponse response = new CreateTrustPolicyResponse();
 		try {
-			String imageId = imageService
-					.getImageByTrustPolicyDraftId(createPolicyRequest.trust_policy_draft_id);
+			ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
+			String imageId = imageInfo.id;
 			String trustPolicyId = imageService
-					.createTrustPolicy(createPolicyRequest.trust_policy_draft_id);
+					.createTrustPolicy(imageId, createPolicyRequest.trust_policy_draft_id);
 			response.setId(trustPolicyId);
 			imageService.deletePasswordForHost(imageId);
 			// / response.setStatus(Constants.SUCCESS);

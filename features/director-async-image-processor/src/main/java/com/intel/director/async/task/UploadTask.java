@@ -237,8 +237,9 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 				imageUploadTransferObject.setDate(new Date());
 				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
 						.getChecksum());
-				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-						.getImage_uri());
+				log.info("URI {}",imageStoreUploadResponse
+						.getImage_uri() );
+				imageUploadTransferObject.setImage_uri(glanceId);
 				log.info("Image upload date to be saved : {}", imageUploadTransferObject);
 				ImageStoreUploadTransferObject imgTransaferObject = persistService
 						.saveImageUpload(imageUploadTransferObject);
