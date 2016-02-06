@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageAttributes;
@@ -992,7 +993,10 @@ public class ImageServiceImpl implements ImageService {
 			policy.getEncryption().getChecksum().setValue(computeHash);
 
 		}
-
+		String uuid = (new UUID()).toString();
+		policy.getImage().setImageId(uuid);
+		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+uuid);
+		
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policy);
 		} catch (JAXBException e) {
@@ -1003,6 +1007,7 @@ public class ImageServiceImpl implements ImageService {
 		log.info("Convert policy in string format");
 
 		// Sign the policy with MtWilson
+
 		Extensions
 				.register(
 						TlsPolicyCreator.class,

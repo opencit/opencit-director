@@ -8,6 +8,11 @@ package com.intel.director.async.task;
 import java.io.File;
 
 import com.intel.director.common.Constants;
+import java.io.StringReader;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
 
 /**
  * Task to upload the tar of image and policy
@@ -58,9 +63,17 @@ public class UploadTarTask extends UploadTask {
 				+ imageActionObject.getImage_id());
 		try {
 			String imageLocation = imageInfo.getLocation();
-
+			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
 			String tarName = trustPolicy.getDisplay_name() + ".tar";
-
+			String policyXml= trustPolicy.getTrust_policy();
+			log.debug("Inside Run Upload Tar task policyXml::"+policyXml);
+			StringReader reader = new StringReader(policyXml);
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+			String glanceId=policy.getImage().getImageId();
+			log.info("Inside Run Upload Tar task glanceId::"+glanceId);
+			imageProperties.put(Constants.GLANCE_ID, glanceId);
 			imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
 			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;

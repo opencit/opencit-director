@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package com.intel.director.images;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -85,9 +86,9 @@ public class Images {
 
 	/**
 	 * API for uploading image metadata like image format, deployment type(VM,
-	 * BareMetal, Docker), image file name, image size ( in bytes ), etc. Creates image
-	 * upload metadata with specified parameters and returns metadata along with
-	 * image id.
+	 * BareMetal, Docker), image file name, image size ( in bytes ), etc.
+	 * Creates image upload metadata with specified parameters and returns
+	 * metadata along with image id.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
@@ -104,6 +105,19 @@ public class Images {
 	 * 	"status" : "Error",
 	 * 	"details" : "Image with Same Name already exists, choose a different name"
 	 * }
+	 * in case of insufficient or invalid data following response is returned:
+	 * 1) Invalid deployment type : XYZ
+	 * 	{
+	 *   "deleted": false,
+	 *   "details": "Invalid deployment type for image",
+	 *   "image_upload_status": "Error"
+	 * }
+	 * 2) Invalid format and deployment type
+	 * {
+	 *   "deleted": false,
+	 *   "details": "Invalid deployment type for image,Inavlid deployment format for image",
+	 *   "image_upload_status": "Error"
+	 * }
 	 * </pre>
 	 * 
 	 * @param TrustDirectorImageUploadRequest
@@ -116,19 +130,28 @@ public class Images {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse createUploadImageMetadata(
+	public Response createUploadImageMetadata(
 			TrustDirectorImageUploadRequest uploadRequest)
 			throws DirectorException {
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
 
+		String errors = uploadRequest.validate();
+		if (StringUtils.isNotBlank(errors)) {
+			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+			uploadImageToTrustDirector.details = uploadRequest.validate();
+			uploadImageToTrustDirector.status = Constants.ERROR;
+			uploadImageToTrustDirector.details = errors;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(uploadImageToTrustDirector).build();
+		}
 		imageService = new ImageServiceImpl();
 
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
 		try {
 			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.state = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
-				return uploadImageToTrustDirector;
+				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
@@ -138,8 +161,7 @@ public class Images {
 			uploadImageToTrustDirector.state = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
-
-			return uploadImageToTrustDirector;
+			return Response.ok().entity(uploadImageToTrustDirector).build();
 		} catch (DirectorException e) {
 			log.error("Error in Saving Image metadata", e);
 			throw new DirectorException("Error in Saving Image metadata", e);
@@ -172,8 +194,7 @@ public class Images {
 	 * 
 	 * </pre>
 	 * @param imageId
-	 *            - id received as response of
-	 *            https://{IP/HOST_NAME}/v1/images/
+	 *            - id received as response of https://{IP/HOST_NAME}/v1/images/
 	 *            request
 	 * @param filInputStream
 	 *            - image data sent as chunk
@@ -185,7 +206,7 @@ public class Images {
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
+	public Response uploadImageToTrustDirector(
 			@PathParam("imageId") String imageId, InputStream filInputStream)
 			throws DirectorException {
 		log.info("Uploading image to TDaaS");
@@ -199,20 +220,18 @@ public class Images {
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			long lEndTime = new Date().getTime();
-			
+
 			long difference = lEndTime - lStartTime;
 			log.info("Time taken to upload image to TD: " + difference);
 			filInputStream.close();
 			Session session = SecurityUtils.getSubject().getSession();
 			session.touch();
-			return uploadImageToTrustDirector;
-
+			return Response.ok(uploadImageToTrustDirector).build();
 		} catch (DirectorException | IOException e) {
 			log.error("Error while uploading image to Trust Director", e);
 			throw new DirectorException("Error in uploading image", e);
 		}
 	}
-
 
 	/**
 	 * Returns list of images in TD depending on the image deployment type
@@ -221,11 +240,11 @@ public class Images {
 	 * 
 	 * This method gets the list of images based on the deployment type provided
 	 * as a query param. Providing the deployment type is optional. If provided
-	 * the value should be VM or BareMetal. edited_date field is updated in case of 
-	 * mounting and delete.image_upload_status can have values Incomplete and Complete. 
-	 * Since the upload happens in multiple steps, the status is Incomplete till the
-	 * sent field is equal to image_size. image_location is for internal server use and 
-       it can't accessed it directly. 
+	 * the value should be VM or BareMetal. edited_date field is updated in case
+	 * of mounting and delete.image_upload_status can have values Incomplete and
+	 * Complete. Since the upload happens in multiple steps, the status is
+	 * Incomplete till the sent field is equal to image_size. image_location is
+	 * for internal server use and it can't accessed it directly.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
@@ -475,7 +494,7 @@ public class Images {
 	 * }
 	 * 
 	 * In case of error:
-	 * { “error”: “error message ” } 
+	 * { “error”: “error message ” }
 	 * 
 	 * </pre>
 	 * 
@@ -648,8 +667,8 @@ public class Images {
 	}
 
 	/**
-	 * Lookup method to fetch the image formats. Currently we return qcow2, vhd, vmdk, raw, vdi
-	 *  as JSON
+	 * Lookup method to fetch the image formats. Currently we return qcow2, vhd,
+	 * vmdk, raw, vdi as JSON
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
@@ -785,7 +804,14 @@ public class Images {
 	 * Input: Image id as path param
 	 * Output: Content sent as stream
 	 * 
-	 * </pre>	 
+	 * </pre>
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * Input: Image id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * </pre>
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall
@@ -822,7 +848,6 @@ public class Images {
 				+ policy.getImgAttributes().getImage_name() + ".xml");
 		return response.build();
 	}
-
 
 	/**
 	 * 
@@ -929,7 +954,7 @@ public class Images {
 		} catch (DirectorException e) {
 			log.error("Error in deleteImage ", e);
 			response.setDeleted(false);
-			///response.setDetails(e.getMessage());
+			// /response.setDetails(e.getMessage());
 			response.setError("Error in deleteImage");
 		}
 		return Response.ok(response).build();
@@ -959,12 +984,13 @@ public class Images {
 	 *   "deleted": false
 	 * }
 	 * 
-	 * In case of any back end error, the error would contain the error occurred at the backed. 
+	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
 	 * </pre>
 	 * 
-	 * @param sshSettingRequest JSON representation of the connection details
-	 * @return Response containing the ID of the image created for the host 
+	 * @param sshSettingRequest
+	 *            JSON representation of the connection details
+	 * @return Response containing the ID of the image created for the host
 	 * @throws DirectorException
 	 */
 
@@ -975,7 +1001,7 @@ public class Images {
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 		SshSettingResponse sshResponse = sshSettingRequest.validate("add");
-		
+
 		if (StringUtils.isNotBlank(sshResponse.getError())) {
 			return sshResponse;
 		}

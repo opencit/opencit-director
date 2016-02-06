@@ -18,7 +18,6 @@ import javax.ws.rs.core.Response;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
-import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
@@ -191,8 +190,6 @@ public class ImageActions {
 					.createImageAction(imageActionRequest);
 		} catch (DirectorException e) {
 			log.error("Error in createImageAction", e);
-			//imageActionResponse.setStatus(Constants.ERROR);
-			//imageActionResponse.setDetails(e.getMessage());
 			imageActionResponse.setError(e.getMessage());
 			return imageActionResponse;
 		}

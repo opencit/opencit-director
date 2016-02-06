@@ -43,18 +43,18 @@ public class UnmountImageHandler {
 			log.info("MAIN : No timeout found. returning");
 			return;
 		}
-		log.info("MAIN : timeout = " + timeout);
+		log.debug("MAIN : timeout = " + timeout);
 		List<String> imagesToBeUnmounted = fetchImagesToBeUnmounted(
 				mountedImageIds, timeout);
 		if (imagesToBeUnmounted.isEmpty()) {
-			log.info("MAIN : No remote hosts to unmount. Returning");
+			log.debug("MAIN : No remote hosts to unmount. Returning");
 			return;
 		}
-		log.info("MAIN : Number of images to be unmounted = "
+		log.debug("MAIN : Number of images to be unmounted = "
 				+ imagesToBeUnmounted.size());
 		for (String imageId : imagesToBeUnmounted) {
 			String mountPath = TdaasUtil.getMountPath(imageId);
-			log.info("MAIN : Unmounting image: " + imageId);
+			log.debug("MAIN : Unmounting image: " + imageId);
 			int exitCode = MountImage.unmountRemoteSystem(mountPath);
 			if (exitCode == 0) {
 				//update the db too
@@ -67,9 +67,9 @@ public class UnmountImageHandler {
 				} catch (DbException e) {
 					log.error("Unable to set the mounted by user to null for image "+imageId, e);
 				}
-				log.info("MAIN : Successfuly unmounted image " + imageId);
+				log.debug("MAIN : Successfuly unmounted image " + imageId);
 			} else {
-				log.info("MAIN : Error unmounting image " + imageId);
+				log.error("MAIN : Error unmounting image " + imageId);
 			}
 		}
 
@@ -105,9 +105,9 @@ public class UnmountImageHandler {
 			Configuration configuration = ConfigurationFactory
 					.getConfiguration();
 			timeout = configuration.get("login.token.expires.minutes", "30");
-			Log.info("timeout from config is " + timeout);
+			Log.debug("timeout from config is " + timeout);
 			if (StringUtils.isBlank(timeout)) {
-				Log.info("Setting timeout to default");
+				Log.debug("Setting timeout to default");
 				timeout = "30";
 			}
 		} catch (IOException e) {
@@ -130,7 +130,7 @@ public class UnmountImageHandler {
 				long diffMinutes = (currentDate.getTime() - trustPolicyDraftEditDate
 						.getTime()) / (60 * 1000) % 60;
 				
-				log.info("DIFF : "+diffMinutes +" Timeout = "+new Long(timeout).longValue());
+				log.debug("DIFF : "+diffMinutes +" Timeout = "+new Long(timeout).longValue());
 				if (diffMinutes > new Long(timeout).longValue()) {
 					imagesToBeUnmounted.add(imageId);
 				}
