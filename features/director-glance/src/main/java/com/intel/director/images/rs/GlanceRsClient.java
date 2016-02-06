@@ -146,8 +146,14 @@ public class GlanceRsClient {
 	public String uploadImageMetaData(Map<String, String> imageProperties)
 			throws IOException {
 		long start = new Date().getTime();
-
-		String uuid = (new UUID()).toString();
+		String uuid=null;
+		log.info("Inside glance upload image metadata glanceid:: "+imageProperties.get(Constants.GLANCE_ID) );
+		if (imageProperties.get(Constants.GLANCE_ID) != null) {
+			uuid = (String) imageProperties.get(Constants.GLANCE_ID);
+		}else{
+			log.info("Generating new uuid in Glance  uploadImageMetaData");
+			uuid=(new UUID()).toString();
+		}
 		Response response;
 		if (imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION) != null) {
 			response = webTarget

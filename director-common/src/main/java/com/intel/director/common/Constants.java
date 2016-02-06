@@ -107,6 +107,7 @@ public class Constants {
 	public static final String GLANCE_HEADER_CONTAINER_FORMAT = "X-Image-Meta-Container_format";
 	public static final String GLANCE = "Glance";
 	public static final String SWIFT = "Swift";
+	public static final String GLANCE_ID="glanceid";
 
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";

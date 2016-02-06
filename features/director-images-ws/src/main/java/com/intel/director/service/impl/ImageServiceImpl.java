@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageAttributes;
@@ -132,6 +133,11 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
+		
+		if(image.deleted){
+			log.error("Cannot launch an image marked as deleted");
+			throw new DirectorException("Cannot launch deleted image: " + imageId);
+		}
 
 		if (image.deleted) {
 			log.error("Cannot launch an image marked as deleted");
@@ -210,6 +216,10 @@ public class ImageServiceImpl implements ImageService {
 					exitcode = MountImage.mountImage(image.getLocation()
 							+ mounteImageName, mountPath);
 					if (exitcode != 0) {
+						log.error("Unable to mount image");
+						throw new DirectorException("Unable to mount image");
+					}
+					if(exitcode != 0){
 						log.error("Unable to mount image");
 						throw new DirectorException("Unable to mount image");
 					}
@@ -983,7 +993,10 @@ public class ImageServiceImpl implements ImageService {
 			policy.getEncryption().getChecksum().setValue(computeHash);
 
 		}
-
+		String uuid = (new UUID()).toString();
+		policy.getImage().setImageId(uuid);
+		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+uuid);
+		
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policy);
 		} catch (JAXBException e) {
@@ -994,6 +1007,7 @@ public class ImageServiceImpl implements ImageService {
 		log.info("Convert policy in string format");
 
 		// Sign the policy with MtWilson
+
 		Extensions
 				.register(
 						TlsPolicyCreator.class,

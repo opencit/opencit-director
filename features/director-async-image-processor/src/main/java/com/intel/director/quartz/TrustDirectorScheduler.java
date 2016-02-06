@@ -41,12 +41,10 @@ public class TrustDirectorScheduler extends AbstractCommand {
 	 * @throws InterruptedException
 	 */
 	public static void runImageActionPoller() throws InterruptedException {
-		log.info("*** Executing task to process the image actions");
 		actionPoller.execute();
 	}
 
 	public static void runUnmountPoller() throws InterruptedException {
-		log.info("*** Executing task to unmount remote hosts that are not in use");
 		unmountImageHandler.unmountUnusedImages();
 	}
 }
