@@ -9,8 +9,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Cacheable;
 
 @Entity
+@Cacheable(false)
 @Table(name = "MW_IMAGE")
 public class MwImage extends MwAuditable {
 

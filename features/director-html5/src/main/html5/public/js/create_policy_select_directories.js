@@ -419,7 +419,8 @@ function createPolicy(){
 		navButtonClicked = false;
 	}
 	var createTrustPolicyMetaData = {
-		"trust_policy_draft_id" : current_trust_policy_draft_id
+		"trust_policy_draft_id" : current_trust_policy_draft_id,
+		"image_id" : current_image_id
 	}
 	$.ajax({
 		type : "POST",
