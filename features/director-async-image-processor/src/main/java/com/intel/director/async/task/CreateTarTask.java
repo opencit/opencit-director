@@ -121,6 +121,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 					log.info("Updating image complete with new policy id {}", createTrustPolicyId);
 					trustPolicyApi = persistService.fetchPolicyById(createTrustPolicyId);				
 					trustPolicy = TdaasUtil.getPolicy(trustPolicyApi.getTrust_policy()); 
+					MountImageResponse unmountImageResponse = imageService.unMountImage(imageActionObject.getImage_id(), "admin");
 				}else{
 					log.info("Exception ");
 					return false;
