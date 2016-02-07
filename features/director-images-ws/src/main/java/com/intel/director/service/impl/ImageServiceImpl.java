@@ -119,13 +119,13 @@ public class ImageServiceImpl implements ImageService {
 	}
 	
 	@Override
-	public MountImageResponse mountImage(String imageId, String user)
+	public MountImageResponse mountImage(String imageId, String backendUser)
 			throws DirectorException {
 		int exitcode = 0;
-		String backendUser = user;
-		user = ShiroUtil.subjectUsername() ;
-		if(user == null){
-			user = backendUser;
+		String loggedInUser = ShiroUtil.subjectUsername() ;
+		if(StringUtils.isBlank(loggedInUser)){
+			loggedInUser = backendUser;
+			log.info("Setting user for mounting to {}", loggedInUser);
 		}
 
 		log.info("inside mounting image in service");
@@ -251,7 +251,7 @@ public class ImageServiceImpl implements ImageService {
 		// Mark the image mounted by the user
 		try {
 			// /image.mounted_by_user_id = user;
-			image.setMounted_by_user_id(user);
+			image.setMounted_by_user_id(loggedInUser);
 			Date currentDate = new Date();
 			image.setEdited_date(currentDate);
 			image.setEdited_by_user_id(ShiroUtil.subjectUsername());
@@ -259,8 +259,8 @@ public class ImageServiceImpl implements ImageService {
 			mountImageResponse = TdaasUtil
 					.mapImageAttributesToMountImageResponse(image);
 
-			log.info("Update mounted_by_user for image in DB for image at location : "
-					+ image.getLocation());
+			log.info("Update mounted_by_user = {} for image in DB for image at location : "
+					+ image.getLocation(), loggedInUser);
 			log.info("*** Completed mounting of image");
 		} catch (DbException ex) {
 			log.error("Error while saving mount data to database: "
@@ -322,13 +322,14 @@ public class ImageServiceImpl implements ImageService {
 		} else {
 			mountPath = DirectorUtil.getMountPath(image.id);
 		}
-
+/*
 		if (image.getMounted_by_user_id() == null) {
+			log.info("NOT DOING ACTUAL UNMOUNT");
 			image.setMounted_by_user_id(null);
 			unmountImageResponse = TdaasUtil
 					.mapImageAttributesToUnMountImageResponse(image);
 			return unmountImageResponse;
-		}
+		}*/
 
 		image.setMounted_by_user_id(null);
 		Date currentDate = new Date();
@@ -941,7 +942,7 @@ public class ImageServiceImpl implements ImageService {
 					policyFound = true;
 				}
 			} catch (DbException e1) {
-				log.error("Unable to fetch draft for draft id::", draft_id);
+				log.error("Unable to fetch policy for  id::", draft_id);
 				policyFound = false;
 			}
 		}
@@ -957,7 +958,7 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
 		} catch (DbException ex) {
-			log.error("Error in mounting image  ", ex);
+			log.error("Error in fetching image  ", ex);
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
@@ -981,7 +982,7 @@ public class ImageServiceImpl implements ImageService {
 			trustPolicy.setImgAttributes(imgAttrs);
 	
 
-			log.info("Existing policy id : {}", existingPolicy.getId());
+			log.info("Existing policy id : {} for image ", existingPolicy.getId() , imageId);
 		}
 
 		// Get the hash
