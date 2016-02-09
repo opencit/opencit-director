@@ -338,6 +338,10 @@ echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
 
+# libguestfs packages has a custom prompt about installing supermin which ignores the “-y” option we provide to apt-get. Following code will help to avoid that prompt 
+export DEBIAN_FRONTEND=noninteractive
+echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
+
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
 DIRECTOR_APT_PACKAGES="zip  unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2" #vdfuse"
@@ -527,7 +531,9 @@ disable_tcp_timestamps
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
-    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
+    touch $DIRECTOR_CONFIGURATION/.director_password
+    chown $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_CONFIGURATION/.director_password
+	director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
