@@ -531,7 +531,9 @@ disable_tcp_timestamps
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
-    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
+    touch $DIRECTOR_CONFIGURATION/.director_password
+    chown $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_CONFIGURATION/.director_password
+	director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
