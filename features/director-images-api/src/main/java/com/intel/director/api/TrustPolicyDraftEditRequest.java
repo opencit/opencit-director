@@ -1,7 +1,5 @@
 package com.intel.director.api;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;

@@ -1,5 +1,8 @@
 package com.intel.director.images;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -20,6 +23,8 @@ import com.intel.director.api.CreateTrustPolicyResponse;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ListTrustPolicyDrafts;
+import com.intel.director.api.TrustPolicy;
+import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
@@ -159,6 +164,18 @@ public class TrustPolicyDrafts {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(createTrustPolicyMetaDataResponse).build();
 		}
+		
+
+		
+		TrustPolicyDraft fetchTrustpolicydraftById = imageService
+				.fetchTrustpolicydraftById(trustPolicyDraftId);
+		if (fetchTrustpolicydraftById == null) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.error = "Trust policy draft with id "+ trustPolicyDraftId+" does not exist";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+
 		try {
 			createTrustPolicyMetaDataResponse = imageService
 					.getPolicyMetadata(trustPolicyDraftId);
@@ -200,7 +217,7 @@ public class TrustPolicyDrafts {
 	 * 
 	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts/97c4b9d2-d0e6-42b5-a4e2-1642b01db21f
-	 * Input: UUID of the image in path
+	 * Input: UUID of the trust policy draft in path
 	 * {"patch":
 	 * "<patch></patch>"
 	 * }
@@ -251,13 +268,31 @@ public class TrustPolicyDrafts {
 		trustPolicyDraftEditRequest.trust_policy_draft_id = trustPolicyDraftId;
 		TrustPolicyDraftResponse policyDraft = new TrustPolicyDraftResponse();
 		String trustPolicyDraftXML = null;
-		String error=trustPolicyDraftEditRequest.validate();
-		if(!StringUtils.isBlank(error)){
-			policyDraft.error = error;
+		
+		String error = trustPolicyDraftEditRequest.validate();
+
+		if (!StringUtils.isBlank(error)) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.error = error;
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(policyDraft).build();
+					.entity(genericResponse).build();
 		}
-	
+		
+		List<String> errors = new ArrayList<>();
+		TrustPolicyDraft fetchTrustpolicydraftById = imageService
+				.fetchTrustpolicydraftById(trustPolicyDraftId);
+		if (fetchTrustpolicydraftById == null) {
+			errors.add("Invalid trust policy draft id provided");
+		}
+
+		if (errors.size() > 0) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.error = StringUtils.join(errors, ", ");
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
 		
 		try {
 			policyDraft = imageService
@@ -292,7 +327,7 @@ public class TrustPolicyDrafts {
 	 *  https://{IP/HOST_NAME}/v1/rpc/finalize-trust-policy-draft
 	 *  
 	 * Input
-	 * {"trust_policy_draft_id":"<UUID of trust policy draft>"}
+	 * {"trust_policy_draft_id":"<UUID of trust policy draft>", "image_id" : "<UUID of the image>"}
 	 * In case of a success, the response would be :
 	 * {"id":"14767a34-b5a4-4f84-be7a-7604670fe8b5"}
 	 * id returned in case of success response is id of trust policy created 
@@ -315,13 +350,26 @@ public class TrustPolicyDrafts {
 			CreateTrustPolicyMetaDataRequest createPolicyRequest) {
 		CreateTrustPolicyResponse createTrustPolicyDraftResponse = new CreateTrustPolicyResponse();
 		try {
-			ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
 			String error=createPolicyRequest.validate("policy");
 			if(!StringUtils.isBlank(error)){
 				createTrustPolicyDraftResponse.error = error;
 				return Response.status(Response.Status.BAD_REQUEST)
 						.entity(createTrustPolicyDraftResponse).build();
 			}
+			ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
+			if(imageInfo == null){
+				createTrustPolicyDraftResponse.error = "No image with id : "+createPolicyRequest.image_id+" exists.";
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(createTrustPolicyDraftResponse).build();
+			}
+			TrustPolicyDraft fetchTrustpolicydraftById = imageService
+					.fetchTrustpolicydraftById(createPolicyRequest.trust_policy_draft_id);
+			if (fetchTrustpolicydraftById == null) {
+				createTrustPolicyDraftResponse.error = "No trust policy draft with id : "+createPolicyRequest.trust_policy_draft_id+" exists.";
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(createTrustPolicyDraftResponse).build();
+			}
+			
 			String imageId = imageInfo.id;
 			String trustPolicyId = imageService
 					.createTrustPolicy(imageId, createPolicyRequest.trust_policy_draft_id);
@@ -373,6 +421,19 @@ public class TrustPolicyDrafts {
 		}
 
 		try {
+			ImageInfo fetchImageById = imageService.fetchImageById(createTrustPolicyMetaDataRequest.image_id);
+			if(fetchImageById == null){
+				createTrustPolicyMetadataResponse.setError("Invalid image id provided");
+				createTrustPolicyMetadataResponse.setId(createTrustPolicyMetaDataRequest.image_id);
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(createTrustPolicyMetadataResponse).build();
+
+			}
+		} catch (DirectorException e1) {
+			log.error("Invalid image id", e1);
+		}
+
+		try {
 			createTrustPolicyMetadataResponse = imageService
 					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
@@ -421,6 +482,30 @@ public class TrustPolicyDrafts {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(trustPolicyDraft).build();
 		}
+		
+
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(req.getImage_id());
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			trustPolicyDraft.error = "No image with id : "+req.getImage_id()+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(trustPolicyDraft).build();
+		}
+		
+		String trust_policy_id = imageInfo.getTrust_policy_id();
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+
+		if(trustPolicyByTrustId == null){
+			trustPolicyDraft.error = "No trust policy exists for image with id : "+req.getImage_id()+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(trustPolicyDraft).build();
+		}
+		
+		
 		try {
 			
 			trustPolicyDraft= imageService.createPolicyDraftFromPolicy(req.getImage_id());
@@ -460,6 +545,15 @@ public class TrustPolicyDrafts {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}
+		
+		TrustPolicyDraft fetchTrustpolicydraftById = imageService.fetchTrustpolicydraftById(trustPolicyDraftId);
+		if(fetchTrustpolicydraftById == null){
+			genericResponse.error = "Trust Policy Draft Id does not exist for id "+trustPolicyDraftId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+
+		}
+		
 		try {
 			imageService.deleteTrustPolicyDraft(trustPolicyDraftId);
 			genericResponse.setDeleted(true);

@@ -23,9 +23,12 @@ import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageActionService;
+import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageActionImpl;
+import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 /**
@@ -39,7 +42,7 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 public class ImageActions {
 
 	ImageActionService actionService = new ImageActionImpl();
-
+	ImageService imageService = new ImageServiceImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActions.class);
 
@@ -202,6 +205,22 @@ public class ImageActions {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(imageActionResponse).build();
 		}
+		
+		ImageInfo fetchImageById = null;
+		try {
+			fetchImageById = imageService
+					.fetchImageById(imageActionRequest.image_id);
+		} catch (DirectorException e1) {
+			log.error("unable to fetch image");
+		}
+
+		if (fetchImageById == null) {
+			imageActionResponse.error = "Image does not exist for id: "
+					+ imageActionRequest.image_id;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
+		
 		try {
 			imageActionObject = actionService
 					.createImageAction(imageActionRequest);
@@ -250,6 +269,18 @@ public class ImageActions {
 	///	GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(actionId,RegexPatterns.UUID)){
 			imageActionResponse.error = "Action Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
+		ImageActionObject fetchImageAction = null;
+		try {
+			fetchImageAction = actionService.fetchImageAction(actionId);
+		} catch (DirectorException e1) {
+			log.error("unable to fetch image action", e1);
+		}
+
+		if(fetchImageAction == null){			
+			imageActionResponse.error = "Image action does not exist for id "+actionId;
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(imageActionResponse).build();
 		}

@@ -152,5 +152,7 @@ public interface ImageService {
 			throws DirectorException;
 	
 	public ImageInfo fetchImageById(String imageId) throws DirectorException;
+	
+	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId);
 }
 

@@ -133,11 +133,10 @@ public class CreateTrustPolicyMetaDataRequest {
 			}
 			if (StringUtils.isBlank(getLaunch_control_policy())) {
 				errors.add("Launch Control Policy is empty");
-			} else if (!(Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY
-					.equals(getLaunch_control_policy()))
-					&& !(Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE
-							.equals(getLaunch_control_policy()))) {
-				errors.add("Incorrect launch control policy");
+			} else if (!ValidationUtil.isValidWithRegex(getLaunch_control_policy(), Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY+"|"+Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE)) {
+				errors.add("Incorrect launch control policy. Valid values are "
+						+ Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE
+						+ " and " + Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY);
 			}
 
 			if (!ValidationUtil.isValidWithRegex(getImage_id(),
@@ -145,7 +144,8 @@ public class CreateTrustPolicyMetaDataRequest {
 				errors.add("Image id is empty or not in uuid format");
 
 			}
-
+			
+			
 		} else if ("policy".equals(type)) {
 			if (!ValidationUtil.isValidWithRegex(getImage_id(),
 					RegexPatterns.UUID)) {

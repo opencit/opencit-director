@@ -31,6 +31,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -57,6 +58,7 @@ import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
@@ -310,7 +312,7 @@ public class Images {
 		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		if(!CommonValidations.validateImageDeployments(deployment_type)){
-			searchImagesResponse.error = "Incorrect deployment_type";
+			searchImagesResponse.error = "Incorrect deployment_type. Valid types are BareMetal or VM";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(searchImagesResponse).build();
 		}
@@ -464,6 +466,18 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(mountImageResponse).build();
 		}
+		try {
+			ImageInfo fetchImageById = imageService.fetchImageById(mountImage.id);
+			if(fetchImageById == null){
+				mountImageResponse.setError("Invalid image id provided");
+				mountImageResponse.setId(mountImage.id);
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(mountImageResponse).build();
+
+			}
+		} catch (DirectorException e1) {
+			log.error("Invalid image id", e1);
+		}
 		
 		
 		log.info("inside mounting image in web service");
@@ -541,7 +555,19 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(unmountImageResponse).build();
 		}
-		
+		try {
+			ImageInfo fetchImageById = imageService.fetchImageById(unmountimage.id);
+			if(fetchImageById == null){
+				unmountImageResponse.setError("Invalid image id provided");
+				unmountImageResponse.setId(unmountimage.id);
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(unmountImageResponse).build();
+
+			}
+		} catch (DirectorException e1) {
+			log.error("Invalid image id", e1);
+		}
+
 	
 		try {
 			unmountImageResponse = imageService.unMountImage(unmountimage.id,
@@ -639,6 +665,27 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(filesInImageResponse).build();
 		}
+		
+		try {
+			ImageInfo fetchImageById = imageService.fetchImageById(imageId);
+			if(fetchImageById == null){
+				filesInImageResponse.error = "Invalid image id provided";
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(filesInImageResponse).build();
+
+			}
+		} catch (DirectorException e1) {
+			log.error("Invalid image id", e1);
+		}
+		
+		String mountPath = TdaasUtil.getMountPath(imageId);
+		File f = new File(mountPath);
+		if(!f.exists()){
+			filesInImageResponse.error = "Image not mounted";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(filesInImageResponse).build();
+		}
+		
 		try {
 			filesInImageResponse = imageService
 					.searchFilesInImage(searchFilesInImageRequest);
@@ -652,6 +699,10 @@ public class Images {
 				// TODO Handle Error
 				log.error("Error while unmounting image  : " + imageId, e);
 			}
+			filesInImageResponse.error = "Error doing search operation";
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(filesInImageResponse).build();
+
 		}
 		String join = StringUtils.join(filesInImageResponse.files, "");
 		filesInImageResponse.treeContent = join;
@@ -863,6 +914,32 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}
+		
+
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			genericResponse.error = "No image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		
+		String trust_policy_id = imageInfo.getTrust_policy_id();
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+
+		if(trustPolicyByTrustId == null){
+			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		
 
 		try {
 			policy = imageService.getTrustPolicyByImageId(imageId);
@@ -918,6 +995,33 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}
+		
+
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			genericResponse.error = "No image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		
+		String trust_policy_id = imageInfo.getTrust_policy_id();
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+
+		if(trustPolicyByTrustId == null){
+			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		
+		
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
@@ -1051,6 +1155,8 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(sshResponse).build();
 		}
+		
+		
 		try {
 			sshResponse = imageService.addHost(sshSettingRequest);
 		} catch (DirectorException e) {

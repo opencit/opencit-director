@@ -29,4 +29,27 @@ public class SearchFilesInImageResponse {
 	public List<String> patchXml = null;
 	public String treeContent = null;
 	public String error;
+	public List<String> getPatchXml() {
+		return patchXml;
+	}
+	public void setPatchXml(List<String> patchXml) {
+		this.patchXml = patchXml;
+	}
+	public String getTreeContent() {
+		return treeContent;
+	}
+	public void setTreeContent(String treeContent) {
+		this.treeContent = treeContent;
+	}
+	public String getError() {
+		return error;
+	}
+	public void setError(String error) {
+		this.error = error;
+	}
+	public void setFiles(List<String> files) {
+		this.files = files;
+	}
+	
+	
 }

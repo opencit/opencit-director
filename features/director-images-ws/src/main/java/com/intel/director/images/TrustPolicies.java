@@ -21,8 +21,10 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
+import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
@@ -151,6 +153,14 @@ public class TrustPolicies {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(monitorStatus).build();
 		}
+
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
+		if(trustPolicyByTrustId == null){
+			monitorStatus.error = "Trust Policy does not exist for id: "+trustPolicyId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(monitorStatus).build();
+		}
+		
 		try {
 			imageService.updateTrustPolicy(updateTrustPolicyRequest,
 					trustPolicyId);
@@ -202,6 +212,22 @@ public class TrustPolicies {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(importPolicyTemplateResponse).build();
 		}
+		
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(req.getImage_id());
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			importPolicyTemplateResponse.error = "No image with id : "+req.getImage_id()+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}else if (!imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)){
+			importPolicyTemplateResponse.error = "Templates can only be applied to non virtualized servers.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}
 		try {
 			importPolicyTemplateResponse = imageService
 					.importPolicyTemplate(req.getImage_id());
@@ -246,6 +272,14 @@ public class TrustPolicies {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(response).build();
 		}
+		
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
+		if(trustPolicyByTrustId == null){
+			response.error = "Trust Policy does not exist for id: "+trustPolicyId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		
 		try {
 			imageService.deleteTrustPolicy(trustPolicyId);
 			response.setDeleted(true);

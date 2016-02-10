@@ -10,10 +10,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
-
-
 
 
 /**
@@ -23,10 +20,11 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 public class TrustDirectorImageUploadRequest extends ImageAttributes{
 	public static final String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
     public String image_file;
+    
     public String validate(){
     	List<String> errors = new ArrayList<>();
     	if(!ValidationUtil.isValidWithRegex(image_name,NAME_REGEX)){
-    		errors.add("Invalid name for image");
+    		errors.add("Invalid name for image. Image can contain number, aphabets and following characters: (- _ @ . ; ,)");
     	}
     	List<String> validDeploymentTypes = new ArrayList<>(2);
     	validDeploymentTypes.add("Docker");
@@ -34,8 +32,9 @@ public class TrustDirectorImageUploadRequest extends ImageAttributes{
     	if(!(StringUtils.isNotBlank(image_deployments) && validDeploymentTypes.contains(image_deployments))){
     		errors.add("Invalid deployment type for image");
     	}
-    	if(!(StringUtils.isNotBlank(image_format) && "qcow2".equals(image_format))){
-    		errors.add("Invalid format for image");
+    	
+    	if(!((StringUtils.isNotBlank(image_format) && ValidationUtil.isValidWithRegex(image_format, "qcow2|vhd(vpc)|vmdk|raw|vdi")))){
+    		errors.add("Invalid format for image. Valid formats are: qcow2, vhd(vpc), vmdk, raw, vdi");
     	}
     	if(!(image_size != null && (image_size > 0))){
     		errors.add("Invalid image size image");

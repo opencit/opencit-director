@@ -2977,5 +2977,14 @@ public class ImageServiceImpl implements ImageService {
 					"Unable to updateSshDataById", e);
 		}
 	}
+
+	@Override
+	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId) {
+		try {
+			return imagePersistenceManager.fetchPolicyDraftById(trustPolicyDraftId);
+		} catch (DbException e) {
+			return null;
+		}
+	}
 	
 }
