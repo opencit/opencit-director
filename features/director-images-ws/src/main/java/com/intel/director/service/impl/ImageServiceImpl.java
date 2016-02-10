@@ -58,6 +58,7 @@ import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
@@ -778,7 +779,7 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public TrustPolicyDraft editTrustPolicyDraft(
+	public TrustPolicyDraftResponse editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustpolicyDraftEditRequest)
 			throws DirectorException {
 		TrustPolicyDraft trustPolicyDraft = null;
@@ -807,7 +808,10 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error in editTrustPolicyDraft()");
 			throw new DirectorException("Error in editTrustPolicyDraft ", e);
 		}
-		return trustPolicyDraft;
+		Mapper mapper = new DozerBeanMapper();
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(trustPolicyDraft,
+				TrustPolicyDraftResponse.class);
+		return trustPolicyDraftResponse;
 	}
 
 	public CreateTrustPolicyMetaDataResponse getPolicyMetadata(String draftid)
@@ -1926,7 +1930,7 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId)
+	public TrustPolicyDraftResponse createPolicyDraftFromPolicy(String imageId)
 			throws DirectorException {
 
 		ImageInfo imageInfo;
@@ -1966,14 +1970,16 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Unable to save policy draft", e);
 			throw new DirectorException("Unable to save policy draft ", e);
 		}
-
+		Mapper mapper = new DozerBeanMapper();
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(trustPolicyDraft,
+				TrustPolicyDraftResponse.class);
 		try {
 			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
 		} catch (DbException e) {
 			log.error("Cannoot delete policy", e);
 			throw new DirectorException("Cannot delete policy draft y", e);
 		}
-		return savePolicyDraft;
+		return trustPolicyDraftResponse;
 	}
 
 	public TrustPolicyDraft trustPolicyToTrustPolicyDraft(

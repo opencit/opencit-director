@@ -100,4 +100,6 @@ public class Constants {
 	public static final String GLANCE_ID="glanceid";
 	
 	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
+	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
+	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
 }

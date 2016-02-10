@@ -25,6 +25,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -61,7 +62,7 @@ public interface ImageService {
 
 	public String getTrustPolicyForImage(String imageId);
 
-	public TrustPolicyDraft editTrustPolicyDraft(
+	public TrustPolicyDraftResponse editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -81,7 +82,7 @@ public interface ImageService {
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId) throws DirectorException;
+	public TrustPolicyDraftResponse createPolicyDraftFromPolicy(String imageId) throws DirectorException;
 
 	public String getDisplayNameForImage(String image_id) throws DirectorException;
 

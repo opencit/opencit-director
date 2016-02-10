@@ -16,8 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
-
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
@@ -92,7 +92,13 @@ public class TrustPolicies {
 	@GET
 	public Response getTrustPoliciesData(
 			@PathParam("trustPolicyId") String trustPolicyId) {
-		TrustPolicyResponse trustpolicyresponse = null;
+		TrustPolicyResponse trustpolicyresponse = new TrustPolicyResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			trustpolicyresponse.error = "Trust Policy Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(trustpolicyresponse).build();
+		}
+
 		try {
 			trustpolicyresponse = imageService
 					.getTrustPolicyMetaData(trustPolicyId);
@@ -135,24 +141,27 @@ public class TrustPolicies {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public GenericResponse updateTrustPolicy(
+	public Response updateTrustPolicy(
 			@PathParam("trustPolicyId") String trustPolicyId,
 			UpdateTrustPolicyRequest updateTrustPolicyRequest) {
 		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		if (StringUtils.isBlank(trustPolicyId)) {
-			return monitorStatus;
+		////monitorStatus.status = Constants.SUCCESS;
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			monitorStatus.error = "Trust Policy Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(monitorStatus).build();
 		}
 		try {
 			imageService.updateTrustPolicy(updateTrustPolicyRequest,
 					trustPolicyId);
+			monitorStatus.status = Constants.SUCCESS;
 		} catch (DirectorException de) {
 			log.error("Error updating policy name for : " + trustPolicyId, de);
 			//monitorStatus.status = Constants.ERROR;
 			//monitorStatus.details = de.getMessage();
 			monitorStatus.setError(de.getMessage());
 		}
-		return monitorStatus;
+		return Response.ok(monitorStatus).build();
 	}
 
 	/**
@@ -186,8 +195,13 @@ public class TrustPolicies {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public ImportPolicyTemplateResponse importPolicyTemplate(GenericRequest req) {
+	public Response importPolicyTemplate(GenericRequest req) {
 		ImportPolicyTemplateResponse importPolicyTemplateResponse = new ImportPolicyTemplateResponse();
+		if(!ValidationUtil.isValidWithRegex(req.getImage_id(),RegexPatterns.UUID)){
+			importPolicyTemplateResponse.error = "Image id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}
 		try {
 			importPolicyTemplateResponse = imageService
 					.importPolicyTemplate(req.getImage_id());
@@ -196,10 +210,10 @@ public class TrustPolicies {
 			log.error("Error in importPolicyTemplate ", e);
 			// /importPolicyTemplateResponse.setStatus(Constants.ERROR);
 			importPolicyTemplateResponse.setError(e.getMessage());
-			return importPolicyTemplateResponse;
+			return Response.ok(importPolicyTemplateResponse).build();
 		}
 
-		return importPolicyTemplateResponse;
+		return Response.ok(importPolicyTemplateResponse).build();
 	}
 
 	/**
@@ -224,9 +238,14 @@ public class TrustPolicies {
 	@Path("trust-policy/{trustPolicyId: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	public GenericResponse deletePolicy(
+	public Response deletePolicy(
 			@PathParam("trustPolicyId") String trustPolicyId) {
 		GenericResponse response = new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			response.error = "Trust Policy Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
 		try {
 			imageService.deleteTrustPolicy(trustPolicyId);
 			response.setDeleted(true);
@@ -236,7 +255,7 @@ public class TrustPolicies {
 			response.setError("Error in deleting trust policy : "
 					+ trustPolicyId);
 		}
-		return response;
+		return Response.ok(response).build();
 
 	}
 

@@ -35,6 +35,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.api.CommonValidations;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageInfoResponse;
@@ -146,7 +149,7 @@ public class Images {
 		try {
 			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
@@ -208,7 +211,13 @@ public class Images {
 			throws DirectorException {
 		log.info("Uploading image to TDaaS");
 		imageService = new ImageServiceImpl();
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector =new TrustDirectorImageUploadResponse();;
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			uploadImageToTrustDirector.details = "Imaged id is empty or not in uuid format";
+			uploadImageToTrustDirector.status = Constants.ERROR;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(uploadImageToTrustDirector).build();
+		}
 		try {
 			long lStartTime = new Date().getTime();
 
@@ -284,8 +293,6 @@ public class Images {
 	 *     }
 	 * }]}
 	 * 
-	 * Mount image with incorrect image id
-	 * {"deleted":false,"error":"No image found with id: 465A8B27-7CC8-4A3C-BBBC-26161Es3853CD"}
 	 * </pre>
 	 * 
 	 * @param deployment_type
@@ -296,14 +303,22 @@ public class Images {
 	@Path("images")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public SearchImagesResponse getImagesByDeploymentType(
+	public Response getImagesByDeploymentType(
 			@QueryParam("deploymentType") String deployment_type)
 			throws DirectorException {
+		
 		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
+		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
+		if(!CommonValidations.validateImageDeployments(deployment_type)){
+			searchImagesResponse.error = "Incorrect deployment_type";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(searchImagesResponse).build();
+		}
+		
 		searchImagesRequest.deploymentType = deployment_type;
-		SearchImagesResponse searchImagesResponse = imageService
+		 searchImagesResponse = imageService
 				.searchImages(searchImagesRequest);
-		return searchImagesResponse;
+		return Response.ok(searchImagesResponse).build();
 
 	}
 
@@ -356,8 +371,14 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getImageDetails(@PathParam("imageId") String imageId)
 			throws DirectorException {
+		ImageInfoResponse imageInfoResponse = new ImageInfoResponse();
 
-		ImageInfoResponse imageInfoResponse = imageService
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			imageInfoResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageInfoResponse).build();
+		}
+		imageInfoResponse = imageService
 				.getImageDetails(imageId);
 		if (imageInfoResponse == null) {
 			return Response.status(Response.Status.NOT_FOUND).build();
@@ -432,17 +453,19 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public MountImageResponse mountImage(MountImageRequest mountImage,
+	public Response mountImage(MountImageRequest mountImage,
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse) {
 		MountImageResponse mountImageResponse = new MountImageResponse();
-
-		if (StringUtils.isBlank(mountImage.id)) {
-			mountImageResponse = new MountImageResponse();
-			mountImageResponse.setError("No image id provided for mount");
+		String error=mountImage.validate();
+		if (StringUtils.isNotBlank(error)) {
+			mountImageResponse.setError(error);
 			mountImageResponse.setId(mountImage.id);
-			return mountImageResponse;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(mountImageResponse).build();
 		}
+		
+		
 		log.info("inside mounting image in web service");
 		String user = getLoginUsername();
 		log.info("User mounting image : " + user);
@@ -451,9 +474,9 @@ public class Images {
 		} catch (DirectorException e) {
 			log.error("Error while Mounting the Image");
 			mountImageResponse.error = e.getMessage();
-			return mountImageResponse;
+			return Response.ok(mountImageResponse).build();
 		}
-		return mountImageResponse;
+		return Response.ok(mountImageResponse).build();
 	}
 
 	/**
@@ -506,17 +529,20 @@ public class Images {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public UnmountImageResponse unMountImage(MountImageRequest unmountimage,
+	public Response unMountImage(MountImageRequest unmountimage,
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse) {
 		String user = getLoginUsername();
-		UnmountImageResponse unmountImageResponse;
-		if (StringUtils.isBlank(unmountimage.id)) {
-			unmountImageResponse = new UnmountImageResponse();
-			unmountImageResponse.setError("No image id provided for unnount");
+		UnmountImageResponse unmountImageResponse = new UnmountImageResponse();
+		String error=unmountimage.validate();
+		if (StringUtils.isNotBlank(error)) {
+			unmountImageResponse.setError(error);
 			unmountImageResponse.setId(unmountimage.id);
-			return unmountImageResponse;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(unmountImageResponse).build();
 		}
+		
+	
 		try {
 			unmountImageResponse = imageService.unMountImage(unmountimage.id,
 					user);
@@ -526,7 +552,7 @@ public class Images {
 			unmountImageResponse.setError(e.getMessage());
 			unmountImageResponse.setId(unmountimage.id);
 		}
-		return unmountImageResponse;
+		return Response.ok(unmountImageResponse).build();
 	}
 
 	/**
@@ -601,13 +627,18 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public SearchFilesInImageResponse searchFilesInImage(
+	public Response searchFilesInImage(
 			@PathParam("imageId") String imageId, @Context UriInfo uriInfo) {
 		imageService = new ImageServiceImpl();
 		SearchFilesInImageRequest searchFilesInImageRequest = new TdaasUtil()
 				.mapUriParamsToSearchFilesInImageRequest(uriInfo);
 		searchFilesInImageRequest.id = imageId;
 		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			filesInImageResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(filesInImageResponse).build();
+		}
 		try {
 			filesInImageResponse = imageService
 					.searchFilesInImage(searchFilesInImageRequest);
@@ -626,7 +657,7 @@ public class Images {
 		filesInImageResponse.treeContent = join;
 
 		// return join;
-		return filesInImageResponse;
+		return Response.ok(filesInImageResponse).build();
 	}
 
 	/**
@@ -731,9 +762,15 @@ public class Images {
 	@Path("image-launch-policies")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public ListImageLaunchPolicyResponse getImageLaunchPoliciesList(
+	public Response getImageLaunchPoliciesList(
 			@QueryParam("deploymentType") String deploymentType) {
-		return lookupService.getImageLaunchPolicies(deploymentType);
+		ListImageLaunchPolicyResponse imgLaunchPolicy= new ListImageLaunchPolicyResponse();
+		if(!CommonValidations.validateImageDeployments(deploymentType)){
+			imgLaunchPolicy.error = "Incorrect deployment_type";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imgLaunchPolicy).build();
+		}
+		return Response.ok(lookupService.getImageLaunchPolicies(deploymentType)).build();
 	}
 
 	/**
@@ -820,6 +857,13 @@ public class Images {
 	public Response downloadPolicyForImageId(
 			@PathParam("imageId") String imageId) {
 		TrustPolicy policy = null;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+
 		try {
 			policy = imageService.getTrustPolicyByImageId(imageId);
 		} catch (DirectorException e) {
@@ -868,6 +912,12 @@ public class Images {
 			@PathParam("imageId") final String imageId) {
 
 		File tarBall;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
@@ -933,6 +983,12 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImage(@PathParam("imageId") String imageId) {
 		GenericResponse response = new GenericResponse();
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
 		try {
 			if (imageService.fetchImageById(imageId) != null) {
 				imageService.deleteImage(imageId);
@@ -987,12 +1043,13 @@ public class Images {
 	@Path("images/host")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
+	public Response addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 		SshSettingResponse sshResponse = sshSettingRequest.validate("add");
 
 		if (StringUtils.isNotBlank(sshResponse.getError())) {
-			return sshResponse;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(sshResponse).build();
 		}
 		try {
 			sshResponse = imageService.addHost(sshSettingRequest);
@@ -1000,7 +1057,7 @@ public class Images {
 			log.error("Error while adding shh settings");
 			sshResponse.setError(e.getMessage());
 		}
-		return sshResponse;
+		return Response.ok(sshResponse).build();
 	}
 
 	/**
@@ -1048,10 +1105,11 @@ public class Images {
 	@Path("images/host")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public SshSettingResponse updateHost(SshSettingRequest sshSettingRequest) {
+	public Response updateHost(SshSettingRequest sshSettingRequest) {
 		SshSettingResponse sshResponse = sshSettingRequest.validate("update");
 		if (StringUtils.isNotBlank(sshResponse.getError())) {
-			return sshResponse;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(sshResponse).build();
 		}
 
 		try {
@@ -1060,7 +1118,7 @@ public class Images {
 			log.error("Error in updateHost");
 			sshResponse.setError(e.getMessage());
 		}
-		return sshResponse;
+		return Response.ok(sshResponse).build();
 
 	}
 
