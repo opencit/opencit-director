@@ -212,7 +212,7 @@ input[readonly] {
 
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
-					if (myArr.state == "Error") {
+					if (myArr.status == "Error") {
 						$('#file_upload_window_modal_body').html(myArr.details);
 						$("#file_upload_window_modal").modal({
 							backdrop : "static"

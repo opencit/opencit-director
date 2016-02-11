@@ -15,12 +15,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageActionService;
+import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageActionImpl;
+import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 /**
@@ -34,7 +42,7 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 public class ImageActions {
 
 	ImageActionService actionService = new ImageActionImpl();
-
+	ImageService imageService = new ImageServiceImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActions.class);
 
@@ -119,6 +127,12 @@ public class ImageActions {
 	@GET
 	public Response fetchImageAction(@PathParam("actionId") String actionId) {
 		try {
+			GenericResponse genericResponse= new GenericResponse();
+			if(!ValidationUtil.isValidWithRegex(actionId,RegexPatterns.UUID)){
+				genericResponse.error = "Action Id is empty or not in uuid format";
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(genericResponse).build();
+			}
 			if(actionService.fetchImageAction(actionId)!=null){
 				return Response.ok(actionService.fetchImageAction(actionId))
 						.build();
@@ -181,17 +195,39 @@ public class ImageActions {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public ImageActionResponse createImageAction(
+	public Response createImageAction(
 			ImageActionRequest imageActionRequest) {
 		ImageActionResponse imageActionResponse = new ImageActionResponse();
 		ImageActionObject imageActionObject;
+		String error=imageActionRequest.vaidate();
+		if(!StringUtils.isBlank(error)){
+			imageActionResponse.error=error;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
+		
+		ImageInfo fetchImageById = null;
+		try {
+			fetchImageById = imageService
+					.fetchImageById(imageActionRequest.image_id);
+		} catch (DirectorException e1) {
+			log.error("unable to fetch image");
+		}
+
+		if (fetchImageById == null) {
+			imageActionResponse.error = "Image does not exist for id: "
+					+ imageActionRequest.image_id;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
+		
 		try {
 			imageActionObject = actionService
 					.createImageAction(imageActionRequest);
 		} catch (DirectorException e) {
 			log.error("Error in createImageAction", e);
 			imageActionResponse.setError(e.getMessage());
-			return imageActionResponse;
+			return Response.ok(imageActionResponse).build();
 		}
 		imageActionResponse.setId(imageActionObject.getId());
 		imageActionResponse.setImage_id(imageActionObject.getImage_id());
@@ -204,7 +240,7 @@ public class ImageActions {
 				.getCurrent_task_name());
 		imageActionResponse.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
-		return imageActionResponse;
+		return Response.ok(imageActionResponse).build();
 	}
 
 	/**
@@ -226,19 +262,37 @@ public class ImageActions {
 	@Path("image-actions/{actionId: [0-9a-zA-Z_-]+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@DELETE
-	public ImageActionResponse deleteImageAction(
+	public Response deleteImageAction(
 			@PathParam("actionId") String actionId) {
 		ImageActionResponse imageActionResponse = new ImageActionResponse();
 		imageActionResponse.setDeleted(true);
+	///	GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(actionId,RegexPatterns.UUID)){
+			imageActionResponse.error = "Action Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
+		ImageActionObject fetchImageAction = null;
+		try {
+			fetchImageAction = actionService.fetchImageAction(actionId);
+		} catch (DirectorException e1) {
+			log.error("unable to fetch image action", e1);
+		}
+
+		if(fetchImageAction == null){			
+			imageActionResponse.error = "Image action does not exist for id "+actionId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponse).build();
+		}
 		try {
 			actionService.deleteImageAction(actionId);
 		} catch (Exception e) {
 			log.error("Error in deleteImageAction", e);
 			imageActionResponse.setError("Error in deleteImageAction");
 			imageActionResponse.setDeleted(false);
-			return imageActionResponse;
+			return Response.ok(imageActionResponse).build();
 		}
-		return imageActionResponse;
+		return Response.ok(imageActionResponse).build();
 	}
 
 }

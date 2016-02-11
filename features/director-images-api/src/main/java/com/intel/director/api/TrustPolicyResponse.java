@@ -4,7 +4,7 @@ public class TrustPolicyResponse extends TrustPolicy {
 	
 	public boolean encrypted;
 	public String image_launch_policy;
-	
+	public String error;
 	
 	public boolean isEncrypted() {
 		return encrypted;
