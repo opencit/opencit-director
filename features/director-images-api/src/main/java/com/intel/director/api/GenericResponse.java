@@ -1,22 +1,12 @@
 package com.intel.director.api;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-public class GenericResponse {
-	
-	public String error;
-	
-	@JsonInclude(Include.NON_NULL)
-	public String status; //Needs to be removed, but some api still using it
-	@JsonInclude(Include.NON_NULL)
-	public String details; //Needs to be removed, but some api still using it
-	private boolean deleted;
-	public boolean isDeleted() {
-		return deleted;
-	}
 
-	public void setDeleted(boolean deleted) {
-		this.deleted = deleted;
-	}
+public class GenericResponse {
+
+	
+	public String status;
+	public String details;
+	public String error;
+	private boolean deleted;
 
 
 	public String getDetails() {
@@ -37,9 +27,14 @@ public class GenericResponse {
 	public String getError() {
 		return error;
 	}
-
 	public void setError(String error) {
 		this.error = error;
-	}
+	}	
 	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}	
 }

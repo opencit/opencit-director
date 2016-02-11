@@ -2,6 +2,9 @@ package com.intel.director.api;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+
 
 public class SshSettingRequest extends AuditFields {
 	String ip_address;
@@ -82,18 +85,19 @@ public class SshSettingRequest extends AuditFields {
 	}
 
 	public SshSettingResponse validate(String operation) {
+		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
 		SshSettingResponse sshResponse = new SshSettingResponse();
-		if (StringUtils.isBlank(getIpAddress())) {
-			sshResponse.setError("No Ip adress provided");
-		} else if (StringUtils.isBlank(getUsername())) {
-			sshResponse.setError("No username provided");
-		} else if (StringUtils.isBlank(getPassword())) {
-			sshResponse.setError("No password provided");
+		if (!ValidationUtil.isValidWithRegex(getIpAddress(),RegexPatterns.IPADDRESS)) {
+			sshResponse.setError("No Ip adress provided or ip adress in incorrect format");
+		} else if (!ValidationUtil.isValidWithRegex(getUsername(),NAME_REGEX)) {
+			sshResponse.setError("No username provided or username is not in correct format");
+		} else if (!ValidationUtil.isValidWithRegex(getPassword(),RegexPatterns.PASSWORD)) {
+			sshResponse.setError("No password provided or password is in incorrect format");
 		}
 
 		if ("update".equals(operation)) {
-			if (StringUtils.isBlank(getImage_id())) {
-				sshResponse.setError("No image id provided");
+			if (!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)) {
+				sshResponse.setError("No image id provided or image id is not in uuid format");
 			}
 		}
 

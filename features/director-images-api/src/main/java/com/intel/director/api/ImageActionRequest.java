@@ -2,6 +2,11 @@ package com.intel.director.api;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+
 public class ImageActionRequest {
 	public String image_id;
 	public String action_id;
@@ -23,6 +28,24 @@ public class ImageActionRequest {
 	}
 	public void setActions(List<ImageActionTask> actions) {
 		this.actions = actions;
+	}
+	
+	public String vaidate(){
+		String error=null;
+		if(!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)){
+		error = "Image Id is empty or not in uuid format";
+			return error;
+		}
+		boolean hasActions=false;
+		if(actions!=null ){
+			if(actions.size()>0){
+				hasActions=true;
+			}
+		}
+		if(!hasActions){
+			error = "Actions are empty";
+		}
+		return error;
 	}
 	
 }
