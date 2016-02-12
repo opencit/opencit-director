@@ -31,7 +31,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -39,9 +38,6 @@ import org.apache.shiro.session.Session;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
-import com.intel.director.api.GenericResponse;
-import com.intel.director.api.CreateTrustPolicyResponse;
-import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageInfoResponse;

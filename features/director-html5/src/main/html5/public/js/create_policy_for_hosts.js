@@ -73,7 +73,7 @@ function addhostandnext() {
 	
 	$("#createBMLivePolicyNext").prop('disabled', true);
 
-	if(current_image_id){
+	if(current_image_id != ""){
 			
 			$.ajax({
 		type : "PUT",
@@ -148,6 +148,31 @@ function addhostandnext() {
 								return;
 							}
 							current_trust_policy_draft_id=data.id;
+							var policyTemplateRequest={
+									"image_id" :current_image_id
+								}
+
+							$.ajax({
+								type : "POST",
+
+
+								url : "/v1/rpc/apply-trust-policy-template/",
+								contentType : "application/json",
+								headers : {
+									'Accept' : 'application/json'
+									},
+								data : JSON.stringify(policyTemplateRequest),
+
+								success : function (data) {
+									$("#createBMLivePolicyNext").prop('disabled', false);
+
+									if (data.error) {
+										show_error_in_bmlivemodal(data.error);
+										return;
+									}
+								}
+							});
+							
 							nextButtonLiveBM();
 						}
 					});
