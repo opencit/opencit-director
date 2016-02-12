@@ -170,10 +170,11 @@ function addhostandnext() {
 										show_error_in_bmlivemodal(data.error);
 										return;
 									}
+									nextButtonLiveBM();
+
 								}
 							});
 							
-							nextButtonLiveBM();
 						}
 					});
 				}
