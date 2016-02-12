@@ -221,10 +221,9 @@ function createPolicyDraftFromPolicy() {
 							$('body').removeClass("modal-open");
 							return false;
 						}else{
-			current_trust_policy_draft_id = data.id;
-		    }
-
-		}
+							current_trust_policy_draft_id = data.id;
+						}
+			}
 	});
 	$.ajax({
 		type : "POST",

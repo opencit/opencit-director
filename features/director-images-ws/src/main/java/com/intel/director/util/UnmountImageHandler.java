@@ -1,5 +1,6 @@
 package com.intel.director.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,7 +9,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.dnault.xmlpatch.internal.Log;
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustPolicyDraft;
@@ -18,7 +18,9 @@ import com.intel.director.common.MountImage;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageServiceImpl;
+import com.intel.mtwilson.Folders;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -46,7 +48,7 @@ public class UnmountImageHandler {
 		log.debug("MAIN : timeout = " + timeout);
 		List<String> imagesToBeUnmounted = fetchImagesToBeUnmounted(
 				mountedImageIds, timeout);
-		if (imagesToBeUnmounted.isEmpty()) {
+		if (imagesToBeUnmounted == null || (imagesToBeUnmounted != null && imagesToBeUnmounted.isEmpty())) {
 			log.debug("MAIN : No remote hosts to unmount. Returning");
 			return;
 		}
@@ -102,9 +104,11 @@ public class UnmountImageHandler {
 	private String fetchSessionTimeout() {
 		String timeout = null;
 		try {
-			Configuration configuration = ConfigurationFactory
-					.getConfiguration();
-			timeout = configuration.get("login.token.expires.minutes", "30");
+			File customFile = new File( Folders.configuration() + File.separator + "director.properties" );
+			ConfigurationProvider provider;
+			provider = ConfigurationFactory.createConfigurationProvider(customFile);
+			com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider.load();
+			timeout = loadedConfiguration.get("login.token.expires.minutes", "30");
 			Log.debug("timeout from config is " + timeout);
 			if (StringUtils.isBlank(timeout)) {
 				Log.debug("Setting timeout to default");

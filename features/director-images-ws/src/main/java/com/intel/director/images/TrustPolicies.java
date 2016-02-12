@@ -136,7 +136,7 @@ public class TrustPolicies {
 	 * { "error" : "Policy Name Already Exists","deleted":false }
 	 * 
 	 * </pre>
-	 * @param createPolicyRequest
+	 * @param updateTrustPolicyRequest
 	 * @return GenericResponse
 	 */
 	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+}")
@@ -197,8 +197,6 @@ public class TrustPolicies {
 	 * 
 	 * </pre>
 	 * 
-	 * @param image_id
-	 *            the image for which the template needs to be applied
 	 * @return Response that sends back the status of the function.
 	 */
 	@Path("rpc/apply-trust-policy-template/")
