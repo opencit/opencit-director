@@ -265,7 +265,7 @@ function refreshBMOnlineGrid() {
 	$("#bmGridOnline").html("")
 	$.ajax({
 		type : "GET",
-		url : "/v1/images?deploymentType=BareMetalLive",
+		url : "/v1/images?deploymentType=BareMetal",
 		dataType : "json",
 		success : function(result) {
 			images = result.images;
