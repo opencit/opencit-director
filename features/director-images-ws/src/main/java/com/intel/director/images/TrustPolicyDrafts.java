@@ -438,10 +438,8 @@ public class TrustPolicyDrafts {
 					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
 			log.error("createTrustPolicyMetaData failed", e);
-			// createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
-			// createTrustPolicyMetadataResponse.setDetails(e.getMessage());
-			createTrustPolicyMetadataResponse
-					.setError("Unable to create policy draft");
+			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
+			createTrustPolicyMetadataResponse.setDetails(e.getMessage());			
 			return Response.ok(createTrustPolicyMetadataResponse).build();
 		}
 

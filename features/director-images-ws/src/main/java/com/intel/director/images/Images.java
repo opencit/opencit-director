@@ -31,7 +31,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -125,9 +124,9 @@ public class Images {
 	 * }
 	 * </pre>
 	 * 
-	 * @param TrustDirectorImageUploadRequest
+	 * @param uploadRequest
 	 *            object which includes metadata information
-	 * @return TrustDirectorImageUploadResponse object contains newly created
+	 * @return Response object contains newly created
 	 *         image metadata along with image_id
 	 * @throws DirectorException
 	 */
@@ -448,8 +447,6 @@ public class Images {
 	 * {"id":"465A8B27-7CC8-4A3C-BBBC-26161Es3853CD","deleted":false,"error":"Error fetching image:465A8B27-7CC8-4A3C-BBBC-26161Es3853CD"}
 	 * </pre>
 	 * 
-	 * @param imageId
-	 *            UUID: Image id of the image in MW_IMAGE to be mounted
 	 * @param httpServletRequest
 	 * @param httpServletResponse
 	 * @return MountImageResponse containing the details of the mount process.
@@ -484,7 +481,7 @@ public class Images {
 		
 		
 		log.info("inside mounting image in web service");
-		String user = getLoginUsername();
+		String user = ShiroUtil.subjectUsername();
 		log.info("User mounting image : " + user);
 		try {
 			mountImageResponse = imageService.mountImage(mountImage.id, user);
@@ -535,8 +532,6 @@ public class Images {
 	 * 
 	 * </pre>
 	 * 
-	 * @param imageId
-	 *            Id of the image to be un-mounted
 	 * @param httpServletRequest
 	 * @param httpServletResponse
 	 * @return UnmountImageResponse containing the details of the unmount
@@ -549,7 +544,7 @@ public class Images {
 	public Response unMountImage(MountImageRequest unmountimage,
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse) {
-		String user = getLoginUsername();
+		String user = ShiroUtil.subjectUsername();
 		UnmountImageResponse unmountImageResponse = new UnmountImageResponse();
 		String error=unmountimage.validate();
 		if (StringUtils.isNotBlank(error)) {
@@ -642,7 +637,7 @@ public class Images {
 	 * @param imageId
 	 *            Id of the image which is mounted and whose files are being
 	 *            browsed
-	 * @param searchFilesInImageRequest
+	 * @param uriInfo
 	 *            Request containing the options selected by the user on the
 	 *            tree. It contains flags like include/exclude flags for regex
 	 *            filter, select all flag, init flag for first time load
@@ -777,10 +772,9 @@ public class Images {
 	 * values for deployment type are: 1) VM 2) BareMetal
 	 * 
 	 * 
-	 * @param deployment_type
 	 * @return launch policy list
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-launch-policies
 	 * Input: QueryParam String deploymentType=VM
 	 * deploymentType can be VM , BareMetal or Docker
@@ -836,8 +830,8 @@ public class Images {
 	 * 
 	 * @return GetImageStoresResponse
 	 * @throws DirectorException
-	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-stores
 	 * Input: NA
 	 * Output:
@@ -863,17 +857,6 @@ public class Images {
 		imageStore.setName("Swift");
 		imageStores.image_stores.add(imageStore);
 		return imageStores;
-	}
-
-	/**
-	 * Utility methods
-	 * 
-	 * @param httpServletRequest
-	 * @return
-	 */
-	protected String getLoginUsername() {
-		return ShiroUtil.subjectUsername();
-
 	}
 
 	/**

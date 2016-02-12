@@ -187,7 +187,7 @@ public class ImageActions {
 	 * 
 	 * </pre>
 	 * 
-	 * @param ImageActionRequest
+	 * @param imageActionRequest 
 	 * @return ImageActionResponse containing action_id.
 	 */
 
@@ -256,7 +256,6 @@ public class ImageActions {
 	 * 
 	 * </pre>
 	 * 
-	 * @param imageActionRequest
 	 * @return Status of delete operation
 	 */
 	@Path("image-actions/{actionId: [0-9a-zA-Z_-]+}")

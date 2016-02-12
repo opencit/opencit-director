@@ -25,7 +25,7 @@ function show_error_in_bmlivemodal(message){
 function addhostandnext() {
 	var self = this;
 	$("#image_name").val(current_image_name);
-	self.createBMLiveMetaData = new CreateBMLiveMetaData({});
+	self.BMLiveMetaData = new CreateBMLiveMetaData({});
 	self.data = {};
 	
 	
@@ -73,7 +73,120 @@ function addhostandnext() {
 	
 	$("#createBMLivePolicyNext").prop('disabled', true);
 
-	$.ajax({
+	if(current_image_id != ""){
+			
+			$.ajax({
+		type : "PUT",
+		url : "/v1/images/host",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : JSON.stringify(data), 
+		success : function (data, status, xhr) {
+			
+			if (data.error) {
+						$("#createBMLivePolicyNext").prop('disabled', false);
+						show_error_in_editbmlivemodal(data.error);				
+						return;
+			}
+			
+		
+			
+			self.BMLiveMetaData.launch_control_policy = "MeasureOnly";
+			self.BMLiveMetaData.isEncrypted = false;
+			self.BMLiveMetaData.display_name = $("#display_name_host").val();
+			var mountimage = {
+						"id" : current_image_id
+					}
+			$.ajax({
+				type : "POST",
+				url : "/v1/rpc/mount-image",
+
+				contentType : "application/json",
+				headers : {
+					'Accept' : 'application/json'
+				},
+				data :   JSON.stringify(mountimage),
+				success : function (data, status, xhr) {
+
+					if (data.error) {
+						show_error_in_bmlivemodal(data.details);
+						$("#createBMLivePolicyNext").prop('disabled', false);
+						return;
+					}
+					
+					
+					$.ajax({
+						type : "POST",
+						url : "/v1/trust-policy-drafts",
+						contentType : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						data : ko.toJSON(self.BMLiveMetaData), 
+						success : function (data, status, xhr) {
+							
+							if (data.status == "Error") {								
+								$("#createBMLivePolicyNext").prop('disabled', false);
+								show_error_in_bmlivemodal(data.details);
+
+
+								$.ajax({
+									type : "POST",
+									url : "/v1/rpc/unmount-image",
+									contentType : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									data : JSON.stringify(mountimage),
+									success : function(data, status, xhr) {
+										console.log("IMAGE UNMOUNTED");
+										}
+									});
+	
+								return;
+							}
+							current_trust_policy_draft_id=data.id;
+							var policyTemplateRequest={
+									"image_id" :current_image_id
+								}
+
+							$.ajax({
+								type : "POST",
+
+
+								url : "/v1/rpc/apply-trust-policy-template/",
+								contentType : "application/json",
+								headers : {
+									'Accept' : 'application/json'
+									},
+								data : JSON.stringify(policyTemplateRequest),
+
+								success : function (data) {
+									$("#createBMLivePolicyNext").prop('disabled', false);
+
+									if (data.error) {
+										show_error_in_bmlivemodal(data.error);
+										return;
+									}
+								}
+							});
+							
+							nextButtonLiveBM();
+						}
+					});
+				}
+			});
+			
+		}
+		
+	});
+		
+	
+	}else{
+		
+			$.ajax({
 		type : "POST",
 		url : "/v1/images/host",
 		contentType : "application/json",
@@ -89,10 +202,10 @@ function addhostandnext() {
 			}
 			
 			current_image_id = data.image_id;
-			self.createBMLiveMetaData.launch_control_policy = "MeasureOnly";
-			self.createBMLiveMetaData.encrypted = false;
-			self.createBMLiveMetaData.display_name = $("#display_name_host").val();
-			self.createBMLiveMetaData.image_id = current_image_id ;
+			self.BMLiveMetaData.launch_control_policy = "MeasureOnly";
+			self.BMLiveMetaData.encrypted = false;
+			self.BMLiveMetaData.display_name = $("#display_name_host").val();
+			self.BMLiveMetaData.image_id = current_image_id ;
 			var mountimage = {
 						"id" : current_image_id
 					}
@@ -123,7 +236,7 @@ function addhostandnext() {
 						headers : {
 							'Accept' : 'application/json'
 						},
-						data : ko.toJSON(self.createBMLiveMetaData), 
+						data : ko.toJSON(self.BMLiveMetaData), 
 						success : function (data, status, xhr) {
 							if (data.status == "Error") {
 								$("#createBMLivePolicyNext").prop('disabled', false);
@@ -172,4 +285,10 @@ function addhostandnext() {
 			});
 		}
 	});
+		
+	
+	}
+	
+	
+
 }

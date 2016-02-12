@@ -1971,7 +1971,7 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Unable to save policy draft ", e);
 		}
 		Mapper mapper = new DozerBeanMapper();
-		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(trustPolicyDraft,
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(savePolicyDraft,
 				TrustPolicyDraftResponse.class);
 		try {
 			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
