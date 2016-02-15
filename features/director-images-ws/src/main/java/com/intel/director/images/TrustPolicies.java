@@ -15,7 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
+import org.apache.commons.lang.StringUtils;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.GenericRequest;
@@ -147,12 +147,13 @@ public class TrustPolicies {
 			@PathParam("trustPolicyId") String trustPolicyId,
 			UpdateTrustPolicyRequest updateTrustPolicyRequest) {
 		GenericResponse monitorStatus = new GenericResponse();
-		////monitorStatus.status = Constants.SUCCESS;
-		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
-			monitorStatus.error = "Trust Policy Id is empty or not in uuid format";
+		String errors = updateTrustPolicyRequest.validate(trustPolicyId);
+		if (StringUtils.isNotBlank(errors)) {
+			monitorStatus.error = errors;
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(monitorStatus).build();
 		}
+		
 
 		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
 		if(trustPolicyByTrustId == null){

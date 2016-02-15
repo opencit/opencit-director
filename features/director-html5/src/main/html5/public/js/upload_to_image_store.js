@@ -180,7 +180,26 @@ function UploadStoreViewModel() {
 						}
 						createImageActions(imageActionData);
 
+					}, 
+					error: function(data) {
+						
+						var obj = jQuery.parseJSON( data.responseText );
+
+						
+						
+							$('#error_vm_body_3_direct').text(obj.error);
+							$("#error_vm_3_direct").modal({
+								backdrop : "static"
+							});
+
+							$('#error_vm_body_3').text(obj.error);
+							$("#error_vm_3").modal({
+								backdrop : "static"
+							});
+							$('body').removeClass("modal-open");
+							return;
 					}
+					
 				
 			});	
 		}else{

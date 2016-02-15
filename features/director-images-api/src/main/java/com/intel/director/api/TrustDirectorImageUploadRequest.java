@@ -18,7 +18,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
  * @author soakx
  */
 public class TrustDirectorImageUploadRequest extends ImageAttributes{
-	public static final String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
+	public static final String NAME_REGEX = "[a-zA-Z0-9,;. @_-]+";
     public String image_file;
     
     public String validate(){
