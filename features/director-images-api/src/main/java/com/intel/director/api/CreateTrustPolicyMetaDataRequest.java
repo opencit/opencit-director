@@ -125,7 +125,7 @@ public class CreateTrustPolicyMetaDataRequest {
 	 */
 
 	public String validate(String type) {
-		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
+		String NAME_REGEX = "[a-zA-Z0-9,;. @_-]+";
 		List<String> errors = new ArrayList<>();
 		if ("draft".equals(type)) {
 			if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {

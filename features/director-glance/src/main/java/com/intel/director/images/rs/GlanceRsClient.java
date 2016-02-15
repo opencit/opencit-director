@@ -73,6 +73,7 @@ public class GlanceRsClient {
 			putRequest.setHeader("Content-Type", "application/octet-stream");
 			ist = new FileInputStream(file);
 
+			//log.info("Got input stream to file {}"+file.getAbsolutePath());
 			HttpEntity inputHttp = new InputStreamEntity(ist);
 			putRequest.setEntity(inputHttp);
 
@@ -91,6 +92,7 @@ public class GlanceRsClient {
 				sb.append(output);
 				// log.debug(output);
 			}
+			log.info("Response from glance : {}", sb.toString());
 			JSONObject obj = new JSONObject(sb.toString());
 			log.debug("obj::" + obj);
 			
@@ -204,6 +206,7 @@ public class GlanceRsClient {
 			sb.append(output);
 			// log.debug(output);
 		}
+//log.info("Response form glance {}", sb.toString());
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");

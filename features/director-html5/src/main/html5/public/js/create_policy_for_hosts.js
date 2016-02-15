@@ -150,7 +150,7 @@ function addhostandnext() {
 							current_trust_policy_draft_id=data.id;
 							var policyTemplateRequest={
 									"image_id" :current_image_id
-								}
+								};
 
 							$.ajax({
 								type : "POST",
@@ -254,6 +254,16 @@ function addhostandnext() {
 										console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
 										}
 									});
+
+								//delete the image
+								$.ajax({
+									type : "DELETE",
+									url : "/v1/images/"+current_image_id,
+									success : function(data, status, xhr) {
+										console.log("IMAGE deleted");
+										current_image_id = "";
+										}
+									});
 								
 								return;
 							}
@@ -284,6 +294,14 @@ function addhostandnext() {
 					});
 				}
 			});
+		},
+		error:function (data, status, xhr) {			
+			var obj = jQuery.parseJSON( data.responseText );
+			
+			show_error_in_bmlivemodal(obj.error);
+			$("#createBMLivePolicyNext").prop('disabled', false);
+			return;
+
 		}
 	});
 		

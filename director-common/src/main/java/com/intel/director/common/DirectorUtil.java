@@ -40,7 +40,7 @@ public class DirectorUtil {
 			String trustPolicyName, String tarLocation, String tarName)
 			throws IOException {
 
-		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir
+		String command = "tar -cf '" + tarLocation + tarName + "' -C " + imageDir
 				+ " " + imageName + " " + trustPolicyName;
 		// / String tarName = imageName + "-" + new
 		// SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
