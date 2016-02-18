@@ -111,12 +111,14 @@ public class Constants {
 	public static final String GLANCE_HEADER_CHECKSUM = "Image-Meta-Checksum";
 	public static final String GLANCE_HEADER_CONTAINER_FORMAT = "X-Image-Meta-Container_format";
 	public static final String GLANCE = "Glance";
+public static final String GLANCE_ID = "Glance_Id";
 	public static final String SWIFT = "Swift";
 
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
 	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
 	public static final String TASK_NAME_UPLOAD_IMAGE = "Upload Image";
+	public static final String TASK_NAME_UPLOAD_TO_HUB = "Upload To Hub";
 	public static final String TASK_NAME_ENCRYPT_IMAGE = "Encrypt Image";
 	public static final String TASK_NAME_UPLOAD_TAR = "Upload Tar";
 	public static final String TASK_NAME_CREATE_DOCKER_TAR = "Create Docker Tar";

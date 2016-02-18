@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 
-<title>Edit Policy Wizard</title>
-<meta name="author" content="aakash">
+    <title>Edit Policy Wizard</title>
+    <meta name="author" content="aakash">
 </head>
+
 <body>
 
 
 
-	<span>
+    <span>
 		<div class="row col-md-12">
 			<div class="col-md-3"></div>
 			<div id="docker_edit_wizard" class="swMain col-md-6" style="margin-top: 3px;">
@@ -23,42 +25,41 @@
 							class="stepDesc col-md-10"> Policy Metadata<br> <small>Edit
 									basic details for policy generation</small>
 						</span>
-					</a></li>
-					<li class="col-md-4"><a
-						href="#create_policy_select_directories_docker.html"
-						id="edit_policy_docker_step_2" class="disabled col-md-12"
-						style="margin-top: 5px;" isdone="0" rel="2"> <label
-							class="stepNumber col-md-2">2</label> <span
-							class="stepDesc col-md-10"> Select Files<br> <small>Select
+    </a>
+    </li>
+    <li class="col-md-4">
+        <a href="#create_policy_select_directories_docker.html" id="edit_policy_docker_step_2" class="disabled col-md-12" style="margin-top: 5px;" isdone="0" rel="2">
+            <label class="stepNumber col-md-2">2</label> <span class="stepDesc col-md-10"> Select Files<br> <small>Select
 									file/directories for calculating hash </small>
 						</span>
-					</a></li>
+        </a>
+    </li>
 
-					<li class="col-md-4"><a href="#upload_imagestore_docker.html"
-						id="edit_policy_docker_step_3" class="disabled col-md-12" isdone="0"
-						style="margin-top: 5px;" rel="3"> <label
-							class="stepNumber col-md-2">3</label> <span
-							class="stepDesc col-md-10"> Upload to Store<br> <small>Upload
+    <li class="col-md-4">
+        <a href="#upload_imagestore_docker.html" id="edit_policy_docker_step_3" class="disabled col-md-12" isdone="0" style="margin-top: 5px;" rel="3">
+            <label class="stepNumber col-md-2">3</label> <span class="stepDesc col-md-10"> Upload to Store<br> <small>Upload
 									Policy generated to image store</small>
 						</span>
-					</a></li>
+        </a>
+    </li>
 
-				</ul>
+    </ul>
 
-			</div>
-			<div class="col-md-3"></div>
-		</div>
-	</span>
+    </div>
+    <div class="col-md-3"></div>
+    </div>
+    </span>
 
-	<div id="editPolicyDockerStepsContent">
-		<div id="edit_policy_docker_content_step_1" style="display: block;"></div>
-		<div id="edit_policy_docker_content_step_2" style="display: none;"></div>
-		<div id="edit_policy_docker_content_step_3" style="display: none;"></div>
-	</div>
-
-
+    <div id="editPolicyDockerStepsContent">
+        <div id="edit_policy_docker_content_step_1" style="display: block;"></div>
+        <div id="edit_policy_docker_content_step_2" style="display: none;"></div>
+        <div id="edit_policy_docker_content_step_3" style="display: none;"></div>
+    </div>
 
 
-	<script src="/v1/html5/public/director-html5/js/edit_policy_wizard_docker.js"></script>
+
+
+    <script src="/v1/html5/public/director-html5/js/edit_policy_wizard_docker.js"></script>
 </body>
+
 </html>

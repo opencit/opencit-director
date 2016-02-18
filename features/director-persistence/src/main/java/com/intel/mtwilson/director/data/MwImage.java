@@ -49,10 +49,10 @@ public class MwImage extends MwAuditable {
 	public String status;
 
 	@Column(name = "CONTENT_LENGTH")
-	public Integer contentlength;
+	public Long contentlength;
 	
 	@Column(name = "SENT")
-	public Integer sent;
+	public Long sent;
 	
 	@Column(name = "repository")
 	private String repository;
@@ -137,11 +137,11 @@ public class MwImage extends MwAuditable {
 		this.tblMwimageUploadCollection = tblMwimageUploadCollection;
 	}
 
-	public Integer getContentlength() {
+	public Long getContentlength() {
 		return contentlength;
 	}
 
-	public void setContentlength(Integer contentlength) {
+	public void setContentlength(Long contentlength) {
 		this.contentlength = contentlength;
 	}
 
@@ -169,11 +169,11 @@ public class MwImage extends MwAuditable {
 		this.status = status;
 	}
 
-	public Integer getSent() {
+	public Long getSent() {
 		return sent;
 	}
 
-	public void setSent(Integer sent) {
+	public void setSent(Long sent) {
 		this.sent = sent;
 	}
 

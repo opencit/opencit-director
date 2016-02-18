@@ -1,18 +1,69 @@
 var imageFormats = new Array();
 var image_policies = new Array();
 
-$.ajax({
-    type: "GET",
-    url: "/v1/trust-policy-drafts/?imageId=" + current_image_id + "&imageArchive=false",
-    contentType: "application/json",
-    headers: {
-        'Accept': 'application/json'
-    },
-    dataType: "json",
-    success: function(data, status, xhr) {
-        showImageLaunchPoliciesDocker(data);
+edit_policy_initialize();
+
+function edit_policy_initialize() {
+    if (!current_trust_policy_draft_id) {
+        var create_draft_request = {
+            "image_id": current_image_id
+        }
+
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            headers: {
+                'Accept': 'application/json'
+            },
+            data: JSON.stringify(create_draft_request),
+
+            url: "/v1/rpc/create-draft-from-policy",
+            success: function(data, status, xhr) {
+
+                if (data.status == "Error") {
+                    ///	show_error_in_trust_policy_tab("Internal error");
+                    return false;
+                } else {
+                    current_trust_policy_draft_id = data.id;
+                    $.ajax({
+                        type: "GET",
+                        url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
+                        contentType: "application/json",
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        dataType: "json",
+                        success: function(data, status, xhr) {
+                            showImageLaunchPoliciesDocker(data);
+                        }
+                    });
+
+
+
+                }
+
+            }
+        });
+    } else {
+        $.ajax({
+            type: "GET",
+            url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
+            contentType: "application/json",
+            headers: {
+                'Accept': 'application/json'
+            },
+            dataType: "json",
+            success: function(data, status, xhr) {
+                showImageLaunchPoliciesDocker(data);
+            }
+        });
+
     }
-});
+
+
+
+}
+
 
 function EditDockerImageMetaData(data) {
 
@@ -45,10 +96,10 @@ function EditDockerImageViewModel(data) {
             data: ko.toJSON(self.editDockerImageMetaData), // $("#loginForm").serialize(),
             success: function(data, status, xhr) {
 
-                if (data.status == "Error") {
+                if (data.error) {
                     $('#for_mount_edit_docker').hide();
                     $('#default_edit_docker').show();
-                    $('#error_modal_body_edit_docker_1').text(data.details);
+                    $('#error_modal_body_edit_docker_1').text(data.error);
                     $("#error_modal_edit_docker_1").modal({
                         backdrop: "static"
                     });
@@ -70,10 +121,10 @@ function EditDockerImageViewModel(data) {
                     data: JSON.stringify(mountimage), // $("#loginForm").serialize(),
                     success: function(data, status, xhr) {
                         $("#editDockerPolicyNext").prop('disabled', false);
-                        if (data.status == "Error") {
+                        if (data.error) {
                             $('#for_mount_edit_docker').show();
                             $('#default_edit_docker').hide();
-                            $('#error_modal_body_edit_docker_1').text(data.details);
+                            $('#error_modal_body_edit_docker_1').text(data.error);
                             $("#error_modal_edit_docker_1").modal({
                                 backdrop: "static"
                             });
@@ -82,7 +133,7 @@ function EditDockerImageViewModel(data) {
                         nextButtonDocker();
                     }
                 });
-                
+
             }
         });
 
@@ -122,7 +173,7 @@ function addRadios(arr) {
         if (arr[i].name == 'encrypted') {
             continue;
         }
-        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="' + arr[i].name + '" >' + arr[i].value + '</label>';
+        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="edit_policy_' + arr[i].name + '" value="' + arr[i].name + '" >' + arr[i].display_name + '</label>';
     }
 
     $('#launch_control_policy').html(temp);

@@ -108,13 +108,13 @@
 
 
 								<div class="col-md-offset-1 col-md-1">
-									<button type="button" onclick="backToVmImagesPage()"
+									<button type="button" onclick="backToVmImagesPage()" id="vm_upload_direct_back_to_images"
 										class="btn btn-primary">Back To Images</button>
 								</div>
 
 
 								<div class="col-md-offset-6 col-md-1">
-									<button type="button" class="btn btn-primary" data-toggle="modal" onclick="uploadToStore()"
+									<button type="button" class="btn btn-primary" data-toggle="modal" id="vm_upload_direct_button" onclick="uploadToStore()"
 										data-target="#redirect">Upload</button>
 								</div>
 								<!-- Modal -->
@@ -131,7 +131,7 @@
 												<p>Task has been queued for asynchronus execution</p>
 											</div>
 											<div class="modal-footer">
-												<button type="button" class="btn btn-default"
+												<button id="upload_direct_success_modal_ok" type="button" class="btn btn-default"
 													data-dismiss="modal" onclick="backToVmImagesPage()">Close</button>
 											</div>
 										</div>

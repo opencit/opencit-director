@@ -188,47 +188,25 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 			ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
 			ImageStoreUploadResponse imageStoreUploadResponse = imageStoreManager
 					.fetchDetails(null, glanceId);
-			int size = (int) (content.length() / 1024);
-			double dataSize =  (content.length() / 1024);
+			long size = (long) content.length() ;
+			long dataSize = content.length() ;
 			ImageAttributes imgAttrs;
 			String uploadid = null;
 			boolean firstTime = true;
-			int sent = (int)imageStoreUploadResponse.getSent() / 1024;
-			double dataSent =  imageStoreUploadResponse.getSent() / 1024;
+			long sent = (long) imageStoreUploadResponse.getSent() ;
+			long dataSent = imageStoreUploadResponse.getSent() ;
 			while (dataSent != dataSize) {
 
 				log.debug("##################Inside while loop size::" + size
 						+ " sent::" + sent);
-				// / Date currentTime = new Date();
 				imgAttrs = new ImageAttributes();
 				imgAttrs.setId(imageActionObject.getImage_id());
-			///	imageUploadTransferObject.setImg(imgAttrs);
-			///	imageUploadTransferObject.setImage_size(size);
-
-			///	imageUploadTransferObject.setSent(sent);
 				updateImageActionContentSent(sent, size);
-			///	imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
-
-			///	imageUploadTransferObject.setDate(new Date());
-			///	imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-			///			.getChecksum());
-			///	imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-			///			.getImage_uri());
-				///if (firstTime) {
-
-				///	ImageStoreUploadTransferObject imgTransaferObject = persistService
-				///			.saveImageUpload(imageUploadTransferObject);
-				///	uploadid = imgTransaferObject.getId();
-				//	firstTime = false;
-			//	} else {
-
-				///	imageUploadTransferObject.setId(uploadid);
-				///	persistService.updateImageUpload(imageUploadTransferObject);
-			//	}
+	
 				imageStoreUploadResponse = imageStoreManager.fetchDetails(null,
 						glanceId);
-				dataSent = imageStoreUploadResponse.getSent() / 1024;
-				sent = (int)imageStoreUploadResponse.getSent() / 1024;
+				dataSent = (long)imageStoreUploadResponse.getSent() ;
+				sent = (long) imageStoreUploadResponse.getSent() ;
 			}
 
 			imgAttrs = new ImageAttributes();
@@ -253,11 +231,7 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 						.saveImageUpload(imageUploadTransferObject);
 				///uploadid = imgTransaferObject.getId();
 				// /firstTime = false;
-			} /*else {
-
-				imageUploadTransferObject.setId(uploadid);
-				persistService.updateImageUpload(imageUploadTransferObject);
-			}*/
+			} 
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;

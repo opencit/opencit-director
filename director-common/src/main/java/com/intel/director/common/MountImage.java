@@ -136,23 +136,26 @@ public class MountImage {
 		return exitcode;
 	}
 	
-	public static int dockerSave(String repository,String tag,String tarDestination,String name) {
-		int exitcode = 0; 
-		String command = Constants.DOCKER_EXECUTABLES + SPACE
-				 + "save" + SPACE + "-o" + SPACE + tarDestination + File.separator + name + SPACE + repository + ":" + tag;
+	public static int dockerSave(String repository, String tag,
+			String tarDestination, String name) {
+		int exitcode = 0;
+		String command = Constants.DOCKER_EXECUTABLES + SPACE + "save" + SPACE
+				+ "-o" + SPACE + tarDestination + File.separator + name + SPACE
+				+ repository + ":" + tag;
 		log.info("\n" + "creating tar using docker save at : " + tarDestination
 				+ " with command: " + command);
 		try {
-			
+
 			File dirForDockerTar = new File(tarDestination);
 			if (!dirForDockerTar.exists()) {
 				dirForDockerTar.mkdir();
 			}
 			log.info("\n" + "Running docker save");
 			exitcode = DirectorUtil.executeCommandInExecUtil(
-					Constants.DOCKER_EXECUTABLES, "save", "-o", tarDestination + File.separator + name, repository + ":" + tag);
+					Constants.DOCKER_EXECUTABLES, "save", "-o", tarDestination
+							+ File.separator + name, repository + ":" + tag);
 		} catch (IOException e) {
-			if(exitcode == 0){
+			if (exitcode == 0) {
 				exitcode = 1;
 			}
 			log.error("Error in creating  docker tar" + e);
@@ -176,7 +179,7 @@ public class MountImage {
 		return exitcode;
 	}
 	
-	public static int dockerTag(String repository, String tag, String newTag) {
+	public static int dockerTag(String repository, String tag, String newRepo, String newTag) {
 		int exitcode = 0;
 		String command = Constants.DOCKER_EXECUTABLES + SPACE + "tag" + SPACE + repository + ":" + tag + SPACE + repository + ":" + newTag;
 		log.info("\n" + "tagging docker image  : "
@@ -184,7 +187,7 @@ public class MountImage {
 		try {
 			exitcode = DirectorUtil
 					.executeCommandInExecUtil(Constants.DOCKER_EXECUTABLES,
-							"tag", repository + ":" + tag, repository + ":" + newTag);
+							"tag", repository + ":" + tag, newRepo + ":" + newTag);
 		} catch (IOException e) {
 			log.error("Error in tagging docker image" + e);
 			if(exitcode == 0){

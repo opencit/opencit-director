@@ -273,4 +273,26 @@ public class DirectorUtil {
 		
 	}
 
+	public static String getKeyIdFromUrl(String url) {
+		log.debug("URL :: " + url);
+		String[] split = url.split("/");
+		int index = 0;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("keys")) {
+				log.debug("Keys index :: " + i);
+				index = ++i;
+				break;
+			}
+		}
+
+		log.debug("Index :: " + index);
+
+		if (index != 0) {
+			return split[index];
+		} else {
+			return null;
+		}
+
+	}
+
 }

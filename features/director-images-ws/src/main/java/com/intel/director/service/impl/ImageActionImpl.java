@@ -8,9 +8,9 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
+import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
@@ -84,10 +84,10 @@ public class ImageActionImpl implements ImageActionService {
 			imageInfo = persistService
 					.fetchImageById(imageActionRequest.image_id);
 		} catch (DbException e1) {
-			log.error("Unable to fetch image by id :"
-					+ imageActionRequest.image_id, e1);
-			throw new DirectorException("Unable to fetch image by id :"
-					+ imageActionRequest.image_id, e1);
+			log.error("Image with id :" + imageActionRequest.image_id
+					+ " does'nt exist", e1);
+			throw new DirectorException("Image with id :"
+					+ imageActionRequest.image_id + " does'nt exist", e1);
 		}
 
 		TrustPolicy trustPolicy = null;
@@ -141,16 +141,11 @@ public class ImageActionImpl implements ImageActionService {
 			ImageActionTask imageActions = new ImageActionTask();
 			if (action.getTask_name() != null) {
 				imageActions.setTask_name(action.getTask_name());
-			}
-			if (action.getStatus() != null) {
-				imageActions.setStatus(StringUtils.isNotBlank(action
-						.getStatus()) ? action.getStatus()
-						: Constants.INCOMPLETE);
-			}
+				imageActions.setStatus(Constants.INCOMPLETE);
+			}		
 			if (action.getStorename() != null) {
 				imageActions.setStorename(action.getStorename());
 			}
-
 			list.add(imageActions);
 		}
 		if (list.size() != 0) {
@@ -205,8 +200,8 @@ public class ImageActionImpl implements ImageActionService {
 		try {
 			persistService.deleteImageActionById(actionId);
 		} catch (DbException e) {
-			log.error("Error while deleting image action" + e);
-			throw new DirectorException("Error while deleting image action", e);
+			log.error("No image action with Id :: " + actionId + e);
+			throw new DirectorException("Error while deleting image action :: " + actionId, e);
 		}
 	}
 

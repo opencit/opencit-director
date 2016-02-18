@@ -20,16 +20,16 @@ function createPolicyForBMImage(imageid, imagename) {
 	goToCreatePolicyWizardForBMImage();
 }
 
-function createPolicy2(imageid, imagename) {
+/*function createPolicy2(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
 	current_trust_policy_draft_id='';
 	current_image_name = imagename;
 
-	goToCreatePolicyWizard2();
-}
+	goToCreatePolicyWizardForBMLive();
+}*/
 
-function goToCreatePolicyWizard2() {
+function goToCreatePolicyWizardForBMLive() {
 	$("#bm_images_grid_page").hide();
 	$("#create_policy_wizard2_").show();
 
@@ -51,16 +51,16 @@ function editPolicyForBMImage(imageid, imagename) {
 	currentFlow = "Edit";
 	current_image_id = imageid;
 	current_image_name = imagename;
-	// ///current_trust_policy_id=trust_policy_id;
+	current_trust_policy_draft_id='';
 	goToEditPolicyWizardForBMImage();
 }
 
-function editPolicyForBMLive(hostid, hostname) {
+function editPolicyForBMLive(hostid, hostname,trust_policy_draft_id) {
 
 	currentFlow = "Edit";
 	current_image_id = hostid;
 	current_image_name = hostname;
-	// ///current_trust_policy_id=trust_policy_id;
+	current_trust_policy_draft_id=trust_policy_draft_id;
 	goToEditPolicyWizardForBMLive();
 }
 
@@ -448,3 +448,6 @@ function deletePolicyBM(imageid) {
 
 	
 }
+
+
+

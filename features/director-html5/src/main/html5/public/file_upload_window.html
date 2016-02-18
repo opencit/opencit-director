@@ -63,19 +63,98 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/bootstrap.min.js"></script>
     <script type="text/javascript">
-        var image_deployments = window.image_deployments_parent;
-        var image_format = window.image_format_parent;
-        var authorizationToken = window.auth_token_parent;
+        var authorizationToken = window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken();
+        var image_deployments = window.opener.image_type_upload;
+        var image_format = window.opener.image_format_upload;
+
 
         var urlToUploadMetadata = "/v1/images";
         var blob, BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
         var fileName = "";
         var currentFileName = "";
+        var refreshIntervalId = 0;
+        var defaultSessionExtensionInterval = 20 * 60 * 1000;
+
 
         function validateName(fileName) {
             fileName = fileName.split(' '); //we split the string in an array of strings using     whitespace as separator
             return (fileName.length == 1); //true when there is only one word, false else.
         }
+
+
+        function extendSessionIfNeeded() {
+            var cd = new Date();
+            console.log("Refreshing token at : " + cd);
+            var formData = {
+                "authorization_token": authorizationToken
+            }
+            $.ajax({
+                type: "PATCH",
+                url: "/v1/login/extend",
+                data: JSON.stringify(formData),
+                contentType: "application/json",
+                dataType: 'json',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': "Token " + authorizationToken
+                },
+                success: function(data, status) {
+                    console.log("YAY !!! Got extended date from server for token : " + authorizationToken);
+                    var token = data.value;
+                    console.log("Expiry date for token " + authorizationToken + " extended");
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log("Expiry date for token " + authorizationToken + " extension failed");
+                }
+            });
+        }
+
+        function scheduleSessionRefresh(upload_size) {
+            var numberOfCallsRequired = (upload_size / 1048576) / 10;
+            var timeTakenForCalls = numberOfCallsRequired * 5;
+
+            console.log("Size of file being uploaded = " + numberOfCallsRequired);
+            console.log("Number of calls required : " + numberOfCallsRequired);
+            console.log("Time taken for calls :" + timeTakenForCalls);
+
+            var authToken = encodeURIComponent(authorizationToken);
+            console.log("Token sent with GET : " + authToken);
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "/v1/login?token=" + authToken + "&randomStr=" + new Date().getTime(),
+                dataType: 'json',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': "Token " + authorizationToken
+                },
+                success: function(data, status) {
+                    console.log("Got expiry date from server for token : " + authorizationToken);
+
+                    var currentDate = data.current_date;
+                    var expiryDate = data.expiry_date;
+                    var interval = data.timeout_interval;
+                    console.log("currentDate - " + currentDate + " :: expiryDate - " + expiryDate + " interval - " + interval);
+                    var timeToExpiry = expiryDate - currentDate;
+                    if (timeToExpiry <= (1000 * timeTakenForCalls)) {
+
+                        extendSessionIfNeeded();
+                        if (refreshIntervalId == 0) {
+                            console.log("***********************************************");
+                            refreshIntervalId = setInterval(function() {
+                                extendSessionIfNeeded();
+                            }, ((interval * 60 * 1000) - 10000));
+                            console.log("Scheduled session extender with ID : " + refreshIntervalId);
+                        }
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log("&&&&&&&&& Cannot retrieve details for " + token);
+                }
+            });
+
+        }
+
 
         function validateForm() {
             $('#upload').prop('disabled', true);
@@ -102,21 +181,20 @@
             }
             blob = document.getElementById('myfile').files[0];
             SIZE = blob.size;
-            var upload_size = Math.floor(SIZE / 1024);
-            /*var urlToUploadMetadata = "/v1/images/uploads/content/uploadMetadata?image_deployments="
-            + image_deployments + "&image_format=" + image_format + "&fileName=" + fileName + "&fileSize=" + upload_size;*/
+            scheduleSessionRefresh(SIZE);
+
             var image_id;
+            var upload_size = Math.floor(SIZE / 1024);
+
             var xhrmdt = new XMLHttpRequest();
             xhrmdt.open('POST', urlToUploadMetadata, true);
-            //xhrmdt.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhrmdt.setRequestHeader("Content-Type", "application/json");
             xhrmdt.setRequestHeader("Authorization", "Token " + authorizationToken);
-            //xhrmdt.send();
             upload_data = {
                 'image_deployments': image_deployments,
                 'image_format': image_format,
                 'image_name': fileName,
-                'image_size': upload_size
+                'image_size': SIZE
             };
             if (image_deployments == "Docker") {
                 upload_data.repository = $('#input_repo').val();
@@ -130,37 +208,41 @@
             xhrmdt.send(JSON.stringify(upload_data));
             xhrmdt.onreadystatechange = function(e) {
 
-                if (xhrmdt.readyState === 4) {
-                    if (xhrmdt.status === 200) {
-                        var myArr = JSON.parse(xhrmdt.responseText);
-                        image_id = myArr.id;
-                        if (myArr.state == "Error") {
-                            $('#file_upload_window_modal_body').html(myArr.details);
-                            $("#file_upload_window_modal").modal({
-                                backdrop: "static"
-                            });
-                            $('body').removeClass("modal-open");
+                    if (xhrmdt.readyState === 4) {
+                        if (xhrmdt.status === 200) {
+
+                            var myArr = JSON.parse(xhrmdt.responseText);
+                            image_id = myArr.id;
+                            if (myArr.state == "Error") {
+                                $('#file_upload_window_modal_body').html(myArr.details);
+                                $("#file_upload_window_modal").modal({
+                                    backdrop: "static"
+                                });
+                                $('body').removeClass("modal-open");
+                                $('#upload').prop('disabled', false);
+                                return false;
+                            }
+                            BYTES_PER_CHUNK = 1048576 * 10; //10MB
+                            start = 0;
+                            end = BYTES_PER_CHUNK;
+                            upload_chunks(image_id, start, end);
+
+                        } else if (xhrmdt.status === 401) {
+                            alert("Session timed out");
+                            window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+                            window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null);
+                            window.opener.location.reload();
+                            window.close();
+                        } else {
+                            console.log("Clearing interval : " + refreshIntervalId);
+                            clearInterval(refreshIntervalId);
+                            alert("Failed to save image upload metdata.");
                             $('#upload').prop('disabled', false);
                             return false;
                         }
-                        //alert(image_id);
-                        //alert(SIZE);
-                        BYTES_PER_CHUNK = 1048576 * 10;
-                        start = 0;
-                        end = BYTES_PER_CHUNK;
-                        upload_chunks(image_id, start, end);
-
-                        document.getElementById("upload").onclick = function() {
-                            this.disabled = true;
-                        }
-                    } else {
-                        alert("Failed to save image upload metdata.");
-                        $('#upload').prop('disabled', false);
                     }
                 }
-            }
-
-            //NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
+                //NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
         }
 
         function upload_chunks(image_id, start, end) {
@@ -203,7 +285,15 @@
 
                             upload_chunks(image_id, start, end);
 
+                        } else if (xhrmdt.status === 401) {
+                            alert("Session timed out");
+                            window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
+                            window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null);
+                            window.opener.location.reload();
+                            window.close();
                         } else {
+                            console.log("Clearing interval : " + refreshIntervalId);
+                            clearInterval(refreshIntervalId);
                             alert("File upload failed..");
                             $('#upload').prop('disabled', false);
                         }
@@ -212,7 +302,7 @@
 
             } else {
                 if (image_deployments == 'Docker') {
-					$("#message").html("<font color='green'>Loading Image...</font>");
+                    $("#message").html("<font color='green'>Loading Image...</font>");
                     $.ajax({
                         type: "GET",
                         url: "/v1/rpc/docker-load/" + image_id,
@@ -221,9 +311,9 @@
                             "Authorization": "Token " + authorizationToken
                         },
                         success: function(data) {
-                            if (data.status == "Error") {
+                            if (data.error) {
                                 alert("Error in loading docker image");
-								$('#upload').prop('disabled', false);
+                                $('#upload').prop('disabled', false);
                                 return;
                             }
                             $("#message").html("<font color='blue'>Your file has been uploaded!</font>");
@@ -231,7 +321,12 @@
                                 this.disabled = false;
                             }
                             alert("Image upload successfully completed");
-                            $('#upload').prop('disabled', false);
+		var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
+                    	var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
+                    	goToTPDiv.show();
+                    	$('#upload').prop('disabled', false);
+                	goToTPDiv.css("display", "block");							
+
                             window.close();
                             return;
                         }
@@ -242,7 +337,13 @@
                         this.disabled = false;
                     }
                     alert("Image upload successfully completed");
+                    var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
+                    var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
+                    //uploadBtnDiv.hide();
+                    goToTPDiv.show();
                     $('#upload').prop('disabled', false);
+                	$('#upload').prop('disabled', false);
+                	goToTPDiv.css("display", "block");
                     window.close();
                 }
             }
@@ -263,6 +364,7 @@
 
         $(document).ready(
             function() {
+				$('[data-toggle="tooltip"]').tooltip();
                 if (image_deployments == "Docker") {
                     $('#repo_tag').show();
                 }
@@ -301,9 +403,9 @@
         <input type="text" id="image_name_input" class="form-control" placeholder="Enter Image Name with extension (optional)...">
         <br />
         <div id="repo_tag" style="display: none;">
-            <input type="text" id="input_repo" class="form-control" placeholder="Enter Repository">
+            <input type="text" id="input_repo" data-toggle="tooltip" title="Repo of Docker Image" class="form-control" placeholder="Enter Repository">
             <br />
-            <input type="text" id="input_tag" class="form-control" placeholder="Enter Tag">
+            <input type="text" id="input_tag" data-toggle="tooltip" title="Tag of Docker Image" class="form-control" placeholder="Enter Tag">
         </div>
         <br />
         <input class="btn btn-primary" id="upload" type="button" onclick="validateForm()" value="Upload">

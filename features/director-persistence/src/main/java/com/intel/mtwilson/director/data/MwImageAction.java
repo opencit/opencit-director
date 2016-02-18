@@ -25,7 +25,7 @@ public class MwImageAction {
 	
 	
 	public MwImageAction(String image_id, String action, int action_count,
-			int action_completed, int action_size, int action_size_max) {
+			int action_completed, long action_size, long action_size_max) {
 		super();
 		this.image_id = image_id;
 		this.action = action;
@@ -52,10 +52,10 @@ public class MwImageAction {
 	private int action_completed;
 	
 	@Column(name = "action_size")
-	private int action_size;
+	private long action_size;
 
 	@Column(name = "action_size_max")
-	private int action_size_max;
+	private long action_size_max;
 	
 	@Column(name= "current_task_name")
 	private String current_task_name;
@@ -63,19 +63,19 @@ public class MwImageAction {
 	@Column(name= "current_task_status")
 	private String current_task_status;
 	
-	public int getAction_size() {
+	public long getAction_size() {
 		return action_size;
 	}
 
-	public void setAction_size(int action_size) {
+	public void setAction_size(long action_size) {
 		this.action_size = action_size;
 	}
 
-	public int getAction_size_max() {
+	public long getAction_size_max() {
 		return action_size_max;
 	}
 
-	public void setAction_size_max(int action_size_max) {
+	public void setAction_size_max(long action_size_max) {
 		this.action_size_max = action_size_max;
 	}
 

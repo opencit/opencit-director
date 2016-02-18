@@ -78,7 +78,7 @@ public class LookupServiceImpl implements LookupService {
         ImageLaunchPolicy imagelaunchpolicy = new ImageLaunchPolicy();
         imagelaunchpolicy.image_deployments = new ArrayList<String>();
         imagelaunchpolicy.name = Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY;
-        imagelaunchpolicy.value = "Hash Only";
+        imagelaunchpolicy.display_name = "Hash Only";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_DOCKER);
@@ -89,7 +89,7 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy = new ImageLaunchPolicy();
         imagelaunchpolicy.image_deployments = new ArrayList<String>();
         imagelaunchpolicy.name = Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE;
-        imagelaunchpolicy.value = "Hash and enforce";
+        imagelaunchpolicy.display_name = "Hash and enforce";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_DOCKER);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
@@ -98,7 +98,7 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy = new ImageLaunchPolicy();
         imagelaunchpolicy.image_deployments = new ArrayList<String>();
         imagelaunchpolicy.name = "encrypted";
-        imagelaunchpolicy.value = "Encryption";
+        imagelaunchpolicy.display_name = "Encryption";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         
         

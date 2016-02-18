@@ -46,6 +46,11 @@ public class ExecuteActionsTask implements Runnable {
 				log.info("Processing stopped for action: "+imageActionObj.getId());
 				return;
 			}
+			
+			if(i == (imageActions.size() - 1)){
+				imageActionObj.setCurrent_task_name(null);
+				imageActionObj.setCurrent_task_status(null);
+			}
 		}
 	}
 

@@ -402,23 +402,26 @@ public class Mapper {
 
 	public TrustPolicyDraft toTransferObject(
 			MwTrustPolicyDraft mwTrustPolicyDraft) {
-		TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
-		trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
-		trustPolicyDraft
-				.setTrust_policy_draft(fromCharacterArray(mwTrustPolicyDraft
-						.getTrustPolicyDraft()));
-		trustPolicyDraft.setName(mwTrustPolicyDraft.getName());
-		ImageAttributes imgAttributes = toTransferObject(mwTrustPolicyDraft
-				.getImage());
-		trustPolicyDraft.setImgAttributes(imgAttributes);
-		trustPolicyDraft.setCreated_by_user_id(mwTrustPolicyDraft
-				.getCreatedByUserId());
-		trustPolicyDraft.setEdited_by_user_id(mwTrustPolicyDraft
-				.getEditedByUserId());
-		trustPolicyDraft.setCreated_date(mwTrustPolicyDraft.getCreatedDate());
-		trustPolicyDraft.setEdited_date(mwTrustPolicyDraft.getEditedDate());
-		trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft.getDisplay_name());
-		return trustPolicyDraft;
+		if(mwTrustPolicyDraft!=null){
+			TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
+			trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
+			trustPolicyDraft
+					.setTrust_policy_draft(fromCharacterArray(mwTrustPolicyDraft
+							.getTrustPolicyDraft()));
+			trustPolicyDraft.setName(mwTrustPolicyDraft.getName());
+			ImageAttributes imgAttributes = toTransferObject(mwTrustPolicyDraft
+					.getImage());
+			trustPolicyDraft.setImgAttributes(imgAttributes);
+			trustPolicyDraft.setCreated_by_user_id(mwTrustPolicyDraft
+					.getCreatedByUserId());
+			trustPolicyDraft.setEdited_by_user_id(mwTrustPolicyDraft
+					.getEditedByUserId());
+			trustPolicyDraft.setCreated_date(mwTrustPolicyDraft.getCreatedDate());
+			trustPolicyDraft.setEdited_date(mwTrustPolicyDraft.getEditedDate());
+			trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft.getDisplay_name());
+			return trustPolicyDraft;
+		}
+		return null;
 	}
 
 	public MwImageUpload toData(

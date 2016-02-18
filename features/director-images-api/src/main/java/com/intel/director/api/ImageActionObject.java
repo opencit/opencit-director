@@ -8,8 +8,8 @@ public class ImageActionObject extends GenericResponse {
 	private String image_id;
 	private int action_count;
 	private int action_completed;
-	private int action_size;
-	private int action_size_max;
+	private long action_size;
+	private long action_size_max;
 	private List<ImageActionTask> actions;
 	private String current_task_status;
 	private String current_task_name;
@@ -45,16 +45,16 @@ public class ImageActionObject extends GenericResponse {
 	public void setAction_completed(int action_completed) {
 		this.action_completed = action_completed;
 	}
-	public int getAction_size() {
+	public long getAction_size() {
 		return action_size;
 	}
-	public void setAction_size(int action_size) {
+	public void setAction_size(long action_size) {
 		this.action_size = action_size;
 	}
-	public int getAction_size_max() {
+	public long getAction_size_max() {
 		return action_size_max;
 	}
-	public void setAction_size_max(int action_size_max) {
+	public void setAction_size_max(long action_size_max) {
 		this.action_size_max = action_size_max;
 	}
 	public String getCurrent_task_status() {

@@ -7,7 +7,7 @@ package com.intel.director.api;
 
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
@@ -21,12 +21,13 @@ public class ImageAttributes extends AuditFields {
   
     public String image_format;
     public String image_deployments;
+    @JsonProperty("image_upload_status")
     public String status;
-    public Integer image_size;
-    public Integer sent;
+    public Long image_size;
+    public Long sent;
     public String mounted_by_user_id;
     public boolean deleted;
-    @JsonIgnore
+    @JsonProperty("image_Location")
     public String location;
     
     public String repository;
@@ -39,7 +40,7 @@ public class ImageAttributes extends AuditFields {
     public ImageAttributes(String created_by_user_id, Date created_date,
             String edited_by_user_id, Date edited_date, String id, String image_name,
             String format, String image_deployments, String status,
-            Integer image_size, Integer sent, String mounted_by_user_id,
+            Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
         this.id = id;
@@ -59,7 +60,7 @@ public class ImageAttributes extends AuditFields {
     public ImageAttributes(String created_by_user_id, Date created_date,
             String edited_by_user_id, Date edited_date, String image_name,
             String format, String image_deployments, String status,
-            Integer image_size, Integer sent, String mounted_by_user_id,
+            Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
 
@@ -131,19 +132,19 @@ public class ImageAttributes extends AuditFields {
         this.status = status;
     }
 
-    public Integer getImage_size() {
+    public Long getImage_size() {
         return image_size;
     }
 
-    public void setImage_size(Integer image_size) {
+    public void setImage_size(Long image_size) {
         this.image_size = image_size;
     }
 
-    public Integer getSent() {
+    public Long getSent() {
         return sent;
     }
 
-    public void setSent(Integer sent) {
+    public void setSent(Long sent) {
         this.sent = sent;
     }
 

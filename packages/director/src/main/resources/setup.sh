@@ -234,6 +234,7 @@ update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 #------------------ Glance properties
 
+
 update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
 update_property_in_file "glance.port" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
 update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
@@ -309,10 +310,12 @@ update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
 update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
+update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 
 
 # director requires java 1.7 or later
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 java_detect
 if ! java_ready; then
@@ -331,6 +334,17 @@ else
   echo_failure "Java $JAVA_REQUIRED_VERSION not found"
   exit 1
 fi
+
+mkdir -p $JAVA_HOME
+java_install_in_home $JAVA_PACKAGE
+echo "# $(date)" > $DIRECTOR_ENV/director-java
+echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
+echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
+echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
+
+# libguestfs packages has a custom prompt about installing supermin which ignores the â€œ-yâ€ option we provide to apt-get. Following code will help to avoid that prompt 
+export DEBIAN_FRONTEND=noninteractive
+echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
 
 # make sure unzip and authbind are installed
 DIRECTOR_YUM_PACKAGES="zip unzip authbind qemu-utils expect openssl sshfs kpartx libguestfs-tools lvm2"
@@ -441,17 +455,18 @@ if [ -z "$SKIP_DATABASE_INIT" ]; then
  
  
  
- 
- 
-
-
-
- 
+DIRECTOR_PORT_HTTP=${DIRECTOR_PORT_HTTP:-${JETTY_PORT:-80}}
+DIRECTOR_PORT_HTTPS=${DIRECTOR_PORT_HTTPS:-${JETTY_SECURE_PORT:-443}}
 # setup authbind to allow non-root director to listen on ports 80 and 443
-if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ]; then
-  touch /etc/authbind/byport/80 /etc/authbind/byport/443
-  chmod 500 /etc/authbind/byport/80 /etc/authbind/byport/443
-  chown $DIRECTOR_USERNAME /etc/authbind/byport/80 /etc/authbind/byport/443
+if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTP" -lt "1024" ]; then
+  touch /etc/authbind/byport/$DIRECTOR_PORT_HTTP
+  chmod 500 /etc/authbind/byport/$DIRECTOR_PORT_HTTP
+  chown $DIRECTOR_USERNAME /etc/authbind/byport/$DIRECTOR_PORT_HTTP
+fi
+if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ -d /etc/authbind/byport ] && [ "$DIRECTOR_PORT_HTTPS" -lt "1024" ]; then
+  touch /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
+  chmod 500 /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
+  chown $DIRECTOR_USERNAME /etc/authbind/byport/$DIRECTOR_PORT_HTTPS
 fi
 
 # delete existing java files, to prevent a situation where the installer copies
@@ -535,6 +550,55 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
 
   director setup
 fi
+
+## Installing Docker
+## already installed needs to be checked not implemented in code
+version_gt() { 
+	test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; 
+}
+
+MINIMUM_KERNEL_VERSION_REQUIRED="3.10"
+CURRENT_KERNEL_VERSION=`uname -r | awk -F. '{print $1 FS $2}'`
+echo "CURRENT_KERNEL_VERSION=$CURRENT_KERNEL_VERSION"
+echo "MINIMUM_KERNEL_VERSION_REQUIRED=$MINIMUM_KERNEL_VERSION_REQUIRED"
+
+if ! version_gt $CURRENT_KERNEL_VERSION $MINIMUM_KERNEL_VERSION_REQUIRED; then
+	echo "Sorry Your kernel doesn't this version of docker..!!"
+	exit 1
+fi
+
+CODENAME=`lsb_release -c | awk --field-separator=: '{print $2}'`
+CODENAME=`echo $CODENAME | tr " " "\n"`
+
+LIST="precise trusty vivid wily"
+
+if echo "$LIST" | grep -q "$CODENAME"; then
+  echo "Valid ubuntu version";
+else
+  echo "Sorry Your Ubuntu Version is not supported";
+  exit 1;
+fi
+
+REPO_ADDRESS=`echo "deb https://apt.dockerproject.org/repo ubuntu-$CODENAME main"`
+
+apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+
+
+echo $REPO_ADDRESS 
+if grep -Fxq "$REPO_ADDRESS" /etc/apt/sources.list.d/docker.list
+then
+	echo "repo already set"
+else
+	echo "updating repo..."
+	echo $REPO_ADDRESS > /etc/apt/sources.list.d/docker.list
+	apt-get update
+fi
+
+echo "Installing docker....!!!!!"
+apt-get -y install docker-engine=1.9.1-0~$CODENAME --force-yes
+sudo apt-mark hold docker-engine            
+docker version  
+## Docker 
 
 # delete the temporary setup environment variables file
 rm -f $DIRECTOR_ENV/director-setup

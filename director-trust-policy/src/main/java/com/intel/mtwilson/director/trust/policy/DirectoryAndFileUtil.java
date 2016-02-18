@@ -46,13 +46,11 @@ public class DirectoryAndFileUtil {
 	public void setImageId(String imageId) {
 		this.imageId = imageId;
 	}
-
 	public DirectoryAndFileUtil() {
 	}
 
-	public String getFilesAndDirectories(String imageId,
-			DirectoryMeasurement dirMeasurement) throws FileNotFoundException,
-			IOException {
+	public String getFilesAndDirectories(String imageId, DirectoryMeasurement dirMeasurement)
+			throws FileNotFoundException, IOException {
 		// Create find command
 		String command = createFindCommand(imageId, dirMeasurement, false);
 		// Execute find command and return result
@@ -66,7 +64,6 @@ public class DirectoryAndFileUtil {
 		// Execute find command and return result
 		return executeCommand(command);
 	}
-
 	/**
 	 * This method applies include and exclude criteria on a directory and
 	 * returns list of files that satisfies criteria
@@ -78,11 +75,10 @@ public class DirectoryAndFileUtil {
 	 * @throws FileNotFoundException
 	 *             if directory path is not valid it throws exception
 	 */
-	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement,
-			boolean skipDirectories) throws FileNotFoundException, IOException {
+	public String getFiles(String imageId, DirectoryMeasurement dirMeasurement, boolean skipDirectories)
+			throws FileNotFoundException, IOException {
 		// Create find command
-		String command = createFindCommand(imageId, dirMeasurement,
-				skipDirectories);
+		String command = createFindCommand(imageId, dirMeasurement, skipDirectories);
 		// Execute find command and return result
 		return executeCommand(command);
 	}
@@ -103,8 +99,7 @@ public class DirectoryAndFileUtil {
 	 */
 	private String createFindCommand(String imageId,
 			DirectoryMeasurement dirMeasurement, boolean skipDirectories) {
-		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)
-				+ File.separator + "mount" + dirMeasurement.getPath();
+		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+dirMeasurement.getPath();
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		String command = "find " + directoryAbsolutePath;
@@ -161,10 +156,9 @@ public class DirectoryAndFileUtil {
 	}
 
 	public Digest getDirectoryHash(String imageId,
-			DirectoryMeasurement directoryMeasurement, String measurementType,
-			boolean skipDirectories) throws IOException {
-		String fileList = getFiles(imageId, directoryMeasurement,
-				skipDirectories);
+			DirectoryMeasurement directoryMeasurement, String measurementType, boolean skipDirectories)
+			throws IOException {
+		String fileList = getFiles(imageId, directoryMeasurement, skipDirectories);
 		Digest digest = Digest.algorithm(measurementType).digest(
 				fileList.getBytes("UTF-8"));
 		return digest;
@@ -182,10 +176,10 @@ public class DirectoryAndFileUtil {
 	 */
 	public Digest getFileHash(String imageId, FileMeasurement fileMeasurement,
 			String measurementType) throws IOException {
-		String filePath = DirectorUtil.getMountPath(imageId) + File.separator
-				+ "mount" + fileMeasurement.getPath();
+		String filePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"
+				+ fileMeasurement.getPath();
 		filePath = getSymlinkValue(filePath);
-		if (filePath == null || !new File(filePath).exists()) {
+		if (filePath == null || !new File(filePath).exists()){
 			return null;
 		}
 		Digest digest = Digest.algorithm(measurementType).digest(
@@ -236,11 +230,9 @@ public class DirectoryAndFileUtil {
 		return filePath;
 	}
 
-	private String executeCommand(String command) throws ExecuteException,
-			IOException {
+	private String executeCommand(String command) throws ExecuteException, IOException{
 		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
-		if (result.getStderr() != null
-				&& StringUtils.isNotEmpty(result.getStderr())) {
+		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
 		}
 		return result.getStdout();

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.MountImageResponse;
@@ -22,6 +23,7 @@ import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -46,8 +48,9 @@ public interface ImageService {
 	public UnmountImageResponse unMountImage(String imageId, String user)
 			throws DirectorException;
 
-	public TrustDirectorImageUploadResponse uploadImageToTrustDirectorSingle(
-			String image_id, InputStream filInputStream) throws DirectorException;
+	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
+			String image_id, InputStream fileInputStream)
+			throws DirectorException ;
 
 
 	public SearchImagesResponse searchImages(
@@ -91,7 +94,7 @@ public interface ImageService {
 
 	public String getFilepathForImage(String imageId, boolean isModified) throws DbException;
 
-	public TrustPolicy getTrustPolicyByImageId(String imageId) throws DbException;
+	public TrustPolicy getTrustPolicyByImageId(String imageId) throws  DirectorException;
 	
 	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId) throws DirectorException;
 
@@ -99,7 +102,7 @@ public interface ImageService {
 
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			int fileSize,String repository,String tag) throws DirectorException;
+			long fileSize,String repository,String tag) throws DirectorException;
 	
 	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException;
 
@@ -126,11 +129,17 @@ public interface ImageService {
 			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
 
 	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
+	
+	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
 
 	public void dockerLoad(String image_id) throws DirectorException;
 
 	public void dockerTag(String image_id) throws DirectorException;
 
 	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException;
+
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(
+			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException;
 }
 

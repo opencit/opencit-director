@@ -100,7 +100,7 @@ public abstract class ImageActionAsyncTask  {
 		String currentTaskStatus = status;
 		synchronized (this) {
 			taskAction.setStatus(status);
-			taskAction.setExecutionDetails(details);
+			
 			int count = imageActionObject.getAction_completed();
 			int action_completed;
 			if (Constants.COMPLETE.equals(status)) {
@@ -108,6 +108,7 @@ public abstract class ImageActionAsyncTask  {
 			} else {
 				if (Constants.ERROR.equals(status)) {
 					currentTaskStatus += " : " + details;
+					taskAction.setError(details);
 				}
 				action_completed = count;
 			}
@@ -125,7 +126,7 @@ public abstract class ImageActionAsyncTask  {
 	}
 	
 	
-	protected void updateImageActionContentSent(int sent, int size) {
+	protected void updateImageActionContentSent(long sent, long size) {
 		synchronized (this) {
 
 			

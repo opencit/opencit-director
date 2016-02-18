@@ -1,29 +1,24 @@
 #!/bin/bash
 
-function inject_policy_and_save_image(){
+function inject_policy(){
 	echo "Running Image..!!"
-	foo="$tag"
-	foo+="_source"
-	docker run "$repository:$foo"
-	containerId=`docker ps -aq --no-trunc | awk '{print $1; exit}'`
+	containerId=`docker run -id "$repository:$tag"`
+	docker exec $containerId mkdir -p /trust
+	docker stop $containerId
+#	containerId=`docker ps -aq --no-trunc | awk '{print $1; exit}'`
 	echo "Container ID is :: $containerId"
 	echo "Injecting Policy..!!"
-	docker cp "$trustPolicyPath/trustpolicy.xml" "$containerId:/tmp/trustpolicy.xml"
+	docker cp "$trustPolicyPath/trustpolicy.xml" "$containerId:/trust/trustpolicy.xml"
 	echo "Injecting Completed..!!"
 	echo "Committing Image..!!"
-	imageId=`docker commit $containerId "$repository:$tag"`
+	imageId=`docker commit $containerId "$newrepository:$newtag"`
 	echo "New Image ID is :: $imageId"
 	echo "Image Committed Successfully..!!"
-	echo "Creating Tar..!!"
-	docker save -o "$trustPolicyPath/$repository:$tag" "$repository:$tag"
-	echo "Tar Created Successfully..!!"
 	echo "Removing Container..!!"
 	docker rm $containerId
-	echo "Removing Image..!!"
-	docker rmi -f "$repository:$tag"
 }
 
-if [ $# -ne 3 ]
+if [ $# -ne 5 ]
 then
    echo "Insufficient Parameters"
    exit 1
@@ -31,14 +26,18 @@ fi
 
 repository=$1
 tag=$2
-trustPolicyPath=$3
+newrepository=$3
+newtag=$4
+trustPolicyPath=$5
 
-if [ ! -z $repository ] || [ ! -z $tag ] || [ ! -z $trustPolicyPath ]
+if [ ! -z $repository ] || [ ! -z $tag ] || [ ! -z $trustPolicyPath ] || [ ! -z $newrepository ] || [ ! -z $newtag ]
 then
     echo "Repository is: $repository"
     echo "Tag is: $tag"
+	echo "New repository is: $newrepository"
+    echo "New tag is: $newtag"
     echo "TrustPolicyPath is: $trustPolicyPath"
-    inject_policy_and_save_image
+    inject_policy
     echo "Injecting and save successfully"
 else
     echo "Please provide a valid repository, tag, trustPolicyPath"

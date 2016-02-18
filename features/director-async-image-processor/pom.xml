@@ -4,7 +4,7 @@
 	<groupId>com.intel.mtwilson.director</groupId>
 	<artifactId>director-async-image-processor</artifactId>
 	<packaging>jar</packaging>
-		<version>0.1-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 
 	<description>Async image action processor</description>
 	<parent>
@@ -98,6 +98,11 @@
 			<artifactId>director-glance</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-dockerhub</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>

@@ -1,9 +1,11 @@
 package com.intel.director.async;
 
+import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.async.task.CreateDockerTarTask;
 import com.intel.director.async.task.CreateTarTask;
 import com.intel.director.async.task.EncryptImageTask;
 import com.intel.director.async.task.ImageActionAsyncTask;
+import com.intel.director.async.task.UploadDockerHubTask;
 import com.intel.director.async.task.UploadImageTask;
 import com.intel.director.async.task.UploadPolicyTask;
 import com.intel.director.async.task.UploadTarTask;
@@ -36,6 +38,9 @@ public class ImageActionTaskFactory {
 			break;			
 		case Constants.TASK_NAME_CREATE_DOCKER_TAR:
 			actionTask = new CreateDockerTarTask();
+			break;
+		case Constants.TASK_NAME_UPLOAD_TO_HUB:
+			actionTask = new UploadDockerHubTask();
 			break;
 		case Constants.TASK_NAME_UPLOAD_TAR:
 			actionTask = new UploadTarTask(imageStoreName);

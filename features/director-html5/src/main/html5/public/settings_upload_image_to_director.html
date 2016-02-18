@@ -6,23 +6,34 @@
     <meta name="author" content="jbuhacoff">
 
     <script>
+        var image_type_upload;
+        var image_format_upload;
+
         $(document).ready(function() {
+
             $("#image_format").hide();
             $("#gotoUploadWindow").click(function() {
                 var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
-                OpenWindow.image_deployments_parent = $("#image_type").val();
+                image_type_upload = $("#image_type").val();
                 if ($("#image_type").val() == 'VM') {
-                    OpenWindow.image_format_parent = 'qcow2';
+                	image_format_upload = 'qcow2';
                 } else if ($("#image_type").val() == 'Docker') {
-                    OpenWindow.image_format_parent = 'tar';
+                	image_format_upload = 'tar';
                 } else {
-                    OpenWindow.image_format_parent = $("#image_format").val();
+                	image_format_upload = $("#image_format").val();
                 }
                 OpenWindow.auth_token_parent = mainViewModel.loginViewModel.userProfile.authorizationToken();
             });
+			$( "#image_type" ).change(function() {
+				if($("#image_type").val() != 'VM'){
+					$( "#image_format_label").hide();			
+				} else {
+					$( "#image_format_label").show();
+				}
+			});
 
             fetchDeploymentType();
-            //fetchImageFormat();
+
         });
 
         function fetchDeploymentType() {
@@ -62,9 +73,12 @@
         };
 
         function goToTrustPolicyPage() {
+            $('[data-navbar-feature-button-index="0"]').removeClass('active');
+            $('[data-navbar-feature-button-index="1"]').addClass('active');
             $("#upload-to-td").removeClass('active');
             $("#director-trust-policy").addClass('active');
 
+            $("#docker-dashboard-main-page").hide();
             $("#bm-dashboard-main-page").hide();
             $("#vm-dashboard-main-page").show();
 
@@ -79,6 +93,11 @@
                 "/v1/html5/public/director-html5/vm_images_page.html");
             umount_image();
 
+        }
+
+        function hideGoToTrustPolicyButton() {
+            var goToTPDiv = $("#goToTrustPolicyPageDiv");
+            goToTPDiv.hide();
         }
     </script>
 
@@ -109,21 +128,29 @@
                     <div class="row">
                         <div class="form-group">
                             <div class="col-md-2"></div>
-                            <div class="col-md-8">
+                            <div class="col-md-8" id="image_format_label">
                                 Supported Image Formats : qcow2, vhd(vpc), vmdk, raw, vdi
                             </div>
                             <div class="col-md-2"></div>
+                            <!--								<label class="control-label col-md-4" for="supported_format"><span class="pull-right">Supported  Image Formats:</span></label>
+								<div class="col-md-4">
+									<div id = "supported_format">QCOW2</div>
+									<select class="form-control" id="image_format">
+										
+									</select>
+								</div>
+							<div class="col-md-4"></div> -->
                         </div>
                     </div>
                     <br />
                     <div class="row">
                         <div class="form-group">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-5">
-                                <button id="gotoUploadWindow" class="btn btn-primary">Next</button>
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4" id="gotoUploadWindowDiv">
+                                <button id="gotoUploadWindow" class="btn btn-primary">Upload</button>
                             </div>
-                            <div class="col-md-5">
-                                <button id="gotoUploadWindow" class="btn btn-primary" onclick="goToTrustPolicyPage()">Go to Trust Policy Page</button>
+                            <div id="goToTrustPolicyPageDiv" class="col-md-1">
+                                <button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()">Trust Policy Page</button>
                             </div>
                         </div>
                     </div>

@@ -16,6 +16,6 @@
 
         <module>director-setup</module>
         <module>features</module>
-
-    </modules>
+    
+  </modules>
 </project>

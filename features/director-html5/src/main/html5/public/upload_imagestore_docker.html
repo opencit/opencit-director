@@ -112,16 +112,16 @@
 
 								<div class="col-md-offset-1 col-md-1">
 									<button type="button" onclick="createPolicyDraftFromPolicy()"
-										class="btn btn-primary">Previous</button>
+										class="btn btn-primary" id="docker_upload_previous">Previous</button>
 								</div>
 
 								<div class="col-md-offset-3 col-md-1">
 									<button type="button" class="btn btn-primary"
-										onclick="backToDockerPage()">Upload Later</button>
+										onclick="backToDockerPage()" id="docker_upload_later">Upload Later</button>
 								</div>
 
 								<div class="col-md-offset-3 col-md-1">
-									<button type="button" class="btn btn-primary" onclick="uploadToStore()">Upload
+									<button type="button" class="btn btn-primary" id="docker_upload_now" onclick="uploadToStore()">Upload
 										Now</button>
 								</div>
 								<!-- Modal -->

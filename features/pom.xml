@@ -13,13 +13,13 @@
 
     <modules>
         <module>director-images-api</module>
-	<module>director-image-store</module>
+		<module>director-image-store</module>
         <module>director-persistence</module>
         <module>director-html5</module>
         <module>director-images-ws</module>
-	<module>director-async-image-processor</module>
+		<module>director-async-image-processor</module>
         <module>director-glance</module>
         <module>director-kms</module>
-
-    </modules>
+		<module>director-dockerhub</module>
+  </modules>
 </project>

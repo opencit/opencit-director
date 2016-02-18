@@ -19,7 +19,6 @@ import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.mapper.Mapper;
 
 public class ImageDao {
@@ -112,7 +111,7 @@ public class ImageDao {
 			StringBuffer queryString = new StringBuffer(
 					"select id,name,image_format,image_deployments,created_by_user_id,created_date,"
 							+ "location,mounted_by_user_id,sent,status,edited_by_user_id,edited_date,deleted,"
-							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,repository,tag from mw_image_info_view where deleted=false and 1=1");
+							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,content_length,repository,tag from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
 
 			if (imgFilter != null) {
 				if (imgFilter.getId() != null) {
@@ -212,7 +211,7 @@ public class ImageDao {
 					imgInfo.setCreated_date((java.sql.Date) imageObj[5]);
 					imgInfo.setLocation((String) imageObj[6]);
 					imgInfo.setMounted_by_user_id((String) imageObj[7]);
-					imgInfo.setSent((Integer) imageObj[8]);
+					imgInfo.setSent((Long) imageObj[8]);
 					imgInfo.setStatus((String) imageObj[9]);
 					imgInfo.setEdited_by_user_id((String) imageObj[10]);
 					imgInfo.setEdited_date((java.sql.Date) imageObj[11]);
@@ -223,8 +222,9 @@ public class ImageDao {
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setUploads_count(((Long) imageObj[17]).intValue());
-					imgInfo.setRepository((String) imageObj[18]);
-					imgInfo.setTag((String) imageObj[19]);
+					imgInfo.setImage_size(((Long) imageObj[18]));
+					imgInfo.setRepository((String) imageObj[19]);
+					imgInfo.setTag((String) imageObj[20]);
 					imageInfoList.add(imgInfo);
 				}
 			}
@@ -260,6 +260,9 @@ public class ImageDao {
 		EntityManager em = getEntityManager();
 		try {
 			MwImage mwImage = em.find(MwImage.class, id);
+			if(mwImage==null){
+				return null;
+			}
 			ImageInfo imgInfo = new ImageInfo();
 
 			imgInfo.setId(mwImage.getId());

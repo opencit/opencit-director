@@ -19,12 +19,12 @@ function createPolicyDocker(imageid, imagename) {
     goToCreatePolicyDockerWizard();
 }
 
-function editPolicyDocker(imageid, imagename) {
+function editPolicyDocker(imageid, imagename, trust_policy_draft_id) {
 
     currentFlow = "Edit";
     current_image_id = imageid;
     current_image_name = imagename;
-    current_trust_policy_draft_id = '';
+    current_trust_policy_draft_id = trust_policy_draft_id;
 
     goToEditPolicyDockerWizard();
 }

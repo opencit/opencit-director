@@ -8,6 +8,11 @@ package com.intel.director.async.task;
 import java.io.File;
 
 import com.intel.director.common.Constants;
+import java.io.StringReader;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
 
 /**
  * Task to upload the tar of image and policy
@@ -37,7 +42,7 @@ public class UploadTarTask extends UploadTask {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
 				super.initProperties();
-				runFlag = runUploadTarTask();
+				runFlag  = runUploadTarTask();
 			}
 		}
 		return runFlag;
@@ -57,49 +62,54 @@ public class UploadTarTask extends UploadTask {
 		log.debug("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		try {
-			String tarName;
-			if(Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo.image_deployments)){
-				tarName = imageInfo.repository + ":" + imageInfo.tag;
-			} else {
-				tarName = trustPolicy.getDisplay_name() + ".tar";
-			}
 			String imageLocation = imageInfo.getLocation();
-			String tarLocation = imageLocation
-					+ imageActionObject.getImage_id() + File.separator;
+			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
+			String tarName = "";
+			if(imageInfo.getImage_deployments().equalsIgnoreCase(Constants.DEPLOYMENT_TYPE_DOCKER)){
+				imageProperties.put(Constants.NAME, imageInfo.getRepository() + ":" + imageInfo.getTag());			
+			} else {	
+				imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
+			}
+			tarName = trustPolicy.getDisplay_name() + ".tar";
+			String policyXml= trustPolicy.getTrust_policy();
+			log.debug("Inside Run Upload Tar task policyXml::"+policyXml);
+			StringReader reader = new StringReader(policyXml);
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+			String glanceId=policy.getImage().getImageId();
+			log.info("Inside Run Upload Tar task glanceId::"+glanceId);
+			imageProperties.put(Constants.GLANCE_ID, glanceId);
 			
-			imageProperties.put(Constants.NAME, tarName);
-			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
-					"glance_image_tar");
-
-			
-
+			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
+			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;
 			log.debug("runUploadTarTask tarname::" + tarName
 					+ " ,tarLocation ::" + tarLocation);
 			content = new File(tarLocation + tarName);
-
-			
-			
-			super.run();
-			runFlag = true;
-
-			// Cleanup of folder
+			boolean parentRunStatus = super.run();
+			runFlag = parentRunStatus;
+			//Cleanup of folder
 			File uuidFolder = new File(tarLocation);
 			File[] listFiles = uuidFolder.listFiles();
 			boolean deleteFileFlag = true;
 			for (File file : listFiles) {
-				log.info("Deleteing file " + file.getAbsolutePath()
-						+ " after successful upload");
-				if (!file.delete()) {
+				log.info("Deleteing file "+file.getAbsolutePath()+" after successful upload");
+				if(!file.delete()){
 					log.info("!!!!! File could not be deleted");
 					deleteFileFlag = false;
 				}
-
+				
 			}
-			if (deleteFileFlag) {
+			if(deleteFileFlag){
 				deleteFileFlag = uuidFolder.delete();
-				log.info("Is folder deleted == " + deleteFileFlag);
-			} else {
-				log.info("UUID : " + tarLocation + " cannot be cleaned up");
+				log.info("Is folder deleted == "+deleteFileFlag);
+			}else{
+				log.info("UUID : "+tarLocation +" cannot be cleaned up");
+			}
+			String encImageFileName = imageInfo.getLocation()+File.separator+imageInfo.getImage_name() + "-enc";
+			File encImageFile = new File(encImageFileName);
+			if(encImageFile.exists()){
+				encImageFile.delete();
 			}
 			return runFlag;
 		} catch (Exception e) {
@@ -112,4 +122,5 @@ public class UploadTarTask extends UploadTask {
 		return runFlag;
 
 	}
+
 }

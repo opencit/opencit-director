@@ -7,6 +7,7 @@ import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
+import com.intel.director.common.MountImage;
 
 public class CreateDockerTarTask extends ImageActionAsyncTask {
 	
@@ -78,9 +79,18 @@ public class CreateDockerTarTask extends ImageActionAsyncTask {
 					+ newLocation + " trustPolicyName::" + trustPolicyName
 					+ " imageLocation::" + imageLocation);
 			
-			log.info("**********************####################@@@@@@@@@@@@@@@@@@@@@@@");
-			DirectorUtil.executeCommandInExecUtil(Constants.dockerPolicyInject, imageinfo.repository, imageinfo.tag , newLocation);
-			log.info("**********************####################@@@@@@@@@@@@@@@@@@@@@@@**********************");
+			log.info("Injecting Policy @ /trust");
+			DirectorUtil.executeCommandInExecUtil(Constants.dockerPolicyInject,
+					imageinfo.repository, imageinfo.tag + "_source",
+					imageinfo.repository, imageinfo.tag, newLocation);
+			log.info("Policy Injected Successfully");
+			log.info("Creating Docker tar...!!!");
+			MountImage.dockerSave(imageinfo.repository, imageinfo.tag,
+					newLocation, trustPolicy.getDisplay_name() + ".tar");
+			log.info("Docker tar created Successfully");
+			log.info("Removing Image :: " + imageinfo.repository + imageinfo.tag);
+			MountImage.dockerRMI(imageinfo.repository, imageinfo.tag);
+			log.info("Image removed" + imageinfo.repository + imageinfo.tag);
 			log.info("Create Docker Tar : commplete");
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);

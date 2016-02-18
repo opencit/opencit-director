@@ -35,11 +35,11 @@ function CreateDockerImageViewModel() {
 
             success: function(data, status, xhr) {
 
-                if (data.status == "Error") {
-                    $('#for_mount_docker').hide();
-                    $('#default_docker').show();
-                    $('#error_modal_body_docker_1').text(data.details);
-                    $("#error_modal_docker_1").modal({
+                if (data.error) {
+                    $('#for_mount').hide();
+                    $('#default').show();
+                    $('#error_modal_body_vm_1').text(data.error);
+                    $("#error_modal_vm_1").modal({
                         backdrop: "static"
                     });
                     $('body').removeClass("modal-open");
@@ -61,10 +61,10 @@ function CreateDockerImageViewModel() {
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
                         $("#createDockerPolicyNext").prop('disabled', false);
-                        if (data.status == "Error") {
+                        if (data.error) {
                             $('#default').hide();
                             $('#for_mount').show();
-                            $('#error_modal_body_docker_1').text(data.details);
+                            $('#error_modal_body_docker_1').text(data.error);
                             $("#error_modal_docker_1").modal({
                                 backdrop: "static"
                             });
@@ -107,7 +107,8 @@ function addRadios(arr) {
         if (arr[i].name == 'encrypted') {
             continue;
         }
-        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" value="' + arr[i].name + '">' + arr[i].value + '</label>';
+        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="create_policy_' + arr[i].name + '" value="' + arr[i].name + '">' + arr[i].display_name + '</label>';
+
     }
     $('#launch_control_policy').html(temp);
 };

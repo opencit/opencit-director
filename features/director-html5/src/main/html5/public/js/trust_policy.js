@@ -6,7 +6,6 @@ function show_error_in_trust_policy_tab(message) {
     });
     $('body').removeClass("modal-open");
 
-
 }
 
 function show_dialog_content_trust_policy_tab() {
@@ -25,16 +24,14 @@ function goToVMPage() {
     $("#bm-dashboard-main-page").hide();
     $("#vm-dashboard-main-page").show();
 
-
     var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
 
     if (isEmpty == false) {
         $("#vm-dashboard-main-page").html("");
     }
     hideLoading();
-    $("#vm-dashboard-main-page")
-        .load(
-            "/v1/html5/public/director-html5/vm_images_page.html");
+    $("#vm-dashboard-main-page").load(
+        "/v1/html5/public/director-html5/vm_images_page.html");
     umount_image();
 }
 
@@ -50,12 +47,11 @@ function goToDockerPage() {
         $("#docker-dashboard-main-page").html("");
     }
 
-    $("#docker-dashboard-main-page").load("/v1/html5/public/director-html5/docker_images_page.html");
+    $("#docker-dashboard-main-page").load(
+        "/v1/html5/public/director-html5/docker_images_page.html");
 
     umount_image();
 }
-
-
 
 function umount_image() {
     if (typeof current_image_id !== 'undefined') {
@@ -85,12 +81,10 @@ function umount_image() {
 
 }
 
-
 function goToBMPage() {
     $("#docker-dashboard-main-page").hide();
     $("#vm-dashboard-main-page").hide();
     $("#bm-dashboard-main-page").show();
-
 
     var isEmpty = !$.trim($("#bm-dashboard-main-page").html());
 
@@ -109,7 +103,7 @@ function ImageData() {}
 function refresh_vm_images_Grid() {
     var self = this;
 
-    $("#vmGrid").html("");
+    $("#vmGrid").html("")
     $.ajax({
         type: "GET",
         url: "/v1/images?deploymentType=VM",
@@ -125,43 +119,53 @@ function refresh_vm_images_Grid() {
                 if (images[i].deleted) {
                     continue;
                 }
+
                 self.gridData = new ImageData();
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" onclick=\"deleteImage('" + images[i].id + "')\"/></a>";
+                if (images[i].status == 'Complete') {
 
-                self.gridData.trust_policy = "<div id=\"trust_policy_vm_column" + images[i].id + "\">";
+                    self.gridData.trust_policy = "<div id=\"trust_policy_vm_column" + images[i].id + "\">";
 
-                if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
+                    if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
 
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createTrustPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
 
+                    }
+
+                    if (images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editTrustPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                        tpdid = images[i].trust_policy_draft_id;
+                    } else if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editTrustPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicy('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyVM('" + images[i].trust_policy_id + "','" + images[i].trust_policy_draft_id + "','" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                    }
+                    self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+
+                } else {
+                    //self.gridData.image_delete = "";
+                    self.gridData.trust_policy = "";
                 }
-
-                if (images[i].trust_policy_draft_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
-
-                } else if (images[i].trust_policy_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
-                }
-
-                if (images[i].trust_policy_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicy('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
-                }
-
-                if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyVM('" + images[i].id + "','" + images[i].trust_policy_id + "','" + images[i].image_name + "')\"></span></a>";
-                }
-                self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
 
                 self.gridData.image_upload = "";
-                if (images[i].uploads_count != 0) {
-                    self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
-                } else {
-                    self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
-                }
+                if (images[i].status == 'Complete') {
 
-                self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" onclick=\"uploadToImageStorePage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
+                    if (images[i].uploads_count != 0) {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
+                    } else {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
+                    }
+
+                    self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" onclick=\"uploadToImageStorePage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
+                }
 
                 self.gridData.created_date = images[i].created_date;
 
@@ -234,7 +238,10 @@ function refresh_vm_images_Grid() {
 
         },
         error: function(jqXHR, exception) {
+
             show_error_in_trust_policy_tab("Failed to get images list");
+
+
         }
     });
 
@@ -245,7 +252,7 @@ function refresh_vm_images_Grid() {
 function refreshBMOnlineGrid() {
     var self = this;
     endpoint = "/v1/images";
-    $("#bmGridOnline").html("");
+    $("#bmGridOnline").html("")
     $.ajax({
         type: "GET",
         url: "/v1/images?deploymentType=BareMetalLive",
@@ -328,7 +335,7 @@ function refreshBMOnlineGrid() {
                     					type : "text",
                     					width : 100,
                     					align : "center"
-                    }, */
+                    				}, */
                     {
                         title: "Policy Created Date",
                         name: "created_date",
@@ -341,7 +348,6 @@ function refreshBMOnlineGrid() {
 
     });
 }
-
 
 function refresh_bm_images_Grid() {
     alert("inside bm");
@@ -408,6 +414,7 @@ function refresh_bm_images_Grid() {
 
 function refresh_docker_Grid() {
     var self = this;
+
     $("#dockerGrid").html("");
     $.ajax({
         type: "GET",
@@ -424,50 +431,55 @@ function refresh_docker_Grid() {
                 if (images[i].deleted) {
                     continue;
                 }
+
                 self.gridData = new ImageData();
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
-                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" onclick=\"deleteImageDocker('" + images[i].id + "')\"/></a>";
+                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"deleteImageDocker('" + images[i].id + "')\"/></a>";
+                if (images[i].image_upload_status == 'Complete') {
 
-                self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
+                    self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
+                    if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
 
-                if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" id=\"docker_add_row_" + i + "\" onclick=\"createPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
 
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" onclick=\"createPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                    }
 
+                    if (images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\" id=\"docker_edit_row_" + i + "\" onclick=\"editPolicyDocker('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_draft_id + "')\"></span></a>";
+                        tpdid = images[i].trust_policy_draft_id;
+                    } else if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" id=\"docker_edit_row_" + i + "\" onclick=\"editPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\" id=\"docker_download_row_" + i + "\"  title=\"Download\" onclick=\"downloadPolicy('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"docker_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"deletePolicyDocker('" + images[i].trust_policy_id + "','" + images[i].trust_policy_draft_id + "','" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+                    }
+                    self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+                } else {
+                    //self.gridData.image_delete = "";
+                    self.gridData.trust_policy = "";
                 }
-
-                if (images[i].trust_policy_draft_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\"  onclick=\"editPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
-
-                } else if (images[i].trust_policy_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" onclick=\"editPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
-                }
-
-                if (images[i].trust_policy_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\"   title=\"Download\" onclick=\"downloadPolicy('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
-                }
-
-                if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\"   title=\"Delete Policy\" onclick=\"deletePolicyDocker('" + images[i].id + "','" + images[i].trust_policy_id + "','" + images[i].image_name + "')\"></span></a>";
-                }
-                self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
 
                 self.gridData.image_upload = "";
-                if (images[i].uploads_count != 0) {
-                    self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
-                } else {
-                    self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
+                if (images[i].image_upload_status == 'Complete') {
+
+                    if (images[i].uploads_count != 0) {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"docker_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
+                    } else {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"docker_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";
+                    }
+
+                    self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" id=\"docker_upload_row_" + i + "\" onclick=\"uploadToImageStoreDockerPage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
                 }
-
-                self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" onclick=\"uploadToImageStoreDockerPage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
-
                 self.gridData.created_date = images[i].created_date;
 
                 self.gridData.tag = images[i].tag;
                 self.gridData.repository = images[i].repository;
-
-
                 self.gridData.image_format = images[i].image_format;
                 grid.push(self.gridData);
 
@@ -539,6 +551,7 @@ function refresh_docker_Grid() {
 
         },
         error: function(jqXHR, exception) {
+
             show_error_in_trust_policy_tab("Failed to get images list");
         }
     });
@@ -547,18 +560,16 @@ function refresh_docker_Grid() {
 
 function refresh_all_trust_policy_grids() {
     refresh_vm_images_Grid();
-    //refresh_bm_images_Grid();
+    // refresh_bm_images_Grid();
     refreshBMOnlineGrid();
     refresh_docker_Grid();
 }
 
-
 function showLoading() {
     $("#loader_body").html("");
-    var html1 = "<div id='loading_icon_container' style='background-color: rgba(1, 1, 1, 0.3);bottom: 0;left: 0;position: fixed;right: 0;top: 0;text-align: center;z-index: 1;'><img id='director_loading_icon' src='/v1/html5/public/director-html5/images/ajax-loader.gif' style='position:absolute;top:30%;z-index: 1;display:none;text-align: center;'  width='75' height='75' /> </div>";
+    var html1 = "<div id='loading_icon_container' style='background-color: rgba(1, 1, 1, 0.3);bottom: 0;left: 0;position: fixed;right: 0;top: 0;text-align: center;z-index: 1;'><img id='director_loading_icon' src='/v1/html5/public/director-html5/images/ajax-loader.gif' style='position:absolute;top:30%;left:48%;z-index: 1;display:none;text-align: center;'  width='75' height='75' /> </div>";
 
     $("#loader_body").html(html1);
-    //$( "#loading_icon_container" ).css('text-align','center');
     $("#director_loading_icon").show();
 
 }

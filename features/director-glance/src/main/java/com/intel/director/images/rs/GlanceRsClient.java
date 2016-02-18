@@ -57,7 +57,7 @@ public class GlanceRsClient {
 			String glanceId) throws IOException {
 		long start = new Date().getTime();
 		BufferedReader br = null;
-		InputStream ist =  null;
+		InputStream ist = null;
 		DefaultHttpClient httpClient = null;
 		try {
 			httpClient = new DefaultHttpClient();
@@ -91,14 +91,13 @@ public class GlanceRsClient {
 				sb.append(output);
 				// log.debug(output);
 			}
-			log.info("Response from glance : "+sb.toString());
 			JSONObject obj = new JSONObject(sb.toString());
 			log.debug("obj::" + obj);
-			
+
 		} catch (IOException e) {
 			throw e;
 		} finally {
-			
+
 			if (httpClient != null) {
 				httpClient.close();
 			}
@@ -106,13 +105,11 @@ public class GlanceRsClient {
 				ist.close();
 			}
 			try {
-				
 
 				if (br != null) {
 					br.close();
 				}
 
-				
 			} catch (IOException e) {
 				log.error("Error closing streams ");
 			}
@@ -199,7 +196,6 @@ public class GlanceRsClient {
 			sb.append(output);
 			// log.debug(output);
 		}
-		log.info("Metadata Response: "+sb.toString());
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");

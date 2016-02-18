@@ -1,11 +1,52 @@
-endpoint = "/v1/images/";
+endpoint = "/v1";
 var imageFormats = new Array();
 var image_policies = new Array();
 
 
+edit_policy_bmlive_initialize();
+
+function edit_policy_bmlive_initialize(){
+	
+if(!current_trust_policy_draft_id){
+	var create_draft_request={
+			"image_id" :current_image_id
+		}
+
+		$.ajax({
+			type : "POST",
+			contentType : "application/json",
+			headers : {
+					'Accept' : 'application/json'
+				},
+			data : JSON.stringify(create_draft_request),
+
+			url : "/v1/rpc/create-draft-from-policy",
+			success : function(data, status, xhr) {
+				
+				if (data.status == "Error") {
+				///	show_error_in_trust_policy_tab("Internal error");
+								return false;
+							}else{
+				current_trust_policy_draft_id = data.id;
+
+				$.ajax({
+	type : "GET",
+	url : "/v1/images/"+current_image_id,
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function (data, status, xhr) {
+		$("#host_ip_edit").val(data.ip_address);
+		$("#username_for_host_edit").val(data.username);
+	}
+});
+
+
 $.ajax({
 	type : "GET",
-	url : "/v1/trust-policy-drafts/?imageId="+ current_image_id + "&deploymentType=BareMetal",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
 	// accept: "application/json",
 	contentType : "application/json",
 	headers : {
@@ -14,10 +55,54 @@ $.ajax({
 	dataType : "json",
 	success : function(data, status, xhr) {
 		$("#display_name_host_edit").val(data.display_name);
+	}
+});
+
+
+			    }
+
+			}
+		});
+}else{
+
+$.ajax({
+	type : "GET",
+	url : "/v1/images/"+current_image_id,
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function (data, status, xhr) {
 		$("#host_ip_edit").val(data.ip_address);
 		$("#username_for_host_edit").val(data.username);
 	}
 });
+
+
+$.ajax({
+	type : "GET",
+	url : "/v1/trust-policy-drafts/"+current_trust_policy_draft_id,
+	// accept: "application/json",
+	contentType : "application/json",
+	headers : {
+		'Accept' : 'application/json'
+	},
+	dataType : "json",
+	success : function(data, status, xhr) {
+		$("#display_name_host_edit").val(data.display_name);
+	}
+});
+
+}
+
+
+
+
+}
+
+
+
 
 function EditBMLiveMetaData() {
 	
@@ -127,9 +212,9 @@ return;
 				data :   JSON.stringify(mountimage),
 				success : function (data, status, xhr) {
 
-					if (data.status == "Error") {
+					if (data.error) {
 						$("#editBMLivePolicyNext").prop('disabled', false);
-						show_error_in_editbmlivemodal(data.details);
+						show_error_in_editbmlivemodal(data.error);
 						return;
 					}
 					
@@ -145,8 +230,8 @@ return;
 						success : function (data, status, xhr) {
 							$("#editBMLivePolicyNext").prop('disabled', false);
 
-							if (data.status == "Error") {								
-								show_error_in_editbmlivemodal(data.details);
+							if (data.error) {								
+								show_error_in_editbmlivemodal(data.error);
 
 								$.ajax({
 									type : "POST",

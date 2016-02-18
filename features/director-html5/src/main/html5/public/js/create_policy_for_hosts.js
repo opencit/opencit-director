@@ -160,8 +160,8 @@ function addhostandnext() {
 								success : function (data) {
 									$("#createBMLivePolicyNext").prop('disabled', false);
 
-									if (data.status == "Error") {
-										show_error_in_bmlivemodal(data.details);
+									if (data.error) {
+										show_error_in_bmlivemodal(data.error);
 										return;
 									}
 									nextButtonLiveBM();

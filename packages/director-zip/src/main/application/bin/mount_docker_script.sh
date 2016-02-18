@@ -62,7 +62,7 @@ mount_aufs() {
 	DOCKER_AUFS_PATH="/var/lib/docker/aufs"
 	DOCKER_AUFS_LAYERS="${DOCKER_AUFS_PATH}/layers"
 	DOCKER_AUFS_DIFF="${DOCKER_AUFS_PATH}/diff"
-	BRANCH="br"
+	BRANCH="br:${DOCKER_AUFS_DIFF}/${IMAGE_ID}=rw+wh"
 	while read LAYER; do
   		BRANCH="${BRANCH}:${DOCKER_AUFS_DIFF}/${LAYER}=rw+wh"
 	done < "${DOCKER_AUFS_LAYERS}/${IMAGE_ID}"
