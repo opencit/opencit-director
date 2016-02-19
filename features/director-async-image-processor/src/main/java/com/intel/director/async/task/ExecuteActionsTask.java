@@ -6,12 +6,16 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
+import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.DbServiceImpl;
+import com.intel.mtwilson.director.dbservice.IPersistService;
 
 public class ExecuteActionsTask implements Runnable {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ExecuteActionsTask.class);
 
 	ImageActionObject imageActionObj;
+	IPersistService persistService = new DbServiceImpl();
 
 	public ExecuteActionsTask(ImageActionObject imageActionObject) {
 		this.imageActionObj = imageActionObject;
@@ -27,6 +31,7 @@ public class ExecuteActionsTask implements Runnable {
 		for (int i = 0; i < imageActions.size(); i++) {
 			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
+				markImageActionWithError("No task found for execution");
 				return;
 			}
 			String task_name = taskToBeExecuted.getTask_name();
@@ -36,6 +41,7 @@ public class ExecuteActionsTask implements Runnable {
 			ImageActionAsyncTask task = ImageActionTaskFactory.getImageActionTask(
 					task_name, imageStore);
 			if(task == null){
+				markImageActionWithError("Null task");
 				return;
 			}
 			log.info("Task instance from factory : " + task.getTaskName());
@@ -44,6 +50,7 @@ public class ExecuteActionsTask implements Runnable {
 			if(!task.run()){
 				log.info("Exiting because "+task.getTaskName()+" did not execute successfully");
 				log.info("Processing stopped for action: "+imageActionObj.getId());
+				markImageActionWithError("Exiting because "+task.getTaskName()+" did not execute successfully");
 				return;
 			}
 			
@@ -52,6 +59,19 @@ public class ExecuteActionsTask implements Runnable {
 				imageActionObj.setCurrent_task_status(null);
 			}
 		}
+	}
+	
+
+	private void markImageActionWithError(String details) {
+		imageActionObj.setStatus(Constants.ERROR);
+		imageActionObj.setDetails(details);
+		try {
+			persistService.updateImageAction(imageActionObj);
+		} catch (DbException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**

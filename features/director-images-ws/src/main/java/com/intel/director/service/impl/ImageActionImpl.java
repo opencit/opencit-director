@@ -89,6 +89,9 @@ public class ImageActionImpl implements ImageActionService {
 			throw new DirectorException("Image with id :"
 					+ imageActionRequest.image_id + " does'nt exist", e1);
 		}
+		if(imageInfo==null){
+			throw new DirectorException("Image does not exist");
+		}
 
 		TrustPolicy trustPolicy = null;
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
@@ -200,8 +203,8 @@ public class ImageActionImpl implements ImageActionService {
 		try {
 			persistService.deleteImageActionById(actionId);
 		} catch (DbException e) {
-			log.error("No image action with Id :: " + actionId + e);
-			throw new DirectorException("Error while deleting image action :: " + actionId, e);
+			log.error("Error in deleting image action" , e);
+			throw new DirectorException("Error in deleting image action " , e);
 		}
 	}
 

@@ -88,8 +88,7 @@ public class Constants {
 	public static final String GLANCE_IMAGE_STORE_USERNAME = "glance.image.store.username";
 	public static final String GLANCE_IMAGE_STORE_PASSWORD = "glance.image.store.password";
 	public static final String GLANCE_TENANT_NAME = "glance.tenant.name";
-	public static final String GLANCE_IP = "glance.ip";
-	public static final String GLANCE_PORT = "glance.port";
+	public static final String GLANCE_API_ENDPOINT = "glance.api.endpoint";
 	public static final String DIRECTOR_ID = "director.id";
 	public static final String CONTENT_LENGTH="Content-Length";
 	public static final String GLANCE_HEADER_CREATED_AT="X-Image-Meta-Created_at";
@@ -98,6 +97,9 @@ public class Constants {
 	public static final String GLANCE_HEADER_LOCATION="Location";
 	public static final String GLANCE_HEADER_CHECKSUM="Image-Meta-Checksum";
 	public static final String GLANCE_HEADER_CONTAINER_FORMAT="X-Image-Meta-Container_format";
+	public static final String GLANCE_ID="glanceid";
 	
 	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
+	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
+	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
 }

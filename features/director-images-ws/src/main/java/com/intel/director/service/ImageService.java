@@ -15,6 +15,7 @@ import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -24,6 +25,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
+import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -49,8 +51,7 @@ public interface ImageService {
 			throws DirectorException;
 
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			String image_id, InputStream fileInputStream)
-			throws DirectorException ;
+			String image_id, InputStream filInputStream) throws DirectorException;
 
 
 	public SearchImagesResponse searchImages(
@@ -61,7 +62,7 @@ public interface ImageService {
 
 	public String getTrustPolicyForImage(String imageId);
 
-	public TrustPolicyDraft editTrustPolicyDraft(
+	public TrustPolicyDraftResponse editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -76,12 +77,12 @@ public interface ImageService {
 	public CreateTrustPolicyMetaDataResponse getPolicyMetadataForImage(
 			String image_id) throws DirectorException;
 
-	public String createTrustPolicy(String image_id)
+	public String createTrustPolicy(String image_id, String trust_policy_draft_id)
 			throws DirectorException;
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustPolicyDraft createPolicyDraftFromPolicy(String imageId) throws DirectorException;
+	public TrustPolicyDraftResponse createPolicyDraftFromPolicy(String imageId) throws DirectorException;
 
 	public String getDisplayNameForImage(String image_id) throws DirectorException;
 
@@ -141,5 +142,37 @@ public interface ImageService {
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;
+	public void updateTrustPolicy(
+			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
+
+	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
+	
+	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
+
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(
+			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException;
+	
+	public List<SshSettingRequest> sshData() throws DirectorException;
+
+	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
+			throws DirectorException ;
+	
+	public void postSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException;
+
+	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
+			throws DirectorException;
+
+	public void updateSshDataById(String sshId) throws DirectorException;
+
+	public void deleteSshSetting(String sshId) throws DirectorException;
+
+	public SshSettingRequest fetchSshInfoByImageId(String image_id)
+			throws DirectorException;
+	
+	public ImageInfo fetchImageById(String imageId) throws DirectorException;
+	
+	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId);
 }
 

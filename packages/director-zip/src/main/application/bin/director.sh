@@ -98,7 +98,7 @@ JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
 JAVA_OPTS=${JAVA_OPTS:-"-Dlogback.configurationFile=$DIRECTOR_CONFIGURATION/logback.xml"}
 
 DIRECTOR_SETUP_FIRST_TASKS=${DIRECTOR_SETUP_FIRST_TASKS:-"update-extensions-cache-file"}
-DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore director-envelope-key"}
+DIRECTOR_SETUP_TASKS=${DIRECTOR_SETUP_TASKS:-"password-vault jetty-tls-keystore shiro-ssl-port director-envelope-key"}
 DIRECTOR_KMS_SETUP_TASKS=${DIRECTOR_KMS_SETUP_TASKS:-"director-envelope-key-registration"}
 
 # the standard PID file location /var/run is typically owned by root;
@@ -153,17 +153,7 @@ director_complete_setup() {
   if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA1" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
   	director_run setup $DIRECTOR_KMS_SETUP_TASKS
   fi
-  ###TODO: REMOVE AFTER MTWILSON CLIENT CONNECTION CORRECTED -savino
-  if [ -n "$MTWILSON_SERVER" ] && [ -n "$MTWILSON_SERVER_PORT" ]; then
-    openssl s_client -connect ${MTWILSON_SERVER}:${MTWILSON_SERVER_PORT} 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/mtwcert.pem
-    $JAVA_HOME/jre/bin/keytool -import -noprompt -trustcacerts -alias mtwcert -file /tmp/mtwcert.pem -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass "$JAVA_KEYSTORE_PASSWORD"
-    rm /tmp/mtwcert.pem
-  else
-    echo_failure "Mtwilson server address or server port not defined"
-    return -1
-  fi
-  
-  
+
 }
 
 # arguments are optional, if provided they are the names of the tasks to run, in order
@@ -186,9 +176,9 @@ director_start() {
     fi
 
     # check if we need to use authbind or if we can start java directly
-    prog="java"
+    prog="$JAVA_CMD"
     if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
-      prog="authbind java"
+      prog="authbind $JAVA_CMD"
       JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
     fi
 
@@ -243,7 +233,7 @@ scheduler_is_running() {
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # check the process list just in case the pid file is stale
-    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main image-action-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main trust-director-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
   if [ -z "$SCHEDULER_PID" ]; then
     # Scheduler is not running
@@ -284,9 +274,9 @@ scheduler_start() {
     fi
 
     # check if we need to use authbind or if we can start java directly
-    prog="java"
+    prog="$JAVA_CMD"
     if [ -n "$DIRECTOR_USERNAME" ] && [ "$DIRECTOR_USERNAME" != "root" ] && [ $(whoami) != "root" ] && [ -n $(which authbind) ]; then
-      prog="authbind java"
+      prog="authbind $JAVA_CMD"
       JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
     fi
 
@@ -295,7 +285,7 @@ scheduler_start() {
     # the last background process pid $! must be stored from the subshell.
     (
       cd $DIRECTOR_HOME
-      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main image-action-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
+      $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main trust-director-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
       echo $! > $SCHEDULER_PID_FILE
     )
     if scheduler_is_running; then

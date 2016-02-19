@@ -8,9 +8,11 @@ package com.intel.director.service.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
 import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -91,6 +93,10 @@ public class SSHManager {
 			log.info("inside ssh connect setup set passwd");
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
+			int timeout = Integer.valueOf(getSessionTimeout()) ;
+			log.info("TIMEOUT: "+timeout);
+			timeout = timeout * 60 * 1000;
+			sesConnection.setTimeout(timeout);
 			sesConnection.setConfig(config);
 			log.info("inside ssh connect setup set config");
 			sesConnection.connect(intTimeOut);
@@ -102,6 +108,21 @@ public class SSHManager {
 		}
 
 		return Constants.SUCCESS;
+	}
+
+	
+	
+	private String getSessionTimeout() {
+		log.info("inside getting session timeout");
+		String timeout = "30";
+
+		Properties prop = DirectorUtil.getPropertiesFile("director.properties");
+		timeout = prop.getProperty("login.token.expires.minutes", "30");
+		log.info("session timeout in happy path = " + timeout);
+
+		log.info("session timeout in default path = " + timeout);
+		return timeout;
+
 	}
 
 	private void mkdirs(String path) {
@@ -133,6 +154,9 @@ public class SSHManager {
 	}
 
 	public void close() {
+		if(channelSftp != null){
+			channelSftp.exit();
+		}
 		sesConnection.disconnect();
 	}
 

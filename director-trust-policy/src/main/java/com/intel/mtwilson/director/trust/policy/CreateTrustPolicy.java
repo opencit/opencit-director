@@ -154,7 +154,6 @@ public class CreateTrustPolicy {
 			throws IOException {
 		Whitelist whitelist = trustPolicy.getWhitelist();
 		List<Measurement> measurements = whitelist.getMeasurements();
-		String imageId = trustPolicy.getImage().getImageId();
 		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil(imageId);
 		//List<String> invalidFiles = new ArrayList<>();
 		// Initialize cumulative hash

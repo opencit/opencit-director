@@ -348,7 +348,36 @@ public class DbServiceTest {
 	}
 
 	public void testPolicyDao() throws DbException {
-		try {
+		try{
+		
+			
+		List<TrustPolicy> deleteTrustPoliciesList= new ArrayList<TrustPolicy>();
+		TrustPolicy trustPolicy1= new TrustPolicy(createdUserId, sevenDaysBackDate, createdUserId, sevenDaysBackDate, "trustPolicy1desc","<abc>TrustPolicy xml1 field</abc>","TrustPolicy1_"+sevenDaysBackDate, persistedImgAttributesList.get(0));
+		deleteTrustPoliciesList.add(trustPolicy1);
+		TrustPolicy trustPolicyCreated=dBServiceImpl.savePolicy(trustPolicy1);
+		Assert.assertTrue("Create operation fail", trustPolicyCreated.getId() != null);
+		String trustPolicyId = trustPolicyCreated.getId();
+		trustPolicyCreated.setDescription("Updated Description");
+		dBServiceImpl.updatePolicy(trustPolicyCreated);
+		TrustPolicy trustPolicyRetrieved = dBServiceImpl.fetchPolicyById(trustPolicyId);
+		System.out.println("Image Name::"+trustPolicyRetrieved.getImgAttributes().getImage_name());
+		System.out.println("trustPolicyRetrieved.getDescription()::"+trustPolicyRetrieved.getDescription());
+		Assert.assertTrue("Update operation fail",
+				(trustPolicyRetrieved.getDescription().equals("Updated Description")));
+		List<TrustPolicy> trustPoliciesList= new ArrayList<TrustPolicy>();
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, sevenDaysBackDate, createdUserId2, sevenDaysBackDate, "trustPolicy2desc","<abc>TrustPolicy xml2 field</abc>","TrustPolicy2_"+sevenDaysBackDate, persistedImgAttributesList.get(1)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId, threeDaysBackDate, createdUserId, threeDaysBackDate, "trustPolicy3desc","<abc>TrustPolicy xml3 field</abc>","TrustPolicy3_"+sevenDaysBackDate, persistedImgAttributesList.get(2)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, oneDaysBackDate, createdUserId2, oneDaysBackDate, "trustPolicy4desc","<abc>TrustPolicy xml4 field</abc>","TrustPolicy4_"+sevenDaysBackDate, persistedImgAttributesList.get(3)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, sevenDaysBackDate, createdUserId2, sevenDaysBackDate, "trustPolicy5desc","<abc>TrustPolicy xml5 field</abc>","TrustPolicy5_"+sevenDaysBackDate, persistedImgAttributesList.get(4)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId, threeDaysBackDate, createdUserId, threeDaysBackDate, "trustPolicy6desc","<abc>TrustPolicy xml6 field</abc>","TrustPolicy6_"+sevenDaysBackDate, persistedImgAttributesList.get(5)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, sevenDaysBackDate, createdUserId2, sevenDaysBackDate, "trustPolicy7desc","<abc>TrustPolicy xml7 field</abc>","TrustPolicy7_"+sevenDaysBackDate, persistedImgAttributesList.get(6)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, sevenDaysBackDate, createdUserId2, sevenDaysBackDate, "trustPolicy8desc","<abc>TrustPolicy xml8 field</abc>","TrustPolicy8_"+sevenDaysBackDate, persistedImgAttributesList.get(7)));
+		trustPoliciesList.add(new TrustPolicy(createdUserId2, sevenDaysBackDate, createdUserId2, sevenDaysBackDate, "trustPolicy9desc","<abc>TrustPolicy xml9 field</abc>","TrustPolicy9_"+sevenDaysBackDate, persistedImgAttributesList.get(8)));
+		
+		for (TrustPolicy trustPolicy : trustPoliciesList) {
+			
+			dBServiceImpl.savePolicy(trustPolicy);
+		}
 
 			List<TrustPolicy> deleteTrustPoliciesList = new ArrayList<TrustPolicy>();
 			TrustPolicy trustPolicy1 = new TrustPolicy(createdUserId,
@@ -416,8 +445,15 @@ public class DbServiceTest {
 
 			for (TrustPolicy trustPolicy : trustPoliciesList) {
 
-				dBServiceImpl.savePolicy(trustPolicy);
-			}
+		for (TrustPolicy tp : searchPolicyList) {
+			System.out.println("### trust policy::" + tp);
+			System.out.println("### searchPolicyList imageName::" + tp.getImgAttributes().getImage_name());
+		}
+		Assert.assertTrue(
+				"fetchPolicies(searchFilter, OrderBy) fail",
+				(searchPolicyList.size() == 6)
+						&& (searchPolicyList.get(0).getDescription()
+								.equalsIgnoreCase("trustPolicy4desc")));
 
 			TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
 			trustPolicyFilter.setCreated_by_user_id(createdUserId2);
@@ -543,7 +579,14 @@ public class DbServiceTest {
 					"TrustPolicyDraft9_" + sevenDaysBackDate,
 					persistedImgAttributesList.get(8)));
 
-			for (TrustPolicyDraft trustPolicyDraft : trustPoliciesDraftList) {
+		for (TrustPolicyDraft tpd : searchPolicyDraftList) {
+			System.out.println("### trust policy draft::" + tpd);
+			System.out.println("### searchPolicyDraftList imageName::" + tpd.getImgAttributes().getImage_name());
+		}
+		Assert.assertTrue(
+				"fetchPolicyDrafts(searchFilter, OrderBy) fail",
+				(searchPolicyDraftList.size() == 6)
+						);
 
 				dBServiceImpl.savePolicyDraft(trustPolicyDraft);
 			}
@@ -645,9 +688,14 @@ public class DbServiceTest {
 			ImageStoreUploadOrderBy imgOrder = new ImageStoreUploadOrderBy();
 			imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
 
-			imgOrder.setOrderBy(OrderByEnum.DESC);
-			List<ImageStoreUploadTransferObject> searcImgList = dBServiceImpl
-					.fetchImageUploads(imgUpFilter, imgOrder);
+		for (ImageStoreUploadTransferObject tpd : searcImgList) {
+			System.out.println("### ImageStoreUploadOrderBy::" + tpd);
+			System.out.println("### ImageStoreUploadOrderBy imageName::" + tpd.getImg().getImage_name());
+		}
+		Assert.assertTrue(
+				"fetchImageUploads(searchFilter, OrderBy) fail",
+				(searcImgList.size()!=0)
+						);
 
 			System.out
 					.println("#######################Search Trust policies############"

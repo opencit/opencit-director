@@ -38,7 +38,7 @@ public class DirectoryAndFileUtil {
 	public DirectoryAndFileUtil(String imageId) {
 		this.imageId = imageId;
 	}
-
+	
 	public String getImageId() {
 		return imageId;
 	}
@@ -180,6 +180,7 @@ public class DirectoryAndFileUtil {
 				+ fileMeasurement.getPath();
 		filePath = getSymlinkValue(filePath);
 		if (filePath == null || !new File(filePath).exists()){
+			log.info("File does not exist {}", filePath);
 			return null;
 		}
 		Digest digest = Digest.algorithm(measurementType).digest(

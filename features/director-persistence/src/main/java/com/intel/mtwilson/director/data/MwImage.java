@@ -9,8 +9,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Cacheable;
 
 @Entity
+@Cacheable(false)
 @Table(name = "MW_IMAGE")
 public class MwImage extends MwAuditable {
 
@@ -46,10 +48,10 @@ public class MwImage extends MwAuditable {
 	private MwTrustPolicyDraft trustPolicyDraft;
 
 	@Column(name = "STATUS")
-	public String status;
+	private String status;
 
 	@Column(name = "CONTENT_LENGTH")
-	public Long contentlength;
+	private Long  contentLength;
 	
 	@Column(name = "SENT")
 	public Long sent;
@@ -137,12 +139,12 @@ public class MwImage extends MwAuditable {
 		this.tblMwimageUploadCollection = tblMwimageUploadCollection;
 	}
 
-	public Long getContentlength() {
-		return contentlength;
+	public Long getContentLength() {
+		return contentLength;
 	}
 
-	public void setContentlength(Long contentlength) {
-		this.contentlength = contentlength;
+	public void setContentLength(Long contentlength) {
+		this.contentLength = contentlength;
 	}
 
 	public MwTrustPolicy getTrustPolicy() {

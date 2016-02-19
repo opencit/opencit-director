@@ -1,5 +1,10 @@
 package com.intel.director.api;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
+
 
 public class SshSettingRequest extends AuditFields {
 	String ip_address;
@@ -9,15 +14,15 @@ public class SshSettingRequest extends AuditFields {
 	String id;
 	String key;
 	String image_id;
-	String policy_name;
+	///String policy_name;
 
-	public String getPolicy_name() {
+	/*public String getPolicy_name() {
 		return policy_name;
 	}
 
 	public void setPolicy_name(String policy_name) {
 		this.policy_name = policy_name;
-	}
+	}*/
 
 	public SshSettingRequest() {
 
@@ -77,6 +82,26 @@ public class SshSettingRequest extends AuditFields {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public SshSettingResponse validate(String operation) {
+		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
+		SshSettingResponse sshResponse = new SshSettingResponse();
+		if (!ValidationUtil.isValidWithRegex(getIpAddress(),RegexPatterns.IPADDRESS)) {
+			sshResponse.setError("No Ip adress provided or ip adress in incorrect format");
+		} else if (!ValidationUtil.isValidWithRegex(getUsername(),NAME_REGEX)) {
+			sshResponse.setError("No username provided or username is not in correct format");
+		} else if (!ValidationUtil.isValidWithRegex(getPassword(),RegexPatterns.PASSWORD)) {
+			sshResponse.setError("No password provided or password is in incorrect format");
+		}
+
+		if ("update".equals(operation)) {
+			if (!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)) {
+				sshResponse.setError("No image id provided or image id is not in uuid format");
+			}
+		}
+
+		return sshResponse;
 	}
 
 }

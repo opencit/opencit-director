@@ -11,20 +11,22 @@ $(document)
         });
 
 function createTrustPolicy(imageid, imagename) {
-    currentFlow = "Create";
-    current_image_id = imageid;
-    current_image_name = imagename;
-    current_trust_policy_draft_id = '';
+	currentFlow = "Create";
+	current_image_id = imageid;
+	current_image_name = imagename;
+	current_trust_policy_draft_id='';
 
     goToCreatePolicyWizard();
 }
 
-function editTrustPolicy(imageid, imagename, trust_policy_draft_id) {
+function editTrustPolicy(imageid, imagename,trust_policy_draft_id) {
 
-    currentFlow = "Edit";
-    current_image_id = imageid;
-    current_image_name = imagename;
-    current_trust_policy_draft_id = trust_policy_draft_id;
+	currentFlow = "Edit";
+	current_image_id = imageid;
+	current_image_name = imagename;
+	current_trust_policy_draft_id=trust_policy_draft_id;
+
+	// ///current_trust_policy_id=trust_policy_id;
 
     goToEditPolicyWizard();
 }
@@ -101,20 +103,27 @@ function backToVmImagesPage() {
     };
     current_trust_policy_draft_id = '';
     if (current_image_id != "" && current_image_id != null) {
-
-        $.ajax({
-            type: "POST",
-            url: "/v1/rpc/unmount-image",
-            contentType: "application/json",
-            headers: {
-                'Accept': 'application/json'
-            },
-            data: JSON.stringify(mountimage),
-            success: function(data, status, xhr) {
-                current_image_id = "";
-                console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
-            }
-        });
+	var self = this;
+		var mountimage = { 
+		"id" : current_image_id
+	};
+	current_trust_policy_draft_id='';
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		
+		$.ajax({
+			type : "POST",
+			url : "/v1/rpc/unmount-image",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : JSON.stringify(mountimage),
+			success : function(data, status, xhr) {
+				current_image_id = "";
+				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+			}
+		});
 
     }
     $('body').removeClass("modal-open");
@@ -223,20 +232,18 @@ function downloadPolicy(imageid, trust_policy_id) {
 
     var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
 
+ 
 
-
-    $.ajax({
-        type: "POST",
-        url: "/v1/login/tokens",
-        accept: "application/json",
-        contentType: "application/json",
-        headers: {
-            'Accept': 'application/json'
-        },
-        data: token_request_json,
-        success: function(data, status, xhr) {
-            var authtoken = authtoken = data.data[0].token;
-            var url = "/v1/images/" + imageid + "/downloads/policy?Authorization=" + encodeURIComponent(authtoken);
+ $.ajax({
+            type: "POST",
+            url: "/v1/login/tokens",
+            accept: "application/json",
+            contentType: "application/json",
+            headers: {'Accept': 'application/json'},
+     		data: token_request_json,
+            success: function(data, status, xhr) {
+            	var authtoken= authtoken=data.data[0].token;
+            	var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
 
             window.location = url;
         },

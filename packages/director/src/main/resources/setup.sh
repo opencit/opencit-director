@@ -234,9 +234,8 @@ update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 #------------------ Glance properties
 
-
-update_property_in_file "glance.ip" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_IP"
-update_property_in_file "glance.port" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PORT"
+update_property_in_file "glance.api.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_API_ENDPOINT"
+update_property_in_file "glance.keystone.public.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_KEYSTONE_PUBLIC_ENDPOINT"
 update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
 update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
 update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
@@ -317,24 +316,21 @@ update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_
 # detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
 echo "Installing Java..."
 JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-java_detect
-if ! java_ready; then
-  # java not installed, check if we have the bundle
-  JAVA_INSTALL_REQ_BUNDLE=$(ls -1 jdk-*.tar.gz 2>/dev/null | head -n 1)
-  if [ -n "$JAVA_INSTALL_REQ_BUNDLE" ]; then
-    director_java_install
-    java_detect
+JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
+# check if java is readable to the non-root user
+if [ -z "$JAVA_HOME" ]; then
+  java_detect > /dev/null
+fi
+if [ -n "$JAVA_HOME" ]; then
+  if [ $(whoami) == "root" ]; then
+    JAVA_USER_READABLE=$(sudo -u $DIRECTOR_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
+  else
+    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
   fi
 fi
-if java_ready_report; then
-  echo "# $(date)" > $DIRECTOR_ENV/director-java
-  echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
-  echo "export JAVA_CMD=$java" >> $DIRECTOR_ENV/director-java
-else
-  echo_failure "Java $JAVA_REQUIRED_VERSION not found"
-  exit 1
+if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
+  JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
 fi
-
 mkdir -p $JAVA_HOME
 java_install_in_home $JAVA_PACKAGE
 echo "# $(date)" > $DIRECTOR_ENV/director-java
@@ -342,7 +338,7 @@ echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
 
-# libguestfs packages has a custom prompt about installing supermin which ignores the â€œ-yâ€ option we provide to apt-get. Following code will help to avoid that prompt 
+# libguestfs packages has a custom prompt about installing supermin which ignores the �-y� option we provide to apt-get. Following code will help to avoid that prompt 
 export DEBIAN_FRONTEND=noninteractive
 echo libguestfs-tools libguestfs/update-appliance boolean true | debconf-set-selections
 
@@ -535,7 +531,9 @@ disable_tcp_timestamps
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
-    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
+    touch $DIRECTOR_CONFIGURATION/.director_password
+    chown $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_CONFIGURATION/.director_password
+	director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
@@ -545,8 +543,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
  director config mtwilson.navbar.buttons director-html5,mtwilson-core-html5 >/dev/null
  director config mtwilson.navbar.hometab director-trust-policy >/dev/null
 
-  director config jetty.port ${JETTY_PORT:-80} >/dev/null
-  director config jetty.secure.port ${JETTY_SECURE_PORT:-443} >/dev/null
+  director config jetty.port $DIRECTOR_PORT_HTTP >/dev/null
+  director config jetty.secure.port $DIRECTOR_PORT_HTTPS >/dev/null
 
   director setup
 fi
@@ -608,6 +606,9 @@ for directory in $DIRECTOR_HOME $DIRECTOR_CONFIGURATION $DIRECTOR_JAVA $DIRECTOR
   chown -R $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $directory
 done
 
+director import-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
+director import-config --in=/opt/director/configuration/kms.properties --out=/opt/director/configuration/kms.properties
+director import-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
 # start the server, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"

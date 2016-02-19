@@ -15,14 +15,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang.StringUtils;
-
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
+import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageService;
@@ -50,7 +52,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * 
 	 * Input: pass the UUID of the image as path param
 	 * Output: {
@@ -92,7 +94,13 @@ public class TrustPolicies {
 	@GET
 	public Response getTrustPoliciesData(
 			@PathParam("trustPolicyId") String trustPolicyId) {
-		TrustPolicyResponse trustpolicyresponse = null;
+		TrustPolicyResponse trustpolicyresponse = new TrustPolicyResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			trustpolicyresponse.error = "Trust Policy Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(trustpolicyresponse).build();
+		}
+
 		try {
 			trustpolicyresponse = imageService
 					.getTrustPolicyMetaData(trustPolicyId);
@@ -109,50 +117,62 @@ public class TrustPolicies {
 	}
 
 	/**
+	 * This method is used to update the trust policy display name.
+	 * 
 	 * On the step 3/3 of the wizard for VM, when the user clicks on the "Upload
 	 * now" button, we accept the last moment changes in the name of the policy
-	 * and update it. This method just validates that the name given by the user
-	 * is unique
+	 * and update it. 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * 
-	 * https://server.com:8443/v1/trust-policies/7897-232321-432423-4322
-	 * Input: UUID of trust policy in path {"display_name":"Name of policy"}
+	 * https://{IP/HOST_NAME}/v1/trust-policies/d80ce469-39fd-4940-bb67-c0573551ce4c2
+	 * Input: UUID of trust policy in path {"display_name":"policy_renamed"}
 	 * Output: 
 	 * In case of success : 
-	 * { "status" : "success"}
+	 * {"status":"success","deleted":false}
 	 * 
 	 * In case of error such as policy name already exists:
-	 * { "error" : "Policy Name Already Exists" }
+	 * { "error" : "Policy Name Already Exists","deleted":false }
 	 * 
 	 * </pre>
-	 * @param createPolicyRequest
+	 * @param updateTrustPolicyRequest
 	 * @return GenericResponse
 	 */
-	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+|}")
+	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public GenericResponse updateTrustPolicy(
+	public Response updateTrustPolicy(
 			@PathParam("trustPolicyId") String trustPolicyId,
 			UpdateTrustPolicyRequest updateTrustPolicyRequest) {
 		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		if (StringUtils.isBlank(trustPolicyId)) {
-			return monitorStatus;
+		String errors = updateTrustPolicyRequest.validate(trustPolicyId);
+		if (StringUtils.isNotBlank(errors)) {
+			monitorStatus.error = errors;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(monitorStatus).build();
 		}
+		
+
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
+		if(trustPolicyByTrustId == null){
+			monitorStatus.error = "Trust Policy does not exist for id: "+trustPolicyId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(monitorStatus).build();
+		}
+		
 		try {
 			imageService.updateTrustPolicy(updateTrustPolicyRequest,
 					trustPolicyId);
+			monitorStatus.status = Constants.SUCCESS;
 		} catch (DirectorException de) {
 			log.error("Error updating policy name for : " + trustPolicyId, de);
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = de.getMessage();
+			//monitorStatus.status = Constants.ERROR;
+			//monitorStatus.details = de.getMessage();
 			monitorStatus.setError(de.getMessage());
 		}
-		return monitorStatus;
+		return Response.ok(monitorStatus).build();
 	}
 
 	/**
@@ -165,7 +185,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/rpc/apply-trust-policy-template
+	 * https://{IP/HOST_NAME}/v1/rpc/apply-trust-policy-template
 	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
 	 *  
 	 * Output: In case of success :: {"trust_policy":"<policy xml>"}
@@ -178,16 +198,35 @@ public class TrustPolicies {
 	 * 
 	 * </pre>
 	 * 
-	 * @param image_id
-	 *            the image for which the template needs to be applied
 	 * @return Response that sends back the status of the function.
 	 */
 	@Path("rpc/apply-trust-policy-template/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public ImportPolicyTemplateResponse importPolicyTemplate(GenericRequest req) {
+	public Response importPolicyTemplate(GenericRequest req) {
 		ImportPolicyTemplateResponse importPolicyTemplateResponse = new ImportPolicyTemplateResponse();
+		if(!ValidationUtil.isValidWithRegex(req.getImage_id(),RegexPatterns.UUID)){
+			importPolicyTemplateResponse.error = "Image id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}
+		
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(req.getImage_id());
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			importPolicyTemplateResponse.error = "No image with id : "+req.getImage_id()+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}else if (!imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)){
+			importPolicyTemplateResponse.error = "Templates can only be applied to non virtualized servers.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(importPolicyTemplateResponse).build();
+		}
 		try {
 			importPolicyTemplateResponse = imageService
 					.importPolicyTemplate(req.getImage_id());
@@ -196,10 +235,10 @@ public class TrustPolicies {
 			log.error("Error in importPolicyTemplate ", e);
 			// /importPolicyTemplateResponse.setStatus(Constants.ERROR);
 			importPolicyTemplateResponse.setError(e.getMessage());
-			return importPolicyTemplateResponse;
+			return Response.ok(importPolicyTemplateResponse).build();
 		}
 
-		return importPolicyTemplateResponse;
+		return Response.ok(importPolicyTemplateResponse).build();
 	}
 
 	/**
@@ -208,7 +247,7 @@ public class TrustPolicies {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
-	 * https://server.com:8443/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
+	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: UUID of the policy to be deleted
 	 * Output: In case of successful deletion:
 	 * {"deleted":true}
@@ -224,9 +263,22 @@ public class TrustPolicies {
 	@Path("trust-policy/{trustPolicyId: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	public GenericResponse deletePolicy(
+	public Response deletePolicy(
 			@PathParam("trustPolicyId") String trustPolicyId) {
 		GenericResponse response = new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			response.error = "Trust Policy Id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
+		if(trustPolicyByTrustId == null){
+			response.error = "Trust Policy does not exist for id: "+trustPolicyId;
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		
 		try {
 			imageService.deleteTrustPolicy(trustPolicyId);
 			response.setDeleted(true);
@@ -236,7 +288,7 @@ public class TrustPolicies {
 			response.setError("Error in deleting trust policy : "
 					+ trustPolicyId);
 		}
-		return response;
+		return Response.ok(response).build();
 
 	}
 

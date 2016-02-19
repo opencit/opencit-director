@@ -7,12 +7,8 @@ package com.intel.director.common;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 
@@ -43,7 +40,7 @@ public class DirectorUtil {
 			String trustPolicyName, String tarLocation, String tarName)
 			throws IOException {
 
-		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir
+		String command = "tar -cf '" + tarLocation + tarName + "' -C " + imageDir
 				+ " " + imageName + " " + trustPolicyName;
 		// / String tarName = imageName + "-" + new
 		// SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
@@ -191,34 +188,29 @@ public class DirectorUtil {
 
 	public static Properties getPropertiesFile(String path) {
 		Properties prop = new Properties();
-		InputStream input = null;
+		File customFile = new File(Constants.configurationPath + path);
+		ConfigurationProvider provider;
 		try {
-			input = new FileInputStream(Constants.configurationPath + path);
-			File file = new File(Constants.configurationPath + path);
-			if (!file.exists()) {
-				file.createNewFile();
+			provider = ConfigurationFactory.createConfigurationProvider(customFile);
+			Configuration loadedConfiguration = provider.load();
+			Set<String> keys = loadedConfiguration.keys();
+			for(String key : keys){
+				prop.put(key, loadedConfiguration.get(key));
 			}
-			prop.load(input);
 		} catch (IOException e) {
-			// TODO Handle Error
+			// TODO Auto-generated catch block
 			log.error("Error while getting the file .....");
-		}
-		try {
-			if (input != null) {
-				input.close();
-			}
-		} catch (IOException e) {
-			// TODO Handle Error
-			log.error("Error while closing the stream at getPropertiesFile() .....");
 		}
 		return prop;
 	}
 
-	public static String getProperties(String path) {
-		Properties prop = getPropertiesFile(path);
+	public static String getProperties(String path) throws IOException {
+		File customFile = new File(Constants.configurationPath + path);
+		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(customFile);
+		Configuration loadedConfiguration = provider.load();
 		Map<String, String> map = new HashMap<String, String>();
-		for (String key : prop.stringPropertyNames()) {
-			String value = prop.getProperty(key);
+		for (String key : loadedConfiguration.keys()) {
+			String value = loadedConfiguration.get(key);
 			map.put(key.replace(".", "_"), value);
 		}
 		JSONObject json = new JSONObject(map);
@@ -243,34 +235,40 @@ public class DirectorUtil {
 		return data;
 	}
 
-	public static void writeToFile(Map<String, Object> map, String fileName) {
-		Properties properties = new Properties();
+	public static void writeToFile(Map<String, Object> map, String fileName) throws IOException {
+		File customFile = new File(fileName);
+		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(customFile);
 		Set<String> set = map.keySet();
 		Iterator<String> itr = set.iterator();
-		OutputStream output = null;
+		Configuration loadedConfiguration = provider.load();
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
 			String value = (String) map.get(key);
-			properties.setProperty(key.replace('_', '.'), value);
+			loadedConfiguration.set(key.replace('_', '.'), value);
 		}
-		try {
-			output = new FileOutputStream(fileName);
-			properties.store(output, fileName);
-			
-		} catch (IOException e) {
-			// TODO Handle Error
-			log.error("Error while writing into the file in writeToFile().....");
-		}finally{
-			if(output != null){
-				try {
-					output.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error("Error closing stream", e);
-				}
+		provider.save(loadedConfiguration);
+	}
+
+	public static String getKeyIdFromUrl(String url) {
+		log.debug("URL :: " + url);
+		String[] split = url.split("/");
+		int index = 0;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("keys")) {
+				log.debug("Keys index :: " + i);
+				index = ++i;
+				break;
 			}
 		}
-		
+
+		log.debug("Index :: " + index);
+
+		if (index != 0) {
+			return split[index];
+		} else {
+			return null;
+		}
+
 	}
 
 	public static String getKeyIdFromUrl(String url) {

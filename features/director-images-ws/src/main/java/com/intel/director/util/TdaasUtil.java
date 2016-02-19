@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import com.intel.mtwilson.shiro.ShiroUtil;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -58,6 +59,7 @@ import com.intel.director.api.SshKey;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.SshSettingRequest;
+import com.intel.director.api.SshSettingResponse;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftRequest;
@@ -178,6 +180,9 @@ public class TdaasUtil {
 		Director director = new Director();
 		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
 				: DirectorUtil.getDirectorId());
+		if(ShiroUtil.subjectUsername() != null){
+			director.setCustomerId(ShiroUtil.subjectUsername());
+		}
 		Image image = new Image();
 		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
@@ -431,7 +436,7 @@ public class TdaasUtil {
 		sshSettingRequest.setEdited_by_user_id(sshSettingInfo
 				.getEdited_by_user_id());
 		sshSettingRequest.setEdited_date(sshSettingInfo.getEdited_date());
-		sshSettingRequest.setImage_id(sshSettingInfo.getImage_id().getId());
+		sshSettingRequest.setImage_id(sshSettingInfo.getImage().getId());
 		return sshSettingRequest;
 
 	}
@@ -458,11 +463,15 @@ public class TdaasUtil {
 		sshSettingInfo.setId(sshSettingRequest.getId());
 		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
 		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
-		sshSettingInfo.setName(sshSettingRequest.getName());
+		if (!StringUtils.isBlank(sshSettingRequest.getName())) {
+			sshSettingInfo.setName(sshSettingRequest.getName());
+		} else {
+			sshSettingInfo.setName(sshSettingRequest.getIpAddress());
+		}
 		sshSettingInfo
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
-		sshSettingInfo.setImage_id(toImage(sshSettingRequest.getImage_id(),
+		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
 				sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername()));
 		return sshSettingInfo;
@@ -780,10 +789,14 @@ public class TdaasUtil {
 
 	}
 
-	public static SshSettingRequest convertSshInfoToRequest(SshSettingInfo info) {
-		SshSettingRequest setting = new SshSettingRequest();
-		setting.setImage_id(info.getImage_id().getId());
-		return setting;
+	public static SshSettingResponse convertSshInfoToResponse(SshSettingInfo info) {
+		SshSettingResponse sshResponse = new SshSettingResponse();
+		sshResponse.setImage_id(info.getImage().getId());
+		sshResponse.setImage_name(info.getImage().getImage_name());
+		sshResponse.setIp_address(info.getIpAddress());
+		///sshResponse.setKey(info.getK);
+		sshResponse.setUsername(info.getUsername());
+		return sshResponse;
 	}
 
 	public SearchFilesInImageRequest mapUriParamsToSearchFilesInImageRequest(

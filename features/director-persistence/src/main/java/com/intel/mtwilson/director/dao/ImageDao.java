@@ -19,6 +19,7 @@ import com.intel.director.api.ui.SearchImageByPolicyCriteria;
 import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.mapper.Mapper;
 
 public class ImageDao {
@@ -277,7 +278,7 @@ public class ImageDao {
 			imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 			imgInfo.setCreated_date(mwImage.getCreatedDate());
 			imgInfo.setEdited_date(mwImage.getEditedDate());
-			imgInfo.setImage_size(mwImage.getContentlength());
+			imgInfo.setImage_size(mwImage.getContentLength());
 			imgInfo.setStatus(mwImage.getStatus());
 			imgInfo.setSent(mwImage.getSent());
 			if (mwImage.getTrustPolicy() != null) {

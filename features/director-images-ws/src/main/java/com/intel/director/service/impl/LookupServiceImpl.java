@@ -49,10 +49,14 @@ public class LookupServiceImpl implements LookupService {
     @Override
     public ListImageFormatsResponse getImageFormats() {
         ListImageFormatsResponse formatsResponse = new ListImageFormatsResponse();
-        ImageFormatsResponse imageFormatResponse = new ImageFormatsResponse();
-        imageFormatResponse.setName("qcow2");
-        imageFormatResponse.setDisplay_name("qcow2");
-        formatsResponse.image_formats.add(imageFormatResponse);
+        String[] formatArray = {"qcow2", "vhd","vmdk", "raw", "vdi"}; 
+        for(String formatName: formatArray){
+        	   ImageFormatsResponse imageFormatResponse = new ImageFormatsResponse();
+               imageFormatResponse.setName(formatName);
+               imageFormatResponse.setDisplay_name(formatName);
+               formatsResponse.image_formats.add(imageFormatResponse);
+        }
+     
         return formatsResponse;
     }
 

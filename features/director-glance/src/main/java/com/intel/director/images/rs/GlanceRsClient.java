@@ -45,12 +45,12 @@ public class GlanceRsClient {
 	public Client client;
 	public String authToken;
 
-	public GlanceRsClient(WebTarget webTarget, Client client, String glanceIp,
+	public GlanceRsClient(WebTarget webTarget, Client client, String glanceKeystonePublicEndpoint,
 			String tenanatName, String username, String password) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
 
-		createAuthToken(glanceIp, tenanatName, username, password);
+		createAuthToken(glanceKeystonePublicEndpoint, tenanatName, username, password);
 	}
 
 	public void uploadImage(File file, Map<String, String> imageProperties,
@@ -73,6 +73,7 @@ public class GlanceRsClient {
 			putRequest.setHeader("Content-Type", "application/octet-stream");
 			ist = new FileInputStream(file);
 
+			//log.info("Got input stream to file {}"+file.getAbsolutePath());
 			HttpEntity inputHttp = new InputStreamEntity(ist);
 			putRequest.setEntity(inputHttp);
 
@@ -91,13 +92,14 @@ public class GlanceRsClient {
 				sb.append(output);
 				// log.debug(output);
 			}
+			log.info("Response from glance : {}", sb.toString());
 			JSONObject obj = new JSONObject(sb.toString());
 			log.debug("obj::" + obj);
 
 		} catch (IOException e) {
 			throw e;
 		} finally {
-
+			
 			if (httpClient != null) {
 				httpClient.close();
 			}
@@ -130,7 +132,7 @@ public class GlanceRsClient {
 		imageStoreResponse.setId(glanceId);
 		imageStoreResponse.setImage_uri(response
 				.getHeaderString(Constants.GLANCE_HEADER_LOCATION));
-		imageStoreResponse.setSent(new Integer(response
+		imageStoreResponse.setSent(new Long(response
 				.getHeaderString(Constants.CONTENT_LENGTH)));
 		imageStoreResponse.setChecksum(response
 				.getHeaderString(Constants.GLANCE_HEADER_CHECKSUM));
@@ -144,8 +146,14 @@ public class GlanceRsClient {
 	public String uploadImageMetaData(Map<String, String> imageProperties)
 			throws IOException {
 		long start = new Date().getTime();
-
-		String uuid = (new UUID()).toString();
+		String uuid=null;
+		log.info("Inside glance upload image metadata glanceid:: "+imageProperties.get(Constants.GLANCE_ID) );
+		if (imageProperties.get(Constants.GLANCE_ID) != null) {
+			uuid = (String) imageProperties.get(Constants.GLANCE_ID);
+		}else{
+			log.info("Generating new uuid in Glance  uploadImageMetaData");
+			uuid=(new UUID()).toString();
+		}
 		Response response;
 		if (imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION) != null) {
 			response = webTarget
@@ -196,6 +204,7 @@ public class GlanceRsClient {
 			sb.append(output);
 			// log.debug(output);
 		}
+//log.info("Response form glance {}", sb.toString());
 		JSONObject obj = new JSONObject(sb.toString());
 		JSONObject image = obj.getJSONObject("image");
 		String id = image.getString("id");
@@ -205,7 +214,7 @@ public class GlanceRsClient {
 		return id;
 	}
 
-	private void createAuthToken(String glanceIP, String tenantName,
+	private void createAuthToken(String glanceKeystonePublicEndpoint, String tenantName,
 			String userName, String password) {
 		long start = new Date().getTime();
 		//TODO not used after being assigned
@@ -215,8 +224,8 @@ public class GlanceRsClient {
 
 		try {
 			httpClient = new DefaultHttpClient();
-			HttpPost postRequest = new HttpPost("http://" + glanceIP
-					+ ":5000/v2.0/tokens");
+			HttpPost postRequest = new HttpPost( glanceKeystonePublicEndpoint
+					+ "/v2.0/tokens");
 
 			String body = "{\"auth\": {\"tenantName\": \"" + tenantName
 					+ "\", \"passwordCredentials\": {\"username\": \""
@@ -272,7 +281,7 @@ public class GlanceRsClient {
 		long end = new Date().getTime();
 		printTimeDiff("createAuthToken", start, end);
 		if(responseHasError){
-			throw new GlanceException("Unable to communicate with Glance at "+glanceIP);
+			throw new GlanceException("Unable to communicate with Glance at "+glanceKeystonePublicEndpoint);
 		}
 	}
 
@@ -283,6 +292,6 @@ public class GlanceRsClient {
 	}
 
 	private void printTimeDiff(String method, long start, long end) {
-		log.info(method + " took " + (end - start) + " ms");
+		log.debug(method + " took " + (end - start) + " ms");
 	}
 }

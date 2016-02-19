@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.configuration.BaseConfiguration;
 
@@ -22,6 +21,8 @@ import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.imagestore.ImageStoreManager;
 import com.intel.mtwilson.Folders;
+import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.mtwilson.configuration.ConfigurationProvider;
 
 /**
  * Superclass for all upload tasks
@@ -140,35 +141,49 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 	private boolean runUploadTask() {
 		boolean runFlag = false;
 		FileReader reader = null;
+
+		/*
+		 * TODO:- Fetch classname from database based on imagestorename
+		 * imageStoreManager=getImageStoreImpl(classname);
+		 * 
+		 * Fetch Glance parameters from property file
+		 */
+
+		org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
+		Configuration configuration = new CommonsConfiguration(apacheConfig);
+
+		File customFile = new File(Folders.configuration() + File.separator
+				+ "director.properties");
+		ConfigurationProvider provider;
+
 		try {
+			provider = ConfigurationFactory
+					.createConfigurationProvider(customFile);
+			com.intel.dcsg.cpg.configuration.Configuration loadedConfiguration = provider
+					.load();
 
-			/*
-			 * TODO:- Fetch classname from database based on imagestorename
-			 * imageStoreManager=getImageStoreImpl(classname);
-			 * 
-			 * Fetch Glance parameters from property file
-			 */
-
-			File configfile = new File(Folders.configuration() + File.separator
-					+ "director.properties");
-			org.apache.commons.configuration.Configuration apacheConfig = new BaseConfiguration();
-			Configuration configuration = new CommonsConfiguration(apacheConfig);
-			reader = new FileReader(configfile);
-
-			Properties prop = new Properties();
-
-			prop.load(reader);
-
-			configuration.set(Constants.GLANCE_IP,
-					prop.getProperty(Constants.GLANCE_IP));
-			configuration.set(Constants.GLANCE_PORT,
-					prop.getProperty(Constants.GLANCE_PORT));
+			configuration.set(Constants.GLANCE_API_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_API_ENDPOINT));
+			configuration.set(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT,
+					loadedConfiguration.get(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_USERNAME,
-					prop.getProperty(Constants.GLANCE_IMAGE_STORE_USERNAME));
+					loadedConfiguration
+							.get(Constants.GLANCE_IMAGE_STORE_USERNAME));
 			configuration.set(Constants.GLANCE_IMAGE_STORE_PASSWORD,
-					prop.getProperty(Constants.GLANCE_IMAGE_STORE_PASSWORD));
+					loadedConfiguration
+							.get(Constants.GLANCE_IMAGE_STORE_PASSWORD));
 			configuration.set(Constants.GLANCE_TENANT_NAME,
-					prop.getProperty(Constants.GLANCE_TENANT_NAME));
+					loadedConfiguration.get(Constants.GLANCE_TENANT_NAME));
+		} catch (IOException e1) {
+			log.error(
+					"Failed to fetch glance properties form director.properties",
+					e1);
+			updateImageActionState(Constants.ERROR,
+					"Failed to fetch glance properties form director.properties");
+			return false;
+		}
+
+		try {
 			ImageStoreManager imageStoreManager = new GlanceImageStoreManager(
 					configuration);
 
@@ -211,32 +226,42 @@ public abstract class UploadTask extends ImageActionAsyncTask {
 
 			imgAttrs = new ImageAttributes();
 			imgAttrs.setId(imageActionObject.getImage_id());
-			
+
 			updateImageActionContentSent(sent, size);
 		///	imageUploadTransferObject.setStatus(Constants.IN_PROGRESS);
 
 			
 			imageUploadTransferObject.setStatus(Constants.COMPLETE);
-			if (size==sent) {
+			if (size == sent) {
+				log.info("Saving to MW_IMAGE_UPLOAD. Size of image={}. Uploaded size={}", size, sent);
 				imageUploadTransferObject.setImg(imgAttrs);
 				imageUploadTransferObject.setImage_size(size);
 
 				imageUploadTransferObject.setSent(sent);
 				imageUploadTransferObject.setDate(new Date());
 				imageUploadTransferObject.setChecksum(imageStoreUploadResponse
-					.getChecksum());
-				imageUploadTransferObject.setImage_uri(imageStoreUploadResponse
-						.getImage_uri());
+						.getChecksum());
+				log.info("URI {}",imageStoreUploadResponse
+						.getImage_uri() );
+				imageUploadTransferObject.setImage_uri(glanceId);
+				log.info("Image upload date to be saved : {}", imageUploadTransferObject);
 				ImageStoreUploadTransferObject imgTransaferObject = persistService
 						.saveImageUpload(imageUploadTransferObject);
-				///uploadid = imgTransaferObject.getId();
+				// /uploadid = imgTransaferObject.getId();
 				// /firstTime = false;
-			} 
+			} /*
+			 * else {
+			 * 
+			 * imageUploadTransferObject.setId(uploadid);
+			 * persistService.updateImageUpload(imageUploadTransferObject); }
+			 */
 
 			updateImageActionState(Constants.COMPLETE, Constants.COMPLETE);
 			runFlag = true;
 		} catch (Exception e) {
-			log.error("Error in uploading artifact to Glance for image action :"+imageActionObject.getImage_id(), e);
+			log.error(
+					"Error in uploading artifact to Glance for image action :"
+							+ imageActionObject.getImage_id(), e);
 			updateImageActionState(Constants.ERROR, e.getMessage());
 		} finally {
 			try {

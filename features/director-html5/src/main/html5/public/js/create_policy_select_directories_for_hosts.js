@@ -1,4 +1,4 @@
-var endpoint = "/v1/images/";
+var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 
@@ -9,16 +9,14 @@ function SelectDirectoriesMetaData(data) {
 
 
 function SelectDirectoriesViewModel() {
+	var self = this;
+
+
+function SelectDirectoriesViewModel() {
     var self = this;
-
-    self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
-
-    self.selectDirectoriesSubmit = function(loginFormElement) {
-        clearInterval(refreshIntervalId);
-        nextButtonClicked = true;
-        editPolicyDraft();
-    }
-
+		clearInterval(refreshIntervalId );
+		nextButtonClicked = true;
+		editPolicyDraft();
 };
 
 function ApplyRegexMetaData(data) {
@@ -36,10 +34,23 @@ function ApplyRegExViewModel() {
     var self = this;
 
     self.applyRegexMetaData = new ApplyRegexMetaData({});
-    self.resetRegEx = function(event) {
-        var sel_dir = $("#sel_dir").val();
-        var node = $("input[name='directory_" + sel_dir + "']");
+    self.resetRegEx = function(event) { 
+		var sel_dir = $("#sel_dir").val();
+		var node = $("input[name='directory_" + sel_dir + "']");
+		
 
+		var config = {
+			root : '/',
+			dir : sel_dir,
+			script : '/v1/images/' + current_image_id + '/search',
+			expandSpeed : 1000,
+			collapseSpeed : 1000,
+			multiFolder : true,
+			loadMessage : "Loading...",
+			init : false,
+			filesForPolicy : false,
+			reset_regex : true
+		};
 
         var config = {
             root: '/',
@@ -54,37 +65,54 @@ function ApplyRegExViewModel() {
             reset_regex: true
         };
 
-        var len = node.parent().children().length;
-        var counter = 0;
-        node.parent().children().each(function() {
-            if (counter++ > 2) {
-                $(this).remove();
-            }
-        });
+		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
+				'selected');
 
-        node.parent().removeClass('collapsed').addClass('expanded').removeClass(
-            'selected');
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-unlock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
-        $("i[id='toggle_" + sel_dir + "']").attr("class", "fa fa-unlock");
-        $("i[id='toggle_" + sel_dir + "']").attr("style", "color: blue; font-size : 1.6em");
+		node.attr('checked', false);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
+		});
+		
+		node.removeAttr("rootregexdir");
+		node.removeAttr("include");
+		node.removeAttr("exclude");
+		node.removeAttr("recursive");
 
-        node.attr('checked', false);
-        (node.parent()).fileTree(config, function(file, checkedStatus,
-            rootRegexDir) {
-            editPatch(file, checkedStatus, rootRegexDir);
-        });
-
-        node.removeAttr("rootregexdir");
-        node.removeAttr("include");
-        node.removeAttr("exclude");
-        node.removeAttr("recursive");
-
-        closeRegexPanel();
+		closeRegexPanel();
     }
-    self.applyRegEx = function(loginFormElement) {
-        var include = loginFormElement.create_policy_regex_include.value;
-        var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
-        var exclude = loginFormElement.create_policy_regex_exclude.value;
+	self.applyRegEx = function(loginFormElement) {
+		var include = loginFormElement.create_policy_regex_include.value;
+		var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
+		var exclude = loginFormElement.create_policy_regex_exclude.value;
+		
+	
+		if((include == "" || include == null || include ==  undefined) && (exclude == "" || exclude == null || exclude ==  undefined))
+		{
+			$("#regex_error_bm_live").html("<font color='red'>Provide atleast one filter</font>");
+			return;
+		}
+		$("#regex_error_bm_live").html("");
+		var sel_dir = loginFormElement.sel_dir.value;
+		var node = $("input[name='directory_" + sel_dir + "']");
+		var config = {
+			root : '/',
+			dir : sel_dir,
+			script : '/v1/images/' + current_image_id + '/search',
+			expandSpeed : 1000,
+			collapseSpeed : 1000,
+			multiFolder : true,
+			loadMessage : "Loading...",
+			init : false,
+			filesForPolicy : false,
+			recursive : true,
+			include : include,
+			include_recursive : includeRecursive,
+			exclude : exclude
+		};
 
 
         if ((include == "" || include == null || include == undefined) && (exclude == "" || exclude == null || exclude == undefined)) {
@@ -110,16 +138,24 @@ function ApplyRegExViewModel() {
             exclude: exclude
         };
 
-        var len = node.parent().children().length;
-        var counter = 0;
-        node.parent().children().each(function() {
-            if (counter++ > 2) {
-                $(this).remove();
-            }
-        });
+		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
+		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
 
-        node.parent().removeClass('collapsed').addClass('expanded').addClass(
-            'selected');
+		node.attr('checked', true);
+		(node.parent()).fileTree(config, function(file, checkedStatus,
+				rootRegexDir) {
+			editPatch(file, checkedStatus, rootRegexDir);
+		});
+		
+		node.attr("rootregexdir",sel_dir);
+		node.attr("include", include);
+		node.attr("exclude", exclude);
+		node.attr("recursive", ""+includeRecursive+"");
+
+		
+		closeRegexPanel();
+
+	}
 
         $("i[id='toggle_" + sel_dir + "']").attr("class", "fa fa-lock");
         $("i[id='toggle_" + sel_dir + "']").attr("style", "color: blue; font-size : 1.6em");
@@ -143,76 +179,76 @@ function ApplyRegExViewModel() {
 };
 
 function toggleState(str) {
-    var id = str.id;
-    var n = id.indexOf("_");
-    var path = id.substring(n + 1);
+	var id = str.id;
+	var n = id.indexOf("_");
+	var path = id.substring(n + 1);
+	
+	
+	var checkboxObj = $("input[name='directory_"+path + "']");
+	if(checkboxObj.attr("rootregexdir") == undefined || checkboxObj.attr("rootregexdir")=='undefined'){
+		console.log("checkboxObj.rootregexdir:"+checkboxObj.attr("rootregexdir"));
+		console.log("No regex");
+	}else{
+		path = checkboxObj.attr("rootregexdir") ; 
+		$('#create_policy_regex_includeRecursive').attr('checked', checkboxObj.attr("recursive")=="true");
+		var includeObj = $("input[id='create_policy_regex_include']");
+		var include = checkboxObj.attr("include");
+		includeObj.attr("value",include);		
+		
+		var excludeObj = $("input[id='create_policy_regex_exclude']");
+		var exclude = checkboxObj.attr("exclude");
+		excludeObj.attr("value",exclude);
+	}
 
-
-    var checkboxObj = $("input[name='directory_" + path + "']");
-    if (checkboxObj.attr("rootregexdir") == undefined || checkboxObj.attr("rootregexdir") == 'undefined') {
-        console.log("checkboxObj.rootregexdir:" + checkboxObj.attr("rootregexdir"));
-        console.log("No regex");
-    } else {
-        path = checkboxObj.attr("rootregexdir");
-        $('#create_policy_regex_includeRecursive').attr('checked', checkboxObj.attr("recursive") == "true");
-        var includeObj = $("input[id='create_policy_regex_include']");
-        var include = checkboxObj.attr("include");
-        includeObj.attr("value", include);
-
-        var excludeObj = $("input[id='create_policy_regex_exclude']");
-        var exclude = checkboxObj.attr("exclude");
-        excludeObj.attr("value", exclude);
-    }
-
-
-
-    var oldSelDir = "";
-    if ($('#regexPanel').hasClass('open')) {
-        oldSelDir = $('#sel_dir').val();
-    }
-    $("#regex_error_bm_live").html("");
-    $('#dir_path').val(path);
-    $('#folderPathDiv').text(id.substring(n + 1));
-    $('#sel_dir').val(path);
-    $('input[name=asset_tag_policy]').val(path);
-    if ($('#regexPanel').hasClass('open')) {
-        // reset values
-        // check if it is open already, and user has clicked lock/unlock icon
-        // for a different dir
-        // close the current panel and open new
-        if (path == oldSelDir) {
-            closeRegexPanel();
-        }
-    } else {
-        openRegexPanel();
-    }
-    document.forms["form-horizontal"].reset();
+	
+	
+	var oldSelDir = "";
+	if ($('#regexPanel').hasClass('open')) {
+		oldSelDir = $('#sel_dir').val();
+	}
+	$("#regex_error_bm_live").html("");
+	$('#dir_path').val(path);
+	$('#folderPathDiv').text(id.substring(n + 1));
+	$('#sel_dir').val(path);
+	$('input[name=asset_tag_policy]').val(path);
+	if ($('#regexPanel').hasClass('open')) {		
+		// reset values
+		// check if it is open already, and user has clicked lock/unlock icon
+		// for a different dir
+		// close the current panel and open new
+		if(path == oldSelDir){
+			closeRegexPanel();		
+		}
+	} else {
+		openRegexPanel();
+	}
+	document.forms["form-horizontal"].reset();
 }
 
-function openRegexPanel() {
-    $('#regexPanel').addClass('col-md-4');
-    $('#regexPanel').addClass('open');
-    $('#regexPanel').removeClass('hidden');
-    $('#directoryTree').removeClass('col-md-12');
-    $('#directoryTree').addClass('col-md-8');
+function openRegexPanel(){
+	$('#regexPanel').addClass('col-md-4');
+	$('#regexPanel').addClass('open');
+	$('#regexPanel').removeClass('hidden');
+	$('#directoryTree').removeClass('col-md-12');
+	$('#directoryTree').addClass('col-md-8');
 }
 
-function closeRegexPanel() {
-    $('#regexPanel').removeClass('col-md-4');
-    $('#regexPanel').removeClass('open');
-    $('#regexPanel').addClass('hidden');
-    $('#directoryTree').addClass('col-md-12');
-    $('#directoryTree').removeClass('col-md-8');
+function closeRegexPanel(){
+	$('#regexPanel').removeClass('col-md-4');
+	$('#regexPanel').removeClass('open');
+	$('#regexPanel').addClass('hidden');
+	$('#directoryTree').addClass('col-md-12');
+	$('#directoryTree').removeClass('col-md-8');
 
-    // reset values et while opening toggle
-    $('#dir_path').val("");
-    $('#folderPathDiv').text("");
-    $('#sel_dir').val("");
+	// reset values et while opening toggle
+	$('#dir_path').val("");
+	$('#folderPathDiv').text("");
+	$('#sel_dir').val("");
 
-
-    $("input[id='create_policy_regex_include']").attr("value", "");
-    $("input[id='create_policy_regex_exclude']").attr("value", "");
-    $("input[id='create_policy_regex_includeRecursive']").attr("checked", false);
+	
+	$("input[id='create_policy_regex_include']").attr("value","");
+	$("input[id='create_policy_regex_exclude']").attr("value","");
+	$("input[id='create_policy_regex_includeRecursive']").attr("checked",false);
 
 }
 
@@ -225,38 +261,54 @@ var nextButtonClicked = false;
 
 
 var refreshIntervalId = setInterval(function() {
-    var d = new Date();
-    var n = d.getTime();
-    console.log("TImer - EDIT -- " + n);
-    editPolicyDraft();
+	var d = new Date();
+	var n = d.getTime();
+	console.log("TImer - EDIT -- "+n);
+	editPolicyDraft();
 }, 10000);
 
 function editPatchWithDataFromServer(patch) {
-    var cnt = 0;
-    for (cnt in patch) {
-        var addRemovePatch = patch[cnt];
-        if (jQuery.inArray(addRemovePatch, patches) == -1) {
-            patches.push(addRemovePatch);
-        }
-    }
+	var cnt = 0;
+	for (cnt in patch) {
+		var addRemovePatch = patch[cnt];
+		if (jQuery.inArray(addRemovePatch, patches) == -1) {
+			patches.push(addRemovePatch);
+		}
+	}
 
     editPolicyDraft();
 
 }
 var editPolicyDraft = function() {
-    if (canPushPatch == false) {
-        return;
-    } else {
-        canPushPatch = false;
-    }
+	if(canPushPatch == false){
+		return;
+	}else{
+		canPushPatch = false;
+	}
 
-    if (patches.length == 0 && temp_patches.length == 0) {
-        canPushPatch = true;
-        if (nextButtonClicked) {
-            createPolicy();
-        }
-        return;
-    }
+	if (patches.length == 0 && temp_patches.length == 0) {
+		canPushPatch = true;
+		if(nextButtonClicked){
+			createPolicy();
+		}
+		return;
+	}
+	
+	for (i = 0; i < temp_patches.length; i++) {
+		patches.push(temp_patches[i]);		
+	}
+	if(temp_patches.length > 0){
+		temp_patches.length = 0;		
+	}
+		
+
+	var patchBegin = "<patch>";
+	var patchEnd = "</patch>";
+	var patchesStr = "";
+	for (i = 0; i < patches.length; i++) {
+		var addRemoveXml = patches[i];
+		patchesStr = patchesStr.concat(addRemoveXml);
+	}
 
     for (i = 0; i < temp_patches.length; i++) {
         patches.push(temp_patches[i]);
@@ -266,56 +318,64 @@ var editPolicyDraft = function() {
     }
 
 
-    var patchBegin = "<patch>";
-    var patchEnd = "</patch>";
-    var patchesStr = "";
-    for (i = 0; i < patches.length; i++) {
-        var addRemoveXml = patches[i];
-        patchesStr = patchesStr.concat(addRemoveXml);
-    }
-
-    var finalPatch = patchBegin.concat(patchesStr, patchEnd);
-
-    var formData = JSON.stringify({
-        patch: finalPatch
-    });
-
-    $.ajax({
-        type: "POST",
-        url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
-        data: formData,
-        contentType: "application/json",
-        success: function(data, status) {
-            canPushPatch = true;
-            patches.length = 0;
-            // Show message in div
-            var $messageDiv = $('#saveMessage'); // get the reference of the
-            // div
-            $messageDiv.show().html('Draft saved'); // show and set the message
-            setTimeout(function() {
-                $messageDiv.hide().html('');
-            }, 3000); // 3 seconds later, hide
-            // and clear the message
-            console.log("success after edit draft");
-            createPolicy();
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            canPushPatch = true;
-            temp_patches.length = 0;
-            var $messageDiv = $('#saveMessage'); // get the reference of the
-            // div
-            $messageDiv.show().html('Error saving draft'); // show and set the
-            // message
-            setTimeout(function() {
-                $messageDiv.hide().html('');
-            }, 3000); // 3 seconds later, hide
-            createPolicy();
-        }
-    });
+	$.ajax({
+		type : "POST",
+		url : "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
+		data : formData,
+		contentType : "application/json",
+		success : function(data, status) {
+			canPushPatch = true;
+			patches.length = 0;
+			// Show message in div
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
+			$messageDiv.show().html('Draft saved'); // show and set the message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
+			// and clear the message
+			console.log("success after edit draft");
+			createPolicy();
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			canPushPatch = true;
+			temp_patches.length=0;
+			var $messageDiv = $('#saveMessage'); // get the reference of the
+			// div
+			$messageDiv.show().html('Error saving draft'); // show and set the
+															// message
+			setTimeout(function() {
+				$messageDiv.hide().html('');
+			}, 3000); // 3 seconds later, hide
+			createPolicy();
+		}
+	});
 }
 
 $(document)
-    .ready(
+		.ready(
+				
+				function() {
+					patches.length = 0;
+					if (pageInitialized)
+						return;
+					$("#dirNextButton").prop('disabled', true);
+
+
+					$('#jstree2').fileTree(
+							{
+								root : '/',
+								dir : '/',
+								script : '/v1/images/'
+										+ current_image_id + '/search',
+								expandSpeed : 1000,
+								collapseSpeed : 1000,
+								multiFolder : true,
+								init : true,
+								loadMessage : "Loading..."
+							}, function(file, checkedStatus, rootRegexDir) {
+								editPatch(file, checkedStatus, rootRegexDir);
+							});
 
         function() {
             patches.length = 0;
@@ -349,10 +409,17 @@ $(document)
 /* Patches processing */
 
 function editPatch(file, checkedStatus, rootRegexDir) {
-    var whichPatchToUse = patches;
-    if (canPushPatch == false) {
-        whichPatchToUse = temp_patches;
-    }
+	var whichPatchToUse = patches;
+	if(canPushPatch == false){
+		whichPatchToUse = temp_patches;
+	}
+
+	var addRemoveXml;
+	var node = $("input[name='" + file + "']");
+	var parent = node.parent();
+	var addPath = "'//*[local-name()=\"Whitelist\"]'";
+	var removePath = "'//*[local-name()=\"Whitelist\"]";
+	var pos = "prepend";
 
     var addRemoveXml;
     var node = $("input[name='" + file + "']");
@@ -368,87 +435,91 @@ function editPatch(file, checkedStatus, rootRegexDir) {
         addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\"" + rootRegexDir + "\"]'";
     }
 
-    if (checkedStatus == true) {
-
-        addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath + "><File Path=\"" + file + "\"/></add>";
-    } else {
-        addRemoveXml = "<remove sel=" + removePath + "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
-    }
-    whichPatchToUse.push(addRemoveXml);
+		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
+				+ "><File Path=\"" + file + "\"/></add>";
+	} else {
+		addRemoveXml = "<remove sel=" + removePath
+				+ "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
+	}
+	whichPatchToUse.push(addRemoveXml);
 }
 
-function backToBMLiveFirstPage() {
-    var mountimage = {
-        "id": current_image_id
-    }
-    if (current_image_id != "" && current_image_id != null) {
-        $.ajax({
-            type: "POST",
-            url: "/v1/rpc/unmount-image",
-            contentType: "application/json",
-            headers: {
-                'Accept': 'application/json'
-            },
-            data: JSON.stringify(mountimage),
-            success: function(data, status, xhr) {
-                backButtonLiveBM();
-            }
-        });
-    }
+function backToBMLiveFirstPage()
+{
+					var mountimage = {
+						"id" : current_image_id
+					}
+	if(current_image_id != "" && current_image_id !=null)
+	{
+		$.ajax({
+			type : "POST",
+			url : "/v1/rpc/unmount-image",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			data : JSON.stringify(mountimage),
+			success : function(data, status, xhr) {
+				backButtonLiveBM();
+			}
+		});
+	}
 }
 
-function createPolicy() {
-    if (nextButtonClicked == false) {
-        return;
-    } else {
-        nextButtonClicked = false;
-        patches.length = 0;
-    }
-    showLoading();
-    var createTrustPolicyMetaData = {
-        "trust_policy_draft_id": current_trust_policy_draft_id
-    }
-    $.ajax({
-        type: "POST",
-        url: "/v1/rpc/finalize-trust-policy-draft",
-        contentType: "application/json",
-        headers: {
-            'Accept': 'application/json'
-        },
-        dataType: "json",
-        data: JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
-        success: function(data) {
-            var mountimage = {
-                "id": current_image_id
-            }
-            var createResponse = data.error;
-            current_image_action_id = "";
-            $.ajax({
-                type: "POST",
-                url: "/v1/rpc/unmount-image",
-                contentType: "application/json",
-                headers: {
-                    'Accept': 'application/json'
-                },
-                data: JSON.stringify(mountimage),
-                success: function(data, status, xhr) {
-                    hideLoading();
-                    console.log("Unmount successfully")
+function createPolicy(){
+	if(nextButtonClicked == false){
+		return;
+	}else{
+		nextButtonClicked = false;
+		patches.length = 0;	
+	}
+	showLoading();
+		var createTrustPolicyMetaData = {
+			"trust_policy_draft_id" : current_trust_policy_draft_id,
+			"image_id" : current_image_id
+		}
+		$.ajax({
+			type : "POST",
+			url : "/v1/rpc/finalize-trust-policy-draft",
+			contentType : "application/json",
+			headers : {
+				'Accept' : 'application/json'
+			},
+			dataType : "json",
+			data : JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
+			success : function(data) {
+				var mountimage = {
+					"id" : current_image_id
+				}
+				var createResponse = data.error;
+				current_image_action_id = "";
+				$.ajax({
+					type : "POST",
+					url : "/v1/rpc/unmount-image",
+					contentType : "application/json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					data : JSON.stringify(mountimage),
+					success : function(data, status, xhr) {
+						hideLoading();
+						console.log("Unmount successfully")
 
-                    if (createResponse) {
-                        $("#error_modal_bm_live_2").modal({
-                            backdrop: "static"
-                        });
-                        $('body').removeClass("modal-open");
-                    } else {
-                        nextButtonLiveBM();
-                    }
+						if(createResponse)
+						{
+							$("#error_modal_bm_live_2").modal({backdrop: "static"});
+								$('body').removeClass("modal-open");
+						}else{
+							nextButtonLiveBM();	
+						}
 
-                }
-            });
-
-        }
-    });
+					}
+				});
+				
+			}
+		});
 
 
 }
+
+

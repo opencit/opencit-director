@@ -182,18 +182,21 @@ return;
 
 	$.ajax({
 		type : "PUT",
-		url : "/v1/setting/updatehost",
+		url : "/v1/images/host",
 		contentType : "application/json",
 		headers : {
 			'Accept' : 'application/json'
 		},
 		data : JSON.stringify(data), 
 		success : function (data, status, xhr) {
-			if (data.status == "Error") {
-				$("#editBMLivePolicyNext").prop('disabled', false);
-				show_error_in_editbmlivemodal(data.details);				
-				return;
+			
+			if (data.error) {
+						$("#editBMLivePolicyNext").prop('disabled', false);
+						show_error_in_editbmlivemodal(data.error);				
+						return;
 			}
+			
+		
 			
 			self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
 			self.editBMLiveMetaData.isEncrypted = false;
@@ -230,8 +233,8 @@ return;
 						success : function (data, status, xhr) {
 							$("#editBMLivePolicyNext").prop('disabled', false);
 
-							if (data.error) {								
-								show_error_in_editbmlivemodal(data.error);
+							if (data.status == "Error") {								
+								show_error_in_editbmlivemodal(data.details);
 
 								$.ajax({
 									type : "POST",

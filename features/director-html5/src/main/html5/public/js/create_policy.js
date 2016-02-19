@@ -81,6 +81,21 @@ function CreateImageViewModel() {
 						nextButton();
 					}
 				});
+			},
+			error:function(data, status, xhr) {
+					console.log(data);
+					$('#for_mount').hide();
+					$('#default').show();
+					$('#error_modal_body_vm_1').text("");
+					var obj = jQuery.parseJSON( data.responseText );
+
+					$('#error_modal_body_vm_1').text(obj.error);
+					$("#error_modal_vm_1").modal({
+						backdrop : "static"
+					});
+					$('body').removeClass("modal-open");
+					$("#createVMPolicyNext").prop('disabled', false);
+					return;
 			}
 		});
 

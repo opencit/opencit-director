@@ -253,7 +253,7 @@ public class Mapper {
 	public MwImage toData(ImageAttributes imgAttributes) {
 		MwImage mwImage = new MwImage();
 		mwImage.setImageDeploymentType(imgAttributes.getImage_deployments());
-		mwImage.setContentlength(imgAttributes.getImage_size());
+		mwImage.setContentLength(imgAttributes.getImage_size());
 		mwImage.setImageFormat(imgAttributes.getImage_format());
 		mwImage.setLocation(imgAttributes.getLocation());
 		mwImage.setMountedByUserId(imgAttributes.getMounted_by_user_id());
@@ -297,7 +297,7 @@ public class Mapper {
 		imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 		imgInfo.setCreated_date(mwImage.getCreatedDate());
 		imgInfo.setEdited_date(mwImage.getEditedDate());
-		imgInfo.setImage_size(mwImage.getContentlength());
+		imgInfo.setImage_size(mwImage.getContentLength());
 		imgInfo.setStatus(mwImage.getStatus());
 		imgInfo.setSent(mwImage.getSent());
 		if(mwImage.getRepository() != null){
@@ -527,6 +527,9 @@ public class Mapper {
 	}
 
 	public ImageActionObject toTransferObject(MwImageAction mwImageAction) {
+		if(mwImageAction==null){
+			return null;
+		}
 		ImageActionObject imageActionObject = new ImageActionObject();
 		imageActionObject.setId(mwImageAction.getId());
 		imageActionObject.setImage_id(mwImageAction.getImage_id());
@@ -597,7 +600,7 @@ public class Mapper {
 		mwHost.setUsername(sshSetting.getUsername());
 		mwHost.setSshPassword(toData(sshSetting.getPassword()));
 		mwHost.setSshKey(toData(sshSetting.getSshKeyId()));
-		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
 		if (sshSetting.getCreated_date() != null) {
 			mwHost.setCreatedByUserId(sshSetting.getCreated_by_user_id());
@@ -623,7 +626,7 @@ public class Mapper {
 		sshSetting.setEdited_by_user_id(mwHost.getEditedByUserId());
 		sshSetting.setCreated_date(mwHost.getCreatedDate());
 		sshSetting.setEdited_date(mwHost.getEditedDate());
-		sshSetting.setImage_id(toTransferObject(mwHost.getImageId()));
+		sshSetting.setImage(toTransferObject(mwHost.getImageId()));
 		return sshSetting;
 	}
 
@@ -644,7 +647,7 @@ public class Mapper {
 		if (sshSetting.getEdited_date() != null) {
 			mwHost.setEditedByUserId(sshSetting.getEdited_by_user_id());
 		}
-		mwHost.setImageId(toData(sshSetting.getImage_id()));
+		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
 		mwHost.setCreatedDate(sqlDate);
 		mwHost.setEditedDate(sqlDate);
