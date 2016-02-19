@@ -2,7 +2,7 @@ var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 
-    this.imageid = current_image_id;
+	this.imageid = current_image_id;
 
 }
 
@@ -11,29 +11,31 @@ function SelectDirectoriesMetaData(data) {
 function SelectDirectoriesViewModel() {
 	var self = this;
 
+	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 
-function SelectDirectoriesViewModel() {
-    var self = this;
+	self.selectDirectoriesSubmit = function(loginFormElement) {
 		clearInterval(refreshIntervalId );
 		nextButtonClicked = true;
 		editPolicyDraft();
+	}
+
 };
 
 function ApplyRegexMetaData(data) {
-    this.sel_dir = ko.observable("");
-    this.dir_path = ko.observable();
-    this.create_policy_regex_exclude = ko.observable("");
-    this.create_policy_regex_include = ko.observable("");
-    this.create_policy_regex_includeRecursive = ko.observable("");
+	this.sel_dir = ko.observable("");
+	this.dir_path = ko.observable();
+	this.create_policy_regex_exclude = ko.observable("");
+	this.create_policy_regex_include = ko.observable("");
+	this.create_policy_regex_includeRecursive = ko.observable("");
 
-    this.selected_image_format = ko.observable();
+	this.selected_image_format = ko.observable();
 
 }
 
 function ApplyRegExViewModel() {
-    var self = this;
+	var self = this;
 
-    self.applyRegexMetaData = new ApplyRegexMetaData({});
+	self.applyRegexMetaData = new ApplyRegexMetaData({});
     self.resetRegEx = function(event) { 
 		var sel_dir = $("#sel_dir").val();
 		var node = $("input[name='directory_" + sel_dir + "']");
@@ -52,18 +54,13 @@ function ApplyRegExViewModel() {
 			reset_regex : true
 		};
 
-        var config = {
-            root: '/',
-            dir: sel_dir,
-            script: '/v1/images/' + current_image_id + '/search',
-            expandSpeed: 1000,
-            collapseSpeed: 1000,
-            multiFolder: true,
-            loadMessage: "Loading...",
-            init: false,
-            filesForPolicy: false,
-            reset_regex: true
-        };
+		var len = node.parent().children().length;
+		var counter = 0;
+		node.parent().children().each(function() {
+			if (counter++ > 2) {
+				$(this).remove();
+			}
+		});
 
 		node.parent().removeClass('collapsed').addClass('expanded').removeClass(
 				'selected');
@@ -114,29 +111,16 @@ function ApplyRegExViewModel() {
 			exclude : exclude
 		};
 
+		var len = node.parent().children().length;
+		var counter = 0;
+		node.parent().children().each(function() {
+			if (counter++ > 2) {
+				$(this).remove();
+			}
+		});
 
-        if ((include == "" || include == null || include == undefined) && (exclude == "" || exclude == null || exclude == undefined)) {
-            $("#regex_error_bm_live").html("<font color='red'>Provide atleast one filter</font>");
-            return;
-        }
-        $("#regex_error_bm_live").html("");
-        var sel_dir = loginFormElement.sel_dir.value;
-        var node = $("input[name='directory_" + sel_dir + "']");
-        var config = {
-            root: '/',
-            dir: sel_dir,
-            script: '/v1/images/' + current_image_id + '/search',
-            expandSpeed: 1000,
-            collapseSpeed: 1000,
-            multiFolder: true,
-            loadMessage: "Loading...",
-            init: false,
-            filesForPolicy: false,
-            recursive: true,
-            include: include,
-            include_recursive: includeRecursive,
-            exclude: exclude
-        };
+		node.parent().removeClass('collapsed').addClass('expanded').addClass(
+				'selected');
 
 		$("i[id='toggle_" + sel_dir + "']").attr("class","fa fa-lock");
 		$("i[id='toggle_" + sel_dir + "']").attr("style","color: blue; font-size : 1.6em");
@@ -156,25 +140,6 @@ function ApplyRegExViewModel() {
 		closeRegexPanel();
 
 	}
-
-        $("i[id='toggle_" + sel_dir + "']").attr("class", "fa fa-lock");
-        $("i[id='toggle_" + sel_dir + "']").attr("style", "color: blue; font-size : 1.6em");
-
-        node.attr('checked', true);
-        (node.parent()).fileTree(config, function(file, checkedStatus,
-            rootRegexDir) {
-            editPatch(file, checkedStatus, rootRegexDir);
-        });
-
-        node.attr("rootregexdir", sel_dir);
-        node.attr("include", include);
-        node.attr("exclude", exclude);
-        node.attr("recursive", "" + includeRecursive + "");
-
-
-        closeRegexPanel();
-
-    }
 
 };
 
@@ -276,7 +241,7 @@ function editPatchWithDataFromServer(patch) {
 		}
 	}
 
-    editPolicyDraft();
+	editPolicyDraft();
 
 }
 var editPolicyDraft = function() {
@@ -310,13 +275,11 @@ var editPolicyDraft = function() {
 		patchesStr = patchesStr.concat(addRemoveXml);
 	}
 
-    for (i = 0; i < temp_patches.length; i++) {
-        patches.push(temp_patches[i]);
-    }
-    if (temp_patches.length > 0) {
-        temp_patches.length = 0;
-    }
+	var finalPatch = patchBegin.concat(patchesStr, patchEnd);
 
+	var formData = JSON.stringify({
+		patch : finalPatch
+	});
 
 	$.ajax({
 		type : "POST",
@@ -377,34 +340,14 @@ $(document)
 								editPatch(file, checkedStatus, rootRegexDir);
 							});
 
-        function() {
-            patches.length = 0;
-            if (pageInitialized)
-                return;
-            $("#dirNextButton").prop('disabled', true);
+					mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
+					mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
 
+					ko.applyBindings(mainViewModel, document
+							.getElementById("select_directories_page"));
 
-            $('#jstree2').fileTree({
-                root: '/',
-                dir: '/',
-                script: '/v1/images/' + current_image_id + '/search',
-                expandSpeed: 1000,
-                collapseSpeed: 1000,
-                multiFolder: true,
-                init: true,
-                loadMessage: "Loading..."
-            }, function(file, checkedStatus, rootRegexDir) {
-                editPatch(file, checkedStatus, rootRegexDir);
-            });
-
-            mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
-            mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
-
-            ko.applyBindings(mainViewModel, document
-                .getElementById("select_directories_page"));
-
-            pageInitialized = true;
-        });
+					pageInitialized = true;
+				});
 
 /* Patches processing */
 
@@ -421,19 +364,15 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 	var removePath = "'//*[local-name()=\"Whitelist\"]";
 	var pos = "prepend";
 
-    var addRemoveXml;
-    var node = $("input[name='" + file + "']");
-    var parent = node.parent();
-    var addPath = "'//*[local-name()=\"Whitelist\"]'";
-    var removePath = "'//*[local-name()=\"Whitelist\"]";
-    var pos = "prepend";
+	if (rootRegexDir != "") {
+		if (checkedStatus == true) {
+			pos = "after";
+		}
+		addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+				+ rootRegexDir + "\"]'";
+	}
 
-    if (rootRegexDir != "") {
-        if (checkedStatus == true) {
-            pos = "after";
-        }
-        addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\"" + rootRegexDir + "\"]'";
-    }
+	if (checkedStatus == true) {
 
 		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
 				+ "><File Path=\"" + file + "\"/></add>";

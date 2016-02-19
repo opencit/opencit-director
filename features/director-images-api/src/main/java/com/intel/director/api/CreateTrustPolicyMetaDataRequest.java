@@ -3,8 +3,6 @@ package com.intel.director.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
@@ -25,8 +23,6 @@ public class CreateTrustPolicyMetaDataRequest {
 
 	public String deployment_type;
 	
-	public boolean encrypted=false;
-
 	public boolean encrypted = false;
 
 	public String image_name;

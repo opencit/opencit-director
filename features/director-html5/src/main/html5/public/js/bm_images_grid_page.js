@@ -127,6 +127,9 @@ function refreshBMOnlineGrid() {
 					align : "center"
 				} ],
 				onRefreshed: function(args) {
+					if(grid.length <= 0){
+						return;
+					}
 					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
 					var numOfPages = Math.ceil(numOfPagesWithDecimal);
 					if(args.grid.pageIndex > numOfPages){
@@ -194,6 +197,9 @@ function refresh_bm_images_Grid() {
 					align : "center"
 				} ],
 				onRefreshed: function(args) {
+					if(grid.length <= 0){
+						return;
+					}
 					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
 					var numOfPages = Math.ceil(numOfPagesWithDecimal);
 					if(args.grid.pageIndex > numOfPages){

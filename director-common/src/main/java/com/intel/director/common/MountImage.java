@@ -53,7 +53,7 @@ public class MountImage {
 		int exitcode = 0; 
 		String command = Constants.mountRemoteFileSystemScript + SPACE
 				+ ipAddress + SPACE + userName + SPACE + password + SPACE + mountpath;
-		
+		log.info("Executing command " + command);
 		try {
 			exitcode = DirectorUtil.executeCommandInExecUtil(
 					Constants.mountRemoteFileSystemScript, ipAddress, userName,

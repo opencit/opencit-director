@@ -2,21 +2,16 @@ var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 	
-    this.imageid = current_image_id;
+	this.imageid = current_image_id;
 	
 }
 
 function SelectDirectoriesViewModel() {
-    var self = this;
+	var self = this;
 	
-    self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
+	self.selectDirectoriesMetaData = new SelectDirectoriesMetaData({});
 	
-    self.selectDirectoriesSubmit = function(loginFormElement) {
-        $("#createVmPolicyDirNext").prop('disabled', true);
-        clearInterval(refreshIntervalId);
-        navButtonClicked = true;
-        editPolicyDraft();
-    }
+	self.selectDirectoriesSubmit = function(loginFormElement) {
 		$("#createVmPolicyDirNext").prop('disabled', true);
 		clearInterval(refreshIntervalId );
 		navButtonClicked = true;
@@ -26,20 +21,20 @@ function SelectDirectoriesViewModel() {
 };
 
 function ApplyRegexMetaData(data) {
-    this.sel_dir = ko.observable("");
-    this.dir_path = ko.observable();
-    this.create_policy_regex_exclude = ko.observable("");
-    this.create_policy_regex_include = ko.observable("");
-    this.create_policy_regex_includeRecursive = ko.observable("");
+	this.sel_dir = ko.observable("");
+	this.dir_path = ko.observable();
+	this.create_policy_regex_exclude = ko.observable("");
+	this.create_policy_regex_include = ko.observable("");
+	this.create_policy_regex_includeRecursive = ko.observable("");
 	
-    this.selected_image_format = ko.observable();
+	this.selected_image_format = ko.observable();
 	
 }
 
 function ApplyRegExViewModel() {
-    var self = this;
+	var self = this;
 	
-    self.applyRegexMetaData = new ApplyRegexMetaData({});
+	self.applyRegexMetaData = new ApplyRegexMetaData({});
 	
     self.resetRegEx = function(event) {
 		var sel_dir = $("#sel_dir").val();
@@ -117,17 +112,13 @@ function ApplyRegExViewModel() {
 			include_recursive : includeRecursive,
 			exclude : exclude
 		};
-    self.applyRegEx = function(loginFormElement) {
-        var include = loginFormElement.create_policy_regex_include.value;
-        var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
-        var exclude = loginFormElement.create_policy_regex_exclude.value;
-        console.log(include + "-- " + exclude + " -- " + includeRecursive);
-        if ((include == "" || include == null || include == undefined) && (exclude == "" || exclude == null || exclude == undefined)) {
-            $("#regex_error_vm").html("<font color='red'>Provide atleast one filter</font>");
-            return;
-        }
-        $("#regex_error_vm").html("");
-        var sel_dir = loginFormElement.sel_dir.value.trim();
+		var len = node.parent().children().length;
+		var counter = 0;
+		node.parent().children().each(function() {
+			if (counter++ > 2) {
+				$(this).remove();
+			}
+		});
 		
 		node.parent().removeClass('collapsed').addClass('expanded').addClass(
 		'selected');
@@ -151,22 +142,6 @@ function ApplyRegExViewModel() {
 		closeRegexPanel();
 	}
 	
-
-        node.attr('checked', true);
-        (node.parent()).fileTree(config, function(file, checkedStatus,
-            rootRegexDir) {
-            editPatch(file, checkedStatus, rootRegexDir);
-        });
-
-
-        //set regex params
-        node.attr("rootregexdir", sel_dir);
-        node.attr("include", include);
-        node.attr("exclude", exclude);
-        node.attr("recursive", "" + includeRecursive + "");
-        closeRegexPanel();
-    }
-
 };
 
 function toggleState(node) {
@@ -267,8 +242,7 @@ function editPatchWithDataFromServer(patch) {
 	}
 	console.log("Server patch - EDIT");
 	
-    editPolicyDraft();
-}
+	editPolicyDraft();
 	
 	
 }
@@ -299,21 +273,19 @@ var editPolicyDraft = function() {
 	}
 	
 	
-    if (patches.length == 0 && temp_patches.length == 0) {
-        canPushPatch = true;
-        if (navButtonClicked) {
-            createPolicy();
-        }
-        return;
-    }
+	var patchBegin = "<patch>";
+	var patchEnd = "</patch>";
+	var patchesStr = "";
+	for (i = 0; i < patches.length; i++) {
+		var addRemoveXml = patches[i];
+		patchesStr = patchesStr.concat(addRemoveXml);
+	}
 	
-    for (i = 0; i < temp_patches.length; i++) {
-        patches.push(temp_patches[i]);
-    }
-    if (temp_patches.length > 0) {
-        temp_patches.length = 0;
-    }
+	var finalPatch = patchBegin.concat(patchesStr, patchEnd);
 	
+	var formData = JSON.stringify({
+		patch : finalPatch
+	});
 	
 	$.ajax({
 		type : "POST",
@@ -403,7 +375,7 @@ function editPatch(file, checkedStatus, rootRegexDir) {
 		+ rootRegexDir + "\"]'";
 	}
 	
-    if (checkedStatus == true) {
+	if (checkedStatus == true) {
 		
 		addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath
 		+ "><File Path=\"" + file + "\"/></add>";

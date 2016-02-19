@@ -1,6 +1,5 @@
 package com.intel.director.async;
 
-import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.async.task.CreateDockerTarTask;
 import com.intel.director.async.task.CreateTarTask;
 import com.intel.director.async.task.EncryptImageTask;

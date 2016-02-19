@@ -32,7 +32,9 @@
                 <inherited>true</inherited>
             </plugin>
 
-        </plugins>        
+        </plugins>       
+        
+         
         
     </build>
  
@@ -43,6 +45,7 @@
             <version>0.1-SNAPSHOT</version>
             <artifactId>director-images-api</artifactId>
         </dependency>
+    
     
 
     </dependencies>

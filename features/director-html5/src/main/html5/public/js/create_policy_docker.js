@@ -17,10 +17,10 @@ function CreateDockerImageViewModel() {
     self.createDockerImageMetaData = new CreateDockerImageMetaData({});
 
     self.createDockerImage = function(loginFormElement) {
+        $("#createDockerPolicyNext").prop('disabled', true);
 
         self.createDockerImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
         self.createDockerImageMetaData.encrypted = false;
-
         self.createDockerImageMetaData.display_name = $('#display_name').val();
         current_display_name = $('#display_name').val();
 
@@ -74,6 +74,21 @@ function CreateDockerImageViewModel() {
                         nextButtonDocker();
                     }
                 });
+            },
+            error: function(data, status, xhr) {
+                console.log(data);
+                $('#for_mount').hide();
+                $('#default').show();
+                $('#error_modal_body_docker_1').text("");
+                var obj = jQuery.parseJSON(data.responseText);
+
+                $('#error_modal_body_docker_1').text(obj.error);
+                $("#error_modal_docker_1").modal({
+                    backdrop: "static"
+                });
+                $('body').removeClass("modal-open");
+                $("#createDockerPolicyNext").prop('disabled', false);
+                return;
             }
         });
 

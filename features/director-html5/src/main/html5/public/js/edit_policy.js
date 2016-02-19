@@ -74,9 +74,9 @@ function EditImageMetaData(data) {
 }
 
 function EditImageViewModel(data) {
-    var self = this;
+	var self = this;
 
-    self.editImageMetaData = new EditImageMetaData(data);
+	self.editImageMetaData = new EditImageMetaData(data);
 
 	self.editImage = function (loginFormElement) {
 		$("#editVMPolicyNext").prop('disabled', true);
@@ -142,59 +142,7 @@ function EditImageViewModel(data) {
 			}
 		});
 
-        $.ajax({
-            type: "POST",
-            url: "/v1/trust-policy-drafts",
-            // accept: "application/json",
-            contentType: "application/json",
-            headers: {
-                'Accept': 'application/json'
-            },
-            data: ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
-            success: function(data, status, xhr) {
-
-                if (data.error) {
-                    $('#for_mount_edit_vm').hide();
-                    $('#default_edit_vm').show();
-                    $('#error_modal_body_edit_vm_1').text(data.error);
-                    $("#error_modal_edit_vm_1").modal({
-                        backdrop: "static"
-                    });
-                    $("#editVMPolicyNext").prop('disabled', false);
-                    return;
-                }
-                current_trust_policy_draft_id = data.id;
-                var mountimage = {
-                    "id": current_image_id
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "/v1/rpc/mount-image",
-                    // accept: "application/json",
-                    contentType: "application/json",
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    data: JSON.stringify(mountimage), // $("#loginForm").serialize(),
-                    success: function(data, status, xhr) {
-                        $("#editVMPolicyNext").prop('disabled', false);
-                        if (data.error) {
-                            $('#for_mount_edit_vm').show();
-                            $('#default_edit_vm').hide();
-                            $('#error_modal_body_edit_vm_1').text(data.error);
-                            $("#error_modal_edit_vm_1").modal({
-                                backdrop: "static"
-                            });
-                            return;
-                        }
-                        nextButton();
-                    }
-                });
-                // /nextButton();
-            }
-        });
-
-    }
+	}
 
 };
 
@@ -233,13 +181,7 @@ function addRadios(arr) {
 		temp = temp
 			 + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="edit_policy_'+ arr[i].name + '" value="'
 			 + arr[i].name + '" >' + arr[i].display_name + '</label>';
-            if (data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha1 == "" ||
-                data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha1 == null ||
-                data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha1 == undefined) {
-                $('#encryptRow').hide();
-            } else {
-                $('#encryptRow').show();
-            }
+	}
 
 	$('#launch_control_policy').html(temp);
 	$.ajax({

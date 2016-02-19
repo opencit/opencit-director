@@ -111,7 +111,6 @@ public class Constants {
 	public static final String GLANCE_HEADER_CHECKSUM = "Image-Meta-Checksum";
 	public static final String GLANCE_HEADER_CONTAINER_FORMAT = "X-Image-Meta-Container_format";
 	public static final String GLANCE = "Glance";
-public static final String GLANCE_ID = "Glance_Id";
 	public static final String SWIFT = "Swift";
 	public static final String GLANCE_ID="glanceid";
 

@@ -10,7 +10,7 @@ public class CommonValidations {
 		if(StringUtils.isBlank(image_deployments)){
 			return true;
 		}
-		return ValidationUtil.isValidWithRegex(image_deployments, "BareMetal|VM") ;			
+		return ValidationUtil.isValidWithRegex(image_deployments, "BareMetal|VM|Docker") ;			
 	}
 	
 	

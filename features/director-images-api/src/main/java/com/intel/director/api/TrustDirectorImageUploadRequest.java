@@ -33,7 +33,7 @@ public class TrustDirectorImageUploadRequest extends ImageAttributes{
     		errors.add("Invalid deployment type for image");
     	}
     	
-    	if(!((StringUtils.isNotBlank(image_format) && ValidationUtil.isValidWithRegex(image_format, "qcow2|vhd(vpc)|vmdk|raw|vdi")))){
+    	if(!((StringUtils.isNotBlank(image_format) && ValidationUtil.isValidWithRegex(image_format, "qcow2|vhd(vpc)|vmdk|raw|vdi|tar")))){
     		errors.add("Invalid format for image. Valid formats are: qcow2, vhd(vpc), vmdk, raw, vdi");
     	}
     	if(!(image_size != null && (image_size > 0))){

@@ -158,7 +158,7 @@ public class Images {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.state = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
-				return uploadImageToTrustDirector;
+				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
@@ -1162,49 +1162,6 @@ public class Images {
 		}
 		return Response.ok(sshResponse).build();
 	}
-
-
-	@Path("rpc/docker-save/{image_id: [0-9a-zA-Z_-]+}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse dockerSave(@PathParam("image_id") String image_id) {
-		log.info("performing Docker save  simultaneously");
-		String user = getLoginUsername();
-		log.info("User perfomig docker save  : " + user);
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		try {
-			imageService.dockerSave(image_id, user);
-		} catch (DirectorException e) {
-			log.error("Error while perfomig docker save ");
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = e.getMessage();
-			return monitorStatus;
-		}
-		return monitorStatus;
-	}
-	
-	@Path("rpc/docker-rmi/{image_id: [0-9a-zA-Z_-]+}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse dockerRMI(@PathParam("image_id") String image_id) {
-		log.info("performing Docker rmi simultaneously");
-		String user = getLoginUsername();
-		log.info("User perfomig docker  rmi : " + user);
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		try {
-			imageService.dockerRMI(image_id, user);
-		} catch (DirectorException e) {
-			log.error("Error while perfomig docker  rmi");
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = e.getMessage();
-			return monitorStatus;
-		}
-		return monitorStatus;
-	}
 	
 	/**
 	 * This method updates the host related details provided by the user. The
@@ -1343,6 +1300,17 @@ public class Images {
 			return genericResponse;
 		}
 		return genericResponse;
+	}
+	
+	/**
+	 * Utility methods
+	 * 
+	 * @param httpServletRequest
+	 * @return
+	 */
+	protected String getLoginUsername() {
+		return ShiroUtil.subjectUsername();
+
 	}
 
 }

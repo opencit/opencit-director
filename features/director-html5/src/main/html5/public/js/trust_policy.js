@@ -6,6 +6,7 @@ function show_error_in_trust_policy_tab(message) {
     });
     $('body').removeClass("modal-open");
 
+
 }
 
 function show_dialog_content_trust_policy_tab() {
@@ -18,11 +19,13 @@ function show_dialog_content_trust_policy_tab() {
 
 }
 
+
 function goToVMPage() {
 
     $("#docker-dashboard-main-page").hide();
     $("#bm-dashboard-main-page").hide();
     $("#vm-dashboard-main-page").show();
+
 
     var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
 
@@ -251,11 +254,11 @@ function refresh_vm_images_Grid() {
 
 function refreshBMOnlineGrid() {
     var self = this;
-    endpoint = "/v1/images";
+    endpoint = "/v1";
     $("#bmGridOnline").html("")
     $.ajax({
         type: "GET",
-        url: "/v1/images?deploymentType=BareMetalLive",
+        url: "/v1/images?deploymentType=BareMetal",
         dataType: "json",
         success: function(result) {
             images = result.images;
@@ -351,11 +354,11 @@ function refreshBMOnlineGrid() {
 
 function refresh_bm_images_Grid() {
     alert("inside bm");
-    endpoint = "/v1/images/";
+    endpoint = "/v1";
     $("#bmGridImages").html("")
     $.ajax({
         type: "GET",
-        url: endpoint + "imagesList/BareMetal",
+        url: endpoint + "/images/imagesList/BareMetal",
         accept: "application/json",
         headers: {
             'Accept': 'application/json'
@@ -560,7 +563,7 @@ function refresh_docker_Grid() {
 
 function refresh_all_trust_policy_grids() {
     refresh_vm_images_Grid();
-    // refresh_bm_images_Grid();
+    //refresh_bm_images_Grid();
     refreshBMOnlineGrid();
     refresh_docker_Grid();
 }
@@ -580,3 +583,4 @@ function hideLoading() {
     $("#director_loading_icon").html("");
 
 }
+alert("TP.js working fine")

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import com.intel.dcsg.cpg.validation.RegexPatterns;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 /**
  *

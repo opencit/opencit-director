@@ -315,6 +315,7 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	public UnmountImageResponse unMountImage(String imageId, String user)
 			throws DirectorException {
+		int exitCode = 0;
 		log.info("inside unmounting image in service");
 		UnmountImageResponse unmountImageResponse = null;
 		ImageAttributes image = null;
@@ -355,22 +356,23 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Error updating image:" + imageId);
 		}
 		try {
+			
 			if (image.getImage_format() == null) {
 				// Throw an exception if different user than the mounted_by user
 				// tries to unmount
-				MountImage.unmountRemoteSystem(mountPath);
+				exitCode = MountImage.unmountRemoteSystem(mountPath);
 				log.info("*** unmount of BM LIVE complete");
 
 			} else if (image.getImage_deployments().equalsIgnoreCase(
 					Constants.DEPLOYMENT_TYPE_DOCKER)) {
-				MountImage
+				exitCode = MountImage
 						.unmountDocker(mountPath, image.repository, image.tag);
 				log.info("Docker image unmounted successfully");
 
 			} else {
 				log.info("Updated DB with unmount data");
 				log.info("Unmounting from location : " + mountPath);
-				MountImage.unmountImage(mountPath);
+				exitCode = MountImage.unmountImage(mountPath);
 				log.info("Unmount script execution complete : " + mountPath);
 				log.info("*** unmount BM/VM complete");
 			}
@@ -1121,7 +1123,6 @@ public class ImageServiceImpl implements ImageService {
 
 		String trustPolicyName = null;
 		String trustPolicyFile = null;
-		String mountPath = TdaasUtil.getMountPath(imageId);
 		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 
 		if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
@@ -2772,54 +2773,6 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id)
-			throws DirectorException {
-		TrustPolicy trustPolicy;
-		try {
-			trustPolicy = imagePersistenceManager
-					.fetchPolicyById(trust_policy_id);
-		} catch (DbException e) {
-			log.error("Unable To fetch Policy with policy Id :: "
-					+ trust_policy_id);
-			throw new DirectorException(
-					"Unable To fetch Policy with policy Id :: "
-							+ trust_policy_id, e);
-		}
-		if (trustPolicy == null || trustPolicy.getTrust_policy() == null) {
-			log.error("Trust Policy is null for :: " + trust_policy_id);
-			throw new DirectorException("Trust Policy is null  :: "
-					+ trust_policy_id);
-		}
-
-		try {
-			return TdaasUtil
-					.convertTrustPolicyToTrustPolicyResponse(trustPolicy);
-		} catch (JAXBException e) {
-			log.error("Unable to convert Trust Policy to TrustPolicyResponse",
-					e);
-			throw new DirectorException(
-					"Unable to convert Trust Policy to TrustPolicyResponse", e);
-		}
-	}
-
-	@Override
-	public String getImageByTrustPolicyDraftId(String trustPolicydraftId)
-			throws DirectorException {
-		TrustPolicyDraft existingDraft = null;
-		try {
-			existingDraft = imagePersistenceManager
-					.fetchPolicyDraftById(trustPolicydraftId);
-		} catch (DbException e1) {
-			String errorMsg = "Unable to fetch draft for trust policy draft id "
-					+ trustPolicydraftId;
-			log.error(errorMsg);
-			throw new DirectorException(errorMsg, e1);
-		}
-		return existingDraft.getImgAttributes().id;
-
-	}
-
-	@Override
 	public void dockerSave(String image_id, String user)
 			throws DirectorException {
 		ImageInfo image;
@@ -2971,55 +2924,6 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	
-	public ImageInfoResponse getImageDetails(String imageId)
-			throws DirectorException {
-		ImageInfoResponse imageInfoResponse = null;
-		try {
-			ImageInfo imageInfo =  imagePersistenceManager
-					.fetchImageById(imageId);
-			if (imageInfo == null) {
-				return null;
-			}	
-			Mapper mapper = new DozerBeanMapper();
-			imageInfoResponse = mapper.map(imageInfo,
-					ImageInfoResponse.class);
-		
-		} catch (DbException e1) {
-
-			log.error("Error in fetchImageById for imageId::" + imageId);
-			throw new DirectorException("unable to fetchImageById", e1);
-		}
-		
-		if (StringUtils.isNotBlank(imageInfoResponse.getImage_deployments())
-				&& imageInfoResponse.getImage_deployments().equals(
-						Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
-			try {
-				SshSettingRequest bareMetalMetaData = getBareMetalMetaData(imageId);
-				imageInfoResponse.setUsername(bareMetalMetaData.getUsername());
-				imageInfoResponse.setIp_address(bareMetalMetaData
-						.getIpAddress());
-			} catch (DirectorException e) {
-				log.error("Error in getImageDetails for imageId::" + imageId);
-				throw new DirectorException("unable to get image details", e);
-
-			}
-		}
-		return imageInfoResponse;
-	}
-	
-	@Override	
-	public List<TrustPolicyDraft> getTrustPolicyDrafts(TrustPolicyDraftFilter trustPolicyDraftFilter) throws DirectorException{
-		List<TrustPolicyDraft> fetchPolicyDrafts = null;
-		try {
-			if (trustPolicyDraftFilter == null) {
-				fetchPolicyDrafts = imagePersistenceManager.fetchPolicyDrafts(
-						null, null);
-			}
-			return fetchPolicyDrafts;
-		} catch (DbException e) {
-			throw new DirectorException("Error Fetching drafts", e);
-		}
-	}
 	
 	@Override
 	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id)

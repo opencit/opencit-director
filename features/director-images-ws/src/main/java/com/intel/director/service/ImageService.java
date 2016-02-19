@@ -126,10 +126,6 @@ public interface ImageService {
 
 	public void dockerRMI(String image_id, String user) throws DirectorException;
 
-	public void updateTrustPolicy(
-			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
-
-	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
 	
 	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
 
@@ -139,16 +135,11 @@ public interface ImageService {
 
 	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException;
 
-	public List<TrustPolicyDraft> getTrustPolicyDrafts(
-			TrustPolicyDraftFilter trustPolicyDraftFilter)
-			throws DirectorException;
 	public void updateTrustPolicy(
 			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
 
 	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
 	
-	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
-
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;

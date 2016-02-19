@@ -19,9 +19,7 @@ import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.service.ImageActionService;
 import com.intel.director.service.ImageService;
-import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.util.TdaasUtil;
 

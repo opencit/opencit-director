@@ -2,8 +2,6 @@ package com.intel.director.api;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 

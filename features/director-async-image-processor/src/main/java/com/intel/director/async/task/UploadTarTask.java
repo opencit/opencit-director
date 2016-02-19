@@ -6,12 +6,12 @@
 package com.intel.director.async.task;
 
 import java.io.File;
-
-import com.intel.director.common.Constants;
 import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+
+import com.intel.director.common.Constants;
 
 
 /**

@@ -1,7 +1,5 @@
 package com.intel.director.api;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 
