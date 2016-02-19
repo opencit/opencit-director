@@ -583,4 +583,3 @@ function hideLoading() {
     $("#director_loading_icon").html("");
 
 }
-alert("TP.js working fine")
