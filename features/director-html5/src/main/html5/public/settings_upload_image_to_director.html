@@ -16,11 +16,11 @@
                 var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
                 image_type_upload = $("#image_type").val();
                 if ($("#image_type").val() == 'VM') {
-                    OpenWindow.image_format_upload = 'qcow2';
+                    image_format_upload = 'qcow2';
                 } else if ($("#image_type").val() == 'Docker') {
-                    OpenWindow.image_format_upload = 'tar';
+                    image_format_upload = 'tar';
                 } else {
-                    OpenWindow.image_format_upload = $("#image_format").val();
+                    image_format_upload = $("#image_format").val();
                 }
                 OpenWindow.auth_token_parent = mainViewModel.loginViewModel.userProfile.authorizationToken();
             });

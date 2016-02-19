@@ -70,8 +70,8 @@ function refresh_docker_Grid() {
                 self.gridData.image_upload = "";
                 if (images[i].image_upload_status == 'Complete') {
 
-                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0) {
-                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"docker_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
+                    if (images[i].uploads_count != 0) {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"vm_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
                     } else {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"docker_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";
                     }

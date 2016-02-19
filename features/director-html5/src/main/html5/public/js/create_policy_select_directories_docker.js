@@ -1,4 +1,4 @@
-var endpoint = "/v1/images/";
+var endpoint = "/v1";
 
 function SelectDirectoriesMetaData(data) {
 
@@ -39,6 +39,7 @@ function ApplyRegExViewModel() {
     self.resetRegEx = function(event) {
         var sel_dir = $("#sel_dir").val();
         var node = $("input[name='directory_" + sel_dir + "']");
+        console.log(node.attr("name"));
         var config = {
             root: '/',
             dir: sel_dir,
@@ -55,6 +56,7 @@ function ApplyRegExViewModel() {
         var len = node.parent().children().length;
         var counter = 0;
         node.parent().children().each(function() {
+            console.log("removing children");
             if (counter++ > 2) {
                 $(this).remove();
             }
@@ -83,7 +85,7 @@ function ApplyRegExViewModel() {
         var include = loginFormElement.create_policy_regex_include.value;
         var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
         var exclude = loginFormElement.create_policy_regex_exclude.value;
-
+        console.log(include + "-- " + exclude + " -- " + includeRecursive);
         if ((include == "" || include == null || include == undefined) && (exclude == "" || exclude == null || exclude == undefined)) {
             $("#regex_error_docker").html("<font color='red'>Provide atleast one filter</font>");
             return;
@@ -399,7 +401,8 @@ function createPolicy() {
         navButtonClicked = false;
     }
     var createTrustPolicyMetaData = {
-        "trust_policy_draft_id": current_trust_policy_draft_id
+        "trust_policy_draft_id": current_trust_policy_draft_id,
+        "image_id": current_image_id
     }
     $.ajax({
         type: "POST",
