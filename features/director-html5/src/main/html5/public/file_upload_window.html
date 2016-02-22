@@ -113,10 +113,6 @@
             var numberOfCallsRequired = (upload_size / 1048576) / 10;
             var timeTakenForCalls = numberOfCallsRequired * 5;
 
-            console.log("Size of file being uploaded = " + numberOfCallsRequired);
-            console.log("Number of calls required : " + numberOfCallsRequired);
-            console.log("Time taken for calls :" + timeTakenForCalls);
-
             var authToken = encodeURIComponent(authorizationToken);
             console.log("Token sent with GET : " + authToken);
             $.ajax({
@@ -134,13 +130,11 @@
                     var currentDate = data.current_date;
                     var expiryDate = data.expiry_date;
                     var interval = data.timeout_interval;
-                    console.log("currentDate - " + currentDate + " :: expiryDate - " + expiryDate + " interval - " + interval);
                     var timeToExpiry = expiryDate - currentDate;
                     if (timeToExpiry <= (1000 * timeTakenForCalls)) {
 
                         extendSessionIfNeeded();
                         if (refreshIntervalId == 0) {
-                            console.log("***********************************************");
                             refreshIntervalId = setInterval(function() {
                                 extendSessionIfNeeded();
                             }, ((interval * 60 * 1000) - 10000));
