@@ -308,7 +308,7 @@
                         type: "POST",
                         url: "/v1/rpc/docker-load",
                         dataType: "json",
-						data: JSON.stringify(dockerData);
+						data: JSON.stringify(dockerData),
                         headers: {
                             "Authorization": "Token " + authorizationToken
                         },
@@ -324,7 +324,7 @@
 								type: "POST",
 								url: "/v1/rpc/docker-tag",
 								dataType: "json",
-								data: JSON.stringify(dockerData);
+								data: JSON.stringify(dockerData),
 								headers: {
 									"Authorization": "Token " + authorizationToken
 								},
