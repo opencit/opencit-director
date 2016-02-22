@@ -38,6 +38,7 @@ import org.apache.shiro.session.Session;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
+import com.intel.director.api.DockerRequestObject;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageInfoResponse;
@@ -156,7 +157,7 @@ public class Images {
 			}
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
@@ -1225,92 +1226,75 @@ public class Images {
 
 	}
 
-		@Path("rpc/docker-save/{image_id: [0-9a-zA-Z_-]+}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse dockerSave(@PathParam("image_id") String image_id) {
-		log.info("performing Docker save  simultaneously");
-		String user = getLoginUsername();
-		log.info("User perfomig docker save  : " + user);
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		try {
-			imageService.dockerSave(image_id, user);
-		} catch (DirectorException e) {
-			log.error("Error while perfomig docker save ");
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = e.getMessage();
-			return monitorStatus;
-		}
-		return monitorStatus;
-	}
-	
 	@Path("rpc/docker-rmi/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse dockerRMI(@PathParam("image_id") String image_id) {
+	@DELETE
+	public Response dockerRMI(@PathParam("image_id") String image_id) {
 		log.info("performing Docker rmi simultaneously");
-		String user = getLoginUsername();
-		log.info("User perfomig docker  rmi : " + user);
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
+		GenericResponse monitorStatus;
 		try {
-			imageService.dockerRMI(image_id, user);
+			monitorStatus = imageService.dockerRMI(image_id);
 		} catch (DirectorException e) {
 			log.error("Error while perfomig docker  rmi");
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = e.getMessage();
-			return monitorStatus;
+			monitorStatus = new GenericResponse();
+			monitorStatus.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(monitorStatus).build();
 		}
-		return monitorStatus;
+		if (monitorStatus == null) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+		return Response.ok(monitorStatus).build();
 	}
-	
-	@Path("rpc/docker-load/{image_id: [0-9a-zA-Z_-]+}")
+
+	@Path("rpc/docker-load")
 	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public GenericResponse dockerLoad(@PathParam("image_id") String image_id) {
+	@POST
+	public Response dockerLoad(DockerRequestObject dockerRequestObject) {
 		log.info("performing Docker Load ");
 		GenericResponse genericResponse = new GenericResponse();
 		genericResponse.status = Constants.SUCCESS;
+		GenericResponse dockerLoad;
 		try {
-			imageService.dockerLoad(image_id);
+			dockerLoad = imageService.dockerLoad(dockerRequestObject
+					.getImage_id());
 		} catch (DirectorException e) {
 			log.error("Error while perfomig docker  load");
 			genericResponse.error = e.getMessage();
-			return genericResponse;
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(genericResponse).build();
 		}
-		return genericResponse;
+		if (dockerLoad == null) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		return Response.ok(genericResponse).build();
 	}
 
-	@Path("rpc/docker-tag/{image_id: [0-9a-zA-Z_-]+}")
+	@Path("rpc/docker-tag")
 	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public GenericResponse dockerTag(@PathParam("image_id") String image_id) {
+	@POST
+	public Response dockerTag(DockerRequestObject dockerRequestObject) {
 		log.info("performing Docker tag ");
-		GenericResponse genericResponse = new GenericResponse();
-		genericResponse.status = Constants.SUCCESS;
+		GenericResponse dockerTag;
 		try {
-			imageService.dockerTag(image_id);
+			dockerTag = imageService.dockerTag(
+					dockerRequestObject.getImage_id(),
+					dockerRequestObject.getRepository(),
+					dockerRequestObject.getTag());
 		} catch (DirectorException e) {
 			log.error("Error while perfomig docker  tag");
-			genericResponse.status = Constants.ERROR;
-			genericResponse.details = e.getMessage();
-			return genericResponse;
+			dockerTag = new GenericResponse();
+			dockerTag.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(dockerTag).build();
 		}
-		return genericResponse;
+		if (dockerTag == null) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+		return Response.ok(dockerTag).build();
 	}
 	
-	/**
-	 * Utility methods
-	 * 
-	 * @param httpServletRequest
-	 * @return
-	 */
-	protected String getLoginUsername() {
-		return ShiroUtil.subjectUsername();
-
-	}
 
 }

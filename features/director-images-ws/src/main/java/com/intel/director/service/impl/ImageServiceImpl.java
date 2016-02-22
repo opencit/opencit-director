@@ -33,6 +33,7 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
@@ -2773,39 +2774,7 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public void dockerSave(String image_id, String user)
-			throws DirectorException {
-		ImageInfo image;
-		TrustPolicy trustPolicy;
-		try {
-			image = imagePersistenceManager.fetchImageById(image_id);
-		} catch (DbException e) {
-			log.error("Error in fetching image  ", e);
-			throw new DirectorException("No image found with id: " + image_id,
-					e);
-		}
-		try {
-			trustPolicy = imagePersistenceManager.fetchPolicyById(image
-					.getTrust_policy_id());
-		} catch (DbException e1) {
-			log.error("Error in fetching policy  ", e1);
-			throw new DirectorException("No image found with id: "
-					+ image.getTrust_policy_id(), e1);
-		}
-		try {
-			MountImage.dockerSave(image.repository, image.tag, "/mnt/images/"
-					+ image.id, trustPolicy.getDisplay_name() + ".tar");
-			log.info("Docker image sav and removed successfully");
-		} catch (Exception e) {
-			log.error("Error in Docker image sav and removed  ", e);
-			throw new DirectorException(
-					"Error in Docker image sav and removed ", e);
-		}
-
-	}
-
-	@Override
-	public void dockerRMI(String image_id, String user)
+	public GenericResponse dockerRMI(String image_id)
 			throws DirectorException {
 		ImageInfo image;
 		try {
@@ -2814,6 +2783,9 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error in mounting image  ", e);
 			throw new DirectorException("No image found with id: " + image_id,
 					e);
+		}
+		if(image == null){
+			return null;
 		}
 		try {
 			MountImage.dockerRMI(image.repository, image.tag);
@@ -2822,18 +2794,22 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error in Docker image  removed  ", e);
 			throw new DirectorException("Error in Docker image  removed ", e);
 		}
+		return new GenericResponse();
 
 	}
 
 	@Override
-	public void dockerLoad(String image_id) throws DirectorException {
+	public GenericResponse dockerLoad(String image_id) throws DirectorException {
 		ImageInfo image;
 		try {
 			image = imagePersistenceManager.fetchImageById(image_id);
 		} catch (DbException e) {
-			log.error("Error in mounting image  ", e);
-			throw new DirectorException("No image found with id: " + image_id,
+			log.error("Error in Loading image  ", e);
+			throw new DirectorException("Error in Loading image with id: " + image_id,
 					e);
+		}
+		if(image == null){
+			return null;
 		}
 		try {
 			log.info("Loading Docker image...!!!");
@@ -2850,35 +2826,11 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Error in loading  Docker image ", e);
 			throw new DirectorException("Error in loading  Docker image ", e);
 		}
-		try {
-			log.info("Tagging Docker image...!!!");
-			MountImage.dockerTag(image.repository, image.tag, image.repository, image.tag
-					+ "_source");
-			log.info("Docker image  tagged successfully...!!!");
-		} catch (Exception e) {
-			image.setStatus(Constants.INCOMPLETE);
-			try {
-				imagePersistenceManager.updateImage(image);
-			} catch (DbException e1) {
-				log.error("Error in Updating Image Status", e1);
-				throw new DirectorException("Error in Updating Image Status", e1);
-			}
-			log.error("Error in Docker Tagging image", e);
-			throw new DirectorException("Error in Docker Tagging image", e);
-		}
-		try {
-			log.info("Removing Docker image...!!!");
-			MountImage.dockerRMI(image.repository, image.tag);
-			log.info("Docker image  removed successfully...!!!");
-		} catch (Exception e) {
-			log.error("Error in Docker image  removed  ", e);
-			throw new DirectorException("Error in Docker image  removed ", e);
-		}
-
+		return new GenericResponse();
 	}
 
 	@Override
-	public void dockerTag(String image_id) throws DirectorException {
+	public GenericResponse dockerTag(String image_id, String repository, String tag) throws DirectorException {
 		ImageInfo image;
 		try {
 			image = imagePersistenceManager.fetchImageById(image_id);
@@ -2887,15 +2839,20 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + image_id,
 					e);
 		}
+		
+		if(image == null){
+			return null;
+		}
+		
 		try {
 			log.info("Tagging Docker image...!!!");
-			MountImage.dockerTag(image.repository, image.tag,image.repository, image.tag
-					+ "_source");
+			MountImage.dockerTag(image.repository, image.tag,repository, tag);
 			log.info("Docker image  tagged successfully...!!!");
 		} catch (Exception e) {
 			log.error("Error in Docker Tagging image", e);
 			throw new DirectorException("Error in Docker Tagging image", e);
 		}
+		return new GenericResponse();
 	}
 
 	@Override

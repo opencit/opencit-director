@@ -302,11 +302,13 @@
 
             } else {
                 if (image_deployments == 'Docker') {
+					var dockerData = { "image_id" : image_id};
                     $("#message").html("<font color='green'>Loading Image...</font>");
                     $.ajax({
-                        type: "GET",
-                        url: "/v1/rpc/docker-load/" + image_id,
+                        type: "POST",
+                        url: "/v1/rpc/docker-load",
                         dataType: "json",
+						data: JSON.stringify(dockerData);
                         headers: {
                             "Authorization": "Token " + authorizationToken
                         },
@@ -316,19 +318,51 @@
                                 $('#upload').prop('disabled', false);
                                 return;
                             }
-                            $("#message").html("<font color='blue'>Your file has been uploaded!</font>");
-                            document.getElementById("upload").onclick = function() {
-                                this.disabled = false;
-                            }
-                            alert("Image upload successfully completed");
-		var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
-                    	var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
-                    	goToTPDiv.show();
-                    	$('#upload').prop('disabled', false);
-                	goToTPDiv.css("display", "block");							
-
-                            window.close();
-                            return;
+							dockerData.repository = upload_data.repository;
+							dockerData.tag = upload_data.tag + "_source";
+							$.ajax({
+								type: "POST",
+								url: "/v1/rpc/docker-tag",
+								dataType: "json",
+								data: JSON.stringify(dockerData);
+								headers: {
+									"Authorization": "Token " + authorizationToken
+								},
+								success: function(data) {
+									if (data.error) {
+										alert("Error in loading docker image");
+										$('#upload').prop('disabled', false);
+										return;
+									}
+									$.ajax({
+										type: "DELETE",
+										url: "/v1/rpc/docker-rmi/" + image_id,
+										dataType: "json",
+										headers: {
+											"Authorization": "Token " + authorizationToken
+										},
+										success: function(data) {
+											if (data.error) {
+												alert("Error in loading docker image");
+												$('#upload').prop('disabled', false);
+												return;
+											}
+											$("#message").html("<font color='blue'>Your file has been uploaded!</font>");
+											document.getElementById("upload").onclick = function() {
+												this.disabled = false;
+											}
+											alert("Image upload successfully completed");
+											var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
+											var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
+											goToTPDiv.show();
+											$('#upload').prop('disabled', false);
+											goToTPDiv.css("display", "block");							
+											window.close();
+											return;
+										}
+									});
+								}
+							});
                         }
                     });
                 } else {

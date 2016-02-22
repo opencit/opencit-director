@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
@@ -122,16 +123,14 @@ public interface ImageService {
 			throws DirectorException;
 	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id) throws DirectorException;
 
-	public void dockerSave(String image_id, String user) throws DirectorException;
-
-	public void dockerRMI(String image_id, String user) throws DirectorException;
+	public GenericResponse dockerRMI(String image_id) throws DirectorException;
 
 	
 	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
 
-	public void dockerLoad(String image_id) throws DirectorException;
+	public GenericResponse dockerLoad(String image_id) throws DirectorException;
 
-	public void dockerTag(String image_id) throws DirectorException;
+	public GenericResponse dockerTag(String image_id, String repository, String tag) throws DirectorException;
 
 	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException;
 
