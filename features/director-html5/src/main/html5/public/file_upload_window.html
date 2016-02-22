@@ -113,6 +113,10 @@
             var numberOfCallsRequired = (upload_size / 1048576) / 10;
             var timeTakenForCalls = numberOfCallsRequired * 5;
 
+            console.log("Size of file being uploaded = " + numberOfCallsRequired);
+            console.log("Number of calls required : " + numberOfCallsRequired);
+            console.log("Time taken for calls :" + timeTakenForCalls);
+
             var authToken = encodeURIComponent(authorizationToken);
             console.log("Token sent with GET : " + authToken);
             $.ajax({
@@ -130,11 +134,13 @@
                     var currentDate = data.current_date;
                     var expiryDate = data.expiry_date;
                     var interval = data.timeout_interval;
+                    console.log("currentDate - " + currentDate + " :: expiryDate - " + expiryDate + " interval - " + interval);
                     var timeToExpiry = expiryDate - currentDate;
                     if (timeToExpiry <= (1000 * timeTakenForCalls)) {
 
                         extendSessionIfNeeded();
                         if (refreshIntervalId == 0) {
+                            console.log("***********************************************");
                             refreshIntervalId = setInterval(function() {
                                 extendSessionIfNeeded();
                             }, ((interval * 60 * 1000) - 10000));
@@ -207,7 +213,7 @@
 
                             var myArr = JSON.parse(xhrmdt.responseText);
                             image_id = myArr.id;
-                            if (myArr.state == "Error") {
+                            if (myArr.image_upload_status  == "Error") {
                                 $('#file_upload_window_modal_body').html(myArr.details);
                                 $("#file_upload_window_modal").modal({
                                     backdrop: "static"
@@ -301,6 +307,7 @@
                     $.ajax({
                         type: "POST",
                         url: "/v1/rpc/docker-load",
+						contentType: "application/json",
                         dataType: "json",
 						data: JSON.stringify(dockerData),
                         headers: {
@@ -318,6 +325,7 @@
 								type: "POST",
 								url: "/v1/rpc/docker-tag",
 								dataType: "json",
+								contentType: "application/json",
 								data: JSON.stringify(dockerData),
 								headers: {
 									"Authorization": "Token " + authorizationToken

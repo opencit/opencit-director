@@ -1250,6 +1250,7 @@ public class Images {
 
 	@Path("rpc/docker-load")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@POST
 	public Response dockerLoad(DockerRequestObject dockerRequestObject) {
 		log.info("performing Docker Load ");
@@ -1274,6 +1275,7 @@ public class Images {
 
 	@Path("rpc/docker-tag")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@POST
 	public Response dockerTag(DockerRequestObject dockerRequestObject) {
 		log.info("performing Docker tag ");
