@@ -126,7 +126,7 @@ public abstract class ImageActionAsyncTask  {
 	}
 	
 	
-	protected void updateImageActionContentSent(int sent, int size) {
+	protected void updateImageActionContentSent(long sent, long size) {
 		synchronized (this) {
 
 			

@@ -40,17 +40,6 @@ function CreateImageViewModel() {
 
 			success : function(data, status, xhr) {
 			
-				if (data.error) {
-					$('#for_mount').hide();
-					$('#default').show();
-					$('#error_modal_body_vm_1').text(data.error);
-					$("#error_modal_vm_1").modal({
-						backdrop : "static"
-					});
-					$('body').removeClass("modal-open");
-					$("#createVMPolicyNext").prop('disabled', false);
-					return;
-				}
 				current_trust_policy_draft_id = data.id;
 				var mountimage = {
 					"id" : current_image_id
@@ -81,6 +70,21 @@ function CreateImageViewModel() {
 						nextButton();
 					}
 				});
+			},
+			error:function(data, status, xhr) {
+					console.log(data);
+					$('#for_mount').hide();
+					$('#default').show();
+					$('#error_modal_body_vm_1').text("");
+					var obj = jQuery.parseJSON( data.responseText );
+
+					$('#error_modal_body_vm_1').text(obj.error);
+					$("#error_modal_vm_1").modal({
+						backdrop : "static"
+					});
+					$('body').removeClass("modal-open");
+					$("#createVMPolicyNext").prop('disabled', false);
+					return;
 			}
 		});
 

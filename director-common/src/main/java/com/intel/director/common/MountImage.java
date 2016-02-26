@@ -51,8 +51,7 @@ public class MountImage {
 		int exitcode = 0; 
 		String command = Constants.mountRemoteFileSystemScript + " "
 				+ ipAddress + " " + userName + " " + password + " " + mountpath;
-		log.info("\n" + "Mounting the The remote System : " + ipAddress
-				+ "with command: " + command);
+		
 		try {
 			exitcode = DirectorUtil.executeCommandInExecUtil(
 					Constants.mountRemoteFileSystemScript, ipAddress, userName,

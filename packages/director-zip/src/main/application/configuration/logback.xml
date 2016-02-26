@@ -54,6 +54,7 @@
     <!-- INFO:  Enabling session validation scheduler...  -->
     
     <logger name="com.intel.dcsg.cpg.util.shiro" level="ERROR"/>
+    <logger name="com.intel.mtwilson.util.exec.ExecUtil" level="INFO"/>
     <!-- INFO:  Logged in cit as superuser -->
     
     <!--

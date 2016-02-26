@@ -135,7 +135,7 @@ public class DbServiceTest {
 	
 		ImageAttributes imgAttrs = new ImageAttributes(createdUserId,
 				new Date(), createdUserId, new Date(), "img1", "qcow", "VM",
-				"ACTIVE", 512, 24, null, false, "C://temp");
+				"ACTIVE", 512L, 24L, null, false, "C://temp");
 
 	
 
@@ -157,88 +157,88 @@ public class DbServiceTest {
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "img2", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "img3", "qcow", "VM", "ACTIVE",
-				512, 24, null, false, "C://temp"));
+				512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				oneDaysBackDate, createdUserId, oneDaysBackDate, "img4",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "img5", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu1",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu2",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "ubuntu3", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu4",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "ubuntu5", "qcow", "VM",
-				"UPLOADED", 512, 24, null, false, "C://temp"));
+				"UPLOADED", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "ubuntu6", "vhd", "VM", "UPLOADED",
-				512, 24, null, false, "C://temp"));
+				512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate, "ubuntu7",
-				"vhd", "BareMetal", "UPLOADED", 512, 24, null, false,
+				"vhd", "BareMetal", "UPLOADED", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "ubuntu8",
-				"qcow", "VM", "ACTIVE", 1024, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 1024L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate, "ubuntu9",
-				"qcow", "VM", "ACTIVE", 512, 24, null, false, "C://temp"));
+				"qcow", "VM", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate,
-				"ubuntu10", "test", "BareMetal", "ACTIVE", 512, 24, null,
+				"ubuntu10", "test", "BareMetal", "ACTIVE", 512L, 24L, null,
 				false, "C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate,
-				"ubuntu11", "test", "VM", "ACTIVE", 512, 24, null, false,
+				"ubuntu11", "test", "VM", "ACTIVE", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				sevenDaysBackDate, createdUserId, sevenDaysBackDate,
-				"ubuntu12", "qcow", "VM", "ACTIVE", 512, 24, null, false,
+				"ubuntu12", "qcow", "VM", "ACTIVE", 512L, 24L, null, false,
 				"C://temp"));
 
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, threeDaysBackDate,
 						createdUserId, threeDaysBackDate, "fedora1", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList.add(new ImageAttributes(createdUserId,
 				threeDaysBackDate, createdUserId, threeDaysBackDate, "fedora2",
-				"test", "VM", "UPLOADED", 512, 24, null, false, "C://temp"));
+				"test", "VM", "UPLOADED", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList
 				.add(new ImageAttributes(createdUserId, sevenDaysBackDate,
 						createdUserId, sevenDaysBackDate, "fedora3", "qcow",
-						"BareMetal", "ACTIVE", 512, 24, null, false, "C://temp"));
+						"BareMetal", "ACTIVE", 512L, 24L, null, false, "C://temp"));
 		imgAttributesList.add(new ImageAttributes(createdUserId, currentDate,
 				createdUserId, currentDate, "fedora4", "qcow", "VM",
-				"UPLOADED", 512, 24, null, false, "C://temp"));
+				"UPLOADED", 512L, 24L, null, false, "C://temp"));
 
 	
 		for(int i=0;i<imgAttributesList.size();i++){
@@ -552,18 +552,18 @@ public void removeAllImageStoreSettingsEntries() throws DbException {
 		try{
 		
 	
-		ImageStoreUploadTransferObject imgUpload1= new ImageStoreUploadTransferObject("http://imageuri1", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId, persistedImgAttributesList.get(0));
+		ImageStoreUploadTransferObject imgUpload1= new ImageStoreUploadTransferObject("http://imageuri1", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId, persistedImgAttributesList.get(0));
 		
 		
 		ImageStoreUploadTransferObject imageStoreUploadCreated=dBServiceImpl.saveImageUpload(imgUpload1);
 		Assert.assertTrue("Create image upload operation fail", imageStoreUploadCreated.getId() != null);
 		
 		List<ImageStoreUploadTransferObject> imageUploadList= new ArrayList<ImageStoreUploadTransferObject>();
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri2", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(1)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri3", threeDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(2)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri4", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(3)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri5", oneDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(4)));
-		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri6", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048, 1024, createdUserId2, persistedImgAttributesList.get(5)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri2", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(1)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri3", threeDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(2)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri4", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(3)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri5", oneDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(4)));
+		imageUploadList.add( new ImageStoreUploadTransferObject("http://imageuri6", sevenDaysBackDate, "C:/temp", "edfd", "ACTIVE", 2048L, 1024L, createdUserId2, persistedImgAttributesList.get(5)));
 		
 		for(ImageStoreUploadTransferObject imgU: imageUploadList){
 			dBServiceImpl.saveImageUpload(imgU);

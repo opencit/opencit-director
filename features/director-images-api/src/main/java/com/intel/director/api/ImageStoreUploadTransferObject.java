@@ -11,14 +11,14 @@ public class ImageStoreUploadTransferObject {
     protected String tmp_location;
     protected String checksum;
     protected String status;
-    protected Integer image_size;
-    protected Integer sent;
+    protected Long image_size;
+    protected Long sent;
     protected String uploaded_by_user_id;
     protected ImageAttributes img;
 
     public ImageStoreUploadTransferObject(String image_uri, Date date,
             String tmp_location, String checksum, String status,
-            Integer image_size, Integer sent, String uploaded_by_user_id,
+            Long image_size, Long sent, String uploaded_by_user_id,
             ImageAttributes img) {
         super();
         this.image_uri = image_uri;
@@ -84,19 +84,19 @@ public class ImageStoreUploadTransferObject {
         this.status = status;
     }
 
-    public Integer getImage_size() {
+    public Long getImage_size() {
         return image_size;
     }
 
-    public void setImage_size(Integer image_size) {
+    public void setImage_size(Long image_size) {
         this.image_size = image_size;
     }
 
-    public Integer getSent() {
+    public Long getSent() {
         return sent;
     }
 
-    public void setSent(Integer sent) {
+    public void setSent(Long sent) {
         this.sent = sent;
     }
 

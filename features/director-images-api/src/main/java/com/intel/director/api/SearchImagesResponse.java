@@ -13,7 +13,7 @@ import com.intel.director.api.ui.ImageInfo;
  *
  * @author soakx
  */
-public class SearchImagesResponse {
+public class SearchImagesResponse extends GenericResponse {
 
     public List<ImageInfo> images;
 }

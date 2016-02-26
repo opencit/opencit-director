@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import com.intel.mtwilson.shiro.ShiroUtil;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -179,6 +180,9 @@ public class TdaasUtil {
 		Director director = new Director();
 		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
 				: DirectorUtil.getDirectorId());
+		if(ShiroUtil.subjectUsername() != null){
+			director.setCustomerId(ShiroUtil.subjectUsername());
+		}
 		Image image = new Image();
 		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
@@ -292,7 +296,7 @@ public class TdaasUtil {
 		imageAttributes.id = imageId;
 		imageAttributes.image_deployments = "VM";
 		imageAttributes.image_format = "qcow2";
-		imageAttributes.image_size = 1000;
+		imageAttributes.image_size = 1000L;
 		imageAttributes.location = "/opt/director/vm/" + imageId;
 		imageAttributes.mounted_by_user_id = null;
 		imageAttributes.image_name = "IMG_" + imageId;

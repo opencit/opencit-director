@@ -6,6 +6,7 @@ public class ImageInfoResponse extends ImageInfo{
 
 	public String ip_address;
 	public String username;
+	public String error;
 	public String getIp_address() {
 		return ip_address;
 	}
@@ -18,6 +19,12 @@ public class ImageInfoResponse extends ImageInfo{
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
+	public String getError() {
+		return error;
+	}
+	public void setError(String error) {
+		this.error = error;
+	}
+
 	
 }

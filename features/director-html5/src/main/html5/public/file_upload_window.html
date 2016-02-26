@@ -202,17 +202,17 @@ input[readonly] {
 			'image_deployments' : image_deployments,
 			'image_format' : image_format,
 			'image_name' : fileName,
-			'image_size' : upload_size
+			'image_size' : SIZE
 		};
 		xhrmdt.send(JSON.stringify(upload_data));
 		xhrmdt.onreadystatechange = function(e) {
 
 			if (xhrmdt.readyState === 4) {
-				if (xhrmdt.status === 200) {
+				if (xhrmdt.status === 400 || xhrmdt.status === 200 ) {
 
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
-					if (myArr.state == "Error") {
+					if (myArr.image_upload_status == "Error") {
 						$('#file_upload_window_modal_body').html(myArr.details);
 						$("#file_upload_window_modal").modal({
 							backdrop : "static"
