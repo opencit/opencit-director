@@ -6,18 +6,25 @@ import java.util.Map;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreSettings;
+import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyTemplateInfo;
+import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageActionFilter;
+import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.PolicyUploadFilter;
+import com.intel.director.api.ui.PolicyUploadOrderBy;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
@@ -60,8 +67,15 @@ public interface IPersistService {
 	public abstract List<ImageInfo> fetchImages(ImageInfoOrderBy orderBy,
 			int firstRecord, int maxRecords) throws DbException;
 
-	public abstract TrustPolicy fetchPolicyForImage(String imageId)
+	public abstract TrustPolicy fetchActivePolicyForImage(String imageId)
 			throws DbException;
+	
+	public abstract List<TrustPolicy> fetchPoliciesForImage(String imageId)
+			throws DbException;
+	
+	public abstract List<TrustPolicy> fetchArchivedPoliciesForImage(String imageId)
+			throws DbException;
+
 
 	public abstract TrustPolicyDraft fetchPolicyDraftForImage(String imageId)
 			throws DbException;
@@ -229,6 +243,9 @@ public interface IPersistService {
 	public abstract ImageActionObject fetchImageActionById(
 			String image_action_id) throws DbException;
 
+	public abstract List<ImageActionObject> fetchImageActions(ImageActionFilter imageActionFilter, ImageActionOrderBy imageActionOrderBy)
+			throws DbException;
+	
 	public void updateImageAction(ImageActionObject imageactionobject)
 			throws DbException;
 
@@ -276,4 +293,57 @@ public interface IPersistService {
 	public List<PolicyTemplateInfo> fetchPolicyTemplate(PolicyTemplateInfo filter) throws DbException;
 
 	public abstract void destroySshPassword(String id) throws DbException;
+
+	public ImageStoreTransferObject saveImageStore(
+			ImageStoreTransferObject imageStoreTO) throws DbException;
+
+	public void updateImageStore(ImageStoreTransferObject imageStoreTO)
+			throws DbException;
+
+	public void destroyImageStore(ImageStoreTransferObject imageStoreTO)
+			throws DbException;
+
+	public void destroyImageStoreByID(String image_store_id) throws DbException;
+
+	public ImageStoreTransferObject fetchImageStorebyId(String id) throws DbException;
+
+	public List<ImageStoreTransferObject> fetchImageStores(
+			ImageStoreFilter imageStoreFilter) throws DbException;
+	
+	
+	
+	
+	public abstract PolicyUploadTransferObject savePolicyUpload(
+			PolicyUploadTransferObject polUpload) throws DbException;
+
+	public abstract void updatePolicyUpload(
+			PolicyUploadTransferObject polUpload) throws DbException;
+
+	public abstract List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadFilter polUploadFilter,
+			PolicyUploadOrderBy orderBy) throws DbException;
+
+	public abstract List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadFilter polUploadFilter,
+			PolicyUploadOrderBy orderBy, int firstRecord, int maxRecords)
+			throws DbException;
+
+	public abstract PolicyUploadTransferObject fetchPolicyUploadById(
+			String id) throws DbException;
+
+	public abstract void destroyPolicyUpload(
+			PolicyUploadTransferObject PolicyUploadTransferObject)
+			throws DbException;
+
+	public abstract int getTotalPolicyUploadsCount() throws DbException;
+
+	public abstract int getTotalPolicyUploadsCount(
+			PolicyUploadFilter polUploadFilter) throws DbException;
+
+	public abstract List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadOrderBy orderBy) throws DbException;
+
+	public abstract List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadOrderBy orderBy, int firstRecord, int maxRecords)
+			throws DbException;
 }

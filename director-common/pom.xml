@@ -15,11 +15,52 @@
 	</parent>
 
 	<dependencies>
+		<!-- Director -->
+
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<artifactId>director-images-api</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- MTW -->
 		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-codec</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<artifactId>mtwilson-util-exec</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-configuration</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.kms</groupId>
+			<artifactId>kms-client-jaxrs2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-password-vault</artifactId>
+			<version>${mtwilson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-configuration</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-trustpolicy-xml</artifactId>
+			<type>jar</type>
+		</dependency>
+
+		<!-- Others -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
@@ -46,35 +87,15 @@
 			<version>1.10</version>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-exec</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-configuration</artifactId>
-			<version>${mtwilson.version}</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<artifactId>director-images-api</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.kms</groupId>
-			<artifactId>kms-client-jaxrs2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-password-vault</artifactId>
-			<version>${mtwilson.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.rauschig</groupId>
 			<artifactId>jarchivelib</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.kamranzafar</groupId>
+			<artifactId>jtar</artifactId>
+			<version>2.2</version>
 		</dependency>
 
 

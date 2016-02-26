@@ -17,10 +17,10 @@ function CreateDockerImageViewModel() {
     self.createDockerImageMetaData = new CreateDockerImageMetaData({});
 
     self.createDockerImage = function(loginFormElement) {
-        $("#createDockerPolicyNext").prop('disabled', true);
 
         self.createDockerImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
         self.createDockerImageMetaData.encrypted = false;
+
         self.createDockerImageMetaData.display_name = $('#display_name').val();
         current_display_name = $('#display_name').val();
 

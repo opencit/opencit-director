@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 
-<title>Virtualized Server</title>
-<meta name="author" content="aakash">
+    <title>Virtualized Server</title>
+    <meta name="author" content="aakash">
 </head>
+
 <body>
 
-</br>
-		<h4><span class="label label-default">
+    </br>
+    <h4><span class="label label-default">
 		<a href="#" style=" text-decoration:none; color:white; cursor:text;">Virtualized Server</a>
   		</span>
 		<span class="label label-primary">
@@ -18,36 +20,77 @@
 		<span class="label label-primary">
 			<a href="#" onClick="goToDockerPage()" style=" text-decoration:none; color:white;  ">  Docker  </a>
 		</span></h4>
-		
-		<div class="panel panel-default">
-		<div class="panel-heading" id="vmgrid_panel_heading" >
-			<h1>Virtualized Server&nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh"  id="vmgrid_panel_refresh" title="Refresh" onclick="refresh_vm_images_Grid();"></span></a></h1>
-		</div>
-		<div class="panel-body" id="vmgrid_panel_body" >
 
-			<div class="row">
-				<div class="col-md-1"></div>
-		<div class="col-md-10" style="margin-top: 10px;">
-			<div id="vmGrid"></div>
-		</div>
-		<div class="col-md-1"></div>
-			</div>
+    <div class="panel panel-default">
+        <div class="panel-heading" id="vmgrid_panel_heading">
+            <h1>Virtualized Server&nbsp;<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh"  id="vmgrid_panel_refresh" title="Refresh" onclick="refresh_vm_images_Grid();"></span></a></h1>
+        </div>
+        <div class="panel-body" id="vmgrid_panel_body">
 
-		</div>
-	</div>
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10" style="margin-top: 10px;">
+                    <div id="vmGrid"></div>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
 
-	
+        </div>
+    </div>
 
-	<script type="text/javascript">
-		console.log("createimage.html script");
-		resourceLoader.loadJS([ 'js/knockout.js', 'js/jquery.js' ], function() {
-			console.log("vm_images_grid_page.html: loaded scripts");
-			// add our view models to the main view model defined by index.html
-			/// alert(!!ko.dataFor(document.getElementById("imgeId"));  
-			///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
-		});
-	</script>
-	<script
-		src="/v1/html5/public/director-html5/js/vm_images_grid_page.js"></script>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="image_action_history" role="dialog">
+        <div class="modal-dialog modal-lg">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <center>
+                        <h4 class="modal-title"><div id="image_action_history_title"></div></h4></center>
+                </div>
+                <div class="modal-body">
+                    <center>
+                        <font color="red">
+                            <div id="image_action_history_error"></div>
+                        </font>
+                        <center>
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10">
+                                    <div id="vm_image_action_history_grid"></div>
+
+
+                                </div>
+                                <div class="col-md-1" style="margin-top: 8px;"></div>
+                            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+    <script type="text/javascript">
+        console.log("createimage.html script");
+        resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js'], function() {
+            console.log("vm_images_grid_page.html: loaded scripts");
+            // add our view models to the main view model defined by index.html
+            /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
+        });
+    </script>
+    <script src="/v1/html5/public/director-html5/js/vm_images_grid_page.js"></script>
 </body>
+
 </html>

@@ -69,13 +69,12 @@ public class ImageActionPoller {
 					+ imageActionObj.getCurrent_task_status());
 			if (imageIdsInProcess.contains(imageActionObj.getImage_id())) {
 				continue;
-			} else {
-				imageIdsInProcess.add(imageActionObj.getImage_id());
-			}
+			} 
 
 			if (imageActionObj.getCurrent_task_status() != null
 					&& imageActionObj.getCurrent_task_status().equals(
 							Constants.INCOMPLETE)) {
+				imageIdsInProcess.add(imageActionObj.getImage_id());
 				ExecuteActionsTask task = new ExecuteActionsTask(imageActionObj);
 				ImageActionExecutor.submitTask(task);
 				log.info("Submitted task for ExecuteActions for id: "

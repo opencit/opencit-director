@@ -195,5 +195,44 @@ public class MountImage {
 		}
 		return exitcode;
 	}
+	
+	public static int mountWindowsRemoteSystem(String ipAddress,
+			String userName, String password, String mountpath,
+			String partition, int dir_mode, int file_mode) {
+		int exitcode = 0;
+		String command = "mount -t cifs" + SPACE + "//" + ipAddress + "/"
+				+ partition + "$" + SPACE + mountpath + SPACE + "-o" + SPACE
+				+ "user=" + userName + "," + "pass=" + password + ",dir_mode="
+				+ dir_mode + ",file_mode=" + file_mode;
+
+		log.info("MOunting To Windows Remote Host Using :: " + command);
+
+		try {
+			exitcode = DirectorUtil.executeCommandInExecUtil("mount", "-t",
+					"cifs", "//" + ipAddress + "/" + partition + "$",
+					mountpath, "-o", "user=" + userName + "," + "pass="
+							+ password + ",dir_mode=" + dir_mode
+							+ ",file_mode=" + file_mode);
+		} catch (IOException e) {
+			exitcode = 1;
+			log.error("Error in mounting remote host" + e);
+		}
+		return exitcode;
+	}
+	
+	public static int unmountWindowsRemoteSystem(String mountPath) {
+		int exitcode = 0;
+
+		log.debug("Unmounting the Remote File System in mount path : "
+				+ mountPath);
+		try {
+			exitcode = DirectorUtil.executeCommandInExecUtil("umount",
+					mountPath);
+		} catch (IOException e) {
+			exitcode = 1;
+			log.error("Error in unmounting remote host" + e);
+		}
+		return exitcode;
+	}
 
 }

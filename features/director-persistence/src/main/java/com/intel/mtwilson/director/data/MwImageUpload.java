@@ -46,16 +46,29 @@ public class MwImageUpload {
 		@Column(name = "DATE")
 		private Date date;
 		
-		@Column(name = "IS_TARBALL_UPLOAD")
-		private boolean isTarballUpload;
+		@Column(name = "UPLOAD_VARIABLES_MD5", length = 32)
+		private String uploadVariablesMd5;
 		
+	  	@Column(name = "POLICY_UPLOAD_ID", length = 36)
+		private String policyUploadId;
+	
+	  	@ManyToOne(optional = false)
+		@JoinColumn(name = "STORE_ID", referencedColumnName = "id")
+		private MwImageStore store;
+	  	
 		@Column(name = "CONTENT_LENGTH")
 		private Long contentlength;
 		
 		@Column(name = "SENT")
 		private Long sent;
 
-
+		@Column(name = "STORE_ARTIFACT_ID", length = 36)
+		private String storeArtifactId;
+		
+		@Column(name = "IS_DELETED")
+		private boolean isDeleted; 
+		
+		
 		public MwImageUpload(){
 			super();
 		}
@@ -78,7 +91,31 @@ public class MwImageUpload {
 		}
 
 
-	
+		
+
+		public MwImageStore getStore() {
+			return store;
+		}
+
+		public void setStore(MwImageStore store) {
+			this.store = store;
+		}
+
+		public String getUploadVariablesMd5() {
+			return uploadVariablesMd5;
+		}
+
+		public void setUploadVariablesMd5(String uploadVariablesMd5) {
+			this.uploadVariablesMd5 = uploadVariablesMd5;
+		}
+
+		public String getPolicyUploadId() {
+			return policyUploadId;
+		}
+
+		public void setPolicyUploadId(String policyUploadId) {
+			this.policyUploadId = policyUploadId;
+		}
 
 		public Character[] getImageUri() {
 			return imageUri;
@@ -120,14 +157,7 @@ public class MwImageUpload {
 			this.date = date;
 		}
 
-		public boolean isTarballUpload() {
-			return isTarballUpload;
-		}
-
-		public void setTarballUpload(boolean isTarballUpload) {
-			this.isTarballUpload = isTarballUpload;
-		}
-
+	
 		public Long getContentlength() {
 			return contentlength;
 		}
@@ -142,6 +172,22 @@ public class MwImageUpload {
 
 		public void setSent(Long sent) {
 			this.sent = sent;
+		}
+
+		public String getStoreArtifactId() {
+			return storeArtifactId;
+		}
+
+		public void setStoreArtifactId(String storeArtifactId) {
+			this.storeArtifactId = storeArtifactId;
+		}
+
+		public boolean isDeleted() {
+			return isDeleted;
+		}
+
+		public void setDeleted(boolean isDeleted) {
+			this.isDeleted = isDeleted;
 		}
 
 		

@@ -2,35 +2,20 @@
 <html>
 <head>
 
-
-<title>Create Policy</title>
+<title>Upload To Image Store</title>
 <meta name="author" content="aakash">
 </head>
 <body>
-	<script type="text/javascript">
-		/*
-		var endpoint = "/v1";
-		function MainViewModel() {
-		    var self = this;
-		    self.keysViewModel = new KeyListViewModel();
-		    self.settingsViewModel = new SettingListViewModel();
-		}
-		
-		 */
-
-		var checkImageActionId = true;
+	<script>
+		current_depolyment_type = "VM";
 	</script>
 	<script
 		src="/v1/html5/public/director-html5/js/upload_to_image_store.js"></script>
 
-
-
-
-
 	<div id="upload_to_image_store" data-bind="with: UploadStoreViewModel">
 		<form class="form-horizontal" role="form"
 			data-bind="submit: uploadToStore">
-			<div data-bind="with: UploadStoreMetaData">
+			<div>
 
 				<div class="row">
 					<div class="col-md-2"></div>
@@ -41,9 +26,7 @@
 							</div>
 							<div class="panel-body">
 
-
-
-								<div class="form-group">
+								<div class="form-group" id = "display_name_last_div">
 									<label class="control-label col-md-4" for="display_name_last">Policy	
 										Name:</label>
 									<div class="col-md-4">
@@ -52,77 +35,70 @@
 									</div>
 								</div>
 
-
-
-
-								<div id="tarball_radio_div" class="form-group">
-									<label class="control-label col-md-4" for="tarball_option">Upload
-										as tarball:</label>
-									<div id="tarball_option" class="col-md-8">
-										<label class="radio-inline"> <input type="radio"
-											value="1" name="tarball_radio" onclick="toggleradios11();" />Yes
-										</label> <label class="radio-inline"> <input type="radio"
-											value="0" name="tarball_radio" onclick="toggleradios11();" />No
-										</label>
-									</div>
-								</div>
-
-
-								<div id="tarball_upload_div" class="form-group">
-									<label class="control-label col-md-4"
-										for="tarball_upload_combo">Tarball Upload:</label>
-									<div class="col-md-4">
-										<select class="form-control" id="tarball_upload_combo"
-											name="tarball_upload_combo" required>
-
+								<div id="upload_artifact_div" class="form-group">
+									<label class="control-label col-md-4" for="upload_artifact">Upload Artifact</label>
+									<div class="col-md-8">
+										<select class="form-control" id="upload_artifact">
+												
 										</select>
 									</div>
 								</div>
 
+								<div id="upload_image_div" class="form-group">
+									<label class="control-label col-md-4" for="upload_image">Image Upload:</label>
+									<div class="col-md-4">
+										<select class="form-control" id="upload_image">
+										</select>
+									</div>
+								</div>
 
-								<div id="image_policy_upload_div">
+								<div id="upload_policy_div" class="form-group">
+									<label class="control-label col-md-4" for="upload_policy">Policy Upload:</label>
+									<div class="col-md-4">
+										<select class="form-control" id="upload_policy">
+										</select>
+									</div>
+								</div>
+								
+								<div id="upload_tarball_div" class="form-group">
+									<label class="control-label col-md-4" for="upload_tarball">Image With Policy Upload:</label>
+									<div class="col-md-4">
+										<select class="form-control" id="upload_tarball">
+										</select>
+									</div>
+								</div>
 
-									<div class="form-group">
-										<label class="control-label col-md-4" for="image_upload_combo">Image
-											Upload:</label>
-										<div class="col-md-4">
-											<select class="form-control" id="image_upload_combo"
-												name="image_upload_combo" required>
-
-											</select>
-										</div>
+								
+								<div id = "wizard_flow_buttons">
+									<div class="col-md-offset-1 col-md-1">
+										<button type="button" onclick="createPolicyDraftFromPolicy()"
+											class="btn btn-primary" id="vm_upload_previous">Previous</button>
+									</div>
+	
+									<div class="col-md-offset-3 col-md-1">
+										<button type="button" class="btn btn-primary"
+											onclick="backToVmImagesPage()" id="vm_upload_later">Upload Later</button>
 									</div>
 
-
-
-									<div id="policy_upload_div" class="form-group">
-										<label class="control-label col-md-4"
-											for="policy_upload_combo">Policy Upload:</label>
-										<div class="col-md-4">
-											<select class="form-control" id="policy_upload_combo"
-												name="policy_upload_combo" required>
-
-											</select>
-										</div>
-									</div>
-
-								</div>
-
-
-								<div class="col-md-offset-1 col-md-1">
-									<button type="button" onclick="createPolicyDraftFromPolicy()"
-										class="btn btn-primary" id="vm_upload_previous">Previous</button>
-								</div>
-
-								<div class="col-md-offset-3 col-md-1">
-									<button type="button" class="btn btn-primary"
-										onclick="backToVmImagesPage()" id="vm_upload_later">Upload Later</button>
-								</div>
-
-								<div class="col-md-offset-3 col-md-1">
-									<button type="button" class="btn btn-primary" id="vm_upload_now" onclick="uploadToStore()">Upload
+									<div class="col-md-offset-3 col-md-1">
+										<button type="button" class="btn btn-primary" id="vm_upload_now" onclick="uploadToStore()">Upload
 										Now</button>
+									</div>
 								</div>
+								
+								<br />
+								
+								<div id = "grid_flow_buttons">
+									<div class="col-md-offset-1 col-md-1">
+										<button type="button" onclick="backToVmImagesPage()" id="vm_upload_direct_back_to_images"
+											class="btn btn-primary">Back To Images</button>
+									</div>
+
+									<div class="col-md-offset-6 col-md-1">
+										<button type="button" class="btn btn-primary" id="vm_upload_direct_button" onclick="uploadToStore()">Upload</button>
+									</div>
+								</div>
+								
 								<!-- Modal -->
 								<div class="modal fade" id="redirect" role="dialog">
 									<div class="modal-dialog">
@@ -144,6 +120,8 @@
 
 									</div>
 								</div>
+								
+								
 								<!-- Modal -->
 								<div class="modal fade" id="error_vm_3" role="dialog">
 									<div class="modal-dialog">
@@ -164,6 +142,10 @@
 										</div>
 									</div>
 								</div>
+								
+								
+								
+								
 							</div>
 						</div>
 					</div>

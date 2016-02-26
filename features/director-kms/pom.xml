@@ -1,66 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>director-maven-java</artifactId>
-        <groupId>com.intel.mtwilson.director</groupId>
-        <version>0.1-SNAPSHOT</version>
-    </parent>
-    <artifactId>director-kms</artifactId>
-    <packaging>jar</packaging>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>    
-    
-    
-    <dependencies>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.kms</groupId>
-            <artifactId>kms-client-jaxrs2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.schmizz</groupId>
-            <artifactId>sshj</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-exec</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-configuration</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
-            <artifactId>director-common</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>director-maven-java</artifactId>
+		<groupId>com.intel.mtwilson.director</groupId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>director-kms</artifactId>
+	<packaging>jar</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>
+
+
+	<dependencies>
+		<!-- Director -->
+
+
+		<!-- MTW -->
+		<dependency>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<artifactId>mtwilson-util-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<artifactId>mtwilson-util-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.kms</groupId>
+			<artifactId>kms-client-jaxrs2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<artifactId>mtwilson-util-exec</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-configuration</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-password-vault</artifactId>
 			<version>${mtwilson.version}</version>
 		</dependency>
-		
-    </dependencies>
+		<!-- Other -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.schmizz</groupId>
+			<artifactId>sshj</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
+		</dependency>
+	</dependencies>
 </project>

@@ -2,6 +2,7 @@ package com.intel.mtwilson.director.data;
 
 import java.util.Collection;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Cacheable;
 
 @Entity
 @Cacheable(false)
@@ -27,7 +27,14 @@ public class MwImage extends MwAuditable {
 
 	@Column(name = "LOCATION")
 	private String location;
-
+	
+	@Column(name = "TMP_LOCATION")
+	private String tmpLocation;
+	
+	@Column(name = "UPLOAD_VARIABLES_MD5", length = 32)
+	private String uploadVariablesMd5;
+	
+	
 	@Column(name = "MOUNTED_BY_USER_ID", length = 36)
 	private String mountedByUserId;
 
@@ -38,9 +45,8 @@ public class MwImage extends MwAuditable {
 	@OneToMany(mappedBy = "image")
 	private Collection<MwImageUpload> tblMwimageUploadCollection;
 
-	@OneToOne(optional = true,cascade = CascadeType.ALL)
-	@JoinColumn(name = "TRUST_POLICY_ID", referencedColumnName = "ID")
-	private MwTrustPolicy trustPolicy;
+	@OneToMany(mappedBy = "image")
+	private Collection<MwTrustPolicy> trustPolicyCollection;
 
 
 	@OneToOne(optional = true,cascade = CascadeType.ALL)
@@ -54,7 +60,7 @@ public class MwImage extends MwAuditable {
 	private Long  contentLength;
 	
 	@Column(name = "SENT")
-	public Long sent;
+	private Long  sent;
 	
 	@Column(name = "repository")
 	private String repository;
@@ -147,13 +153,7 @@ public class MwImage extends MwAuditable {
 		this.contentLength = contentlength;
 	}
 
-	public MwTrustPolicy getTrustPolicy() {
-		return trustPolicy;
-	}
 
-	public void setTrustPolicy(MwTrustPolicy trustPolicy) {
-		this.trustPolicy = trustPolicy;
-	}
 
 	public MwTrustPolicyDraft getTrustPolicyDraft() {
 		return trustPolicyDraft;
@@ -179,5 +179,31 @@ public class MwImage extends MwAuditable {
 		this.sent = sent;
 	}
 
+	public String getTmpLocation() {
+		return tmpLocation;
+	}
+
+	public void setTmpLocation(String tmpLocation) {
+		this.tmpLocation = tmpLocation;
+	}
+
+	public String getUploadVariablesMd5() {
+		return uploadVariablesMd5;
+	}
+
+	public void setUploadVariablesMd5(String uploadVariablesMd5) {
+		this.uploadVariablesMd5 = uploadVariablesMd5;
+	}
+
+	public Collection<MwTrustPolicy> getTrustPolicyCollection() {
+		return trustPolicyCollection;
+	}
+
+	public void setTrustPolicyCollection(
+			Collection<MwTrustPolicy> trustPolicyCollection) {
+		this.trustPolicyCollection = trustPolicyCollection;
+	}
+	
+	
 	
 }

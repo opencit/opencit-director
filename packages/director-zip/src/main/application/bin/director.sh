@@ -329,6 +329,8 @@ done
 rm -rf /mnt/director
 
 if [ "$2" = "--purge" ]; then
+	director export-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
+
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}
 	DIRECTOR_DB_NAME=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.name' | cut -d'=' -f2`
 	DIRECTOR_DB_USER=`cat ${DIRECTOR_PROPERTIES_FILE} | grep 'director.db.username' | cut -d'=' -f2`

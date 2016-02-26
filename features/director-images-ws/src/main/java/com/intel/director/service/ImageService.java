@@ -44,7 +44,6 @@ import com.intel.mtwilson.director.db.exception.DbException;
  */
 public interface ImageService {
 
-	
 	public MountImageResponse mountImage(String imageId, String user)
 			throws DirectorException;
 
@@ -52,19 +51,21 @@ public interface ImageService {
 			throws DirectorException;
 
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
-			String image_id, InputStream filInputStream) throws DirectorException;
-
+			String image_id, InputStream filInputStream)
+			throws DirectorException;
 
 	public SearchImagesResponse searchImages(
 			SearchImagesRequest searchImagesRequest) throws DirectorException;
 
 	public SearchFilesInImageResponse searchFilesInImage(
-			SearchFilesInImageRequest searchFilesInImageRequest) throws DirectorException;;
+			SearchFilesInImageRequest searchFilesInImageRequest)
+			throws DirectorException;;
 
 	public String getTrustPolicyForImage(String imageId);
 
 	public TrustPolicyDraftResponse editTrustPolicyDraft(
-			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) throws DirectorException;
+			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest)
+			throws DirectorException;
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
@@ -73,42 +74,55 @@ public interface ImageService {
 	public CreateTrustPolicyMetaDataResponse getPolicyMetadata(String draftid)
 			throws DirectorException;
 
-	public ImageListResponse getImagesForVM(List<ImageInfo> images) throws DirectorException;
-	
+	public ImageListResponse getImagesForVM(List<ImageInfo> images)
+			throws DirectorException;
+
 	public CreateTrustPolicyMetaDataResponse getPolicyMetadataForImage(
 			String image_id) throws DirectorException;
+	
+	public String fetchImageIdByDraftOrPolicy(String draftOrPolicyId);
 
-	public String createTrustPolicy(String image_id, String trust_policy_draft_id)
+	public String createTrustPolicy(String trust_policy_draft_id)
 			throws DirectorException;
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 
-	public TrustPolicyDraftResponse createPolicyDraftFromPolicy(String imageId) throws DirectorException;
+	public TrustPolicyDraftResponse createPolicyDraftFromPolicy(String imageId)
+			throws DirectorException;
 
-	public String getDisplayNameForImage(String image_id) throws DirectorException;
+	public String getDisplayNameForImage(String image_id)
+			throws DirectorException;
 
 	ImageListResponse getImagesForBareMetal(List<ImageInfo> images)
 			throws DirectorException;
 
-	public ImageListResponse getBareMetalLive(List<ImageInfo> images) throws DirectorException;
+	public ImageListResponse getBareMetalLive(List<ImageInfo> images)
+			throws DirectorException;
 
-	public ImageListResponse getImages(List<ImageInfo> images, String deployment_type) throws DirectorException;
+	public ImageListResponse getImages(List<ImageInfo> images,
+			String deployment_type) throws DirectorException;
 
-	public String getFilepathForImage(String imageId, boolean isModified) throws DbException;
+	public String getFilepathForImage(String imageId, boolean isModified)
+			throws DbException;
 
-	public TrustPolicy getTrustPolicyByImageId(String imageId) throws  DirectorException;
-	
-	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId) throws DirectorException;
+	public TrustPolicy getTrustPolicyByImageId(String imageId)
+			throws DirectorException;
+
+	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId)
+			throws DirectorException;
 
 	public void deleteTrustPolicy(String imageId) throws DirectorException;
 
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			long fileSize,String repository,String tag) throws DirectorException;
-	
-	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException;
+			long fileSize, String repository, String tag)
+			throws DirectorException;
 
-	public SshSettingRequest getBareMetalMetaData(String image_id) throws DirectorException;
+	public File createTarballOfPolicyAndManifest(String imageId)
+			throws DirectorException;
+
+	public SshSettingRequest getBareMetalMetaData(String image_id)
+			throws DirectorException;
 
 	public void deletePasswordForHost(String image_id) throws DirectorException;
 
@@ -121,12 +135,22 @@ public interface ImageService {
 
 	void deleteTrustPolicyDraft(String trust_policy_draft_id)
 			throws DirectorException;
-	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id) throws DirectorException;
 
-	public GenericResponse dockerRMI(String image_id) throws DirectorException;
+	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id)
+			throws DirectorException;
 
-	
-	public ImageInfoResponse getImageDetails(String imageId) throws DirectorException;
+	public void dockerSave(String image_id, String user)
+			throws DirectorException;
+
+	public GenericResponse dockerRMI(String image_id)
+			throws DirectorException;
+
+	public void updateTrustPolicy(
+			UpdateTrustPolicyRequest updateTrustPolicyRequest,
+			String trust_policy_id) throws DirectorException;
+
+	public String getImageByTrustPolicyDraftId(String trustPolicydraftId)
+			throws DirectorException;
 
 	public GenericResponse dockerLoad(String image_id) throws DirectorException;
 
@@ -134,20 +158,21 @@ public interface ImageService {
 
 	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException;
 
-	public void updateTrustPolicy(
-			UpdateTrustPolicyRequest updateTrustPolicyRequest, String trust_policy_id) throws DirectorException;
 
-	public String getImageByTrustPolicyDraftId(String trustPolicydraftId) throws DirectorException;
+	public ImageInfo fetchImageById(String id) throws DirectorException;
+
+	public ImageInfoResponse getImageDetails(String imageId)
+			throws DirectorException;
 	
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;
-	
+
 	public List<SshSettingRequest> sshData() throws DirectorException;
 
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
-			throws DirectorException ;
-	
+			throws DirectorException;
+
 	public void postSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException;
 
@@ -160,9 +185,8 @@ public interface ImageService {
 
 	public SshSettingRequest fetchSshInfoByImageId(String image_id)
 			throws DirectorException;
-	
-	public ImageInfo fetchImageById(String imageId) throws DirectorException;
-	
+			
 	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId);
+	
 }
 

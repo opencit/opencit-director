@@ -531,9 +531,7 @@ disable_tcp_timestamps
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
-    touch $DIRECTOR_CONFIGURATION/.director_password
-    chown $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_CONFIGURATION/.director_password
-	director generate-password > $DIRECTOR_CONFIGURATION/.director_password
+    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
@@ -594,8 +592,6 @@ fi
 
 echo "Installing docker....!!!!!"
 apt-get -y install docker-engine=1.9.1-0~$CODENAME --force-yes
-sudo apt-mark hold docker-engine            
-docker version  
 ## Docker 
 
 # delete the temporary setup environment variables file
@@ -609,6 +605,7 @@ done
 director import-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
 director import-config --in=/opt/director/configuration/kms.properties --out=/opt/director/configuration/kms.properties
 director import-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
+
 # start the server, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"

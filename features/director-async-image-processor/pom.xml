@@ -39,17 +39,11 @@
 	</build>
 
 	<dependencies>
-		<!-- director projects begin -->
+		<!-- Director -->
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
 			<version>0.1-SNAPSHOT</version>
 			<artifactId>director-images-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20140107</version>
 		</dependency>
 
 
@@ -68,11 +62,6 @@
 					<artifactId>json</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20140107</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
@@ -97,7 +86,6 @@
 			<version>0.1-SNAPSHOT</version>
 			<artifactId>director-glance</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
 			<version>0.1-SNAPSHOT</version>
@@ -109,9 +97,21 @@
 			<version>0.1-SNAPSHOT</version>
 			<artifactId>director-trust-policy</artifactId>
 		</dependency>
+
+
+		<!-- MTW -->
+
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-configuration</artifactId>
+		</dependency>
+
+		<!-- Others -->
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
 		</dependency>
 	</dependencies>
 </project>

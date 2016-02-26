@@ -5,7 +5,6 @@
  */
 package com.intel.director.images.async;
 
-import java.io.File;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,31 +21,27 @@ public class ImageTransferTask implements Runnable {
 
     private final String glanceid;
     private final GlanceRsClient glanceRsClient;
-    private final File uploadfile;
-    private final Map<String, String> imageProperties;
+    private final Map<String, Object> imageProperties;
   
 
-    public ImageTransferTask(File file, Map<String, String> imageProperties, String id, GlanceRsClient glanceRsClient) {
+    public ImageTransferTask(Map<String, Object> imageProperties, String id, GlanceRsClient glanceRsClient) {
         this.glanceid = id;
         this.glanceRsClient = glanceRsClient;
         this.imageProperties=imageProperties;
-        this.uploadfile=file;
     }
 
     @Override
     public void run() {
-        //glanceRsClient.uploadImage(imageStoreRequest);
-        System.out.println("RUN inside task");
+        log.info("Inside ImageTransferTask run()");        
         try {
-        	System.out.println("Before glance response..");
-            glanceRsClient.uploadImage(uploadfile,imageProperties,glanceid);
-            System.out.println("Uploading .... ");
+        	log.info("Before uploading image using glance client ");
+            glanceRsClient.uploadImage(imageProperties);
+            log.info("Uploading .... ");
             Thread.sleep(1000 * 30);
         } catch (InterruptedException ex) {
             Logger.getLogger(ImageTransferTask.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception e) {
-			// TODO Handle Error
-			log.error("Error in ImageTransferTask" + e);
+			log.error("Error in ImageTransferTask" , e);
 		}
         System.out.println("Uploading complete");
     }

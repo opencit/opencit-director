@@ -18,9 +18,9 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
  * @author soakx
  */
 public class UpdateTrustPolicyRequest {
-
-	public String display_name;
-	public String image_id;
+	
+    public String display_name;
+    public String image_id;
 
 	public String getDisplay_name() {
 		return display_name;

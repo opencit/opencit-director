@@ -1,4 +1,3 @@
-var endpoint = "/v1/images/";
 var pageInitialized = false;
 $(document).ready(function() {
 
@@ -14,6 +13,129 @@ $(document).ready(function() {
 function ImageData() {
 
 }
+
+function showImageActionHistoryDialog(imageid) {
+
+    $("#image_action_history_title").html("Image Actions History");
+
+    $('#image_action_history').modal('show');
+    show_vm_action_history_grid(imageid);
+
+}
+
+
+function HistoryData() {
+
+}
+
+function show_vm_action_history_grid(imageid) {
+
+
+    var self = this;
+
+    $("#vm_image_action_history_grid").html("")
+    $.ajax({
+        type: "GET",
+        url: "/v1/image-actions/history/" + imageid,
+        accept: "application/json",
+        headers: {
+            'Accept': 'application/json'
+        },
+
+        success: function(data, status, xhr) {
+
+            console.log("Action History grid refreshed");
+            actionHistoryList = data.image_action_history_list;
+            var grid = [];
+
+            for (i = 0; i < actionHistoryList.length; i++) {
+
+
+                self.gridData = new HistoryData();
+                self.gridData.artifact_name = actionHistoryList[i].artifact_name;
+                self.gridData.execution_status = actionHistoryList[i].execution_status;
+                self.gridData.datetime = actionHistoryList[i].datetime;
+
+                self.gridData.artifact_name = actionHistoryList[i].artifact_name;
+
+
+                self.gridData.store_names = actionHistoryList[i].store_names;
+
+                ///alert("self.gridData.artifact_name::"+self.gridData.artifact_name);
+
+
+                grid.push(self.gridData);
+
+            }
+
+            $("#vm_image_action_history_grid").jsGrid({
+
+                height: "auto",
+                width: "100%",
+                sorting: true,
+                paging: true,
+                pageSize: 5,
+                pageButtonCount: 15,
+                data: grid,
+                fields: [{
+                        title: "Artifact",
+                        name: "artifact_name",
+                        type: "text",
+                        width: 150,
+                        align: "center"
+				}, {
+                        title: "Status",
+                        name: "execution_status",
+                        type: "text",
+                        width: 230,
+                        align: "center"
+				}, {
+                        title: "Store",
+                        name: "store_names",
+                        type: "text",
+                        width: 100,
+                        align: "center"
+				},
+
+                    {
+                        title: "ExecutionDate",
+                        name: "datetime",
+                        type: "text",
+                        width: 150,
+                        align: "center"
+					}],
+                onRefreshed: function(args) {
+                    if (grid.length <= 0) {
+                        return;
+                    }
+                    var numOfPagesWithDecimal = grid.length / args.grid.pageSize;
+                    var numOfPages = Math.ceil(numOfPagesWithDecimal);
+                    if (args.grid.pageIndex > numOfPages) {
+                        args.grid.reset();
+                    }
+
+                }
+            });
+            var delay = 300;
+            setTimeout(function() {
+                $("#vm_image_action_history_grid").show();
+                $("#vm_image_action_history_grid").jsGrid("refresh");
+            }, delay);
+
+        },
+        error: function(jqXHR, exception) {
+
+            show_error_in_trust_policy_tab("Failed to get action history list");
+
+
+        }
+    });
+
+
+
+
+}
+
 
 function refresh_vm_images_Grid() {
     var self = this;
@@ -73,8 +195,8 @@ function refresh_vm_images_Grid() {
                 self.gridData.image_upload = "";
                 if (images[i].image_upload_status == 'Complete') {
 
-                    if (images[i].uploads_count != 0) {
-                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"vm_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
+                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0) {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"vm_ok_row_" + i + "\" title=\"Uploaded Before\"  onclick=\"showImageActionHistoryDialog('" + images[i].id + "')\" ></span></a>";
                     } else {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"vm_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";
                     }
@@ -143,7 +265,18 @@ function refresh_vm_images_Grid() {
                         type: "text",
                         width: 150,
                         align: "center"
-				}]
+				}],
+                onRefreshed: function(args) {
+                    if (grid.length <= 0) {
+                        return;
+                    }
+                    var numOfPagesWithDecimal = grid.length / args.grid.pageSize;
+                    var numOfPages = Math.ceil(numOfPagesWithDecimal);
+                    if (args.grid.pageIndex > numOfPages) {
+                        args.grid.reset();
+                    }
+
+                }
             });
             var delay = 1000;
             setTimeout(function() {

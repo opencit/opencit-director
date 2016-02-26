@@ -16,21 +16,21 @@
                 var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
                 image_type_upload = $("#image_type").val();
                 if ($("#image_type").val() == 'VM') {
-                    image_format_upload = 'qcow2';
+                	image_format_upload = 'qcow2';
                 } else if ($("#image_type").val() == 'Docker') {
-                    image_format_upload = 'tar';
+                	image_format_upload = 'tar';
                 } else {
-                    image_format_upload = $("#image_format").val();
+                	image_format_upload = $("#image_format").val();
                 }
                 OpenWindow.auth_token_parent = mainViewModel.loginViewModel.userProfile.authorizationToken();
             });
-            $("#image_type").change(function() {
-                if ($("#image_type").val() != 'VM') {
-                    $("#image_format_label").hide();
-                } else {
-                    $("#image_format_label").show();
-                }
-            });
+			$( "#image_type" ).change(function() {
+				if($("#image_type").val() != 'VM'){
+					$( "#image_format_label").hide();			
+				} else {
+					$( "#image_format_label").show();
+				}
+			});
 
             fetchDeploymentType();
 
@@ -150,7 +150,8 @@
                                 <button id="gotoUploadWindow" class="btn btn-primary">Upload</button>
                             </div>
                             <div id="goToTrustPolicyPageDiv" class="col-md-1">
-                                <button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()">Trust Policy Page</button></div>
+                                <button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()">Trust Policy Page</button>
+                            </div>
                         </div>
                     </div>
                 </div>

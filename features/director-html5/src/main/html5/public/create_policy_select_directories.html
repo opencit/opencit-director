@@ -8,16 +8,15 @@
 </head>
 
 <body>
-	<div id="select_directories_page" class="row">
-		<div class="col-md-2"></div>
-		<div class="col-md-8" style="margin-top: 10px;">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h1>Select Directories Page&nbsp;<a href='#' ><span class='glyphicon glyphicon-question-sign'  title='Help' onclick='show_dialog_content_trust_policy_tab("Select Directories help","All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated. All the content for Select Directories help will be shown here. This content will be soon updated.")'></span></a></h1>
-					<span id="saveMessage"></span>
-				</div>
-				<div class="panel-body"
-					style="padding-top: 0px; padding-bottom: 0px;">
+    <div id="select_directories_page" class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8" style="margin-top: 10px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1>Select Directories Page&nbsp;<a href='#' ><span class='glyphicon glyphicon-question-sign'  title='Help' onclick='show_dialog_content_trust_policy_tab("Select Directories help","All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated. All the content for Select Directories help will be shown here. This content will be soon updated.")'></span></a></h1>
+                    <span id="saveMessage"></span>
+                </div>
+                <div class="panel-body" style="padding-top: 0px; padding-bottom: 0px;">
 
 
 
@@ -39,12 +38,12 @@
                                         </div>
 
 
-										<div class="col-md-offset-6 col-md-1 " id="dirNextButton">
-											<button type="submit" id="createVmPolicyDirNext" class="btn btn-primary gotonext">Next</button>
-										</div>
-										<!-- Modal -->
-										<div class="modal fade" id="error_modal_vm_2" role="dialog">
-											<div class="modal-dialog">
+                                        <div class="col-md-offset-6 col-md-1 " id="dirNextButton">
+                                            <button type="submit" id="createVmPolicyDirNext" class="btn btn-primary gotonext">Next</button>
+                                        </div>
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="error_modal_vm_2" role="dialog">
+                                            <div class="modal-dialog">
 
                                                 <!-- Modal content-->
                                                 <div class="modal-content">
@@ -79,10 +78,8 @@
                                 <div>
                                     <div class="panel panel-default">
 
-										<div class="panel-heading"
-											style="height: 40px; background: #0071c5;">
-											<h4
-												style="color: #ddd; font-weight: bold; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">
+                                        <div class="panel-heading" style="height: 40px; background: #0071c5;">
+                                            <h4 style="color: #ddd; font-weight: bold; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">
 												<center>Apply RegEx</center>
 											</h4>
                                         </div>
@@ -91,25 +88,17 @@
                                                 <input type="hidden" name="dir_path" value="Norway">
                                                 <!-- <div
 								style="height: 154px; float: left; padding-left: 0px; padding-right: 0px; padding-top: 25px;"> -->
-												<div class="form-group">
-													<label class="control-label col-md-6"
-														style="padding-left: 4px; padding-right: 17px; padding-top: 10px;"
-														for="create_policy_regex_filename">Folder Path:</label>
-													<div id="folderPathDiv" class="col-md-5"
-														style="padding-left: 0px; padding-right: 0px; padding-top: 10px;">
-													</div>
-												</div>
-												<div class="form-group">
-													<label class="control-label col-md-6" id=""
-														style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-														for="create_policy_regex_include">Include Filter:</label>
-													<div class="col-md-5"
-														style="padding-left: 0px; padding-right: 0px;">
-														<input type="text" class="form-control"
-															id="create_policy_regex_include"
-															placeholder="Enter RegEx" />
-													</div>
-												</div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 10px;" for="create_policy_regex_filename">Folder Path:</label>
+                                                    <div id="folderPathDiv" class="col-md-5" style="padding-left: 0px; padding-right: 0px; padding-top: 10px;">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" id="" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_include">Include Filter:</label>
+                                                    <div class="col-md-5" style="padding-left: 0px; padding-right: 0px;">
+                                                        <input type="text" class="form-control" id="create_policy_regex_include" placeholder="Enter RegEx" />
+                                                    </div>
+                                                </div>
 
 
                                                 <div class="form-group">
@@ -127,22 +116,20 @@
                                                         </div>
                                                     </div>
 
-												</div>
-												<div class="form-group">
-													<label style="padding-left: 100px;"
-														for="regex_error_vm"><div id="regex_error_vm"></div></label>
-												</div>
-											</div>
-											<div class="col-md-offset-3 col-md-3"
-												style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
-												<button type="submit" id="applyRegexVMBtn" class="btn btn-primary">Apply</button>
-											</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label style="padding-left: 100px;" for="regex_error_vm">
+                                                        <div id="regex_error_vm"></div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-offset-3 col-md-3" style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
+                                                <button id="applyRegexVMBtn" type="submit" class="btn btn-primary">Apply</button>
+                                            </div>
 
-											<div class=" col-md-3"
-												style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
-												<button id="resetRegexVMBtn" class="btn btn-primary"
-													data-bind="click: resetRegEx">Reset</button>
-											</div>
+                                            <div class=" col-md-3" style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
+                                                <button id="resetRegexVMBtn" class="btn btn-primary" data-bind="click: resetRegEx">Reset</button>
+                                            </div>
 
                                         </div>
                                     </div>

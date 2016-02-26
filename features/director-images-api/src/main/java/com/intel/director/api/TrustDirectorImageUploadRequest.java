@@ -20,7 +20,6 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 public class TrustDirectorImageUploadRequest extends ImageAttributes{
 	public static final String NAME_REGEX = "[a-zA-Z0-9,;. @_-]+";
     public String image_file;
-    
     public String validate(){
     	List<String> errors = new ArrayList<>();
     	if(!ValidationUtil.isValidWithRegex(image_name,NAME_REGEX)){

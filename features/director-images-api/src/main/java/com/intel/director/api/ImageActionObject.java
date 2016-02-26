@@ -1,5 +1,6 @@
 package com.intel.director.api;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class ImageActionObject extends GenericResponse {
@@ -13,7 +14,51 @@ public class ImageActionObject extends GenericResponse {
 	private List<ImageActionTask> actions;
 	private String current_task_status;
 	private String current_task_name;
+	private Calendar datetime;
+	private String storeNames;
+
+	private String artifactName;
 	
+
+
+
+
+	
+	public String getStoreNames() {
+		return storeNames;
+	}
+
+
+
+
+	public void setStoreNames(String storeNames) {
+		this.storeNames = storeNames;
+	}
+
+
+
+
+	public Calendar getDatetime() {
+		return datetime;
+	}
+
+
+
+
+	public void setDatetime(Calendar datetime) {
+		this.datetime = datetime;
+	}
+
+
+
+
+
+	public String getArtifactName() {
+		return artifactName;
+	}
+	public void setArtifactName(String artifactName) {
+		this.artifactName = artifactName;
+	}
 	
 	public List<ImageActionTask> getActions() {
 		return actions;

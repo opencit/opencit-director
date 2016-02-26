@@ -161,7 +161,7 @@ function refresh_vm_images_Grid() {
                 self.gridData.image_upload = "";
                 if (images[i].status == 'Complete') {
 
-                    if (images[i].uploads_count != 0) {
+                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0  ) {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
                     } else {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
@@ -471,7 +471,7 @@ function refresh_docker_Grid() {
                 self.gridData.image_upload = "";
                 if (images[i].image_upload_status == 'Complete') {
 
-                    if (images[i].uploads_count != 0) {
+                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0) {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"docker_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
                     } else {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"docker_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";

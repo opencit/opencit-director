@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 
 /**
- * 
+ *
  * @author soakx
  */
 public class MountImageRequest {

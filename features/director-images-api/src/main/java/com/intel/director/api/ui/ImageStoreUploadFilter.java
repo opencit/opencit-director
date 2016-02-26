@@ -15,12 +15,49 @@ public class ImageStoreUploadFilter extends ImageStoreUploadTransferObject {
     protected String image_name;
 
     protected String image_format;
-
-    public String getImage_name() {
+    
+    protected boolean  enableDeletedCheck;
+    
+	public String getImage_name() {
         return image_name;
     }
 
-    public void setImage_name(String image_name) {
+	
+  
+
+
+
+
+
+
+
+	public boolean isEnableDeletedCheck() {
+		return enableDeletedCheck;
+	}
+
+
+
+
+
+
+
+
+
+
+	public void setEnableDeletedCheck(boolean enableDeletedCheck) {
+		this.enableDeletedCheck = enableDeletedCheck;
+	}
+
+
+
+
+
+
+
+
+
+
+	public void setImage_name(String image_name) {
         this.image_name = image_name;
     }
 

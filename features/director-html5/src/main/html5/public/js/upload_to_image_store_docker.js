@@ -1,14 +1,21 @@
-var imageStores = new Array();
+displayImageStorePage();
 
-var option;
+function displayImageStorePage() {
+    if (current_flow == "Wizard") {
+        $("#grid_flow_buttons").hide();
+        $("#wizard_flow_buttons").show();
+    } else {
+        $("#grid_flow_buttons").show();
+        $("#wizard_flow_buttons").hide();
+    }
+    $("#display_name_last_div").hide();
+    $('#upload_artifact').hide();
+    $('#upload_image_div').hide();
+    $('#upload_policy_div').hide();
+    $('#upload_tarball_div').hide();
 
-function mountMetaData() {
-
-}
-displayImageStore();
-
-function displayImageStore() {
     if (current_trust_policy_id != "" && current_trust_policy_id != undefined && current_trust_policy_id != "undefined") {
+        $("#display_name_last_div").show();
         $.ajax({
             type: "GET",
             url: "/v1/trust-policy/" + current_trust_policy_id,
@@ -20,217 +27,170 @@ function displayImageStore() {
 
                 if (data.display_name != undefined && data.display_name != null && data.display_name != "") {
                     current_display_name = data.display_name;
+                    $('#display_name_last').show();
                     $('#display_name_last').val(current_display_name);
-                    $('#display_name_last_direct').val(current_display_name);
                 }
             }
         });
-    }
-    $
-        .ajax({
+
+        $.ajax({
             type: "GET",
-            url: "/v1/image-stores",
-            contentType: "application/json",
-            headers: {
-                'Accept': 'application/json'
-            },
+            url: "/v1/deployment-artifacts?depolymentType=" + current_depolyment_type,
             dataType: "json",
-            success: function(data, status, xhr) {
-
-                imageStores = data.image_stores;
-
-                //option = "<option value='0'>Select</option>";
-
-                option = '<option value="Glance">Glance</option>';
-
-                $('#upload_image_name').val(current_image_name);
-                if (currentFlow && (currentFlow == "Upload") && (current_trust_policy_id == "null")) {
-                    // / alert("inside !current_trust_policy_id");
-                    if (current_display_name == 'undefined' || current_display_name == "") {
-                        current_display_name = current_image_name;
-                    }
-                    $('#display_name_last').val(current_display_name);
-                    $('#display_name_last_direct')
-                        .val(current_display_name);
-                    $('#tarball_radio_div').hide();
-                    $('#tarball_upload_div').hide();
-
-                    $('#image_policy_upload_div').show();
-                    $('#policy_upload_div').hide();
-                    $('#image_upload_combo').append(option);
-                } else {
-                    $('#tarball_radio_div').hide();
-                    $("input[name=tarball_radio][value='1']").attr(
-                        'checked', 'checked');
-
-                    $('#display_name_last').val(current_display_name);
-                    $('#display_name_last_direct')
-                        .val(current_display_name);
-                    $('#tarball_upload_div').show();
-                    $('#image_policy_upload_div').hide();
-                    $('#tarball_upload_combo').append(option);
-                    $('#image_upload_combo').append(option);
-                    $('#policy_upload_combo').append(option);
-
+            success: function(data) {
+                var artifacts_strings = "<option value='0'>Select</option>";
+                for (var key in data) {
+                    artifacts_strings = artifacts_strings + "<option value=" + key + ">" + data[key] + "</option>";
                 }
-                mainViewModel.uploadImageStoreViewModel = new UploadStoreViewModel();
-                // /] ko.cleanNode(mainViewModel);
-
-                ko.applyBindings(mainViewModel, document
-                    .getElementById("upload_to_image_store"));
-
+                $('#upload_artifact').html(artifacts_strings);
+                $('#upload_artifact').show();
             }
         });
 
-}
-
-function toggleradios11() {
-
-    var showTaraballDiv = $('input[name=tarball_radio]:checked').val();
-
-    if (showTaraballDiv == 0) {
-
-        $('#image_policy_upload_div').show();
-        $('#tarball_upload_div').hide();
-        $('#image_policy_upload_div').hide();
 
     } else {
-
-        $('#tarball_upload_div').hide();
-        $('#image_policy_upload_div').hide();
-
+        $("#display_name_last_div").hide();
+        var artifacts_strings = "<option value='0'>Select</option><option value='Image'>Image</option>";
+        $('#upload_artifact').html(artifacts_strings);
+        $('#upload_artifact').show();
     }
-};
-
-function UploadStoreMetaData(data) {
-    this.image_id = current_image_id;
-    this.display_name = current_display_name;
 }
 
-function UploadStoreViewModel() {
-    var self = this;
-    $('#display_name_last').val(current_display_name);
-    $('#display_name_last_direct').val(current_display_name);
-
-    self.uploadStoreMetaData = new UploadStoreMetaData();
-
-    self.uploadToStore = function(loginFormElement) {
-        self.uploadStoreMetaData.check_image_action_id = checkImageActionId;
-        self.uploadStoreMetaData.image_action_id = current_image_action_id;
-
-        self.uploadStoreMetaData.store_name_for_tarball_upload = $(
-            '#tarball_upload_combo').val();
-        self.uploadStoreMetaData.store_name_for_image_upload = $(
-            '#image_upload_combo').val();
-        self.uploadStoreMetaData.store_name_for_policy_upload = $(
-            '#policy_upload_combo').val();
-
-        if (checkImageActionId) {
-            if ($('#display_name_last').val() != current_display_name) {
-                self.uploadStoreMetaData.display_name = $('#display_name_last')
-                    .val();
-                current_display_name = $('#display_name_last').val();
-            }
-        } else {
-            if ($('#display_name_last_direct').val() != current_display_name) {
-                self.uploadStoreMetaData.display_name = $(
-                    '#display_name_last_direct').val();
-                current_display_name = $('#display_name_last_direct').val();
-            }
+$(function() {
+    $("#upload_artifact").change(function() {
+        $('#upload_image_div').hide();
+        $('#upload_policy_div').hide();
+        $('#upload_tarball_div').hide();
+        var artifact_selected = $('option:selected', this).val();
+        var div_to_show = [];
+        if (artifact_selected.indexOf("Tarball") > -1) {
+            console.log("Tarball");
+            div_to_show.push("tarball");
+        } else if (artifact_selected.indexOf("Image") > -1) {
+            console.log("Image");
+            div_to_show.push("image");
         }
-
-        if (current_trust_policy_id == undefined || current_trust_policy_id == 'undefined') {
-            current_trust_policy_id = "";
+        if (artifact_selected.indexOf("Docker") > -1) {
+            artifact_selected = "Docker";
         }
-        var displayNameFormData = {
-            "display_name": current_display_name
-        };
+        console.log("Artifacts :: " + artifact_selected + " :: divs ::" + div_to_show);
+        getImageStore(artifact_selected, div_to_show);
+    });
+});
+
+
+function getImageStore(artifact_selected, div_to_show) {
+    for (i = 0; i < div_to_show.length; i++) {
         $.ajax({
-            type: "POST",
-            url: "/v1/trust-policies/" + current_trust_policy_id,
-            contentType: "application/json",
+            type: "GET",
+            url: "/v1/image-stores?artifacts=" + artifact_selected,
             dataType: "json",
-            headers: {
-                'Accept': 'application/json'
-            },
-            data: JSON.stringify(displayNameFormData),
+            async: false,
             success: function(data) {
-                if (data.error) {
-                    $('#error_docker_body_3_direct').text(data.error);
-                    $("#error_docker_3_direct").modal({
-                        backdrop: "static"
-                    });
-                    $('#error_docker_body_3').text(data.error);
-                    $("#error_docker_3").modal({
-                        backdrop: "static"
-                    });
-                    $('body').removeClass("modal-open");
-                    return;
+                var image_stores = data.image_stores;
+                var image_stores_strings = "<option value='0'>Select</input>"
+                for (j = 0; j < image_stores.length; j++) {
+                    image_stores_strings += "<option value=" + image_stores[j].id + ">" + image_stores[j].name + "</option>";
                 }
-
-                var imageActionData = {};
-                if (current_trust_policy_id == undefined || current_trust_policy_id == 'undefined' || current_trust_policy_id == '') {
-                    imageActionData = {
-                        "image_id": current_image_id,
-                        "actions": [{
-                            "task_name": "Upload Image",
-                            "status": "Incomplete",
-                            "storename": $('#tarball_upload_combo').val()
-                        }]
-                    }
-                } else {
-                    imageActionData = {
-                        "image_id": current_image_id,
-                        "actions": [{
-                            "task_name": "Create Docker Tar",
-                            "status": "Incomplete"
-                            }, {
-                            "task_name": "Upload Tar",
-                            "status": "Incomplete",
-                            "storename": $('#tarball_upload_combo').val()
-                        }]
-                    }
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "/v1/image-actions",
-                    contentType: "application/json",
-                    dataType: "json",
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    data: JSON.stringify(imageActionData),
-                    success: function(data) {
-                        if (data.error) {
-                            $('#error_docker_body_3_direct').text(data.error);
-                            $("#error_docker_3_direct").modal({
-                                backdrop: "static"
-                            });
-                            $('#error_docker_body_3').text(data.error);
-                            $("#error_docker_3").modal({
-                                backdrop: "static"
-                            });
-                            $('body').removeClass("modal-open");
-                            return false;
-                        }
-                        console.log("uploadToStore success" + data);
-                        current_image_action_id = "";
-                        current_trust_policy_id = "";
-                        current_image_id = "";
-                        $("#redirect").modal({
-                            backdrop: "static"
-                        });
-                        $("#redirect_direct").modal({
-                            backdrop: "static"
-                        });
-                    }
-                });
-
+                $('#upload_' + div_to_show[i]).html(image_stores_strings);
+                $('#upload_' + div_to_show[i] + '_div').show();
             }
         });
+    }
+}
 
+function uploadToStore() {
+    var self = this;
+    var artifact = $('#upload_artifact').val();
+	if(artifact == "0"){
+		$('#error_docker_body_3').text("Select Artifact To Upload");
+        $("#error_docker_3").modal({
+			backdrop: "static"
+        });
+        $('body').removeClass("modal-open");
+		return;
+	}
+	var artifact_name = artifact;
+    var uploadStoreMetaData = {}
+    uploadStoreMetaData.artifact_store_list = [];
+    uploadStoreMetaData.image_id = current_image_id;
+    var artifact_loc = "";
+    if (artifact.indexOf("Tarball") > -1) {
+        artifact_loc = "tarball";
+    } else if (artifact.indexOf("Image") > -1) {
+        artifact_loc = "image";
     }
 
+    var image_store_id = $("#upload_" + artifact_loc).val();
+	if(image_store_id == "0"){
+		$('#error_docker_body_3').text("Select Appropriate Image Store");
+        $("#error_docker_3").modal({
+			backdrop: "static"
+        });
+        $('body').removeClass("modal-open");
+		return;
+	}
+    var artifact_store = {
+        "artifact_name": artifact_name,
+        "image_store_id": image_store_id
+    };
+    uploadStoreMetaData.artifact_store_list.push(artifact_store);
+    current_display_name = $('#display_name_last').val();
+
+    if (current_trust_policy_id == undefined || current_trust_policy_id == 'undefined') {
+        current_trust_policy_id = "";
+    }
+    var displayNameFormData = {
+        "display_name": current_display_name
+    };
+    $.ajax({
+        type: "POST",
+        url: "/v1/trust-policies/" + current_trust_policy_id,
+        contentType: "application/json",
+        dataType: "json",
+        headers: {
+            'Accept': 'application/json'
+        },
+        data: JSON.stringify(displayNameFormData),
+        success: function(data) {
+            if (data.error) {
+                $('#error_docker_body_3').text(data.error);
+                $("#error_docker_3").modal({
+                    backdrop: "static"
+                });
+                $('body').removeClass("modal-open");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/v1/image-actions",
+                contentType: "application/json",
+                dataType: "json",
+                headers: {
+                    'Accept': 'application/json'
+                },
+                data: JSON.stringify(uploadStoreMetaData),
+                success: function(data) {
+                    if (data.error) {
+                        $('#error_docker_body_3').text(data.error);
+                        $("#error_docker_3").modal({
+                            backdrop: "static"
+                        });
+                        $('body').removeClass("modal-open");
+                        return false;
+                    }
+                    console.log("uploadToStore success" + data);
+                    current_trust_policy_id = "";
+                    current_image_id = "";
+                    $("#redirect").modal({
+                        backdrop: "static"
+                    });
+                }
+            });
+
+        }
+    });
 };
 
 

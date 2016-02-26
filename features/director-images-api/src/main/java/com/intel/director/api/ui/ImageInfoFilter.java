@@ -45,21 +45,29 @@ public class ImageInfoFilter extends ImageInfo {
         this.to_created_date = to_created_date;
     }
 
-    @Override
-    public String toString() {
-        return "ImageInfoFilter [from_created_date=" + from_created_date
-                + ", to_created_date=" + to_created_date + ", trust_policy_id="
-                + trust_policy_id + ", trust_policy_name=" + trust_policy_name
-                + ", trust_policy_draft_name=" + trust_policy_draft_name
-                + ", trust_policy_draft_id=" + trust_policy_draft_id
-                + ", uploads_count=" + uploads_count + ", id=" + id + ", image_name="
-                + image_name + ", format=" + image_format + ", image_deployments="
-                + image_deployments + ", status=" + status + ", image_size="
-                + image_size + ", sent=" + sent + ", mounted_by_user_id="
-                + mounted_by_user_id + ", deleted=" + deleted + ", location="
-                + location + ", created_by_user_id=" + created_by_user_id
-                + ", created_date=" + created_date + ", edited_by_user_id="
-                + edited_by_user_id + ", edited_date=" + edited_date + "]";
-    }
+	@Override
+	public String toString() {
+		return "ImageInfoFilter [from_created_date=" + from_created_date
+				+ ", to_created_date=" + to_created_date + ", policyCriteria="
+				+ policyCriteria + ", uploadCriteria=" + uploadCriteria
+				+ ", trust_policy_id=" + trust_policy_id
+				+ ", trust_policy_name=" + trust_policy_name
+				+ ", trust_policy_draft_name=" + trust_policy_draft_name
+				+ ", trust_policy_draft_id=" + trust_policy_draft_id
+				+ ", image_uploads_count=" + image_uploads_count
+				+ ", policy_uploads_count=" + policy_uploads_count
+				+ ", policy_name=" + policy_name + ", id=" + id
+				+ ", image_name=" + image_name + ", image_format="
+				+ image_format + ", image_deployments=" + image_deployments
+				+ ", status=" + status + ", image_size=" + image_size
+				+ ", sent=" + sent + ", mounted_by_user_id="
+				+ mounted_by_user_id + ", deleted=" + deleted + ", location="
+				+ location + ", repository=" + repository + ", tag=" + tag
+				+ ", created_by_user_id=" + created_by_user_id
+				+ ", created_date=" + created_date + ", edited_by_user_id="
+				+ edited_by_user_id + ", edited_date=" + edited_date + "]";
+	}
+
+
 
 }

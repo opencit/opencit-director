@@ -6,6 +6,7 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
+import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -14,8 +15,9 @@ public class ExecuteActionsTask implements Runnable {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ExecuteActionsTask.class);
 
-	ImageActionObject imageActionObj;
 	IPersistService persistService = new DbServiceImpl();
+
+	ImageActionObject imageActionObj;
 
 	public ExecuteActionsTask(ImageActionObject imageActionObject) {
 		this.imageActionObj = imageActionObject;
@@ -31,26 +33,30 @@ public class ExecuteActionsTask implements Runnable {
 		for (int i = 0; i < imageActions.size(); i++) {
 			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
-				markImageActionWithError("No task found for execution");
-				return;
+				markImageActionWithError("Unable to find a task for execution");
 			}
 			String task_name = taskToBeExecuted.getTask_name();
-			String imageStore = taskToBeExecuted.getStorename();
 			log.info("Task being executed: " + task_name);
 
-			ImageActionAsyncTask task = ImageActionTaskFactory.getImageActionTask(
-					task_name, imageStore);
+			ImageActionAsyncTask task = null;
+			try {
+				task = ImageActionTaskFactory.getImageActionTask(
+						task_name);
+				task.setImageActionObject(imageActionObj);
+				task.setTaskAction(taskToBeExecuted);
+				//Set the image id and the policy id in the customProperties map
+				task.init();
+			} catch (DirectorException e) {
+				log.error("unable to get a task for {}",task_name);
+			}
 			if(task == null){
-				markImageActionWithError("Null task");
-				return;
+				markImageActionWithError("Unable to find a task for execution "+task_name);
 			}
 			log.info("Task instance from factory : " + task.getTaskName());
-			task.setImageActionObject(imageActionObj);
-			task.setTaskAction(taskToBeExecuted);
 			if(!task.run()){
+				markImageActionWithError("Unable to execute task "+task.getTaskName());
 				log.info("Exiting because "+task.getTaskName()+" did not execute successfully");
 				log.info("Processing stopped for action: "+imageActionObj.getId());
-				markImageActionWithError("Exiting because "+task.getTaskName()+" did not execute successfully");
 				return;
 			}
 			
@@ -60,7 +66,6 @@ public class ExecuteActionsTask implements Runnable {
 			}
 		}
 	}
-	
 
 	private void markImageActionWithError(String details) {
 		imageActionObj.setStatus(Constants.ERROR);
@@ -68,8 +73,7 @@ public class ExecuteActionsTask implements Runnable {
 		try {
 			persistService.updateImageAction(imageActionObj);
 		} catch (DbException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Erorr in ExecuteActionTask",e);
 		}
 		
 	}

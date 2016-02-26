@@ -10,6 +10,7 @@ package com.intel.director.common;
  * @author GS-0681
  */
 public class Constants {
+
 	public static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
 	public static final String mountRemoteFileSystemScript = "/opt/director/bin/mount_remote_system.sh";
 	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
@@ -44,6 +45,7 @@ public class Constants {
 	public static final String Enc_IMAGE_LOCATION = "EncImage Location";
 	public static final String Enc_KERNEL_PATH = "EncKernel Path";
 	public static final String Enc_INITRD_PATH = "EncInitrd Path";
+	public static final String VISIBILITY="visibility";
 
 	public static final String remoteSystemIpAddress = "IP Address";
 	public static final String remoteSystemuserName = "User Name";
@@ -113,15 +115,40 @@ public class Constants {
 	public static final String GLANCE = "Glance";
 	public static final String SWIFT = "Swift";
 	public static final String GLANCE_ID="glanceid";
+	public static final String SWIFT_IP = "swift.ip";
+	public static final String SWIFT_USERNAME = "swift.usename";
+	public static final String SWIFT_PASSWORD = "swift.password";
+	public static final String SWIFT_TENANT_NAME = "swift.tenant.name";
+	public static final String SWIFT_API_VERSION = "v1.0";
+	public static final String SWIFT_CONTAINER_NAME = "swift.container.name";
+	public static final String SWIFT_OBJECT_NAME = "swift.object.name";
+	public static final String SWIFT_ACCOUNT_NAME = "swift.account.name";
+	public static final String SWIFT_ACCOUNT_USERNAME = "swift.account.usename";
+	public static final String SWIFT_ACCOUNT_USER_PASSWORD = "swift.account.userpassword";
+	public static final String SWIFT_STORAGE_USER = "X-Storage-User";
+	public static final String SWIFT_STORAGE_PASSWORD = "X-Storage-Pass";
+	public static final String SWIFT_PORT = "swift.port";
+	public static final String AUTH_TOKEN = "X-AUTH-TOKEN";
+	public static final String SWIFT_STORAGE_URL ="X-Storage-Url";
+	public static final String SWIFT_WRITE_TO_FILE_PATH ="swift.write.to.file.path";
+	
+	
+	public static final String SWIFT_POLICY_PATH = "/policy";
+	public static final String SWIFT_PATH = "swift.path";
+	public static final String SWIFT_POLICY_CONTAINER_NAME = "trust_policies";
+	public static final String SWIFT_DOWNLOAD_FILE_NAME = "swift.download.file.name";
+	public static final String SWIFT_DOWNLOAD_FILE_PATH = "swift.download.file.path";
 
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
 	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
 	public static final String TASK_NAME_UPLOAD_IMAGE = "Upload Image";
-	public static final String TASK_NAME_UPLOAD_TO_HUB = "Upload To Hub";
 	public static final String TASK_NAME_ENCRYPT_IMAGE = "Encrypt Image";
 	public static final String TASK_NAME_UPLOAD_TAR = "Upload Tar";
-	public static final String TASK_NAME_CREATE_DOCKER_TAR = "Create Docker Tar";
+	public static final String TASK_NAME_INJECT_POLICY = "Inject Policy";
+	public static final String TASK_NAME_UPDATE_METADATA = "Update Metadata";
+	public static final String TASK_NAME_RECREATE_POLICY = "Recreate Policy";
+	public static final String TASK_NAME_UPLOAD_IMAGE_FOR_POLICY = "Upload Image For Policy";
 	public static final String COMPLETE = "Complete";
 	public static final String INCOMPLETE = "Incomplete";
 	public static final String IN_PROGRESS = "In Progress";
@@ -136,13 +163,36 @@ public class Constants {
 	public static final String INCLUDE_LIST_BM_LIVE="bmlive.include";
 	public static final String MTWILSON_PROP_FILE = "mtwilson.properties";
 	public static final String KMS_PROP_FILE = "kms.properties";
-	public static final String MTWILSON_TRUST_POLICY_LOCATION="x-image-meta-property-mtwilson_trustpolicy_location";
+	public static final String MTWILSON_TRUST_POLICY_LOCATION="mtwilson_trustpolicy_location";
 
 	
 	public static final String DIRECTOR_DB_URL="director.db.url";
 	public static final String DIRECTOR_DB_USERNAME="director.db.username";
 	public static final String DIRECTOR_DB_PASSWORD="director.db.password";
 	public static final String DIRECTOR_DB_DRIVER="director.db.driver";
+	public static final String ARTIFACT_IMAGE="Image";
+	public static final String ARTIFACT_TAR="Tarball";
+	public static final String ARTIFACT_POLICY="Policy";
+	public static final String ARTIFACT_IMAGE_WITH_POLICY="ImageWithPolicy";
+	public static final String ARTIFACT_IMAGE_WITH_POLICY_DISPLAY_NAME="Image With Policy Seperated";
+	public static final String ARTIFACT_DOCKER = "Docker";
+	public static final String ARTIFACT_DOCKER_IMAGE="DockerImage";
+	public static final String ARTIFACT_DOCKER_WITH_POLICY="DockerTarball";
+	public static final String STORE_IMAGE="StoreImage";
+	public static final String STORE_TAR="StoreTarball";
+	public static final String STORE_POLICY="StorePolicy";
+	public static final String STORE_DOCKER="StoreDocker";
 	
-
+	
+	public static final String CONNECTOR_GLANCE = "Glance";
+	public static final String CONNECTOR_SWIFT = "Swift";
+	public static final String CONNECTOR_DOCKERHUB = "Docker";
+	
+	public static final String UPLOAD_TO_IMAGE_STORE_FILE = "UPLOAD_TO_IMAGE_STORE_FILE";
+	
+	public static final String DOCKER_HUB_USERNAME = "Username";
+	public static final String DOCKER_HUB_PASSWORD = "Password";
+	public static final String DOCKER_HUB_EMAIL = "Email";
+	
+	public static final String IMAGE_INFO_OBJECT = "IMAGE_INFO_OBJECT";
 }

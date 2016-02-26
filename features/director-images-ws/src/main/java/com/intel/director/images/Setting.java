@@ -13,8 +13,6 @@ import com.intel.director.api.MountWilsonSetting;
 import com.intel.director.api.SettingsKMSObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
-import com.intel.director.service.ImageService;
-import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
 import com.intel.mtwilson.configuration.ConfigurationException;
 import com.intel.mtwilson.launcher.ws.ext.V2;

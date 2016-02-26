@@ -13,16 +13,7 @@
 	</parent>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+		<!-- Director -->
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
 			<version>0.1-SNAPSHOT</version>
@@ -33,11 +24,9 @@
 			<version>0.1-SNAPSHOT</version>
 			<artifactId>director-common</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-
+		
+		
+		<!-- MTW -->
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-configuration</artifactId>
@@ -62,6 +51,22 @@
 		<dependency>
 			<groupId>com.intel.mtwilson.kms</groupId>
 			<artifactId>kms-client-jaxrs2</artifactId>
+		</dependency>
+
+		<!-- Others -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
 		</dependency>
 
 	</dependencies>

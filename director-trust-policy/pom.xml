@@ -18,18 +18,29 @@
 			</plugin>
 		</plugins>
 	</build>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>
+
 	<dependencies>
+		<!-- Director -->
+
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
 			<artifactId>director-common</artifactId>
 			<version>0.1-SNAPSHOT</version>
-			<type>jar</type>
 		</dependency>
+
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.7</version>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<artifactId>director-kms</artifactId>
+			<version>0.1-SNAPSHOT</version>
 		</dependency>
+
+		<!-- MTW -->
+
 		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-exec</artifactId>
@@ -38,30 +49,26 @@
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-trustpolicy-xml</artifactId>
-			<version>3.0-SNAPSHOT</version>
 			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-crypto</artifactId>
-			<version>0.4-SNAPSHOT</version>
 			<type>jar</type>
+			<version>0.4-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- Other -->
+
 		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<artifactId>director-kms</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
 		</dependency>
 	</dependencies>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-	</properties>
 </project>

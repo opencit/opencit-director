@@ -9,7 +9,7 @@ package com.intel.director.images.rs;
  *
  * @author GS-0681
  */
-public class GlanceException extends RuntimeException {
+public class GlanceException extends Exception {
 
     public GlanceException() {
     }

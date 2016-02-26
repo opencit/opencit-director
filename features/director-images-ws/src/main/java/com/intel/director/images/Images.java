@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,9 +39,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
 import com.intel.director.api.DockerRequestObject;
 import com.intel.director.api.GenericResponse;
-import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageInfoResponse;
-import com.intel.director.api.ImageStoreObject;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPolicyResponse;
@@ -122,7 +119,7 @@ public class Images {
 	 * }
 	 * </pre>
 	 * 
-	 * @param uploadRequest
+	 * @param TrustDirectorImageUploadRequest
 	 *            object which includes metadata information
 	 * @return Response object contains newly created
 	 *         image metadata along with image_id
@@ -151,15 +148,15 @@ public class Images {
 		try {
 			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.state = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.state = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
-				return Response.ok().entity(uploadImageToTrustDirector).build();
+				return Response.ok(uploadImageToTrustDirector).build();
 			}
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
@@ -314,7 +311,6 @@ public class Images {
 	public Response getImagesByDeploymentType(
 			@QueryParam("deploymentType") String deployment_type)
 			throws DirectorException {
-		
 		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		if(!CommonValidations.validateImageDeployments(deployment_type)){
@@ -482,8 +478,6 @@ public class Images {
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
 		}
-		
-		
 		log.info("inside mounting image in web service");
 		String user = ShiroUtil.subjectUsername();
 		log.info("User mounting image : " + user);
@@ -532,10 +526,12 @@ public class Images {
 	 * }
 	 * 
 	 * In case of error:
-	 * { “error”: “error message ” }
+	 * { â€œerrorâ€: â€œerror message â€ }
 	 * 
 	 * </pre>
 	 * 
+	 * @param imageId
+	 *            Id of the image to be un-mounted
 	 * @param httpServletRequest
 	 * @param httpServletResponse
 	 * @return UnmountImageResponse containing the details of the unmount
@@ -826,41 +822,14 @@ public class Images {
 	}
 
 	/**
-	 * List configured image stores
+	 * Utility methods
 	 * 
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * 
-	 * @return GetImageStoresResponse
-	 * @throws DirectorException
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/image-stores
-	 * Input: NA
-	 * Output:
-	 * {
-	 *   "image_stores": [
-	 *     { "name": "Glance" },
-	 *     { "name": "Swift" }
-	 *   ]
-	 * }
-	 * </pre>
+	 * @param httpServletRequest
+	 * @return
 	 */
-	@Deprecated
-	@Path("image-stores")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public GetImageStoresResponse getImageStores() throws DirectorException {
-		GetImageStoresResponse imageStores = new GetImageStoresResponse();
-		imageStores.image_stores = new ArrayList<ImageStoreObject>();
-		ImageStoreObject imageStore = new ImageStoreObject();
-		imageStore.setName("Glance");
-		imageStores.image_stores.add(imageStore);
-		imageStore = new ImageStoreObject();
-		imageStore.setName("Swift");
-		imageStores.image_stores.add(imageStore);
-		return imageStores;
+	protected String getLoginUsername() {
+		return ShiroUtil.subjectUsername();
+
 	}
 
 	/**
@@ -1225,7 +1194,28 @@ public class Images {
 		return Response.ok(sshResponse).build();
 
 	}
-
+	
+	@Path("rpc/docker-save/{image_id: [0-9a-zA-Z_-]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public GenericResponse dockerSave(@PathParam("image_id") String image_id) {
+		log.info("performing Docker save  simultaneously");
+		String user = getLoginUsername();
+		log.info("User perfomig docker save  : " + user);
+		GenericResponse monitorStatus = new GenericResponse();
+		monitorStatus.status = Constants.SUCCESS;
+		try {
+			imageService.dockerSave(image_id, user);
+		} catch (DirectorException e) {
+			log.error("Error while perfomig docker save ");
+			monitorStatus.status = Constants.ERROR;
+			monitorStatus.details = e.getMessage();
+			return monitorStatus;
+		}
+		return monitorStatus;
+	}
+	
 	@Path("rpc/docker-rmi/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1297,6 +1287,4 @@ public class Images {
 		}
 		return Response.ok(dockerTag).build();
 	}
-	
-
 }

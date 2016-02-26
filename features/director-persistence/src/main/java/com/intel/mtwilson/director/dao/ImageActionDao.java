@@ -2,15 +2,21 @@ package com.intel.mtwilson.director.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.intel.director.api.ImageActionObject;
-import com.intel.director.api.ImageActionTask;
+import com.intel.director.api.ui.ImageActionFields;
+import com.intel.director.api.ui.ImageActionFilter;
+import com.intel.director.api.ui.ImageActionOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.mtwilson.director.data.MwImageAction;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.mapper.Mapper;
@@ -41,7 +47,7 @@ public class ImageActionDao {
 			em.persist(img);
 			em.getTransaction().commit();
 		} catch (Exception e) {
-			log.error("createImage failed",e);
+			log.error("createImageAction failed",e);
 			throw new DbException("ImageActionDao,createImageAction method", e);
 		}
 
@@ -67,7 +73,7 @@ public class ImageActionDao {
 		return img;
 	}
 
-	public List<ImageActionObject> getImageActionByImageID(String image_id)
+	/*public List<ImageActionObject> getImageActionByImageID(String image_id)
 			throws DbException {
 		List<ImageActionObject> imageActionObjectList = new ArrayList<ImageActionObject>();
 		Gson gson = new Gson();
@@ -111,7 +117,7 @@ public class ImageActionDao {
 			em.close();
 		}
 		return imageActionObjectList;
-	}
+	}*/
 
 	public void updateImageAction(MwImageAction img) throws DbException {
 		EntityManager em = getEntityManager();
@@ -159,9 +165,21 @@ public class ImageActionDao {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+
 	public List<MwImageAction> showAllAction() throws DbException {
 		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<MwImageAction> cq = cb.createQuery(MwImageAction.class);
+        Root<MwImageAction> rootEntry = cq.from(MwImageAction.class);
+        CriteriaQuery<MwImageAction> all = cq.select(rootEntry);
+        TypedQuery<MwImageAction> allQuery = em.createQuery(all);
+        if(allQuery==null){
+        	return null;
+        }
+        return allQuery.getResultList();
+		
+		
+	/*	EntityManager em = getEntityManager();
 		List<MwImageAction> li;
 		try {
 
@@ -172,7 +190,77 @@ public class ImageActionDao {
 			log.error("showAllAction failed",e);
 			throw new DbException("Show All Image Action Object Failed", e);
 		}
-		return li;
+		return li;*/
+	}
+	
+	
+	public List<MwImageAction> findMwImageAction(ImageActionFilter imageActionFilter, ImageActionOrderBy imageActionOrderBy)
+			throws DbException {
+
+		EntityManager em = getEntityManager();
+		try {
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+			CriteriaQuery<Object> criteriaQuery  = criteriaBuilder
+					.createQuery();
+			Root<MwImageAction> mwImageAction = criteriaQuery.from(MwImageAction.class);
+
+			Map<ImageActionFields, String> imageActionAttributestoDataMapper = mapper
+					.getImageActionsAttributesMapper();
+			
+			List<Predicate> predicates = new ArrayList<Predicate>();
+			if (imageActionFilter != null) {
+				
+				if(imageActionFilter.getId()!=null){
+					predicates.add(criteriaBuilder.equal(mwImageAction.<String> get(imageActionAttributestoDataMapper.get(ImageActionFields.ID)),
+							imageActionFilter.getId()));
+				}
+				if(imageActionFilter.getImage_id()!=null){
+					predicates.add(criteriaBuilder.equal(mwImageAction.<String> get(imageActionAttributestoDataMapper.get(ImageActionFields.IMAGE_ID)),
+							imageActionFilter.getImage_id()));
+				}
+				if(imageActionFilter.getCurrent_task_name()!=null){
+					predicates.add(criteriaBuilder.like(mwImageAction.<String> get(imageActionAttributestoDataMapper.get(ImageActionFields.CURRENT_TASK_NAME)),
+							"%"+imageActionFilter.getCurrent_task_name()+"%"));
+				}
+				if(imageActionFilter.getCurrent_task_status()!=null){
+					predicates.add(criteriaBuilder.like(mwImageAction.<String> get(imageActionAttributestoDataMapper.get(ImageActionFields.CURRENT_TASK_STATUS)),
+							"%"+imageActionFilter.getCurrent_task_status()+"%"));
+				}
+				
+
+			}
+			
+			criteriaQuery.where(criteriaBuilder.and(predicates
+					.toArray(new Predicate[] {})));
+			
+			 if (imageActionOrderBy != null) {
+	               
+	                    if ((OrderByEnum.ASC) == (imageActionOrderBy.getOrderBy())) {
+	                    	criteriaQuery.orderBy(criteriaBuilder.asc(mwImageAction.get(imageActionAttributestoDataMapper.get(imageActionOrderBy.getImageActionFields()))));
+	                    } else if ((OrderByEnum.DESC) == (imageActionOrderBy.getOrderBy())) {
+	                    	criteriaQuery.orderBy(criteriaBuilder.desc(mwImageAction.get(imageActionAttributestoDataMapper.get(imageActionOrderBy.getImageActionFields()))));
+	                    }
+	                
+	            }
+			
+			Query q = em.createQuery(criteriaQuery);
+			log.info("Query :: " + q.toString());
+
+			List<Object[]> result = q.getResultList();
+			List<MwImageAction> mwImageActionList = new ArrayList<MwImageAction>();
+			for (Object objArray : result) {
+				MwImageAction isd = (MwImageAction) objArray;
+				mwImageActionList.add(isd);
+			}
+			return mwImageActionList;
+		} catch (Exception e) {
+			log.error("findMwImageAction failed", e);
+			throw new DbException("ImageActionDao,findMwImageAction failed", e);
+		}
+
+		finally {
+			em.close();
+		}
 	}
 
 }

@@ -7,6 +7,7 @@ package com.intel.director.api;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -32,6 +33,9 @@ public class ImageAttributes extends AuditFields {
     
     public String repository;
     public String tag;
+    public String uploadVariableMD5;
+    public String tmpLocation;
+    
     
     public ImageAttributes() {
         super();
@@ -77,22 +81,41 @@ public class ImageAttributes extends AuditFields {
 
     }
 
-    @Override
-    public String toString() {
-        return "ImageAttributes [id=" + id + ", image_name=" + image_name + ", format="
-                + image_format + ", image_deployments=" + image_deployments
-                + ", status=" + status + ", image_size=" + image_size
-                + ", sent=" + sent + ", mounted_by_user_id="
-                + mounted_by_user_id + ", deleted=" + deleted + ", location="
-                + location + ", content_length="
-                + ", created_by_user_id=" + created_by_user_id
-                + ", created_date=" + created_date + ", edited_by_user_id="
-                + edited_by_user_id + ", edited_date=" + edited_date + "]";
-    }
 
     
+    
+    
+    @Override
+	public String toString() {
+		return "ImageAttributes [id=" + id + ", image_name=" + image_name
+				+ ", image_format=" + image_format + ", image_deployments="
+				+ image_deployments + ", status=" + status + ", image_size="
+				+ image_size + ", sent=" + sent + ", mounted_by_user_id="
+				+ mounted_by_user_id + ", deleted=" + deleted + ", location="
+				+ location + ", repository=" + repository + ", tag=" + tag
+				+ ", uploadVariableMD5=" + uploadVariableMD5 + ", tmpLocation="
+				+ tmpLocation + "]";
+	}
 
-    public String getId() {
+	@JsonIgnore
+    public String getUploadVariableMD5() {
+		return uploadVariableMD5;
+	}
+
+	public void setUploadVariableMD5(String uploadVariableMD5) {
+		this.uploadVariableMD5 = uploadVariableMD5;
+	}
+	
+	@JsonIgnore
+	public String getTmpLocation() {
+		return tmpLocation;
+	}
+
+	public void setTmpLocation(String tmpLocation) {
+		this.tmpLocation = tmpLocation;
+	}
+
+	public String getId() {
         return id;
     }
 
@@ -136,8 +159,8 @@ public class ImageAttributes extends AuditFields {
         return image_size;
     }
 
-    public void setImage_size(Long image_size) {
-        this.image_size = image_size;
+    public void setImage_size(long sizeInBytes) {
+        this.image_size = sizeInBytes;
     }
 
     public Long getSent() {

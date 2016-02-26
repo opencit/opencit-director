@@ -1,4 +1,4 @@
-var endpoint = "/v1";
+var endpoint = "/v1/images/";
 
 function SelectDirectoriesMetaData(data) {
 
@@ -68,6 +68,7 @@ function ApplyRegExViewModel() {
         $("i[id='toggle_" + sel_dir + "']").attr("style", "color: blue; font-size : 1.6em");
 
         node.attr('checked', false);
+
         (node.parent()).fileTree(config, function(file, checkedStatus,
             rootRegexDir) {
             editPatch(file, checkedStatus, rootRegexDir);
@@ -316,8 +317,11 @@ var editPolicyDraft = function() {
 $(document)
     .ready(
         function() {
+            console.log("******* before tree");
+
             if (pageInitialized)
                 return;
+            console.log("******* before tree 1");
             $("#dirNextButton").prop('disabled', true);
             $('#jstree2').fileTree({
                 root: '/',
@@ -439,6 +443,7 @@ function createPolicy() {
                         console.log("ERROR and Unmount successfully");
                         return;
                     } else {
+						current_flow = "Wizard";
                         nextButtonDocker();
                     }
                 }

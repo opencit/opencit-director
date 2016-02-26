@@ -70,8 +70,8 @@ function refresh_docker_Grid() {
                 self.gridData.image_upload = "";
                 if (images[i].image_upload_status == 'Complete') {
 
-                    if (images[i].uploads_count != 0) {
-                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"vm_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
+                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0) {
+                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"docker_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
                     } else {
                         self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"docker_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";
                     }
@@ -144,7 +144,18 @@ function refresh_docker_Grid() {
                     type: "text",
                     width: 120,
                     align: "center"
-                }]
+				} ],
+				onRefreshed: function(args) {
+					if(grid.length <= 0){
+						return;
+					}
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				}
             });
             var delay = 1000;
             setTimeout(function() {

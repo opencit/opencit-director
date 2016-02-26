@@ -350,29 +350,11 @@ public class TrustPolicyDrafts {
 			CreateTrustPolicyMetaDataRequest createPolicyRequest) {
 		CreateTrustPolicyResponse createTrustPolicyDraftResponse = new CreateTrustPolicyResponse();
 		try {
-			String error=createPolicyRequest.validate("policy");
-			if(!StringUtils.isBlank(error)){
-				createTrustPolicyDraftResponse.error = error;
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
-			if(imageInfo == null){
-				createTrustPolicyDraftResponse.error = "No image with id : "+createPolicyRequest.image_id+" exists.";
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			TrustPolicyDraft fetchTrustpolicydraftById = imageService
-					.fetchTrustpolicydraftById(createPolicyRequest.trust_policy_draft_id);
-			if (fetchTrustpolicydraftById == null) {
-				createTrustPolicyDraftResponse.error = "No trust policy draft with id : "+createPolicyRequest.trust_policy_draft_id+" exists.";
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			
-			String imageId = imageInfo.id;
+		String imageId=imageService.fetchImageIdByDraftOrPolicy(createPolicyRequest.getTrust_policy_draft_id());
+		/*	ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
+			String imageId = imageInfo.id;*/
 			String trustPolicyId = imageService
-					.createTrustPolicy(imageId, createPolicyRequest.trust_policy_draft_id);
+					.createTrustPolicy(createPolicyRequest.trust_policy_draft_id);
 			createTrustPolicyDraftResponse.setId(trustPolicyId);
 			imageService.deletePasswordForHost(imageId);
 			// / response.setStatus(Constants.SUCCESS);

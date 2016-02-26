@@ -20,7 +20,7 @@ function createPolicyDocker(imageid, imagename) {
 }
 
 function editPolicyDocker(imageid, imagename, trust_policy_draft_id) {
-
+	
     currentFlow = "Edit";
     current_image_id = imageid;
     current_image_name = imagename;
@@ -30,7 +30,7 @@ function editPolicyDocker(imageid, imagename, trust_policy_draft_id) {
 }
 
 function uploadToImageStoreDockerPage(imageid, imagename, trust_policy_id) {
-
+	current_flow = "Grid";
     currentFlow = "Upload";
     current_image_id = imageid;
     current_image_name = imagename;
@@ -47,7 +47,7 @@ function goToUploadToImageStoreDockerPage() {
         $("#upload_to_image_store_redirect_docker").html("");
     }
 
-    $("#upload_to_image_store_redirect_docker").load("/v1/html5/public/director-html5/upload_imagestore_docker_direct.html");
+    $("#upload_to_image_store_redirect_docker").load("/v1/html5/public/director-html5/upload_imagestore_docker.html");
 
 }
 

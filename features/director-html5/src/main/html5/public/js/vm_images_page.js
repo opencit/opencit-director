@@ -26,13 +26,11 @@ function editTrustPolicy(imageid, imagename, trust_policy_draft_id) {
     current_image_name = imagename;
     current_trust_policy_draft_id = trust_policy_draft_id;
 
-    // ///current_trust_policy_id=trust_policy_id;
-
     goToEditPolicyWizard();
 }
 
 function uploadToImageStorePage(imageid, imagename, trust_policy_id) {
-
+    current_flow = "Grid";
     currentFlow = "Upload";
     current_image_id = imageid;
     current_image_name = imagename;
@@ -51,7 +49,7 @@ function goToUploadToImageStorePage() {
 
     $("#upload_to_image_store_redirect")
         .load(
-            "/v1/html5/public/director-html5/upload_imagestore_direct.html");
+            "/v1/html5/public/director-html5/upload_imagestore.html");
 
 }
 

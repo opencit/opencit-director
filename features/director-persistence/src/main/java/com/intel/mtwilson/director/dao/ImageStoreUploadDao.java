@@ -129,6 +129,19 @@ public class ImageStoreUploadDao {
                     predicates.add(criteriaBuilder.like(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IMAGE_URI)),
                             "%" + imgUploadFilter.getImage_uri() + "%"));
                 }
+                if (imgUploadFilter.getStoreArtifactId() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.STORE_ARTIFACT_ID)),
+                             imgUploadFilter.getStoreArtifactId() ));
+                }
+                
+                if (imgUploadFilter.isEnableDeletedCheck()) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<Boolean>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IS_DELETED)),
+                    		imgUploadFilter.isDeleted() ));
+                }
+                if (imgUploadFilter.getImage_uri() != null) {
+                    predicates.add(criteriaBuilder.like(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IMAGE_URI)),
+                            "%" + imgUploadFilter.getImage_uri() + "%"));
+                }
 
                 if (imgUploadFilter.getImage_name() != null) {
                     predicates.add(criteriaBuilder.like(mwImage.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IMAGE_NAME)),
@@ -143,6 +156,11 @@ public class ImageStoreUploadDao {
                 if (imgUploadFilter.getImage_id() != null) {
                     predicates.add(criteriaBuilder.like(mwImage.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IMAGE_ID)),
                             "%" + imgUploadFilter.getImage_id() + "%"));
+                }
+                
+                if (imgUploadFilter.getUploadVariableMD5() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.UPLOAD_VARIABLES_MD5)),
+                            imgUploadFilter.getUploadVariableMD5() ));
                 }
 
                 if (imgUploadFilter.getFrom_date() != null) {

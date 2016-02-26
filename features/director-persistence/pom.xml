@@ -14,7 +14,30 @@
 	</parent>
 
 	<dependencies>
+		<!-- Director -->
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<artifactId>director-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
+
+
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<artifactId>director-images-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- MTW -->
+		<dependency>
+			<groupId>com.intel.mtwilson.util</groupId>
+			<artifactId>mtwilson-util-io</artifactId>
+			<type>jar</type>
+			<version>0.3-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Others -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -31,23 +54,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<artifactId>director-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-
-		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>eclipselink</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<artifactId>director-images-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -70,13 +79,6 @@
 			<artifactId>powermock-module-junit4</artifactId>
 			<version>1.6.2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.util</groupId>
-			<artifactId>mtwilson-util-io</artifactId>
-			<version>0.3-SNAPSHOT</version>
-			<type>jar</type>
-		</dependency>
-
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

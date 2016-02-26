@@ -82,6 +82,7 @@ public class SshSettingRequest extends AuditFields {
 		this.key = key;
 	}
 
+	
 	public SshSettingResponse validate(String operation) {
 		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
 		SshSettingResponse sshResponse = new SshSettingResponse();
