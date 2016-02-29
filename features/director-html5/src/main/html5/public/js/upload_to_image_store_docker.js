@@ -102,15 +102,15 @@ function getImageStore(artifact_selected, div_to_show) {
 function uploadToStore() {
     var self = this;
     var artifact = $('#upload_artifact').val();
-	if(artifact == "0"){
-		$('#error_docker_body_3').text("Select Artifact To Upload");
+    if (artifact == "0") {
+        $('#error_docker_body_3').text("Select Artifact To Upload");
         $("#error_docker_3").modal({
-			backdrop: "static"
+            backdrop: "static"
         });
         $('body').removeClass("modal-open");
-		return;
-	}
-	var artifact_name = artifact;
+        return;
+    }
+    var artifact_name = artifact;
     var uploadStoreMetaData = {}
     uploadStoreMetaData.artifact_store_list = [];
     uploadStoreMetaData.image_id = current_image_id;
@@ -122,77 +122,66 @@ function uploadToStore() {
     }
 
     var image_store_id = $("#upload_" + artifact_loc).val();
-	if(image_store_id == "0"){
-		$('#error_docker_body_3').text("Select Appropriate Image Store");
+    if (image_store_id == "0") {
+        $('#error_docker_body_3').text("Select Appropriate Image Store");
         $("#error_docker_3").modal({
-			backdrop: "static"
+            backdrop: "static"
         });
         $('body').removeClass("modal-open");
-		return;
-	}
+        return;
+    }
     var artifact_store = {
         "artifact_name": artifact_name,
         "image_store_id": image_store_id
     };
     uploadStoreMetaData.artifact_store_list.push(artifact_store);
-    current_display_name = $('#display_name_last').val();
+    createImageStoreActions(uploadStoreMetaData);
+};
 
-    if (current_trust_policy_id == undefined || current_trust_policy_id == 'undefined') {
-        current_trust_policy_id = "";
-    }
-    var displayNameFormData = {
-        "display_name": current_display_name
-    };
+function createImageStoreActions(uploadStoreMetaData) {
     $.ajax({
         type: "POST",
-        url: "/v1/trust-policies/" + current_trust_policy_id,
+        url: "/v1/image-actions",
         contentType: "application/json",
         dataType: "json",
         headers: {
             'Accept': 'application/json'
         },
-        data: JSON.stringify(displayNameFormData),
-        success: function(data) {
+        data: JSON.stringify(uploadStoreMetaData),
+        success: function(data, status) {
+
             if (data.error) {
                 $('#error_docker_body_3').text(data.error);
                 $("#error_docker_3").modal({
                     backdrop: "static"
                 });
                 $('body').removeClass("modal-open");
-                return;
+                return false;
             }
-
-            $.ajax({
-                type: "POST",
-                url: "/v1/image-actions",
-                contentType: "application/json",
-                dataType: "json",
-                headers: {
-                    'Accept': 'application/json'
-                },
-                data: JSON.stringify(uploadStoreMetaData),
-                success: function(data) {
-                    if (data.error) {
-                        $('#error_docker_body_3').text(data.error);
-                        $("#error_docker_3").modal({
-                            backdrop: "static"
-                        });
-                        $('body').removeClass("modal-open");
-                        return false;
-                    }
-                    console.log("uploadToStore success" + data);
-                    current_trust_policy_id = "";
-                    current_image_id = "";
-                    $("#redirect").modal({
-                        backdrop: "static"
-                    });
-                }
+            console.log("uploadToStore success" + data);
+            current_image_action_id = "";
+            current_trust_policy_id = "";
+            current_image_id = "";
+            $("#redirect").modal({
+                backdrop: "static"
             });
-
+        },
+        error: function(jqXHR, error, errorThrown) {
+            var message = "";
+            if (jqXHR.status == 400) {
+                message = (JSON.parse(jqXHR.responseText)).error;
+            } else {
+                message = "Something went wrong";;
+            }
+            $('#error_vm_body_3').text(message);
+            $("#error_vm_3").modal({
+                backdrop: "static"
+            });
+            $('body').removeClass("modal-open");
         }
     });
-};
 
+}
 
 function createPolicyDraftFromPolicy() {
     var mountimage = {

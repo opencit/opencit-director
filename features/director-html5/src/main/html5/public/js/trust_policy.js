@@ -1,3 +1,127 @@
+function showImageActionHistoryDialog(imageid){
+	
+
+	$("#image_action_history_title").html("Image Actions History");
+
+	$('#image_action_history').modal('show');
+	show_action_history_grid(imageid);
+	
+}
+
+
+function HistoryData(){
+	
+}
+
+function show_action_history_grid(imageid){
+	
+
+    var self = this;
+
+    $("#image_action_history_grid").html("")
+    $.ajax({
+        type: "GET",
+        url: "/v1/image-actions/history/"+imageid,
+        accept: "application/json",
+        headers: {
+            'Accept': 'application/json'
+        },
+        
+        success: function(data, status, xhr) {
+        	
+            console.log("Action History grid refreshed");
+            actionHistoryList = data.image_action_history_list;
+            var grid = [];
+            
+            for (i = 0; i < actionHistoryList.length; i++) {
+              
+
+                self.gridData = new HistoryData();
+                self.gridData.artifact_name = actionHistoryList[i].artifact_name;
+		self.gridData.execution_status = actionHistoryList[i].execution_status;
+		self.gridData.datetime= actionHistoryList[i].datetime;
+
+ 		self.gridData.artifact_name = actionHistoryList[i].artifact_name;
+	
+
+               self.gridData.store_names = actionHistoryList[i].store_names;
+
+                ///alert("self.gridData.artifact_name::"+self.gridData.artifact_name);
+
+
+                grid.push(self.gridData);
+
+            }
+            
+            $("#image_action_history_grid").jsGrid({
+
+                height: "auto",
+                width: "100%",
+                sorting: true,
+                paging: true,
+                pageSize: 5,
+                pageButtonCount: 15,
+                data: grid,
+                fields: [{
+                        title: "Artifact",
+                        name: "artifact_name",
+                        type: "text",
+                        width: 150,
+                        align: "center"
+				}, {
+                        title: "Status",
+                        name: "execution_status",
+                        type: "text",
+                        width: 230,
+                        align: "center"
+				}, {
+                        title: "Store",
+                        name: "store_names",
+                        type: "text",
+                        width: 100,
+                        align: "center"
+				}, 
+                   
+                    {
+                        title: "ExecutionDate",
+                        name: "datetime",
+                        type: "text",
+                        width: 150,
+                        align: "center"
+					}],
+				onRefreshed: function(args) {
+					if(grid.length <= 0){
+						return;
+					}
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				}
+            });
+            var delay = 300;
+            setTimeout(function() {
+                $("#image_action_history_grid").show();
+                $("#image_action_history_grid").jsGrid("refresh");
+            }, delay);
+
+        },
+        error: function(jqXHR, exception) {
+
+            show_error_in_trust_policy_tab("Failed to get action history list");
+
+
+        }
+    });
+
+
+  	
+	
+}
+
+
 function show_error_in_trust_policy_tab(message) {
 
     $('#error_modal_body_trust_policy_tab').text(message);
@@ -5,7 +129,6 @@ function show_error_in_trust_policy_tab(message) {
         backdrop: "static"
     });
     $('body').removeClass("modal-open");
-
 
 }
 
@@ -19,13 +142,11 @@ function show_dialog_content_trust_policy_tab() {
 
 }
 
-
 function goToVMPage() {
 
     $("#docker-dashboard-main-page").hide();
     $("#bm-dashboard-main-page").hide();
     $("#vm-dashboard-main-page").show();
-
 
     var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
 
@@ -254,11 +375,11 @@ function refresh_vm_images_Grid() {
 
 function refreshBMOnlineGrid() {
     var self = this;
-    endpoint = "/v1";
+    endpoint = "/v1/images";
     $("#bmGridOnline").html("")
     $.ajax({
         type: "GET",
-        url: "/v1/images?deploymentType=BareMetal",
+        url: "/v1/images?deploymentType=BareMetalLive",
         dataType: "json",
         success: function(result) {
             images = result.images;
@@ -354,11 +475,11 @@ function refreshBMOnlineGrid() {
 
 function refresh_bm_images_Grid() {
     alert("inside bm");
-    endpoint = "/v1";
+    endpoint = "/v1/images/";
     $("#bmGridImages").html("")
     $.ajax({
         type: "GET",
-        url: endpoint + "/images/imagesList/BareMetal",
+        url: endpoint + "imagesList/BareMetal",
         accept: "application/json",
         headers: {
             'Accept': 'application/json'
@@ -563,7 +684,7 @@ function refresh_docker_Grid() {
 
 function refresh_all_trust_policy_grids() {
     refresh_vm_images_Grid();
-    //refresh_bm_images_Grid();
+    // refresh_bm_images_Grid();
     refreshBMOnlineGrid();
     refresh_docker_Grid();
 }

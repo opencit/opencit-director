@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.intel.director.api.ConnectorProperties;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageStoresService;
+import com.intel.director.store.util.ImageStorePasswordUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -85,6 +87,10 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		try {
 			fetchImageStorebyId = imagePersistenceManager
 					.fetchImageStorebyId(imageStoreId);
+			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
+			ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil.getPasswordConfiguration(fetchImageStorebyId);
+			String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());
+			passwordConfiguration.setValue(passwordForImageStore);
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore :: " + imageStoreId);
 			throw new DirectorException("Error in fetching ImageStore :: "
@@ -109,14 +115,26 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	}
 	
 	@Override
-	public void deleteImageStore(String imageStoreId) throws DirectorException {
+	public GenericDeleteResponse deleteImageStore(String imageStoreId) throws DirectorException {
+		ImageStoreTransferObject fetchImageStorebyId = null;
 		try {
-			imagePersistenceManager.destroyImageStoreByID(imageStoreId);
+			fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
 					
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore @ deleteImageStore", e);
 			throw new DirectorException("Error in fetching ImageStore @ deleteImageStore", e);
 		}
+		if(fetchImageStorebyId == null){
+			return null;
+		}
+		fetchImageStorebyId.setDeleted(true);
+		try {
+			imagePersistenceManager.updateImageStore(fetchImageStorebyId);
+		} catch (DbException e) {
+			log.error("Error in updating ImageStore @ deleteImageStore", e);
+			throw new DirectorException("Error in updating ImageStore @ deleteImageStore", e);
+		}
+		return new GenericDeleteResponse();
 	}
 	
 	@Override

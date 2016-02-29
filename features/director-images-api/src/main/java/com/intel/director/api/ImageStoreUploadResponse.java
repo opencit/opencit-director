@@ -93,10 +93,11 @@ public class ImageStoreUploadResponse implements StoreResponse{
 	        this.sent = sent;
 	    }
 
+	    @Override
 	    public String getId() {
 	        return id;
 	    }
-
+	    
 	    public void setId(String id) {
 	        this.id = id;
 	    }
@@ -141,10 +142,12 @@ public class ImageStoreUploadResponse implements StoreResponse{
 	        this.checksum = checksum;
 	    }
 
+	    @Override
 	    public String getStatus() {
 	        return status;
 	    }
 
+	    @Override
 	    public void setStatus(String status) {
 	        this.status = status;
 	    }
@@ -182,5 +185,12 @@ public class ImageStoreUploadResponse implements StoreResponse{
 	                + status + ", image_size=" + image_size + ", sent=" + sent
 	                + "]";
 	    }
+
+
+
+		@Override
+		public String getUri() {
+			return image_uri;
+		}
 	
 }

@@ -7,12 +7,13 @@ package com.intel.director.async.task;
 
 import java.io.File;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ArtifactUploadService;
+import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 
 /**
  * Task to upload the tar of image and policy
@@ -60,42 +61,48 @@ public class UploadTarTask extends GenericUploadTask {
 		String tarName = trustPolicy.getDisplay_name() + ".tar";
 		if (Constants.DEPLOYMENT_TYPE_DOCKER
 				.equalsIgnoreCase(imageInfo.image_deployments)) {
+			ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
+			ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
+					.fetchImageUploadByImageId(imageInfo.getId());
+			customProperties.put(Constants.GLANCE_ID, imageInfo.getId());
+			if (imageUploadByImageId != null) {
+				UUID uuid = new UUID();
+				customProperties.put(Constants.GLANCE_ID, uuid.toString());
+			}
+
 			customProperties.put(Constants.NAME, imageInfo.repository + ":" + imageInfo.tag);
 		} else {	
 			customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
+			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
+			log.info("Inside Run Upload Tar task glanceId::" + glanceId);
+			customProperties.put(Constants.GLANCE_ID, glanceId);
 		}
 		
 		log.info("TAR name {}", tarName);
 		String imageLocation = imageInfo.getLocation();
 		String tarLocation = imageLocation + imageActionObject.getImage_id()
 				+ File.separator;
-		JAXBContext jaxbContext = null;
-		try {
-			jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-		} catch (JAXBException e) {
-			updateImageActionState(Constants.ERROR,"Error in Uploading Tar");
-			log.error("Unable to instantiate the jaxbcontext", e);
-			return false;
-		}
+
 	
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
 				"glance_image_tar");
 
 	
-		String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
-		log.info("Inside Run Upload Tar task glanceId::" + glanceId);
-		customProperties.put(Constants.GLANCE_ID, glanceId);
 		log.info("runUploadTarTask tarname::" + tarName + " ,tarLocation ::"
 				+ tarLocation);
 		//File content = new File(tarLocation + tarName);
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, tarLocation + tarName);
 		log.info("Before transferring to generic upload");
-		super.run();
+		runFlag = super.run();
 		log.info("After transferring to generic upload");
-		runFlag = true;
 
 		// Cleanup of folder
+		cleanupDirectories(tarLocation);
+		return runFlag;
+
+	}
+	
+	private void cleanupDirectories(String tarLocation){
 		File uuidFolder = new File(tarLocation);
 		File[] listFiles = uuidFolder.listFiles();
 		boolean deleteFileFlag = true;
@@ -120,7 +127,6 @@ public class UploadTarTask extends GenericUploadTask {
 		if (encImageFile.exists()) {
 			encImageFile.delete();
 		}
-		return runFlag;
 
 	}
 }

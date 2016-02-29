@@ -5,7 +5,6 @@
  */
 package com.intel.director.async.task;
 
-import java.io.File;
 import java.io.StringReader;
 import java.util.List;
 
@@ -13,8 +12,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import com.intel.director.api.ConnectorProperties;
-import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -25,7 +22,6 @@ import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.PolicyUploadFilter;
 import com.intel.director.common.Constants;
-import com.intel.director.images.GlanceImageStoreManager;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;

@@ -199,7 +199,7 @@ public class GlanceRsClient {
 		}
 		long end = new Date().getTime();
 		printTimeDiff("fetchDetails", start, end);
-
+		imageImageStoreUploadResponse.setStatus(Constants.COMPLETE);
 		return imageImageStoreUploadResponse;
 	}
 

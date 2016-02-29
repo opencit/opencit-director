@@ -46,7 +46,7 @@
 						<!-- Modal content-->
 						<div class="modal-content">
 							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<button type="button" class="close" data-dismiss="modal" onclick="imageStoreSettingPage()">&times;</button>
 								<center><h4 class="modal-title">External Storage</h4></center>
 							</div>
 							<div class="modal-body">
@@ -105,7 +105,7 @@
 						<!-- Modal content-->
 						<div class="modal-content">
 							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<button type="button"  onclick="imageStoreSettingPage()" class="close" data-dismiss="modal">&times;</button>
 								<center><h4 class="modal-title">External Storage</h4></center>
 							</div>
 							<div class="modal-body">
@@ -144,7 +144,7 @@
 								</div>
 							</div>
 							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage">Close</button>
+								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage()">Close</button>
 								<button type="button" class="btn btn-default" onclick = "editImageStore()">Next</button>
 							</div>
 						</div>
@@ -159,7 +159,7 @@
 						<!-- Modal content-->
 						<div class="modal-content">
 							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<button type="button" onclick="imageStoreSettingPage()" class="close" data-dismiss="modal">&times;</button>
 								<center><h4 class="modal-title"><div id="image_store_details_title"></div></h4></center>
 							</div>
 							<div class="modal-body">
@@ -177,7 +177,7 @@
 							</div>
 							<div class="modal-footer">
 								<div class="row">
-									<div class="col-md-1"><button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
+									<div class="col-md-1"><button type="button" onclick="imageStoreSettingPage()" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
 									<div class="col-md-1"><div id = "editBackButton"><button type="button" class="btn btn-default" onclick = "backToEdit()">Back</button></div></div>
 									<div class="col-md-1"><div id = "saveButton"></div></div>
 								</div>

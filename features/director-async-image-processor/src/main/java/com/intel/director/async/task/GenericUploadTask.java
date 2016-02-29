@@ -40,6 +40,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 
 	@Override
 	public boolean run() {
+		
 		try {
 			imageInfo = persistService.fetchImageById(imageActionObject
 					.getImage_id());
@@ -67,7 +68,6 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		} catch (StoreException e1) {
 			log.error("Erorr in addCustomProperties imagestore manager",e1);		
 			updateImageActionState(Constants.ERROR, e1.getMessage());
-			
 			return false;
 		}
 		// Upload is an async task
@@ -77,11 +77,23 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			} catch (StoreException e) {
 				log.error("Error uploading the artifact to store id {}",
 						taskAction.getStoreId(), e);
+				if(e.getMessage().startsWith(Constants.ARTIFACT_ID+":")){
+					ImageStoreUploadResponse imageStoreUploadResponse = new ImageStoreUploadResponse();
+					imageStoreUploadResponse.setStatus(Constants.ERROR);
+					imageStoreUploadResponse.setId(e.getMessage().substring(e.getMessage().indexOf(":")+1));
+					try {
+						updateUploadTable(imageStoreUploadResponse);
+					} catch (DirectorException e1) {
+						log.error("Error updating uploads table", e1);
+						return false;
+					}
+
+				}
 				return false;
 			}
 			log.info("Upload process started");
 		}
-		StoreResponse storeResponse=null;
+		StoreResponse storeResponse;
 		try {
 			 storeResponse=(StoreResponse)imageStoreManager.fetchDetails();
 		} catch (StoreException e) {
@@ -114,14 +126,13 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 	private void updateImageUploads(StoreResponse storeResponse) throws DirectorException {
 	///	log.info("updating image uploads table for image id {}",imageActionObject.getImage_id());
 		ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
-		imageUploadTransferObject.setStatus(Constants.COMPLETE);
+		imageUploadTransferObject.setStatus(storeResponse.getStatus());
 		imageUploadTransferObject.setImg(imageInfo);
 		imageUploadTransferObject.setDate(new Date());
 		imageUploadTransferObject.setStoreId(taskAction.getStoreId());
 		log.info("updating image uploads table for image id {}",imageActionObject.getImage_id()+" imageUri::"+((ImageStoreUploadResponse)storeResponse).getImage_uri());
-		ImageStoreUploadResponse imgStoreUploadResponse= (ImageStoreUploadResponse)storeResponse;	
-		imageUploadTransferObject.setImage_uri(imgStoreUploadResponse.getImage_uri());
-		String glanceId= imgStoreUploadResponse.getId();
+		imageUploadTransferObject.setImage_uri(storeResponse.getUri());
+		String glanceId= storeResponse.getId();
 		imageUploadTransferObject.setStoreArtifactId(glanceId);
 		String dekUrl=DirectorUtil.fetchDekUrl(trustPolicy);
 		String uploadVariableMD5=DirectorUtil.computeUploadVar(glanceId, dekUrl);
@@ -139,18 +150,17 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 
 	private void updatePolicyUploads(StoreResponse storeResponse) throws DirectorException {
 		PolicyUploadTransferObject policyUploadTranserObject=new PolicyUploadTransferObject();
-		policyUploadTranserObject.setStatus(Constants.COMPLETE);
+		policyUploadTranserObject.setStatus(storeResponse.getStatus());
 		policyUploadTranserObject.setTrust_policy(trustPolicy);
 		policyUploadTranserObject.setStoreId(taskAction.getStoreId());
 		policyUploadTranserObject.setDate(new Date());
 		log.info("updating policy uploads table for image id {}",imageActionObject.getImage_id()+" policyId "+trustPolicy.getId()+" and diplay name::"+trustPolicy.getDisplay_name()+" with policyUri::"+(((SwiftObjectResponse)storeResponse).getSwiftUri()));
-		SwiftObjectResponse swiftObjectResponse= (SwiftObjectResponse)storeResponse;
-		String glanceId= swiftObjectResponse.getObjectName();
+		String glanceId= storeResponse.getId();
 		String dekUrl=DirectorUtil.fetchDekUrl(trustPolicy);
 		policyUploadTranserObject.setStoreArtifactId(glanceId);
 		String uploadVariableMD5=DirectorUtil.computeUploadVar(glanceId, dekUrl);
 		policyUploadTranserObject.setUploadVariableMD5(uploadVariableMD5);
-		policyUploadTranserObject.setPolicy_uri(swiftObjectResponse.getSwiftUri());
+		policyUploadTranserObject.setPolicy_uri(storeResponse.getUri());
 	///	updateImage(uploadVariableMD5);
 		try {
 			persistService.savePolicyUpload(policyUploadTranserObject);

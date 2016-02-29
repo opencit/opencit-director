@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.intel.director.api.ImageStoreResponse;
+import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.DirectorUtil;
@@ -52,7 +54,11 @@ public class DockerHubManager extends StoreManagerImpl {
 
 	@Override
 	public <T extends StoreResponse> T fetchDetails() throws StoreException {
-		return null;
+		StoreResponse imageStoreResponse = new ImageStoreUploadResponse();
+		imageStoreResponse.setStatus(com.intel.director.common.Constants.COMPLETE);
+		ImageInfo  imageInfo = (ImageInfo) objectProperties.get(ImageInfo.class.getName());
+		imageStoreResponse.setId(imageInfo.id);
+		return (T) imageStoreResponse;
 	}
 
 	@Override

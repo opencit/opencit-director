@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.director.api.ImageInfoDetailedResponse;
 import com.intel.director.api.SearchImagesRequest;
 import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustPolicyDraft;
@@ -89,11 +90,11 @@ public class UnmountImageHandler {
 			return null;
 		}
 		List<String> mountedImageIds = new ArrayList<>();
-		List<ImageInfo> images = searchImagesResponse.images;
-		for (ImageInfo imageInfo : images) {
+		List<ImageInfoDetailedResponse> images = searchImagesResponse.images;
+		for (ImageInfoDetailedResponse imageInfoDetailedResponse : images) {
 			// Check if the image is mounted
-			if (StringUtils.isNotBlank(imageInfo.mounted_by_user_id)) {
-				mountedImageIds.add(imageInfo.id);
+			if (StringUtils.isNotBlank(imageInfoDetailedResponse.mounted_by_user_id)) {
+				mountedImageIds.add(imageInfoDetailedResponse.id);
 			}
 		}
 		return mountedImageIds;

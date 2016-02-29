@@ -5,8 +5,6 @@
  */
 package com.intel.director.async.task;
 
-import java.io.File;
-
 import javax.xml.bind.JAXBException;
 
 import com.intel.dcsg.cpg.io.UUID;
@@ -184,8 +182,8 @@ public class UploadImageTask extends GenericUploadTask {
 			String imageLocation = imageInfo.getLocation();
 			String imageFilePath = null;
 			imageFilePath = imageLocation + imageInfo.getImage_name();
-			File content = new File(imageFilePath);
-			customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, content);
+			//File content = new File(imageFilePath);
+			customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 			customProperties.put(Constants.NAME, imageInfo.getRepository()
 					+ ":" + imageInfo.getTag());
 		}

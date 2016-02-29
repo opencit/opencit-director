@@ -35,9 +35,11 @@ import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageInfoDetailedResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageListResponseInfo;
+import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.PolicyTemplateInfo;
@@ -58,6 +60,10 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.ImageStoreUploadFields;
+import com.intel.director.api.ui.ImageStoreUploadFilter;
+import com.intel.director.api.ui.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
@@ -252,6 +258,7 @@ public class ImageServiceImpl implements ImageService {
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		try {
 			List<ImageInfo> fetchImages = null;
+			List<ImageInfoDetailedResponse> imageInfoDetailedResponseList= new ArrayList<ImageInfoDetailedResponse>();
 			// Fetch all images
 			if (searchImagesRequest.deploymentType == null) {
 				fetchImages = imagePersistenceManager.fetchImages(null);
@@ -269,15 +276,47 @@ public class ImageServiceImpl implements ImageService {
 				for (int i = 0; i < fetchImages.size(); i++) {
 					fetchImages.get(i).setPolicy_name(
 							getDisplayNameForImage(fetchImages.get(i).id));
+					Mapper mapper = new DozerBeanMapper();		
+					ImageInfoDetailedResponse imageInfoDetailedResponse=mapper.map(
+							fetchImages.get(i), ImageInfoDetailedResponse.class);
+					imageInfoDetailedResponse.setCreated_date(fetchImages.get(i).getCreated_date());
+					imageInfoDetailedResponse.setActionEntryCreated(checkActionEntryCreated(fetchImages.get(i).getId()));
+					imageInfoDetailedResponseList.add(imageInfoDetailedResponse);
+					
 				}
 			}
-			searchImagesResponse.images = fetchImages;
+		
+			
+			searchImagesResponse.images = imageInfoDetailedResponseList;
 		} catch (DbException de) {
 			log.error("Error while retrieving list of images", de);
 			throw new DirectorException(
 					"Error while retrieving list of images", de);
 		}
 		return searchImagesResponse;
+	}
+
+	private boolean checkActionEntryCreated(String imageId) {
+		ImageStoreUploadOrderBy imgOrder = new ImageStoreUploadOrderBy();
+		imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
+		imgOrder.setOrderBy(OrderByEnum.DESC);
+		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
+		imgUpFilter.setImage_id(imageId);
+		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		try {
+			fetchImageUploads = imagePersistenceManager.fetchImageUploads(
+					imgUpFilter, imgOrder);
+		
+			
+		} catch (DbException e) {
+			log.error("Error fetching image uploads {}",e);
+			
+			
+		}
+		if(fetchImageUploads!=null && fetchImageUploads.size()>0){
+			return true;
+		}
+		return false;
 	}
 
 	/**

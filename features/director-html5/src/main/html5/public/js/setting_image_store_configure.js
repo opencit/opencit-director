@@ -30,7 +30,7 @@ function imageStoreSettingPage() {
 				
 				image_store.image_artifacts = image_store.image_artifacts.substring(0, image_store.image_artifacts.length - 1);
 				var image_store_json = JSON.stringify(image_stores[i]);
-				image_store.actions = '<a href=\'#\' onclick=\'populateImageStore(' + image_store_json + ')\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>' 
+				image_store.actions = '<a href=\'#\' onclick=\'getImageStoreAndPopulateImageStore(\"' + image_stores[i].id + '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>' 
 					+ '<a href=\'#\' onclick =\'deleteImageStore("' + image_stores[i].id + '")\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>';
 				image_stores_grid.push(image_store);
 				
@@ -145,10 +145,16 @@ function createImageStore(){
 			createImageStoreRequest = data;
 			var image_store_details = createImageStoreRequest.image_store_details;
 			for(i = 0 ; i < image_store_details.length; i++) {
-				str = str +  "<div class=\"row\">"
-				str = str + "<label class=\"control-label col-md-4\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
-					"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"Enter " + 
-					image_store_details[i].key + "\"></div><br />";
+				str = str +  "<div class=\"row\">";
+				if(image_store_details[i].key.toLowerCase().indexOf("password") != -1){
+					str = str + "<label class=\"control-label col-md-4\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+						"<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"Enter " + 
+						image_store_details[i].key + "\"></div><br />";
+				} else {
+					str = str + "<label class=\"control-label col-md-4\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+						"<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"Enter " + 
+						image_store_details[i].key + "\"></div><br />";
+				}
 				str = str + "</div>";
 			}
 			$("#edit_image_store_name").val(data.name);
@@ -216,6 +222,22 @@ function updateImageStore(updateImageStoreRequest, isEdit){
 	});
 }
 
+function getImageStoreAndPopulateImageStore(imageStoreId){
+	$.ajax({
+		type : "GET",
+		url : "/v1/image-stores/" + imageStoreId,
+		contentType: "application/json",
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function (data, status, xhr) {
+			populateImageStore(data);
+		}
+	});
+}
+
+
 function editImageStore(){
 	$('#editBackButton').show();
 	$('#edit_image_store').modal('hide');
@@ -260,15 +282,29 @@ function populateImageStoreDetails(image_store_details){
 		str = str + "<div class=\"row\">";
 		if(image_store_details[i].value){ 
 			valueHolder = image_store_details[i].value;
-			str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
-			"<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\"" + image_store_details[i].id + "\" ></div><br />";
-			$("#"+image_store_details[i].id).val(valueHolder);
-			
+			if(image_store_details[i].key.toLowerCase().indexOf("password") != -1){
+				str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+					"<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=\"" + image_store_details[i].id + "\" ></div><br />";
+				$("#"+image_store_details[i].id).val(valueHolder);
+			} else {
+				str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+				"<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\"" + image_store_details[i].id + "\" ></div><br />";
+				$("#"+image_store_details[i].id).val(valueHolder);
+			}			
 		} else {
-			valueHolder = image_store_details[i].key;
-			str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
-			"<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"" + 
-				valueHolder + "\"></div><br />";
+		
+			if(image_store_details[i].key.toLowerCase().indexOf("password") != -1){
+				valueHolder = image_store_details[i].key;
+				str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+					"<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"" + 
+					valueHolder + "\"></div><br />";
+			} else {
+				valueHolder = image_store_details[i].key;
+				str = str + "<label align=\"right\" class=\"control-label col-md-6\" for=" + image_store_details[i].id + ">" + image_store_details[i].key + ": </label>" +
+					"<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=" + image_store_details[i].id + " placeholder=\"" + 
+					valueHolder + "\"></div><br />";
+			}
+
 
 		}
 		str = str + "</div>";
@@ -298,7 +334,7 @@ function resetAllFields(){
 function backToEdit(){
 	$("#image_store_details_error").html("");
 	$('#image_store_details').modal('hide');
-	$('#edit_image_store').modal('show')
+	$('#edit_image_store').modal('show');
 }
 function deleteImageStore(imageStoreId){
 	$.ajax({

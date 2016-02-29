@@ -20,6 +20,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ListTrustPolicyDrafts;
@@ -519,7 +520,7 @@ public class TrustPolicyDrafts {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deletePolicyDraft(
 			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
-		GenericResponse genericResponse = new GenericResponse();
+		GenericDeleteResponse genericResponse = new GenericDeleteResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyDraftId,RegexPatterns.UUID)){
 			genericResponse.error = "Trust Policy Draft Id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)

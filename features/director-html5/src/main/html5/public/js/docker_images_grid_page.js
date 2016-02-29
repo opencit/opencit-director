@@ -14,6 +14,11 @@ function ImageData() {
 
 }
 
+
+
+
+
+
 function refresh_docker_Grid() {
     var self = this;
 
@@ -69,12 +74,12 @@ function refresh_docker_Grid() {
 
                 self.gridData.image_upload = "";
                 if (images[i].image_upload_status == 'Complete') {
+	
+		     if(images[i].action_entry_created){
+			 self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-cloud-upload\" id=\"vm_ok_row_" + i + "\" title=\"Upload Action History\"  onclick=\"showImageActionHistoryDialog('" + images[i].id + "')\" ></span></a>";
 
-                    if (images[i].image_uploads_count != 0 || images[i].policy_uploads_count != 0) {
-                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" id=\"docker_ok_row_" + i + "\" title=\"Uploaded Before\"></span></a>";
-                    } else {
-                        self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" id=\"docker_minus_row_" + i + "\" title=\"Never Uploaded\"></span></a>";
-                    }
+		    }
+	
 
                     self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" id=\"docker_upload_row_" + i + "\" onclick=\"uploadToImageStoreDockerPage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
                 }

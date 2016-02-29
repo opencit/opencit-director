@@ -159,7 +159,9 @@ public class SwiftObjectStoreManager extends StoreManagerImpl implements
 
 		}
 		swiftObjectResponse.setObjectName(objectName);
-		swiftObjectResponse.setSwiftUri(swiftRsClient.storageUrl + "/" + containerName + "/" + objectName);
+		String uri = swiftRsClient.storageUrl + "/" + containerName + "/" + objectName;
+		swiftObjectResponse.setSwiftUri(uri);
+		swiftObjectResponse.setStatus(com.intel.director.common.Constants.COMPLETE);
 		log.info("Fetch complete from swift");
 		return (T) swiftObjectResponse;
 	}

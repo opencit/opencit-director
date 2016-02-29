@@ -20,8 +20,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.ConnectorProperties;
-import com.intel.director.api.GenericResponse;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreResponse;
@@ -142,6 +144,12 @@ public class ImageStores {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getImageStore(@PathParam("imageStoreId") String imageStoreId)
 			throws DirectorException {
+		GenericDeleteResponse response = new GenericDeleteResponse();
+		if(!ValidationUtil.isValidWithRegex(imageStoreId,RegexPatterns.UUID)){
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
 		ImageStoreTransferObject imageStoreResponse = imageStoreService
 				.getImageStoreById(imageStoreId);
 		if (imageStoreResponse == null) {
@@ -211,13 +219,14 @@ public class ImageStores {
 	}
 
 	/**
-	 * Delete image store for the provided imageStoreId if not exists respond
-	 * with HTTP 404 Not Found
+	 * Turns deleted flag of image store to false for the provided imageStoreId
+	 * if not exists respond with HTTP 404 Not Found
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
 	 * @mtwSampleRestCall <pre>
 	 * Input:
+	 *  	https://{IP/HOST_NAME}/v1/image-stores/9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8
 	 * 		PathParam: 9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8 
 	 * 
 	 * Output:
@@ -235,16 +244,27 @@ public class ImageStores {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImageStores(
-			@PathParam("imageStoreId") String imageStoreId) {
+			@PathParam("imageStoreId") String imageStoreId)
+			throws DirectorException {
+		GenericDeleteResponse deleteImageStore = null;
+		GenericDeleteResponse response = new GenericDeleteResponse();
+		if(!ValidationUtil.isValidWithRegex(imageStoreId,RegexPatterns.UUID)){
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
 		try {
-			imageStoreService.deleteImageStore(imageStoreId);
+			deleteImageStore = imageStoreService.deleteImageStore(imageStoreId);
 		} catch (DirectorException e) {
-			return Response.status(Status.NOT_FOUND).build();
+			log.error("Error in Deleting Image Store", e);
+			throw new DirectorException("Error in Deleting Image Store", e);
 		}
 
-		GenericResponse response = new GenericResponse();
-		response.setDeleted(true);
-		return Response.ok(response).build();
+		if (deleteImageStore == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		deleteImageStore.setDeleted(true);
+		return Response.ok(deleteImageStore).build();
 	}
 
 

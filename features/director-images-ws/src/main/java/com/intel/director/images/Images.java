@@ -38,6 +38,7 @@ import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
 import com.intel.director.api.DockerRequestObject;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
@@ -58,8 +59,10 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
+import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
@@ -80,6 +83,7 @@ public class Images {
 	ImageService imageService = new ImageServiceImpl();
 	LookupService lookupService = new LookupServiceImpl();
 	SettingImpl settingimpl = new SettingImpl();
+	ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(Images.class);
 
@@ -1053,12 +1057,12 @@ public class Images {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImage(@PathParam("imageId") String imageId) {
-		GenericResponse response = new GenericResponse();
-		GenericResponse genericResponse= new GenericResponse();
+		GenericDeleteResponse response = new GenericDeleteResponse();
+	///	GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
-			genericResponse.error = "Imaged id is empty or not in uuid format";
+			response.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+					.entity(response).build();
 		}
 		try {
 			if (imageService.fetchImageById(imageId) != null) {
@@ -1195,33 +1199,18 @@ public class Images {
 
 	}
 	
-	@Path("rpc/docker-save/{image_id: [0-9a-zA-Z_-]+}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@POST
-	public GenericResponse dockerSave(@PathParam("image_id") String image_id) {
-		log.info("performing Docker save  simultaneously");
-		String user = getLoginUsername();
-		log.info("User perfomig docker save  : " + user);
-		GenericResponse monitorStatus = new GenericResponse();
-		monitorStatus.status = Constants.SUCCESS;
-		try {
-			imageService.dockerSave(image_id, user);
-		} catch (DirectorException e) {
-			log.error("Error while perfomig docker save ");
-			monitorStatus.status = Constants.ERROR;
-			monitorStatus.details = e.getMessage();
-			return monitorStatus;
-		}
-		return monitorStatus;
-	}
-	
 	@Path("rpc/docker-rmi/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@DELETE
 	public Response dockerRMI(@PathParam("image_id") String image_id) {
 		log.info("performing Docker rmi simultaneously");
+		GenericDeleteResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
 		GenericResponse monitorStatus;
 		try {
 			monitorStatus = imageService.dockerRMI(image_id);
@@ -1244,6 +1233,13 @@ public class Images {
 	@POST
 	public Response dockerLoad(DockerRequestObject dockerRequestObject) {
 		log.info("performing Docker Load ");
+		GenericDeleteResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(dockerRequestObject.getImage_id(),
+				RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
 		GenericResponse genericResponse = new GenericResponse();
 		genericResponse.status = Constants.SUCCESS;
 		GenericResponse dockerLoad;
@@ -1271,6 +1267,13 @@ public class Images {
 		log.info("performing Docker tag ");
 		GenericResponse dockerTag;
 		try {
+			GenericDeleteResponse response = new GenericDeleteResponse();
+			if (!ValidationUtil.isValidWithRegex(
+					dockerRequestObject.getImage_id(), RegexPatterns.UUID)) {
+				response.error = "Imaged id is empty or not in uuid format";
+				return Response.status(Response.Status.BAD_REQUEST)
+						.entity(response).build();
+			}
 			dockerTag = imageService.dockerTag(
 					dockerRequestObject.getImage_id(),
 					dockerRequestObject.getRepository(),
@@ -1286,5 +1289,17 @@ public class Images {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		return Response.ok(dockerTag).build();
+	}
+	
+	@Path("rpc/remove-orphan-policies")
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public void removeOrphanPolicies() throws DirectorException {
+		log.info("Removing Orphan Policies");
+		try {
+			artifactUploadService.removeOrphanPolicies();
+		} catch (DirectorException e) {
+			throw new DirectorException("Error In Removing Orphan Policies");
+		}
 	}
 }

@@ -74,7 +74,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 				DirectorUtil.callExec("mkdir -p " + tarDestination);
 				MountImage.dockerSave(imageInfo.getRepository(),
 						imageInfo.getTag(), tarDestination,
-						trustPolicy.getDescription() + ".tar");
+						trustPolicy.getDisplay_name() + ".tar");
 				MountImage.dockerRMI(imageInfo.getRepository(),
 						imageInfo.getTag());
 			} else {

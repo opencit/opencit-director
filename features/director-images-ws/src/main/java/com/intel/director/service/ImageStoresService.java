@@ -2,6 +2,7 @@ package com.intel.director.service;
 
 import java.util.List;
 
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.images.exception.DirectorException;
@@ -15,7 +16,7 @@ public interface ImageStoresService {
 	public List<ImageStoreTransferObject> getImageStores(
 			ImageStoreFilter imageStoreFilter) throws DirectorException;
 
-	public void deleteImageStore(String imageStoreId)
+	public GenericDeleteResponse deleteImageStore(String imageStoreId)
 			throws DirectorException;
 
 	public ImageStoreTransferObject updateImageStore(

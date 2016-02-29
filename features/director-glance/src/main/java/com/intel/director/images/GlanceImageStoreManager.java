@@ -9,7 +9,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.StoreResponse;
+import com.intel.director.common.Constants;
 import com.intel.director.images.rs.GlanceException;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
@@ -48,9 +51,10 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 
 	@Override
 	public String upload() throws StoreException {
+		String glanceid = null;
 		try {
 			log.info("uploading metadata");
-			String glanceid = glanceRsClient
+			 glanceid = glanceRsClient
 					.uploadImageMetaData(objectProperties);
 			log.info("uploading image");
 			uploadImage(objectProperties);
@@ -58,6 +62,10 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			// //startPolling(file.geimageProperties, glanceid);
 		} catch (GlanceException e) {
 			log.error("Error  upload to Glance", e);
+			if(StringUtils.isNotBlank(glanceid)){
+				//delete
+				throw new StoreException(Constants.ARTIFACT_ID+":"+glanceid, e);
+			}
 			throw new StoreException("Error  upload to Glance", e);
 		}
 
