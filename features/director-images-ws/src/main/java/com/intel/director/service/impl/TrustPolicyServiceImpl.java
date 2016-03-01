@@ -65,12 +65,19 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			throw new DirectorException("No Image found  ", e);
 		}
 		try {
-			trustPolicy = persistService.fetchPolicyById(imageInfo.getTrust_policy_id());
+			if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
+				trustPolicy = persistService.fetchPolicyById(imageInfo
+						.getTrust_policy_id());
+			}
 		} catch (DbException e) {
 			log.error("Error fetching policy for image ", e);
 		}
 		try {
-			trustPolicyDraft = persistService.fetchPolicyDraftById(imageInfo.getTrust_policy_draft_id());
+			if (StringUtils.isNotBlank(imageInfo.getTrust_policy_draft_id())) {
+				trustPolicyDraft = persistService
+						.fetchPolicyDraftById(imageInfo
+								.getTrust_policy_draft_id());
+			}
 		} catch (DbException e) {
 			log.error("Error fetching policy for image ", e);
 		}

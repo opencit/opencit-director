@@ -22,7 +22,7 @@ public class SwiftRsClientBuilder {
 				|| configuration.get(Constants.SWIFT_API_ENDPOINT) == null
 				|| configuration.get(Constants.SWIFT_TENANT_NAME) == null
 				|| configuration.get(Constants.SWIFT_ACCOUNT_USERNAME) == null
-				|| configuration.get(Constants.SWIFT_AUTH_ENDPOINT) == null
+				|| configuration.get(Constants.SWIFT_KEYSTONE_ENDPOINT) == null
 				|| configuration.get(Constants.SWIFT_KEYSTONE_SERVICE_NAME) == null
 				|| configuration.get(Constants.SWIFT_ACCOUNT_USER_PASSWORD) == null
 ) {
@@ -32,7 +32,7 @@ public class SwiftRsClientBuilder {
 		String swiftApiEndpoint = (String) configuration
 				.get(Constants.SWIFT_API_ENDPOINT);
 		String swiftAuthEndpoint = (String) configuration
-				.get(Constants.SWIFT_AUTH_ENDPOINT);
+				.get(Constants.SWIFT_KEYSTONE_ENDPOINT);
 		String tenantName = (String) configuration
 				.get(Constants.SWIFT_TENANT_NAME);
 		String accountUsername = (String) configuration

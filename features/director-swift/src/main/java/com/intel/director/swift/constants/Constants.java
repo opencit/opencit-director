@@ -125,6 +125,7 @@ public class Constants {
 	public static final String SWIFT_WRITE_TO_FILE_PATH ="swift.write.to.file.path";
 	public static final String SWIFT_API_ENDPOINT = "swift.api.endpoint";
 	public static final String SWIFT_AUTH_ENDPOINT = "swift.auth.endpoint";
+	public static final String SWIFT_KEYSTONE_ENDPOINT = "swift.keystone.endpoint";
 	
 	public static final String SWIFT_POLICY_PATH = "/policy";
 	public static final String SWIFT_PATH = "swift.path";
