@@ -131,7 +131,7 @@ public class Constants {
 	public static final String AUTH_TOKEN = "X-AUTH-TOKEN";
 	public static final String SWIFT_STORAGE_URL ="X-Storage-Url";
 	public static final String SWIFT_WRITE_TO_FILE_PATH ="swift.write.to.file.path";
-	
+	public static final String SWIFT_KEYSTONE_SERVICE_NAME="swift.keystone.service.name";
 	
 	public static final String SWIFT_POLICY_PATH = "/policy";
 	public static final String SWIFT_PATH = "swift.path";

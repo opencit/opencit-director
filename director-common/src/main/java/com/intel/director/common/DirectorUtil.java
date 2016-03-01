@@ -23,12 +23,20 @@ import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -271,8 +279,6 @@ public class DirectorUtil {
 		}
 		return uploadvar;
 	}
-	
-	
 
 	public static String computeHash(MessageDigest md, File file)
 			throws IOException {
@@ -358,6 +364,36 @@ public class DirectorUtil {
 		}
 		return policy.getImage().getImageId();
 	}
+
+	public static String prettifyXml(String xml) {
+		final InputSource src = new InputSource(new StringReader(xml));
+		Node document;
+		try {
+			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			log.error("Error parsing string {}", xml, e);
+			return null;
+		}
+		final Boolean keepDeclaration = Boolean.valueOf(xml.startsWith("<?xml"));
+
+		DOMImplementationRegistry registry = null;
+		try {
+			registry = DOMImplementationRegistry.newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException e) {
+			log.error("Error initializing DOMImplementationRegistry {}", e);
+			return null;
+		}
+		final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+		final LSSerializer writer = impl.createLSSerializer();
+
+		// Set this to true if the output needs to be beautified.
+		writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+		// Set this to true if the declaration is needed to be outputted.
+		writer.getDomConfig().setParameter("xml-declaration", keepDeclaration);
+
+		return writer.writeToString(document);
+	}
+
 	
 	public static String fetchDekUrl(TrustPolicy policy){
 		if(policy==null){
@@ -379,5 +415,4 @@ public class DirectorUtil {
 		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getURL() : "";
 		
 	}
-
 }

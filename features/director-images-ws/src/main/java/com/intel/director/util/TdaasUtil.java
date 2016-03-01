@@ -24,14 +24,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import net.schmizz.sshj.SSHClient;
 
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
@@ -86,6 +86,8 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
+
+import net.schmizz.sshj.SSHClient;
 
 /**
  * 
@@ -831,5 +833,22 @@ public class TdaasUtil {
 
 		return tpr;
 		
+	}
+	
+	public static String getVersionedName(String name) {
+		String REGEX = ".*[-]{1}[v]{1}[0-9]*$";
+		Pattern p = Pattern.compile(REGEX);
+		Matcher m = p.matcher(name);
+		StringBuffer sb = new StringBuffer(name);
+		if (m.find()) {
+			int last = name.lastIndexOf("-v");
+			String substring = name.substring(last + 2);
+			int parseInt = Integer.parseInt(substring);
+			parseInt++;
+			sb.replace(last + 2, name.length(), parseInt + "");
+		} else {
+			sb.append("-v1");
+		}
+		return sb.toString();
 	}
 }

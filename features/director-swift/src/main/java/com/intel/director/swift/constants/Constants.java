@@ -124,13 +124,14 @@ public class Constants {
 	public static final String SWIFT_STORAGE_URL ="X-Storage-Url";
 	public static final String SWIFT_WRITE_TO_FILE_PATH ="swift.write.to.file.path";
 	public static final String SWIFT_API_ENDPOINT = "swift.api.endpoint";
+	public static final String SWIFT_AUTH_ENDPOINT = "swift.auth.endpoint";
 	
 	public static final String SWIFT_POLICY_PATH = "/policy";
 	public static final String SWIFT_PATH = "swift.path";
 	public static final String SWIFT_POLICY_CONTAINER_NAME = "trust_policies";
 	public static final String SWIFT_DOWNLOAD_FILE_NAME = "swift.download.file.name";
 	public static final String SWIFT_DOWNLOAD_FILE_PATH = "swift.download.file.path";
-
+	public static final String SWIFT_KEYSTONE_SERVICE_NAME="swift.keystone.service.name";
 	public static final String TASK_NAME_CREATE_TAR = "Create Tar";
 	public static final String TASK_NAME_PUSH_POLICY = "Push Policy";
 	public static final String TASK_NAME_UPLOAD_POLICY = "Upload Policy";
@@ -159,5 +160,6 @@ public class Constants {
 	public static final String DIRECTOR_DB_DRIVER="director.db.driver";
 	
 	public static final String UPLOAD_TO_IMAGE_STORE_FILE = "UPLOAD_TO_IMAGE_STORE_FILE";
+	
 
 }

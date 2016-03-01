@@ -2,6 +2,7 @@ package com.intel.director.images;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +21,13 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ctc.wstx.util.StringUtil;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.api.CommonValidations;
 import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.GenericDeleteResponse;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreResponse;
@@ -105,21 +109,30 @@ public class ImageStores {
 	@Path("image-stores")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public ImageStoreResponse getImageStores(
+	public Response getImageStores(
 			@QueryParam("artifacts") String artifacts) throws DirectorException {
 		ImageStoreResponse imageStoreResponse = new ImageStoreResponse();
 		List<ImageStoreTransferObject> imageStores = null;
+		
 		if (StringUtils.isBlank(artifacts)) {
 			imageStores = imageStoreService.getImageStores(null);
 		} else {
 			ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
+			
 			String[] artifactsArray = artifacts.split(",");
+			for(String str: artifactsArray){
+			 if(!ValidationUtil.isValidWithRegex(str,Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR)){
+				 imageStoreResponse.setError("Invalid artifact provided. It should be "+ Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR);
+				 return Response.status(Response.Status.BAD_REQUEST)
+							.entity(imageStoreResponse).build();
+			 }
+			}
 			imageStoreFilter.setArtifact_types(artifactsArray);
 			imageStores = imageStoreService.getImageStores(imageStoreFilter);
 		}
 		imageStoreResponse.image_stores = new ArrayList<ImageStoreTransferObject>(
 				imageStores);
-		return imageStoreResponse;
+		return Response.ok(imageStoreResponse).build();
 	}
 
 	/**
@@ -287,20 +300,31 @@ public class ImageStores {
 	 * 
 	 * Output:
 	 * 
-	 * If invalid deployment type is provided, emppty list is returned
+	 * If invalid deployment type is provided, empty list is returned
 	 * </pre>
 	 */
 	@Path("deployment-artifacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Map<String, String> getArtifactsForDeployment(
+	public Response getArtifactsForDeployment(
 			@QueryParam("depolymentType") String depolymentType) {
+		GenericResponse genericResponse= new GenericResponse();
+		if(StringUtils.isBlank(depolymentType)){
+			genericResponse.error = "Please provide depolyment type";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		if(!CommonValidations.validateImageDeployments(depolymentType)){
+			genericResponse.error = "Incorrect deployment_type";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
 		switch (depolymentType) {
 		case Constants.DEPLOYMENT_TYPE_VM:
-			return ArtifactsForDeploymentType.VM.getArtifacts();
+			return Response.ok(ArtifactsForDeploymentType.VM.getArtifacts()).build();
 
 		case Constants.DEPLOYMENT_TYPE_DOCKER:
-			return ArtifactsForDeploymentType.DOCKER.getArtifacts();
+			return Response.ok(ArtifactsForDeploymentType.DOCKER.getArtifacts()).build();
 		}
 		return null;
 	}

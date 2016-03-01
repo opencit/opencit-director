@@ -125,6 +125,7 @@ public class Constants {
 	
 	public static final String SWIFT = "Swift";
 	public static final String SWIFT_API_ENDPOINT = "swift.api.endpoint";
+	public static final String SWIFT_AUTH_ENDPOINT = "swift.keystone.endpoint";
 	public static final String SWIFT_IP = "swift.ip";
 	public static final String SWIFT_USERNAME = "swift.usename";
 	public static final String SWIFT_PASSWORD = "swift.password";
@@ -135,6 +136,8 @@ public class Constants {
 	public static final String SWIFT_ACCOUNT_NAME = "swift.account.name";
 	public static final String SWIFT_ACCOUNT_USERNAME = "swift.account.usename";
 	public static final String SWIFT_ACCOUNT_USER_PASSWORD = "swift.account.userpassword";
+	public static final String SWIFT_KEYSTONE_SERVICE_NAME="swift.keystone.service.name";
+	
 	public static final String SWIFT_STORAGE_USER = "X-Storage-User";
 	public static final String SWIFT_STORAGE_PASSWORD = "X-Storage-Pass";
 	public static final String SWIFT_PORT = "swift.port";

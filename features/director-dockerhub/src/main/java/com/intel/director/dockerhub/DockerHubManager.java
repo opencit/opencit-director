@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.api.ui.ImageInfo;

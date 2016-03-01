@@ -20,23 +20,30 @@ public class SwiftRsClientBuilder {
 
 		if (configuration == null
 				|| configuration.get(Constants.SWIFT_API_ENDPOINT) == null
-				|| configuration.get(Constants.SWIFT_ACCOUNT_NAME) == null
+				|| configuration.get(Constants.SWIFT_TENANT_NAME) == null
 				|| configuration.get(Constants.SWIFT_ACCOUNT_USERNAME) == null
-				|| configuration.get(Constants.SWIFT_ACCOUNT_USER_PASSWORD) == null) {
-			throw new SwiftException("No configuration provided for swift");
+				|| configuration.get(Constants.SWIFT_AUTH_ENDPOINT) == null
+				|| configuration.get(Constants.SWIFT_KEYSTONE_SERVICE_NAME) == null
+				|| configuration.get(Constants.SWIFT_ACCOUNT_USER_PASSWORD) == null
+) {
+			throw new SwiftException("All configurations not provided for swift");
 		}
 		///String swiftIp = (String) configuration.get(Constants.SWIFT_IP);
-		String swiftAPIEndpoint = (String) configuration
+		String swiftApiEndpoint = (String) configuration
 				.get(Constants.SWIFT_API_ENDPOINT);
-		String accountName = (String) configuration
-				.get(Constants.SWIFT_ACCOUNT_NAME);
+		String swiftAuthEndpoint = (String) configuration
+				.get(Constants.SWIFT_AUTH_ENDPOINT);
+		String tenantName = (String) configuration
+				.get(Constants.SWIFT_TENANT_NAME);
 		String accountUsername = (String) configuration
 				.get(Constants.SWIFT_ACCOUNT_USERNAME);
 		String accountUserPassword = (String) configuration
 				.get(Constants.SWIFT_ACCOUNT_USER_PASSWORD);
+		String keystoneServiceName = (String) configuration
+				.get(Constants.SWIFT_KEYSTONE_SERVICE_NAME);
 
-		return new SwiftRsClient(swiftAPIEndpoint, accountName,
-				accountUsername, accountUserPassword);
+		return new SwiftRsClient(swiftApiEndpoint,swiftAuthEndpoint, tenantName,
+				accountUsername, accountUserPassword,keystoneServiceName);
 
 	}
 

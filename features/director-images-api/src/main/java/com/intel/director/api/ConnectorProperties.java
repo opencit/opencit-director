@@ -14,11 +14,12 @@ public enum ConnectorProperties {
 					
 	SWIFT(
 			"SWIFT", "com.intel.director.swift.objectstore.SwiftObjectStoreManager",
-			new String[] { Constants.SWIFT_API_ENDPOINT,
-					Constants.SWIFT_ACCOUNT_NAME,
+			new String[] { Constants.SWIFT_API_ENDPOINT,Constants.SWIFT_AUTH_ENDPOINT,
+					Constants.SWIFT_TENANT_NAME,
 					Constants.SWIFT_ACCOUNT_USERNAME,
 					Constants.SWIFT_ACCOUNT_USER_PASSWORD,
-					Constants.SWIFT_CONTAINER_NAME},
+					Constants.SWIFT_CONTAINER_NAME,
+					Constants.SWIFT_KEYSTONE_SERVICE_NAME},
 			new HashMap<String, String>(){{put(Constants.ARTIFACT_POLICY, "Policy");}}), 
 	GLANCE("GLANCE",
 			"com.intel.director.images.GlanceImageStoreManager", new String[] {

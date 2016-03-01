@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,11 +35,16 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
@@ -56,8 +62,8 @@ public class SwiftRsClient {
 	public String authToken;
 	public String storageUrl;
 
-	public SwiftRsClient(String swiftApiEndpoint, String accountName,
-			String accountUsername, String accountUserPassword)
+	public SwiftRsClient(String swiftApiEndpoint, String swiftAuthEndpoint,String tenantName,
+			String accountUsername, String accountUserPassword,String swiftKeystoneService)
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
@@ -69,8 +75,10 @@ public class SwiftRsClient {
 			throw new SwiftException("Initialize SwiftRsClient failed", e);
 		}
 		webTarget = client.target(url.toExternalForm());
-
-		createAuthToken(accountName, accountUsername, accountUserPassword);
+	
+		createAuthTokenFromKeystone(swiftApiEndpoint,swiftAuthEndpoint, tenantName, accountUsername,
+					accountUserPassword,swiftKeystoneService);
+		
 
 	}
 
@@ -488,20 +496,37 @@ public class SwiftRsClient {
 		+ objectName;
 	}
 
-	private void createAuthToken(String accountName, String accountUsername,
+/*	private void createAuthToken(String swiftAuthEndpoint,String accountName, String accountUsername,
 			String accountUserPassword) throws SwiftException {
 		
 		long start = new Date().getTime();
 		Response response=null;
-		
+		WebTarget authWebTarget;
+		Client authWebClient;
+		authWebClient = ClientBuilder.newBuilder().build();
+		URL authUrl = null;
+		try {
+			authUrl = new URL(swiftAuthEndpoint);
+		} catch (MalformedURLException e) {
+			log.error("Initialize SwiftRsClient failed");
+			throw new SwiftException("Initialize SwiftRsClient failed", e);
+		}
+		authWebTarget = authWebClient.target(authUrl.toExternalForm());
 		try {
 			response = webTarget
-					.path("/auth/" + Constants.SWIFT_API_VERSION)
+					.path("/auth/v1.0")
 					.request()
 					.header(Constants.SWIFT_STORAGE_USER,
 							accountName + ":" + accountUsername)
 					.header(Constants.SWIFT_STORAGE_PASSWORD,
 							accountUserPassword).get();
+			response = authWebTarget
+					.request()
+					.header(Constants.SWIFT_STORAGE_USER,
+							accountName + ":" + accountUsername)
+					.header(Constants.SWIFT_STORAGE_PASSWORD,
+							accountUserPassword).get();
+			
 		}catch (Exception e) {
 			throw new SwiftException("createAuthToken Failed ", e);
 		}
@@ -518,8 +543,174 @@ public class SwiftRsClient {
 		long end = new Date().getTime();
 		printTimeDiff("createAuthToken swift", start, end);
 	}
+	*/
+	private void createAuthTokenFromKeystone(String swiftApiEndpoint,String swiftAuthEndpoint,
+			String tenantName, String userName, String password,String swiftKeystoneServiceName)
+			throws SwiftException {
+		long start = new Date().getTime();
+		String host=null;
+		HttpClient httpClient = null;
+		BufferedReader br = null;
+		boolean responseHasError = true;
+		// String authEndpoint = swiftAuthEndpoint + "/v2.0/tokens";
+		try {
+			URL urlSwift = new URL(swiftApiEndpoint);
+			host=urlSwift.getHost();
+		} catch (MalformedURLException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
+		httpClient = HttpClientBuilder.create().build();
+		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
+
+		AuthTokenBody authTokenBody = new AuthTokenBody();
+		authTokenBody.auth = new Auth();
+		authTokenBody.auth.tenantName = tenantName;
+		authTokenBody.auth.passwordCredentials = new PasswordCredentials();
+		authTokenBody.auth.passwordCredentials.username = userName;
+		authTokenBody.auth.passwordCredentials.password = password;
+
+		ObjectMapper mapper = new ObjectMapper();
+		String body = null;
+		try {
+			body = mapper.writeValueAsString(authTokenBody);
+		} catch (JsonProcessingException e2) {
+			log.error("Error while creating auth token", e2);
+			throw new SwiftException("Error while creating auth token", e2);
+		}
+		// log.info("Auth token body {}", body);
+		HttpEntity entity = null;
+		try {
+			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e2) {
+			log.error("Error while creating auth token", e2);
+			throw new SwiftException("Error while creating auth token", e2);
+		}
+
+		postRequest.setEntity(entity);
+		postRequest.setHeader("Content-Type", "application/json");
+		postRequest.setHeader("Accept", "application/json");
+		HttpResponse response = null;
+		try {
+			response = httpClient.execute(postRequest);
+		} catch (ClientProtocolException e1) {
+			log.error("Error while creating auth token", e1);
+			throw new SwiftException("Error while creating auth token", e1);
+		} catch (Exception e1) {
+			log.error("Error while creating auth token", e1);
+			throw new SwiftException("Error while creating auth token", e1);
+		}
+		
+		if(response.getStatusLine().getStatusCode()!=200){
+			throw new SwiftException("Error in getting token for swift, error::"+response.getStatusLine());
+		}
+		try {
+			br = new BufferedReader(new InputStreamReader(
+					(response.getEntity().getContent())));
+
+			String output;
+			StringBuffer sb = new StringBuffer();
+
+			while ((output = br.readLine()) != null) {
+				sb.append(output);
+			}
+			// /log.info("createAuthToken response::" + sb.toString());
+			JSONObject obj = new JSONObject(sb.toString());
+			if (obj.has("access")) {
+				JSONObject jsonObjectAccess = obj.getJSONObject("access");
+				if (jsonObjectAccess.has("token")) {
+					JSONObject property = jsonObjectAccess
+							.getJSONObject("token");
+					authToken = property.getString("id");
+					responseHasError = false;
+
+				}
+				if (!responseHasError) {
+					JSONArray serviceCatalogs = jsonObjectAccess
+							.getJSONArray("serviceCatalog");
+					if (serviceCatalogs != null && serviceCatalogs.length() > 0) {
+
+						for (int i = 0; i < serviceCatalogs.length(); i++) {
+							JSONObject serviceCatalog = serviceCatalogs
+									.getJSONObject(i);
+							String type = serviceCatalog.getString("type");
+							String name = serviceCatalog
+									.getString("name");
+							if (!("object-store".equals(type) && swiftKeystoneServiceName
+									.equals(name))) {
+								continue;
+							}
+							JSONArray endpoints = serviceCatalog.getJSONArray("endpoints");
+							if (endpoints != null && endpoints.length() > 0) {
+
+								JSONObject endpoint = endpoints
+										.getJSONObject(0);
+								storageUrl = endpoint.getString("publicURL");
+								if(storageUrl.contains("Controller")){    //TODO:- read host names from /etc/hosts or find any other approach 
+									storageUrl=storageUrl.replace("Controller", host);
+								}
+								if (org.apache.commons.lang.StringUtils
+										.isBlank(storageUrl)) {
+									responseHasError = false;
+								}
+								log.info("Storege url::" + storageUrl);
+							}
+						}
+					}
+				}
+			} else {
+				responseHasError = true;
+			}
+			// httpClient.getConnectionManager().shutdown();
+
+		} catch (IOException e) {
+			log.error("Error while creating auth token", e);
+		} catch (Exception e) {
+			log.error("Error while creating auth token", e);
+			throw new SwiftException("Error while creating auth token", e);
+		} finally {
+
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					log.error("Error closing reader", e);
+				}
+			}
+
+		}
+		long end = new Date().getTime();
+		printTimeDiff("createAuthToken", start, end);
+		if (responseHasError) {
+			throw new SwiftException("Unable to communicate with Swift at "
+					+ swiftAuthEndpoint);
+		}
+	}
 
 	private void printTimeDiff(String method, long start, long end) {
 		log.info(method + " took " + (end - start) + " ms");
 	}
+}
+
+
+
+
+
+@JsonInclude(value = Include.NON_NULL)
+class AuthTokenBody {
+	public Auth auth;
+
+}
+
+@JsonInclude(value = Include.NON_NULL)
+class Auth {
+	public String tenantName;
+	public PasswordCredentials passwordCredentials;
+
+}
+
+@JsonInclude(value = Include.NON_NULL)
+class PasswordCredentials {
+	public String username;
+	public String password;
 }

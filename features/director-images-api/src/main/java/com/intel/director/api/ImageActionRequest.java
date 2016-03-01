@@ -35,7 +35,7 @@ public class ImageActionRequest {
 		List<String> errors = new ArrayList<String>();
 	
 		if(!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)){
-		errors.add("Image Id is empty or not in uuid format");
+			errors.add("Image Id is empty or not in uuid format");
 		}
 	
 		if (artifact_store_list.size() == 2) {
@@ -44,11 +44,25 @@ public class ImageActionRequest {
 					&& artifact_store_list.get(1).getArtifact_name()
 							.equals(Constants.ARTIFACT_POLICY))) {		
 			
-				errors.add("Invalid list of artifacts selected for upload. Image should be followed by policy");
+				errors.add("Invalid list of artifacts selected for upload. Image should be followed by Policy");
 			}
 		} else if (artifact_store_list.size() > 2) {
-			errors.add("Invalid number of artifacts selected for upload. ");
+			errors.add("Artifacts can t be gretaer than 2 ");
+		}else if(artifact_store_list.size()==1){
+			 if(!ValidationUtil.isValidWithRegex(artifact_store_list.get(0).getArtifact_name(),Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR)){
+				 errors.add("Invalid artifact provided. It should be "+ Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR);
+				
+			 }
+			
 		}
+		
+		for(ArtifactStoreDetails artifactStoreDetails: artifact_store_list){
+			if(!ValidationUtil.isValidWithRegex(artifactStoreDetails.getImage_store_id(),RegexPatterns.UUID)){
+				errors.add("Image Store Id is empty or not in uuid format");
+				break;
+			} 
+		}
+			
 		return StringUtils.join(errors, ", ");
 	}
 	

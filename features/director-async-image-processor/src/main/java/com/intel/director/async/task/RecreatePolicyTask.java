@@ -5,19 +5,19 @@
  */
 package com.intel.director.async.task;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.service.ImageService;
-import com.intel.director.service.impl.ImageServiceImpl;
+import com.intel.director.service.TrustPolicyService;
+import com.intel.director.service.impl.TrustPolicyServiceImpl;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 
@@ -90,7 +90,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		}
 		for (ImageStoreUploadTransferObject imageTransfer : imageUploads) {
 			if (imageTransfer.getImg().getId()
-					.equals(imageActionObject.getImage_id())) {
+					.equals(trustPolicyObj.getImage().getImageId())) {
 				log.info("image upload entry found for the image id {}",
 						imageTransfer.getImage_uri());
 				log.info("policy's image id : "
@@ -107,47 +107,46 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		if (regenPolicy) {
 			log.info("Regen for image {}", imageActionObject.getImage_id());
 			log.info("Image has policy id {}", imageInfo.getTrust_policy_id());
+		
+			UUID uuid = new UUID(); 
+			trustPolicyObj.getImage().setImageId(uuid.toString());
+			TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(imageInfo);
+			String policyXml = null;
+			try {
+				policyXml = TdaasUtil.convertTrustPolicyToString(trustPolicyObj);
+			} catch (JAXBException e) {
+				log.error("Error converting policy object to string", e);
+				return false;
+			}
+			try {
+				policyXml = trustPolicyService.signTrustPolicy(policyXml);
+			} catch (DirectorException e) {
+				log.error("Error signing trust policy", e);
+				return false;			}
+			trustPolicy.setTrust_policy(policyXml);
+			try {
+				trustPolicyService.archiveAndSaveTrustPolicy(policyXml);
+			} catch (DirectorException e) {
+				log.error("Error saving trust policy", e);
+				return false;
+			}
 
-			ImageService imageService = new ImageServiceImpl();
+			//TODO: Remove after test start
 			try {
-				imageService.mountImage(imageActionObject.getImage_id(),
-						"admin");
-			} catch (DirectorException e) {
-				updateImageActionState(Constants.ERROR, "Error in recreating policy");
-				log.error("Error in mountImage , Recreate task", e);
-				return false;
-			}
-			log.info("Mounting complete");
+				imageInfo = persistService.fetchImageById(imageActionObject
+						.getImage_id());
+				if(imageInfo != null){
+					String trust_policy_id = imageInfo.getTrust_policy_id();
+					com.intel.director.api.TrustPolicy fetchPolicyById = persistService.fetchPolicyById(trust_policy_id);
+					log.info("Updated trust policy with new generated image id {}",fetchPolicyById.getTrust_policy());
+				}
+			}catch(DbException e){
+				log.error("Error fetching image", e);
+			}			
+			log.info("Image NOW has policy id {}", imageInfo.getTrust_policy_id());
+			
+			//TODO: Remove after test end
 
-			String createTrustPolicyId = null;
-			try {
-				createTrustPolicyId = imageService
-						.createTrustPolicy(trustPolicy.getId());
-			} catch (DirectorException e) {
-				updateImageActionState(Constants.ERROR, "Error in recreating policy");
-				log.error("Error in createTrustPolicy , Recreate task", e);
-				return false;
-			}
-			log.info("Regen complete. Updating image");
-			imageInfo.setTrust_policy_id(createTrustPolicyId);
-			imageInfo.setEdited_date(new Date());
-			try {
-				persistService.updateImage(imageInfo);
-			} catch (DbException e) {
-				updateImageActionState(Constants.ERROR, "Error in recreating policy");
-				log.error("Error in updateImage , Recreate task", e);
-				return false;
-			}
-			log.info("Updating image complete with new policy id {}",
-					createTrustPolicyId);
-			try {
-				imageService.unMountImage(imageActionObject.getImage_id(),
-						"admin");
-			} catch (DirectorException e) {
-				updateImageActionState(Constants.ERROR,"Error in recreating policy");
-				log.error("Error in unmounting image", e);
-				return false;
-			}
 		}
 
 		updateImageActionState(Constants.COMPLETE, "recreate task completed");
