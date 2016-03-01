@@ -110,6 +110,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		
 			UUID uuid = new UUID(); 
 			trustPolicyObj.getImage().setImageId(uuid.toString());
+			trustPolicyObj.setSignature(null);
 			TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(imageInfo);
 			String policyXml = null;
 			try {

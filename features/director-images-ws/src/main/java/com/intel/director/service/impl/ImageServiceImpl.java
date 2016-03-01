@@ -917,18 +917,9 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyService.calculateHashes(policy);
 		
 		//Calculate image hash inside encryption tag
-		trustPolicyService.addEncryption(policy);
+		trustPolicyService.addEncryption(policy);		
 		
-		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
-		ImageStoreUploadTransferObject imageStoreUploadTransferObject = artifactUploadService.fetchImageUploadByImageId(imageId);		
-		if(imageStoreUploadTransferObject != null){
-			log.debug("Image id has already been uploaded. Generating a new one");
-			String uuid = (new UUID()).toString();
-			policy.getImage().setImageId(uuid);			
-		}else{
-			log.debug("Image id has never been uploaded. Using the TD image id");
-			policy.getImage().setImageId(imageId);
-		}
+		policy.getImage().setImageId(imageId);
 		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+policy.getImage().getImageId());
 		
 		try {
