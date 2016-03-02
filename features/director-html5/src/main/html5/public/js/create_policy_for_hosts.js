@@ -111,7 +111,7 @@ function addhostandnext() {
                     success: function(data, status, xhr) {
 
                         if (data.error) {
-                            show_error_in_bmlivemodal(data.details);
+                            show_error_in_bmlivemodal("Error mounting remote host");
                             $("#createBMLivePolicyNext").prop('disabled', false);
                             return;
                         }
@@ -223,8 +223,8 @@ function addhostandnext() {
                     },
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
-                        if (data.status == "Error") {
-                            show_error_in_bmlivemodal(data.details);
+                        if (data.error) {
+                            show_error_in_bmlivemodal("Error mounting remote host");
                             $("#createBMLivePolicyNext").prop('disabled', false);
                             return;
                         }

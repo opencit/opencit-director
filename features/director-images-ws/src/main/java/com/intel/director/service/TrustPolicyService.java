@@ -32,6 +32,8 @@ public interface TrustPolicyService {
     
     public TrustPolicy archiveAndSaveTrustPolicy(String policyXml) throws DirectorException;
     
+    public TrustPolicy archiveAndSaveTrustPolicy(String policyXml,String userName) throws DirectorException;
+    
     public void copyTrustPolicyAndManifestToHost(String policyXml) throws DirectorException;
     
     public void addEncryption(com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) throws DirectorException;

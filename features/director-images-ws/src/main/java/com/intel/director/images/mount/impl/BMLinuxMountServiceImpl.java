@@ -36,6 +36,7 @@ public class BMLinuxMountServiceImpl extends MountServiceImpl {
 
 	@Override
 	public int unmount() {
+		log.info("unmounting image mounted at {}", mountPath);
 		return MountImage.unmountRemoteSystem(mountPath);
 	}
 

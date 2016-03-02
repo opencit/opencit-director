@@ -29,6 +29,8 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GenericResponse;
+import com.intel.director.api.ImageActionHistoryResponse;
+import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
 import com.intel.director.api.ImageInfoResponse;
@@ -53,6 +55,9 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.ui.ImageActionFields;
+import com.intel.director.api.ui.ImageActionFilter;
+import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageStoreUploadFields;
@@ -290,23 +295,21 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	private boolean checkActionEntryCreated(String imageId) {
-		ImageStoreUploadOrderBy imgOrder = new ImageStoreUploadOrderBy();
-		imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
-		imgOrder.setOrderBy(OrderByEnum.DESC);
-		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
-		imgUpFilter.setImage_id(imageId);
-		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		List<ImageActionObject> imageActionObjectList = new ArrayList<ImageActionObject>();
+		ImageActionFilter imageActionFilter = new ImageActionFilter();
+		ImageActionOrderBy imageActionOrderBy = new ImageActionOrderBy();
+		imageActionOrderBy.setImageActionFields(ImageActionFields.DATE);
+		imageActionOrderBy.setOrderBy(OrderByEnum.DESC);
+		imageActionFilter.setImage_id(imageId);
+
 		try {
-			fetchImageUploads = imagePersistenceManager.fetchImageUploads(
-					imgUpFilter, imgOrder);
-		
-			
+			imageActionObjectList = imagePersistenceManager.fetchImageActions(
+					imageActionFilter, imageActionOrderBy);
 		} catch (DbException e) {
-			log.error("Error fetching image uploads {}",e);
-			
-			
+			log.error("unable to fetch image upload entries , checkActionEntryCreated : "+ imageActionFilter);
+		
 		}
-		if(fetchImageUploads!=null && fetchImageUploads.size()>0){
+		if(imageActionObjectList!=null && imageActionObjectList.size()>0){
 			return true;
 		}
 		return false;
@@ -938,7 +941,7 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyService.copyTrustPolicyAndManifestToHost(signedPolicyXml);
 		
 		//Save the policy to DB
-		TrustPolicy trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(signedPolicyXml);
+		TrustPolicy trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(signedPolicyXml,ShiroUtil.subjectUsername());
 		return trustPolicy.getId();
 	}
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(

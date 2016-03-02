@@ -119,8 +119,11 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		return signedPolicyXml;
 	}
 
+	
+	//TODO: Refactor
+	//Called from normal UI flow
 	@Override
-	public TrustPolicy archiveAndSaveTrustPolicy(String policyXml) throws DirectorException {
+	public TrustPolicy archiveAndSaveTrustPolicy(String policyXml,String userName) throws DirectorException {
 		TrustPolicy activePolicy = null;
 		TrustPolicyDraft existingDraft = null;
 		TrustPolicy trustPolicy = new TrustPolicy();
@@ -145,8 +148,8 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 
 		trustPolicy.setCreated_date(new Date());
 		trustPolicy.setEdited_date(new Date());
-		trustPolicy.setEdited_by_user_id(ShiroUtil.subjectUsername());
-		trustPolicy.setCreated_by_user_id(ShiroUtil.subjectUsername());
+		trustPolicy.setEdited_by_user_id(userName);
+		trustPolicy.setCreated_by_user_id(userName);
 
 
 		try {
@@ -174,6 +177,48 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 				log.error("Unable to delete policy draft after creating policy", e);
 			}
 		}
+		return trustPolicy;
+
+	}
+	
+	
+	//only called from async task - RecreatePolicy
+	
+	public TrustPolicy archiveAndSaveTrustPolicy(String policyXml) throws DirectorException {
+		TrustPolicy activePolicy = null;
+		TrustPolicy newTrustPolicy = new TrustPolicy();
+		if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
+			activePolicy = trustPolicy;			
+			newTrustPolicy.setTrust_policy(policyXml);
+			newTrustPolicy.setDisplay_name(activePolicy.getDisplay_name());
+			newTrustPolicy.setImgAttributes(activePolicy.getImgAttributes());
+			newTrustPolicy.setName(activePolicy.getName());
+			newTrustPolicy.setCreated_by_user_id(activePolicy.getCreated_by_user_id());
+			newTrustPolicy.setEdited_by_user_id(activePolicy.getCreated_by_user_id());
+			newTrustPolicy.setCreated_date(new Date());
+			newTrustPolicy.setEdited_date(new Date());		
+		} else {
+			throw new DirectorException("No policy for the image");
+		}		
+
+
+		try {
+			newTrustPolicy = persistService.savePolicy(newTrustPolicy);
+			if (newTrustPolicy.getId() != null && activePolicy != null) {
+				activePolicy.setArchive(true);
+				try {
+					persistService.updatePolicy(activePolicy);
+				} catch (DbException e1) {
+					log.error("Unable to updatePolicy", e1);
+					throw new DirectorException("Unable to updatePolicy", e1);
+				}
+			}
+			
+		} catch (DbException e) {
+			log.error("Unable to save policy after signing", e);
+			throw new DirectorException("Unable to save policy after signing", e);
+		}
+		log.info("trust policy succesfylly created , createdPolicyId::" + trustPolicy.getId());
 		return trustPolicy;
 
 	}
@@ -234,6 +279,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			files.add(manifestFile);
 			files.add(trustPolicyFile);
 			sshManager.sendFileToRemoteHost(files, "/boot/trust");
+			log.info("Completed transfer of manifest and trust policy");
 		} catch (JSchException e) {
 			// TODO Auto-generated catch block
 			log.error("Unable to send trustPolicy /manifest  file to remote host ", e);
@@ -245,6 +291,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			deleteFile.delete();
 			deleteFile = new File(localPathForPolicyAndManifest);
 			deleteFile.delete();
+			log.info("Trust policy and manifest written to tmp cleaned up");
 		}
 
 	}
@@ -261,8 +308,11 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			return;
 		}
 
-		if (!policy.getEncryption().getKey().getValue().contains("keys")) {
-			throw new DirectorException("Invalid key for encryption");
+		if(!policy.getEncryption().getKey().getURL().equals("uri")){
+			//Means a key was previously generated
+			if (!policy.getEncryption().getKey().getValue().contains("keys")) {
+				throw new DirectorException("Invalid key for encryption");
+			}
 		}
 
 		String filePath = imageInfo.getLocation() + imageInfo.getImage_name();

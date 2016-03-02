@@ -66,7 +66,7 @@ public class KmsUtil {
 					"Trust Director Envelope alias not configured");
 		}
 
-		log.debug("**** KMSUTIL: Folders.configuration() : " + Folders.configuration());
+		log.debug("KMSUTIL: Folders.configuration() : " + Folders.configuration());
 		String keystorePath = getConfiguration().get(DIRECTOR_KEYSTORE,
 				Folders.configuration() + File.separator + "keystore.jks");
 		File keystoreFile = new File(keystorePath);
@@ -74,7 +74,7 @@ public class KmsUtil {
 			throw new Exception(
 					"Director Keystore file does not exist");
 		}
-
+		log.debug("KMSUTIL: Got the keystore");
 		try (PasswordKeyStore passwordVault = PasswordVaultFactory
 				.getPasswordKeyStore(getConfiguration())) {
 			if (passwordVault.contains(DIRECTOR_KEYSTORE_PASSWORD)) {
@@ -82,6 +82,7 @@ public class KmsUtil {
 						.get(DIRECTOR_KEYSTORE_PASSWORD);
 			}
 		}
+		log.debug("KMSUTIL: Got the keystore password");
 		if (keystorePassword == null
 				|| keystorePassword.toCharArray().length == 0) {
 			throw new Exception(
@@ -99,6 +100,8 @@ public class KmsUtil {
 		if (directorEnvelopePublicKey == null) {
 			log.error("Trust Director envelope public key is not configured");
 		}
+		
+		log.debug("Got the TD env key");
 
 		// Collect KMS configurations
 		kmsEndpointUrl = kmsprops.get(KMS_ENDPOINT_URL.replace('.','_'));
@@ -107,18 +110,22 @@ public class KmsUtil {
 					"KMS endpoint URL not configured");
 		}
 
+		log.debug("Got the kms endpoint {}", kmsEndpointUrl);
 		kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
 		if (kmsTlsPolicyCertificateSha1 == null
 				|| kmsTlsPolicyCertificateSha1.isEmpty()) {
 			throw new Exception(
 					"KMS TLS policy certificate digest not configured");
 		}
+		
+		log.debug("Got the KMS SHA1");
 
 		kmsLoginBasicUsername = kmsprops.get(KMS_LOGIN_BASIC_USERNAME.replace('.', '_'));
 		if (kmsLoginBasicUsername == null || kmsLoginBasicUsername.isEmpty()) {
 			throw new Exception(
 					"KMS API username not configured");
 		}
+		log.debug("Got the KMS user name");
 
 		try (PasswordKeyStore passwordVault = PasswordVaultFactory
 				.getPasswordKeyStore(getConfiguration())) {
@@ -128,6 +135,8 @@ public class KmsUtil {
 			} else
 				kmsLoginBasicPassword = null;
 		}
+		
+		log.debug("Got the KMS password");
 		// kmsLoginBasicPassword =
 		// getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD,
 		// kmsLoginBasicPassword);
@@ -143,6 +152,8 @@ public class KmsUtil {
 		properties.setProperty("login.basic.username", kmsLoginBasicUsername);
 		properties.setProperty("login.basic.password", kmsLoginBasicPassword);
 		keys = new Keys(properties);
+		
+		log.debug("INIT of Keys complete");
 
 	}
 
@@ -192,8 +203,8 @@ public class KmsUtil {
 		return null;
 	}
 
-	public static String getProperties(String path) throws IOException {		
-		File customFile = new File(Folders.configuration()+path);
+	public static String getProperties(String path) throws IOException {
+		File customFile = new File(Folders.configuration() + File.separator + path);
 		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(customFile);
 		Configuration loadedConfiguration = provider.load();
 		Map<String, String> map = new HashMap<String, String>();

@@ -100,8 +100,8 @@ public class CreateTrustPolicy {
 		KmsUtil kmsUtil = null;
 		try {
 			kmsUtil = new KmsUtil();
-		} catch (Exception e1) {
-			log.error("Error in initialization of KMS Util");
+		} catch (Exception e1) {			
+			log.error("Error in initialization of KMS Util {}", e1);
 			return;
 		}
 		
