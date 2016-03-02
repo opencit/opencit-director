@@ -2,19 +2,27 @@ package com.intel.director.async.task;
 
 import java.util.Date;
 
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
+import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.api.SwiftObjectResponse;
+import com.intel.director.api.TrustPolicy;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
+import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /**
@@ -123,27 +131,73 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		}
 	}
 
-	private void updateImageUploads(StoreResponse storeResponse) throws DirectorException {
-	///	log.info("updating image uploads table for image id {}",imageActionObject.getImage_id());
+	private void updateImageUploads(StoreResponse storeResponse)
+			throws DirectorException {
+		// /
+		// log.info("updating image uploads table for image id {}",imageActionObject.getImage_id());
 		ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
 		imageUploadTransferObject.setStatus(storeResponse.getStatus());
-		imageUploadTransferObject.setImg(imageInfo);
+		ImageAttributes imageAttr = new ImageAttributes();
+		ImageInfo image = null;
+		try {
+			image = persistService.fetchImageById(imageInfo.id);
+		} catch (DbException e) {
+			log.error("Error fetching image", e);
+			throw new DirectorException(e);
+		}
+		String trustPolicyId = image.getTrust_policy_id();
+
+		String dekUrl = DirectorUtil.fetchDekUrl(trustPolicy);
+
+		String imageId = imageInfo.getId();
+		String glanceId = storeResponse.getId();
+
+		if (StringUtils.isNotBlank(trustPolicyId)) {
+			TrustPolicy trustPolicy2 = null;
+			try {
+				trustPolicy2 = persistService.fetchPolicyById(trustPolicyId);
+			} catch (DbException e) {
+				log.error("Error fetching policy", e);
+				throw new DirectorException(e);
+			}
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policyObj = null;
+			try {
+				policyObj = TdaasUtil.getPolicy(trustPolicy2.getTrust_policy());
+			} catch (JAXBException e) {
+				log.error("Error converting policy xml to object", e);
+				throw new DirectorException(e);
+			}
+			String imageIdInPolicy = policyObj.getImage().getImageId();
+			if(!imageId.equals(glanceId)){
+				glanceId = imageIdInPolicy;
+			}
+			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
+		}
+
+		imageAttr.setId(imageId);
+		imageUploadTransferObject.setImg(imageAttr);
 		imageUploadTransferObject.setDate(new Date());
 		imageUploadTransferObject.setStoreId(taskAction.getStoreId());
-		log.info("updating image uploads table for image id {}",imageActionObject.getImage_id()+" imageUri::"+((ImageStoreUploadResponse)storeResponse).getImage_uri());
+		log.info(
+				"updating image uploads table for image id {}",
+				imageActionObject.getImage_id()
+						+ " imageUri::"
+						+ ((ImageStoreUploadResponse) storeResponse)
+								.getImage_uri());
 		imageUploadTransferObject.setImage_uri(storeResponse.getUri());
-		String glanceId= storeResponse.getId();
 		imageUploadTransferObject.setStoreArtifactId(glanceId);
-		String dekUrl=DirectorUtil.fetchDekUrl(trustPolicy);
-		String uploadVariableMD5=DirectorUtil.computeUploadVar(glanceId, dekUrl);
+		String uploadVariableMD5 = DirectorUtil.computeUploadVar(glanceId,
+				dekUrl);
 		imageUploadTransferObject.setUploadVariableMD5(uploadVariableMD5);
 		updateImage(uploadVariableMD5);
 		try {
 			persistService.saveImageUpload(imageUploadTransferObject);
-			log.info("updated data for image {} uploaded", imageActionObject.getImage_id());
+			log.info("updated data for image {} uploaded",
+					imageActionObject.getImage_id());
 		} catch (DbException e1) {
 			log.error("Error updating ImageUploads table", e1);
-			throw new DirectorException("GenericUploadTask, error saving imageupload data",e1);
+			throw new DirectorException(
+					"GenericUploadTask, error saving imageupload data", e1);
 		}
 
 	}

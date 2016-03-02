@@ -7,6 +7,7 @@ import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.quartz.ImageActionPoller;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -63,6 +64,7 @@ public class ExecuteActionsTask implements Runnable {
 			if(i == (imageActions.size() - 1)){
 				imageActionObj.setCurrent_task_name(null);
 				imageActionObj.setCurrent_task_status(null);
+				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 			}
 		}
 	}
@@ -75,7 +77,7 @@ public class ExecuteActionsTask implements Runnable {
 		} catch (DbException e) {
 			log.error("Erorr in ExecuteActionTask",e);
 		}
-		
+		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 	}
 
 	/**

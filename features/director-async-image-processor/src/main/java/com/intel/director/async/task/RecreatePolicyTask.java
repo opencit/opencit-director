@@ -89,18 +89,11 @@ public class RecreatePolicyTask extends GenericUploadTask {
 			return false;
 		}
 		for (ImageStoreUploadTransferObject imageTransfer : imageUploads) {
-			if (imageTransfer.getImg().getId()
-					.equals(trustPolicyObj.getImage().getImageId())) {
-				log.info("image upload entry found for the image id {}",
-						imageTransfer.getImage_uri());
-				log.info("policy's image id : "
-						+ trustPolicyObj.getImage().getImageId());
-				if (imageTransfer.getImage_uri().contains(
-						trustPolicyObj.getImage().getImageId())) {
-					log.info("Found an image in glance");
-					regenPolicy = true;
-					break;
-				}
+			if (imageTransfer.getStoreArtifactId().equals(
+					trustPolicyObj.getImage().getImageId())) {
+				log.info("Found an image in glance");
+				regenPolicy = true;
+				break;
 			}
 		}
 
@@ -111,7 +104,13 @@ public class RecreatePolicyTask extends GenericUploadTask {
 			UUID uuid = new UUID(); 
 			trustPolicyObj.getImage().setImageId(uuid.toString());
 			trustPolicyObj.setSignature(null);
-			TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(imageInfo);
+			TrustPolicyService trustPolicyService = null;
+			try {
+				trustPolicyService = new TrustPolicyServiceImpl(imageInfo.getId());
+			} catch (DirectorException e1) {
+				log.error("Error init TrustPolicyService", e1);
+				return false;
+			}
 			String policyXml = null;
 			try {
 				policyXml = TdaasUtil.convertTrustPolicyToString(trustPolicyObj);
@@ -126,7 +125,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 				return false;			}
 			trustPolicy.setTrust_policy(policyXml);
 			try {
-				trustPolicyService.archiveAndSaveTrustPolicy(policyXml);
+				trustPolicyService.archiveAndSaveTrustPolicy(policyXml, trustPolicy.getCreated_by_user_id());
 			} catch (DirectorException e) {
 				log.error("Error saving trust policy", e);
 				return false;

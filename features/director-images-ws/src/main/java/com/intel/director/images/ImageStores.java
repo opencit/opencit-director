@@ -2,9 +2,7 @@ package com.intel.director.images;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,7 +19,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.ctc.wstx.util.StringUtil;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;

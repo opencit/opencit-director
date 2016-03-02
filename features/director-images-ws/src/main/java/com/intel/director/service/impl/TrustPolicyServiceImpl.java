@@ -51,10 +51,6 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	private TrustPolicy trustPolicy = null;
 	private TrustPolicyDraft trustPolicyDraft = null;
 
-	public TrustPolicyServiceImpl(ImageInfo imageInfo) {
-		this.imageInfo = imageInfo;
-		
-	}
 
 	public TrustPolicyServiceImpl(String imageId) throws DirectorException {
 		super();
@@ -124,40 +120,33 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	//Called from normal UI flow
 	@Override
 	public TrustPolicy archiveAndSaveTrustPolicy(String policyXml,String userName) throws DirectorException {
-		TrustPolicy activePolicy = null;
-		TrustPolicyDraft existingDraft = null;
-		TrustPolicy trustPolicy = new TrustPolicy();
+		TrustPolicy newTrustPolicy = new TrustPolicy();
+		newTrustPolicy.setTrust_policy(policyXml);
+		ImageAttributes imgAttrs = new ImageAttributes();
+		imgAttrs.setId(imageInfo.id);
+		newTrustPolicy.setImgAttributes(imgAttrs);
+
 		if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
-			activePolicy = trustPolicy;
-			trustPolicy.setTrust_policy(policyXml);
-			trustPolicy.setDisplay_name(activePolicy.getDisplay_name());
-			trustPolicy.setImgAttributes(activePolicy.getImgAttributes());
-			trustPolicy.setName(activePolicy.getName());
+			newTrustPolicy.setDisplay_name(trustPolicy.getDisplay_name());
+			newTrustPolicy.setName(trustPolicy.getName());
 		} else if (StringUtils.isNotBlank(imageInfo.getTrust_policy_draft_id())) {
-			existingDraft = trustPolicyDraft;
-			policyXml = existingDraft.getTrust_policy_draft();
-			String display_name = existingDraft.getDisplay_name();
-			trustPolicy.setDisplay_name(display_name);
-			ImageAttributes imgAttrs = new ImageAttributes();
-			imgAttrs.setId(imageInfo.id);
-			trustPolicy.setImgAttributes(imgAttrs);
-			trustPolicy.setTrust_policy(policyXml);
+			newTrustPolicy.setDisplay_name(trustPolicyDraft.getDisplay_name());
 		} else {
 			throw new DirectorException("No policy or draft for the image");
 		}
 
-		trustPolicy.setCreated_date(new Date());
-		trustPolicy.setEdited_date(new Date());
-		trustPolicy.setEdited_by_user_id(userName);
-		trustPolicy.setCreated_by_user_id(userName);
+		newTrustPolicy.setCreated_date(new Date());
+		newTrustPolicy.setEdited_date(new Date());
+		newTrustPolicy.setEdited_by_user_id(userName);
+		newTrustPolicy.setCreated_by_user_id(userName);
 
 
 		try {
-			trustPolicy = persistService.savePolicy(trustPolicy);
-			if (trustPolicy.getId() != null && activePolicy != null) {
-				activePolicy.setArchive(true);
+			newTrustPolicy = persistService.savePolicy(newTrustPolicy);
+			if (newTrustPolicy.getId() != null && trustPolicy != null) {
+				trustPolicy.setArchive(true);
 				try {
-					persistService.updatePolicy(activePolicy);
+					persistService.updatePolicy(trustPolicy);
 				} catch (DbException e1) {
 					log.error("Unable to updatePolicy", e1);
 					throw new DirectorException("Unable to updatePolicy", e1);
@@ -168,16 +157,16 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			log.error("Unable to save policy after signing", e);
 			throw new DirectorException("Unable to save policy after signing", e);
 		}
-		log.info("trust policy succesfylly created , createdPolicyId::" + trustPolicy.getId());
+		log.info("trust policy succesfylly created , createdPolicyId::" + newTrustPolicy.getId());
 
-		if (existingDraft != null) {
+		if (trustPolicyDraft != null) {
 			try {
-				persistService.destroyPolicyDraft(existingDraft);
+				persistService.destroyPolicyDraft(trustPolicyDraft);
 			} catch (DbException e) {
 				log.error("Unable to delete policy draft after creating policy", e);
 			}
 		}
-		return trustPolicy;
+		return newTrustPolicy;
 
 	}
 	
@@ -185,42 +174,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	//only called from async task - RecreatePolicy
 	
 	public TrustPolicy archiveAndSaveTrustPolicy(String policyXml) throws DirectorException {
-		TrustPolicy activePolicy = null;
-		TrustPolicy newTrustPolicy = new TrustPolicy();
-		if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
-			activePolicy = trustPolicy;			
-			newTrustPolicy.setTrust_policy(policyXml);
-			newTrustPolicy.setDisplay_name(activePolicy.getDisplay_name());
-			newTrustPolicy.setImgAttributes(activePolicy.getImgAttributes());
-			newTrustPolicy.setName(activePolicy.getName());
-			newTrustPolicy.setCreated_by_user_id(activePolicy.getCreated_by_user_id());
-			newTrustPolicy.setEdited_by_user_id(activePolicy.getCreated_by_user_id());
-			newTrustPolicy.setCreated_date(new Date());
-			newTrustPolicy.setEdited_date(new Date());		
-		} else {
-			throw new DirectorException("No policy for the image");
-		}		
-
-
-		try {
-			newTrustPolicy = persistService.savePolicy(newTrustPolicy);
-			if (newTrustPolicy.getId() != null && activePolicy != null) {
-				activePolicy.setArchive(true);
-				try {
-					persistService.updatePolicy(activePolicy);
-				} catch (DbException e1) {
-					log.error("Unable to updatePolicy", e1);
-					throw new DirectorException("Unable to updatePolicy", e1);
-				}
-			}
-			
-		} catch (DbException e) {
-			log.error("Unable to save policy after signing", e);
-			throw new DirectorException("Unable to save policy after signing", e);
-		}
-		log.info("trust policy succesfylly created , createdPolicyId::" + trustPolicy.getId());
-		return trustPolicy;
-
+		return archiveAndSaveTrustPolicy(policyXml, ShiroUtil.subjectUsername());
 	}
 
 	@Override
@@ -339,7 +293,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		}
 		try {
 			new CreateTrustPolicy(imageInfo.id).createTrustPolicy(policy);
-		} catch (CryptographyException | IOException e1) {
+		} catch (Exception e1) {
 			log.error("Unable to create trust policy- create hashes");
 			throw new DirectorException("Unable to create policy - create hashes", e1);
 		}

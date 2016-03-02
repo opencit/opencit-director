@@ -131,6 +131,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
 					trustPolicyLocationTag);
 			customProperties.put(Constants.GLANCE_ID, glanceId);
+		////	customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			StoreManager imageStoreManager =null;
 			try {
 				imageStoreManager = StoreManagerFactory

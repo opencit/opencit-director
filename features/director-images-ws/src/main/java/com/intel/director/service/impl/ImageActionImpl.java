@@ -69,7 +69,7 @@ public  class ImageActionImpl implements ImageActionService {
 		List<ImageActionObject> allActionObject = persistService
 				.searchByAction();
 		for (ImageActionObject img : allActionObject) {
-			if ((img.getAction_completed() != img.getAction_count())
+			if ((img.getAction_completed() < img.getAction_count())  
 					&& !(img.getCurrent_task_status() != null && img
 							.getCurrent_task_status().startsWith(
 									Constants.ERROR))) {

@@ -25,18 +25,15 @@ import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 import org.springframework.stereotype.Component;
 
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.GenericResponse;
-import com.intel.director.api.ImageActionHistoryResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageListResponseInfo;
-import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.ImportPolicyTemplateResponse;
 import com.intel.director.api.MountImageResponse;
 import com.intel.director.api.PolicyTemplateInfo;
@@ -60,9 +57,6 @@ import com.intel.director.api.ui.ImageActionFilter;
 import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
-import com.intel.director.api.ui.ImageStoreUploadFields;
-import com.intel.director.api.ui.ImageStoreUploadFilter;
-import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
@@ -74,7 +68,6 @@ import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.mount.MountService;
 import com.intel.director.images.mount.MountServiceFactory;
-import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.TrustPolicyService;
 import com.intel.director.store.StoreManager;
@@ -922,7 +915,9 @@ public class ImageServiceImpl implements ImageService {
 		//Calculate image hash inside encryption tag
 		trustPolicyService.addEncryption(policy);		
 		
-		policy.getImage().setImageId(imageId);
+		if(policy.getImage() != null && policy.getImage().getImageId() == null){
+			policy.getImage().setImageId(imageId);
+		}
 		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+policy.getImage().getImageId());
 		
 		try {
@@ -941,7 +936,7 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyService.copyTrustPolicyAndManifestToHost(signedPolicyXml);
 		
 		//Save the policy to DB
-		TrustPolicy trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(signedPolicyXml,ShiroUtil.subjectUsername());
+		TrustPolicy trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(signedPolicyXml);
 		return trustPolicy.getId();
 	}
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(

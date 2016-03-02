@@ -48,12 +48,21 @@ public class ImageActionRequest {
 			}
 		} else if (artifact_store_list.size() > 2) {
 			errors.add("Artifacts can t be gretaer than 2 ");
-		}else if(artifact_store_list.size()==1){
-			 if(!ValidationUtil.isValidWithRegex(artifact_store_list.get(0).getArtifact_name(),Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR)){
-				 errors.add("Invalid artifact provided. It should be "+ Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR);
-				
-			 }
-			
+		} else if (artifact_store_list.size() == 1) {
+			if (!ValidationUtil.isValidWithRegex(artifact_store_list.get(0)
+					.getArtifact_name(), Constants.ARTIFACT_IMAGE + "|"
+					+ Constants.ARTIFACT_DOCKER_IMAGE + "|"
+					+ Constants.ARTIFACT_POLICY + "|" + Constants.ARTIFACT_TAR
+					+ "|" + Constants.ARTIFACT_DOCKER_WITH_POLICY)) {
+				errors.add("Invalid artifact provided. It should be "
+						+ Constants.ARTIFACT_IMAGE + "|"
+						+ Constants.ARTIFACT_DOCKER_IMAGE + "|"
+						+ Constants.ARTIFACT_POLICY + "|"
+						+ Constants.ARTIFACT_TAR + "|"
+						+ Constants.ARTIFACT_DOCKER_WITH_POLICY);
+
+			}
+
 		}
 		
 		for(ArtifactStoreDetails artifactStoreDetails: artifact_store_list){

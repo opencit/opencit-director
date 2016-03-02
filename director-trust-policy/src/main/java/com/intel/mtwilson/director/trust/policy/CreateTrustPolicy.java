@@ -65,7 +65,7 @@ public class CreateTrustPolicy {
 	 * @throws IOException
 	 */
 	public void createTrustPolicy(TrustPolicy trustPolicy)
-			throws CryptographyException, IOException {
+			throws CryptographyException, IOException, Exception {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
 
@@ -78,6 +78,8 @@ public class CreateTrustPolicy {
 				log.error(
 						"Error in createTrustPolicy() in CreateTrustPolicy.java",
 						e);
+				throw e;
+				
 			}
 		}
 	}
@@ -95,7 +97,7 @@ public class CreateTrustPolicy {
 	 */
 	private void addEncryption(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException, JAXBException,
-			XMLStreamException {
+			XMLStreamException, Exception {
 		// get DEK
 		KmsUtil kmsUtil = null;
 		try {
@@ -137,6 +139,7 @@ public class CreateTrustPolicy {
 		} catch (Exception e) {
 			// TODO Handle Error
 			log.error("Error in KmsUtil().createKey() in addEncryption() in CreateTrustPolicy.java", e);
+			throw e;
 		}
 	}
 

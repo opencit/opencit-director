@@ -57,6 +57,10 @@ public class UploadImageTask extends GenericUploadTask {
 		log.info("Inside UploadImageTask fetchUploadImageId() glanceId::"+glanceId);
 		return glanceId;
 	}
+	
+	public String fetchUploadImageName(){
+		return imageInfo.getImage_name();
+	}
 
 	/**
 	 * Entry method for running the task
@@ -109,6 +113,7 @@ public class UploadImageTask extends GenericUploadTask {
 
 	}
 
+	
 	private void setupUploadVmImage() throws DirectorException {
 		String imageFilePath = null;
 		String imageLocation = imageInfo.getLocation();
@@ -117,7 +122,7 @@ public class UploadImageTask extends GenericUploadTask {
 		
 		String glanceId=fetchUploadImageId();
 		customProperties.put(Constants.GLANCE_ID,glanceId);
-	
+		String uploadImageName=fetchUploadImageName();
 		if (trustPolicy != null) {
 			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 			try {
@@ -128,10 +133,11 @@ public class UploadImageTask extends GenericUploadTask {
 				throw new DirectorException(
 						"Unable to convert policy xml to object", e);
 			}
+			
 			if (policy != null && policy.getEncryption() != null) {
 				imageFilePath = imageLocation + imageInfo.getImage_name()
 						+ "-enc";
-				customProperties.put(Constants.NAME, imageInfo.getImage_name()
+				customProperties.put(Constants.NAME, uploadImageName
 						+ "-enc");
 				encrypt = true;
 			}
@@ -139,7 +145,7 @@ public class UploadImageTask extends GenericUploadTask {
 		}
 		if (!encrypt) {
 			imageFilePath = imageLocation + imageInfo.getImage_name();
-			customProperties.put(Constants.NAME, imageInfo.getImage_name());
+			customProperties.put(Constants.NAME, uploadImageName);
 		}
 
 	///	File content = new File(imageFilePath);

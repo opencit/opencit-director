@@ -103,12 +103,8 @@ public class UploadPolicyTask extends GenericUploadTask {
 			log.info("ASYNCH UPLOADER, Inside upload Policy Task, customProperties"+customProperties);
 			runFlag = super.run();
 
-		if(runFlag){
-			updateImageActionState(Constants.COMPLETE,
-					Constants.COMPLETE);
-		}else{
-			
-		updateImageActionState(Constants.ERROR,
+		if(!runFlag){			
+			updateImageActionState(Constants.ERROR,
 					"Error in  Uploading Policy");
 		}
 		return runFlag;

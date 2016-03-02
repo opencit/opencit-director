@@ -32,6 +32,10 @@ public class UploadImageForPolicyTask extends UploadImageTask {
 	public String getTaskName() {
 		return Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY;
 	}
+	
+	public String fetchUploadImageName(){
+		return trustPolicy.getDisplay_name();
+	}
 
 	@Override
 	public String fetchUploadImageId() {
