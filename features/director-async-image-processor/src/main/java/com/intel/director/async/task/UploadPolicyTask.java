@@ -24,10 +24,8 @@ import com.intel.mtwilson.director.db.exception.DbException;
  * @author GS-0681
  */
 public class UploadPolicyTask extends GenericUploadTask {
-	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(UploadPolicyTask.class);
-	
-	
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UploadPolicyTask.class);
+
 	public UploadPolicyTask() throws DirectorException {
 		super();
 	}
@@ -58,54 +56,62 @@ public class UploadPolicyTask extends GenericUploadTask {
 	public boolean runUploadPolicyTask() {
 		boolean runFlag = false;
 		File file = null;
-		//try {
 
-			String imageLocation = imageInfo.getLocation();
-			if (trustPolicy != null) {
+		if (trustPolicy == null) {
+			return false;
+		}
+		String imageLocation = imageInfo.getLocation();
 
-				String trustPolicyName = "trustpolicy.xml" ;
+		String trustPolicyName = "trustpolicy.xml";
+		String policyLocation = imageLocation + imageInfo.getId();
+		File policyDir = new File(policyLocation);
+		if (!policyDir.exists()) {
+			policyDir.mkdirs();
+		}
+		String policyPath = policyLocation + File.separator + trustPolicyName;
+		new FileUtilityOperation().writeToFile(policyPath,
+				trustPolicy.getTrust_policy());
+		file = new File(policyPath);
+		String storeId = taskAction.getStoreId();
+		String containerName = null;
+		// ImageStoreSettings
+		// imageStoreSettings=persistService.fetchImageStoreSettingsById(storeId);
+		ImageStoreTransferObject imgStoreTransferObject = null;
+		try {
+			imgStoreTransferObject = persistService.fetchImageStorebyId(storeId);
+		} catch (DbException e) {
+			log.error("Error in fetchImageStorebyId", e);
+			updateImageActionState(Constants.ERROR, "Error in uploading policy");
+			return false;
+		}
+		Collection<ImageStoreDetailsTransferObject> imgStoreDetails = imgStoreTransferObject.image_store_details;
+		log.info("ASYNCH UPLOADER, Inside upload Policy Task, imgStoreDetails::" + imgStoreDetails + " for storeid::"
+				+ storeId);
+		for (ImageStoreDetailsTransferObject detailsRecord : imgStoreDetails) {
+			if (Constants.SWIFT_CONTAINER_NAME.equals(detailsRecord.getKey())) {
+				containerName = detailsRecord.getValue();
+				break;
+			}
+		}
+		if (StringUtils.isBlank(containerName)) {
+			log.error("containerName is null during UploadPolicyTask");
+			updateImageActionState(Constants.ERROR, "containerName is null during UploadPolicyTask");
+			return false;
+		}
+		String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
 
-				String trustPolicyLocation = imageLocation;
-				new FileUtilityOperation().writeToFile(trustPolicyLocation + trustPolicyName, trustPolicy.getTrust_policy());
-				file = new File(trustPolicyLocation + trustPolicyName);
-			}
-			String storeId=taskAction.getStoreId();
-			String containerName=null;
-			//ImageStoreSettings imageStoreSettings=persistService.fetchImageStoreSettingsById(storeId);
-			ImageStoreTransferObject imgStoreTransferObject = null;
-			try {
-				imgStoreTransferObject = persistService.fetchImageStorebyId(storeId);
-			} catch (DbException e) {
-				log.error("Error in fetchImageStorebyId",e);
-				updateImageActionState(Constants.ERROR,"Error in uploading policy");
-				return false;
-			}
-			Collection<ImageStoreDetailsTransferObject> imgStoreDetails=imgStoreTransferObject.image_store_details;
-			log.info("ASYNCH UPLOADER, Inside upload Policy Task, imgStoreDetails::"+imgStoreDetails+" for storeid::"+storeId);
-			for(ImageStoreDetailsTransferObject detailsRecord:imgStoreDetails){
-				if(Constants.SWIFT_CONTAINER_NAME.equals(detailsRecord.getKey())){
-					containerName=detailsRecord.getValue();
-					break;
-				}
-			}
-			if(StringUtils.isBlank(containerName)){
-				log.error("containerName is null during UploadPolicyTask");
-				updateImageActionState(Constants.ERROR,
-						"containerName is null during UploadPolicyTask");
-				return false;
-			}
-			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
+		customProperties.put(Constants.SWIFT_CONTAINER_NAME, containerName);
+		customProperties.put(Constants.SWIFT_OBJECT_NAME, glanceId);
+		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, file);
+		log.info("ASYNCH UPLOADER, Inside upload Policy Task, customProperties" + customProperties);
+		runFlag = super.run();
+
+		// Cleanup policies
+		file.delete();		
+		policyDir.delete();
 		
-		
-			customProperties.put(Constants.SWIFT_CONTAINER_NAME, containerName);
-			customProperties.put(Constants.SWIFT_OBJECT_NAME, glanceId);
-			customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, file);
-			log.info("ASYNCH UPLOADER, Inside upload Policy Task, customProperties"+customProperties);
-			runFlag = super.run();
-
-		if(!runFlag){			
-			updateImageActionState(Constants.ERROR,
-					"Error in  Uploading Policy");
+		if (!runFlag) {
+			updateImageActionState(Constants.ERROR, "Error in  Uploading Policy");
 		}
 		return runFlag;
 

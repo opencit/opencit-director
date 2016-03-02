@@ -74,6 +74,7 @@ import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.manifest.xml.MeasurementType;
+import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
 import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
@@ -175,8 +176,9 @@ public class TdaasUtil {
 			throws JAXBException {
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = new com.intel.mtwilson.trustpolicy.xml.TrustPolicy();
 		Director director = new Director();
-		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
-				: DirectorUtil.getDirectorId());
+/*		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
+				: DirectorUtil.getDirectorId());*/
+		director.setCustomerId(ShiroUtil.subjectUsername());
 		Image image = new Image();
 		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
