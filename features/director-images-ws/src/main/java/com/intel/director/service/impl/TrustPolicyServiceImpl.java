@@ -13,7 +13,6 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;

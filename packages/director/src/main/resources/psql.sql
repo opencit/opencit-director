@@ -22,10 +22,12 @@ ALTER TABLE MW_POLICY_UPLOAD ADD CONSTRAINT FK_MW_POLICY_UPLOAD_POLICY_ID FOREIG
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_SSH_KEY_ID FOREIGN KEY (SSH_KEY_ID) REFERENCES MW_SSH_KEY (ID);
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_IMAGE_ID FOREIGN KEY (IMAGE_ID) REFERENCES MW_IMAGE (ID);
 ALTER TABLE MW_HOST ADD CONSTRAINT FK_MW_HOST_SSH_PASSWORD_ID FOREIGN KEY (SSH_PASSWORD_ID) REFERENCES MW_SSH_PASSWORD (ID);
-ALTER TABLE MW_IMAGE_STORE_DETAILS ADD CONSTRAINT FK_MW_IMAGE_STORE_DETAILS_IMAGE_STORE_ID FOREIGN KEY (IMAGE_STORE_ID) REFERENCES MW_IMAGE_STORE (id);
+ALTER TABLE MW_IMAGE_STORE_DETAILS ADD CONSTRAINT FK_MW_IMAGE_STORE_DETAILS_IMAGE_STORE_ID FOREIGN KEY (IMAGE_STORE_ID) REFERENCES MW_IMAGE_STORE (id) ON DELETE CASCADE;
 -- View: mw_image_info_view
 
 -- DROP VIEW mw_image_info_view;
+CREATE OR REPLACE VIEW mw_trust_policy_info_view AS SELECT * FROM  mw_trust_policy mwtrustpolicy  WHERE mwtrustpolicy.archive IS  FALSE;
+
 
 CREATE OR REPLACE VIEW mw_image_info_view AS 
  SELECT mwimg.id,
@@ -62,8 +64,8 @@ CREATE OR REPLACE VIEW mw_image_info_view AS
 	mwimg.repository,
 	mwimg.tag
    FROM mw_image mwimg
-	LEFT JOIN mw_trust_policy mwtrustpolicy ON mwimg.id::text = mwtrustpolicy.image_id::text
-    LEFT JOIN mw_trust_policy_draft mwpolicydraft ON mwpolicydraft.id::text = mwimg.trust_policy_draft_id::text  WHERE mwtrustpolicy.archive IS NOT TRUE;
+	LEFT JOIN mw_trust_policy_info_view mwtrustpolicy ON mwimg.id::text = mwtrustpolicy.image_id::text
+    LEFT JOIN mw_trust_policy_draft mwpolicydraft ON mwpolicydraft.id::text = mwimg.trust_policy_draft_id::text;
 
 ALTER TABLE mw_image_info_view
   OWNER TO postgres;

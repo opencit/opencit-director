@@ -2153,13 +2153,15 @@ public class ImageServiceImpl implements ImageService {
 					+ trust_policy_id, e);
 		}
 		if (policy != null) {
+			policy.setArchive(true);
 			try {
-				imagePersistenceManager.destroyPolicy(policy);
-			} catch (DbException e) {
-				log.error("Error deleting policy with id " + trust_policy_id);
-				throw new DirectorException("Error deleting policy with id "
-						+ trust_policy_id, e);
+				imagePersistenceManager.updatePolicy(policy);
+			} catch (DbException e1) {
+				log.error("Unable in archiving policy, deleteTrustPolicy", e1);
+				throw new DirectorException("Unable in archiving policy, deleteTrustPolicy", e1);
 			}
+			
+			
 			ImageInfo image;
 			try {
 				image = imagePersistenceManager.fetchImageById(policy

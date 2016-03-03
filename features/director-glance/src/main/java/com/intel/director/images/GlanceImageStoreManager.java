@@ -132,9 +132,14 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 	}
 
 	@Override
-	public <T extends StoreResponse> List<T> fetchAllImages() {
+	public <T extends StoreResponse> List<T> fetchAllImages() throws StoreException {
 		// TODO Auto-generated method stub
-		return null;
+		try {
+			return (List<T>) glanceRsClient.fetchAllImages(objectProperties);
+		} catch (GlanceException e) {
+			log.error("Error  in updateMetadataGlance in Glance", e);
+			throw new StoreException("Error in updateMetadataGlance", e);
+		}
 	}
 
 }

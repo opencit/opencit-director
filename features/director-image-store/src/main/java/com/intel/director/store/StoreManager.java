@@ -25,5 +25,5 @@ public interface StoreManager {
 	  public void addCustomProperties(Map<String, Object> map) throws StoreException;
 	  public void update() throws StoreException;
 	  public void delete(URL url) throws StoreException;
-	  public <T extends StoreResponse> List<T> fetchAllImages();
+	  public <T extends StoreResponse> List<T> fetchAllImages() throws StoreException;
 }

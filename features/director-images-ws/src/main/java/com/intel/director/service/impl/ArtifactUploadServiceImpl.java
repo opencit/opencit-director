@@ -112,8 +112,14 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			List<ImageStoreUploadResponse> fetchAllImages = imageStoreManager
-					.fetchAllImages();
+			List<ImageStoreUploadResponse> fetchAllImages = null;
+			try {
+				fetchAllImages = imageStoreManager
+						.fetchAllImages();
+			} catch (StoreException e) {
+				log.error("Error in fetchAllImagesFromGlance ", e);
+				throw new DirectorException("Error in fetchAllImagesFromGlance", e);
+			}
 			for (ImageStoreUploadResponse storeResponse : fetchAllImages) {
 				idFromImageStores.add(storeResponse.getId());
 			}

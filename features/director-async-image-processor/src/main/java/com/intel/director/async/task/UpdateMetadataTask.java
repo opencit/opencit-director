@@ -20,7 +20,9 @@ import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
+import com.intel.director.api.ui.PolicyUploadFields;
 import com.intel.director.api.ui.PolicyUploadFilter;
+import com.intel.director.api.ui.PolicyUploadOrderBy;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.store.StoreManager;
@@ -107,6 +109,9 @@ public class UpdateMetadataTask extends GenericUploadTask {
 
 			PolicyUploadFilter policyUploadFilter = new PolicyUploadFilter();
 			policyUploadFilter.setTrust_policy_id(trustPolicy.getId());
+			
+						
+			
 			List<PolicyUploadTransferObject> policyUploads =null;
 			try {
 				policyUploads = persistService
@@ -116,9 +121,9 @@ public class UpdateMetadataTask extends GenericUploadTask {
 				updateImageActionState(Constants.ERROR, "Error in Updating metadata in imagestore");
 				return false;
 			}
-			String policyUri = policyUploads.get(0)
-					.getPolicy_uri();
-			String storeId=policyUploads.get(0).getStoreId();
+			PolicyUploadTransferObject policyUploadTransferObject = policyUploads.get(policyUploads.size()-1);
+			String policyUri = policyUploadTransferObject.getPolicy_uri();
+			String storeId=policyUploadTransferObject.getStoreId();
 			ImageStoreTransferObject imageStoreDTO=null;
 			try {
 			imageStoreDTO = persistService.fetchImageStorebyId(storeId);
@@ -164,18 +169,15 @@ public class UpdateMetadataTask extends GenericUploadTask {
 
 			}
 			
-			ImageStoreUploadOrderBy imgOrder = new ImageStoreUploadOrderBy();
-			imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
-			imgOrder.setOrderBy(OrderByEnum.DESC);
 			ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 			imgUpFilter.setImage_id(imageInfo.getId());
 			List<ImageStoreUploadTransferObject> fetchImageUploads = null;
 			try {
 				fetchImageUploads = persistService.fetchImageUploads(
-						imgUpFilter, imgOrder);
+						imgUpFilter, null);
 				log.info("ImageActionImpl, ARTIFACT_POLICY action, fetchImageUploads");
 				if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
-					ImageStoreUploadTransferObject imageStoreTranserObject=fetchImageUploads.get(0);
+					ImageStoreUploadTransferObject imageStoreTranserObject=fetchImageUploads.get(fetchImageUploads.size() - 1);
 					imageStoreTranserObject.setPolicyUploadId(trustPolicy.getId());
 					persistService.updateImageUpload(imageStoreTranserObject);
 				}

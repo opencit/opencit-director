@@ -559,7 +559,7 @@ public class GlanceRsClient {
 
 		Client client = ClientBuilder.newBuilder().build();
 		WebTarget target = client.target(url.toExternalForm());
-		Response response = target.path("/v1/images").request()
+		Response response = target.path("/v1/images/detail").request()
 				.header("X-Auth-Token", authToken).get();
 
 		InputStream inputStream = (InputStream) response.getEntity();
@@ -582,7 +582,7 @@ public class GlanceRsClient {
 		JSONArray images = obj.getJSONArray("images");
 		for (int i = 0; i < images.length(); i++) {
 			ImageStoreUploadResponse object = new ImageStoreUploadResponse();
-			JSONObject json = new JSONObject(images.get(i));
+			JSONObject json = (JSONObject) images.get(i);
 			object.setId(json.getString("id"));
 			list.add(object);
 		}
