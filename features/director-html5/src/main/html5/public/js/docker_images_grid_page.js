@@ -167,6 +167,7 @@ function refresh_docker_Grid() {
                 $("#dockerGrid").show();
                 $("#dockerGrid").jsGrid("refresh");
             }, delay);
+            $("#dockerGrid").jsGrid("sort", { field: "image_name", order: "asc" });
 
         },
         error: function(jqXHR, exception) {

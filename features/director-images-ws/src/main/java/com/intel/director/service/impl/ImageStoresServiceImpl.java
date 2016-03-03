@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
@@ -89,8 +91,10 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 					.fetchImageStorebyId(imageStoreId);
 			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
 			ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil.getPasswordConfiguration(fetchImageStorebyId);
-			String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());
-			passwordConfiguration.setValue(passwordForImageStore);
+			if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
+				String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());			
+				passwordConfiguration.setValue(passwordForImageStore);
+			}
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore :: " + imageStoreId);
 			throw new DirectorException("Error in fetching ImageStore :: "
@@ -159,7 +163,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			throw new DirectorException("Error in Fetching ImageStore @ doesImageStoreNameExist", e);
 		}
 		for (ImageStoreTransferObject imageStoreTO : fetchImageStores) {
-			if(imageStoreTO.name.equalsIgnoreCase(name) && !imageStoreTO.id.equalsIgnoreCase(imageStoreId)) {
+			if(!imageStoreTO.deleted && imageStoreTO.name.equalsIgnoreCase(name) && !imageStoreTO.id.equalsIgnoreCase(imageStoreId)) {
 				return true;
 			}
 		}

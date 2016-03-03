@@ -111,6 +111,7 @@ public class ImageStores {
 		ImageStoreResponse imageStoreResponse = new ImageStoreResponse();
 		List<ImageStoreTransferObject> imageStores = null;
 		
+		List<ImageStoreTransferObject> activeImageStores = new ArrayList<>();
 		if (StringUtils.isBlank(artifacts)) {
 			imageStores = imageStoreService.getImageStores(null);
 		} else {
@@ -127,8 +128,17 @@ public class ImageStores {
 			imageStoreFilter.setArtifact_types(artifactsArray);
 			imageStores = imageStoreService.getImageStores(imageStoreFilter);
 		}
+		
+		for (ImageStoreTransferObject imageStoreTransferObject : imageStores) {
+			if(imageStoreTransferObject.deleted){
+				continue;
+			}
+			activeImageStores.add(imageStoreTransferObject);
+		}
+		
+		
 		imageStoreResponse.image_stores = new ArrayList<ImageStoreTransferObject>(
-				imageStores);
+				activeImageStores);
 		return Response.ok(imageStoreResponse).build();
 	}
 

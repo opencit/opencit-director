@@ -165,6 +165,7 @@ function refresh_vm_images_Grid() {
                 $("#vmGrid").show();
                 $("#vmGrid").jsGrid("refresh");
             }, delay);
+            $("#vmGrid").jsGrid("sort", { field: "image_name", order: "asc" });
 
         },
         error: function(jqXHR, exception) {
@@ -174,5 +175,6 @@ function refresh_vm_images_Grid() {
 
         }
     });
+
 
 }

@@ -133,7 +133,8 @@ public class UploadImageTask extends GenericUploadTask {
 				throw new DirectorException(
 						"Unable to convert policy xml to object", e);
 			}
-			
+
+			/*
 			if (policy != null && policy.getEncryption() != null) {
 				imageFilePath = imageLocation + imageInfo.getImage_name()
 						+ "-enc";
@@ -141,14 +142,13 @@ public class UploadImageTask extends GenericUploadTask {
 						+ "-enc");
 				encrypt = true;
 			}
-
+			 */
 		}
-		if (!encrypt) {
-			imageFilePath = imageLocation + imageInfo.getImage_name();
+//		if (!encrypt) {
+//			imageFilePath = imageLocation + imageInfo.getImage_name();
 			customProperties.put(Constants.NAME, uploadImageName);
-		}
+//		}
 
-	///	File content = new File(imageFilePath);
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 	}
 

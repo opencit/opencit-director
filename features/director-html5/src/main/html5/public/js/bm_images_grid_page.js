@@ -100,13 +100,7 @@ function refreshBMOnlineGrid() {
                         width: 100,
                         align: "center"
 				},
-                    /* {
-                    					title : "Push Policy",
-                    					name : "image_upload",
-                    					type : "text",
-                    					width : 100,
-                    					align : "center"
-                    				}, */
+                    
                     {
                         title: "Policy Created Date",
                         name: "created_date",
@@ -126,6 +120,8 @@ function refreshBMOnlineGrid() {
 
                 }
             });
+            $("#bmGridOnline").jsGrid("sort", { field: "image_name", order: "asc" });
+
         }
 
     });
