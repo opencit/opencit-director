@@ -27,8 +27,7 @@ import com.intel.mtwilson.director.db.exception.DbException;
  * @author GS-0681
  */
 public class RecreatePolicyTask extends GenericUploadTask {
-	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(UploadPolicyTask.class);
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RecreatePolicyTask.class);
 
 	public RecreatePolicyTask() throws DirectorException {
 		super();
@@ -61,8 +60,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		boolean runFlag = true;
 
 		// try {
-		log.info("Inside runRecreatePolicyTask for ::"
-				+ imageActionObject.getImage_id());
+		log.info("Inside runRecreatePolicyTask for ::" + imageActionObject.getImage_id());
 
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyObj = null;
 		try {
@@ -84,13 +82,12 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		try {
 			imageUploads = persistService.fetchImageUploads(imgOrder);
 		} catch (DbException e) {
-			updateImageActionState(Constants.ERROR,"Error in recreating policy");
+			updateImageActionState(Constants.ERROR, "Error in recreating policy");
 			log.error("Error in fetchImageUploads , Recreate task", e);
 			return false;
 		}
 		for (ImageStoreUploadTransferObject imageTransfer : imageUploads) {
-			if (imageTransfer.getStoreArtifactId().equals(
-					trustPolicyObj.getImage().getImageId())) {
+			if (imageTransfer.getStoreArtifactId().equals(trustPolicyObj.getImage().getImageId())) {
 				log.info("Found an image in glance");
 				regenPolicy = true;
 				break;
@@ -100,8 +97,8 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		if (regenPolicy) {
 			log.info("Regen for image {}", imageActionObject.getImage_id());
 			log.info("Image has policy id {}", imageInfo.getTrust_policy_id());
-		
-			UUID uuid = new UUID(); 
+
+			UUID uuid = new UUID();
 			trustPolicyObj.getImage().setImageId(uuid.toString());
 			trustPolicyObj.setSignature(null);
 			TrustPolicyService trustPolicyService = null;
@@ -122,39 +119,20 @@ public class RecreatePolicyTask extends GenericUploadTask {
 				policyXml = trustPolicyService.signTrustPolicy(policyXml);
 			} catch (DirectorException e) {
 				log.error("Error signing trust policy", e);
-				return false;			}
+				return false;
+			}
 			trustPolicy.setTrust_policy(policyXml);
 			try {
-				trustPolicyService.archiveAndSaveTrustPolicy(policyXml, trustPolicy.getCreated_by_user_id());
+				trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(policyXml,
+						trustPolicy.getCreated_by_user_id());
 			} catch (DirectorException e) {
 				log.error("Error saving trust policy", e);
 				return false;
 			}
-
-			//TODO: Remove after test start
-			try {
-				imageInfo = persistService.fetchImageById(imageActionObject
-						.getImage_id());
-				if(imageInfo != null){
-					String trust_policy_id = imageInfo.getTrust_policy_id();
-					com.intel.director.api.TrustPolicy fetchPolicyById = persistService.fetchPolicyById(trust_policy_id);
-					log.info("Updated trust policy with new generated image id {}",fetchPolicyById.getTrust_policy());
-				}
-			}catch(DbException e){
-				log.error("Error fetching image", e);
-			}			
-			log.info("Image NOW has policy id {}", imageInfo.getTrust_policy_id());
-			
-			//TODO: Remove after test end
-
 		}
 
 		updateImageActionState(Constants.COMPLETE, "recreate task completed");
 
-		/*
-		 * } catch (Exception e) { runFlag = false;
-		 * updateImageActionState(Constants.ERROR, e.getMessage()); }
-		 */
 		return runFlag;
 
 	}

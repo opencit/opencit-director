@@ -1,18 +1,13 @@
 package com.intel.director.glance.test;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
 import com.intel.dcsg.cpg.io.UUID;
-import com.intel.director.api.ImageActionObject;
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.common.Constants;
 import com.intel.director.images.GlanceImageStoreManager;
-import com.intel.director.store.StoreManager;
-import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
 import com.intel.mtwilson.director.db.exception.DbException;
 

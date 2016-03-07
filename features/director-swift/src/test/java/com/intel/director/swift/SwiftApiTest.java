@@ -5,20 +5,12 @@
 package com.intel.director.swift;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.intel.director.api.ImageAttributes;
-import com.intel.director.api.StoreResponse;
-import com.intel.director.api.SwiftObjectResponse;
-import com.intel.director.api.User;
-import com.intel.director.store.StoreManager;
 import com.intel.director.swift.constants.Constants;
 import com.intel.director.swift.objectstore.SwiftManager;
 import com.intel.director.swift.objectstore.SwiftObjectStoreManager;

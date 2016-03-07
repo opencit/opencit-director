@@ -5,12 +5,9 @@
  */
 package com.intel.director.async.task;
 
-import java.io.StringReader;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageStoreTransferObject;
@@ -23,6 +20,7 @@ import com.intel.director.images.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
+import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 
@@ -72,27 +70,14 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			return false;
 		}
 
-		JAXBContext jaxbContext = null;
-		Unmarshaller unmarshaller = null;
+
+		TrustPolicy policy;
 		try {
-			jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
-			unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
-		} catch (JAXBException e1) {
-			log.error("JaxbException upadetmetadata task", e1);
-			updateImageActionState(Constants.ERROR, "Error in Updating metadata in imagestore");
+			policy = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
+		} catch (JAXBException e2) {
+			log.error("Error converting policy xml to object ", e2);
 			return false;
 		}
-
-		StringReader reader = new StringReader(trustPolicy.getTrust_policy());
-		TrustPolicy policy = null;
-		try {
-			policy = (TrustPolicy) unmarshaller.unmarshal(reader);
-		} catch (JAXBException e1) {
-			log.error("JaxbException upadetmetadata task", e1);
-			updateImageActionState(Constants.ERROR, "Error in Updating metadata in imagestore");
-			return false;
-		}
-
 		String glanceId = policy.getImage().getImageId();
 
 		ImageStoreUploadTransferObject imageStoreTranserObject = null;

@@ -11,6 +11,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
@@ -104,29 +105,12 @@ public class UploadTarTask extends GenericUploadTask {
 	
 	private void cleanupDirectories(String tarLocation){
 		File uuidFolder = new File(tarLocation);
-		File[] listFiles = uuidFolder.listFiles();
-		boolean deleteFileFlag = true;
-		for (File file : listFiles) {
-			log.info("Deleteing file " + file.getAbsolutePath()
-					+ " after successful upload");
-			if (!file.delete()) {
-				log.info("!!!!! File could not be deleted");
-				deleteFileFlag = false;
-			}
+		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
+		fileUtilityOperation.deleteFileOrDirectory(uuidFolder);
 
-		}
-		if (deleteFileFlag) {
-			deleteFileFlag = uuidFolder.delete();
-			log.info("Is folder deleted == " + deleteFileFlag);
-		} else {
-			log.info("UUID : " + tarLocation + " cannot be cleaned up");
-		}
 		String encImageFileName = imageInfo.getLocation() + File.separator
 				+ imageInfo.getImage_name() + "-enc";
 		File encImageFile = new File(encImageFileName);
-		if (encImageFile.exists()) {
-			encImageFile.delete();
-		}
-
+		fileUtilityOperation.deleteFileOrDirectory(encImageFile);
 	}
 }

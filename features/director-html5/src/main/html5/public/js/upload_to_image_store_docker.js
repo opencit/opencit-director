@@ -50,7 +50,7 @@ function displayImageStorePage() {
 
     } else {
         $("#display_name_last_div").hide();
-        var artifacts_strings = "<option value='0'>Select</option><option value='Image'>Image</option>";
+        var artifacts_strings = "<option value='0'>Select</option><option value='DockerImage'>Docker Image</option>";
         $('#upload_artifact').html(artifacts_strings);
         $('#upload_artifact').show();
     }

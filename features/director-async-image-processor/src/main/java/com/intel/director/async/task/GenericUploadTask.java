@@ -2,8 +2,6 @@ package com.intel.director.async.task;
 
 import java.util.Date;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.director.api.ImageActionObject;
@@ -22,7 +20,6 @@ import com.intel.director.images.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
-import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /**
@@ -160,7 +157,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 				log.error("Error fetching policy", e);
 				throw new DirectorException(e);
 			}
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policyObj = null;
+		/*	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policyObj = null;
 			try {
 				policyObj = TdaasUtil.getPolicy(trustPolicy2.getTrust_policy());
 			} catch (JAXBException e) {
@@ -170,7 +167,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			String imageIdInPolicy = policyObj.getImage().getImageId();
 			if(!imageId.equals(glanceId)){
 				glanceId = imageIdInPolicy;
-			}
+			}*/
 			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
 		}
 

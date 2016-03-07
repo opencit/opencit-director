@@ -178,6 +178,7 @@ public class Constants {
 	public static final String ARTIFACT_DOCKER = "Docker";
 	public static final String ARTIFACT_DOCKER_IMAGE="DockerImage";
 	public static final String ARTIFACT_DOCKER_WITH_POLICY="DockerTarball";
+	public static final String ARTIFACT_IMAGE_WHEN_POLICY_EXISTS="ImageWhenPolicyExist";
 	public static final String STORE_IMAGE="StoreImage";
 	public static final String STORE_TAR="StoreTarball";
 	public static final String STORE_POLICY="StorePolicy";

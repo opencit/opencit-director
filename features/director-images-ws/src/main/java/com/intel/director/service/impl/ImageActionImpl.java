@@ -201,18 +201,23 @@ public  class ImageActionImpl implements ImageActionService {
 						artifactStoreIdMap.put(Constants.STORE_IMAGE, storeId);
 						
 					}else{
-						throw new DirectorException("No previous image uploads for policy upload action to be created,  uploadId::"+uploadId);
+						throw new DirectorException("It is mandatory to upload image before uploading policy");
 					}
 				} catch (DbException e) {
 					log.error("Error fetching image uploads by storageArtifactId {}", uploadId, e);
 					return null;
 				}
 				
+				artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
+				imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(artifactStoreList.get(0).getArtifact_name(),artifactStoreIdMap,isEncrypted));	
 				
-				
-			}
+			}else if(Constants.ARTIFACT_IMAGE.equals(artifactStoreList.get(0).getArtifact_name()) && (imageInfo.getTrust_policy_id()!=null)){
+				artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
+				imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(Constants.ARTIFACT_IMAGE_WHEN_POLICY_EXISTS,artifactStoreIdMap,isEncrypted));
+			}else{
 			artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
 			imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(artifactStoreList.get(0).getArtifact_name(),artifactStoreIdMap,isEncrypted));
+			}
 		}
 		
 		if(!isCorrectActionList){
@@ -412,28 +417,33 @@ public  class ImageActionImpl implements ImageActionService {
 		List<ImageActionTask> imageActiontaskList = imageActionObject
 				.getActions();
 		ImageActionHistoryResponse imageActionResponse= new ImageActionHistoryResponse();
+		String previousTaskname=null;
 		for (ImageActionTask imageActionTask : imageActiontaskList) {
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_TAR)) {
 				artifactName = Constants.ARTIFACT_TAR;
 				break;
 			}
-			if (imageActionTask.getTask_name().equals(
-					Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY)) {
+			if(previousTaskname!=null && previousTaskname.equals(Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY) && imageActionTask.getTask_name().equals(Constants.TASK_NAME_UPLOAD_POLICY)){
 				artifactName = Constants.ARTIFACT_IMAGE_WITH_POLICY_DISPLAY_NAME;
 				break;
 			}
 			if (imageActionTask.getTask_name().equals(
+					Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY)) {
+				artifactName = Constants.ARTIFACT_IMAGE;
+				
+			}
+			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_POLICY)) {
 				artifactName = Constants.ARTIFACT_POLICY;
-
+				
 			}
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_IMAGE)) {
 				artifactName = Constants.ARTIFACT_IMAGE;
 
 			}
-
+			previousTaskname=imageActionTask.getTask_name();
 		}
 
 		ImageStoreTransferObject imageStoreDTO = null;
@@ -444,7 +454,7 @@ public  class ImageActionImpl implements ImageActionService {
 		for (ImageActionTask imageActiontask : imageActionTaskList) {
 
 			if (StringUtils.isNotBlank(imageActiontask.getStoreId()) && !Constants.TASK_NAME_UPDATE_METADATA.equals(imageActiontask.getTask_name())) {
-				;
+				
 				String storeId = imageActiontask.getStoreId();
 				try {
 					imageStoreDTO = persistService.fetchImageStorebyId(storeId);

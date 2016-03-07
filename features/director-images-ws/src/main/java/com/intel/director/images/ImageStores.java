@@ -37,6 +37,9 @@ import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageStoresServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.store.util.ImageStorePasswordUtil;
+import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.DbServiceImpl;
+import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 /**
@@ -50,9 +53,9 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 public class ImageStores {
 	ImageStoresService imageStoreService = new ImageStoresServiceImpl();
 	LookupService lookupService = new LookupServiceImpl();
+	IPersistService persistService = new DbServiceImpl();
 
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(ImageStores.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageStores.class);
 
 	/**
 	 * List of configured image stores
@@ -64,7 +67,9 @@ public class ImageStores {
 	 * @return GetImageStoresResponse
 	 * @throws DirectorException
 	 * @TDMethodType GET
-	 * @TDSampleRestCall <pre>
+	 * @TDSampleRestCall
+	 * 
+	 *                   <pre>
 	 * https://{IP/HOST_NAME}/v1/image-stores
 	 * Input: Query parameter is optional If provided: - "artifacts"
 	 * 
@@ -101,44 +106,43 @@ public class ImageStores {
 	 *     }
 	 *   ]
 	 * }
-	 * </pre>
+	 *                   </pre>
 	 */
 	@Path("image-stores")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getImageStores(
-			@QueryParam("artifacts") String artifacts) throws DirectorException {
+	public Response getImageStores(@QueryParam("artifacts") String artifacts) throws DirectorException {
 		ImageStoreResponse imageStoreResponse = new ImageStoreResponse();
 		List<ImageStoreTransferObject> imageStores = null;
-		
+
 		List<ImageStoreTransferObject> activeImageStores = new ArrayList<>();
 		if (StringUtils.isBlank(artifacts)) {
 			imageStores = imageStoreService.getImageStores(null);
 		} else {
 			ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
-			
+
 			String[] artifactsArray = artifacts.split(",");
-			for(String str: artifactsArray){
-			 if(!ValidationUtil.isValidWithRegex(str,Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR)){
-				 imageStoreResponse.setError("Invalid artifact provided. It should be "+ Constants.ARTIFACT_IMAGE+"|"+Constants.ARTIFACT_DOCKER+"|"+Constants.ARTIFACT_POLICY+"|"+Constants.ARTIFACT_TAR);
-				 return Response.status(Response.Status.BAD_REQUEST)
-							.entity(imageStoreResponse).build();
-			 }
+			for (String str : artifactsArray) {
+				if (!ValidationUtil.isValidWithRegex(str, Constants.ARTIFACT_IMAGE + "|" + Constants.ARTIFACT_DOCKER
+						+ "|" + Constants.ARTIFACT_POLICY + "|" + Constants.ARTIFACT_TAR)) {
+					imageStoreResponse.setError("Invalid artifact provided. It should be " + Constants.ARTIFACT_IMAGE
+							+ "|" + Constants.ARTIFACT_DOCKER + "|" + Constants.ARTIFACT_POLICY + "|"
+							+ Constants.ARTIFACT_TAR);
+					return Response.status(Response.Status.BAD_REQUEST).entity(imageStoreResponse).build();
+				}
 			}
 			imageStoreFilter.setArtifact_types(artifactsArray);
 			imageStores = imageStoreService.getImageStores(imageStoreFilter);
 		}
-		
+
 		for (ImageStoreTransferObject imageStoreTransferObject : imageStores) {
-			if(imageStoreTransferObject.deleted){
+			if (imageStoreTransferObject.deleted) {
 				continue;
 			}
 			activeImageStores.add(imageStoreTransferObject);
 		}
-		
-		
-		imageStoreResponse.image_stores = new ArrayList<ImageStoreTransferObject>(
-				activeImageStores);
+
+		imageStoreResponse.image_stores = new ArrayList<ImageStoreTransferObject>(activeImageStores);
 		return Response.ok(imageStoreResponse).build();
 	}
 
@@ -148,13 +152,55 @@ public class ImageStores {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * Input:
 	 * 
+	 * https://<TD_HOST>/v1/image-stores/3DA92563-A2A6-4D52-9337-3201D11105E1
 	 * Output:
 	 * 
+	 * {
+	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	"name": "ExtStore_1",
+	"artifact_types": [
+	"Image",
+	"Tarball"
+	],
+	"connector": "Glance",
+	"deleted": false,
+	"image_store_details": [
+	{
+	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.image.store.username"
+	},
+	{
+	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.api.endpoint"
+	},
+	{
+	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.tenant.name"
+	},
+	{
+	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.keystone.public.endpoint"
+	},
+	{
+	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.image.store.password"
+	}
+	]
+	}
+	
+	If an invalid ID for image store is give, a HTTP 404 is returned
+	 *                    </pre>
 	 * 
-	 * </pre>
 	 * @param imageStoreId
 	 * @return
 	 * @throws DirectorException
@@ -162,51 +208,107 @@ public class ImageStores {
 	@Path("image-stores/{imageStoreId: [0-9a-zA-Z_-]+}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getImageStore(@PathParam("imageStoreId") String imageStoreId)
-			throws DirectorException {
+	public Response getImageStore(@PathParam("imageStoreId") String imageStoreId) throws DirectorException {
 		GenericDeleteResponse response = new GenericDeleteResponse();
-		if(!ValidationUtil.isValidWithRegex(imageStoreId,RegexPatterns.UUID)){
+		if (!ValidationUtil.isValidWithRegex(imageStoreId, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(response).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
-		ImageStoreTransferObject imageStoreResponse = imageStoreService
-				.getImageStoreById(imageStoreId);
+		ImageStoreTransferObject imageStoreResponse = imageStoreService.getImageStoreById(imageStoreId);
 		if (imageStoreResponse == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		return Response.ok(imageStoreResponse).build();
 	}
 
+	/**
+	 * 
+	 * Creates the external store. the user can either pass the whole object, if
+	 * the details are knows or just the name, artifacts and connector to
+	 * reserve a external store. The user can then call the PUT call to update
+	 * the values of the connection properties.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 * Input:
+	 *  	https://{IP/HOST_NAME}/v1/image-stores
+	 *  {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["Image", "Tarball"]}
+	 *
+	 *  Output: {
+	 *"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"name": "ExtStore_1",
+	 *"artifact_types": [
+	 *"Image",
+	 *"Tarball"
+	 *],
+	 *"connector": "Glance",
+	 *"deleted": false,
+	 *"image_store_details": [
+	 *{
+	 *"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"key": "glance.api.endpoint"
+	 *},
+	 *{
+	 *"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"key": "glance.keystone.public.endpoint"
+	 *},
+	 *{
+	 *"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"key": "glance.image.store.username"
+	 *},
+	 *{
+	 *"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"key": "glance.image.store.password"
+	 *},
+	 *{
+	 *"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 *"key": "glance.tenant.name"
+	 *}
+	 *]
+	 *}
+	 *	
+	 *  There are validations for the connector and artifact_types fields. 
+	 *  If incorrect values are given
+	 *  {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["ABC", "Tarball"]} 
+	 *  following is the reponse:	   
+	 *  Connector Doesn't Support Given Artifact(s)
+	 * 
+	 *                    </pre>
+	 * 
+	 * @param imageStoreTransferObject
+	 * @return
+	 * @throws DirectorException
+	 */
 	@Path("image-stores")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createImageStore(
-			ImageStoreTransferObject imageStoreTransferObject)
-			throws DirectorException {
+	public Response createImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
 
-		boolean validateConnectorArtifacts = imageStoreService
-				.validateConnectorArtifacts(
-						imageStoreTransferObject.getArtifact_types(),
-						imageStoreTransferObject.getConnector());
+		boolean validateConnectorArtifacts = imageStoreService.validateConnectorArtifacts(
+				imageStoreTransferObject.getArtifact_types(), imageStoreTransferObject.getConnector());
 		ImageStoreTransferObject createImageStore = new ImageStoreTransferObject();
 		if (!validateConnectorArtifacts) {
-			return Response.ok("Connector Doesn\'t Support Given Artifact(s)")
-					.status(Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).entity("Connector Doesn\'t Support Given Artifact(s)").build();
 		}
 
-		boolean doesImageStoreNameExist = imageStoreService
-				.doesImageStoreNameExist(imageStoreTransferObject.getName(),
-						imageStoreTransferObject.id);
+		boolean doesImageStoreNameExist = imageStoreService.doesImageStoreNameExist(imageStoreTransferObject.getName(),
+				imageStoreTransferObject.id);
 		if (doesImageStoreNameExist) {
 			createImageStore.setError("Image Store Name Already Exists.");
 			return Response.ok(createImageStore).build();
 		}
 
 		try {
-			createImageStore = imageStoreService
-					.createImageStore(imageStoreTransferObject);
+			createImageStore = imageStoreService.createImageStore(imageStoreTransferObject);
 		} catch (DirectorException e) {
 			log.error(e.getMessage());
 			throw new DirectorException(e.getMessage());
@@ -214,26 +316,32 @@ public class ImageStores {
 		return Response.ok(createImageStore).build();
 	}
 
+	/**
+	 * 
+	 * @param imageStoreTransferObject
+	 * @return
+	 * @throws DirectorException
+	 */
 	@Path("image-stores")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ImageStoreTransferObject updateImageStores(
-			ImageStoreTransferObject imageStoreTransferObject)
+	public ImageStoreTransferObject updateImageStores(ImageStoreTransferObject imageStoreTransferObject)
 			throws DirectorException {
 		ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
-		boolean doesImageStoreNameExist = imageStoreService
-				.doesImageStoreNameExist(imageStoreTransferObject.getName(),
-						imageStoreTransferObject.id);
+		boolean doesImageStoreNameExist = imageStoreService.doesImageStoreNameExist(imageStoreTransferObject.getName(),
+				imageStoreTransferObject.id);
 		if (doesImageStoreNameExist) {
 			updateImageStore.setError("Image Store Name Already Exists.");
 			return updateImageStore;
 		}
-		
-		//Encrypt password fields
+
+		// Encrypt password fields
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
-		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil.getPasswordConfiguration(imageStoreTransferObject);
-		String encryptedPassword = imageStorePasswordUtil.encryptPasswordForImageStore(passwordConfiguration.getValue());
+		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil
+				.getPasswordConfiguration(imageStoreTransferObject);
+		String encryptedPassword = imageStorePasswordUtil
+				.encryptPasswordForImageStore(passwordConfiguration.getValue());
 		passwordConfiguration.setValue(encryptedPassword);
 		return imageStoreService.updateImageStore(imageStoreTransferObject);
 	}
@@ -244,7 +352,9 @@ public class ImageStores {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * Input:
 	 *  	https://{IP/HOST_NAME}/v1/image-stores/9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8
 	 * 		PathParam: 9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8 
@@ -255,7 +365,8 @@ public class ImageStores {
 	 * 
 	 * In case ImageStore doesn't exist, gives HTTP 404 Not Found
 	 * 
-	 * </pre>
+	 *                    </pre>
+	 * 
 	 * @param imageStoreId
 	 * @return
 	 * @throws DirectorException
@@ -263,15 +374,12 @@ public class ImageStores {
 	@Path("image-stores/{imageStoreId: [0-9a-zA-Z_-]+}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteImageStores(
-			@PathParam("imageStoreId") String imageStoreId)
-			throws DirectorException {
+	public Response deleteImageStores(@PathParam("imageStoreId") String imageStoreId) throws DirectorException {
 		GenericDeleteResponse deleteImageStore = null;
 		GenericDeleteResponse response = new GenericDeleteResponse();
-		if(!ValidationUtil.isValidWithRegex(imageStoreId,RegexPatterns.UUID)){
+		if (!ValidationUtil.isValidWithRegex(imageStoreId, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(response).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 		try {
 			deleteImageStore = imageStoreService.deleteImageStore(imageStoreId);
@@ -287,8 +395,6 @@ public class ImageStores {
 		return Response.ok(deleteImageStore).build();
 	}
 
-
-
 	/**
 	 * List the configured supported artifacts for the deployment type
 	 * 
@@ -296,35 +402,33 @@ public class ImageStores {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * 
-	 * @return List of supported artifacts	  
+	 * @return List of supported artifacts
 	 * @TDMethodType GET
-	 * @TDSampleRestCall 
-	 * <pre>
+	 * @TDSampleRestCall
+	 * 
+	 *                   <pre>
 	 * 	https://{IP/HOST_NAME}/v1/deployment-artifacts?depolymentType=VM
-
+	
 	 * Input: Required: Name of deploymentType: VM or Docker
 	 * 
 	 * 
 	 * Output:
 	 * 
 	 * If invalid deployment type is provided, empty list is returned
-	 * </pre>
+	 *                   </pre>
 	 */
 	@Path("deployment-artifacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getArtifactsForDeployment(
-			@QueryParam("depolymentType") String depolymentType) {
-		GenericResponse genericResponse= new GenericResponse();
-		if(StringUtils.isBlank(depolymentType)){
+	public Response getArtifactsForDeployment(@QueryParam("depolymentType") String depolymentType) {
+		GenericResponse genericResponse = new GenericResponse();
+		if (StringUtils.isBlank(depolymentType)) {
 			genericResponse.error = "Please provide depolyment type";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		if(!CommonValidations.validateImageDeployments(depolymentType)){
+		if (!CommonValidations.validateImageDeployments(depolymentType)) {
 			genericResponse.error = "Incorrect deployment_type";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
 		switch (depolymentType) {
 		case Constants.DEPLOYMENT_TYPE_VM:
@@ -336,7 +440,6 @@ public class ImageStores {
 		return null;
 	}
 
-
 	/**
 	 * List the configured connectors or the connector by the name provided
 	 * 
@@ -344,12 +447,13 @@ public class ImageStores {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * 
-	 * @return External store connector details	  
+	 * @return External store connector details
 	 * @TDMethodType GET
-	 * @TDSampleRestCall 
-	 * <pre>
+	 * @TDSampleRestCall
+	 * 
+	 *                   <pre>
 	 * 	https://{IP/HOST_NAME}/v1/image-store-connectors
-
+	
 	 * Input: Optional : Name of connector
 	 * https://{IP/HOST_NAME}/v1/Docker
 	 * https://{IP/HOST_NAME}/v1/Glance
@@ -357,15 +461,14 @@ public class ImageStores {
 	 * 
 	 * Output:
 	 * 
-	 * </pre>
+	 *                   </pre>
 	 */
 	@Path("/image-store-connectors/{connector: [0-9a-zA-Z_-]+|}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getConnector(
-			@PathParam("connector") String connector) {
-		 
-		if(StringUtils.isBlank(connector)){
+	public Response getConnector(@PathParam("connector") String connector) {
+
+		if (StringUtils.isBlank(connector)) {
 			List<ImageStoreConnector> connectorsList = new ArrayList<>();
 			for (ConnectorProperties connectorProperties : ConnectorProperties.values()) {
 				ImageStoreConnector storeConnector = new ImageStoreConnector();
@@ -377,20 +480,112 @@ public class ImageStores {
 			}
 			return Response.ok(connectorsList).build();
 		}
-		
+
 		ConnectorProperties connectorProperties = ConnectorProperties.getConnectorByName(connector);
-		
-		if(connectorProperties != null){
+
+		if (connectorProperties != null) {
 			ImageStoreConnector storeConnector = new ImageStoreConnector();
 			storeConnector.setName(connectorProperties.getName());
 			storeConnector.setDriver(connectorProperties.getDriver());
 			storeConnector.setProperties(Arrays.asList(connectorProperties.getProperties()));
 			storeConnector.setSupported_artifacts(connectorProperties.getSupported_artifacts());
 			return Response.ok(storeConnector).build();
-		}else{
+		} else {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		
+
+	}
+
+	/**
+	 * Validate Image Store
+	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @TDMethodType GET
+	 * @return Status of the connection
+	 * @TDSampleRestCall
+	 * 
+	 *                   <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/<IMAGE_STORE_UUID>/validate-image-store
+	 * Input: the UUID of the image store would be sent as part of the request
+	 * Output:
+	 * {
+	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	"name": "ExtStore_1",
+	"artifact_types": [
+	"Image",
+	"Tarball"
+	],
+	"connector": "Glance",
+	"deleted": false,
+	"is_valid": true,
+	"image_store_details": [
+	{
+	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.image.store.username"
+	},
+	{
+	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.api.endpoint"
+	},
+	{
+	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.tenant.name"
+	},
+	{
+	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.keystone.public.endpoint"
+	},
+	{
+	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	  "key": "glance.image.store.password"
+	}
+	]
+	}
+	 * 
+	 * 
+	 *                   </pre>
+	 * 
+	 * @param imageStoreId
+	 * @return Response containing the status
+	 */
+	@Path("rpc/image-stores/{imageStoreId: [0-9a-zA-Z_-]+}/validate")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response validateImageStore(@PathParam("imageStoreId") String imageStoreId) {
+		ImageStoreTransferObject imageStoreTransferObject = null;
+		if (!ValidationUtil.isValidWithRegex(imageStoreId, RegexPatterns.UUID)) {
+			GenericResponse response = new GenericResponse();
+			response.error = "Image store id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+
+		try {
+			imageStoreTransferObject = persistService.fetchImageStorebyId(imageStoreId);
+		} catch (DbException e1) {
+			log.error("Erroor fetching image store by id {}", imageStoreId, e1);
+		}
+		if (imageStoreTransferObject == null) {
+			GenericResponse response = new GenericResponse();
+			response.error = "Invalid image store id";
+			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+		}
+
+		imageStoreTransferObject.setIsValid(true);
+
+		try {
+			imageStoreService.validateImageStore(imageStoreId);
+		} catch (DirectorException e) {
+			imageStoreTransferObject.setError(e.getMessage());
+			imageStoreTransferObject.setIsValid(false);
+		}
+		return Response.ok(imageStoreTransferObject).build();
+
 	}
 
 }

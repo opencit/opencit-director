@@ -1718,12 +1718,12 @@ public class ImageServiceImpl implements ImageService {
 		Mapper mapper = new DozerBeanMapper();
 		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(savePolicyDraft,
 				TrustPolicyDraftResponse.class);
-		try {
+		/*try {
 			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
 		} catch (DbException e) {
 			log.error("Cannoot delete policy", e);
 			throw new DirectorException("Cannot delete policy draft y", e);
-		}
+		}*/
 		return trustPolicyDraftResponse;
 	}
 

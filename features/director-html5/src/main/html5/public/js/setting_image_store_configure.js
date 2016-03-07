@@ -11,7 +11,6 @@ function imageStoreSettingPage() {
 			var image_stores = data.image_stores;
 			var image_stores_grid = [];
 			
-			console.log("Lenght :: " + image_stores.length);
 			for (i = 0; i < image_stores.length; i++) {
 				var image_store = {};
 				console.log("deleted :: " + image_stores[i].deleted);
@@ -31,7 +30,8 @@ function imageStoreSettingPage() {
 				image_store.image_artifacts = image_store.image_artifacts.substring(0, image_store.image_artifacts.length - 1);
 				var image_store_json = JSON.stringify(image_stores[i]);
 				image_store.actions = '<a href=\'#\' onclick=\'getImageStoreAndPopulateImageStore(\"' + image_stores[i].id + '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>' 
-					+ '<a href=\'#\' onclick =\'deleteImageStore("' + image_stores[i].id + '")\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>';
+					+ '<a href=\'#\' onclick =\'deleteImageStore("' + image_stores[i].id + '")\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>'
+					+'<a href=\'#\' onclick=\'validateImageStore(\"' + image_stores[i].id + '\")\'><span id="'+ image_stores[i].id +'" title=\'Validate\' class=\'glyphicon glyphicon-refresh\'></span></a>';
 				image_stores_grid.push(image_store);
 				
 				
@@ -241,7 +241,7 @@ function getImageStoreAndPopulateImageStore(imageStoreId){
 function editImageStore(){
 	$('#editBackButton').show();
 	$('#edit_image_store').modal('hide');
-	$('#image_store_details').modal('show');
+	$('#image_store_details').modal({backdrop: 'static', keyboard: false});
 	$("#image_store_details_title").html($("#edit_image_store_name").val());
 }
 
@@ -346,6 +346,36 @@ function deleteImageStore(imageStoreId){
 		},
 		success : function (data, status, xhr) {
 			imageStoreSettingPage();
+		}
+	});
+}
+
+function validateImageStore(imageStoreId) {
+	$.ajax({
+		type : "GET",
+		url : "/v1/rpc/image-stores/" + imageStoreId + "/validate",
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function(data, status, xhr) {
+			console.log("Status: "+status);
+			if (xhr.status == 200) {
+				console.log("200 OK");
+				$("span#"+imageStoreId).removeClass("glyphicon glyphicon-refresh");
+				if (data.is_valid) {
+					console.log("Successfull connection");					
+					$("span#"+imageStoreId).addClass("glyphicon glyphicon-ok");
+				} else {
+					console.log("Failed conncection");
+					$("span#"+imageStoreId).addClass("glyphicon glyphicon-remove");
+					$("span#"+imageStoreId).attr("title", data.error);
+				}
+			} else {
+				console.log("NOT 200 OK");
+				$("span#"+imageStoreId).addClass("glyphicon glyphicon-remove");
+			}
+
 		}
 	});
 }

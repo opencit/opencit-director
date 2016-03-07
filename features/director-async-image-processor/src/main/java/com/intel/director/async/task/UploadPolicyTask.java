@@ -64,14 +64,6 @@ public class UploadPolicyTask extends GenericUploadTask {
 
 		String trustPolicyName = "trustpolicy.xml";
 		String policyLocation = imageLocation + imageInfo.getId();
-		File policyDir = new File(policyLocation);
-		if (!policyDir.exists()) {
-			policyDir.mkdirs();
-		}
-		String policyPath = policyLocation + File.separator + trustPolicyName;
-		new FileUtilityOperation().writeToFile(policyPath,
-				trustPolicy.getTrust_policy());
-		file = new File(policyPath);
 		String storeId = taskAction.getStoreId();
 		String containerName = null;
 		// ImageStoreSettings
@@ -100,6 +92,21 @@ public class UploadPolicyTask extends GenericUploadTask {
 		}
 		String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
 
+		
+		File policyDir = new File(policyLocation);
+		if (!policyDir.exists()) {
+			policyDir.mkdirs();
+		}
+		String policyPath = policyLocation + File.separator + trustPolicyName;
+		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
+		boolean writeToFileStatus = fileUtilityOperation.writeToFile(policyPath,
+				trustPolicy.getTrust_policy());
+		if(!writeToFileStatus){
+			fileUtilityOperation.deleteFileOrDirectory(policyDir);
+			return false;
+		}
+		file = new File(policyPath);
+
 		customProperties.put(Constants.SWIFT_CONTAINER_NAME, containerName);
 		customProperties.put(Constants.SWIFT_OBJECT_NAME, glanceId);
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, file);
@@ -107,9 +114,7 @@ public class UploadPolicyTask extends GenericUploadTask {
 		runFlag = super.run();
 
 		// Cleanup policies
-		file.delete();		
-		policyDir.delete();
-		
+		fileUtilityOperation.deleteFileOrDirectory(policyDir);
 		if (!runFlag) {
 			updateImageActionState(Constants.ERROR, "Error in  Uploading Policy");
 		}

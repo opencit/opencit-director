@@ -23,9 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.activation.MimeType;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
@@ -36,6 +40,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
@@ -48,6 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
+import com.sun.activation.registries.MimeTypeEntry;
 
 /**
  * 
@@ -557,8 +563,7 @@ public class SwiftRsClient {
 			URL urlSwift = new URL(swiftApiEndpoint);
 			host=urlSwift.getHost();
 		} catch (MalformedURLException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
+			throw new SwiftException("Error getting swift host", e3);
 		}
 		httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
@@ -586,16 +591,13 @@ public class SwiftRsClient {
 			log.error("Error while creating auth token", e2);
 			throw new SwiftException("Error while creating auth token", e2);
 		}
-
+		
 		postRequest.setEntity(entity);
-		postRequest.setHeader("Content-Type", "application/json");
-		postRequest.setHeader("Accept", "application/json");
+		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 		HttpResponse response = null;
 		try {
 			response = httpClient.execute(postRequest);
-		} catch (ClientProtocolException e1) {
-			log.error("Error while creating auth token", e1);
-			throw new SwiftException("Error while creating auth token", e1);
 		} catch (Exception e1) {
 			log.error("Error while creating auth token", e1);
 			throw new SwiftException("Error while creating auth token", e1);
@@ -660,11 +662,7 @@ public class SwiftRsClient {
 				}
 			} else {
 				responseHasError = true;
-			}
-			// httpClient.getConnectionManager().shutdown();
-
-		} catch (IOException e) {
-			log.error("Error while creating auth token", e);
+			}				
 		} catch (Exception e) {
 			log.error("Error while creating auth token", e);
 			throw new SwiftException("Error while creating auth token", e);

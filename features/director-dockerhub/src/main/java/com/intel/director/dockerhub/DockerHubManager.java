@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.api.ui.ImageInfo;
@@ -81,6 +82,32 @@ public class DockerHubManager extends StoreManagerImpl {
 	@Override
 	public <T extends StoreResponse> List<T> fetchAllImages() {
 		throw new NotImplementedException();
+	}
+
+	@Override
+	public GenericResponse validate() throws StoreException {
+		GenericResponse response = new GenericResponse();
+		int exitCode = 0;
+		try {
+			exitCode = DirectorUtil.executeCommandInExecUtil("docker", "login", "-u",(String) objectProperties
+								.get(Constants.DOCKER_HUB_USERNAME), "-e",(String) objectProperties
+								.get(Constants.DOCKER_HUB_EMAIL), "-p",(String) objectProperties
+								.get(Constants.DOCKER_HUB_PASSWORD));
+			if(exitCode != 0){
+				response.setError("Invalid Credentials");
+			}
+		} catch (IOException e) {
+			log.error("Error in executing docker login command");
+			response.setError(e.getMessage());
+		}
+		finally{
+			try {
+				DirectorUtil.executeCommandInExecUtil("docker", "logout");
+			} catch (IOException e) {
+				log.error("Error in executing docker logout command");
+			}
+		}
+		return response;
 	}
 
 }

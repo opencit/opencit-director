@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.images.rs.GlanceException;
@@ -140,6 +141,17 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			log.error("Error  in updateMetadataGlance in Glance", e);
 			throw new StoreException("Error in updateMetadataGlance", e);
 		}
+	}
+
+	@Override
+	public GenericResponse validate() throws StoreException {
+		GenericResponse response = new GenericResponse();
+		try {
+			glanceRsClient.fetchAllImages(objectProperties);
+		} catch (GlanceException e) {
+			response.setError("Invalid API Endpoint");
+		}
+		return response;
 	}
 
 }

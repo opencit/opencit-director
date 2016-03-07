@@ -22,6 +22,8 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpEntity;
@@ -83,9 +85,9 @@ public class GlanceRsClient {
 		HttpPut putRequest = new HttpPut(webTarget.getUri().toString()
 				+ GLANCE_API_VERSION + "/" + glanceId + "/file");
 		log.debug("upload Image  uri:: " + putRequest.getURI());
-		putRequest.setHeader("X-Auth-Token", authToken);
+		putRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
-		putRequest.setHeader("Content-Type", "application/octet-stream");
+		putRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
 		File file = new File(
 				(String) customProperties
 						.get(com.intel.director.common.Constants.UPLOAD_TO_IMAGE_STORE_FILE));
@@ -141,7 +143,7 @@ public class GlanceRsClient {
 		Response response = null;
 
 		response = webTarget.path(GLANCE_API_VERSION + "/" + glanceId)
-				.request().header("X-Auth-Token", authToken).get();
+				.request().header(Constants.AUTH_TOKEN, authToken).get();
 
 		// /System.out.println("Inside fetch details reponse::" + response);
 		log.info("###### fetch details status::" + response.getStatus());
@@ -205,18 +207,8 @@ public class GlanceRsClient {
 
 	public String uploadImageMetaData(Map<String, Object> imageProperties)
 			throws GlanceException {
-		String uuid = null;
 		log.info("Inside glance upload image metadata glanceid:: "
 				+ imageProperties.get(Constants.GLANCE_ID));
-		if (imageProperties.get(Constants.GLANCE_ID) != null) {
-			log.info("IMage id is provided : {}",
-					(String) imageProperties.get(Constants.GLANCE_ID));
-			uuid = (String) imageProperties.get(Constants.GLANCE_ID);
-		} else {
-			log.info("Generating new uuid in Glance  uploadImageMetaData");
-			uuid = (new UUID()).toString();
-		}
-
 		log.info("No mtw TP location");
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		String id = null;
@@ -225,7 +217,6 @@ public class GlanceRsClient {
 		String glanceId = null;
 		if (imageProperties.get(Constants.GLANCE_ID) != null) {
 			glanceId = (String) imageProperties.get(Constants.GLANCE_ID);
-
 			log.info(("Inside upload image metadata glanceId: " + glanceId));
 		} else {
 			glanceId = (new UUID()).toString();
@@ -381,10 +372,10 @@ public class GlanceRsClient {
 		}
 		log.debug("Glance updateMetadata body:: " + body);
 		patchRequest.setEntity(entity);
-		patchRequest.setHeader("Content-Type",
+		patchRequest.setHeader(HttpHeaders.CONTENT_TYPE,
 				"application/openstack-images-v2.1-json-patch");
 
-		patchRequest.setHeader("X-Auth-Token", authToken);
+		patchRequest.setHeader(Constants.AUTH_TOKEN,  authToken);
 
 		HttpResponse response;
 
@@ -470,8 +461,8 @@ public class GlanceRsClient {
 			}
 
 			postRequest.setEntity(entity);
-			postRequest.setHeader("Content-Type", "application/json");
-			postRequest.setHeader("Accept", "application/json");
+			postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+			postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 			HttpResponse response = null;
 			try {
 				response = httpClient.execute(postRequest);
@@ -509,8 +500,7 @@ public class GlanceRsClient {
 			}
 			// httpClient.getConnectionManager().shutdown();
 
-		} catch (IOException e) {
-			log.error("Error while creating auth token", e);
+		
 		} catch (Exception e) {
 			log.error("Error while creating auth token", e);
 			throw new GlanceException("Error while creating auth token", e);
@@ -560,7 +550,7 @@ public class GlanceRsClient {
 		Client client = ClientBuilder.newBuilder().build();
 		WebTarget target = client.target(url.toExternalForm());
 		Response response = target.path("/v1/images/detail").request()
-				.header("X-Auth-Token", authToken).get();
+				.header(Constants.AUTH_TOKEN, authToken).get();
 
 		InputStream inputStream = (InputStream) response.getEntity();
 

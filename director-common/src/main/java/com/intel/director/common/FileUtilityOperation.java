@@ -44,7 +44,7 @@ public class FileUtilityOperation {
 
 		try {
 			if (destDir.exists()) {
-				deleteDir(destDir);
+				deleteFileOrDirectory(destDir);
 			}
 			archiver.extract(sourceFile, destDir);
 		} catch (IOException ex) {
@@ -55,7 +55,7 @@ public class FileUtilityOperation {
 	}
 
 	// Delete the directory with its contents
-	public void deleteDir(File file) {
+	public void deleteFileOrDirectory(File file) {
 		if (file == null) {
 			return;
 		}
@@ -68,7 +68,7 @@ public class FileUtilityOperation {
 				String files[] = file.list();
 				for (String temp : files) {
 					File fileDelete = new File(file, temp);
-					deleteDir(fileDelete);
+					deleteFileOrDirectory(fileDelete);
 				}
 				// check the directory again, if empty then delete it
 				if (file.list() == null || file.list().length == 0) {

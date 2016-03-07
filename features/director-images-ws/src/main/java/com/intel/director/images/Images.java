@@ -58,6 +58,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
+import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.ImageService;
@@ -1010,11 +1011,9 @@ public class Images {
 					log.info("Deleting temporary files "
 							+ Constants.TARBALL_PATH + imageId);
 					super.close();
+					FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 					final File dir = new File(Constants.TARBALL_PATH + imageId);
-					for (File file : dir.listFiles()) {
-						file.delete();
-					}
-					dir.delete();
+					fileUtilityOperation.deleteFileOrDirectory(dir);
 				}
 			};
 		} catch (FileNotFoundException e) {

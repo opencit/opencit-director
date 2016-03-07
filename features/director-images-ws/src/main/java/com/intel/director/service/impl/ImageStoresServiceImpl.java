@@ -10,12 +10,16 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.GenericDeleteResponse;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ImageStoresService;
+import com.intel.director.store.StoreManager;
+import com.intel.director.store.StoreManagerFactory;
+import com.intel.director.store.exception.StoreException;
 import com.intel.director.store.util.ImageStorePasswordUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
@@ -89,6 +93,9 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		try {
 			fetchImageStorebyId = imagePersistenceManager
 					.fetchImageStorebyId(imageStoreId);
+			if(fetchImageStorebyId == null){
+				return null;
+			}
 			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
 			ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil.getPasswordConfiguration(fetchImageStorebyId);
 			if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
@@ -210,6 +217,27 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 
 			default:
 				return false;
+		}
+	}
+
+	@Override
+	public void validateImageStore(String imageStoreId) throws DirectorException {
+		StoreManager manager = null;
+		try {
+			manager = StoreManagerFactory
+					.getStoreManager(imageStoreId);
+		} catch (StoreException e) {
+			log.error("Error in Initializing ImageStore @ validateImageStore", e);
+			throw new DirectorException("Not a valid auth URL or username or password");
+		}
+		try {
+			GenericResponse validate = manager.validate();
+			if(validate.getError() != null){
+				throw new DirectorException(validate.getError());
+			}
+		} catch (StoreException e) {
+			log.error(e.getMessage());
+			throw new DirectorException(e.getMessage());
 		}
 	}
 }

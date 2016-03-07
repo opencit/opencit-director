@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.store.exception.StoreException;
 
@@ -26,4 +27,5 @@ public interface StoreManager {
 	  public void update() throws StoreException;
 	  public void delete(URL url) throws StoreException;
 	  public <T extends StoreResponse> List<T> fetchAllImages() throws StoreException;
+	  public GenericResponse validate() throws StoreException;
 }

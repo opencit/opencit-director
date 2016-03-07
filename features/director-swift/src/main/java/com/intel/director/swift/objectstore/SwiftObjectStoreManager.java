@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.StoreResponse;
 import com.intel.director.api.SwiftObjectResponse;
 import com.intel.director.store.exception.StoreException;
@@ -185,9 +186,9 @@ public class SwiftObjectStoreManager extends StoreManagerImpl implements
 
 	@Override
 	public void delete(URL url) throws StoreException {
-		try{
-		swiftRsClient.deleteObject(url);
-		}catch(SwiftException e){
+		try {
+			swiftRsClient.deleteObject(url);
+		} catch (SwiftException e) {
 			throw new StoreException(e);
 		}
 	}
@@ -196,6 +197,17 @@ public class SwiftObjectStoreManager extends StoreManagerImpl implements
 	public <T extends StoreResponse> List<T> fetchAllImages() {
 		// TODO Auto-generated method stub
 		throw new NotImplementedException();
+	}
+
+	@Override
+	public GenericResponse validate() throws StoreException {
+		GenericResponse response = new GenericResponse();
+		try {
+			swiftRsClient.getContainersList();
+		} catch (SwiftException e) {
+			response.setError("Invalid API Endpoint");
+		}
+		return response;
 	}
 
 

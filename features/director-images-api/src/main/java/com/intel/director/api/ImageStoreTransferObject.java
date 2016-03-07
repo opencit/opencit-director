@@ -3,6 +3,10 @@ package com.intel.director.api;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class ImageStoreTransferObject extends GenericResponse {
 
 	public String id;
@@ -16,7 +20,8 @@ public class ImageStoreTransferObject extends GenericResponse {
 	public boolean deleted;
 	
 	public String deploymentFormat;
-	//public Map<String,String> properties;
+	
+	public Boolean isValid = null;
 	
 	public Collection<ImageStoreDetailsTransferObject> image_store_details;
 	
@@ -80,15 +85,16 @@ public class ImageStoreTransferObject extends GenericResponse {
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
-//
-//	public Map<String, String> getProperties() {
-//		return properties;
-//	}
-//
-//	public void setProperties(Map<String, String> properties) {
-//		this.properties = properties;
-//	}
-//	
+
+	
+
+	public Boolean getIsValid() {
+		return isValid;
+	}
+
+	public void setIsValid(Boolean isValid) {
+		this.isValid = isValid;
+	}
 
 	@Override
 	public String toString() {
