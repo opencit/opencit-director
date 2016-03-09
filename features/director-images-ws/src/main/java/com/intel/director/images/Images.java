@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPolicyResponse;
 import com.intel.director.api.MountImageRequest;
 import com.intel.director.api.MountImageResponse;
+import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
@@ -1292,13 +1294,16 @@ public class Images {
 	
 	@Path("rpc/remove-orphan-policies")
 	@Produces(MediaType.APPLICATION_JSON)
-	@GET
-	public void removeOrphanPolicies() throws DirectorException {
+	@POST
+	public Response removeOrphanPolicies() throws DirectorException {
 		log.info("Removing Orphan Policies");
 		try {
-			artifactUploadService.removeOrphanPolicies();
+			List<PolicyUploadTransferObject> removedOrphanPolicies = artifactUploadService.removeOrphanPolicies();
+			return Response.ok(removedOrphanPolicies).build();
 		} catch (DirectorException e) {
-			throw new DirectorException("Error In Removing Orphan Policies");
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.setError(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
 		}
 	}
 }

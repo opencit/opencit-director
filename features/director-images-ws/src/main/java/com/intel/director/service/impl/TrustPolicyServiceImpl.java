@@ -181,7 +181,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		if (!Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(imageInfo.getImage_deployments())) {
 			return;
 		}
-
+		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 		// Writing inside bare metal modified image
 
 		String localPathForPolicyAndManifest = "/tmp/" + imageInfo.id;
@@ -205,7 +205,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			dirForPolicyAndManifest.mkdir();
 		}
 
-		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
+		
 		fileUtilityOperation.createNewFile(manifestFile);
 		fileUtilityOperation.createNewFile(trustPolicyFile);
 
@@ -238,12 +238,9 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			log.error("Unable to send trustPolicy /manifest  file to remote host ", e);
 			throw new DirectorException("Unable to send trustPolicy /manifest  file to remote host", e);
 		} finally {
-			File deleteFile = new File(manifestFile);
-			deleteFile.delete();
-			deleteFile = new File(trustPolicyFile);
-			deleteFile.delete();
-			deleteFile = new File(localPathForPolicyAndManifest);
-			deleteFile.delete();
+			if (dirForPolicyAndManifest.exists()) {
+				fileUtilityOperation.deleteFileOrDirectory(dirForPolicyAndManifest);
+			}
 			log.info("Trust policy and manifest written to tmp cleaned up");
 		}
 

@@ -704,3 +704,22 @@ function hideLoading() {
     $("#director_loading_icon").html("");
 
 }
+
+
+function cleanup_orphan_policies() {
+	$.ajax({
+		type : "POST",
+		url : "/v1/rpc/remove-orphan-policies",
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function(data, status, xhr) {
+			show_error_in_trust_policy_tab("Orphan policies cleaned up");
+		},
+		error : function(data, status, xhr) {
+            var obj = jQuery.parseJSON(data.responseText);
+			show_error_in_trust_policy_tab(obj.error);
+		} 
+	});
+}

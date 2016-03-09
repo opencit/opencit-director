@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreTransferObject;
@@ -60,6 +62,9 @@ public class StoreManagerFactory {
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
 		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil
 				.getPasswordConfiguration(imageStoreDTO);
+		if(StringUtils.isBlank(passwordConfiguration.getValue())){
+			throw new StoreException("No password set for store "+ storeId);
+		}
 		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreDTO
 				.getImage_store_details();
 		Map<String, String> map = new HashMap<>();

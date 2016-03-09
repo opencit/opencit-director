@@ -555,7 +555,7 @@ public class ImageStores {
 	 * @return Response containing the status
 	 */
 	@Path("rpc/image-stores/{imageStoreId: [0-9a-zA-Z_-]+}/validate")
-	@GET
+	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response validateImageStore(@PathParam("imageStoreId") String imageStoreId) {
 		ImageStoreTransferObject imageStoreTransferObject = null;
