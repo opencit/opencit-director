@@ -2,6 +2,16 @@ endpoint = "/v1";
 var imageFormats = new Array();
 var image_policies = new Array();
 
+$(document).ready(function() {
+    $('input[name="host_type"]:radio').change(
+        function() {
+            if (this.value == 'linux') {
+                $("#partition_to_mount_div").hide();
+            } else {
+                $("#partition_to_mount_div").show();
+            }
+        });
+});
 
 edit_policy_bmlive_initialize();
 
@@ -39,24 +49,42 @@ function edit_policy_bmlive_initialize() {
                         success: function(data, status, xhr) {
                             $("#host_ip_edit").val(data.ip_address);
                             $("#username_for_host_edit").val(data.username);
+                            console.log("Partition :: " + data.partition);
+                            if (data.partition) {
+                                console.log("Windows");
+                                $("#partition_to_mount_div").show();
+                                $("input[name='host_type'][value='linux']")
+                                    .attr('checked', 'unchecked');
+                                $("input[name='host_type'][value='windows']")
+                                    .attr('checked', 'checked');
+                                $("#partition_to_mount").val(data.partition);
+                            } else {
+                                console.log("Linux");
+                                $("#partition_to_mount_div").hide();
+                                $("input[name='host_type'][value='windows']")
+                                    .attr('checked', 'unchecked');
+                                $("input[name='host_type'][value='linux']")
+                                    .attr('checked', 'checked');
+                            }
+
                         }
                     });
 
-
-                    $.ajax({
-                        type: "GET",
-                        url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
-                        // accept: "application/json",
-                        contentType: "application/json",
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        dataType: "json",
-                        success: function(data, status, xhr) {
-                            $("#display_name_host_edit").val(data.display_name);
-                        }
-                    });
-
+                    $
+                        .ajax({
+                            type: "GET",
+                            url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
+                            // accept: "application/json",
+                            contentType: "application/json",
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            dataType: "json",
+                            success: function(data, status, xhr) {
+                                $("#display_name_host_edit").val(
+                                    data.display_name);
+                            }
+                        });
 
                 }
 
@@ -75,6 +103,19 @@ function edit_policy_bmlive_initialize() {
             success: function(data, status, xhr) {
                 $("#host_ip_edit").val(data.ip_address);
                 $("#username_for_host_edit").val(data.username);
+                console.log("Partition :: " + data.partition);
+                if (data.partition) {
+                    console.log("Windows");
+                    $("#partition_to_mount_div").show();
+                    $("input[name='host_type'][value='linux']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='windows']").attr('checked', 'checked');
+                    $("#partition_to_mount").val(data.partition);
+                } else {
+                    console.log("Linux");
+                    $("#partition_to_mount_div").hide();
+                    $("input[name='host_type'][value='windows']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='linux']").attr('checked', 'checked');
+                }
             }
         });
 
@@ -160,6 +201,22 @@ function editandNext() {
     } else {
         show_error_in_editbmlivemodal("Password is mandatory");
         return;
+    }
+
+    if ($("input[name='host_type']:checked").val() == 'windows') {
+        self.data.partition = $("#partition_to_mount").val();
+        self.data.host_type = "Windows";
+        if (!$.trim($("#partition_to_mount").val()) == false) {
+            self.data.partition = $("#partition_to_mount").val();
+            drives = $("#partition_to_mount").val().split(",");
+            drive_to_push = drives[0];
+        } else {
+            show_error_in_bmlivemodal("Partition is Mandatory in case of windows host");
+            return;
+        }
+    } else {
+        self.data.host_type = "Linux";
+        drive_to_push = "";
     }
 
 

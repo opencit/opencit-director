@@ -197,5 +197,8 @@ public class Constants {
 	public static final String DOCKER_HUB_USERNAME = "Username";
 	public static final String DOCKER_HUB_PASSWORD = "Password";
 	public static final String DOCKER_HUB_EMAIL = "Email";
+	
+	public static final String HOST_TYPE_WINDOWS="Windows";
+	public static final String HOST_TYPE_LINUX="Linux";
 
 }

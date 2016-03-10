@@ -36,6 +36,20 @@ public class ImageAttributes extends AuditFields {
     public String uploadVariableMD5;
     public String tmpLocation;
     
+	public String partition;
+	
+	
+	
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
+
+	
+    
     
     public ImageAttributes() {
         super();

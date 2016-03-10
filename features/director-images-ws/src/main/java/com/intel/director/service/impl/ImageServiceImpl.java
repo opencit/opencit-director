@@ -2008,8 +2008,11 @@ public class ImageServiceImpl implements ImageService {
 			// importPolicyTemplateResponse.setStatus("Success");
 			return importPolicyTemplateResponse;
 		}
+		String idendifier = "V";
 		// Check if mounted live BM has /opt/vrtm
-		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
+		if (image.getPartition() == null) {
+			idendifier = TdaasUtil.checkInstalledComponents(imageId);
+		}
 
 		String content = null;
 		Manifest manifest;
@@ -2642,10 +2645,12 @@ public class ImageServiceImpl implements ImageService {
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
 		log.info("Inside addHost, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		if (StringUtils.isBlank(sshSettingRequest.getPartition())) {
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		}
 		log.debug("Going to save sshSetting info in database");
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
@@ -2676,10 +2681,12 @@ public class ImageServiceImpl implements ImageService {
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
 		log.info("Inside updateSshData, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		if (StringUtils.isBlank(sshSettingRequest.getPartition())) {
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		}
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
 
@@ -2691,6 +2698,7 @@ public class ImageServiceImpl implements ImageService {
 					&& StringUtils.isNotBlank(existingSsh.getId())) {
 				sshSettingInfo.setId(existingSsh.getId());
 				ImageAttributes image = existingSsh.getImage();
+				image.setPartition(sshSettingRequest.getPartition());
 				sshSettingInfo.setImage(image);
 			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
@@ -2891,5 +2899,5 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return false;
 	}
-	
+
 }

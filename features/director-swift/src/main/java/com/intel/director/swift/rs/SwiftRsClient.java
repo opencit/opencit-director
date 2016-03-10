@@ -23,11 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.activation.MimeType;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -40,7 +38,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
@@ -53,7 +50,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
-import com.sun.activation.registries.MimeTypeEntry;
 
 /**
  * 

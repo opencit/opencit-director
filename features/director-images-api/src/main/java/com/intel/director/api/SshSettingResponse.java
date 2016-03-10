@@ -6,7 +6,16 @@ public class SshSettingResponse extends GenericResponse {
 	String image_name;
 	String key;
 	String image_id;
+	String partition;
 	
+	
+	
+	public String getPartition() {
+		return partition;
+	}
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
 	public String getIp_address() {
 		return ip_address;
 	}

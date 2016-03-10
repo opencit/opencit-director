@@ -12,6 +12,7 @@ package com.intel.director.common;
 public class Constants {
 
 	public static final String mountScript = "/opt/director/bin/mount_vm_image.sh";
+	public static final String mountWindowsRemoteFileSystemScript = "/opt/director/bin/mount_remote_system_windows.sh";
 	public static final String mountRemoteFileSystemScript = "/opt/director/bin/mount_remote_system.sh";
 	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
 	public static final String mountPath = "/mnt/director/";
@@ -197,4 +198,7 @@ public class Constants {
 	
 	public static final String IMAGE_INFO_OBJECT = "IMAGE_INFO_OBJECT";
 	public static final String ARTIFACT_ID = "ARTIFACT_ID";
+
+	public static final String HOST_TYPE_WINDOWS="Windows";
+	public static final String HOST_TYPE_LINUX="Linux";
 }
