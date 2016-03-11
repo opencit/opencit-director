@@ -186,7 +186,7 @@ function createImageStore() {
 									+ "<label class=\"control-label col-md-4\" for="
 									+ image_store_details[i].id
 									+ ">"
-									+ image_store_details[i].key
+									+ image_store_details[i].key_display_value
 									+ ": </label>"
 									+ "<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id="
 									+ image_store_details[i].id
@@ -198,7 +198,7 @@ function createImageStore() {
 									+ "<label class=\"control-label col-md-4\" for="
 									+ image_store_details[i].id
 									+ ">"
-									+ image_store_details[i].key
+									+ image_store_details[i].key_display_value
 									+ ": </label>"
 									+ "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id="
 									+ image_store_details[i].id

@@ -1,324 +1,180 @@
 var pageInitialized = false;
-$(document)
-		.ready(
-				function() {
-					if (pageInitialized == true)
+$(document).ready(function() {
+
+    if (pageInitialized == true) {
+        return;
+    }
+
+    refresh_vm_images_Grid();
+
+    pageInitialized = true;
+});
+
+function ImageData() {
+
+}
+
+
+
+
+function refresh_vm_images_Grid() {
+    var self = this;
+
+    $("#vmGrid").html("")
+    $.ajax({
+        type: "GET",
+        url: "/v1/images?deploymentType=VM",
+        accept: "application/json",
+        headers: {
+            'Accept': 'application/json'
+        },
+        success: function(data, status, xhr) {
+            console.log("vm grid refreshed");
+            images = data.images;
+            var grid = [];
+            for (i = 0; i < images.length; i++) {
+                if (images[i].deleted) {
+                    continue;
+                }
+
+                self.gridData = new ImageData();
+                self.gridData.image_name = images[i].image_name;
+                self.gridData.policy_name = images[i].policy_name;
+                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"vm_remove_row_" + i + "\" onclick=\"deleteImage('" + images[i].id + "')\"/></a>";
+                if (images[i].image_upload_status == 'Complete') {
+
+                    self.gridData.trust_policy = "<div id=\"trust_policy_vm_column" + images[i].id + "\">";
+                    if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
+
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" id=\"vm_add_row_" + i + "\" onclick=\"createTrustPolicy('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+
+                    }
+
+                    if (images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\"><span class=\"glyphicon glyphicon-edit\" title=\"Edit Policy\" id=\"vm_edit_row_" + i + "\" onclick=\"editTrustPolicy('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_draft_id + "')\"></span></a>";
+                        tpdid = images[i].trust_policy_draft_id;
+                    } else if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Edit Policy\" ><span class=\"glyphicon glyphicon-edit\"  title=\"Edit Policy\" id=\"vm_edit_row_" + i + "\" onclick=\"editTrustPolicy('" + images[i].id + "','" + images[i].image_name + "','')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\" id=\"vm_download_row_" + i + "\"  title=\"Download\" onclick=\"downloadPolicy('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
+                    }
+
+                    if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"vm_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"deletePolicyVM('" + images[i].trust_policy_id + "','" + images[i].trust_policy_draft_id + "','" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+
+                    }
+                    self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
+
+                } else {
+                    //self.gridData.image_delete = "";
+                    self.gridData.trust_policy = "";
+                }
+
+                self.gridData.image_upload = "";
+                if (images[i].image_upload_status == 'Complete') {
+		
+			
+			
+		    if(images[i].action_entry_created){
+			 self.gridData.image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-cloud-upload\" id=\"vm_ok_row_" + i + "\" title=\"Upload Action History\"  onclick=\"showImageActionHistoryDialog('" + images[i].id + "')\" ></span></a>";
+
+		    }
+	
+                   
+                    self.gridData.image_upload += "&nbsp;" + "<a href=\"#\" title=\"Upload\" ><span class=\"glyphicon glyphicon-open\" title=\"Upload\" id=\"vm_upload_row_" + i + "\" onclick=\"uploadToImageStorePage('" + images[i].id + "','" + images[i].image_name + "','" + images[i].trust_policy_id + "')\" ></span></a>";
+                }
+
+                self.gridData.created_date = images[i].created_date;
+
+
+
+                self.gridData.image_format = images[i].image_format;
+                grid.push(self.gridData);
+
+            }
+            $("#vmGrid").jsGrid({
+
+                height: "auto",
+                width: "100%",
+                sorting: true,
+                paging: true,
+                pageSize: 10,
+                pageButtonCount: 15,
+                data: grid,
+                fields: [{
+                        title: "Delete",
+                        name: "image_delete",
+                        type: "text",
+                        width: 50,
+                        align: "center"
+				}, {
+                        title: "Image Name",
+                        name: "image_name",
+                        type: "text",
+                        width: 250,
+                        align: "center"
+				}, {
+                        title: "Policy Name",
+                        name: "policy_name",
+                        type: "text",
+                        width: 200,
+                        align: "center"
+				},
+                    /* {
+                    					title : "Image Format",
+                    					name : "image_format",
+                    					type : "text",
+                    					width : 120,
+                    					align : "center"
+                    				},*/
+                    {
+                        title: "Trust Policy",
+                        name: "trust_policy",
+                        type: "text",
+                        width: 100,
+                        align: "center"
+					}, {
+                        title: "Image Store Upload",
+                        name: "image_upload",
+                        type: "text",
+                        width: 100,
+                        align: "center"
+				}, {
+                        title: "Created Date",
+                        name: "created_date",
+                        type: "text",
+                        width: 150,
+                        align: "center"
+				} ],
+				onRefreshed: function(args) {
+					if(grid.length <= 0){
 						return;
+					}
+					var numOfPagesWithDecimal = grid.length/args.grid.pageSize;
+					var numOfPages = Math.ceil(numOfPagesWithDecimal);
+					if(args.grid.pageIndex > numOfPages){
+						args.grid.reset();
+					}	
+						
+				}
+            });
+            var delay = 1000;
+            setTimeout(function() {
+                $("#vmGrid").show();
+                $("#vmGrid").jsGrid("refresh");
+            }, delay);
+            $("#vmGrid").jsGrid("sort", { field: "image_name", order: "asc" });
+
+        },
+        error: function(jqXHR, exception) {
+
+            show_error_in_trust_policy_tab("Failed to get images list");
+
+
+        }
+    });
 
-					$("#vm_images_grid_page")
-							.load(
-									"/v1/html5/public/director-html5/vm_images_grid_page.html");
-
-					pageInitialized = true;
-				});
-
-function createTrustPolicy(imageid, imagename) {
-	currentFlow = "Create";
-	current_image_id = imageid;
-	current_image_name = imagename;
-	current_trust_policy_draft_id = '';
-
-	goToCreatePolicyWizard();
-}
-
-function editTrustPolicy(imageid, imagename, trust_policy_draft_id) {
-
-	currentFlow = "Edit";
-	current_image_id = imageid;
-	current_image_name = imagename;
-	current_trust_policy_draft_id = trust_policy_draft_id;
-
-	goToEditPolicyWizard();
-}
-
-function uploadToImageStorePage(imageid, imagename, trust_policy_id) {
-	current_flow = "Grid";
-	currentFlow = "Upload";
-	current_image_id = imageid;
-	current_image_name = imagename;
-	current_trust_policy_id = trust_policy_id;
-	goToUploadToImageStorePage();
-}
-
-function goToUploadToImageStorePage() {
-	$("#vm_images_grid_page").hide();
-	$("#upload_to_image_store_redirect").show();
-	var isEmpty = !$.trim($("#upload_to_image_store_redirect").html());
-
-	if (isEmpty == false) {
-		$("#upload_to_image_store_redirect").html("");
-	}
-
-	$("#upload_to_image_store_redirect").load(
-			"/v1/html5/public/director-html5/upload_imagestore.html");
-
-}
-
-function goToCreatePolicyWizard() {
-
-	$("#vm_images_grid_page").hide();
-	$("#create_policy_wizard_").show();
-
-	var htmlpage1 = "create_policy_wizard.html";
-
-	var isEmpty = !$.trim($("#create_policy_wizard_").html());
-
-	if (isEmpty == false) {
-		$("#create_policy_wizard_").html("");
-	}
-
-	$("#create_policy_wizard_").load(
-			"/v1/html5/public/director-html5/create_policy_wizard.html");
-
-}
-
-function goToEditPolicyWizard() {
-	$("#vm_images_grid_page").hide();
-	$("#edit_policy_wizard").show();
-
-	var htmlpage = "/v1/html5/public/director-html5/edit_policy_wizard.html";
-
-	var isEmpty = !$.trim($("#edit_policy_wizard").html());
-
-	if (isEmpty == false) {
-		$("#edit_policy_wizard").html("");
-	}
-
-	$("#edit_policy_wizard").load(htmlpage);
-
-}
-
-function backToVmImagesPage() {
-	$("#create_policy_script").remove();
-	$("#edit_policy_wizard").html("");
-	$("#create_policy_wizard_").html("");
-	$("#create_policy_wizard_").hide("");
-	$("#edit_policy_wizard").hide("");
-	$("#upload_to_image_store_redirect").html("");
-	$("#upload_to_image_store_redirect").hide("");
-	$("#vm_images_grid_page").show();
-	var self = this;
-	var mountimage = {
-		"id" : current_image_id
-	};
-	current_trust_policy_draft_id = '';
-	if (current_image_id != "" && current_image_id != null) {
-
-		$.ajax({
-			type : "POST",
-			url : "/v1/rpc/unmount-image",
-			contentType : "application/json",
-			headers : {
-				'Accept' : 'application/json'
-			},
-			data : JSON.stringify(mountimage),
-			success : function(data, status, xhr) {
-				current_image_id = "";
-				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
-			}
-		});
-	}
-	$('body').removeClass("modal-open");
-	refresh_vm_images_Grid();
-}
-
-function backToVmImagesPageWithountUnmount() {
-	$("#create_policy_script").remove();
-	$("#edit_policy_wizard").html("");
-	$("#create_policy_wizard_").html("");
-	$("#create_policy_wizard_").hide("");
-	$("#edit_policy_wizard").hide("");
-	$("#upload_to_image_store_redirect").html("");
-	$("#upload_to_image_store_redirect").hide("");
-	$("#vm_images_grid_page").show();
-	$('body').removeClass("modal-open");
-	refresh_vm_images_Grid();
-}
-
-function backButton() {
-
-	var activeMasterStepsDiv;
-	var active_wizard_page;
-	if ($('#create_policy_wizard_').is(':hidden')) {
-		activeMasterStepsDiv = "editPolicySteps";
-		active_wizard_page = "edit_policy";
-
-	} else if ($('#edit_policy_wizard').is(':hidden')) {
-		activeMasterStepsDiv = "createPolicySteps";
-		active_wizard_page = "create_policy";
-
-	}
-
-	var divid = $('#' + activeMasterStepsDiv).find("li .selected").attr('id');
-
-	var n = divid.lastIndexOf("_");
-
-	var stepNum = divid.substring(n + 1);
-
-	var previousStepNum = eval(stepNum) - 1;
-
-	$("#" + active_wizard_page + "_content_step_" + stepNum).hide();
-	$("#" + active_wizard_page + "_step_" + stepNum).removeClass("selected");
-	$("#" + active_wizard_page + "_step_" + stepNum).addClass("done");
-	$("#" + active_wizard_page + "_content_step_" + previousStepNum).show();
-
-	$("#" + active_wizard_page + "_step_" + previousStepNum)
-			.removeClass("done");
-	$("#" + active_wizard_page + "_step_" + previousStepNum).addClass(
-			"selected");
-
-}
-
-function nextButton() {
-
-	var activeMasterStepsDiv;
-	var active_wizard_page;
-	if ($('#create_policy_wizard_').is(':hidden')) {
-		activeMasterStepsDiv = "editPolicySteps";
-		active_wizard_page = "edit_policy";
-
-	} else if ($('#edit_policy_wizard').is(':hidden')) {
-		activeMasterStepsDiv = "createPolicySteps";
-		active_wizard_page = "create_policy";
-
-	}
-
-	var divid = $('#' + activeMasterStepsDiv).find("li .selected").attr('id');
-
-	var n = divid.lastIndexOf("_");
-
-	var stepNum = divid.substring(n + 1);
-
-	var nextStepNum = eval(stepNum) + 1;
-
-	$("#" + active_wizard_page + "_content_step_" + stepNum).hide();
-	$("#" + active_wizard_page + "_content_step_" + nextStepNum).show();
-	var html_url = $("#" + active_wizard_page + "_step_" + nextStepNum).attr(
-			'href');
-	var htmlpage = "/v1/html5/public/director-html5/" + html_url.substring(1);
-
-	var isEmpty = !$.trim($(
-			"#" + active_wizard_page + "_content_step_" + nextStepNum).html());
-
-	if (isEmpty == true) {
-		$("#" + active_wizard_page + "_content_step_" + nextStepNum).load(
-				htmlpage);
-	} else {
-		$("#director_loading_icon").hide();
-		$("#loading_icon_container").hide();
-		$("#director_loading_icon").html("");
-
-	}
-
-	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
-	$("#" + active_wizard_page + "_step_" + stepNum).removeClass("selected");
-	$("#" + active_wizard_page + "_step_" + stepNum).addClass("done");
-	$("#" + active_wizard_page + "_step_" + nextStepNum)
-			.removeClass("disabled");
-	$("#" + active_wizard_page + "_step_" + nextStepNum).removeClass("done");
-	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
-
-}
-
-function downloadPolicy(imageid, trust_policy_id) {
-
-	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-		type : "POST",
-		url : "/v1/login/tokens",
-		accept : "application/json",
-		contentType : "application/json",
-		headers : {
-			'Accept' : 'application/json'
-		},
-		data : token_request_json,
-		success : function(data, status, xhr) {
-			var authtoken = authtoken = data.data[0].token;
-			var url = "/v1/images/" + imageid
-					+ "/downloads/policy?Authorization="
-					+ encodeURIComponent(authtoken);
-
-			window.location = url;
-		},
-		error : function(xhr, status, errorMessage) {
-			show_error_in_trust_policy_tab("error in downloading");
-		}
-	});
-
-}
-
-function downloadImage(imageid) {
-
-	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-		type : "POST",
-		url : "/v1/login/tokens",
-		accept : "application/json",
-		contentType : "application/json",
-		headers : {
-			'Accept' : 'application/json'
-		},
-		data : token_request_json,
-		success : function(data, status, xhr) {
-			var authtoken = authtoken = data.data[0].token;
-			var uri = "/v1/images/" + imageid
-					+ "/downloadImage?modified=true&Authorization="
-					+ encodeURI(authtoken);
-
-			window.location = uri;
-
-		},
-		error : function(xhr, status, errorMessage) {
-			show_error_in_trust_policy_tab("error in downloading");
-		}
-	});
-
-}
-
-function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid,
-		imagename) {
-	var callComplete = false;
-	console.log("trust_policy_id :: " + trust_policy_id);
-	if (trust_policy_id != "" && trust_policy_id != "null"
-			&& trust_policy_id != null && trust_policy_id != undefined
-			&& trust_policy_id != "undefined") {
-		$.ajax({
-			type : "DELETE",
-			url : "/v1/trust-policy/" + trust_policy_id,
-			dataType : "text",
-			success : function(result) {
-				callComplete = true;
-				refresh_vm_images_Grid();
-			}
-		});
-	}
-	console.log("trust_policy_draft_id :: " + trust_policy_draft_id);
-	if (trust_policy_draft_id != "" && trust_policy_draft_id != undefined
-			&& trust_policy_draft_id != null && trust_policy_draft_id != "null"
-			&& trust_policy_draft_id != "undefined") {
-		$.ajax({
-			type : "DELETE",
-			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id,
-			dataType : "text",
-			success : function(result) {
-				callComplete = true;
-				refresh_vm_images_Grid();
-			}
-		});
-	}
-}
-
-function deleteImage(imageid) {
-	$.ajax({
-		type : "DELETE",
-		url : "/v1/images/" + imageid,
-		dataType : "text",
-		success : function(result) {
-			refresh_vm_images_Grid();
-			refreshBMOnlineGrid();
-		}
-	});
 
 }

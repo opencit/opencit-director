@@ -79,6 +79,11 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		
 		try {
 			savedImageStore = imagePersistenceManager.saveImageStore(imageStoreTransferObject);
+			if(savedImageStore != null){
+				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
+					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+				}
+			}
 		} catch (DbException e) {
 			log.error("Error in creating ImageStore",e);
 			throw new DirectorException("Error in creating ImageStore",e);
