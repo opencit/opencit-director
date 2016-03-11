@@ -793,10 +793,9 @@ public class Mapper {
 				.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
-		if(imageActionObject.getDatetime()!=null){
-			mwImageAction.setExecutionTime(imageActionObject.getDatetime()
-						);
-			}
+		if (imageActionObject.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageActionObject.getDatetime());
+		}
 		return mwImageAction;
 	}
 

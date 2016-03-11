@@ -66,6 +66,8 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			if(StringUtils.isNotBlank(glanceid)){
 				//delete
 				throw new StoreException(Constants.ARTIFACT_ID+":"+glanceid, e);
+			} else if(e.getMessage().startsWith(Constants.ARTIFACT_ID)){
+				throw new StoreException(e.getMessage(), e);
 			}
 			throw new StoreException("Error  upload to Glance", e);
 		}

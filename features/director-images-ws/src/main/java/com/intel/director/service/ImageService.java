@@ -139,24 +139,12 @@ public interface ImageService {
 	public TrustPolicyResponse getTrustPolicyMetaData(String trust_policy_id)
 			throws DirectorException;
 
-	public void dockerSave(String image_id, String user)
-			throws DirectorException;
-
-	public GenericResponse dockerRMI(String image_id)
-			throws DirectorException;
-
 	public void updateTrustPolicy(
 			UpdateTrustPolicyRequest updateTrustPolicyRequest,
 			String trust_policy_id) throws DirectorException;
 
 	public String getImageByTrustPolicyDraftId(String trustPolicydraftId)
 			throws DirectorException;
-
-	public GenericResponse dockerLoad(String image_id) throws DirectorException;
-
-	public GenericResponse dockerTag(String image_id, String repository, String tag) throws DirectorException;
-
-	public boolean doesRepoTagExist(String repository,String tag) throws DirectorException;
 
 
 	public ImageInfo fetchImageById(String id) throws DirectorException;

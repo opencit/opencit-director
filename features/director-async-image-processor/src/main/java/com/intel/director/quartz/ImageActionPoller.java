@@ -87,6 +87,7 @@ public class ImageActionPoller {
 					imageActionObj.setDetails("Exceeded number of tries");
 					try {
 						persistService.updateImageAction(imageActionObj);
+						continue;
 					} catch (DbException e) {
 						log.error("Error in Poller",e);
 					}					
@@ -96,10 +97,11 @@ public class ImageActionPoller {
 				addEntryFromImageActionCountMap(imageActionObj.getId(), 1);
 			}
 
+			imageIdsInProcess.add(imageActionObj.getImage_id());
+
 			if (imageActionObj.getCurrent_task_status() != null
 					&& imageActionObj.getCurrent_task_status().equals(
 							Constants.INCOMPLETE)) {
-				imageIdsInProcess.add(imageActionObj.getImage_id());
 				ExecuteActionsTask task = new ExecuteActionsTask(imageActionObj);
 				ImageActionExecutor.submitTask(task);
 				log.info("Submitted task for ExecuteActions for id: "

@@ -41,7 +41,7 @@ public class DockerActionImpl implements DockerActionService {
 			}
 		}
 		try {
-			int success = DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/" + image.id,
+			int success = DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/",
 					displayName + ".tar");
 			if (success != 0) {
 				throw new DirectorException("Docker save failed for imageid ::" + image_id);
@@ -117,9 +117,13 @@ public class DockerActionImpl implements DockerActionService {
 		statusToBeCheckedList.add(Constants.COMPLETE);
 		try {
 			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
+			boolean imageCheck = true;
 			for (ImageInfo image : imagesList) {
-				if (!image.isDeleted() && !image.getId().equals(currentImageId)
-						&& statusToBeCheckedList.contains(image.status)
+				imageCheck = true;
+				if (!currentImageId.equals("NO_IMAGE")) {
+					imageCheck = !image.getId().equals(currentImageId);
+				}
+				if (!image.isDeleted() && imageCheck && statusToBeCheckedList.contains(image.status)
 						&& Constants.DEPLOYMENT_TYPE_DOCKER.equals(image.image_deployments)
 						&& repository.equalsIgnoreCase(image.repository) && tag.equalsIgnoreCase(image.tag)) {
 					log.info("Docker image  with given Repo tag already exists.. image name::" + image.getImage_name()
@@ -131,6 +135,11 @@ public class DockerActionImpl implements DockerActionService {
 			throw new DirectorException("Unable to fetch Images", e);
 		}
 		return false;
+	}
+
+	@Override
+	public boolean doesRepoTagExist(String repository, String tag) throws DirectorException {
+		return doesRepoTagExist(repository, tag, "NO_IMAGE");
 	}
 
 	public void dockerPull(String repository, String tag) throws DirectorException {
@@ -164,5 +173,8 @@ public class DockerActionImpl implements DockerActionService {
 		}
 		return image;
 	}
+	
+
+
 }
 

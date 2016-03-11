@@ -35,6 +35,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
@@ -86,52 +87,55 @@ public class SwiftRsClient {
 
 	public List<SwiftContainer> getContainersList() throws SwiftException {
 		List<SwiftContainer> containersList = new ArrayList<SwiftContainer>();
-		long start = new Date().getTime();
-		Response response = webTarget.path("?format=json").request()
-				.header(Constants.AUTH_TOKEN, authToken).get();
+		HttpClient httpClient = HttpClientBuilder.create().build();
 
-		InputStream inputStream = (InputStream) response.getEntity();
+		HttpGet getRequest = new HttpGet(storageUrl + "?format=json" );
 
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				inputStream));
+		getRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
-		String output;
-		StringBuffer sb = new StringBuffer();
-
+		int status = -1;
+		HttpResponse response;
 		try {
+			response = httpClient.execute(getRequest);
+
+			status = response.getStatusLine().getStatusCode();
+			
+			log.info("get Container , status::"+status);
+			if(status != 200){
+				throw new SwiftException("Cannot get the containers");
+			}
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					(response.getEntity().getContent())));
+
+			String output;
+			StringBuffer sb = new StringBuffer();
+			
+
 			while ((output = br.readLine()) != null) {
 				sb.append(output);
-				// log.debug(output);
 			}
-		} catch (IOException e) {
-			log.error("Unable to read json, getContainersList", e);
 			
-			throw new SwiftException("Unable to read json, getContainersList", e);
-		}finally{
-			if(br!=null){
-				try {
-					br.close();
-				} catch (IOException e1) {
-					log.error("Unable to close stream",e1);
+			JSONArray jArray = new JSONArray(sb.toString());
+
+			for (int i = 0; i < jArray.length(); i++) {
+				JSONObject containerJsonObj = jArray.getJSONObject(i);
+				if (containerJsonObj != null) {
+					SwiftContainer swiftContainer = new SwiftContainer();
+					swiftContainer.setBytes(containerJsonObj.getLong("bytes"));
+					swiftContainer.setName(containerJsonObj.getString("name"));
+					swiftContainer.setCount(containerJsonObj.getInt("count"));
+					containersList.add(swiftContainer);
+
 				}
-			}
-		}
-		JSONArray jArray = new JSONArray(sb.toString());
-
-		for (int i = 0; i < jArray.length(); i++) {
-			JSONObject containerJsonObj = jArray.getJSONObject(i);
-			if (containerJsonObj != null) {
-				SwiftContainer swiftContainer = new SwiftContainer();
-				swiftContainer.setBytes(containerJsonObj.getLong("bytes"));
-				swiftContainer.setName(containerJsonObj.getString("name"));
-				swiftContainer.setCount(containerJsonObj.getInt("count"));
-				containersList.add(swiftContainer);
 
 			}
-
+		} catch (ClientProtocolException e1) {
+			log.error("get container failed",e1);
+			throw new SwiftException("get container Failed", e1);
+		} catch (IOException e) {
+			log.error("get container failed",e);
+			throw new SwiftException("get container Failed", e);
 		}
-		long end = new Date().getTime();
-		printTimeDiff("Swift, getContainerList", start, end);
 		return containersList;
 
 	}
@@ -143,11 +147,11 @@ public class SwiftRsClient {
 		try {
 			url = new URL(storageUrl + "/" + containerName + "?format=json");
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Error forming url", e);
+			throw new SwiftException("Error forming url", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response = null;
 		try{
 		 response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();

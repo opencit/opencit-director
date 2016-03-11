@@ -13,6 +13,8 @@ public interface DockerActionService {
 	public void dockerTag(String image_id, String newRepository, String newTag) throws DirectorException;
 
 	public boolean doesRepoTagExist(String repository, String tag, String currentImageId) throws DirectorException;
+	
+	public boolean doesRepoTagExist(String repository, String tag) throws DirectorException ;
 
 	public void dockerPull(String repository, String tag) throws DirectorException;
 
