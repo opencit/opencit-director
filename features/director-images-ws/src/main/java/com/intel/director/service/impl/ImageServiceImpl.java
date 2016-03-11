@@ -62,12 +62,15 @@ import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.common.MountImage;
 import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.async.DirectorAsynchExecutor;
+import com.intel.director.images.async.DockerPullTask;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.images.mount.MountService;
 import com.intel.director.images.mount.MountServiceFactory;
+import com.intel.director.service.DockerActionService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.TrustPolicyService;
 import com.intel.director.store.StoreManager;
@@ -103,8 +106,11 @@ public class ImageServiceImpl implements ImageService {
 
 	private IPersistService imagePersistenceManager;
 
+	private DockerActionService dockerActionService;
+
 	public ImageServiceImpl() {
 		imagePersistenceManager = new DbServiceImpl();
+		dockerActionService = new DockerActionImpl();
 	}
 
 	public ImageInfo fetchImageById(String imageId) throws DirectorException {
@@ -249,7 +255,7 @@ public class ImageServiceImpl implements ImageService {
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		try {
 			List<ImageInfo> fetchImages = null;
-			List<ImageInfoDetailedResponse> imageInfoDetailedResponseList= new ArrayList<ImageInfoDetailedResponse>();
+			List<ImageInfoDetailedResponse> imageInfoDetailedResponseList = new ArrayList<ImageInfoDetailedResponse>();
 			// Fetch all images
 			if (searchImagesRequest.deploymentType == null) {
 				fetchImages = imagePersistenceManager.fetchImages(null);
@@ -267,17 +273,21 @@ public class ImageServiceImpl implements ImageService {
 				for (int i = 0; i < fetchImages.size(); i++) {
 					fetchImages.get(i).setPolicy_name(
 							getDisplayNameForImage(fetchImages.get(i).id));
-					Mapper mapper = new DozerBeanMapper();		
-					ImageInfoDetailedResponse imageInfoDetailedResponse=mapper.map(
-							fetchImages.get(i), ImageInfoDetailedResponse.class);
-					imageInfoDetailedResponse.setCreated_date(fetchImages.get(i).getCreated_date());
-					imageInfoDetailedResponse.setActionEntryCreated(checkActionEntryCreated(fetchImages.get(i).getId()));
-					imageInfoDetailedResponseList.add(imageInfoDetailedResponse);
-					
+					Mapper mapper = new DozerBeanMapper();
+					ImageInfoDetailedResponse imageInfoDetailedResponse = mapper
+							.map(fetchImages.get(i),
+									ImageInfoDetailedResponse.class);
+					imageInfoDetailedResponse.setCreated_date(fetchImages
+							.get(i).getCreated_date());
+					imageInfoDetailedResponse
+							.setActionEntryCreated(checkActionEntryCreated(fetchImages
+									.get(i).getId()));
+					imageInfoDetailedResponseList
+							.add(imageInfoDetailedResponse);
+
 				}
 			}
-		
-			
+
 			searchImagesResponse.images = imageInfoDetailedResponseList;
 		} catch (DbException de) {
 			log.error("Error while retrieving list of images", de);
@@ -299,10 +309,11 @@ public class ImageServiceImpl implements ImageService {
 			imageActionObjectList = imagePersistenceManager.fetchImageActions(
 					imageActionFilter, imageActionOrderBy);
 		} catch (DbException e) {
-			log.error("unable to fetch image upload entries , checkActionEntryCreated : "+ imageActionFilter);
-		
+			log.error("unable to fetch image upload entries , checkActionEntryCreated : "
+					+ imageActionFilter);
+
 		}
-		if(imageActionObjectList!=null && imageActionObjectList.size()>0){
+		if (imageActionObjectList != null && imageActionObjectList.size() > 0) {
 			return true;
 		}
 		return false;
@@ -848,24 +859,25 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		ImageInfo image;
-		String imageId=null;
+		String imageId = null;
 		TrustPolicyDraft existingDraft = null;
 		TrustPolicy existingPolicy = null;
 		String policyXml = null;
 
-		boolean policyFound  = true;
+		boolean policyFound = true;
 		try {
 			existingDraft = imagePersistenceManager
 					.fetchPolicyDraftById(draftOrTrustPolicyId);
 			if (existingDraft == null) {
 				policyFound = false;
 			} else {
-				imageId=existingDraft.getImgAttributes().getId();
+				imageId = existingDraft.getImgAttributes().getId();
 				policyXml = existingDraft.getTrust_policy_draft();
 				policyFound = true;
 			}
 		} catch (DbException e1) {
-			log.error("Unable to fetch draft for draft id::", draftOrTrustPolicyId);
+			log.error("Unable to fetch draft for draft id::",
+					draftOrTrustPolicyId);
 			policyFound = false;
 		}
 
@@ -875,23 +887,23 @@ public class ImageServiceImpl implements ImageService {
 						.fetchPolicyById(draftOrTrustPolicyId);
 				if (existingPolicy == null) {
 					policyFound = false;
-				} else {					
-					imageId=existingPolicy.getImgAttributes().getId();
+				} else {
+					imageId = existingPolicy.getImgAttributes().getId();
 					policyXml = existingPolicy.getTrust_policy();
 					policyFound = true;
 				}
 			} catch (DbException e1) {
-				log.error("Unable to fetch policy for  id::", draftOrTrustPolicyId);
+				log.error("Unable to fetch policy for  id::",
+						draftOrTrustPolicyId);
 				policyFound = false;
 			}
 		}
-		
-		if(!policyFound){
-			throw new DirectorException("no policy found for the id "+ draftOrTrustPolicyId);
+
+		if (!policyFound) {
+			throw new DirectorException("no policy found for the id "
+					+ draftOrTrustPolicyId);
 		}
-		
-		
-		
+
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
 		} catch (DbException ex) {
@@ -899,27 +911,30 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
-		
-		TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(image.id);
+
+		TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(
+				image.id);
 
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		try {
 			policy = TdaasUtil.getPolicy(policyXml);
 		} catch (JAXBException e1) {
-			throw new DirectorException("Unable to convert policy xml into object");
+			throw new DirectorException(
+					"Unable to convert policy xml into object");
 		}
 
 		// Calculate file, dir and cumulative hashes and add to encryption tag
 		trustPolicyService.calculateHashes(policy);
-		
-		//Calculate image hash inside encryption tag
-		trustPolicyService.addEncryption(policy);		
-		
-		if(policy.getImage() != null && policy.getImage().getImageId() == null){
+
+		// Calculate image hash inside encryption tag
+		trustPolicyService.addEncryption(policy);
+
+		if (policy.getImage() != null && policy.getImage().getImageId() == null) {
 			policy.getImage().setImageId(imageId);
 		}
-		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+policy.getImage().getImageId());
-		
+		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"
+				+ policy.getImage().getImageId());
+
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policy);
 		} catch (JAXBException e) {
@@ -931,14 +946,16 @@ public class ImageServiceImpl implements ImageService {
 
 		// Sign the policy with MtWilson
 		String signedPolicyXml = trustPolicyService.signTrustPolicy(policyXml);
-		
-		//in case of live host, add the file to the host
+
+		// in case of live host, add the file to the host
 		trustPolicyService.copyTrustPolicyAndManifestToHost(signedPolicyXml);
-		
-		//Save the policy to DB
-		TrustPolicy trustPolicy = trustPolicyService.archiveAndSaveTrustPolicy(signedPolicyXml);
+
+		// Save the policy to DB
+		TrustPolicy trustPolicy = trustPolicyService
+				.archiveAndSaveTrustPolicy(signedPolicyXml);
 		return trustPolicy.getId();
 	}
+
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
 			throws DirectorException {
@@ -1714,16 +1731,15 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Unable to save policy draft", e);
 			throw new DirectorException("Unable to save policy draft ", e);
 		}
-		
+
 		Mapper mapper = new DozerBeanMapper();
-		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(savePolicyDraft,
-				TrustPolicyDraftResponse.class);
-		/*try {
-			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
-		} catch (DbException e) {
-			log.error("Cannoot delete policy", e);
-			throw new DirectorException("Cannot delete policy draft y", e);
-		}*/
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(
+				savePolicyDraft, TrustPolicyDraftResponse.class);
+		/*
+		 * try { imagePersistenceManager.destroyPolicy(existingTrustPolicy); }
+		 * catch (DbException e) { log.error("Cannoot delete policy", e); throw
+		 * new DirectorException("Cannot delete policy draft y", e); }
+		 */
 		return trustPolicyDraftResponse;
 	}
 
@@ -2158,10 +2174,10 @@ public class ImageServiceImpl implements ImageService {
 				imagePersistenceManager.updatePolicy(policy);
 			} catch (DbException e1) {
 				log.error("Unable in archiving policy, deleteTrustPolicy", e1);
-				throw new DirectorException("Unable in archiving policy, deleteTrustPolicy", e1);
+				throw new DirectorException(
+						"Unable in archiving policy, deleteTrustPolicy", e1);
 			}
-			
-			
+
 			ImageInfo image;
 			try {
 				image = imagePersistenceManager.fetchImageById(policy
@@ -2396,7 +2412,7 @@ public class ImageServiceImpl implements ImageService {
 				try {
 					log.info("Performing docker rmi for image ::"
 							+ imageInfo.id);
-					MountImage.dockerRMI(imageInfo.repository, imageInfo.tag
+					DockerUtil.dockerRMI(imageInfo.repository, imageInfo.tag
 							+ "_source");
 				} catch (Exception e) {
 					log.error("Error in docker rmi: " + imageId, e);
@@ -2747,9 +2763,6 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
-
-
-
 	@Override
 	public void dockerSave(String image_id, String user)
 			throws DirectorException {
@@ -2771,7 +2784,7 @@ public class ImageServiceImpl implements ImageService {
 					+ image.getTrust_policy_id(), e1);
 		}
 		try {
-			MountImage.dockerSave(image.repository, image.tag, "/mnt/images/"
+			DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/"
 					+ image.id, trustPolicy.getDisplay_name() + ".tar");
 			log.info("Docker image sav and removed successfully");
 		} catch (Exception e) {
@@ -2782,9 +2795,7 @@ public class ImageServiceImpl implements ImageService {
 
 	}
 
-	
-	
-@Override
+	@Override
 	public GenericResponse dockerRMI(String image_id) throws DirectorException {
 		ImageInfo image;
 		try {
@@ -2798,7 +2809,7 @@ public class ImageServiceImpl implements ImageService {
 			return null;
 		}
 		try {
-			MountImage.dockerRMI(image.repository, image.tag);
+			DockerUtil.dockerRMI(image.repository, image.tag);
 			log.info("Docker image  removed successfully");
 		} catch (Exception e) {
 			log.error("Error in Docker image  removed  ", e);
@@ -2823,7 +2834,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 		try {
 			log.info("Loading Docker image...!!!");
-			MountImage.dockerLoad(image.getLocation() + image.getImage_name());
+			DockerUtil.dockerLoad(image.getLocation() + image.getImage_name());
 			log.info("Docker image  removed successfully...!!!");
 		} catch (Exception e) {
 			image.setStatus(Constants.INCOMPLETE);
@@ -2858,13 +2869,68 @@ public class ImageServiceImpl implements ImageService {
 
 		try {
 			log.info("Tagging Docker image...!!!");
-			MountImage.dockerTag(image.repository, image.tag, repository, tag);
+			DockerUtil.dockerTag(image.repository, image.tag, repository, tag);
 			log.info("Docker image  tagged successfully...!!!");
 		} catch (Exception e) {
 			log.error("Error in Docker Tagging image", e);
 			throw new DirectorException("Error in Docker Tagging image", e);
 		}
 		return new GenericResponse();
+	}
+
+	@Override
+	public void dockerPull(String imageId) throws DirectorException {
+		DockerPullTask dockerPullTask = new DockerPullTask(imageId);
+		DirectorAsynchExecutor.submitTask(dockerPullTask);
+	}
+
+	@Override
+	public void dockerSetup(String imageId) throws DirectorException {
+
+		ImageInfo image = null;
+
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			log.error("Error in fetching image  ", e);
+
+		}
+		if (image == null) {
+			log.error("dockerSetup, no image found for imageId::" + imageId);
+			return;
+		}
+
+		String repository = image.getRepository();
+		String tag = image.getTag();
+
+		log.info("Inside dockerSetup, repository::" + repository + " tag::"
+				+ tag);
+		boolean success = false;
+
+		String newTag = tag + Constants.SOURCE_TAG;
+		try {
+
+			dockerActionService.dockerTag(imageId, repository, newTag);
+
+			dockerActionService.dockerRMI(imageId);
+			image.setStatus(Constants.COMPLETE);
+
+		} catch (DirectorException e) {
+			log.error(" DockerSetup failed", e);
+		}
+
+		if (!success) {
+			image.setStatus(Constants.ERROR);
+
+		}
+		try {
+			imagePersistenceManager.updateImage(image);
+		} catch (DbException e) {
+			log.error(
+					"Unable to update image action, set status in DockerSetup",
+					e);
+		}
+
 	}
 
 	@Override
@@ -2891,5 +2957,5 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return false;
 	}
-	
+
 }

@@ -296,6 +296,10 @@ public class Mapper {
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.IMAGE_URI, "imageUri");
 			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.ACTION_ID, "actionId");
+			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.STORE_ARTIFACT_NAME, "storeArtifactName");
+			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.CHECKSUM, "checksum");
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.TMP_LOCATION, "tmpLocation");
@@ -549,6 +553,8 @@ public class Mapper {
 		mwImageUpload.setContentlength(imageStoreUploadTO.getImage_size());
 		mwImageUpload.setStoreArtifactId(imageStoreUploadTO
 				.getStoreArtifactId());
+		mwImageUpload.setStoreArtifactName(imageStoreUploadTO.getStoreArtifactName());
+		mwImageUpload.setActionId(imageStoreUploadTO.getActionId());
 		mwImageUpload.setDeleted(imageStoreUploadTO.isDeleted());
 		MwImage mwImage = toData(imageStoreUploadTO.getImg());
 		mwImageUpload.setImage(mwImage);
@@ -615,7 +621,10 @@ public class Mapper {
 		imageStoreUploadTO.setTmp_location(mwImageUpload.getTmpLocation());
 		imageStoreUploadTO.setDeleted(mwImageUpload.isDeleted());
 		imageStoreUploadTO.setStoreArtifactId(mwImageUpload
+				
 				.getStoreArtifactId());
+		imageStoreUploadTO.setActionId(mwImageUpload.getActionId());
+		imageStoreUploadTO.setStoreArtifactName(mwImageUpload.getStoreArtifactName());
 		if (mwImageUpload.getImageUri() != null) {
 			imageStoreUploadTO.setImage_uri(fromCharacterArray(mwImageUpload
 					.getImageUri()));

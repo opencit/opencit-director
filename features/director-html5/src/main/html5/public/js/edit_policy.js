@@ -41,7 +41,7 @@ function edit_policy_initialize() {
 
 
                 }
-
+				
             }
         });
     } else {
@@ -89,7 +89,7 @@ function EditImageViewModel(data) {
             ':checked')
         self.editImageMetaData.display_name = $('#display_name').val();
         current_display_name = $('#display_name').val();
-
+		showLoading();
         $.ajax({
             type: "POST",
             url: "/v1/trust-policy-drafts",
@@ -102,6 +102,7 @@ function EditImageViewModel(data) {
             success: function(data, status, xhr) {
 
                 if (data.error) {
+					hideLoading();
                     $('#for_mount_edit_vm').hide();
                     $('#default_edit_vm').show();
                     $('#error_modal_body_edit_vm_1').text(data.error);
@@ -127,6 +128,7 @@ function EditImageViewModel(data) {
                     success: function(data, status, xhr) {
                         $("#editVMPolicyNext").prop('disabled', false);
                         if (data.error) {
+							hideLoading();
                             $('#for_mount_edit_vm').show();
                             $('#default_edit_vm').hide();
                             $('#error_modal_body_edit_vm_1').text(data.error);
@@ -135,6 +137,7 @@ function EditImageViewModel(data) {
                             });
                             return;
                         }
+						
                         nextButton();
                     }
                 });

@@ -383,7 +383,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=\""
 						+ image_store_details[i].id + "\" ></div><br />";
@@ -393,7 +393,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\""
 						+ image_store_details[i].id + "\" ></div><br />";
@@ -407,7 +407,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id="
 						+ image_store_details[i].id + " placeholder=\""
@@ -418,7 +418,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id="
 						+ image_store_details[i].id + " placeholder=\""

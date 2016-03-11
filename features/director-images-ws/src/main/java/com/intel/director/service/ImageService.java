@@ -188,5 +188,11 @@ public interface ImageService {
 			
 	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId);
 	
+	public void dockerPull(String imageId)
+			throws DirectorException;
+	
+	public void dockerSetup(String imageId)
+			throws DirectorException;
+	
 }
 

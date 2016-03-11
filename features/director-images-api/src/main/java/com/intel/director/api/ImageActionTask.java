@@ -2,7 +2,7 @@ package com.intel.director.api;
 
 public class ImageActionTask {
 	private String status, task_name, location, uri,
-			executionDetails, error, storeId;
+			executionDetails, message, storeId;
 
 	
 	
@@ -31,12 +31,14 @@ public class ImageActionTask {
 		this.storeId = storeId;
 	}
 
-	public String getError() {
-		return error;
+
+
+	public String getMessage() {
+		return message;
 	}
 
-	public void setError(String error) {
-		this.error = error;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public String getStatus() {

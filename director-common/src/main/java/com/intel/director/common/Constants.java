@@ -153,6 +153,7 @@ public class Constants {
 	public static final String INCOMPLETE = "Incomplete";
 	public static final String IN_PROGRESS = "In Progress";
 	public static final String ERROR = "Error";
+	public static final String SOURCE_TAG = "_source";
 
 
 	public static final String DEPLOYMENT_TYPE_VM = "VM";

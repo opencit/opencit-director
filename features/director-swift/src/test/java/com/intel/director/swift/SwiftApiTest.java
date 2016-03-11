@@ -34,7 +34,7 @@ public class SwiftApiTest {
 	public void swiftApiTest() throws Exception {
 		//apacheConfig.put(Constants.SWIFT_IP, "10.35.35.117");
 		apacheConfig.put(Constants.SWIFT_API_ENDPOINT,"http://10.35.35.35:8080");
-		apacheConfig.put(Constants.SWIFT_AUTH_ENDPOINT,"http://10.35.35.35:5000");
+		apacheConfig.put(Constants.SWIFT_KEYSTONE_ENDPOINT,"http://10.35.35.35:5000");
 		apacheConfig.put(Constants.SWIFT_TENANT_NAME, "admin");
 		apacheConfig.put(Constants.SWIFT_ACCOUNT_USERNAME, "admin");
 		apacheConfig.put(Constants.SWIFT_ACCOUNT_USER_PASSWORD,

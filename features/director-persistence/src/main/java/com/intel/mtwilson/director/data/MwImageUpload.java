@@ -65,6 +65,12 @@ public class MwImageUpload {
 		@Column(name = "STORE_ARTIFACT_ID", length = 36)
 		private String storeArtifactId;
 		
+		@Column(name = "STORE_ARTIFACT_NAME")
+		private String storeArtifactName;
+		
+		@Column(name = "ACTION_ID", length = 36)
+		private String actionId;
+		
 		@Column(name = "IS_DELETED")
 		private boolean isDeleted; 
 		
@@ -92,6 +98,22 @@ public class MwImageUpload {
 
 
 		
+
+		public String getActionId() {
+			return actionId;
+		}
+
+		public void setActionId(String actionId) {
+			this.actionId = actionId;
+		}
+
+		public String getStoreArtifactName() {
+			return storeArtifactName;
+		}
+
+		public void setStoreArtifactName(String storeArtifactName) {
+			this.storeArtifactName = storeArtifactName;
+		}
 
 		public MwImageStore getStore() {
 			return store;

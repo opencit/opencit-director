@@ -71,6 +71,7 @@ if(jQuery) (function($){
 					contentType: "application/json",
 					  success: function(data, status) {
 						  console.log("success");
+						  hideLoading();
 						$(c).find('.start').html('');
 						var response = data;
 						if(!(response.patch_xml == null)){							
@@ -84,6 +85,7 @@ if(jQuery) (function($){
 						},
 						 error: function (jqXHR, textStatus, errorThrown)
 					    {
+							hideLoading();
 					 		alert("ERROR");
 					    },
 					});					

@@ -189,6 +189,14 @@ public abstract class ImageActionAsyncTask {
 		imageActionService.updateImageActionState(imageActionObject,
 				taskAction, getTaskName(), status, details);
 	}
+	
+	public void updateImageActionState(String status) {
+		Calendar cal = Calendar.getInstance();
+		imageActionObject.setDatetime(cal );
+		
+		imageActionService.updateImageActionState(imageActionObject,
+				taskAction, getTaskName(), status, null);
+	}
 
 
 }

@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
-import com.intel.director.common.MountImage;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
@@ -106,7 +106,7 @@ public class UploadImageTask extends GenericUploadTask {
 			}
 			runFlag = super.run();
 			if (isDockerhubUplod) {
-				MountImage.dockerRMI(imageInfo.repository, imageInfo.tag);
+				DockerUtil.dockerRMI(imageInfo.repository, imageInfo.tag);
 			}
 		
 		return runFlag;
@@ -134,20 +134,20 @@ public class UploadImageTask extends GenericUploadTask {
 						"Unable to convert policy xml to object", e);
 			}
 
-			/*
+			
 			if (policy != null && policy.getEncryption() != null) {
 				imageFilePath = imageLocation + imageInfo.getImage_name()
 						+ "-enc";
-				customProperties.put(Constants.NAME, uploadImageName
-						+ "-enc");
+			/*	customProperties.put(Constants.NAME, uploadImageName
+						+ "-enc");*/
 				encrypt = true;
 			}
-			 */
+			 
 		}
-//		if (!encrypt) {
-//			imageFilePath = imageLocation + imageInfo.getImage_name();
+		if (!encrypt) {
+			imageFilePath = imageLocation + imageInfo.getImage_name();
 			customProperties.put(Constants.NAME, uploadImageName);
-//		}
+		}
 
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 	}
@@ -180,7 +180,7 @@ public class UploadImageTask extends GenericUploadTask {
 				Constants.CONNECTOR_DOCKERHUB)) {
 			// Its a simple image upload - DI
 			if (imageActionObject.getActions().size() == 1) {
-				MountImage.dockerTag(imageInfo.repository, imageInfo.tag
+				DockerUtil.dockerTag(imageInfo.repository, imageInfo.tag
 						+ "_source", imageInfo.repository, imageInfo.tag);
 				isDockerhubUplod = true;
 			}

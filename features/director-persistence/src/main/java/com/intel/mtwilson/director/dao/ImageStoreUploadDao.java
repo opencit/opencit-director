@@ -134,6 +134,18 @@ public class ImageStoreUploadDao {
                              imgUploadFilter.getStoreArtifactId() ));
                 }
                 
+                if (imgUploadFilter.getStoreArtifactName() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.STORE_ARTIFACT_NAME)),
+                             imgUploadFilter.getStoreArtifactId() ));
+                }
+                
+                if (imgUploadFilter.getActionId() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.ACTION_ID)),
+                             imgUploadFilter.getStoreArtifactId() ));
+                }
+                
+                
+                
                 if (imgUploadFilter.isEnableDeletedCheck()) {
                     predicates.add(criteriaBuilder.equal(mwImageUpload.<Boolean>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IS_DELETED)),
                     		imgUploadFilter.isDeleted() ));
@@ -277,6 +289,22 @@ public class ImageStoreUploadDao {
                 if (imgUploadFilter.getImage_uri() != null) {
                     predicates.add(criteriaBuilder.like(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.IMAGE_URI)),
                             "%" + imgUploadFilter.getImage_uri() + "%"));
+                }
+                
+           
+                if (imgUploadFilter.getStoreArtifactId() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.STORE_ARTIFACT_ID)),
+                             imgUploadFilter.getStoreArtifactId() ));
+                }
+                
+                if (imgUploadFilter.getStoreArtifactName() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.STORE_ARTIFACT_NAME)),
+                             imgUploadFilter.getStoreArtifactId() ));
+                }
+                
+                if (imgUploadFilter.getActionId() != null) {
+                    predicates.add(criteriaBuilder.equal(mwImageUpload.<String>get(imageUploadAttributestoDataMapper.get(ImageStoreUploadFields.ACTION_ID)),
+                             imgUploadFilter.getStoreArtifactId() ));
                 }
 
                 if (imgUploadFilter.getImage_name() != null) {

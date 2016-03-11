@@ -11,8 +11,8 @@ import java.util.List;
 
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.common.MountImage;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 
@@ -72,10 +72,10 @@ public class CreateTarTask extends ImageActionAsyncTask {
 				String tarDestination = imageLocation
 						+ imageActionObject.getImage_id();
 				DirectorUtil.callExec("mkdir -p " + tarDestination);
-				MountImage.dockerSave(imageInfo.getRepository(),
+				DockerUtil.dockerSave(imageInfo.getRepository(),
 						imageInfo.getTag(), tarDestination,
 						trustPolicy.getDisplay_name() + ".tar");
-				MountImage.dockerRMI(imageInfo.getRepository(),
+				DockerUtil.dockerRMI(imageInfo.getRepository(),
 						imageInfo.getTag());
 			} else {
 
@@ -130,7 +130,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 
 			log.info("Create Tar : complete");
 
-			updateImageActionState(Constants.COMPLETE, "COMPLETE");
+			updateImageActionState(Constants.COMPLETE,"Create Tar completed");
 			runFlag = true;
 		} catch (Exception e) {
 			log.error(

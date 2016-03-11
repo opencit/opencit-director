@@ -140,7 +140,7 @@ public class Images {
 			TrustDirectorImageUploadRequest uploadRequest)
 			throws DirectorException {
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
-
+		
 		String errors = uploadRequest.validate();
 		if (StringUtils.isNotBlank(errors)) {
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
@@ -150,27 +150,33 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(uploadImageToTrustDirector).build();
 		}
-		imageService = new ImageServiceImpl();
-
+		imageService = new ImageServiceImpl();	
+		String imageName=uploadRequest.image_name;
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
+			imageName=uploadRequest.repository+":"+uploadRequest.tag;
+		
+		}
 		try {
-			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
+			if (imageService.doesImageNameExist(imageName)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
 				return Response.ok(uploadImageToTrustDirector).build();
 			}
+		
+			
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
 							uploadRequest.image_deployments,
-							uploadRequest.image_format, uploadRequest.image_name,
+							uploadRequest.image_format, imageName,
 							uploadRequest.image_size, uploadRequest.repository, uploadRequest.tag);
-			uploadImageToTrustDirector.state = Constants.SUCCESS;
+			uploadImageToTrustDirector.status = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			return Response.ok().entity(uploadImageToTrustDirector).build();
@@ -1227,6 +1233,63 @@ public class Images {
 		}
 		return Response.ok(monitorStatus).build();
 	}
+	
+	
+	@Path("rpc/docker-pull/{image_id: [0-9a-zA-Z_-]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public Response dockerPull(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker Pull for imageId::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		GenericResponse monitorStatus = new GenericResponse();
+		try {
+			imageService.dockerPull(image_id);
+		} catch (DirectorException e) {
+			log.error("Error while performing docker pull");
+			monitorStatus = new GenericResponse();
+			monitorStatus.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(monitorStatus).build();
+		}
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully queued for download");
+		return Response.ok(monitorStatus).build();
+	}
+	
+	
+	@Path("rpc/docker-setup/{image_id: [0-9a-zA-Z_-]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public Response dockerSetup(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker setup for imageid::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		GenericResponse monitorStatus = new GenericResponse();
+		try {
+			imageService.dockerSetup(image_id);
+		} catch (DirectorException e) {
+			log.error("Error while performing docker setup");
+			monitorStatus = new GenericResponse();
+			monitorStatus.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(monitorStatus).build();
+		}
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully uploaded");
+		return Response.ok(monitorStatus).build();
+	}
+	
 
 	@Path("rpc/docker-load")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1260,6 +1323,9 @@ public class Images {
 		return Response.ok(genericResponse).build();
 	}
 
+
+	
+	
 	@Path("rpc/docker-tag")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)

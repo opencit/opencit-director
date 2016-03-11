@@ -43,7 +43,7 @@ function refresh_docker_Grid() {
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"deleteImageDocker('" + images[i].id + "')\"/></a>";
-                if (images[i].image_upload_status == 'Complete') {
+                if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 
                     self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
                     if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {

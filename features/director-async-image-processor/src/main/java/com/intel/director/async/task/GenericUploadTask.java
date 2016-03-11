@@ -106,8 +106,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			updateImageActionState(Constants.ERROR, e.getMessage());
 			return false;
 		}
-		updateImageActionState(Constants.COMPLETE,
-				Constants.COMPLETE);
+		updateImageActionState(Constants.COMPLETE,getTaskName()+" complete");
 		try {
 			updateUploadTable(storeResponse);
 		} catch (DirectorException e) {
@@ -170,11 +169,13 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			}*/
 			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
 		}
-
+		
+		String storeArtifactName=(String)customProperties.get(Constants.NAME);
 		imageAttr.setId(imageId);
 		imageUploadTransferObject.setImg(imageAttr);
 		imageUploadTransferObject.setDate(new Date());
 		imageUploadTransferObject.setStoreId(taskAction.getStoreId());
+		imageUploadTransferObject.setStoreArtifactName(storeArtifactName);
 		log.info(
 				"updating image uploads table for image id {}",
 				imageActionObject.getImage_id()
@@ -183,6 +184,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 								.getImage_uri());
 		imageUploadTransferObject.setImage_uri(storeResponse.getUri());
 		imageUploadTransferObject.setStoreArtifactId(glanceId);
+		imageUploadTransferObject.setActionId(imageActionObject.getId());
 		String uploadVariableMD5 = DirectorUtil.computeUploadVar(glanceId,
 				dekUrl);
 		imageUploadTransferObject.setUploadVariableMD5(uploadVariableMD5);

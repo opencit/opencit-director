@@ -52,7 +52,7 @@ public class InjectPolicyTask extends ImageActionAsyncTask {
 				injectPolicy();
 				imageActionService.updateImageActionState(imageActionObject,
 						taskAction, getTaskName(), Constants.COMPLETE,
-						"COMPLETE");
+						"Inject Policy complete");
 				runFlag = true;
 			} catch (DirectorException e) {
 				log.error("Error in InjectPolicyTask", e);

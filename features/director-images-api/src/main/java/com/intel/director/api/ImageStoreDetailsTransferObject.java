@@ -6,6 +6,7 @@ public class ImageStoreDetailsTransferObject {
 	public String image_store_id;
 	public String key;
 	public String value;
+	private String keyDisplayValue;
 
 	public String getId() {
 		return id;
@@ -37,6 +38,16 @@ public class ImageStoreDetailsTransferObject {
 
 	public void setImage_store_id(String image_store_id) {
 		this.image_store_id = image_store_id;
+	}
+	
+	
+
+	public String getKeyDisplayValue() {
+		return keyDisplayValue;
+	}
+
+	public void setKeyDisplayValue(String keyDisplayValue) {
+		this.keyDisplayValue = keyDisplayValue;
 	}
 
 	@Override
