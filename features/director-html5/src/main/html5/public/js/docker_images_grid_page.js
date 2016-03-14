@@ -46,7 +46,7 @@ function refresh_docker_Grid() {
                 if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 
                     self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
-                    if (if (images[i].image_upload_status == 'Complete' && (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null)) {
+                    if ((images[i].image_upload_status == 'Complete') && (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null)) {
 
                         self.gridData.trust_policy = self.gridData.trust_policy + "<a href=\"#\" title=\"Create Policy\" ><span class=\"glyphicon glyphicon-plus-sign\"  title=\"Create Policy\" id=\"docker_add_row_" + i + "\" onclick=\"createPolicyDocker('" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
 

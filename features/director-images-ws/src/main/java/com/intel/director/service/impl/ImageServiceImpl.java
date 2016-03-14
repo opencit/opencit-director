@@ -2790,24 +2790,22 @@ public class ImageServiceImpl implements ImageService {
 
 		log.info("Inside dockerSetup, repository::" + repository + " tag::"
 				+ tag);
-		boolean success = false;
+	
 
 		String newTag = tag + Constants.SOURCE_TAG;
 		try {
-
+			dockerActionService.dockerLoad(imageId);
 			dockerActionService.dockerTag(imageId, repository, newTag);
 
 			dockerActionService.dockerRMI(imageId);
 			image.setStatus(Constants.COMPLETE);
 
 		} catch (DirectorException e) {
+			image.setStatus(Constants.ERROR);
 			log.error(" DockerSetup failed", e);
 		}
 
-		if (!success) {
-			image.setStatus(Constants.ERROR);
-
-		}
+	
 		try {
 			imagePersistenceManager.updateImage(image);
 		} catch (DbException e) {

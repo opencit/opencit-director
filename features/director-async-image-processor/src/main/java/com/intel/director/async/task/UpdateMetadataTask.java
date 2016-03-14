@@ -128,7 +128,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 
 		}
 
-		String updateMessage="Metadata updated for Image:"+updatedArtifactName+" in store:"+currentImageStoreDTO.getName();
+		String updateMessage="Policy attached to Image "+updatedArtifactName+" in store "+currentImageStoreDTO.getName();
 		String connectorName = previousUploadImageStoreDTO.getConnector();
 		String trustPolicyLocationTag = connectorName.toLowerCase() + ":" + policyUri;
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, trustPolicyLocationTag);
