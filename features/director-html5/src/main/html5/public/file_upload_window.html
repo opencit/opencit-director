@@ -170,7 +170,8 @@ input[readonly] {
 		///$('#upload').prop('disabled', true);
 
 		var x = document.forms["myform"]["myfile"].value;
-		if (image_deployments != 'Docker' && (x == null || x == "")) {
+		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && (document
+				.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually') && (x == null || x == "") )) {
 			alert("First Choose File Please...");
 			$('#upload').prop('disabled', false);
 			return false;

@@ -42,7 +42,9 @@ function refresh_docker_Grid() {
                 self.gridData = new ImageData();
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
-                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"deleteImageDocker('" + images[i].id + "')\"/></a>";
+				
+				var deleteCallArr = "['deleteImage', 'Are You Sure You Want To delete Image?', '" + images[i].id + "']";
+                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 
                     self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
@@ -64,7 +66,8 @@ function refresh_docker_Grid() {
                     }
 
                     if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"docker_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"deletePolicyDocker('" + images[i].trust_policy_id + "','" + images[i].trust_policy_draft_id + "','" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+						var deleteCallArr = "['deletePolicyDocker', 'Are You Sure You Want To delete Policy?', '" + images[i].trust_policy_id + "', '" + images[i].trust_policy_draft_id + "', '" + images[i].id + "', '" + images[i].image_name + "']"; 
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"docker_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"confirmDeleteOperation(" + deleteCallArr + ")\"></span></a>";
                     }
                     self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
                 } else {

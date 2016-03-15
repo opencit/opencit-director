@@ -26,19 +26,17 @@ function imageStoreSettingPage() {
 							image_store.image_artifacts += ","
 						}
 
-						console.log("image_store.image_artifacts :: "
-								+ image_stores[i].deleted);
-
 						image_store.image_artifacts = image_store.image_artifacts
 								.substring(0,
 										image_store.image_artifacts.length - 1);
 						var image_store_json = JSON.stringify(image_stores[i]);
+					var deleteCallArr = '["deleteImageStore", "Delete Image Store?", "' + image_stores[i].id + '"]';
 						image_store.actions = '<a href=\'#\' onclick=\'getImageStoreAndPopulateImageStore(\"'
 								+ image_stores[i].id
 								+ '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>'
-								+ '<a href=\'#\' onclick =\'deleteImageStore("'
-								+ image_stores[i].id
-								+ '")\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>'
+								+ '<a href=\'#\' onclick =\'confirmDeleteOperationImageStore('
+								+ deleteCallArr
+								+ ')\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>'
 								+ '<a href=\'#\' onclick=\'validateImageStore(\"'
 								+ image_stores[i].id
 								+ '\")\'><span id="'
@@ -496,4 +494,20 @@ function validateImageStore(imageStoreId) {
 		}
 	});
 	
+}
+
+function confirmDeleteOperationImageStore(deleteCallArr){
+	var funcName = deleteCallArr[0];
+
+	var args = "";
+	if(deleteCallArr.length > 2){
+		for(var i=2;i<deleteCallArr.length;i++){
+			args=args + "'"+deleteCallArr[i]+"',";			
+		}
+		args = args.substring(0, args.length-1);
+	}
+	var func = funcName+"("+args+")";
+	$("#image_store_confirm_delete").attr("onclick", func);
+	$("#image_store_delete_confirmation_window_text").text(deleteCallArr[1]);
+	$("#image_store_delete_confirmation_window").modal('show');
 }

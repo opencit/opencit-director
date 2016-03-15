@@ -121,23 +121,19 @@ public class MountImage {
 	
 	
 	public static int mountWindowsRemoteSystem(String ipAddress,
-			String userName, String password, String mountpath,
-			String partition, int dir_mode, int file_mode) {
+			String userName, String password, String mountpath, String partition) {
 		int exitcode = 0;
-		String command = "mount -t cifs" + SPACE + "//" + ipAddress + "/"
-				+ partition + "$" + SPACE + mountpath + SPACE + "-o" + SPACE
-				+ "user=" + userName + "," + "pass=" + password + ",dir_mode="
-				+ dir_mode + ",file_mode=" + file_mode;
+		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE
+				+ ipAddress + SPACE + partition + SPACE + mountpath + SPACE
+				+ userName + SPACE + password;
 
 		log.info("MOunting To Windows Remote Host Using :: " + command);
 
 		try {
-			exitcode = DirectorUtil.executeCommandInExecUtil("mount", "-t",
-					"cifs", "//" + ipAddress + "/" + partition + "$",
-					mountpath, "-o", "user=" + userName + "," + "pass="
-							+ password + ",dir_mode=" + dir_mode
-							+ ",file_mode=" + file_mode);
-		} catch (IOException e) {
+			exitcode = DirectorUtil.executeCommandInExecUtil(
+					Constants.mountWindowsRemoteFileSystemScript, ipAddress,
+					partition, mountpath, userName, password);
+		} catch (Exception e) {
 			exitcode = 1;
 			log.error("Error in mounting remote host" + e);
 		}
