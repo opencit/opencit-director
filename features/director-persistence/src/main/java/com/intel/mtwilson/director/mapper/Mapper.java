@@ -722,10 +722,14 @@ public class Mapper {
 		mwImageAction.setCurrent_task_name(imageAction.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageAction
 				.getCurrent_task_status());
-		if(imageAction.getDatetime()!=null){
-		mwImageAction.setExecutionTime(imageAction.getDatetime()
-					);
+		if (imageAction.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageAction.getDatetime());
+
 		}
+		if (imageAction.getCreatedDateTime() != null) {
+			mwImageAction.setCreatedTime(imageAction.getCreatedDateTime());
+		}
+
 		return mwImageAction;
 	}
 
@@ -747,7 +751,10 @@ public class Mapper {
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
 		if(mwImageAction.getExecutionTime()!=null){
-		imageActionObject.setDatetime(mwImageAction.getExecutionTime());
+			imageActionObject.setDatetime(mwImageAction.getExecutionTime());
+		}
+		if(mwImageAction.getCreatedTime()!=null){
+			imageActionObject.setCreatedDateTime(mwImageAction.getCreatedTime());
 		}
 		List<ImageActionTask> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();

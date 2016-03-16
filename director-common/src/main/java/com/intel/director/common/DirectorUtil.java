@@ -27,6 +27,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -414,5 +415,15 @@ public class DirectorUtil {
 		
 		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getURL() : "";
 		
+	}
+	
+	public static Result executeCommand(String command, String... args)
+			throws ExecuteException, IOException {
+		Result result = ExecUtil.executeQuoted(command, args);
+		if (result.getStderr() != null
+				&& StringUtils.isNotEmpty(result.getStderr())) {
+			log.error(result.getStderr());
+		}
+		return result;
 	}
 }

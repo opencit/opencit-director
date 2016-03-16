@@ -2,6 +2,7 @@ package com.intel.director.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +69,7 @@ public  class ImageActionImpl implements ImageActionService {
 		List<ImageActionObject> actionObjectIncomplete = new ArrayList<ImageActionObject>();
 		List<ImageActionObject> allActionObject = persistService
 				.searchByAction();
+		Collections.sort(allActionObject);
 		for (ImageActionObject img : allActionObject) {
 			if ((img.getAction_completed() < img.getAction_count())  
 					&& !(img.getCurrent_task_status() != null && img
@@ -191,6 +193,8 @@ public  class ImageActionImpl implements ImageActionService {
 				imgOrder.setOrderBy(OrderByEnum.DESC);
 				ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 				imgUpFilter.setStoreArtifactId(uploadId);
+				imgUpFilter.setEnableDeletedCheck(true);
+				imgUpFilter.setDeleted(false);
 				List<ImageStoreUploadTransferObject> fetchImageUploads = null;
 				try {
 					fetchImageUploads = persistService.fetchImageUploads(

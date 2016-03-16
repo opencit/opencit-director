@@ -69,7 +69,9 @@ public class MwImageAction {
 	@Temporal(TemporalType.TIMESTAMP)
 	private java.util.Calendar executionTime;
 	
-	
+	@Column(name = "CREATED_TIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	private java.util.Calendar createdTime;	
 	
 
 	
@@ -152,6 +154,14 @@ public class MwImageAction {
 
 	public void setCurrent_task_status(String current_task_status) {
 		this.current_task_status = current_task_status;
+	}
+	
+	public java.util.Calendar getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(java.util.Calendar createdTime) {
+		this.createdTime = createdTime;
 	}
 
 	@Override

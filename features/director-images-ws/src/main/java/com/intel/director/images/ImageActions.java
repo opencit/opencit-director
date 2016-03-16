@@ -5,6 +5,8 @@
  */
 package com.intel.director.images;
 
+import java.util.Calendar;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -245,6 +247,7 @@ public class ImageActions {
 				.getCurrent_task_name());
 		imageActionResponse.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
+		imageActionResponse.setCreatedDateTime(Calendar.getInstance());
 		return Response.ok(imageActionResponse).build();
 	}
 

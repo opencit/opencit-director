@@ -11,7 +11,6 @@ import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.StoreResponse;
-import com.intel.director.api.SwiftObjectResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;

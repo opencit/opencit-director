@@ -15,10 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.intel.director.api.ImageActionObject;
-import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionExecutor;
 import com.intel.director.async.task.ExecuteActionsTask;
-import com.intel.director.async.task.ImageActionAsyncTask;
 import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;

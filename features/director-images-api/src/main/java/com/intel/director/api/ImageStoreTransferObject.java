@@ -31,6 +31,9 @@ public class ImageStoreTransferObject extends GenericResponse {
 
     
 	public Collection<ImageStoreDetailsTransferObject> getImage_store_details() {
+		if(image_store_details == null || image_store_details.size() == 0 ){
+			return image_store_details;
+		}
 		List<ImageStoreDetailsTransferObject> listImageStoreDetailsTransferObject = new ArrayList<ImageStoreDetailsTransferObject>(
 				image_store_details);
 		Collections.sort(listImageStoreDetailsTransferObject);
