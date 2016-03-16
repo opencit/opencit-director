@@ -1,7 +1,10 @@
 package com.intel.director.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -28,7 +31,10 @@ public class ImageStoreTransferObject extends GenericResponse {
 
     
 	public Collection<ImageStoreDetailsTransferObject> getImage_store_details() {
-		return image_store_details;
+		List<ImageStoreDetailsTransferObject> listImageStoreDetailsTransferObject = new ArrayList<ImageStoreDetailsTransferObject>(
+				image_store_details);
+		Collections.sort(listImageStoreDetailsTransferObject);
+		return listImageStoreDetailsTransferObject;
 	}
 
 	public void setImage_store_details(

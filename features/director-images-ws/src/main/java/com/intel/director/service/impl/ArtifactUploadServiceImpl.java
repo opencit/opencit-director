@@ -106,6 +106,9 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 		
 		//Fetch the image id from image stores
 		for (ImageStoreTransferObject imageStoreTransferObject : fetchImageStores) {
+			if(imageStoreTransferObject.isDeleted()){
+				continue;
+			}
 			StoreManager imageStoreManager = null;
 			try {
 				imageStoreManager = StoreManagerFactory

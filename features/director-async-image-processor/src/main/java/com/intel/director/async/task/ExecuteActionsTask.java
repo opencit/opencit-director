@@ -56,6 +56,8 @@ public class ExecuteActionsTask implements Runnable {
 			log.info("Task instance from factory : " + task.getTaskName());
 			if(!task.run()){
 				markImageActionWithError(task);
+				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
+				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 				log.info("Exiting because "+task.getTaskName()+" did not execute successfully");
 				log.info("Processing stopped for action: "+imageActionObj.getId());
 				return;
@@ -65,6 +67,7 @@ public class ExecuteActionsTask implements Runnable {
 				imageActionObj.setCurrent_task_name(null);
 				imageActionObj.setCurrent_task_status(null);
 				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
 			}
 		}
 	}

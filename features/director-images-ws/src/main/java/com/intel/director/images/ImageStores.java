@@ -2,6 +2,7 @@ package com.intel.director.images;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -37,6 +38,7 @@ import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageStoresServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.store.util.ImageStorePasswordUtil;
+import com.intel.director.util.I18Util;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -336,13 +338,29 @@ public class ImageStores {
 			return updateImageStore;
 		}
 
+		List<String> errorList = new ArrayList<String>();
+		
+		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject.getImage_store_details();
+		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+			if(StringUtils.isBlank(imageStoreDetailsTransferObject.getValue())){
+				errorList.add(I18Util.format(imageStoreDetailsTransferObject.getKey()));
+			}
+		}
+		
+		if (!errorList.isEmpty()) {
+			updateImageStore.setError(StringUtils.join(errorList,",") + " can't be blank");
+			return updateImageStore;
+		}
+		
 		// Encrypt password fields
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
 		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil
 				.getPasswordConfiguration(imageStoreTransferObject);
-		String encryptedPassword = imageStorePasswordUtil
-				.encryptPasswordForImageStore(passwordConfiguration.getValue());
-		passwordConfiguration.setValue(encryptedPassword);
+		if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
+			String encryptedPassword = imageStorePasswordUtil
+					.encryptPasswordForImageStore(passwordConfiguration.getValue());
+			passwordConfiguration.setValue(encryptedPassword);
+		}
 		return imageStoreService.updateImageStore(imageStoreTransferObject);
 	}
 

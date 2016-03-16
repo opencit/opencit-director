@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-public class ImageStoreDetailsTransferObject {
+public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDetailsTransferObject> {
 
 	public String id;
 	public String image_store_id;
@@ -73,6 +73,11 @@ public class ImageStoreDetailsTransferObject {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(ImageStoreDetailsTransferObject o) {
+		return this.key.compareTo(o.key);
 	}
 
 	

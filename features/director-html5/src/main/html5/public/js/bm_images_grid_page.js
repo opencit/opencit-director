@@ -56,7 +56,7 @@ function refreshBMOnlineGrid() {
                 }
 
                 if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-					var deleteCallArr = "['deletePolicyBM', 'Are You Sure You Want To delete Policy?', '" + images[i].id + "']";
+					var deleteCallArr = "['deletePolicyBM', 'Are you sure you want to delete policy for host?', '" + images[i].id + "']";
                     self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"bmlive_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"confirmDeleteOperation(" + deleteCallArr + ")\"></span></a>";
                 }
 

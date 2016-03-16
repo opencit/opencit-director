@@ -394,6 +394,9 @@ public class SwiftRsClient {
 			response = httpClient.execute(putRequest);
 
 			status = response.getStatusLine().getStatusCode();
+			if(!(status == 204 || status == 201 || status == 202)){
+				throw new SwiftException("Unable to create container");
+			}
 			log.info("createContainer , status::"+status);
 
 		} catch (ClientProtocolException e1) {

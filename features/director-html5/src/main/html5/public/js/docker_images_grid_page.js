@@ -43,7 +43,7 @@ function refresh_docker_Grid() {
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
 				
-				var deleteCallArr = "['deleteImage', 'Are You Sure You Want To delete Image?', '" + images[i].id + "']";
+				var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?', '" + images[i].id + "']";
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 
@@ -66,7 +66,7 @@ function refresh_docker_Grid() {
                     }
 
                     if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-						var deleteCallArr = "['deletePolicyDocker', 'Are You Sure You Want To delete Policy?', '" + images[i].trust_policy_id + "', '" + images[i].trust_policy_draft_id + "', '" + images[i].id + "', '" + images[i].image_name + "']"; 
+						var deleteCallArr = "['deletePolicyDocker', 'Are you sure you want to delete policy?', '" + images[i].trust_policy_id + "', '" + images[i].trust_policy_draft_id + "', '" + images[i].id + "', '" + images[i].image_name + "']"; 
                         self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"docker_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"confirmDeleteOperation(" + deleteCallArr + ")\"></span></a>";
                     }
                     self.gridData.trust_policy = self.gridData.trust_policy + "</div>";
