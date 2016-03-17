@@ -296,6 +296,10 @@ public class Mapper {
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.IMAGE_URI, "imageUri");
 			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.ACTION_ID, "actionId");
+			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.STORE_ARTIFACT_NAME, "storeArtifactName");
+			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.CHECKSUM, "checksum");
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.TMP_LOCATION, "tmpLocation");
@@ -551,6 +555,8 @@ public class Mapper {
 		mwImageUpload.setContentlength(imageStoreUploadTO.getImage_size());
 		mwImageUpload.setStoreArtifactId(imageStoreUploadTO
 				.getStoreArtifactId());
+		mwImageUpload.setStoreArtifactName(imageStoreUploadTO.getStoreArtifactName());
+		mwImageUpload.setActionId(imageStoreUploadTO.getActionId());
 		mwImageUpload.setDeleted(imageStoreUploadTO.isDeleted());
 		MwImage mwImage = toData(imageStoreUploadTO.getImg());
 		mwImageUpload.setImage(mwImage);
@@ -617,7 +623,10 @@ public class Mapper {
 		imageStoreUploadTO.setTmp_location(mwImageUpload.getTmpLocation());
 		imageStoreUploadTO.setDeleted(mwImageUpload.isDeleted());
 		imageStoreUploadTO.setStoreArtifactId(mwImageUpload
+				
 				.getStoreArtifactId());
+		imageStoreUploadTO.setActionId(mwImageUpload.getActionId());
+		imageStoreUploadTO.setStoreArtifactName(mwImageUpload.getStoreArtifactName());
 		if (mwImageUpload.getImageUri() != null) {
 			imageStoreUploadTO.setImage_uri(fromCharacterArray(mwImageUpload
 					.getImageUri()));
@@ -715,10 +724,14 @@ public class Mapper {
 		mwImageAction.setCurrent_task_name(imageAction.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageAction
 				.getCurrent_task_status());
-		if(imageAction.getDatetime()!=null){
-		mwImageAction.setExecutionTime(imageAction.getDatetime()
-					);
+		if (imageAction.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageAction.getDatetime());
+
 		}
+		if (imageAction.getCreatedDateTime() != null) {
+			mwImageAction.setCreatedTime(imageAction.getCreatedDateTime());
+		}
+
 		return mwImageAction;
 	}
 
@@ -740,7 +753,10 @@ public class Mapper {
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
 		if(mwImageAction.getExecutionTime()!=null){
-		imageActionObject.setDatetime(mwImageAction.getExecutionTime());
+			imageActionObject.setDatetime(mwImageAction.getExecutionTime());
+		}
+		if(mwImageAction.getCreatedTime()!=null){
+			imageActionObject.setCreatedDateTime(mwImageAction.getCreatedTime());
 		}
 		List<ImageActionTask> taskList = new ArrayList<>();
 		String actions = mwImageAction.getAction();
@@ -786,10 +802,9 @@ public class Mapper {
 				.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
-		if(imageActionObject.getDatetime()!=null){
-			mwImageAction.setExecutionTime(imageActionObject.getDatetime()
-						);
-			}
+		if (imageActionObject.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageActionObject.getDatetime());
+		}
 		return mwImageAction;
 	}
 

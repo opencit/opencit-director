@@ -40,7 +40,10 @@ function refresh_vm_images_Grid() {
                 self.gridData = new ImageData();
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
-                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"vm_remove_row_" + i + "\" onclick=\"deleteImage('" + images[i].id + "')\"/></a>";
+				
+				
+				var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?' , '" + images[i].id + "']";
+                self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"vm_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete') {
 
                     self.gridData.trust_policy = "<div id=\"trust_policy_vm_column" + images[i].id + "\">";
@@ -62,7 +65,8 @@ function refresh_vm_images_Grid() {
                     }
 
                     if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {
-                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"vm_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"deletePolicyVM('" + images[i].trust_policy_id + "','" + images[i].trust_policy_draft_id + "','" + images[i].id + "','" + images[i].image_name + "')\"></span></a>";
+						var deleteCallArr = "['deletePolicyVM', 'Are you sure you want to delete policy?', '" + images[i].trust_policy_id + "', '" + images[i].trust_policy_draft_id + "', '" + images[i].id + "', '" + images[i].image_name + "']"; 
+                        self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-trash\" id=\"vm_delete_row_" + i + "\"  title=\"Delete Policy\" onclick=\"confirmDeleteOperation(" + deleteCallArr + ")\"></span></a>";
 
                     }
                     self.gridData.trust_policy = self.gridData.trust_policy + "</div>";

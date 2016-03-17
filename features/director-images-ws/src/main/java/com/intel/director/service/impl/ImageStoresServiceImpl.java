@@ -21,6 +21,7 @@ import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
 import com.intel.director.store.util.ImageStorePasswordUtil;
+import com.intel.director.util.I18Util;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -78,6 +79,11 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		
 		try {
 			savedImageStore = imagePersistenceManager.saveImageStore(imageStoreTransferObject);
+			if(savedImageStore != null){
+				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
+					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+				}
+			}
 		} catch (DbException e) {
 			log.error("Error in creating ImageStore",e);
 			throw new DirectorException("Error in creating ImageStore",e);
@@ -101,6 +107,9 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
 				String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());			
 				passwordConfiguration.setValue(passwordForImageStore);
+			}
+			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
+				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
 			}
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore :: " + imageStoreId);
@@ -228,7 +237,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 					.getStoreManager(imageStoreId);
 		} catch (StoreException e) {
 			log.error("Error in Initializing ImageStore @ validateImageStore", e);
-			throw new DirectorException("Not a valid auth URL or username or password");
+			throw new DirectorException("Auth endpoint validation failed");
 		}
 		try {
 			GenericResponse validate = manager.validate();

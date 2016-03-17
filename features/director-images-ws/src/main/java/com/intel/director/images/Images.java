@@ -38,7 +38,6 @@ import org.apache.shiro.session.Session;
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
-import com.intel.director.api.DockerRequestObject;
 import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageInfoResponse;
@@ -63,9 +62,11 @@ import com.intel.director.common.Constants;
 import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
+import com.intel.director.service.DockerActionService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
+import com.intel.director.service.impl.DockerActionImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
@@ -87,6 +88,7 @@ public class Images {
 	LookupService lookupService = new LookupServiceImpl();
 	SettingImpl settingimpl = new SettingImpl();
 	ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
+	DockerActionService dockerActionService = new DockerActionImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(Images.class);
 
@@ -139,8 +141,9 @@ public class Images {
 	public Response createUploadImageMetadata(
 			TrustDirectorImageUploadRequest uploadRequest)
 			throws DirectorException {
+		
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
-
+		
 		String errors = uploadRequest.validate();
 		if (StringUtils.isNotBlank(errors)) {
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
@@ -150,27 +153,35 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(uploadImageToTrustDirector).build();
 		}
-		imageService = new ImageServiceImpl();
-
+		imageService = new ImageServiceImpl();	
+		String imageName=uploadRequest.image_name;
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
+			imageName=uploadRequest.repository+":"+uploadRequest.tag;
+		
+		}
 		try {
-			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && dockerActionService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
-				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
-				return Response.ok().entity(uploadImageToTrustDirector).build();
-			}
-			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && imageService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
-				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-				uploadImageToTrustDirector.state = Constants.ERROR;
+				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
 				return Response.ok(uploadImageToTrustDirector).build();
 			}
+			
+			if (imageService.doesImageNameExist(imageName)) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
+				return Response.ok().entity(uploadImageToTrustDirector).build();
+			}
+			
+		
+			
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
 							uploadRequest.image_deployments,
-							uploadRequest.image_format, uploadRequest.image_name,
+							uploadRequest.image_format, imageName,
 							uploadRequest.image_size, uploadRequest.repository, uploadRequest.tag);
-			uploadImageToTrustDirector.state = Constants.SUCCESS;
+			uploadImageToTrustDirector.status = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			return Response.ok().entity(uploadImageToTrustDirector).build();
@@ -1200,97 +1211,62 @@ public class Images {
 
 	}
 	
-	@Path("rpc/docker-rmi/{image_id: [0-9a-zA-Z_-]+}")
+	@Path("rpc/docker-pull/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@DELETE
-	public Response dockerRMI(@PathParam("image_id") String image_id) {
-		log.info("performing Docker rmi simultaneously");
-		GenericDeleteResponse response = new GenericDeleteResponse();
+	@POST
+	public Response dockerPull(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker Pull for imageId::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
 		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(response).build();
 		}
-		GenericResponse monitorStatus;
+		GenericResponse monitorStatus = new GenericResponse();
 		try {
-			monitorStatus = imageService.dockerRMI(image_id);
+			imageService.dockerPull(image_id);
 		} catch (DirectorException e) {
-			log.error("Error while perfomig docker  rmi");
+			log.error("Error while performing docker pull");
 			monitorStatus = new GenericResponse();
 			monitorStatus.error = e.getMessage();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(monitorStatus).build();
 		}
-		if (monitorStatus == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully queued for download");
 		return Response.ok(monitorStatus).build();
 	}
-
-	@Path("rpc/docker-load")
-	@Produces(MediaType.APPLICATION_JSON)
+	
+	
+	@Path("rpc/docker-setup/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	@POST
-	public Response dockerLoad(DockerRequestObject dockerRequestObject) {
-		log.info("performing Docker Load ");
-		GenericDeleteResponse response = new GenericDeleteResponse();
-		if (!ValidationUtil.isValidWithRegex(dockerRequestObject.getImage_id(),
-				RegexPatterns.UUID)) {
+	public Response dockerSetup(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker setup for imageid::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(response).build();
 		}
-		GenericResponse genericResponse = new GenericResponse();
-		genericResponse.status = Constants.SUCCESS;
-		GenericResponse dockerLoad;
+		GenericResponse monitorStatus = new GenericResponse();
 		try {
-			dockerLoad = imageService.dockerLoad(dockerRequestObject
-					.getImage_id());
+			imageService.dockerSetup(image_id);
 		} catch (DirectorException e) {
-			log.error("Error while perfomig docker  load");
-			genericResponse.error = e.getMessage();
+			log.error("Error while performing docker setup");
+			monitorStatus = new GenericResponse();
+			monitorStatus.error = e.getMessage();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(genericResponse).build();
+					.entity(monitorStatus).build();
 		}
-		if (dockerLoad == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-
-		return Response.ok(genericResponse).build();
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully uploaded");
+		return Response.ok(monitorStatus).build();
 	}
-
-	@Path("rpc/docker-tag")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@POST
-	public Response dockerTag(DockerRequestObject dockerRequestObject) {
-		log.info("performing Docker tag ");
-		GenericResponse dockerTag;
-		try {
-			GenericDeleteResponse response = new GenericDeleteResponse();
-			if (!ValidationUtil.isValidWithRegex(
-					dockerRequestObject.getImage_id(), RegexPatterns.UUID)) {
-				response.error = "Imaged id is empty or not in uuid format";
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(response).build();
-			}
-			dockerTag = imageService.dockerTag(
-					dockerRequestObject.getImage_id(),
-					dockerRequestObject.getRepository(),
-					dockerRequestObject.getTag());
-		} catch (DirectorException e) {
-			log.error("Error while perfomig docker  tag");
-			dockerTag = new GenericResponse();
-			dockerTag.error = e.getMessage();
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(dockerTag).build();
-		}
-		if (dockerTag == null) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-		return Response.ok(dockerTag).build();
-	}
+	
+	
 	
 	@Path("rpc/remove-orphan-policies")
 	@Produces(MediaType.APPLICATION_JSON)

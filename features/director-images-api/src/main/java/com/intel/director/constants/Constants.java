@@ -127,7 +127,7 @@ public class Constants {
 	public static final String SWIFT_API_ENDPOINT = "swift.api.endpoint";
 	public static final String SWIFT_AUTH_ENDPOINT = "swift.keystone.endpoint";
 	public static final String SWIFT_IP = "swift.ip";
-	public static final String SWIFT_USERNAME = "swift.usename";
+	public static final String SWIFT_USERNAME = "swift.username";
 	public static final String SWIFT_PASSWORD = "swift.password";
 	public static final String SWIFT_TENANT_NAME = "swift.tenant.name";
 	public static final String SWIFT_API_VERSION = "v1.0";

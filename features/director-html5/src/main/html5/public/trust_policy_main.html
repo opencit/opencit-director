@@ -64,6 +64,30 @@
             </div>
         </div>
     </div>
+	
+	
+				<!-- Modal -->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="delete_confirmation_window" role="dialog">
+					<div class="modal-dialog modal-md">	
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<center><h4 class="modal-title" id = "delete_confirmation_window_text"></h4></center>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col-md-4"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-danger" data-dismiss="modal">No</button></div>
+									<div class="col-md-2"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-success" data-dismiss="modal" id = "confirm_delete" >Yes</button></div>
+									<div class="col-md-4"></div>
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+	
+	
 
 <div class="modal fade" id="image_action_history" role="dialog">
 					<div class="modal-dialog modal-lg">
@@ -86,7 +110,8 @@
 									<div class="col-md-1" style="margin-top: 8px;"></div>
 								</div>
 							</div>
- <div class="modal-footer">
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" id="image_action_history_refresh">Refresh</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
                 </div>
 
@@ -94,6 +119,7 @@
 						
 					</div>
 				</div>
+				
 				
     <script type="text/javascript">
         var endpoint = "/v1/images/";

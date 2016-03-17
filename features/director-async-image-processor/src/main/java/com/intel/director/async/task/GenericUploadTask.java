@@ -11,7 +11,6 @@ import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.StoreResponse;
-import com.intel.director.api.SwiftObjectResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
@@ -81,8 +80,9 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 				imageStoreManager.upload();
 			} catch (StoreException e) {
 				log.error("Error uploading the artifact to store id {}",
-						taskAction.getStoreId(), e);
+						taskAction.getStoreId(), e);				
 				if(e.getMessage().startsWith(Constants.ARTIFACT_ID+":")){
+					log.info("Updating mw image uploads with error");
 					ImageStoreUploadResponse imageStoreUploadResponse = new ImageStoreUploadResponse();
 					imageStoreUploadResponse.setStatus(Constants.ERROR);
 					imageStoreUploadResponse.setId(e.getMessage().substring(e.getMessage().indexOf(":")+1));
@@ -106,8 +106,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			updateImageActionState(Constants.ERROR, e.getMessage());
 			return false;
 		}
-		updateImageActionState(Constants.COMPLETE,
-				Constants.COMPLETE);
+		updateImageActionState(Constants.COMPLETE,getTaskName()+" complete");
 		try {
 			updateUploadTable(storeResponse);
 		} catch (DirectorException e) {
@@ -170,11 +169,13 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 			}*/
 			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
 		}
-
+		
+		String storeArtifactName=(String)customProperties.get(Constants.NAME);
 		imageAttr.setId(imageId);
 		imageUploadTransferObject.setImg(imageAttr);
 		imageUploadTransferObject.setDate(new Date());
 		imageUploadTransferObject.setStoreId(taskAction.getStoreId());
+		imageUploadTransferObject.setStoreArtifactName(storeArtifactName);
 		log.info(
 				"updating image uploads table for image id {}",
 				imageActionObject.getImage_id()
@@ -183,6 +184,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 								.getImage_uri());
 		imageUploadTransferObject.setImage_uri(storeResponse.getUri());
 		imageUploadTransferObject.setStoreArtifactId(glanceId);
+		imageUploadTransferObject.setActionId(imageActionObject.getId());
 		String uploadVariableMD5 = DirectorUtil.computeUploadVar(glanceId,
 				dekUrl);
 		imageUploadTransferObject.setUploadVariableMD5(uploadVariableMD5);
@@ -205,7 +207,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		policyUploadTranserObject.setTrust_policy(trustPolicy);
 		policyUploadTranserObject.setStoreId(taskAction.getStoreId());
 		policyUploadTranserObject.setDate(new Date());
-		log.info("updating policy uploads table for image id {}",imageActionObject.getImage_id()+" policyId "+trustPolicy.getId()+" and diplay name::"+trustPolicy.getDisplay_name()+" with policyUri::"+(((SwiftObjectResponse)storeResponse).getSwiftUri()));
+		log.info("updating policy uploads table for image id {}",imageActionObject.getImage_id()+" policyId "+trustPolicy.getId()+" and diplay name::"+trustPolicy.getDisplay_name());
 		String glanceId= storeResponse.getId();
 		String dekUrl=DirectorUtil.fetchDekUrl(trustPolicy);
 		policyUploadTranserObject.setStoreArtifactId(glanceId);

@@ -124,13 +124,13 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		ImageAttributes imgAttrs = new ImageAttributes();
 		imgAttrs.setId(imageInfo.id);
 		newTrustPolicy.setImgAttributes(imgAttrs);
-
-		if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
+		
+		if (StringUtils.isNotBlank(imageInfo.getTrust_policy_draft_id())) {
+			newTrustPolicy.setDisplay_name(trustPolicyDraft.getDisplay_name());
+		}else if (StringUtils.isNotBlank(imageInfo.getTrust_policy_id())) {
 			newTrustPolicy.setDisplay_name(trustPolicy.getDisplay_name());
 			newTrustPolicy.setName(trustPolicy.getName());
-		} else if (StringUtils.isNotBlank(imageInfo.getTrust_policy_draft_id())) {
-			newTrustPolicy.setDisplay_name(trustPolicyDraft.getDisplay_name());
-		} else {
+		}  else {
 			throw new DirectorException("No policy or draft for the image");
 		}
 

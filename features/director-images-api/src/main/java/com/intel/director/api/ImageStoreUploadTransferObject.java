@@ -18,6 +18,8 @@ public class ImageStoreUploadTransferObject {
     protected String uploadVariableMD5;
     protected String storeId;	// required to set and send it for db Create,Update
     protected String storeArtifactId;
+    protected String actionId;
+    protected String storeArtifactName;
     
     protected String storeName; // Not required to send it for db Create,Update operation
     
@@ -25,7 +27,28 @@ public class ImageStoreUploadTransferObject {
     
     protected ImageAttributes img;
 
-    public ImageStoreUploadTransferObject(String image_uri, Date date,
+    
+    public String getActionId() {
+		return actionId;
+	}
+
+
+	public void setActionId(String actionId) {
+		this.actionId = actionId;
+	}
+
+
+	public String getStoreArtifactName() {
+		return storeArtifactName;
+	}
+
+
+	public void setStoreArtifactName(String storeArtifactName) {
+		this.storeArtifactName = storeArtifactName;
+	}
+
+
+	public ImageStoreUploadTransferObject(String image_uri, Date date,
             String tmp_location, String checksum, String status,
             Long image_size, Long sent, String uploaded_by_user_id,
             ImageAttributes img) {

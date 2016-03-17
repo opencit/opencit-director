@@ -11,8 +11,8 @@ import java.util.List;
 
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.common.MountImage;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 
@@ -69,14 +69,15 @@ public class CreateTarTask extends ImageActionAsyncTask {
 			// Fetch the policy and write to a location. Move to common
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo
 					.getImage_deployments())) {
-				String tarDestination = imageLocation
-						+ imageActionObject.getImage_id();
+				String tarDestination = imageLocation + imageActionObject.getImage_id();
 				DirectorUtil.callExec("mkdir -p " + tarDestination);
-				MountImage.dockerSave(imageInfo.getRepository(),
-						imageInfo.getTag(), tarDestination,
+				int exitCode = DockerUtil.dockerSave(imageInfo.getRepository(), imageInfo.getTag(), tarDestination,
 						trustPolicy.getDisplay_name() + ".tar");
-				MountImage.dockerRMI(imageInfo.getRepository(),
-						imageInfo.getTag());
+				DockerUtil.dockerRMI(imageInfo.getRepository(), imageInfo.getTag());
+				if (exitCode != 0) {
+					log.error("Docker save for image {} failed", imageInfo.id);
+					return false;
+				}
 			} else {
 
 				log.info("Inside runCreateTartask for ::"
@@ -130,7 +131,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 
 			log.info("Create Tar : complete");
 
-			updateImageActionState(Constants.COMPLETE, "COMPLETE");
+			updateImageActionState(Constants.COMPLETE,"Create Tar completed");
 			runFlag = true;
 		} catch (Exception e) {
 			log.error(

@@ -85,7 +85,8 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 	}
 
 	@Override
-	public List<PolicyUploadTransferObject> removeOrphanPolicies() throws DirectorException {
+	public List<PolicyUploadTransferObject> removeOrphanPolicies()
+			throws DirectorException {
 		List<String> idFromImageStores = new ArrayList<String>();
 
 		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
@@ -99,13 +100,16 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 			throw new DirectorException(
 					"Error in fetchImageStores for Glance Connector", e);
 		}
-		if (fetchImageStores == null || (fetchImageStores != null && fetchImageStores.size() == 0)) {
+		if (fetchImageStores == null
+				|| (fetchImageStores != null && fetchImageStores.size() == 0)) {
 			throw new DirectorException("No image stores configured");
 		}
 
-		
-		//Fetch the image id from image stores
+		// Fetch the image id from image stores
 		for (ImageStoreTransferObject imageStoreTransferObject : fetchImageStores) {
+			if (imageStoreTransferObject.isDeleted()) {
+				continue;
+			}
 			StoreManager imageStoreManager = null;
 			try {
 				imageStoreManager = StoreManagerFactory
@@ -126,12 +130,12 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				idFromImageStores.add(storeResponse.getId());
 			}
 		}
-		
-		if(idFromImageStores.size() == 0){
+
+		if (idFromImageStores.size() == 0) {
 			throw new DirectorException("No policies available for cleanup");
 		}
 
-		//Fetch the image id from mw_image_uploads
+		// Fetch the image id from mw_image_uploads
 		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
 		try {
 			ImageStoreUploadFilter uploadFilter = new ImageStoreUploadFilter();
@@ -154,8 +158,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 			imageStoreUploadArtifactsIdList.add(id);
 		}
 
-		
-		//Find list of image ids deleted from image store
+		// Find list of image ids deleted from image store
 		imageStoreUploadArtifactsIdList.removeAll(idFromImageStores);
 
 		List<PolicyUploadTransferObject> policyUploadTransferObjects = null;
@@ -170,47 +173,89 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 			throw new DirectorException("Error in fetchImageUploads", e);
 		}
 
-		if (policyUploadTransferObjects == null || (policyUploadTransferObjects != null && policyUploadTransferObjects.size() == 0)) {
+		if (policyUploadTransferObjects == null
+				|| (policyUploadTransferObjects != null && policyUploadTransferObjects
+						.size() == 0)) {
 			throw new DirectorException("No policy uploads");
 		}
 
 		Map<String, StoreManager> storeManagerMap = new HashMap<>();
 		List<String> deletedPolicyIds = new ArrayList<>();
+		List<String> deletedPolicyStoreArtifactIds = new ArrayList<>();
 		List<PolicyUploadTransferObject> deletedPolicyObjects = new ArrayList<>();
+		List<String> deletedPolicyPolicyUris = new ArrayList<>();
+
 		for (PolicyUploadTransferObject policyUploadTransferObject : policyUploadTransferObjects) {
-			if (imageStoreUploadArtifactsIdList.contains(policyUploadTransferObject.getStoreArtifactId())) {
+
+			
+			// If same policy storeartifactId with same Policy URI is already
+			// deleted then mark this entry as deleted
+			if (deletedPolicyStoreArtifactIds
+					.contains(policyUploadTransferObject.getStoreArtifactId())
+					&& deletedPolicyPolicyUris
+							.contains(policyUploadTransferObject
+									.getPolicy_uri())) {
+				policyUploadTransferObject.setDeleted(true);
+				try {
+					persistenceManager
+							.updatePolicyUpload(policyUploadTransferObject);
+				} catch (DbException e) {
+					log.error("Error  in updating policy upload"
+							+ policyUploadTransferObject.getId(), e);
+				}
+				continue;
+			}
+
+			if (imageStoreUploadArtifactsIdList
+					.contains(policyUploadTransferObject.getStoreArtifactId())) {
 				StoreManager imageStoreManager = null;
-				if (!storeManagerMap.containsKey(policyUploadTransferObject.getStoreId())) {
-					imageStoreManager = storeManagerMap.get(policyUploadTransferObject.getStoreId());
+				if (storeManagerMap.containsKey(policyUploadTransferObject
+						.getStoreId())) {
+					imageStoreManager = storeManagerMap
+							.get(policyUploadTransferObject.getStoreId());
 				} else {
 					try {
 						imageStoreManager = StoreManagerFactory
-								.getStoreManager(policyUploadTransferObject.getStoreId());
-						storeManagerMap.put(policyUploadTransferObject.getStoreId(), imageStoreManager);
+								.getStoreManager(policyUploadTransferObject
+										.getStoreId());
+						storeManagerMap.put(
+								policyUploadTransferObject.getStoreId(),
+								imageStoreManager);
 					} catch (StoreException e) {
-						log.error("Error  in getting imageStoreManager" + policyUploadTransferObject.getId(), e);
+						log.error("Error  in getting imageStoreManager"
+								+ policyUploadTransferObject.getId(), e);
 					}
 				}
-				if(imageStoreManager == null){
+				if (imageStoreManager == null) {
 					continue;
 				}
 				try {
 					try {
-						imageStoreManager.delete(new URL(policyUploadTransferObject.getPolicy_uri()));
+						imageStoreManager.delete(new URL(
+								policyUploadTransferObject.getPolicy_uri()));
 					} catch (MalformedURLException e1) {
-						log.error("Unable to find policy at url : {}", policyUploadTransferObject.getPolicy_uri());
+						log.error("Unable to find policy at url : {}",
+								policyUploadTransferObject.getPolicy_uri());
 						continue;
 					}
 					policyUploadTransferObject.setDeleted(true);
 					try {
-						persistenceManager.updatePolicyUpload(policyUploadTransferObject);
+						persistenceManager
+								.updatePolicyUpload(policyUploadTransferObject);
 					} catch (DbException e) {
-						log.error("Error  in updating policy upload" + policyUploadTransferObject.getId(), e);
+						log.error("Error  in updating policy upload"
+								+ policyUploadTransferObject.getId(), e);
 					}
 					deletedPolicyIds.add(policyUploadTransferObject.getId());
+					deletedPolicyStoreArtifactIds
+							.add(policyUploadTransferObject
+									.getStoreArtifactId());
+					deletedPolicyPolicyUris.add(policyUploadTransferObject
+							.getStoreArtifactId());
 					deletedPolicyObjects.add(policyUploadTransferObject);
 				} catch (StoreException e) {
-					log.error("Error  in deleting policy" + policyUploadTransferObject.getId(), e);
+					log.error("Error  in deleting policy"
+							+ policyUploadTransferObject.getId(), e);
 				}
 
 				// Setting Delete Flag to true for deleted policies
@@ -220,7 +265,8 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 
 		// Setting Delete Flag to true for deleted images
 		for (ImageStoreUploadTransferObject imageStoreUploadTransferObject : fetchImageUploads) {
-			if (deletedPolicyIds.contains(imageStoreUploadTransferObject
+			if (deletedPolicyStoreArtifactIds
+					.contains(imageStoreUploadTransferObject
 							.getStoreArtifactId())) {
 				imageStoreUploadTransferObject.setDeleted(true);
 				try {
@@ -232,7 +278,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				}
 			}
 		}
-		
+
 		return deletedPolicyObjects;
 
 	}

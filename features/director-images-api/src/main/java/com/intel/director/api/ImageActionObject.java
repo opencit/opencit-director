@@ -3,7 +3,7 @@ package com.intel.director.api;
 import java.util.Calendar;
 import java.util.List;
 
-public class ImageActionObject extends GenericResponse {
+public class ImageActionObject extends GenericResponse implements Comparable<ImageActionObject> {
 	
 	private String id;
 	private String image_id;
@@ -18,12 +18,20 @@ public class ImageActionObject extends GenericResponse {
 	private String storeNames;
 
 	private String artifactName;
-	
-
-
-
+	private Calendar createdDateTime;
 
 	
+	public Calendar getCreatedDateTime() {
+		return createdDateTime;
+	}
+
+	public void setCreatedDateTime(Calendar createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
+
+
+
+
 	public String getStoreNames() {
 		return storeNames;
 	}
@@ -122,6 +130,14 @@ public class ImageActionObject extends GenericResponse {
 				+ ", action_size_max=" + action_size_max + ", action=" + actions
 				+ ", current_task_status=" + current_task_status
 				+ ", current_task_name=" + current_task_name + "]";
+	}
+
+	@Override
+	public int compareTo(ImageActionObject o) {
+		if(this.createdDateTime == null || o.createdDateTime == null){
+			return 0;
+		}
+		return this.createdDateTime.compareTo(o.createdDateTime);
 	}
 
 

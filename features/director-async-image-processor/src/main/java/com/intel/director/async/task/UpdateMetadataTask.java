@@ -98,14 +98,14 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			updateImageActionState(Constants.ERROR, "Error in update metadata task");
 
 		}
-
+		String storeId = imageStoreTranserObject.getStoreId();
 		if (!imageStoreTranserObject.getStoreArtifactId().equals(glanceId)) {
 			glanceId = imageStoreTranserObject.getStoreArtifactId();
 		}
-
+		String updatedArtifactName = imageStoreTranserObject.getStoreArtifactName();
 		PolicyUploadFilter policyUploadFilter = new PolicyUploadFilter();
 		policyUploadFilter.setTrust_policy_id(trustPolicy.getId());
-
+			
 		List<PolicyUploadTransferObject> policyUploads = null;
 		try {
 			policyUploads = persistService.fetchPolicyUploads(policyUploadFilter, null);
@@ -116,15 +116,20 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		}
 		PolicyUploadTransferObject policyUploadTransferObject = policyUploads.get(policyUploads.size() - 1);
 		String policyUri = policyUploadTransferObject.getPolicy_uri();
-		String storeId = policyUploadTransferObject.getStoreId();
-		ImageStoreTransferObject imageStoreDTO = null;
+		String previousStoreId = policyUploadTransferObject.getStoreId();
+		ImageStoreTransferObject previousUploadImageStoreDTO = null;
+		ImageStoreTransferObject currentImageStoreDTO = null;
 		try {
-			imageStoreDTO = persistService.fetchImageStorebyId(storeId);
+			currentImageStoreDTO=persistService.fetchImageStorebyId(storeId);
+			previousUploadImageStoreDTO = persistService.fetchImageStorebyId(previousStoreId);
+			
 		} catch (DbException e) {
-			log.error("No store exists for id {}", storeId);
+			log.error("No store exists for id {}", previousStoreId);
 
 		}
-		String connectorName = imageStoreDTO.getConnector();
+
+		String updateMessage="Policy attached to Image "+updatedArtifactName+" in store "+currentImageStoreDTO.getName();
+		String connectorName = previousUploadImageStoreDTO.getConnector();
 		String trustPolicyLocationTag = connectorName.toLowerCase() + ":" + policyUri;
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, trustPolicyLocationTag);
 		customProperties.put(Constants.GLANCE_ID, glanceId);
@@ -172,7 +177,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		}
 
 		if (runFlag) {
-			updateImageActionState(Constants.COMPLETE, "Update Metadata task completed");
+			updateImageActionState(Constants.COMPLETE, updateMessage);
 		}
 		return runFlag;
 

@@ -180,12 +180,42 @@
 									<div class="col-md-1"><button type="button" onclick="imageStoreSettingPage()" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
 									<div class="col-md-1"><div id = "editBackButton"><button type="button" class="btn btn-default" onclick = "backToEdit()">Back</button></div></div>
 									<div class="col-md-1"><div id = "saveButton"></div></div>
+									<div class="col-md-1"><div id = "saveAnywaysButton"></div></div>
+									
 								</div>
 							</div>
 						</div>
 						
 					</div>
 				</div>
+				
+				
+				
+				<!-- Modal -->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="image_store_delete_confirmation_window" role="dialog">
+					<div class="modal-dialog modal-md">	
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<center><h4 class="modal-title" id = "image_store_delete_confirmation_window_text"></h4></center>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col-md-4"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-danger" data-dismiss="modal">No</button></div>
+									<div class="col-md-2"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-success" data-dismiss="modal" id = "image_store_confirm_delete" >Yes</button></div>
+									<div class="col-md-4"></div>
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+				
+				
+				
+				
+				
 			</div>
 			
 		</div>

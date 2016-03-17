@@ -2,6 +2,7 @@ package com.intel.director.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.FetchActionsService;
 import com.intel.director.service.ImageActionService;
+import com.intel.director.service.ImageService;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
@@ -50,14 +52,16 @@ public  class ImageActionImpl implements ImageActionService {
 	public IPersistService persistService;
 	
 	public FetchActionsService fetchActionService;
-
+	public ImageService imageService;
 	public ImageActionImpl() {
 		persistService = new DbServiceImpl();
+		imageService = new ImageServiceImpl();
 	}
 	
 	public ImageActionImpl(FetchActionsService fetchService) {
 		persistService = new DbServiceImpl();
 		this.fetchActionService=fetchService;
+		imageService = new ImageServiceImpl();
 	}
 	
 
@@ -68,6 +72,7 @@ public  class ImageActionImpl implements ImageActionService {
 		List<ImageActionObject> actionObjectIncomplete = new ArrayList<ImageActionObject>();
 		List<ImageActionObject> allActionObject = persistService
 				.searchByAction();
+		Collections.sort(allActionObject);
 		for (ImageActionObject img : allActionObject) {
 			if ((img.getAction_completed() < img.getAction_count())  
 					&& !(img.getCurrent_task_status() != null && img
@@ -191,6 +196,8 @@ public  class ImageActionImpl implements ImageActionService {
 				imgOrder.setOrderBy(OrderByEnum.DESC);
 				ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 				imgUpFilter.setStoreArtifactId(uploadId);
+				imgUpFilter.setEnableDeletedCheck(true);
+				imgUpFilter.setDeleted(false);
 				List<ImageStoreUploadTransferObject> fetchImageUploads = null;
 				try {
 					fetchImageUploads = persistService.fetchImageUploads(
@@ -280,11 +287,14 @@ public  class ImageActionImpl implements ImageActionService {
 			if (Constants.COMPLETE.equals(status)) {
 				action_completed = count + 1;
 			} else {
-				if (Constants.ERROR.equals(status)) {
-					currentTaskStatus += " : " + details;
-					taskAction.setError(details);
-				}
+				/*if (Constants.ERROR.equals(status)) {
+					  currentTaskStatus += " : " + details;
+					
+				}*/
 				action_completed = count;
+			}
+			if(StringUtils.isNotBlank(details)){
+			taskAction.setMessage(details);
 			}
 			imageActionObject.setCurrent_task_status(currentTaskStatus);
 
@@ -416,16 +426,35 @@ public  class ImageActionImpl implements ImageActionService {
 		String artifactName = null;
 		List<ImageActionTask> imageActiontaskList = imageActionObject
 				.getActions();
+		ImageInfo image =null;
+		try {
+			 image = imageService.fetchImageById(imageActionObject.getImage_id());
+			
+		} catch (DirectorException e) {
+			log.error("fetchActionHistoryResponse ,Unable to fetch image");
+			
+		}
+		boolean isDockerImage=false;
+		if(Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image.getImage_deployments())){
+			isDockerImage=true;
+		}
 		ImageActionHistoryResponse imageActionResponse= new ImageActionHistoryResponse();
 		String previousTaskname=null;
+		String displayMessage=null;
 		for (ImageActionTask imageActionTask : imageActiontaskList) {
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_TAR)) {
-				artifactName = Constants.ARTIFACT_TAR;
+				if(isDockerImage){
+					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_WITH_POLICY_DISPLAY_NAME;
+				}else{
+					artifactName = Constants.ARTIFACT_TAR_DISPLAY_NAME;
+				}
+				
 				break;
 			}
 			if(previousTaskname!=null && previousTaskname.equals(Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY) && imageActionTask.getTask_name().equals(Constants.TASK_NAME_UPLOAD_POLICY)){
 				artifactName = Constants.ARTIFACT_IMAGE_WITH_POLICY_DISPLAY_NAME;
+				//displayMessage=imageActionTask.getMessage();
 				break;
 			}
 			if (imageActionTask.getTask_name().equals(
@@ -436,11 +465,16 @@ public  class ImageActionImpl implements ImageActionService {
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_POLICY)) {
 				artifactName = Constants.ARTIFACT_POLICY;
+				//displayMessage=imageActionTask.getMessage();
 				
 			}
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_IMAGE)) {
-				artifactName = Constants.ARTIFACT_IMAGE;
+				if(isDockerImage){
+					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_DISPLAY_NAME;
+				}else{
+					artifactName = Constants.ARTIFACT_TAR_DISPLAY_NAME;
+				}
 
 			}
 			previousTaskname=imageActionTask.getTask_name();
@@ -456,6 +490,7 @@ public  class ImageActionImpl implements ImageActionService {
 			if (StringUtils.isNotBlank(imageActiontask.getStoreId()) && !Constants.TASK_NAME_UPDATE_METADATA.equals(imageActiontask.getTask_name())) {
 				
 				String storeId = imageActiontask.getStoreId();
+				
 				try {
 					imageStoreDTO = persistService.fetchImageStorebyId(storeId);
 					if (StringUtils.isNotBlank(imageStoreDTO.getName())) {
@@ -466,6 +501,15 @@ public  class ImageActionImpl implements ImageActionService {
 					log.error("No store exists for id {}", storeId);
 				}
 			}
+			if (imageActiontask.getTask_name().equals(
+					Constants.TASK_NAME_UPDATE_METADATA)) {
+				displayMessage = imageActiontask.getMessage();
+				
+			}
+			if(Constants.ERROR.equals(imageActiontask.getStatus())){
+				displayMessage=imageActiontask.getMessage();
+			}
+			
 		}
 
 		if(imageActionObject.getDatetime()!=null){
@@ -473,16 +517,59 @@ public  class ImageActionImpl implements ImageActionService {
 			imageActionResponse.setDatetime(sdf.format(imageActionObject.getDatetime().getTime()));
 			
 		}
-		String commaSeperatedStoreNames = StringUtils.join(storeNames, ",");
+		String commaSeperatedStoreNames = StringUtils.join(storeNames, ", ");
 		imageActionResponse.setArtifactName(artifactName);
 		
 		imageActionResponse.setId(imageActionObject.getId());
+		if(StringUtils.isNotBlank(displayMessage) ){
+			imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status()+":-"+displayMessage);
+		}else{
 		imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status());
+		}
 		
 		imageActionResponse.setStoreNames(commaSeperatedStoreNames);
 		return imageActionResponse;
 	}
 
+/*	public String getDisplayMessageForAction(String imageId) {
+		ImageStoreUploadTransferObject imageStoreTranserObject = null;
+		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
+		imgUpFilter.setImage_id(imageId);
+		// /imgUpFilter.setImage_id(imageId);
+		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		try {
+			fetchImageUploads = persistService.fetchImageUploads(imgUpFilter,
+					null);
+			if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
+				imageStoreTranserObject = fetchImageUploads
+						.get(fetchImageUploads.size() - 1);
+
+			}
+		} catch (DbException e) {
+			log.error("Error fetching image uploads {}", e);
+		}
+		if (imageStoreTranserObject == null) {
+			return null;
+		}
+		try {
+			ImageStoreTransferObject imageStoreDTO = persistService
+					.fetchImageStorebyId(imageStoreTranserObject.getStoreId());
+			if (StringUtils.isNotBlank(imageStoreDTO.getName())) {
+				return "Image:"
+						+ imageStoreTranserObject.getStoreArtifactName()
+						+ " in store:" + imageStoreDTO.getName()
+						+ " updated for policy";
+			}
+
+		} catch (DbException e) {
+			log.error("No store exists for id {}",
+					imageStoreTranserObject.getStoreId());
+		}
+		return "Image:" + imageStoreTranserObject.getStoreArtifactName()
+				+ " updated for policy";
+
+	}
+	*/
 
 	
 

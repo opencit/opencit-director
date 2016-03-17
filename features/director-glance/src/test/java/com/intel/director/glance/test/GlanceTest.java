@@ -20,8 +20,8 @@ public class GlanceTest {
 	    	uuid = (new UUID()).toString();
 			GlanceImageStoreManager imageStoreManager = new GlanceImageStoreManager();
 			Map<String,String> configuration= new HashMap<String,String>();
-			configuration.put(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT, "http://10.35.35.239:5000");
-		 	configuration.put(Constants.GLANCE_API_ENDPOINT, "http://10.35.35.239:9292");
+			configuration.put(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT, "http://10.35.35.35:5000");
+		 	configuration.put(Constants.GLANCE_API_ENDPOINT, "http://10.35.35.35:9292");
 	        configuration.put(Constants.GLANCE_IMAGE_STORE_USERNAME,"admin");
 	        configuration.put(Constants.GLANCE_IMAGE_STORE_PASSWORD,"intelmh");
 	        configuration.put(Constants.GLANCE_TENANT_NAME,"admin");
@@ -60,8 +60,8 @@ public class GlanceTest {
 	        configurationUpdate.put(Constants.GLANCE_ID,(new UUID()).toString());*/
 		
 			Map<String,String> configuration1= new HashMap<String,String>();
-			configuration1.put(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT, "http://10.35.35.239:5000");
-		 	configuration1.put(Constants.GLANCE_API_ENDPOINT, "http://10.35.35.239:9292");
+			configuration1.put(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT, "http://10.35.35.35:5000");
+		 	configuration1.put(Constants.GLANCE_API_ENDPOINT, "http://10.35.35.35:9292");
 	        configuration1.put(Constants.GLANCE_IMAGE_STORE_USERNAME,"admin");
 	        configuration1.put(Constants.GLANCE_IMAGE_STORE_PASSWORD,"intelmh");
 	        configuration1.put(Constants.GLANCE_TENANT_NAME,"admin");

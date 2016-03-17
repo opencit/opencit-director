@@ -1,8 +1,9 @@
 function showImageActionHistoryDialog(imageid){
 	
+	var functionToCall = "show_action_history_grid('" + imageid + "')";
 
 	$("#image_action_history_title").html("Image Actions History");
-
+	$("#image_action_history_refresh").attr("onclick",functionToCall);
 	$('#image_action_history').modal('show');
 	show_action_history_grid(imageid);
 	
@@ -379,7 +380,7 @@ function refreshBMOnlineGrid() {
     $("#bmGridOnline").html("")
     $.ajax({
         type: "GET",
-        url: "/v1/images?deploymentType=BareMetalLive",
+        url: "/v1/images?deploymentType=BareMetal",
         dataType: "json",
         success: function(result) {
             images = result.images;
@@ -703,6 +704,22 @@ function hideLoading() {
     $("#loading_icon_container").hide();
     $("#director_loading_icon").html("");
 
+}
+
+function confirmDeleteOperation(deleteCallArr){
+	var funcName = deleteCallArr[0];
+
+	var args = "";
+	if(deleteCallArr.length > 2){
+		for(var i=2;i<deleteCallArr.length;i++){
+			args=args + "'"+deleteCallArr[i]+"',";			
+		}
+		args = args.substring(0, args.length-1);
+	}
+	var func = funcName+"("+args+")";
+	$("#confirm_delete").attr("onclick", func);
+	$("#delete_confirmation_window_text").text(deleteCallArr[1]);
+	$("#delete_confirmation_window").modal('show');
 }
 
 

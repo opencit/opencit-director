@@ -84,7 +84,7 @@ function EditDockerImageViewModel(data) {
         self.editDockerImageMetaData.encrypted = false;
         self.editDockerImageMetaData.display_name = $('#display_name').val();
         current_display_name = $('#display_name').val();
-
+		showLoading();
         $.ajax({
             type: "POST",
             url: "/v1/trust-policy-drafts",
@@ -97,6 +97,7 @@ function EditDockerImageViewModel(data) {
             success: function(data, status, xhr) {
 
                 if (data.error) {
+					hideLoading();
                     $('#for_mount_edit_docker').hide();
                     $('#default_edit_docker').show();
                     $('#error_modal_body_edit_docker_1').text(data.error);
@@ -122,6 +123,7 @@ function EditDockerImageViewModel(data) {
                     success: function(data, status, xhr) {
                         $("#editDockerPolicyNext").prop('disabled', false);
                         if (data.error) {
+							hideLoading();
                             $('#for_mount_edit_docker').show();
                             $('#default_edit_docker').hide();
                             $('#error_modal_body_edit_docker_1').text(data.error);
@@ -130,6 +132,7 @@ function EditDockerImageViewModel(data) {
                             });
                             return;
                         }
+						
                         nextButtonDocker();
                     }
                 });

@@ -293,7 +293,11 @@ function nextButtonLiveBM() {
 	if (isEmpty == true) {
 		$("#" + active_wizard_page + "_content_step_" + nextStepNum).load(
 				htmlpage);
-	}
+	}else{
+        $("#director_loading_icon").hide();
+        $("#loading_icon_container").hide();
+        $("#director_loading_icon").html("");
+    }
 
 	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
 	$("#" + active_wizard_page + "_step_" + stepNum).removeClass("selected");

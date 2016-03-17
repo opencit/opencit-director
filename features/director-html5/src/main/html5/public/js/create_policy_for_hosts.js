@@ -126,6 +126,7 @@ function addhostandnext() {
                 var mountimage = {
                     "id": current_image_id
                 }
+				showLoading();
                 $.ajax({
                     type: "POST",
                     url: "/v1/rpc/mount-image",
@@ -138,6 +139,7 @@ function addhostandnext() {
                     success: function(data, status, xhr) {
 
                         if (data.error) {
+						hideLoading();
                             show_error_in_bmlivemodal("Error mounting remote host");
                             $("#createBMLivePolicyNext").prop('disabled', false);
                             return;
@@ -155,6 +157,7 @@ function addhostandnext() {
                             success: function(data, status, xhr) {
 
                                 if (data.status == "Error") {
+								hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
                                     show_error_in_bmlivemodal(data.details);
 
@@ -178,7 +181,7 @@ function addhostandnext() {
                                 var policyTemplateRequest = {
                                     "image_id": current_image_id
                                 };
-
+			
                                 $.ajax({
                                     type: "POST",
 
@@ -192,19 +195,22 @@ function addhostandnext() {
 
                                     success: function(data) {
                                         $("#createBMLivePolicyNext").prop('disabled', false);
-
+				
                                         if (data.error) {
+										hideLoading();
                                             show_error_in_bmlivemodal(data.error);
                                             return;
                                         }
                                         nextButtonLiveBM();
-
                                     }
                                 });
 
                             }
                         });
-                    }
+                    },
+					error: function(data,status,xhr){
+						hideLoading();
+					}
                 });
 
             }
@@ -240,7 +246,7 @@ function addhostandnext() {
                 var policyTemplateRequest = {
                     "image_id": current_image_id
                 }
-
+				showLoading();
                 $.ajax({
                     type: "POST",
                     url: "/v1/rpc/mount-image",
@@ -251,6 +257,7 @@ function addhostandnext() {
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
                         if (data.error) {
+							hideLoading();
                             show_error_in_bmlivemodal("Error mounting remote host");
                             $("#createBMLivePolicyNext").prop('disabled', false);
                             return;
@@ -267,6 +274,7 @@ function addhostandnext() {
                             data: ko.toJSON(self.BMLiveMetaData),
                             success: function(data, status, xhr) {
                                 if (data.status == "Error") {
+								hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
                                     show_error_in_bmlivemodal(data.details);
                                     $.ajax({
@@ -295,7 +303,7 @@ function addhostandnext() {
                                     return;
                                 }
                                 current_trust_policy_draft_id = data.id;
-
+			
                                 $.ajax({
                                     type: "POST",
 
@@ -309,17 +317,22 @@ function addhostandnext() {
 
                                     success: function(data) {
                                         $("#createBMLivePolicyNext").prop('disabled', false);
-
+										
                                         if (data.error) {
+											hideLoading();
                                             show_error_in_bmlivemodal(data.error);
                                             return;
                                         }
                                         nextButtonLiveBM();
+										
                                     }
                                 });
                             }
                         });
-                    }
+                    },
+					error: function(data,status,xhr){
+						hideLoading();
+					}
                 });
             },
             error: function(data, status, xhr) {

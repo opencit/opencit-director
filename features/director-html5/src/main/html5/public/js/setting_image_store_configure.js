@@ -1,3 +1,5 @@
+var validateIS = true;
+var current_image_store = {};
 function imageStoreSettingPage() {
 	$("#image_store_grid").html("");
 	$
@@ -26,24 +28,25 @@ function imageStoreSettingPage() {
 							image_store.image_artifacts += ","
 						}
 
-						console.log("image_store.image_artifacts :: "
-								+ image_stores[i].deleted);
-
 						image_store.image_artifacts = image_store.image_artifacts
 								.substring(0,
 										image_store.image_artifacts.length - 1);
 						var image_store_json = JSON.stringify(image_stores[i]);
+					var deleteCallArr = '["deleteImageStore", "Are you sure you want to delete the image Store?", "' + image_stores[i].id + '"]';
 						image_store.actions = '<a href=\'#\' onclick=\'getImageStoreAndPopulateImageStore(\"'
 								+ image_stores[i].id
-								+ '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>'
-								+ '<a href=\'#\' onclick =\'deleteImageStore("'
-								+ image_stores[i].id
-								+ '")\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>'
+								+ '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>&nbsp;'
+								+ '<a href=\'#\' onclick =\'confirmDeleteOperationImageStore('
+								+ deleteCallArr
+								+ ')\'><span title=\'Delete\' class=\'glyphicon glyphicon-trash\'></span></a>&nbsp;'
 								+ '<a href=\'#\' onclick=\'validateImageStore(\"'
 								+ image_stores[i].id
 								+ '\")\'><span id="'
 								+ image_stores[i].id
-								+ '" title=\'Validate\' class=\'glyphicon glyphicon-refresh\'></span></a>';
+								+ '" title=\'Validate\' class=\'glyphicon glyphicon-refresh\'></span></a>&nbsp;'
+								+ '<span style=\'color: #337ab7;\' id="image-store-valid-status-'
+								+ image_stores[i].id
+								+ '" title=\'Validation Status\'></span>';
 						image_stores_grid.push(image_store);
 
 					}
@@ -154,12 +157,11 @@ function createImageStore() {
 	}
 
 	for (i = 0; i < createImageStoreRequest.artifact_types.length; i++) {
-		console.log("GOOGLE :: " + createImageStoreRequest.artifact_types[i]);
 		$(
 				"input[value=" + createImageStoreRequest.artifact_types[i]
 						+ "].edit_artifacts").prop("checked", true);
 	}
-
+	createImageStoreRequest.deleted = true;
 	$
 			.ajax({
 				type : "POST",
@@ -177,6 +179,7 @@ function createImageStore() {
 					}
 					var str = "";
 					createImageStoreRequest = data;
+					current_image_store = data;
 					var image_store_details = createImageStoreRequest.image_store_details;
 					for (i = 0; i < image_store_details.length; i++) {
 						str = str + "<div class=\"row\">";
@@ -186,7 +189,7 @@ function createImageStore() {
 									+ "<label class=\"control-label col-md-4\" for="
 									+ image_store_details[i].id
 									+ ">"
-									+ image_store_details[i].key
+									+ image_store_details[i].key_display_value
 									+ ": </label>"
 									+ "<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id="
 									+ image_store_details[i].id
@@ -198,7 +201,7 @@ function createImageStore() {
 									+ "<label class=\"control-label col-md-4\" for="
 									+ image_store_details[i].id
 									+ ">"
-									+ image_store_details[i].key
+									+ image_store_details[i].key_display_value
 									+ ": </label>"
 									+ "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id="
 									+ image_store_details[i].id
@@ -218,12 +221,16 @@ function createImageStore() {
 					}
 
 					jsonStr = JSON.stringify(createImageStoreRequest);
-					saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
+					saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = true; updateImageStore('
 							+ jsonStr + ', false)\'>Save</button>';
+							
+					saveAnywaysButtonStr =  '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = false; updateImageStore('
+							+ jsonStr + ', false)\'>Save Anyways</button>'
 					$("#image_store_details_title").html("");
 					$("#image_store_details_title").html(
 							$("#image_store_name").val());
 					$("#saveButton").html(saveButtonStr);
+					$("#saveAnywaysButton").html(saveAnywaysButtonStr);
 					$("#image_store_properties").html(str);
 					$('#image_store').modal('hide');
 					$('#image_store_details').modal('show');
@@ -266,6 +273,9 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 				"Please select at least one supported artifact");
 		return;
 	}
+	if(!validateIS){
+		updateImageStoreRequest.deleted = false;
+	}
 	$.ajax({
 		type : "PUT",
 		url : "/v1/image-stores",
@@ -280,32 +290,69 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 				$("#image_store_details_error").html(data.error);
 				return;
 			}
-
-			$.ajax({
-				type : "POST",
-				url : "/v1/rpc/image-stores/" + updateImageStoreRequest.id
-						+ "/validate",
-				accept : "application/json",
-				headers : {
-					'Accept' : 'application/json'
-				},
-				success : function(data, status, xhr) {
-					console.log(xhr.status);
-					if (xhr.status == 200) {
-						console.log(data.is_valid);
-						if (data.is_valid) {
-							resetAllFields();
-							$("#image_store_details").modal('hide');
-							imageStoreSettingPage();
+			var activateImageStore = data;
+			if(validateIS){
+				$.ajax({
+					type : "POST",
+					url : "/v1/rpc/image-stores/" + updateImageStoreRequest.id
+							+ "/validate",
+					accept : "application/json",
+					headers : {
+						'Accept' : 'application/json'
+					},
+					success : function(data, status, xhr) {
+						console.log(xhr.status);
+						if (xhr.status == 200) {
+							console.log(data.is_valid);
+							if (data.is_valid) {
+								updateImageStoreRequest.deleted = false
+								$.ajax({
+									type : "PUT",
+									url : "/v1/image-stores",
+									contentType : "application/json",
+									data : JSON.stringify(updateImageStoreRequest),
+									accept : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									success : function(data, status, xhr) {
+										if (data.error) {
+											$("#image_store_details_error").html(data.error);
+											return;
+										}
+										resetAllFields();
+										$("#image_store_details").modal('hide');
+										imageStoreSettingPage();
+									}
+								});
+							} else {
+								$("#image_store_details_error").html(data.error);
+								$.ajax({
+									type : "PUT",
+									url : "/v1/image-stores",
+									contentType : "application/json",
+									data : JSON.stringify(current_image_store),
+									accept : "application/json",
+									headers : {
+										'Accept' : 'application/json'
+									},
+									success : function(data, status, xhr) {
+										
+									}
+								});
+								
+							}
 						} else {
-							$("#image_store_details_error").html(data.error);
+							$("#image_store_details_error").html(response);
 						}
-					} else {
-						$("#image_store_details_error").html(response);
-					}
 
-				}
-			});
+					}
+				});
+			} else {
+				resetAllFields();
+				$("#image_store_details").modal('hide');
+				imageStoreSettingPage();
+			}
 		}
 
 	});
@@ -321,6 +368,7 @@ function getImageStoreAndPopulateImageStore(imageStoreId) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			current_image_store = data;
 			populateImageStore(data);
 		}
 	});
@@ -365,9 +413,12 @@ function populateImageStore(image_store) {
 	populateImageStoreDetails(image_store.image_store_details);
 	$('#edit_image_store').modal('show');
 	jsonStr = JSON.stringify(image_store);
-	saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
+	saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = true; updateImageStore('
 			+ jsonStr + ',true)\'>Save</button>';
+	saveAnywaysButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = false; updateImageStore('
+			+ jsonStr + ',true)\'>Save Anyways</button>';
 	$("#saveButton").html(saveButtonStr);
+	$("#saveAnywaysButton").html(saveAnywaysButtonStr);
 }
 
 function populateImageStoreDetails(image_store_details) {
@@ -383,7 +434,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=\""
 						+ image_store_details[i].id + "\" ></div><br />";
@@ -393,7 +444,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\""
 						+ image_store_details[i].id + "\" ></div><br />";
@@ -407,7 +458,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id="
 						+ image_store_details[i].id + " placeholder=\""
@@ -418,7 +469,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 						+ image_store_details[i].id
 						+ ">"
-						+ image_store_details[i].key
+						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id="
 						+ image_store_details[i].id + " placeholder=\""
@@ -441,6 +492,7 @@ function populateImageStoreDetails(image_store_details) {
 
 function resetAllFields() {
 	$("#image_store_details_error").html("");
+	$('#artifacts_div').hide();
 	$("#image_store_error").html("");
 	$("#image_store_name").val("");
 	$('.edit_artifacts').prop("checked", false);
@@ -477,23 +529,37 @@ function validateImageStore(imageStoreId) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
-			$("span#" + imageStoreId).removeClass("glyphicon glyphicon-refresh");
-
 			console.log(xhr.status);
 			if (xhr.status == 200) {
 				console.log(data.is_valid);
 				if (data.is_valid) {
-					$("span#" + imageStoreId).addClass("glyphicon glyphicon-ok");
+					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-ok");
 				} else {
-					$("span#" + imageStoreId).addClass("glyphicon glyphicon-remove");
-					$("span#" + imageStoreId).attr("title", data.error);
+					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-remove");
+					$("span#image-store-valid-status-" + imageStoreId).attr("title", data.error);
 				}
 			} else {
-				$("span#" + imageStoreId).addClass("glyphicon glyphicon-remove");
-				$("span#" + imageStoreId).attr("title", "Unable to validate image store");
+				$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-remove");
+				$("span#image-store-valid-status-" + imageStoreId).attr("title", "Unable to validate image store");
 			}
 
 		}
 	});
 	
+}
+
+function confirmDeleteOperationImageStore(deleteCallArr){
+	var funcName = deleteCallArr[0];
+
+	var args = "";
+	if(deleteCallArr.length > 2){
+		for(var i=2;i<deleteCallArr.length;i++){
+			args=args + "'"+deleteCallArr[i]+"',";			
+		}
+		args = args.substring(0, args.length-1);
+	}
+	var func = funcName+"("+args+")";
+	$("#image_store_confirm_delete").attr("onclick", func);
+	$("#image_store_delete_confirmation_window_text").text(deleteCallArr[1]);
+	$("#image_store_delete_confirmation_window").modal('show');
 }

@@ -12,7 +12,6 @@ import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
-import com.intel.mtwilson.Environment;
 
 public class ImageStorePasswordUtil {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -23,8 +22,7 @@ public class ImageStorePasswordUtil {
 	private PBKDFCryptoCodec cipher = null;
 
 	public ImageStorePasswordUtil() {
-		directorPassword = StringUtils.isNotBlank(Environment.get("PASSWORD")) ? Environment
-				.get("PASSWORD") : "password";
+		directorPassword = StringUtils.isNotBlank(System.getenv("DIRECTOR_PASSWORD")) ? System.getenv("DIRECTOR_PASSWORD") : "password";
 		log.info("Using directorPassword : {}", directorPassword);
 		protection = PasswordProtectionBuilder.factory().aes(128)
 				.digestAlgorithm("SHA-256").keyAlgorithm("PBKDF2WithHmacSHA1")

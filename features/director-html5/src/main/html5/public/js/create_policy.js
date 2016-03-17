@@ -28,7 +28,7 @@ function CreateImageViewModel() {
 
         self.createImageMetaData.display_name = $('#display_name').val();
         current_display_name = $('#display_name').val();
-
+		showLoading();
         $.ajax({
             type: "POST",
             url: "/v1/trust-policy-drafts",
@@ -41,6 +41,7 @@ function CreateImageViewModel() {
             success: function(data, status, xhr) {
 
                 if (data.error) {
+					hideLoading();
                     $('#for_mount').hide();
                     $('#default').show();
                     $('#error_modal_body_vm_1').text(data.error);
@@ -67,6 +68,7 @@ function CreateImageViewModel() {
                     success: function(data, status, xhr) {
                         $("#createVMPolicyNext").prop('disabled', false);
                         if (data.error) {
+							hideLoading();
                             $('#default').hide();
                             $('#for_mount').show();
                             $('#error_modal_body_vm_1').text(data.error);
@@ -77,13 +79,14 @@ function CreateImageViewModel() {
                             return;
 
                         }
-
+						
                         nextButton();
                     }
                 });
             },
             error: function(data, status, xhr) {
                 console.log(data);
+				hideLoading();
                 $('#for_mount').hide();
                 $('#default').show();
                 $('#error_modal_body_vm_1').text("");

@@ -154,6 +154,7 @@ public class Constants {
 	public static final String INCOMPLETE = "Incomplete";
 	public static final String IN_PROGRESS = "In Progress";
 	public static final String ERROR = "Error";
+	public static final String SOURCE_TAG = "_source";
 
 
 	public static final String DEPLOYMENT_TYPE_VM = "VM";
@@ -173,6 +174,7 @@ public class Constants {
 	public static final String DIRECTOR_DB_DRIVER="director.db.driver";
 	public static final String ARTIFACT_IMAGE="Image";
 	public static final String ARTIFACT_TAR="Tarball";
+	public static final String ARTIFACT_TAR_DISPLAY_NAME="Image With Policy As Tarball";
 	public static final String ARTIFACT_POLICY="Policy";
 	public static final String ARTIFACT_IMAGE_WITH_POLICY="ImageWithPolicy";
 	public static final String ARTIFACT_IMAGE_WITH_POLICY_DISPLAY_NAME="Image With Policy Seperated";
@@ -180,6 +182,8 @@ public class Constants {
 	public static final String ARTIFACT_DOCKER_IMAGE="DockerImage";
 	public static final String ARTIFACT_DOCKER_WITH_POLICY="DockerTarball";
 	public static final String ARTIFACT_IMAGE_WHEN_POLICY_EXISTS="ImageWhenPolicyExist";
+	public static final String ARTIFACT_DOCKER_IMAGE_DISPLAY_NAME="Docker Image";
+	public static final String ARTIFACT_DOCKER_IMAGE_WITH_POLICY_DISPLAY_NAME="Docker Image With Policy";
 	public static final String STORE_IMAGE="StoreImage";
 	public static final String STORE_TAR="StoreTarball";
 	public static final String STORE_POLICY="StorePolicy";

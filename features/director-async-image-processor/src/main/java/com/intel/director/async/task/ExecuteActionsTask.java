@@ -34,7 +34,7 @@ public class ExecuteActionsTask implements Runnable {
 		for (int i = 0; i < imageActions.size(); i++) {
 			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
-				markImageActionWithError("Unable to find a task for execution");
+				markImageActionWithError("Unable to find task");
 			}
 			String task_name = taskToBeExecuted.getTask_name();
 			log.info("Task being executed: " + task_name);
@@ -51,11 +51,13 @@ public class ExecuteActionsTask implements Runnable {
 				log.error("unable to get a task for {}",task_name);
 			}
 			if(task == null){
-				markImageActionWithError("Unable to find a task for execution "+task_name);
+				markImageActionWithError(task);
 			}
 			log.info("Task instance from factory : " + task.getTaskName());
 			if(!task.run()){
-				markImageActionWithError("Unable to execute task "+task.getTaskName());
+				markImageActionWithError(task);
+				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
+				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 				log.info("Exiting because "+task.getTaskName()+" did not execute successfully");
 				log.info("Processing stopped for action: "+imageActionObj.getId());
 				return;
@@ -65,9 +67,31 @@ public class ExecuteActionsTask implements Runnable {
 				imageActionObj.setCurrent_task_name(null);
 				imageActionObj.setCurrent_task_status(null);
 				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
 			}
 		}
 	}
+
+	private void markImageActionWithError(ImageActionAsyncTask failedTask) {
+		imageActionObj.setStatus(Constants.ERROR);
+		imageActionObj.setDetails("Failed to execute task: "+failedTask.getTaskName());
+		imageActionObj.setCurrent_task_status(Constants.ERROR);
+		failedTask.taskAction.setMessage("Failed to complete the task");
+		List<ImageActionTask> actions = imageActionObj.getActions();
+		for (ImageActionTask imageActionTask : actions) {
+			if(imageActionTask.getTask_name().equals(failedTask.getTaskName())){
+				imageActionTask.setStatus(Constants.ERROR);
+				break;
+			}			
+		}
+		try {
+			persistService.updateImageAction(imageActionObj);
+		} catch (DbException e) {
+			log.error("Erorr in ExecuteActionTask",e);
+		}
+		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+	}
+
 
 	private void markImageActionWithError(String details) {
 		imageActionObj.setStatus(Constants.ERROR);
@@ -79,7 +103,6 @@ public class ExecuteActionsTask implements Runnable {
 		}
 		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 	}
-
 	/**
 	 * Find the next task to be executed from the array of tasks
 	 * 

@@ -75,7 +75,7 @@ function ApplyRegExViewModel() {
             rootRegexDir) {
             editPatch(file, checkedStatus, rootRegexDir);
         });
-
+		
         node.removeAttr("rootregexdir");
         node.removeAttr("include");
         node.removeAttr("exclude");
@@ -337,12 +337,12 @@ $(document)
                 init: true,
                 loadMessage: "Loading..."
             }, function(file, checkedStatus, rootRegexDir) {
+				
                 editPatch(file, checkedStatus, rootRegexDir);
             });
-
+			
             mainViewModel.selectDirectoriesViewModel = new SelectDirectoriesViewModel();
             mainViewModel.applyRegExViewModel = new ApplyRegExViewModel();
-
             ko.applyBindings(mainViewModel, document
                 .getElementById("select_directories_page"));
             patches.length = 0;
@@ -377,6 +377,7 @@ function editPatch(file, checkedStatus, rootRegexDir) {
         addRemoveXml = "<remove sel=" + removePath + "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
     }
     whichPatchToUse.push(addRemoveXml);
+	
 }
 
 function backToFirstPage() {

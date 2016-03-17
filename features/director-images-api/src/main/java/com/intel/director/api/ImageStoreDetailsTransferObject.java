@@ -1,11 +1,12 @@
 package com.intel.director.api;
 
-public class ImageStoreDetailsTransferObject {
+public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDetailsTransferObject> {
 
 	public String id;
 	public String image_store_id;
 	public String key;
 	public String value;
+	private String keyDisplayValue;
 
 	public String getId() {
 		return id;
@@ -38,6 +39,16 @@ public class ImageStoreDetailsTransferObject {
 	public void setImage_store_id(String image_store_id) {
 		this.image_store_id = image_store_id;
 	}
+	
+	
+
+	public String getKeyDisplayValue() {
+		return keyDisplayValue;
+	}
+
+	public void setKeyDisplayValue(String keyDisplayValue) {
+		this.keyDisplayValue = keyDisplayValue;
+	}
 
 	@Override
 	public int hashCode() {
@@ -62,6 +73,14 @@ public class ImageStoreDetailsTransferObject {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(ImageStoreDetailsTransferObject o) {
+		if (this.key == null || o.key == null) {
+			return 0;
+		}
+		return this.key.compareTo(o.key);
 	}
 
 	

@@ -279,8 +279,7 @@ public class GlanceRsClient {
 				&& httpResponse.getStatusLine().getStatusCode() != 201) {
 			log.error("uploadimgeMetadata failed,"
 					+ httpResponse.getStatusLine());
-			throw new GlanceException("uploadimgeMetadata failed,"
-					+ httpResponse.getStatusLine());
+			throw new GlanceException(com.intel.director.common.Constants.ARTIFACT_ID+":"+glanceId);					
 		}
 
 		try {
