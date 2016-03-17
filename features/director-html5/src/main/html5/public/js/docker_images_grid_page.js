@@ -43,7 +43,7 @@ function refresh_docker_Grid() {
                 self.gridData.image_name = images[i].image_name;
                 self.gridData.policy_name = images[i].policy_name;
 				
-				var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?', '" + images[i].id + "']";
+				var deleteCallArr = "['deleteImageDocker', 'Are you sure you want to delete the image?', '" + images[i].id + "']";
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 

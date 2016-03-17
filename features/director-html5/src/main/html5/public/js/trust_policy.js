@@ -1,8 +1,9 @@
 function showImageActionHistoryDialog(imageid){
 	
+	var functionToCall = "show_action_history_grid('" + imageid + "')";
 
 	$("#image_action_history_title").html("Image Actions History");
-
+	$("#image_action_history_refresh").attr("onclick",functionToCall);
 	$('#image_action_history').modal('show');
 	show_action_history_grid(imageid);
 	

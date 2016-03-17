@@ -77,6 +77,9 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 
 	@Override
 	public int compareTo(ImageStoreDetailsTransferObject o) {
+		if (this.key == null || o.key == null) {
+			return 0;
+		}
 		return this.key.compareTo(o.key);
 	}
 

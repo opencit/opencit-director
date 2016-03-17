@@ -44,7 +44,7 @@ function imageStoreSettingPage() {
 								+ '\")\'><span id="'
 								+ image_stores[i].id
 								+ '" title=\'Validate\' class=\'glyphicon glyphicon-refresh\'></span></a>&nbsp;'
-								+ '<span id="image-store-valid-status-'
+								+ '<span style=\'color: #337ab7;\' id="image-store-valid-status-'
 								+ image_stores[i].id
 								+ '" title=\'Validation Status\'></span>';
 						image_stores_grid.push(image_store);
@@ -492,6 +492,7 @@ function populateImageStoreDetails(image_store_details) {
 
 function resetAllFields() {
 	$("#image_store_details_error").html("");
+	$('#artifacts_div').hide();
 	$("#image_store_error").html("");
 	$("#image_store_name").val("");
 	$('.edit_artifacts').prop("checked", false);

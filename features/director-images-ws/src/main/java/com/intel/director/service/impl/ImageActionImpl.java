@@ -37,6 +37,7 @@ import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.FetchActionsService;
 import com.intel.director.service.ImageActionService;
+import com.intel.director.service.ImageService;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
@@ -51,14 +52,16 @@ public  class ImageActionImpl implements ImageActionService {
 	public IPersistService persistService;
 	
 	public FetchActionsService fetchActionService;
-
+	public ImageService imageService;
 	public ImageActionImpl() {
 		persistService = new DbServiceImpl();
+		imageService = new ImageServiceImpl();
 	}
 	
 	public ImageActionImpl(FetchActionsService fetchService) {
 		persistService = new DbServiceImpl();
 		this.fetchActionService=fetchService;
+		imageService = new ImageServiceImpl();
 	}
 	
 
@@ -423,13 +426,30 @@ public  class ImageActionImpl implements ImageActionService {
 		String artifactName = null;
 		List<ImageActionTask> imageActiontaskList = imageActionObject
 				.getActions();
+		ImageInfo image =null;
+		try {
+			 image = imageService.fetchImageById(imageActionObject.getImage_id());
+			
+		} catch (DirectorException e) {
+			log.error("fetchActionHistoryResponse ,Unable to fetch image");
+			
+		}
+		boolean isDockerImage=false;
+		if(Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image.getImage_deployments())){
+			isDockerImage=true;
+		}
 		ImageActionHistoryResponse imageActionResponse= new ImageActionHistoryResponse();
 		String previousTaskname=null;
 		String displayMessage=null;
 		for (ImageActionTask imageActionTask : imageActiontaskList) {
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_TAR)) {
-				artifactName = Constants.ARTIFACT_TAR;
+				if(isDockerImage){
+					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_WITH_POLICY_DISPLAY_NAME;
+				}else{
+					artifactName = Constants.ARTIFACT_TAR_DISPLAY_NAME;
+				}
+				
 				break;
 			}
 			if(previousTaskname!=null && previousTaskname.equals(Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY) && imageActionTask.getTask_name().equals(Constants.TASK_NAME_UPLOAD_POLICY)){
@@ -450,7 +470,11 @@ public  class ImageActionImpl implements ImageActionService {
 			}
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_IMAGE)) {
-				artifactName = Constants.ARTIFACT_IMAGE;
+				if(isDockerImage){
+					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_DISPLAY_NAME;
+				}else{
+					artifactName = Constants.ARTIFACT_TAR_DISPLAY_NAME;
+				}
 
 			}
 			previousTaskname=imageActionTask.getTask_name();
@@ -493,7 +517,7 @@ public  class ImageActionImpl implements ImageActionService {
 			imageActionResponse.setDatetime(sdf.format(imageActionObject.getDatetime().getTime()));
 			
 		}
-		String commaSeperatedStoreNames = StringUtils.join(storeNames, ",");
+		String commaSeperatedStoreNames = StringUtils.join(storeNames, ", ");
 		imageActionResponse.setArtifactName(artifactName);
 		
 		imageActionResponse.setId(imageActionObject.getId());

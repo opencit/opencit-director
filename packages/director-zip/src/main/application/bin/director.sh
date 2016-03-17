@@ -329,6 +329,10 @@ done
 rm -rf /mnt/director
 
 if [ "$2" = "--purge" ]; then
+	docker images -q > /tmp/dockerDelete
+	while read line; do docker rmi -f "$line"; done < /tmp/dockerDelete
+	rm -f /tmp/dockerDelete
+	
 	director export-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
 
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}

@@ -234,11 +234,11 @@ update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 #------------------ Glance properties
 
-update_property_in_file "glance.api.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_API_ENDPOINT"
-update_property_in_file "glance.keystone.public.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_KEYSTONE_PUBLIC_ENDPOINT"
-update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
-update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
+#update_property_in_file "glance.api.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_API_ENDPOINT"
+#update_property_in_file "glance.keystone.public.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_KEYSTONE_PUBLIC_ENDPOINT"
+#update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
+#update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
+#update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 
 
@@ -249,16 +249,22 @@ update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENAN
 
 prompt_with_default DIRECTOR_DB_NAME "Drector db name:" "$DIRECTOR_DB_NAME"
 update_property_in_file "director.db.name" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_NAME"
+
 prompt_with_default DIRECTOR_DB_HOSTNAME "Drector db Hostname:" "$DIRECTOR_DB_HOSTNAME"
 update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_HOSTNAME"
+
 prompt_with_default DIRECTOR_DB_PORTNUM "Drector db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
+
 prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
+
 prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
 update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
+
 prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
 update_property_in_file "director.db.driver" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_DRIVER"
+
 
 export DIRECTOR_DB_URL="jdbc:postgresql://${DIRECTOR_DB_HOSTNAME}:${DIRECTOR_DB_PORTNUM}/${DIRECTOR_DB_NAME}"
 update_property_in_file "director.db.url" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_URL"
@@ -490,36 +496,8 @@ if [ -z "$EXISTING_DIRECTOR_COMMAND" ]; then
 fi
 
 
-
  
-postgres_test_dbtables(){
-is_postgres_tables_available=""
-echo "inside db table created  check method"
-res_tables=`sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -c "SELECT table_name FROM information_schema.tables ORDER BY table_name;"|grep -x "\s*mw_image\s*"`
-echo "result of db table exist ${res_tables}"
-if [ -n "$res_tables" ]; then
-   is_postgres_tables_available="yes"
-   return 0
-	
-fi	
 
-return 1
-
-}
-
-
-postgres_test_dbtables
-if [ -n "$is_postgres_tables_available" ]; then
-    echo_success "Database tables in [${POSTGRES_DATABASE}] already exists"
-    return 0
-  else
-   echo "before running scripts"
-        #cp psql.sql /tmp
-        #chmod 777 /tmp/psql.sql
-        psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -a -f psql.sql 2>/tmp/intel.postgres.err >> $INSTALL_LOG_FILE
-        #sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -a -f  "/tmp/psql.sql">> $INSTALL_LOG_FILE
-	echo "after running scripts"
-fi
 
 
 # register linux startup script
@@ -547,6 +525,8 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   director setup
 fi
 
+
+director setup apply-database-patches
 ## Installing Docker
 ## already installed needs to be checked not implemented in code
 version_gt() { 
