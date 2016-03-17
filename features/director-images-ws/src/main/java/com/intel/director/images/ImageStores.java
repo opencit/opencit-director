@@ -353,9 +353,9 @@ public class ImageStores {
 		}
 		
 		// Encrypt password fields
-		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
-		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil
-				.getPasswordConfiguration(imageStoreTransferObject);
+		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.getPasswordConfiguration();
+		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
+
 		if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
 			String encryptedPassword = imageStorePasswordUtil
 					.encryptPasswordForImageStore(passwordConfiguration.getValue());

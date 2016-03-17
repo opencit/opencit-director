@@ -59,9 +59,9 @@ public class StoreManagerFactory {
 					+ connector.getDriver(), e);
 		}
 
-		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil();
-		ImageStoreDetailsTransferObject passwordConfiguration = imageStorePasswordUtil
-				.getPasswordConfiguration(imageStoreDTO);
+
+		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreDTO.getPasswordConfiguration();
+		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 		if(StringUtils.isBlank(passwordConfiguration.getValue())){
 			throw new StoreException("No password set for store "+ storeId);
 		}

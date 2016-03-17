@@ -17,18 +17,18 @@ public class ImageStorePasswordUtil {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageStorePasswordUtil.class);
 
-	private String directorPassword = null;
+	private String randomPassword = null;
 	private PasswordProtection protection = null;
 	private PBKDFCryptoCodec cipher = null;
 
-	public ImageStorePasswordUtil() {
-		directorPassword = StringUtils.isNotBlank(System.getenv("DIRECTOR_PASSWORD")) ? System.getenv("DIRECTOR_PASSWORD") : "password";
-		log.info("Using directorPassword : {}", directorPassword);
+	public ImageStorePasswordUtil(String id) {
+		randomPassword = id;
+		log.info("Using directorPassword : {}", randomPassword);
 		protection = PasswordProtectionBuilder.factory().aes(128)
 				.digestAlgorithm("SHA-256").keyAlgorithm("PBKDF2WithHmacSHA1")
 				.iterations(1000).saltBytes(16).mode("CBC")
 				.padding("PKCS5Padding").build();
-		cipher = new PBKDFCryptoCodec(directorPassword, protection);
+		cipher = new PBKDFCryptoCodec(randomPassword, protection);
 
 	}
 
@@ -47,31 +47,4 @@ public class ImageStorePasswordUtil {
 		return decryptedPassword;
 	}
 
-	public ImageStoreDetailsTransferObject getPasswordConfiguration(
-			ImageStoreTransferObject imageStoreTransferObject) {
-		ImageStoreDetailsTransferObject detailsTransferObject = null;
-
-		Collection<ImageStoreDetailsTransferObject> imageStoreDetails = imageStoreTransferObject
-				.getImage_store_details();
-		ConnectorProperties connectorByName = ConnectorProperties
-				.getConnectorByName(imageStoreTransferObject.getConnector());
-		String passwordElement = null;
-		if (connectorByName.equals(ConnectorProperties.DOCKER)) {
-			passwordElement = Constants.DOCKER_HUB_PASSWORD;
-		} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
-			passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
-		} else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
-			passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
-		}
-
-		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {
-			if (imageStoreDetailsTransferObject.getKey()
-					.equals(passwordElement)) {
-				detailsTransferObject = imageStoreDetailsTransferObject;
-				break;
-			}
-		}
-		return detailsTransferObject;
-
-	}
 }

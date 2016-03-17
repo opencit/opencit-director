@@ -197,5 +197,6 @@ public class Constants {
 	public static final String DOCKER_HUB_USERNAME = "Username";
 	public static final String DOCKER_HUB_PASSWORD = "Password";
 	public static final String DOCKER_HUB_EMAIL = "Email";
+	
 
 }

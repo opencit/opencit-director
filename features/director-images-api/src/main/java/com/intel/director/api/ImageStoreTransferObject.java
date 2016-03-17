@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.intel.director.constants.Constants;
 
 @JsonInclude(Include.NON_NULL)
 public class ImageStoreTransferObject extends GenericResponse {
@@ -114,6 +115,32 @@ public class ImageStoreTransferObject extends GenericResponse {
 				+ ", image_store_details=" + image_store_details + "]";
 	}
 	
+
+	public  ImageStoreDetailsTransferObject getPasswordConfiguration() {
+		ImageStoreDetailsTransferObject detailsTransferObject = null;
+
+		Collection<ImageStoreDetailsTransferObject> imageStoreDetails = getImage_store_details();
+		ConnectorProperties connectorByName = ConnectorProperties
+				.getConnectorByName(getConnector());
+		String passwordElement = null;
+		if (connectorByName.equals(ConnectorProperties.DOCKER)) {
+			passwordElement = Constants.DOCKER_HUB_PASSWORD;
+		} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
+			passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
+		} else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
+			passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
+		}
+
+		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {
+			if (imageStoreDetailsTransferObject.getKey()
+					.equals(passwordElement)) {
+				detailsTransferObject = imageStoreDetailsTransferObject;
+				break;
+			}
+		}
+		return detailsTransferObject;
+
+	}
 
 
 }
