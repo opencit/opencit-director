@@ -99,7 +99,11 @@ public class DirectoryAndFileUtil {
 	 */
 	private String createFindCommand(String imageId,
 			DirectoryMeasurement dirMeasurement, boolean skipDirectories) {
-		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+dirMeasurement.getPath();
+		String pathOfDir = dirMeasurement.getPath();
+		if(!pathOfDir.endsWith(File.separator)){
+			pathOfDir += File.separator;
+		}
+		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir;
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		String command = null;

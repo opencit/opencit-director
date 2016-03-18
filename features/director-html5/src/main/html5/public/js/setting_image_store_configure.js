@@ -32,7 +32,7 @@ function imageStoreSettingPage() {
 								.substring(0,
 										image_store.image_artifacts.length - 1);
 						var image_store_json = JSON.stringify(image_stores[i]);
-					var deleteCallArr = '["deleteImageStore", "Are you sure you want to delete the image Store?", "' + image_stores[i].id + '"]';
+					var deleteCallArr = '["deleteImageStore", "Are you sure you want to delete the external storage configuration?", "' + image_stores[i].id + '"]';
 						image_store.actions = '<a href=\'#\' onclick=\'getImageStoreAndPopulateImageStore(\"'
 								+ image_stores[i].id
 								+ '\")\'><span title=\'Edit\' class=\'glyphicon glyphicon-edit\'></span></a>&nbsp;'

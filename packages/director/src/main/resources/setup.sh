@@ -247,13 +247,13 @@ update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
 
 #required database properties
 
-prompt_with_default DIRECTOR_DB_NAME "Drector db name:" "$DIRECTOR_DB_NAME"
+prompt_with_default DIRECTOR_DB_NAME "Director db name:" "$DIRECTOR_DB_NAME"
 update_property_in_file "director.db.name" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_NAME"
 
-prompt_with_default DIRECTOR_DB_HOSTNAME "Drector db Hostname:" "$DIRECTOR_DB_HOSTNAME"
+prompt_with_default DIRECTOR_DB_HOSTNAME "Director db Hostname:" "$DIRECTOR_DB_HOSTNAME"
 update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_HOSTNAME"
 
-prompt_with_default DIRECTOR_DB_PORTNUM "Drector db Portno:" "$DIRECTOR_DB_PORTNUM"
+prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
 
 prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"

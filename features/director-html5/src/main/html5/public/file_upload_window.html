@@ -519,7 +519,7 @@ input[readonly] {
 					'checked', 'checked');
 			$("#progressbox").show();
 			$("#message_body").show();
-
+			$("#upload").attr('value','Upload');
 
 		} else {
 			$("#progressbox").hide();
@@ -527,6 +527,8 @@ input[readonly] {
 			$("input[name=docker_upload_radio][value='downloadFromHub']").attr(
 					'checked', 'checked');
 			$("#message_body").hide();
+			$("#upload").attr('value','Download');
+
 		}
 	}
 </script>
