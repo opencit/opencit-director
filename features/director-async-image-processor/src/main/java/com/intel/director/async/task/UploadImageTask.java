@@ -123,6 +123,8 @@ public class UploadImageTask extends GenericUploadTask {
 		String glanceId=fetchUploadImageId();
 		customProperties.put(Constants.GLANCE_ID,glanceId);
 		String uploadImageName=fetchUploadImageName();
+		customProperties.put(Constants.NAME, uploadImageName);
+		imageFilePath = imageLocation + imageInfo.getImage_name();
 		if (trustPolicy != null) {
 			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 			try {
@@ -136,17 +138,9 @@ public class UploadImageTask extends GenericUploadTask {
 
 			
 			if (policy != null && policy.getEncryption() != null) {
-				imageFilePath = imageLocation + imageInfo.getImage_name()
-						+ "-enc";
-			/*	customProperties.put(Constants.NAME, uploadImageName
-						+ "-enc");*/
-				encrypt = true;
+				imageFilePath += "-enc";
 			}
 			 
-		}
-		if (!encrypt) {
-			imageFilePath = imageLocation + imageInfo.getImage_name();
-			customProperties.put(Constants.NAME, uploadImageName);
 		}
 
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);

@@ -473,7 +473,7 @@ public  class ImageActionImpl implements ImageActionService {
 				if(isDockerImage){
 					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_DISPLAY_NAME;
 				}else{
-					artifactName = Constants.ARTIFACT_TAR_DISPLAY_NAME;
+					artifactName = Constants.ARTIFACT_IMAGE;
 				}
 
 			}
