@@ -14,8 +14,10 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -425,5 +427,26 @@ public class DirectorUtil {
 			log.error(result.getStderr());
 		}
 		return result;
+	}
+	
+	public static List<String> getDriveFromWindowsHost(String username,
+			String password, String hostAddress) throws ExecuteException,
+			IOException {
+		String SPACE = " ";
+		Result result = ExecUtil
+				.executeQuoted("/bin/bash","-c","/opt/director/bin/wmic" + SPACE + "-U"+ SPACE + username + "%" + password + SPACE + "//"
+						+ hostAddress + SPACE +
+						"'SELECT DeviceID from win32_logicaldisk where DriveType=3'");
+		if (result.getExitCode() != 0
+				&& StringUtils.isNotEmpty(result.getStderr())) {
+			log.error(result.getStderr());
+			throw new IOException("Error Getting partition Info");
+		}
+		String nl = System.getProperty("line.separator");
+		String[] split = result.getStdout().split(nl);
+
+		String[] drives = Arrays.copyOfRange(split, 2, split.length);
+		List<String> driveList = Arrays.asList(drives);
+		return driveList;
 	}
 }

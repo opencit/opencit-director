@@ -3,8 +3,6 @@ package com.intel.director.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.constants.Constants;
@@ -121,23 +119,14 @@ public class SshSettingRequest extends AuditFields {
 			sshResponse.setError("No password provided or password is in incorrect format");
 		}
 		
-		List<String> host_types = new ArrayList<String>();
-		host_types.add(Constants.HOST_TYPE_LINUX);
-		host_types.add(Constants.HOST_TYPE_WINDOWS);
+		List<String> supported_host_types = new ArrayList<String>();
+		supported_host_types.add(Constants.HOST_TYPE_LINUX);
+		supported_host_types.add(Constants.HOST_TYPE_WINDOWS);
 		
-		if (getHost_type() == null || !host_types.contains(getHost_type())) {
+		if (getHost_type() == null || !supported_host_types.contains(getHost_type())) {
 			sshResponse
 					.setError("No Host Type is provided or Host Type is in incorrect format");
 		}
-		
-		if (Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(getHost_type())
-				&& StringUtils.isBlank(getHost_type())) {
-			sshResponse
-					.setError("No Partition is provided");
-		} else if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(getHost_type())) {
-			setHost_type(null);
-		}
-		
 		
 		if ("update".equals(operation)) {
 			if (!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)) {

@@ -13,7 +13,7 @@
     <script>
         $(document).ready(function() {
             if (!(drive_to_push == "" || drive_to_push == null)) {
-                drive_to_push = drive_to_push + ":"
+                drive_to_push = drive_to_push;
                 drive_to_push = drive_to_push.toUpperCase();
             }
             $("#drive_to_push_div").text(drive_to_push + "/boot/trust/");

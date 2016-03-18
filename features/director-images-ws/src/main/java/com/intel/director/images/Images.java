@@ -1282,4 +1282,24 @@ public class Images {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
 		}
 	}
+	
+	@Path("rpc/windows-partition")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@POST
+	public Response getDriveLetterForWindows(SshSettingRequest sshSettingRequest)
+			throws DirectorException {
+		try {
+			List<String> drivesForWindows = imageService.getDrivesForWindows(
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword(),
+					sshSettingRequest.getIpAddress());
+			return Response.ok("{'partitions' : " + drivesForWindows + "}").build();
+		} catch (DirectorException e) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.setError(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity(genericResponse).build();
+		}
+	}
 }

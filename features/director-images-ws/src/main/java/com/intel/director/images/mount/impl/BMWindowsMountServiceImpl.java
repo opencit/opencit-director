@@ -2,6 +2,8 @@ package com.intel.director.images.mount.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.SshSettingInfo;
@@ -32,6 +34,7 @@ public class BMWindowsMountServiceImpl extends MountServiceImpl {
 		}
 
 		String[] partitions = imageInfo.getPartition().split(",");
+		List<String> successfulMounts = new ArrayList<String>();
 		for (String partition : partitions) {
 			String mountDir = mountPath + File.separator + partition.trim();
 			File file = new File(mountDir);
@@ -46,11 +49,16 @@ public class BMWindowsMountServiceImpl extends MountServiceImpl {
 			}
 			int mountWindowsRemoteSystem = MountImage.mountWindowsRemoteSystem(
 					info.getIpAddress(), info.getUsername(), info
-							.getSshPassword().getKey(), mountDir, partition);
+							.getSshPassword().getKey(), mountDir, partition,
+					new String("0444"),new String("0444"));
 			if (mountWindowsRemoteSystem != 0) {
+				for (String mountedPath : successfulMounts) {
+					MountImage.unmountWindowsRemoteSystem(mountedPath);
+				}
 				throw new DirectorException(
 						"Error mounting partition at location " + mountDir);
 			}
+			successfulMounts.add(mountDir);
 		}
 		return 0;
 	}

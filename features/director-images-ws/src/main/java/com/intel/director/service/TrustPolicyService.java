@@ -83,4 +83,7 @@ public interface TrustPolicyService {
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;
+	public void writePolicyAndManifest(String policyXml) throws DirectorException;
+	
+	public String convertPolicyInWindowsFormat(String policyXml) throws DirectorException;
 }

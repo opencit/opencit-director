@@ -1,17 +1,6 @@
 var imageFormats = new Array();
 var image_policies = new Array();
 
-$(document).ready(function() {
-    $('input[name="host_type"]:radio').change(
-        function() {
-            if (this.value == 'linux') {
-                $("#partition_to_mount_div").hide();
-            } else {
-                $("#partition_to_mount_div").show();
-            }
-        });
-});
-
 function CreateBMLiveMetaData(data) {
 
     this.image_id = current_image_id;
@@ -76,19 +65,9 @@ function addhostandnext() {
     }
 
     if ($("input[name='host_type']:checked").val() == 'windows') {
-        self.data.partition = $("#partition_to_mount").val();
 		self.data.host_type = "Windows";
-        if (!$.trim($("#partition_to_mount").val()) == false) {
-            self.data.partition = $("#partition_to_mount").val();
-			drives = $("#partition_to_mount").val().split(",");
-			drive_to_push = drives[0];
-        } else {
-            show_error_in_bmlivemodal("Partition is Mandatory in case of windows host");
-            return;
-        }
     } else {
 		self.data.host_type = "Linux";	
-     	drive_to_push = "";
 	}
 
     self.data.image_id = current_image_id;
@@ -118,6 +97,12 @@ function addhostandnext() {
                     return;
                 }
 
+				if(data.partition){
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+				} else {
+					drive_to_push = "";
+				}
 
 
                 self.BMLiveMetaData.launch_control_policy = "MeasureOnly";

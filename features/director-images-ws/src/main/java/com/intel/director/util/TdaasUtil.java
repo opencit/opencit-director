@@ -467,14 +467,15 @@ public class TdaasUtil {
 		sshSettingInfo
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
+		
 		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
 				sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername()));
+				sshSettingRequest.getUsername(),sshSettingRequest.getPartition()));
 		return sshSettingInfo;
 
 	}
 
-	public ImageAttributes toImage(String id, String ip, String username) {
+	public ImageAttributes toImage(String id, String ip, String username, String partition) {
 		/*
 		 * Calendar c = Calendar.getInstance(); c.setTime(new Date());
 		 * c.add(Calendar.DATE, -3); Date currentDate = new Date();
@@ -493,6 +494,7 @@ public class TdaasUtil {
 		img.setImage_name(ip);
 		img.setSent(null);
 		img.setStatus(Constants.COMPLETE);
+		img.setPartition(partition);
 		return img;
 	}
 
@@ -748,6 +750,7 @@ public class TdaasUtil {
 		sshResponse.setImage_name(info.getImage().getImage_name());
 		sshResponse.setIp_address(info.getIpAddress());
 		sshResponse.setUsername(info.getUsername());
+		sshResponse.setPartition(info.getImage().getPartition());
 		return sshResponse;
 	}
 
