@@ -181,5 +181,8 @@ public interface ImageService {
 	public void dockerSetup(String imageId)
 			throws DirectorException;
 	
+	public List<String> getDrivesForWindows(String username, String password,
+			String ipAddress) throws DirectorException;
+	
 }
 
