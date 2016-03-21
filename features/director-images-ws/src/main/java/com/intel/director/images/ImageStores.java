@@ -353,7 +353,7 @@ public class ImageStores {
 		}
 		
 		// Encrypt password fields
-		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.getPasswordConfiguration();
+		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.fetchPasswordConfiguration();
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 
 		if(StringUtils.isNotBlank(passwordConfiguration.getValue())){

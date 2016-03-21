@@ -40,7 +40,7 @@ import com.intel.mtwilson.setup.SetupException;
  */
 public class ApplyDatabasePatches extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApplyDatabasePatches.class);
-
+    private static final String CHANGELOG_FILE= "changelog.sql"; 
 
 
     private String databaseDriver;
@@ -141,7 +141,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
     
     private HashSet<Long> fetchChangesToApply() throws SetupException, IOException, SQLException{
     	 HashSet<Long> changesToApply =null;
-    	log.info("Inside fetchChangesToApply()", databaseVendor);
+    	log.debug("Inside fetchChangesToApply()", databaseVendor);
         sql = getSql(databaseVendor); 
         
 
@@ -159,11 +159,9 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
              return changesToApply;
 		}
         List<ChangelogEntry> changelog=null; 
-        try{
+       
         changelog = getChangelog(c);
-        }finally{
-        	c.close();
-        }
+       
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<>(); // what is already in the database according to the changelog
         verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
@@ -237,9 +235,17 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
     //        }
             
             ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
+            
+            boolean tableExist=checkIfTableExist("changelog"); 
+            if(!tableExist){
+            	
+            	rdp.addScript(getSqlResource(CHANGELOG_FILE));
+            	log.info("changelog table do not exist");
+            }
             // removing unneeded output as user can't choice what updates to apply
             //System.out.println("Available database updates:");
             for(Long id : changesToApplyInOrder) {
+            	
                 //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
                 rdp.addScript(sql.get(id)); // new ClassPathResource("/com/intel/mtwilson/database/mysql/bootstrap.sql")); // must specify full path to resource
             }
@@ -255,7 +261,14 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
 
     }
    
-    /**
+    private Resource getSqlResource(String sqlFileName) {
+    	   PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+           Resource resource = resolver.getResource("classpath:com/intel/mtwilson/director/database/"+databaseVendor+"/"+sqlFileName);
+           
+           return resource; 
+	}
+
+	/**
      * Locates the SQL files for the specified vendor, and reads them to
      * create a mapping of changelog-date to SQL content. This mapping can
      * then be used to select which files to execute against an existing
@@ -276,15 +289,13 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
                 if( timestamp != null ) {
                     sqlmap.put(timestamp, resource);
                 }
-                else {
-                    log.error("SQL filename is not in recognized format: "+url.toExternalForm());
-                }
+               
             }
         }
         catch(IOException e) {
             throw new SetupException("Error while scanning for SQL files: "+e.getLocalizedMessage(), e);
         }
-        //System.err.println("Number of SQL files: "+sqlmap.size());
+       log.info("getSql  sqlmap::"+sqlmap);
         return sqlmap;        
     }
     
@@ -325,7 +336,15 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
 
  
 
-
+    public boolean checkIfTableExist(String tableName) throws SQLException, ClassNotFoundException {
+    	  log.debug("ckeckIfTableExist for tableName::"+tableName);
+    	  List<String> tableNamesList= getTableNames(DirectorDbConnect.getConnection());
+    	 
+    	if(tableNamesList.contains(tableName)){
+    		return true;
+    	}
+    	return false;
+    }
     
     
     private List<String> getTableNames(Connection c) throws SQLException {
@@ -338,7 +357,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
                    sqlStmt = "SHOW TABLES";
                    break;
                case "postgresql":
-                   sqlStmt = "SELECT table_name FROM information_schema.tables;";
+                   sqlStmt = "SELECT table_name FROM information_schema.tables ORDER BY table_name;";
                    break;
            }
            try (ResultSet rs = s.executeQuery(sqlStmt)) {

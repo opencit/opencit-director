@@ -102,7 +102,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(fetchImageStorebyId == null){
 				return null;
 			}
-			ImageStoreDetailsTransferObject passwordConfiguration = fetchImageStorebyId.getPasswordConfiguration();
+			ImageStoreDetailsTransferObject passwordConfiguration = fetchImageStorebyId.fetchPasswordConfiguration();
 			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 
 			if(StringUtils.isNotBlank(passwordConfiguration.getValue())){

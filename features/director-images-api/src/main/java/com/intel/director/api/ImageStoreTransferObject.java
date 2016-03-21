@@ -116,7 +116,7 @@ public class ImageStoreTransferObject extends GenericResponse {
 	}
 	
 
-	public  ImageStoreDetailsTransferObject getPasswordConfiguration() {
+	public  ImageStoreDetailsTransferObject fetchPasswordConfiguration() {
 		ImageStoreDetailsTransferObject detailsTransferObject = null;
 
 		Collection<ImageStoreDetailsTransferObject> imageStoreDetails = getImage_store_details();
