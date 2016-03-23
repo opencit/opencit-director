@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
@@ -279,7 +280,7 @@ public class ImageServiceImpl implements ImageService {
 					imageInfoDetailedResponse.setCreated_date(fetchImages
 							.get(i).getCreated_date());
 					imageInfoDetailedResponse
-							.setActionEntryCreated(checkActionEntryCreated(fetchImages
+							.setActionEntryCreated(checkNonObsoleteActionEntryCreated(fetchImages
 									.get(i).getId()));
 					imageInfoDetailedResponseList
 							.add(imageInfoDetailedResponse);
@@ -296,7 +297,7 @@ public class ImageServiceImpl implements ImageService {
 		return searchImagesResponse;
 	}
 
-	private boolean checkActionEntryCreated(String imageId) {
+	private boolean checkNonObsoleteActionEntryCreated(String imageId) {
 		List<ImageActionObject> imageActionObjectList = new ArrayList<ImageActionObject>();
 		ImageActionFilter imageActionFilter = new ImageActionFilter();
 		ImageActionOrderBy imageActionOrderBy = new ImageActionOrderBy();
@@ -313,7 +314,12 @@ public class ImageServiceImpl implements ImageService {
 
 		}
 		if (imageActionObjectList != null && imageActionObjectList.size() > 0) {
-			return true;
+			for(ImageActionObject imageActionObject: imageActionObjectList){
+				if(!imageActionObject.getCurrent_task_status().equalsIgnoreCase(Constants.OBSOLETE)){
+					return true;	
+				}
+			}
+			
 		}
 		return false;
 	}
@@ -2764,6 +2770,30 @@ public class ImageServiceImpl implements ImageService {
 
 	@Override
 	public void dockerPull(String imageId) throws DirectorException {
+		ImageInfo image = null;
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			log.error("Error in fetching image  ", e);
+			throw new DirectorException("Error in fetching image");
+		}
+		if (image == null) {
+			log.error("DockerPullTask, no image found for imageId::" + imageId);
+			throw new DirectorException("No image found for imageId");
+		}
+		
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())
+				|| StringUtils.isBlank(image.getRepository())
+				|| StringUtils.isBlank(image.getTag())) {
+			log.error("Cannot Perform Docker Pull Operation in this Image ::" + imageId);
+			throw new DirectorException("Cannot Perform Docker Setup Operation in this Image");
+		}
+		boolean doesRepoTagExist = dockerActionService.doesRepoTagExist(image.repository, image.tag);
+		if(doesRepoTagExist){
+			log.error("Image with same repo tag already exists::" + imageId);
+			throw new DirectorException("Image with same repo tag already exists");			
+		}
 		DockerPullTask dockerPullTask = new DockerPullTask(imageId);
 		DirectorAsynchExecutor.submitTask(dockerPullTask);
 	}
@@ -2783,28 +2813,43 @@ public class ImageServiceImpl implements ImageService {
 			log.error("dockerSetup, no image found for imageId::" + imageId);
 			return;
 		}
-
+		
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())
+				|| StringUtils.isBlank(image.getRepository())
+				|| StringUtils.isBlank(image.getTag())) {
+			log.error("Cannot Perform Docker Setup Operation in this Image ::" + imageId);
+			throw new DirectorException("Cannot Perform Docker Setup Operation in this Image");
+		}
+		
+		
 		String repository = image.getRepository();
 		String tag = image.getTag();
 
 		log.info("Inside dockerSetup, repository::" + repository + " tag::"
 				+ tag);
 	
+		boolean dockerSetupOperation = false;
+		
 
 		String newTag = tag + Constants.SOURCE_TAG;
 		try {
 			dockerActionService.dockerLoad(imageId);
+
 			dockerActionService.dockerTag(imageId, repository, newTag);
-
-			dockerActionService.dockerRMI(imageId);
-			image.setStatus(Constants.COMPLETE);
-
+			dockerSetupOperation = true;
+			
 		} catch (DirectorException e) {
 			image.setStatus(Constants.ERROR);
 			log.error(" DockerSetup failed", e);
 		}
-
-	
+		finally{
+			dockerActionService.dockerRMI(imageId);
+			if(dockerSetupOperation){
+				image.setStatus(Constants.COMPLETE);
+			}
+		}
+		
 		try {
 			imagePersistenceManager.updateImage(image);
 		} catch (DbException e) {
