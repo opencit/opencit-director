@@ -143,6 +143,15 @@ function show_dialog_content_trust_policy_tab() {
 
 }
 
+function show_dialog_content_trust_policy_tab_message(modalTitle, modalMessage){
+    $('#dialog_box_body_trust_policy_tab').text(modalTitle);
+    $('#dialog_box_content_trust_policy_tab').html(modalMessage);
+    $("#dialog_box_trust_policy_tab").modal({
+        backdrop: "static"
+    });
+    $('body').removeClass("modal-open");	
+}
+
 function goToVMPage() {
 
     $("#docker-dashboard-main-page").hide();
@@ -722,6 +731,16 @@ function confirmDeleteOperation(deleteCallArr){
 	$("#delete_confirmation_window").modal('show');
 }
 
+function initiate_download(imageid) {
+	console.log($("#artifact_to_download").val());
+	if($("#artifact_to_download").val() == "Policy"){
+		downloadPolicy(imageid);
+	} else if($("#artifact_to_download").val() == "Manifest") {
+		downloadManifest(imageid);
+	} else if($("#artifact_to_download").val() == "ManifestAndPolicy") {
+		downloadPolicyAndManifest(imageid,null);
+	}
+}
 
 function cleanup_orphan_policies() {
 	$.ajax({
@@ -739,4 +758,119 @@ function cleanup_orphan_policies() {
 			show_error_in_trust_policy_tab(obj.error);
 		} 
 	});
+}
+
+
+function showDownloadModal(imageid,trustpolicyid) {
+	var func = "initiate_download('" + imageid + "')";
+	$("#artifact_to_download_button").attr("onclick",func)
+	$("#download_confirmation_modal").modal('show');
+}
+
+
+function downloadPolicy(imageid, trust_policy_id) {
+
+	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+		type : "POST",
+		url : "/v1/login/tokens",
+		accept : "application/json",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : token_request_json,
+		success : function(data, status, xhr) {
+			var authtoken = authtoken = data.data[0].token;
+			var url = "/v1/images/" + imageid
+					+ "/downloads/policy?Authorization="
+					+ encodeURIComponent(authtoken);
+
+			window.location = url;
+		},
+		error : function(xhr, status, errorMessage) {
+			show_error_in_trust_policy_tab("error in downloading");
+		}
+	});
+
+}
+
+function downloadManifest(imageid) {
+
+	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+		type : "POST",
+		url : "/v1/login/tokens",
+		accept : "application/json",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : token_request_json,
+		success : function(data, status, xhr) {
+			var authtoken = authtoken = data.data[0].token;
+			var url = "/v1/images/" + imageid
+					+ "/downloads/manifest?Authorization="
+					+ encodeURIComponent(authtoken);
+
+			window.location = url;
+		},
+		error : function(xhr, status, errorMessage) {
+			show_error_in_trust_policy_tab("error in downloading");
+		}
+	});
+
+}
+
+function downloadImage(imageid) {
+
+	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+		type : "POST",
+		url : "/v1/login/tokens",
+		accept : "application/json",
+		contentType : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		data : token_request_json,
+		success : function(data, status, xhr) {
+			var authtoken = authtoken = data.data[0].token;
+			var uri = "/v1/images/" + imageid
+					+ "/downloads/image?modified=true&Authorization="
+					+ encodeURIComponent(authtoken);
+
+			window.location = uri;
+
+		},
+		error : function(xhr, status, errorMessage) {
+			show_error_in_trust_policy_tab("error in downloading");
+		}
+	});
+
+}
+
+function downloadPolicyAndManifest(imageid, trust_policy_id) {
+
+var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
+
+	$.ajax({
+            type: "POST",
+            url: "/v1/login/tokens",
+            accept: "application/json",
+            contentType: "application/json",
+            headers: {'Accept': 'application/json'},
+     		data: token_request_json,
+            success: function(data, status, xhr) {
+		var authtoken= authtoken=data.data[0].token;
+		var url="/v1/images/" + imageid + "/downloads/policyAndManifest?Authorization="+encodeURIComponent(authtoken);
+		window.location = url;                  
+            },
+            error: function(xhr, status, errorMessage) {
+              alert("error in downloading");
+            }
+    });
 }

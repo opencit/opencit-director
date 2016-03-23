@@ -38,6 +38,7 @@ import com.intel.director.api.ui.PolicyUploadFields;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyFields;
 import com.intel.director.api.ui.UserFields;
+import com.intel.director.common.Constants;
 import com.intel.mtwilson.director.data.MwHost;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
@@ -750,32 +751,35 @@ public class Mapper {
 				.getCurrent_task_name());
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
-		if(mwImageAction.getExecutionTime()!=null){
+		if (mwImageAction.getExecutionTime() != null) {
 			imageActionObject.setDatetime(mwImageAction.getExecutionTime());
 		}
-		if(mwImageAction.getCreatedTime()!=null){
-			imageActionObject.setCreatedDateTime(mwImageAction.getCreatedTime());
+		if (mwImageAction.getCreatedTime() != null) {
+			imageActionObject
+					.setCreatedDateTime(mwImageAction.getCreatedTime());
 		}
 		List<ImageActionTask> taskList = new ArrayList<>();
-		String actions = mwImageAction.getAction();
-		if (actions != null) {
-			actions = actions.replace("[", "").replace("]", "");
-			String[] split = actions.split("},");
-			ObjectMapper mapper = new ObjectMapper();
-			for (String s : split) {
-				if (!s.endsWith("}")) {
-					s = s.concat("}");
-				}
-				ImageActionTask fromJson;
-				try {
-					fromJson = mapper.readValue(s, ImageActionTask.class);
-					log.debug("TASK CREATED : " + fromJson.toString());
-					taskList.add(fromJson);
+		if (!Constants.OBSOLETE.equals(mwImageAction.getCurrent_task_status())) {
+			String actions = mwImageAction.getAction();
+			if (actions != null) {
+				actions = actions.replace("[", "").replace("]", "");
+				String[] split = actions.split("},");
+				ObjectMapper mapper = new ObjectMapper();
+				for (String s : split) {
+					if (!s.endsWith("}")) {
+						s = s.concat("}");
+					}
+					ImageActionTask fromJson;
+					try {
+						fromJson = mapper.readValue(s, ImageActionTask.class);
+						log.debug("TASK CREATED : " + fromJson.toString());
+						taskList.add(fromJson);
 
-				} catch (Exception e) {
-					log.error("Error in action mapping ", e);
-				}
+					} catch (Exception e) {
+						log.error("Error in action mapping ", e);
+					}
 
+				}
 			}
 		}
 		log.debug("No of tasks : " + taskList.size());

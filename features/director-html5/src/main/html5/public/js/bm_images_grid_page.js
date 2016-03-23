@@ -52,7 +52,7 @@ function refreshBMOnlineGrid() {
                 }
 
                 if (images[i].trust_policy_id != null) {
-                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\" id=\"bmlive_download_row_" + i + "\"  title=\"Download\" onclick=\"downloadPolicyAndManifest('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
+                    self.gridData.trust_policy = self.gridData.trust_policy + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-download-alt\" id=\"bmlive_download_row_" + i + "\"  title=\"Download\" onclick=\"showDownloadModal('" + images[i].id + "','" + images[i].trust_policy_id + "')\"></span></a>";
                 }
 
                 if (images[i].trust_policy_id != null || images[i].trust_policy_draft_id != null) {

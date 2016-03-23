@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -156,6 +157,7 @@ public class Images {
 		imageService = new ImageServiceImpl();	
 		String imageName=uploadRequest.image_name;
 		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
+			uploadRequest.repository.replace("/", "-");
 			imageName=uploadRequest.repository+":"+uploadRequest.tag;
 		
 		}
@@ -946,6 +948,106 @@ public class Images {
 
 	/**
 	 * 
+	 * Method lets the user download the manifest from the grids page. The user
+	 * can visit the grid any time and download the policy. This method looks
+	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
+	 * an xml content to the user
+	 * 
+	 * In case the policy is not found for the image id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 *  https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/manifest
+	 * Input: Image id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * </pre>
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * Input: Image id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * </pre>
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * <pre>
+	 * Input: Image id as path param
+	 *	Output: Content sent as stream
+     *
+	 * </pre>
+	 * @param imageId
+	 *            the image for which the policy is downloaded
+	 * @return XML content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/manifest")
+	@GET
+	@Produces(MediaType.APPLICATION_XML)
+	public Response downloadManifestForImageId(
+			@PathParam("imageId") String imageId) {
+		TrustPolicy policy = null;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			genericResponse.error = "No image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		
+		String trust_policy_id = imageInfo.getTrust_policy_id();
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+
+		if(trustPolicyByTrustId == null){
+			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		
+
+		try {
+			policy = imageService.getTrustPolicyByImageId(imageId);
+		} catch (DirectorException e) {
+			String msg = "Unable to fetch trust policy for image id : "
+					+ imageId;
+			log.error(msg, e);
+			log.info("Returning HTTP 404");
+		}
+		if (policy == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		String manifestForPolicy = null;
+		try {
+			manifestForPolicy = TdaasUtil.getManifestForPolicy(policy.getTrust_policy());
+		} catch (JAXBException e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		ResponseBuilder response = Response.ok(manifestForPolicy);
+		response.header("Content-Disposition", "attachment; filename=manifest_"
+				+ policy.getImgAttributes().getImage_name() + ".xml");
+		return response.build();
+	}
+	
+	/**
+	 * 
 	 * Method lets the user download the policy and manifest as a tarball from
 	 * the grids page. The user can visit the grid any time and download the
 	 * policy and manifest as it was created in the wizrd. This method looks
@@ -1042,6 +1144,78 @@ public class Images {
 		return downloadResponse;
 	}
 
+	/**
+	 * 
+	 * Method lets the user download the image from the grids page. The user can
+	 * visit the grid any time and download image. T
+	 * 
+	 * In case the image is not found for the image id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned File
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/image
+	 * Input: Image UUID
+	 * Output: Content of image as stream
+	 * </pre>
+	 * 
+	 * @param imageId
+	 *            the image for which the policy and manifest is downloaded
+	 * @return TAR ball content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/image")
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadImage(
+			@PathParam("imageId") final String imageId) {
+
+		File tarBall = null;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		ImageInfo imageInfo = null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		tarBall = new File(imageInfo.getLocation() + File.separator + imageInfo.getImage_name());
+	
+		FileInputStream tarInputStream = null;
+		try {
+			tarInputStream = new FileInputStream(tarBall) {
+				@Override
+				public void close() throws IOException {
+					super.close();
+				}
+			};
+		} catch (FileNotFoundException e) {
+			log.error("Error while dowloading Image", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		ResponseBuilder response = Response.ok(tarInputStream);
+
+		response.header("Content-Disposition", "attachment; filename="
+				+ tarBall.getName());
+
+		Response downloadResponse = response.build();
+		return downloadResponse;
+	}
+	
 	/**
 	 * 
 	 * Mark image as deleted. We turn the deleted flag=true in the MW_IMAGE
@@ -1211,6 +1385,36 @@ public class Images {
 
 	}
 	
+	
+	
+	/**
+	 * This method initiates docker pull task for given image_id provided that
+	 * deployment_type of image must be 'Docker' and repo tag should be given
+	 * before.
+	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/docker-pull/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Output: {"details":"Docker Image succesfully queued for download","status":"Success"}
+	 * 
+	 * In case of error:
+	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
+	 * Lets say the user provide the image id which does not have image_deployment as 'Docker':
+	 * {
+	 *   "error": "Cannot Perform Docker Pull Operation in this Image"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param Pathparam
+	 *            : image_id
+	 * @return Response containing details of docker-pull
+	 */
 	@Path("rpc/docker-pull/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1228,7 +1432,6 @@ public class Images {
 			imageService.dockerPull(image_id);
 		} catch (DirectorException e) {
 			log.error("Error while performing docker pull");
-			monitorStatus = new GenericResponse();
 			monitorStatus.error = e.getMessage();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(monitorStatus).build();
@@ -1238,7 +1441,34 @@ public class Images {
 		return Response.ok(monitorStatus).build();
 	}
 	
-	
+	/**
+	 * This method sets up docker image uploaded manually for given image_id for furhter operation provided that
+	 * deployment_type of image must be 'Docker' and repo tag should be given
+	 * before.
+	 * This is mandatory step before performing any further operation on docker image.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/docker-setup/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Output: {"details":"Docker Image succesfully uploaded","status":"Success"}
+	 * 
+	 * In case of error:
+	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
+	 * Lets say the user provide the image id which does not have image_deployment as 'Docker':
+	 * {
+	 *   "error": "Cannot Perform Docker Setup Operation in this Image"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param Pathparam
+	 *            : image_id
+	 * @return Response containing details of docker-setup
+	 */
 	@Path("rpc/docker-setup/{image_id: [0-9a-zA-Z_-]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1267,7 +1497,32 @@ public class Images {
 	}
 	
 	
-	
+	/**
+	 * This method removes policies from configured external storages whose
+	 * associated image is deleted from one or more configured external storages.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/remove-orphan-policies
+	 * 
+	 * Input: NA
+	 * 
+	 * Output: {}
+	 * 
+	 * In case of error:
+	 * Input: NA
+	 * 
+	 * Output:
+	 * {
+	 *   "error": "No image stores configured"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param
+	 * @return Response containing list of details of policies removed
+	 */
 	@Path("rpc/remove-orphan-policies")
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST

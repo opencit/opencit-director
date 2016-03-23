@@ -52,7 +52,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
     @Override
     protected void configure() throws Exception {
     	
-    	log.info("Inside ApplyDatabasePatches configure");
+    	log.info("Going to ApplyDatabasePatches");
     	File customFile = new File( Folders.configuration() + File.separator + "director.properties" );
 		ConfigurationProvider provider;
 		try {
@@ -221,33 +221,31 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
             Collections.sort(changesToApplyInOrder);
             
             
-    //        if(options.getBoolean("check", false)) {
-                log.info("The following changes will be applied:");
-                        for(Long changeId : changesToApplyInOrder) {
-                            /*
-                            ChangelogEntry entry = presentChanges.get(changeId);
-                            System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
-                            */
-                            log.info("Change ID: {}", changeId);
-                        }
-    //            System.exit(0); // database is compatible
-    //            return;
-    //        }
             
             ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
             
-            boolean tableExist=checkIfTableExist("changelog"); 
-            if(!tableExist){
+            boolean changeLogTableExist=checkIfTableExist("changelog"); 
+            boolean mwImageTableExist=checkIfTableExist("mw_image"); 
+            log.info("changeLogTableExist::"+changeLogTableExist+" mwImageTableExist::"+mwImageTableExist);
+            if(!changeLogTableExist){
             	
             	rdp.addScript(getSqlResource(CHANGELOG_FILE));
             	log.info("changelog table do not exist");
-            }
-            // removing unneeded output as user can't choice what updates to apply
-            //System.out.println("Available database updates:");
-            for(Long id : changesToApplyInOrder) {
+            	  log.info("Adding sql script for execution :changelog.sql");
             	
-                //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
-                rdp.addScript(sql.get(id)); // new ClassPathResource("/com/intel/mtwilson/database/mysql/bootstrap.sql")); // must specify full path to resource
+            }
+        
+   
+            int startIndex=0;
+            if(mwImageTableExist && !changeLogTableExist){ /// It has GA database
+            	log.info("Skipping execution of first sql file i.e bootstrap sql file");
+            	startIndex=1;/// Skipping the execution first sql file i.e GA build file as this condition is only true when existing database schema is of GA 
+            }
+            for(int i=startIndex; i<changesToApplyInOrder.size();i++) {
+            	
+                Long id=changesToApplyInOrder.get(i);
+                log.info("Adding sql script for execution id:"+id);
+                rdp.addScript(sql.get(id)); 
             }
             
             rdp.setContinueOnError(true);
@@ -295,7 +293,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
         catch(IOException e) {
             throw new SetupException("Error while scanning for SQL files: "+e.getLocalizedMessage(), e);
         }
-       log.info("getSql  sqlmap::"+sqlmap);
+     ///  log.info("sqlmap for execution::"+sqlmap);
         return sqlmap;        
     }
     
@@ -366,6 +364,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
                }
            }
         }
+        ///log.info("Table Names list :"+list);
         return list;
 
     }

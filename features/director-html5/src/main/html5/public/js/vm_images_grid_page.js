@@ -45,7 +45,7 @@ function refresh_vm_images_Grid() {
 				var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?' , '" + images[i].id + "']";
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"vm_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete') {
-
+					self.gridData.image_name = images[i].image_name + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-floppy-save\" id=\"vm_download_image_row_" + i + "\"  title=\"Download Image\" onclick=\"downloadImage('" + images[i].id + "')\"></span></a>";
                     self.gridData.trust_policy = "<div id=\"trust_policy_vm_column" + images[i].id + "\">";
                     if (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null) {
 

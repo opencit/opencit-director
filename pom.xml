@@ -15,6 +15,6 @@
  <module>director-trust-policy</module>
         <module>director-setup</module>
         <module>features</module>    
-		 <module>database</module>    
+		<module>database</module>    
   </modules>
 </project>

@@ -235,55 +235,55 @@ public class ImageStores {
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
-	 * Input:
-	 *  	https://{IP/HOST_NAME}/v1/image-stores
-	 *  {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["Image", "Tarball"]}
-	 *
-	 *  Output: {
-	 *"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"name": "ExtStore_1",
-	 *"artifact_types": [
-	 *"Image",
-	 *"Tarball"
-	 *],
-	 *"connector": "Glance",
-	 *"deleted": false,
-	 *"image_store_details": [
-	 *{
-	 *"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"key": "glance.api.endpoint"
-	 *},
-	 *{
-	 *"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"key": "glance.keystone.public.endpoint"
-	 *},
-	 *{
-	 *"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"key": "glance.image.store.username"
-	 *},
-	 *{
-	 *"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"key": "glance.image.store.password"
-	 *},
-	 *{
-	 *"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-	 *"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 *"key": "glance.tenant.name"
-	 *}
-	 *]
-	 *}
-	 *	
-	 *  There are validations for the connector and artifact_types fields. 
-	 *  If incorrect values are given
-	 *  {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["ABC", "Tarball"]} 
-	 *  following is the reponse:	   
-	 *  Connector Doesn't Support Given Artifact(s)
+	 *  Input:
+	 *   	https://{IP/HOST_NAME}/v1/image-stores
+	 *   {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["Image", "Tarball"]}
 	 * 
-	 *                    </pre>
+	 *   Output: {
+	 * "id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "name": "ExtStore_1",
+	 * "artifact_types": [
+	 * "Image",
+	 * "Tarball"
+	 * ],
+	 * "connector": "Glance",
+	 * "deleted": false,
+	 * "image_store_details": [
+	 * {
+	 * "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "key": "glance.api.endpoint"
+	 * },
+	 * {
+	 * "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "key": "glance.keystone.public.endpoint"
+	 * },
+	 * {
+	 * "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "key": "glance.image.store.username"
+	 * },
+	 * {
+	 * "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "key": "glance.image.store.password"
+	 * },
+	 * {
+	 * "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * "key": "glance.tenant.name"
+	 * }
+	 * ]
+	 * }
+	 * 	
+	 *   There are validations for the connector and artifact_types fields. 
+	 *   If incorrect values are given
+	 *   {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["ABC", "Tarball"]} 
+	 *   following is the reponse:	   
+	 *   Connector Doesn't Support Given Artifact(s)
+	 * 
+	 * </pre>
 	 * 
 	 * @param imageStoreTransferObject
 	 * @return
@@ -320,8 +320,121 @@ public class ImageStores {
 
 	/**
 	 * 
+	 * Edits the external store.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PUT
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 *  Input:
+	 *   	https://{IP/HOST_NAME}/v1/image-stores
+	 *   {  
+	 *    "id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *    "name":"Glance-36",
+	 *    "artifact_types":[  
+	 *       "Image",
+	 *       "Tarball"
+	 *    ],
+	 *    "connector":"Glance",
+	 *    "deleted":false,
+	 *    "image_store_details":[  
+	 *       {  
+	 *          "id":"9FED428E-EE94-4EA6-A0B9-B0C21A6DF0D8",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.api.endpoint",
+	 *          "value":"http://10.35.35.36:9292",
+	 *          "key_display_value":"API Endpoint"
+	 *       },
+	 *       {  
+	 *          "id":"A11F3A00-7E01-4694-A897-C9FBD4E4497B",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.image.store.password",
+	 *          "value":"intelmh",
+	 *          "key_display_value":"Password"
+	 *       },
+	 *       {  
+	 *          "id":"64337211-D011-4B63-A8EE-F6FF0AC62D33",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.image.store.username",
+	 *          "value":"admin",
+	 *          "key_display_value":"UserName"
+	 *       },
+	 *       {  
+	 *          "id":"FACBD7AD-3409-44E2-8552-6EA8D85913DF",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.keystone.public.endpoint",
+	 *          "value":"http://10.35.35.36:5000",
+	 *          "key_display_value":"Authorization Endpoint"
+	 *       },
+	 *       {  
+	 *          "id":"C855F736-0319-4812-9D5C-342CAD913F45",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.tenant.name",
+	 *          "value":"admin",
+	 *          "key_display_value":"Tenant Name"
+	 *       }
+	 *    ]
+	 * }
+	 * 
+	 *   Output: {  
+	 *    "id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *    "name":"Glance-36",
+	 *    "artifact_types":[  
+	 *       "Image",
+	 *       "Tarball"
+	 *    ],
+	 *    "connector":"Glance",
+	 *    "deleted":false,
+	 *    "image_store_details":[  
+	 *       {  
+	 *          "id":"9FED428E-EE94-4EA6-A0B9-B0C21A6DF0D8",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.api.endpoint",
+	 *          "value":"http://10.35.35.36:9292",
+	 *          "key_display_value":"API Endpoint"
+	 *       },
+	 *       {  
+	 *          "id":"A11F3A00-7E01-4694-A897-C9FBD4E4497B",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.image.store.password",
+	 *          "value":"XNxEwGPUzMWFoUmzaZBV6gP+tblx3h7hF/RwIvPoKFo62DIOm34Z3W0ef/dZWrJq",
+	 *          "key_display_value":"Password"
+	 *       },
+	 *       {  
+	 *          "id":"64337211-D011-4B63-A8EE-F6FF0AC62D33",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.image.store.username",
+	 *          "value":"admin",
+	 *          "key_display_value":"UserName"
+	 *       },
+	 *       {  
+	 *          "id":"FACBD7AD-3409-44E2-8552-6EA8D85913DF",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.keystone.public.endpoint",
+	 *          "value":"http://10.35.35.36:5000",
+	 *          "key_display_value":"Authorization Endpoint"
+	 *       },
+	 *       {  
+	 *          "id":"C855F736-0319-4812-9D5C-342CAD913F45",
+	 *          "image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB",
+	 *          "key":"glance.tenant.name",
+	 *          "value":"admin",
+	 *          "key_display_value":"Tenant Name"
+	 *       }
+	 *    ]
+	 * }
+	 * 	
+	 *   There are validations for the connector and artifact_types fields. 
+	 *   If incorrect values are given
+	 *   {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["ABC", "Tarball"]} 
+	 *   following is the reponse:	   
+	 *   Connector Doesn't Support Given Artifact(s)
+	 * 
+	 * </pre>
+	 * 
 	 * @param imageStoreTransferObject
-	 * @return
+	 * @return ImageStoreTransferObject
 	 * @throws DirectorException
 	 */
 	@Path("image-stores")
@@ -519,63 +632,64 @@ public class ImageStores {
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
-	 * @TDMethodType GET
+	 * @TDMethodType POST
 	 * @return Status of the connection
 	 * @TDSampleRestCall
 	 * 
 	 *                   <pre>
-	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/<IMAGE_STORE_UUID>/validate-image-store
+	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/<IMAGE_STORE_UUID>/validate
 	 * Input: the UUID of the image store would be sent as part of the request
 	 * Output:
 	 * {
-	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	"name": "ExtStore_1",
-	"artifact_types": [
-	"Image",
-	"Tarball"
-	],
-	"connector": "Glance",
-	"deleted": false,
-	"is_valid": true,
-	"image_store_details": [
-	{
-	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.image.store.username"
-	},
-	{
-	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.api.endpoint"
-	},
-	{
-	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.tenant.name"
-	},
-	{
-	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.keystone.public.endpoint"
-	},
-	{
-	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.image.store.password"
-	}
-	]
-	}
+	 * 	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	"name": "ExtStore_1",
+	 * 	"artifact_types": [
+	 * 	"Image",
+	 * 	"Tarball"
+	 * 	],
+	 * 	"connector": "Glance",
+	 * 	"deleted": false,
+	 * 	"is_valid": true,
+	 * 	"image_store_details": [
+	 * 	{
+	 * 	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	  "key": "glance.image.store.username"
+	 * 	},
+	 * 	{
+	 * 	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	  "key": "glance.api.endpoint"
+	 * 	},
+	 * 	{
+	 * 	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	  "key": "glance.tenant.name"
+	 * 	},
+	 * 	{
+	 * 	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	  "key": "glance.keystone.public.endpoint"
+	 * 	},
+	 * 	{
+	 * 	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+	 * 	  "key": "glance.image.store.password"
+	 * 	}
+	 * 	]
+	 * 	}
 	 * 
 	 * 
-	 *                   </pre>
+	 * </pre>
 	 * 
 	 * @param imageStoreId
 	 * @return Response containing the status
+	 * @throws DirectorException
 	 */
 	@Path("rpc/image-stores/{imageStoreId: [0-9a-zA-Z_-]+}/validate")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response validateImageStore(@PathParam("imageStoreId") String imageStoreId) {
+	public Response validateImageStore(@PathParam("imageStoreId") String imageStoreId) throws DirectorException {
 		ImageStoreTransferObject imageStoreTransferObject = null;
 		if (!ValidationUtil.isValidWithRegex(imageStoreId, RegexPatterns.UUID)) {
 			GenericResponse response = new GenericResponse();
@@ -591,7 +705,7 @@ public class ImageStores {
 		if (imageStoreTransferObject == null) {
 			GenericResponse response = new GenericResponse();
 			response.error = "Invalid image store id";
-			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			return Response.status(Response.Status.NOT_FOUND).entity(response).build();
 		}
 
 		imageStoreTransferObject.setIsValid(true);
@@ -601,6 +715,12 @@ public class ImageStores {
 		} catch (DirectorException e) {
 			imageStoreTransferObject.setError(e.getMessage());
 			imageStoreTransferObject.setIsValid(false);
+		}
+		
+		try {
+			persistService.updateImageStore(imageStoreTransferObject);
+		} catch (DbException e) {
+			throw new DirectorException("Error Updating image store");
 		}
 		return Response.ok(imageStoreTransferObject).build();
 

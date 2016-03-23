@@ -492,7 +492,9 @@ function populateImageStoreDetails(image_store_details) {
 
 function resetAllFields() {
 	$("#image_store_details_error").html("");
+	$("#image_store_details_error").text("");
 	$('#artifacts_div').hide();
+	$("#image_store_error").text("");
 	$("#image_store_error").html("");
 	$("#image_store_name").val("");
 	$('.edit_artifacts').prop("checked", false);

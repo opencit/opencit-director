@@ -47,6 +47,11 @@ function refresh_docker_Grid() {
                 self.gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Delete Image\" id=\"docker_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
                 if (images[i].image_upload_status == 'Complete' || images[i].image_upload_status == 'In Progress') {
 
+					if(images[i].image_upload_status == 'Complete'){
+						self.gridData.image_name = images[i].image_name + "&nbsp;<a href=\"#\"><span class=\"glyphicon glyphicon-floppy-save\" id=\"docker_download_image_row_" + i + "\"  title=\"Download Image\" onclick=\"downloadImage('" + images[i].id + "')\"></span></a>";	
+					}
+
+				
                     self.gridData.trust_policy = "<div id=\"trust_policy_docker_column" + images[i].id + "\">";
                     if ((images[i].image_upload_status == 'Complete') && (images[i].trust_policy_draft_id == null && images[i].trust_policy_id == null)) {
 
