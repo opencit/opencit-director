@@ -1,17 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-image-store</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    
     <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
     <description>Image store interface</description>
+    
     <parent>
-         <groupId>com.intel.mtwilson.director</groupId>
-	  <artifactId>director-maven-java</artifactId>
-    	  <version>0.1-SNAPSHOT</version>
-         <relativePath/>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-java</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath/>
     </parent>
-
+    
     <build>
         <plugins>
             <plugin>
@@ -19,31 +22,26 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <inherited>true</inherited>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <inherited>true</inherited>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <inherited>true</inherited>
             </plugin>
-
-        </plugins>        
-        
+        </plugins>
     </build>
- 
+    
     <dependencies>
-        <!-- director projects begin --> 
+        <!-- director -->
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
             <artifactId>director-images-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
-    
-
     </dependencies>
+    
 </project>

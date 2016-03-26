@@ -1,112 +1,101 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.intel.mtwilson.director</groupId>
-	<artifactId>director-async-image-processor</artifactId>
-	<packaging>jar</packaging>
-		<version>0.1-SNAPSHOT</version>
-
-	<description>Async image action processor</description>
-	<parent>
-		<groupId>com.intel.mtwilson.maven</groupId>
-		<artifactId>mtwilson-core-feature-zip</artifactId>
-		<version>3.0-SNAPSHOT</version>
-		<relativePath />
-	</parent>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-		</plugins>
-
-	</build>
-
-	<dependencies>
-		<!-- director projects begin -->
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-images-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20140107</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-images-ws</artifactId>
-
-			<exclusions>
-				<exclusion>
-					<groupId>org.glassfish.jersey.core</groupId>
-					<artifactId>jersey-common</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.json</groupId>
-					<artifactId>json</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20140107</version>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-persistence</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.json</groupId>
-					<artifactId>json</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-common</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-glance</artifactId>
-		</dependency>
-
-
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
-			<artifactId>director-trust-policy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-configuration</artifactId>
-		</dependency>
-	</dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-async-image-processor</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    
+    <packaging>jar</packaging>
+    <description>Async image action processor</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.maven</groupId>
+        <artifactId>mtwilson-core-feature-zip</artifactId>
+        <version>3.0-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-configuration</artifactId>
+        </dependency>
+        
+        <!-- director -->
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-common</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-glance</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-trust-policy</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-images-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-images-ws</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-persistence</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <!-- external -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20140107</version>
+        </dependency>
+    </dependencies>
+    
 </project>
