@@ -98,15 +98,6 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_DOCKER);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         
-        
-        imagelaunchpolicy = new ImageLaunchPolicy();
-        imagelaunchpolicy.image_deployments = new ArrayList<String>();
-        imagelaunchpolicy.name = "encrypted";
-        imagelaunchpolicy.display_name = "Encryption";
-        imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
-        
-        
-        imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         if(StringUtils.isEmpty(deployment_type)){
         	return imageLaunchPoliciesResponse;
         }

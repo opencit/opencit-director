@@ -49,6 +49,16 @@ public class TrustDirectorImageUploadRequest extends ImageAttributes {
 				errors.add("Invalid image size image");
 			}
 		}
+		if (StringUtils.isNotBlank(image_deployments)
+				&& Constants.DEPLOYMENT_TYPE_DOCKER.equals(image_deployments)) {
+			if (StringUtils.isBlank(repository)) {
+				errors.add("Repo cannot be null or blank for docker image");
+			}
+			
+			if(StringUtils.isBlank(tag)){
+				errors.add("Repo cannot be null or blank for docker image");
+			}
+		}
 		return StringUtils.join(errors, ",");
 	}
 

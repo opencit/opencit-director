@@ -2816,24 +2816,24 @@ public class ImageServiceImpl implements ImageService {
 			log.error("dockerSetup, no image found for imageId::" + imageId);
 			return;
 		}
-		
+
 		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
 				.getImage_deployments())
 				|| StringUtils.isBlank(image.getRepository())
 				|| StringUtils.isBlank(image.getTag())) {
-			log.error("Cannot Perform Docker Setup Operation in this Image ::" + imageId);
-			throw new DirectorException("Cannot Perform Docker Setup Operation in this Image");
+			log.error("Cannot Perform Docker Setup Operation in this Image ::"
+					+ imageId);
+			throw new DirectorException(
+					"Cannot Perform Docker Setup Operation in this Image");
 		}
-		
-		
+
 		String repository = image.getRepository();
 		String tag = image.getTag();
 
 		log.info("Inside dockerSetup, repository::" + repository + " tag::"
 				+ tag);
-	
+
 		boolean dockerSetupOperation = false;
-		
 
 		String newTag = tag + Constants.SOURCE_TAG;
 		try {
@@ -2841,18 +2841,17 @@ public class ImageServiceImpl implements ImageService {
 
 			dockerActionService.dockerTag(imageId, repository, newTag);
 			dockerSetupOperation = true;
-			
+
 		} catch (DirectorException e) {
 			image.setStatus(Constants.ERROR);
 			log.error(" DockerSetup failed", e);
-		}
-		finally{
-			dockerActionService.dockerRMI(imageId);
-			if(dockerSetupOperation){
+		} finally {
+			if (dockerSetupOperation) {
+				dockerActionService.dockerRMI(imageId);
 				image.setStatus(Constants.COMPLETE);
 			}
 		}
-		
+
 		try {
 			imagePersistenceManager.updateImage(image);
 		} catch (DbException e) {
@@ -2861,5 +2860,14 @@ public class ImageServiceImpl implements ImageService {
 					e);
 		}
 
+		if (image.getStatus().equals(Constants.ERROR)) {
+			throw new DirectorException("Error while performing docker setup");
+		}
+
+	}
+
+	@Override
+	public void getStalledImages() throws DirectorException {
+		
 	}
 }

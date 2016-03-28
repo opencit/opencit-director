@@ -101,14 +101,14 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			log.info("MTW client init");
 
 		} catch (Exception e) {
-			log.error("Unable to create client for signing the policy with MTW", e);
-			throw new DirectorException("Unable to create client for signing  policy with MTW", e);
+			log.error("Unable to create client for signing the policy with attestation service", e);
+			throw new DirectorException("Unable to create client for signing  policy with attestation service", e);
 		}
 		try {
 			signedPolicyXml = client.signTrustPolicy(policyXml);
 		} catch (Exception e) {
-			log.error("Unable to sign the policy with MTW", e);
-			throw new DirectorException("Unable to sign the policy with MTW", e);
+			log.error("Unable to sign the policy with attestation service", e);
+			throw new DirectorException("Unable to sign the policy with attestation service", e);
 		}
 		log.info("****** SIGN : " + signedPolicyXml);
 		return signedPolicyXml;

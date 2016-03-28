@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +61,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
@@ -154,12 +156,28 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(uploadImageToTrustDirector).build();
 		}
+		
+		if (Constants.DEPLOYMENT_TYPE_DOCKER
+				.equals(uploadRequest.image_deployments)
+				&& uploadRequest.image_size == 0) {
+			boolean doesRepoTagExistInDockerHub = DockerUtil
+					.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
+							uploadRequest.getTag());
+			
+			if(!doesRepoTagExistInDockerHub){
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with repo tag not available in docker hub";
+				return Response.ok(uploadImageToTrustDirector).status(Response.Status.NOT_FOUND).build();
+			}
+		}
+		
 		imageService = new ImageServiceImpl();	
 		String imageName=uploadRequest.image_name;
 		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
-			uploadRequest.repository.replace("/", "-");
-			imageName=uploadRequest.repository+":"+uploadRequest.tag;
-		
+			String repositoryInName = uploadRequest.repository;
+			imageName = repositoryInName.replace("/", "-") + ":"
+					+ uploadRequest.tag;
 		}
 		try {
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && dockerActionService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
@@ -1536,5 +1554,52 @@ public class Images {
 			genericResponse.setError(e.getMessage());
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
 		}
+	}
+	
+
+	/**
+	 * This method returns list of deployment types which allow image encryption
+	 * 
+	 * @return list of deployment types which allow image encryption
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/encryption-supported
+	 * Input: NA
+	 * Output:
+	 * [
+	 *   "VM"
+	 * ]
+	 * </pre>
+	 */
+	@Path("encryption-supported")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response listEncryptionSupported() {
+		List<String> imgEncryptSupported = new ArrayList<String>();
+		imgEncryptSupported.add(Constants.DEPLOYMENT_TYPE_VM);
+		return Response.ok(imgEncryptSupported).build();
+	}
+	
+	
+	/**
+	 * This method returns list of stalled images
+	 * 
+	 * @return list of stalled images
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images-stalled
+	 * Input: NA
+	 * Output:
+	 * [
+	 *   "VM"
+	 * ]
+	 * </pre>
+	 */
+	@Path("images-stalled")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getStalledImages() {
+		//imageService.getStalledImages();
+		return Response.ok().build();
 	}
 }

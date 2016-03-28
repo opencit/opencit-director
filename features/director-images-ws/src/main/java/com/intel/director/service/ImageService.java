@@ -180,6 +180,8 @@ public interface ImageService {
 	
 	public void dockerSetup(String imageId)
 			throws DirectorException;
+
+	public void getStalledImages() throws DirectorException;
 	
 }
 

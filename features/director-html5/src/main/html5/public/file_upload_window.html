@@ -66,6 +66,7 @@ input[readonly] {
 	var authorizationToken = window.opener.mainViewModel.loginViewModel.userProfile
 			.authorizationToken();
 	var image_deployments = window.opener.image_type_upload;
+	var isDockerManualUpload = true;
 	var image_format = window.opener.image_format_upload;
 
 	var urlToUploadMetadata = "/v1/images";
@@ -168,19 +169,23 @@ input[readonly] {
 
 	function validateForm() {
 		///$('#upload').prop('disabled', true);
-
+		console.log("image_deployments ::" + image_deployments);
+		if(image_deployments == "Docker"){
+			isDockerManualUpload = document.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually';
+		} 
+		
+		console.log("isDockerManualUpload ::" + isDockerManualUpload);
 		var x = document.forms["myform"]["myfile"].value;
-		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && (document
-				.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually') && (x == null || x == "") )) {
+		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && isDockerManualUpload && (x == null || x == "") )) {
 			alert("First Choose File Please...");
 			$('#upload').prop('disabled', false);
 			return false;
 		}
-		if (document.forms["myform"]["myfile"].value) {
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload) ) {
 			currentFileName = document.getElementById('myfile').files[0].name;
 		}
 		
-          
+  
 
 
 		if ($('#image_name_input').val() != ""
@@ -200,7 +205,7 @@ input[readonly] {
 			return false;
 		}
 		SIZE = -1;
-		if (document.forms["myform"]["myfile"].value) {
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload)) {
 			blob = document.getElementById('myfile').files[0];
 			SIZE = blob.size;
 			scheduleSessionRefresh(SIZE);
@@ -208,6 +213,10 @@ input[readonly] {
 
 		var image_id;
 		var upload_size = Math.floor(SIZE / 1024);
+		
+		if(!isDockerManualUpload){
+			SIZE = 0;
+		}
 
 		upload_data = {
 			'image_deployments' : image_deployments,
@@ -228,7 +237,7 @@ input[readonly] {
 		executeImageUpload(upload_data, urlToUploadMetadata, authorizationToken)
 		//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
 	}
-
+	
 	function executeImageUpload(upload_data, urlToUploadMetadata,
 			authorizationToken) {
 		$('#upload').prop('disabled', true);
@@ -255,7 +264,7 @@ input[readonly] {
 
 						return false;
 					}
-					if (SIZE != -1) {
+					if (isDockerManualUpload || image_deployments == "VM") {
 					///	$('#upload').prop('disabled', false);
 						BYTES_PER_CHUNK = 1048576 * 10; //10MB
 						start = 0;
