@@ -3,10 +3,12 @@ package com.intel.director.api.ui;
 import java.util.List;
 import java.util.Map;
 
+import com.intel.director.api.ConnectorKey;
+
 public class ImageStoreConnector {
 	private String name;
 	private String driver;
-	private List<String> properties;
+	private List<ConnectorKey> properties;
 	private Map<String, String> supported_artifacts;
 	public String getName() {
 		return name;
@@ -20,10 +22,10 @@ public class ImageStoreConnector {
 	public void setDriver(String driver) {
 		this.driver = driver;
 	}
-	public List<String> getProperties() {
+	public List<ConnectorKey> getProperties() {
 		return properties;
 	}
-	public void setProperties(List<String> properties) {
+	public void setProperties(List<ConnectorKey> properties) {
 		this.properties = properties;
 	}
 	public Map<String, String> getSupported_artifacts() {

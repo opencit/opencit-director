@@ -57,18 +57,6 @@ public class DockerPullTask implements Runnable {
 		String tag = image.getTag();
 
 		log.info("Inside DockerPullTask, repository::" + repository + " tag::" + tag);
-		boolean repoTagImageAlreadyExist = false;
-		try {
-			repoTagImageAlreadyExist = dockerActionService.doesRepoTagExist(repository, tag, imageId);
-			log.info("DockerPullTask, repoTagImageAlreadyExist::" + repoTagImageAlreadyExist + " repository::"
-					+ repository + " tag::" + tag);
-		} catch (DirectorException e1) {
-			log.error("DockerPullTask, doesRepoTagExist failed", e1);
-			return;
-		}
-		if (repoTagImageAlreadyExist) {
-			return;
-		}
 
 		try {
 			image.setStatus(Constants.IN_PROGRESS);
@@ -86,6 +74,7 @@ public class DockerPullTask implements Runnable {
 			dockerActionService.dockerRMI(imageId);
 			image.setStatus(Constants.COMPLETE);
 		} catch (DirectorException e1) {
+			log.error("Error in pull task", e1);
 			image.setStatus(Constants.ERROR);
 			// In case of any exception, remove the docker image
 			try {

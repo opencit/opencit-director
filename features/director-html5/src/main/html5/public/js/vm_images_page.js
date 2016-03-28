@@ -220,62 +220,7 @@ function nextButton() {
 
 }
 
-function downloadPolicy(imageid, trust_policy_id) {
 
-	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-		type : "POST",
-		url : "/v1/login/tokens",
-		accept : "application/json",
-		contentType : "application/json",
-		headers : {
-			'Accept' : 'application/json'
-		},
-		data : token_request_json,
-		success : function(data, status, xhr) {
-			var authtoken = authtoken = data.data[0].token;
-			var url = "/v1/images/" + imageid
-					+ "/downloads/policy?Authorization="
-					+ encodeURIComponent(authtoken);
-
-			window.location = url;
-		},
-		error : function(xhr, status, errorMessage) {
-			show_error_in_trust_policy_tab("error in downloading");
-		}
-	});
-
-}
-
-function downloadImage(imageid) {
-
-	var token_request_json = "{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-		type : "POST",
-		url : "/v1/login/tokens",
-		accept : "application/json",
-		contentType : "application/json",
-		headers : {
-			'Accept' : 'application/json'
-		},
-		data : token_request_json,
-		success : function(data, status, xhr) {
-			var authtoken = authtoken = data.data[0].token;
-			var uri = "/v1/images/" + imageid
-					+ "/downloadImage?modified=true&Authorization="
-					+ encodeURI(authtoken);
-
-			window.location = uri;
-
-		},
-		error : function(xhr, status, errorMessage) {
-			show_error_in_trust_policy_tab("error in downloading");
-		}
-	});
-
-}
 
 function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid,
 		imagename) {

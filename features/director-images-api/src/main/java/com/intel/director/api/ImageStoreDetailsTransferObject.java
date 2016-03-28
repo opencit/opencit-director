@@ -1,5 +1,7 @@
 package com.intel.director.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDetailsTransferObject> {
 
 	public String id;
@@ -7,6 +9,8 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 	public String key;
 	public String value;
 	private String keyDisplayValue;
+	@JsonIgnore
+	public int seqNo;
 
 	public String getId() {
 		return id;
@@ -77,10 +81,7 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 
 	@Override
 	public int compareTo(ImageStoreDetailsTransferObject o) {
-		if (this.key == null || o.key == null) {
-			return 0;
-		}
-		return this.key.compareTo(o.key);
+		return seqNo - o.seqNo; 
 	}
 
 	

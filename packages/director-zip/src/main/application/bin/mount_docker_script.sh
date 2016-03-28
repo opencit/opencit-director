@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #docker Storage drive related info can be found with "docker info" command
 #metadata of image can be find with "cat /va/lib/docker/devicemapper/metadata/full-imageid"
@@ -25,6 +25,7 @@ get_snapshot_table_info() {
 }
 
 mount_device_mapper() {
+	
 	IMAGE_ID=$(docker images --no-trunc | awk -v rep="$REPOSITORY" '$1 == rep' | awk -v tag="$TAG" '$2 == tag {print $3}')
 	get_snapshot_table_info
 	# create volume of snapshot
@@ -50,11 +51,13 @@ mount_device_mapper() {
 }
 
 unmount_device_mapper() {
+	uuidFolder="${MOUNT_PATH/mount}"
 	IMAGE_ID=$(docker images --no-trunc | awk -v rep="$REPOSITORY" '$1 == rep' | awk -v tag="$TAG" '$2 == tag {print $3}')
 	# unmount the volume
 	umount $MOUNT_PATH
 	# remove the volume
 	dmsetup remove "/dev/mapper/${IMAGE_ID}"
+	rm -rf $uuidFolder
 }
 
 mount_aufs() {
@@ -71,7 +74,9 @@ mount_aufs() {
 }
 
 unmount_aufs() {
-	umount $MOUNT_PATH
+	uuidFolder="${MOUNT_PATH/mount}"
+	umount $MOUNT_PATH	
+	rm -rf $uuidFolder
 }
 
 usage()

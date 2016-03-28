@@ -75,9 +75,10 @@ public  class ImageActionImpl implements ImageActionService {
 		Collections.sort(allActionObject);
 		for (ImageActionObject img : allActionObject) {
 			if ((img.getAction_completed() < img.getAction_count())  
-					&& !(img.getCurrent_task_status() != null && img
+					&& !(img.getCurrent_task_status() != null && (img
 							.getCurrent_task_status().startsWith(
-									Constants.ERROR))) {
+									Constants.ERROR) || img
+									.getCurrent_task_status().equalsIgnoreCase(Constants.OBSOLETE)))) {
 				actionObjectIncomplete.add(img);
 			}
 		}
@@ -202,13 +203,18 @@ public  class ImageActionImpl implements ImageActionService {
 				try {
 					fetchImageUploads = persistService.fetchImageUploads(
 							imgUpFilter, imgOrder);
+					boolean uploadImageAgain=true;
 					log.debug("ImageActionImpl, ARTIFACT_POLICY action, fetchingImageUploads for uploadId::"+uploadId);
 					if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
 						String storeId= fetchImageUploads.get(0).getStoreId();
-						artifactStoreIdMap.put(Constants.STORE_IMAGE, storeId);
+						if(StringUtils.isNotBlank(storeId)){
+							uploadImageAgain=false;
+							artifactStoreIdMap.put(Constants.STORE_IMAGE, storeId);	
+						}
 						
-					}else{
-						throw new DirectorException("It is mandatory to upload image before uploading policy");
+					}
+					if(uploadImageAgain){
+						throw new DirectorException("Please upload image before uploading policy");
 					}
 				} catch (DbException e) {
 					log.error("Error fetching image uploads by storageArtifactId {}", uploadId, e);
@@ -414,8 +420,10 @@ public  class ImageActionImpl implements ImageActionService {
 							+ imageActionFilter, e);
 		}
 		for (ImageActionObject imageActionObject : imageActionObjectList) {
+			if(!Constants.OBSOLETE.equalsIgnoreCase(imageActionObject.getCurrent_task_status())){
 			imageActionResponseList
 					.add(fetchActionHistoryResponse(imageActionObject));
+			}
 		}
 		return imageActionResponseList;
 

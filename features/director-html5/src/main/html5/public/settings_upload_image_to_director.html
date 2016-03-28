@@ -17,9 +17,12 @@
                 image_type_upload = $("#image_type").val();
                 if ($("#image_type").val() == 'VM') {
                 	image_format_upload = 'qcow2';
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('VM')" );
                 } else if ($("#image_type").val() == 'Docker') {
                 	image_format_upload = 'tar';
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('Docker')" );
                 } else {
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('VM')" );
                 	image_format_upload = $("#image_format").val();
                 }
                 OpenWindow.auth_token_parent = mainViewModel.loginViewModel.userProfile.authorizationToken();
@@ -72,27 +75,47 @@
 
         };
 
-        function goToTrustPolicyPage() {
-            $('[data-navbar-feature-button-index="0"]').removeClass('active');
-            $('[data-navbar-feature-button-index="1"]').addClass('active');
-            $("#upload-to-td").removeClass('active');
-            $("#director-trust-policy").addClass('active');
+        function goToSpecificTrustPolicyPage(gridToDisplay) {
+		
+			if(gridToDisplay == 'VM'){
+				$('[data-navbar-feature-button-index="0"]').removeClass('active');
+				$('[data-navbar-feature-button-index="1"]').addClass('active');
+				$("#upload-to-td").removeClass('active');
+				$("#director-trust-policy").addClass('active');
 
-            $("#docker-dashboard-main-page").hide();
-            $("#bm-dashboard-main-page").hide();
-            $("#vm-dashboard-main-page").show();
+				$("#docker-dashboard-main-page").hide();
+				$("#bm-dashboard-main-page").hide();
+				$("#vm-dashboard-main-page").show();
 
 
-            var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
+				var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
 
-            if (isEmpty == false) {
-                $("#vm-dashboard-main-page").html("");
-            }
-            hideLoading();
-            $("#vm-dashboard-main-page").load(
-                "/v1/html5/public/director-html5/vm_images_page.html");
-            umount_image();
+				if (isEmpty == false) {
+					$("#vm-dashboard-main-page").html("");
+				}
+				hideLoading();
+				$("#vm-dashboard-main-page").load(
+					"/v1/html5/public/director-html5/vm_images_page.html");
+			} else {
+				$('[data-navbar-feature-button-index="0"]').removeClass('active');
+				$('[data-navbar-feature-button-index="1"]').addClass('active');
+				$("#upload-to-td").removeClass('active');
+				$("#director-trust-policy").addClass('active');
 
+				$("#vm-dashboard-main-page").hide();
+				$("#bm-dashboard-main-page").hide();
+				$("#docker-dashboard-main-page").show();
+
+
+				var isEmpty = !$.trim($("#docker-dashboard-main-page").html());
+
+				if (isEmpty == false) {
+					$("#docker-dashboard-main-page").html("");
+				}
+				hideLoading();
+				$("#docker-dashboard-main-page").load(
+					"/v1/html5/public/director-html5/docker_images_page.html");
+			}
         }
 
         function hideGoToTrustPolicyButton() {
@@ -150,7 +173,7 @@
                                 <button id="gotoUploadWindow" class="btn btn-primary">Upload</button>
                             </div>
                             <div id="goToTrustPolicyPageDiv" class="col-md-1">
-                                <button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()">Trust Policy Page</button>
+                                <button id="goToSpecificTrustPolicyPage" class="btn btn-primary">Trust Policy Page</button>
                             </div>
                         </div>
                     </div>

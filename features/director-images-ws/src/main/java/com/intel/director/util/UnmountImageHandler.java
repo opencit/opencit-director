@@ -32,13 +32,13 @@ public class UnmountImageHandler {
 	private IPersistService persistService = new DbServiceImpl();
 
 	public void unmountUnusedImages() {
-		log.info("MAIN : Fetching remote hosts that are mounted");
+		log.debug("MAIN : Fetching remote hosts that are mounted");
 		List<String> mountedImageIds = fetchMountedImages();
 		if (mountedImageIds == null || mountedImageIds.isEmpty()) {
-			log.info("MAIN : No mouted remote hosts found. Returning.");
+			log.debug("MAIN : No mounted remote hosts found. Returning.");
 			return;
 		}
-		log.info("MAIN : Found " + mountedImageIds.size() + " images");
+		log.debug("MAIN : Found " + mountedImageIds.size() + " images");
 		String timeout = fetchSessionTimeout();
 		if (StringUtils.isBlank(timeout)) {
 			log.info("MAIN : No timeout found. returning");
