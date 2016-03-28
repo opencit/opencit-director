@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
-import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
@@ -457,15 +456,15 @@ public class ImageServiceImpl implements ImageService {
 				log.error("Error in closing stream: ", e);
 			}
 		}
-
+		Date edited_date = new Date();
 		imageInfo.setSent(imageInfo.getSent() + bytesread);
+		imageInfo.setEdited_date(edited_date);
 		log.info("Sent in bytes New: " + imageInfo.getSent());
 		log.info("image size: " + imageInfo.getImage_size());
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
 			imageInfo.setDeleted(false);
-
 			log.info("Image upload COMPLETE..");
 		} else {
 			imageInfo.setStatus(Constants.IN_PROGRESS);
@@ -490,6 +489,15 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		log.info("Browsing files for dir: "
 				+ searchFilesInImageRequest.getDir());
+		if(searchFilesInImageRequest.init){
+			try {
+				TrustPolicyDraft fetchPolicyDraftForImage = imagePersistenceManager.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+				fetchPolicyDraftForImage.setEdited_date(new Date());
+				imagePersistenceManager.updatePolicyDraft(fetchPolicyDraftForImage);
+			} catch (DbException e) {
+				log.error("Error updating policy draft for image {}", searchFilesInImageRequest.id, e);
+			}
+		}
 		List<String> trustPolicyElementsList = new ArrayList<String>();
 		Set<String> fileNames = new HashSet<String>();
 		Set<String> patchFileAddSet = new HashSet<String>();
@@ -2788,11 +2796,6 @@ public class ImageServiceImpl implements ImageService {
 				|| StringUtils.isBlank(image.getTag())) {
 			log.error("Cannot Perform Docker Pull Operation in this Image ::" + imageId);
 			throw new DirectorException("Cannot Perform Docker Setup Operation in this Image");
-		}
-		boolean doesRepoTagExist = dockerActionService.doesRepoTagExist(image.repository, image.tag);
-		if(doesRepoTagExist){
-			log.error("Image with same repo tag already exists::" + imageId);
-			throw new DirectorException("Image with same repo tag already exists");			
 		}
 		DockerPullTask dockerPullTask = new DockerPullTask(imageId);
 		DirectorAsynchExecutor.submitTask(dockerPullTask);

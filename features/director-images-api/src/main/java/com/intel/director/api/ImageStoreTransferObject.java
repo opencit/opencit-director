@@ -37,6 +37,12 @@ public class ImageStoreTransferObject extends GenericResponse {
 		}
 		List<ImageStoreDetailsTransferObject> listImageStoreDetailsTransferObject = new ArrayList<ImageStoreDetailsTransferObject>(
 				image_store_details);
+		
+		ConnectorProperties connectorByName = ConnectorProperties.getConnectorByName(connector);
+		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : listImageStoreDetailsTransferObject) {
+			imageStoreDetailsTransferObject.seqNo = connectorByName.fetchSeqNoOfProperty(imageStoreDetailsTransferObject.key);
+		}
+		
 		Collections.sort(listImageStoreDetailsTransferObject);
 		return listImageStoreDetailsTransferObject;
 	}

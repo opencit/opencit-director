@@ -108,17 +108,26 @@ $(function() {
 									success : function(data) {
 										var artifact_string = "";
 										var artifact_string_edit = "";
+										
 										for ( var key in data.supported_artifacts) {
+											
+											var isChecked = "";
+											
+											if(Object.keys(data.supported_artifacts).length == 1){
+												
+												isChecked = "checked";
+											}
+										
 											artifact_string = artifact_string
-													+ "<input type=\"checkbox\" class=\"artifacts\" value="
+													+ "<input type=\"checkbox\" class=\"artifacts\" value=\""
 													+ key
-													+ ">"
+													+ "\" " + isChecked + ">"
 													+ data.supported_artifacts[key]
 													+ "</input><br/>";
 											artifact_string_edit = artifact_string_edit
-													+ "<input type=\"checkbox\" class=\"edit_artifacts\" value="
+													+ "<input type=\"checkbox\" class=\"edit_artifacts\" value=\""
 													+ key
-													+ ">"
+													+ "\">"
 													+ data.supported_artifacts[key]
 													+ "</input><br/>";
 										}
@@ -152,7 +161,7 @@ function createImageStore() {
 	}
 
 	if (createImageStoreRequest.artifact_types.length == 0) {
-		$("#image_store_error").html("Cannot Accept Zero Artifacts");
+		$("#image_store_error").html("Please select at least one supported artifact");
 		return;
 	}
 
@@ -349,6 +358,7 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 					}
 				});
 			} else {
+
 				resetAllFields();
 				$("#image_store_details").modal('hide');
 				imageStoreSettingPage();
@@ -375,6 +385,23 @@ function getImageStoreAndPopulateImageStore(imageStoreId) {
 }
 
 function editImageStore() {
+	var editImageStoreRequest = {};
+	editImageStoreRequest.artifact_types = $(
+			'input:checkbox:checked.edit_artifacts').map(function() {
+		return this.value;
+	}).get();
+	editImageStoreRequest.name = $("#edit_image_store_name").val().trim();
+	
+	if (editImageStoreRequest.name == ""
+			|| editImageStoreRequest.name.length == 0) {
+		$("#edit_image_store_error").html("Name Cannot be empty");
+		return;
+	}
+	
+	if (editImageStoreRequest.artifact_types.length == 0) {
+		$("#edit_image_store_error").html("Please select at least one supported artifact");
+		return;
+	}
 	$('#editBackButton').show();
 	$('#edit_image_store').modal('hide');
 	$('#image_store_details').modal({
@@ -422,6 +449,7 @@ function populateImageStore(image_store) {
 }
 
 function populateImageStoreDetails(image_store_details) {
+	$("#image_store_details_error").html("");
 	$("#image_store_properties").html("");
 	var str = "";
 	for (i = 0; i < image_store_details.length; i++) {
@@ -490,11 +518,10 @@ function populateImageStoreDetails(image_store_details) {
 	}
 }
 
-function resetAllFields() {
+function resetAllFields() { 
 	$("#image_store_details_error").html("");
-	$("#image_store_details_error").text("");
 	$('#artifacts_div').hide();
-	$("#image_store_error").text("");
+	$("#edit_image_store_error").html("");
 	$("#image_store_error").html("");
 	$("#image_store_name").val("");
 	$('.edit_artifacts').prop("checked", false);

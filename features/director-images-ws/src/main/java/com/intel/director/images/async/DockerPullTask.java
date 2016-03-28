@@ -74,6 +74,7 @@ public class DockerPullTask implements Runnable {
 			dockerActionService.dockerRMI(imageId);
 			image.setStatus(Constants.COMPLETE);
 		} catch (DirectorException e1) {
+			log.error("Error in pull task", e1);
 			image.setStatus(Constants.ERROR);
 			// In case of any exception, remove the docker image
 			try {

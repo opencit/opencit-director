@@ -573,12 +573,21 @@ public class GlanceRsClient {
 			ImageStoreUploadResponse object = new ImageStoreUploadResponse();
 			JSONObject json = (JSONObject) images.get(i);
 			object.setId(json.getString("id"));
+			if (json.has("properties")) {
+				JSONObject jsonPropObject = json.getJSONObject("properties");
+				if (jsonPropObject.has("mtwilson_trustpolicy_location")) {
+						object.setMtwilson_trust_policy_location(jsonPropObject
+								.getString("mtwilson_trustpolicy_location"));
+				}
+			}
 			list.add(object);
 		}
 
 		return list;
 
 	}
+	
+	
 
 	private void printTimeDiff(String method, long start, long end) {
 		log.debug(method + " took " + (end - start) + " ms");

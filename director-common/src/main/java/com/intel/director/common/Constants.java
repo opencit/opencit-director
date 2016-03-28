@@ -177,6 +177,8 @@ public class Constants {
 	public static final String ARTIFACT_TAR="Tarball";
 	public static final String ARTIFACT_TAR_DISPLAY_NAME="Image With Policy As Tarball";
 	public static final String ARTIFACT_POLICY="Policy";
+	public static final String ARTIFACT_MANIFEST="Manifest";
+	public static final String ARTIFACT_MANIFEST_AND_POLICY="PolicyAndManifest";
 	public static final String ARTIFACT_IMAGE_WITH_POLICY="ImageWithPolicy";
 	public static final String ARTIFACT_IMAGE_WITH_POLICY_DISPLAY_NAME="Image With Policy Seperated";
 	public static final String ARTIFACT_DOCKER = "Docker";
