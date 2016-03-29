@@ -13,7 +13,10 @@ import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyUploadTransferObject;
+import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
+import com.intel.director.api.ui.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.PolicyUploadFilter;
 import com.intel.director.common.Constants;
 import com.intel.director.images.exception.DirectorException;
@@ -84,6 +87,10 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 		imgUpFilter.setImage_id(imageInfo.getId());
 		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		
+		ImageStoreUploadOrderBy imageStoreUploadOrderBy = new ImageStoreUploadOrderBy();
+		imageStoreUploadOrderBy.setOrderBy(OrderByEnum.ASC);
+		imageStoreUploadOrderBy.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
 		try {
 			fetchImageUploads = persistService.fetchImageUploads(imgUpFilter, null);
 			if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {

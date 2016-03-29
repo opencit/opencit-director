@@ -2,6 +2,7 @@ package com.intel.mtwilson.director.mapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
@@ -378,12 +379,10 @@ public class Mapper {
 		mwImage.setUploadVariablesMd5(imgAttributes.getUploadVariableMD5());
 		mwImage.setPartition(imgAttributes.getPartition());
 		if (imgAttributes.getCreated_date() != null) {
-			mwImage.setCreatedDate(new java.sql.Date(imgAttributes
-					.getCreated_date().getTime()));
+			mwImage.setCreatedDate(imgAttributes.getCreated_date());
 		}
 		if (imgAttributes.getEdited_date() != null) {
-			mwImage.setEditedDate(new java.sql.Date(imgAttributes
-					.getEdited_date().getTime()));
+			mwImage.setEditedDate(imgAttributes.getEdited_date());
 		}
 		if (imgAttributes.getRepository() != null) {
 			mwImage.setRepository(imgAttributes.getRepository());
@@ -465,12 +464,10 @@ public class Mapper {
 		mwTrustPolicy.setEditedByUserId(trustPolicy.getEdited_by_user_id());
 		mwTrustPolicy.setArchive(trustPolicy.isArchive());
 		if (trustPolicy.getCreated_date() != null) {
-			mwTrustPolicy.setCreatedDate(new java.sql.Date(trustPolicy
-					.getCreated_date().getTime()));
+			mwTrustPolicy.setCreatedDate(trustPolicy.getCreated_date());
 		}
 		if (trustPolicy.getEdited_date() != null) {
-			mwTrustPolicy.setEditedDate(new java.sql.Date(trustPolicy
-					.getEdited_date().getTime()));
+			mwTrustPolicy.setEditedDate(trustPolicy.getEdited_date());
 		}
 		mwTrustPolicy.setDisplay_name(trustPolicy.getDisplay_name());
 		return mwTrustPolicy;
@@ -511,12 +508,11 @@ public class Mapper {
 		mwTrustPolicyDraft.setEditedByUserId(trustPolicyDraft
 				.getEdited_by_user_id());
 		if (trustPolicyDraft.getCreated_date() != null) {
-			mwTrustPolicyDraft.setCreatedDate(new java.sql.Date(
-					trustPolicyDraft.getCreated_date().getTime()));
+			mwTrustPolicyDraft.setCreatedDate(trustPolicyDraft
+					.getCreated_date());
 		}
 		if (trustPolicyDraft.getEdited_date() != null) {
-			mwTrustPolicyDraft.setEditedDate(new java.sql.Date(trustPolicyDraft
-					.getEdited_date().getTime()));
+			mwTrustPolicyDraft.setEditedDate(trustPolicyDraft.getEdited_date());
 		}
 		mwTrustPolicyDraft.setDisplay_name(trustPolicyDraft.getDisplay_name());
 		return mwTrustPolicyDraft;
@@ -576,8 +572,8 @@ public class Mapper {
 		mwImageUpload.setTmpLocation(imageStoreUploadTO.getTmp_location());
 		mwImageUpload.setStatus(imageStoreUploadTO.getStatus());
 		if (imageStoreUploadTO.getDate() != null) {
-			mwImageUpload.setDate(new java.sql.Date(imageStoreUploadTO
-					.getDate().getTime()));
+			mwImageUpload.setDate(imageStoreUploadTO
+					.getDate());
 		}
 
 		return mwImageUpload;
@@ -597,8 +593,7 @@ public class Mapper {
 
 		mwPolicyUpload.setStatus(policyUploadTO.getStatus());
 		if (policyUploadTO.getDate() != null) {
-			mwPolicyUpload.setDate(new java.sql.Date(policyUploadTO.getDate()
-					.getTime()));
+			mwPolicyUpload.setDate(policyUploadTO.getDate()					);
 		}
 		mwPolicyUpload.setStoreArtifactId(policyUploadTO.getStoreArtifactId());
 
@@ -727,7 +722,6 @@ public class Mapper {
 				.getCurrent_task_status());
 		if (imageAction.getDatetime() != null) {
 			mwImageAction.setExecutionTime(imageAction.getDatetime());
-
 		}
 		if (imageAction.getCreatedDateTime() != null) {
 			mwImageAction.setCreatedTime(imageAction.getCreatedDateTime());
@@ -814,8 +808,6 @@ public class Mapper {
 
 	public MwHost toData(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		java.util.Date utilDate = new java.util.Date();
-		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		mwHost.setIpAdsress(sshSetting.getIpAddress());
 		mwHost.setName(sshSetting.getName());
 		mwHost.setUsername(sshSetting.getUsername());
@@ -830,8 +822,8 @@ public class Mapper {
 			mwHost.setEditedByUserId(sshSetting.getEdited_by_user_id());
 		}
 
-		mwHost.setCreatedDate(sqlDate);
-		mwHost.setEditedDate(sqlDate);
+		mwHost.setCreatedDate(Calendar.getInstance());
+		mwHost.setEditedDate(Calendar.getInstance());
 		return mwHost;
 	}
 
@@ -853,8 +845,6 @@ public class Mapper {
 
 	public MwHost toDataUpdate(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		java.util.Date utilDate = new java.util.Date();
-		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		// ssh = toMw(sshSetting.getPassword());
 		mwHost.setId(sshSetting.getId());
 		mwHost.setIpAdsress(sshSetting.getIpAddress());
@@ -870,8 +860,8 @@ public class Mapper {
 		}
 		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
-		mwHost.setCreatedDate(sqlDate);
-		mwHost.setEditedDate(sqlDate);
+		mwHost.setCreatedDate(Calendar.getInstance());
+		mwHost.setEditedDate(Calendar.getInstance());
 		return mwHost;
 	}
 

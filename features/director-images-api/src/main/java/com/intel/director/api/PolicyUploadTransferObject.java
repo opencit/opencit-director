@@ -1,13 +1,13 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public class PolicyUploadTransferObject {
 
     protected String id;
 
     protected String policy_uri;
-    protected Date date;
+    protected Calendar date;
 
     protected String status;
 
@@ -68,10 +68,10 @@ public class PolicyUploadTransferObject {
 	public void setPolicy_uri(String policy_uri) {
 		this.policy_uri = policy_uri;
 	}
-	public Date getDate() {
+	public Calendar getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(Calendar date) {
 		this.date = date;
 	}
 	public String getStatus() {

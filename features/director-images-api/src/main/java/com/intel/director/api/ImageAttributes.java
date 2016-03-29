@@ -5,7 +5,7 @@
  */
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -55,8 +55,8 @@ public class ImageAttributes extends AuditFields {
         super();
     }
 
-    public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id, String image_name,
+    public ImageAttributes(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String id, String image_name,
             String format, String image_deployments, String status,
             Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {
@@ -75,8 +75,8 @@ public class ImageAttributes extends AuditFields {
 
     }
 
-    public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String image_name,
+    public ImageAttributes(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String image_name,
             String format, String image_deployments, String status,
             Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {

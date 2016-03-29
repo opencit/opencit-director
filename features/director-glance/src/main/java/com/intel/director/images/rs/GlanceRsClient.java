@@ -431,7 +431,11 @@ public class GlanceRsClient {
 		boolean responseHasError = false;
 		String authEndpoint = glanceKeystonePublicEndpoint + "/v2.0/tokens";
 
-		
+			try {
+				URL url = new URL(authEndpoint);
+			} catch (MalformedURLException e3) {
+				throw new GlanceException("Invalid auth url", e3);
+			}
 			httpClient = HttpClientBuilder.create().build();
 			HttpPost postRequest = new HttpPost(authEndpoint);
 

@@ -2,7 +2,7 @@ package com.intel.director.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +32,13 @@ public class UnmountImageHandler {
 	private IPersistService persistService = new DbServiceImpl();
 
 	public void unmountUnusedImages() {
-		log.debug("MAIN : Fetching remote hosts that are mounted");
+		log.info("MAIN : Fetching remote hosts that are mounted");
 		List<String> mountedImageIds = fetchMountedImages();
 		if (mountedImageIds == null || mountedImageIds.isEmpty()) {
-			log.debug("MAIN : No mounted remote hosts found. Returning.");
+			log.info("MAIN : No mouted remote hosts found. Returning.");
 			return;
 		}
-		log.debug("MAIN : Found " + mountedImageIds.size() + " images");
+		log.info("MAIN : Found " + mountedImageIds.size() + " images");
 		String timeout = fetchSessionTimeout();
 		if (StringUtils.isBlank(timeout)) {
 			log.info("MAIN : No timeout found. returning");
@@ -62,7 +62,7 @@ public class UnmountImageHandler {
 				try {
 					ImageInfo imageInfo = persistService.fetchImageById(imageId);
 					imageInfo.setMounted_by_user_id(null);
-					imageInfo.setEdited_date(new Date());
+					imageInfo.setEdited_date(Calendar.getInstance());
 					imageInfo.setEdited_by_user_id("poller");
 					persistService.updateImage(imageInfo);
 				} catch (DbException e) {
@@ -125,11 +125,17 @@ public class UnmountImageHandler {
 			try {
 				TrustPolicyDraft trustPolicyDraft = persistService
 						.fetchPolicyDraftForImage(imageId);
-				Date trustPolicyDraftEditDate = trustPolicyDraft
+				Calendar trustPolicyDraftEditDate = trustPolicyDraft
 						.getEdited_date();
-				Date currentDate = new Date();
-				long diffMinutes = (currentDate.getTime() - trustPolicyDraftEditDate
-						.getTime()) / (60 * 1000) % 60;
+				trustPolicyDraftEditDate.set(Calendar.SECOND, 59);
+				trustPolicyDraftEditDate.set(Calendar.HOUR, 23);
+				trustPolicyDraftEditDate.set(Calendar.MINUTE, 59);
+				Calendar currentDate = Calendar.getInstance();
+				currentDate.set(Calendar.SECOND, 59);
+				currentDate.set(Calendar.HOUR, 23);
+				currentDate.set(Calendar.MINUTE, 59);
+				long diffMinutes = (currentDate.getTime().getTime() - trustPolicyDraftEditDate
+						.getTime().getTime()) / (60 * 1000) % 60;
 				
 				log.debug("DIFF : "+diffMinutes +" Timeout = "+new Long(timeout).longValue());
 				if (diffMinutes > new Long(timeout).longValue()) {

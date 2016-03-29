@@ -58,14 +58,19 @@ input[readonly] {
 	cursor: text !important;
 }
 </style>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/jsgrid.css" />
+<link rel="stylesheet" type="text/css" href="css/theme.css" />
 <script src="js/jquery.js"></script>
 <script src="js/jquery.form.js"></script>
-<link rel="stylesheet" href="css/bootstrap.min.css">
+
 <script src="js/bootstrap.min.js"></script>
+<script src="js/jsgrid.min.js"></script>
 <script type="text/javascript">
 	var authorizationToken = window.opener.mainViewModel.loginViewModel.userProfile
 			.authorizationToken();
 	var image_deployments = window.opener.image_type_upload;
+	var isDockerManualUpload = true;
 	var image_format = window.opener.image_format_upload;
 
 	var urlToUploadMetadata = "/v1/images";
@@ -168,19 +173,23 @@ input[readonly] {
 
 	function validateForm() {
 		///$('#upload').prop('disabled', true);
-
+		console.log("image_deployments ::" + image_deployments);
+		if(image_deployments == "Docker"){
+			isDockerManualUpload = document.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually';
+		} 
+		
+		console.log("isDockerManualUpload ::" + isDockerManualUpload);
 		var x = document.forms["myform"]["myfile"].value;
-		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && (document
-				.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually') && (x == null || x == "") )) {
+		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && isDockerManualUpload && (x == null || x == "") )) {
 			alert("First Choose File Please...");
 			$('#upload').prop('disabled', false);
 			return false;
 		}
-		if (document.forms["myform"]["myfile"].value) {
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload) ) {
 			currentFileName = document.getElementById('myfile').files[0].name;
 		}
 		
-          
+  
 
 
 		if ($('#image_name_input').val() != ""
@@ -200,7 +209,7 @@ input[readonly] {
 			return false;
 		}
 		SIZE = -1;
-		if (document.forms["myform"]["myfile"].value) {
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload)) {
 			blob = document.getElementById('myfile').files[0];
 			SIZE = blob.size;
 			scheduleSessionRefresh(SIZE);
@@ -208,6 +217,10 @@ input[readonly] {
 
 		var image_id;
 		var upload_size = Math.floor(SIZE / 1024);
+		
+		if(!isDockerManualUpload){
+			SIZE = 0;
+		}
 
 		upload_data = {
 			'image_deployments' : image_deployments,
@@ -228,7 +241,7 @@ input[readonly] {
 		executeImageUpload(upload_data, urlToUploadMetadata, authorizationToken)
 		//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
 	}
-
+	
 	function executeImageUpload(upload_data, urlToUploadMetadata,
 			authorizationToken) {
 		$('#upload').prop('disabled', true);
@@ -255,7 +268,7 @@ input[readonly] {
 
 						return false;
 					}
-					if (SIZE != -1) {
+					if (isDockerManualUpload || image_deployments == "VM") {
 					///	$('#upload').prop('disabled', false);
 						BYTES_PER_CHUNK = 1048576 * 10; //10MB
 						start = 0;
@@ -289,7 +302,21 @@ input[readonly] {
 						return false;
 					}
 
-				} else {
+				} else if (xhrmdt.status === 404) {
+					var myArr = JSON.parse(xhrmdt.responseText);
+					image_id = myArr.id;
+					if (myArr.details) {
+						$('#file_upload_window_modal_body').html(myArr.details);
+						$("#file_upload_window_modal").modal({
+							backdrop : "static"
+						});
+
+						$('body').removeClass("modal-open");
+						$('#upload').prop('disabled', false);
+						return false;
+					}
+
+				} else  {
 					console.log("Clearing interval : " + refreshIntervalId);
 					clearInterval(refreshIntervalId);
 					alert("Failed to save image upload metdata.");
@@ -531,6 +558,114 @@ input[readonly] {
 
 		}
 	}
+	
+	
+	function refresh_stalled_images_grid(){
+	
+	
+		console.log("Refreshing stalled Image Grid");
+		$("#stalled-images-grid").html("");
+		
+		$.ajax({
+			type: "GET",
+			url: "/v1/images-stalled",
+			headers : {
+				"Authorization" : "Token " + authorizationToken
+			},
+			dataType: "json",
+			success: function(result) {
+				images = result;
+				var grid = [];
+				for (i = 0; i < images.length; i++) {
+					if (images[i].deleted) {
+						continue;
+					}
+					var gridData = {};
+
+					gridData.image_name = images[i].image_name;
+					gridData.created_date = images[i].created_date;
+					var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?' , '" + images[i].id + "']";
+					gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Remove Stalled Image\" id=\"stalled_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
+					grid.push(gridData);
+
+				}
+				
+				$("#stalled-images-grid").jsGrid({
+
+					height: "auto",
+					width: "80%",
+					sorting: true,
+					paging: true,
+					pageSize: 10,
+					pageButtonCount: 15,
+					data: grid,
+					fields: [{
+							title: "Image Name",
+							name: "image_name",
+							type: "text",
+							width: 200,
+							align: "center"
+					},  {
+							title: "Delete",
+							name: "image_delete",
+							type: "text",
+							width: 50,
+							align: "center"
+					},
+						
+						{
+							title: "Policy Created Date",
+							name: "created_date",
+							type: "text",
+							width: 50,
+							align: "center"
+					}],
+					onRefreshed: function(args) {
+						if (grid.length <= 0) {
+							return;
+						}
+						var numOfPagesWithDecimal = grid.length / args.grid.pageSize;
+						var numOfPages = Math.ceil(numOfPagesWithDecimal);
+						if (args.grid.pageIndex > numOfPages) {
+							args.grid.reset();
+						}
+
+					}
+				});
+				$("#stalled-images-grid").jsGrid("sort", { field: "image_name", order: "asc" });
+			}
+		});
+	}
+	
+	function confirmDeleteOperation(deleteCallArr){
+		var funcName = deleteCallArr[0];
+
+		var args = "";
+		if(deleteCallArr.length > 2){
+			for(var i=2;i<deleteCallArr.length;i++){
+				args=args + "'"+deleteCallArr[i]+"',";			
+			}
+			args = args.substring(0, args.length-1);
+		}
+		var func = funcName+"("+args+")";
+		$("#confirm_delete").attr("onclick", func);
+		$("#delete_confirmation_window_text").text(deleteCallArr[1]);
+		$("#delete_confirmation_window").modal('show');
+	}
+	
+	function deleteImage(imageid) {
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/images/" + imageid,
+			dataType : "text",
+			headers : {
+				"Authorization" : "Token " + authorizationToken
+			},
+			success : function(result) {
+				refresh_stalled_images_grid();
+			}
+		});
+	}
 </script>
 
 </head>
@@ -583,7 +718,32 @@ input[readonly] {
 			<font color="red">Note : Please do not close this window when
 				upload is in progress...!!!</font>
 		</div>
+		<br />		<br />		<br />
+		
+		
+		<!-- Modal -->
+		<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="delete_confirmation_window" role="dialog">
+			<div class="modal-dialog modal-md">	
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<center><h4 class="modal-title" id = "delete_confirmation_window_text"></h4></center>
+					</div>
+					<div class="modal-footer">
+						<div class="row">
+							<div class="col-md-4"></div>
+							<div class="col-md-1"><button type="button" class="btn btn-danger" data-dismiss="modal">No</button></div>
+							<div class="col-md-2"></div>
+							<div class="col-md-1"><button type="button" class="btn btn-success" data-dismiss="modal" id = "confirm_delete" >Yes</button></div>
+							<div class="col-md-4"></div>
+						</div>
+					</div>
+				</div>	
+			</div>
+		</div>
 
+		
+		
 		<!-- Modal -->
 		<div class="modal fade" id="file_upload_window_modal" role="dialog">
 			<div class="modal-dialog">
@@ -605,7 +765,15 @@ input[readonly] {
 			</div>
 		</div>
 	</form>
-
+		<!--<button onclick="refresh_stalled_images_grid()">Stalled Images</button><br />-->
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<div id = "stalled-images-grid"></div>
+			</div>
+			<div class="col-md-3"></div>
+		</div>
+		
 
 
 </body>

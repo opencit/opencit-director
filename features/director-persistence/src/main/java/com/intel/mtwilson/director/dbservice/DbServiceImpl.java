@@ -162,8 +162,7 @@ public class DbServiceImpl implements IPersistService {
 	public void updateImage(ImageAttributes img) throws DbException {
 		MwImage mwImage = imgDao.getMwImage(img.getId());
 		if (img.getCreated_date() != null) {
-			mwImage.setCreatedDate(new java.sql.Date(img.getCreated_date()
-					.getTime()));
+			mwImage.setCreatedDate(img.getCreated_date());
 		}
 		if (img.getCreated_by_user_id() != null) {
 			mwImage.setCreatedByUserId(img.getCreated_by_user_id());
@@ -188,8 +187,7 @@ public class DbServiceImpl implements IPersistService {
 			mwImage.setEditedByUserId(img.getEdited_by_user_id());
 		}
 		if (img.getEdited_date() != null) {
-			mwImage.setEditedDate(new java.sql.Date(img.getEdited_date()
-					.getTime()));
+			mwImage.setEditedDate(img.getEdited_date());
 		}
 		if (img.getLocation() != null) {
 			mwImage.setLocation(img.getLocation());

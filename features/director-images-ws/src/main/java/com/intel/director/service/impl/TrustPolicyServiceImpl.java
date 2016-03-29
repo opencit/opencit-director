@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -107,14 +107,14 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			log.info("MTW client init");
 
 		} catch (Exception e) {
-			log.error("Unable to create client for signing the policy with MTW", e);
-			throw new DirectorException("Unable to create client for signing  policy with MTW", e);
+			log.error("Unable to create client for signing the policy with attestation service", e);
+			throw new DirectorException("Unable to create client for signing  policy with attestation service", e);
 		}
 		try {
 			signedPolicyXml = client.signTrustPolicy(policyXml);
 		} catch (Exception e) {
-			log.error("Unable to sign the policy with MTW", e);
-			throw new DirectorException("Unable to sign the policy with MTW", e);
+			log.error("Unable to sign the policy with attestation service", e);
+			throw new DirectorException("Unable to sign the policy with attestation service", e);
 		}
 		log.info("****** SIGN : " + signedPolicyXml);
 		return signedPolicyXml;
@@ -140,8 +140,8 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			throw new DirectorException("No policy or draft for the image");
 		}
 
-		newTrustPolicy.setCreated_date(new Date());
-		newTrustPolicy.setEdited_date(new Date());
+		newTrustPolicy.setCreated_date(Calendar.getInstance());
+		newTrustPolicy.setEdited_date(Calendar.getInstance());
 		newTrustPolicy.setEdited_by_user_id(userName);
 		newTrustPolicy.setCreated_by_user_id(userName);
 

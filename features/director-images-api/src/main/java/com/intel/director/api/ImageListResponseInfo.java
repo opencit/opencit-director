@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import com.intel.director.api.ui.ImageInfo;
 
@@ -12,7 +12,7 @@ public class ImageListResponseInfo extends ImageInfo{
 	public String image_upload;
 	public String image_delete;
 
-	public Date created_date;
+	public Calendar created_date;
 	
 	public String display_name;
 	public String getDisplay_name() {
@@ -47,10 +47,10 @@ public class ImageListResponseInfo extends ImageInfo{
 	public void setImage_upload(String image_upload) {
 		this.image_upload = image_upload;
 	}
-	public Date getCreated_date() {
+	public Calendar getCreated_date() {
 		return created_date;
 	}
-	public void setCreated_date(Date created_date) {
+	public void setCreated_date(Calendar created_date) {
 		this.created_date = created_date;
 	}
 	public String getImage_delete() {
