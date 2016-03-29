@@ -142,12 +142,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 									.getMtwilson_trust_policy_location());
 					storeUploadResponses.add(storeUploadResponse);
 				}
-
 			}
-		}
-
-		if (idFromImageStores.size() == 0) {
-			throw new DirectorException("No policies available for cleanup");
 		}
 
 		// Fetch the image id from mw_image_uploads
