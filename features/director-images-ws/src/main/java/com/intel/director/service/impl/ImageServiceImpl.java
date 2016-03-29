@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -187,7 +187,7 @@ public class ImageServiceImpl implements ImageService {
 		// Mark the image mounted by the user
 		try {
 			image.setMounted_by_user_id(loggedInUser);
-			Date currentDate = new Date();
+			Calendar currentDate = Calendar.getInstance();
 			image.setEdited_date(currentDate);
 			image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 			imagePersistenceManager.updateImage(image);
@@ -227,7 +227,7 @@ public class ImageServiceImpl implements ImageService {
 		mountService.unmount();
 
 		image.setMounted_by_user_id(null);
-		Date currentDate = new Date();
+		Calendar currentDate = Calendar.getInstance();
 		image.setEdited_date(currentDate);
 		image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
@@ -357,7 +357,7 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setImage_size(sizeInBytes);
 		imageAttributes.location = Constants.defaultUploadPath;
 		imageAttributes.image_format = image_format;
-		Date currentDate = new Date();
+		Calendar currentDate = Calendar.getInstance();
 		imageAttributes.setCreated_date(currentDate);
 		imageAttributes.setEdited_date(currentDate);
 		imageAttributes.setEdited_by_user_id(ShiroUtil.subjectUsername());
@@ -456,7 +456,7 @@ public class ImageServiceImpl implements ImageService {
 				log.error("Error in closing stream: ", e);
 			}
 		}
-		Date edited_date = new Date();
+		Calendar edited_date = Calendar.getInstance();
 		imageInfo.setSent(imageInfo.getSent() + bytesread);
 		imageInfo.setEdited_date(edited_date);
 		log.info("Sent in bytes New: " + imageInfo.getSent());
@@ -492,7 +492,7 @@ public class ImageServiceImpl implements ImageService {
 		if(searchFilesInImageRequest.init){
 			try {
 				TrustPolicyDraft fetchPolicyDraftForImage = imagePersistenceManager.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
-				fetchPolicyDraftForImage.setEdited_date(new Date());
+				fetchPolicyDraftForImage.setEdited_date(Calendar.getInstance());
 				imagePersistenceManager.updatePolicyDraft(fetchPolicyDraftForImage);
 			} catch (DbException e) {
 				log.error("Error updating policy draft for image {}", searchFilesInImageRequest.id, e);
@@ -718,8 +718,7 @@ public class ImageServiceImpl implements ImageService {
 		String draft = trustPolicyDraft.getTrust_policy_draft();
 
 		draft = TdaasUtil.patch(draft, trustpolicyDraftEditRequest.patch);
-		Date currentDate = new Date();
-		trustPolicyDraft.setEdited_date(currentDate);
+		trustPolicyDraft.setEdited_date(Calendar.getInstance());
 		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		trustPolicyDraft.setTrust_policy_draft(draft);
 		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
@@ -982,7 +981,7 @@ public class ImageServiceImpl implements ImageService {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
 
-			Date currentDate = new Date();
+			Calendar currentDate = Calendar.getInstance();
 
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageid);
@@ -1015,8 +1014,8 @@ public class ImageServiceImpl implements ImageService {
 					ImageAttributes imgAttrs = new ImageAttributes();
 					imgAttrs.setId(imageid);
 					trustPolicyDraft.setImgAttributes(imgAttrs);
-					trustPolicyDraft.setCreated_date(new Date());
-					trustPolicyDraft.setEdited_date(new Date());
+					trustPolicyDraft.setCreated_date(Calendar.getInstance());
+					trustPolicyDraft.setEdited_date(Calendar.getInstance());
 					trustPolicyDraft.setEdited_by_user_id(ShiroUtil
 							.subjectUsername());
 					trustPolicyDraft.setCreated_by_user_id(ShiroUtil
@@ -1069,8 +1068,8 @@ public class ImageServiceImpl implements ImageService {
 					imgAttrs.setId(imageid);
 					trustPolicyDraft.setImgAttributes(imgAttrs);
 					TrustPolicyDraft policyDraftCreated;
-					trustPolicyDraft.setCreated_date(new Date());
-					trustPolicyDraft.setEdited_date(new Date());
+					trustPolicyDraft.setCreated_date(Calendar.getInstance());
+					trustPolicyDraft.setEdited_date(Calendar.getInstance());
 					trustPolicyDraft.setEdited_by_user_id(ShiroUtil
 							.subjectUsername());
 					trustPolicyDraft.setCreated_by_user_id(ShiroUtil
@@ -1103,7 +1102,7 @@ public class ImageServiceImpl implements ImageService {
 				ImageAttributes imgAttrs = new ImageAttributes();
 				imgAttrs.setId(imageid);
 				existingDraft.setImgAttributes(imgAttrs);
-				existingDraft.setEdited_date(new Date());
+				existingDraft.setEdited_date(Calendar.getInstance());
 				existingDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 				imagePersistenceManager.updatePolicyDraft(existingDraft);
 
@@ -1398,7 +1397,7 @@ public class ImageServiceImpl implements ImageService {
 					+ policyId);
 		}
 		trustPolicy.setDisplay_name(updateTrustPolicyRequest.getDisplay_name());
-		trustPolicy.setEdited_date(new Date());
+		trustPolicy.setEdited_date(Calendar.getInstance());
 		trustPolicy.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
 			imagePersistenceManager.updatePolicy(trustPolicy);
@@ -1736,7 +1735,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 		TrustPolicyDraft savePolicyDraft;
 		try {
-			trustPolicyDraft.setEdited_date(new Date());
+			trustPolicyDraft.setEdited_date(Calendar.getInstance());
 			trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 			savePolicyDraft = imagePersistenceManager
 					.savePolicyDraft(trustPolicyDraft);
@@ -2106,9 +2105,9 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		policyDraftForImage.setTrust_policy_draft(policyXmlWithImports);
-		policyDraftForImage.setEdited_date(new Date());
+		policyDraftForImage.setEdited_date(Calendar.getInstance());
 		policyDraftForImage.setEdited_by_user_id(ShiroUtil.subjectUsername());
-		policyDraftForImage.setCreated_date(new Date());
+		policyDraftForImage.setCreated_date(Calendar.getInstance());
 		policyDraftForImage.setCreated_by_user_id(ShiroUtil.subjectUsername());
 
 		try {
@@ -2867,7 +2866,30 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public void getStalledImages() throws DirectorException {
-		
+	public List<ImageInfo> getStalledImages() throws DirectorException {
+		List<ImageInfo> fetchImages = null;
+		try {
+			fetchImages = imagePersistenceManager.fetchImages(null, null);
+		} catch (DbException e) {
+			log.error("Error while retrieving list of images", e);
+			throw new DirectorException(
+					"Error while retrieving list of images", e);
+		}
+		List<ImageInfo> stalledImages = new ArrayList<ImageInfo>();
+		for (ImageInfo imageInfo : fetchImages) {
+			Calendar edited_date = imageInfo.getEdited_date();
+			Calendar current_date = Calendar.getInstance();
+			
+			long diffInMilli = current_date.getTime().getTime() - edited_date.getTime().getTime();
+			long diffInMinutes = (diffInMilli / (1000*60)) % 60;
+			
+			if(Constants.IN_PROGRESS.equals(imageInfo.getStatus()) && diffInMinutes > 2){
+				if(Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.image_deployments) && imageInfo.image_size == 0){
+					continue;
+				}
+				stalledImages.add(imageInfo);
+			}
+		}
+		return stalledImages;
 	}
 }

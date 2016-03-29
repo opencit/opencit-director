@@ -1,13 +1,13 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public class ImageStoreUploadTransferObject {
 
     protected String id;
 
     protected String image_uri;
-    protected Date date;
+    protected Calendar date;
     protected String tmp_location;
     protected String checksum;
     protected String status;
@@ -48,7 +48,7 @@ public class ImageStoreUploadTransferObject {
 	}
 
 
-	public ImageStoreUploadTransferObject(String image_uri, Date date,
+	public ImageStoreUploadTransferObject(String image_uri, Calendar date,
             String tmp_location, String checksum, String status,
             Long image_size, Long sent, String uploaded_by_user_id,
             ImageAttributes img) {
@@ -108,11 +108,11 @@ public class ImageStoreUploadTransferObject {
         this.image_uri = image_uri;
     }
 
-    public Date getDate() {
+    public Calendar getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 

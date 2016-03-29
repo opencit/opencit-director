@@ -3,7 +3,6 @@ package com.intel.director.service;
 import java.util.List;
 
 import com.intel.director.api.GenericDeleteResponse;
-import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.images.exception.DirectorException;

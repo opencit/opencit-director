@@ -1599,7 +1599,15 @@ public class Images {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStalledImages() {
-		//imageService.getStalledImages();
-		return Response.ok().build();
+		List<ImageInfo> stalledImages = null;
+		GenericResponse response = new GenericResponse();
+		try {
+			stalledImages = imageService.getStalledImages();
+		} catch (DirectorException e) {
+			response.setError(e.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		return Response.ok(stalledImages).build();
 	}
 }

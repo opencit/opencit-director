@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -134,8 +134,8 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			throw new DirectorException("No policy or draft for the image");
 		}
 
-		newTrustPolicy.setCreated_date(new Date());
-		newTrustPolicy.setEdited_date(new Date());
+		newTrustPolicy.setCreated_date(Calendar.getInstance());
+		newTrustPolicy.setEdited_date(Calendar.getInstance());
 		newTrustPolicy.setEdited_by_user_id(userName);
 		newTrustPolicy.setCreated_by_user_id(userName);
 

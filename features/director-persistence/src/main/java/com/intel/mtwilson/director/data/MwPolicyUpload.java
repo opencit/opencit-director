@@ -2,8 +2,8 @@ package com.intel.mtwilson.director.data;
 
 
 
-import java.sql.Date;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
@@ -32,7 +34,8 @@ public class MwPolicyUpload {
 		private MwTrustPolicy trustPolicy;
 		
 		@Column(name = "DATE")
-		private Date date;
+		@Temporal(TemporalType.TIMESTAMP)
+		private Calendar date;
 		
 		@Column(name = "POLICY_URI")
 		private Character[] policyUri;
@@ -60,7 +63,7 @@ public class MwPolicyUpload {
 		
 	
 
-		public MwPolicyUpload(String id, MwTrustPolicy trustPolicy, Date date,
+		public MwPolicyUpload(String id, MwTrustPolicy trustPolicy, Calendar date,
 				Character[] policyUri, String status, MwImageStore store,
 				String storeArtifactId, boolean isDeleted) {
 			super();
@@ -135,11 +138,11 @@ public class MwPolicyUpload {
 			this.trustPolicy = trustPolicy;
 		}
 
-		public Date getDate() {
+		public Calendar getDate() {
 			return date;
 		}
 
-		public void setDate(Date date) {
+		public void setDate(Calendar date) {
 			this.date = date;
 		}
 

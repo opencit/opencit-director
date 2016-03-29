@@ -2,7 +2,7 @@ package com.intel.mtwilson.director.data;
 
 
 
-import java.sql.Date;
+import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
@@ -44,7 +46,8 @@ public class MwImageUpload {
 		private String status;
 		
 		@Column(name = "DATE")
-		private Date date;
+		@Temporal(TemporalType.TIMESTAMP)
+		private Calendar date;
 		
 		@Column(name = "UPLOAD_VARIABLES_MD5", length = 32)
 		private String uploadVariablesMd5;
@@ -171,11 +174,11 @@ public class MwImageUpload {
 			this.status = status;
 		}
 
-		public Date getDate() {
+		public Calendar getDate() {
 			return date;
 		}
 
-		public void setDate(Date date) {
+		public void setDate(Calendar date) {
 			this.date = date;
 		}
 

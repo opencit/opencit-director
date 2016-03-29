@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -480,8 +480,8 @@ public class TdaasUtil {
 		 * c.add(Calendar.DATE, -3); Date currentDate = new Date();
 		 */
 		ImageAttributes img = new ImageAttributes();
-		img.setCreated_date(new Date());
-		img.setEdited_date(new Date());
+		img.setCreated_date(Calendar.getInstance());
+		img.setEdited_date(Calendar.getInstance());
 		img.setDeleted(false);
 		if (StringUtils.isNotBlank(id)) {
 			img.setId(id);

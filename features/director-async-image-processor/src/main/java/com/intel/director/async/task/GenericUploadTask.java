@@ -1,6 +1,6 @@
 package com.intel.director.async.task;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -173,7 +173,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		String storeArtifactName=(String)customProperties.get(Constants.NAME);
 		imageAttr.setId(imageId);
 		imageUploadTransferObject.setImg(imageAttr);
-		imageUploadTransferObject.setDate(new Date());
+		imageUploadTransferObject.setDate(Calendar.getInstance());
 		imageUploadTransferObject.setStoreId(taskAction.getStoreId());
 		imageUploadTransferObject.setStoreArtifactName(storeArtifactName);
 		log.info(
@@ -206,7 +206,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		policyUploadTranserObject.setStatus(storeResponse.getStatus());
 		policyUploadTranserObject.setTrust_policy(trustPolicy);
 		policyUploadTranserObject.setStoreId(taskAction.getStoreId());
-		policyUploadTranserObject.setDate(new Date());
+		policyUploadTranserObject.setDate(Calendar.getInstance());
 		log.info("updating policy uploads table for image id {}",imageActionObject.getImage_id()+" policyId "+trustPolicy.getId()+" and diplay name::"+trustPolicy.getDisplay_name());
 		String glanceId= storeResponse.getId();
 		String dekUrl=DirectorUtil.fetchDekUrl(trustPolicy);

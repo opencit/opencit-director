@@ -1,11 +1,11 @@
 package com.intel.director.api.ui;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public class ImageInfoFilter extends ImageInfo {
 
-    protected Date from_created_date;
-    protected Date to_created_date;
+    protected Calendar from_created_date;
+    protected Calendar to_created_date;
     protected SearchImageByPolicyCriteria policyCriteria;
     protected SearchImageByUploadCriteria uploadCriteria;
 
@@ -29,19 +29,19 @@ public class ImageInfoFilter extends ImageInfo {
         this.uploadCriteria = uploadCriteria;
     }
 
-    public Date getFrom_created_date() {
+    public Calendar getFrom_created_date() {
         return from_created_date;
     }
 
-    public void setFrom_created_date(Date from_created_date) {
+    public void setFrom_created_date(Calendar from_created_date) {
         this.from_created_date = from_created_date;
     }
 
-    public Date getTo_created_date() {
+    public Calendar getTo_created_date() {
         return to_created_date;
     }
 
-    public void setTo_created_date(Date to_created_date) {
+    public void setTo_created_date(Calendar to_created_date) {
         this.to_created_date = to_created_date;
     }
 

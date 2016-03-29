@@ -1,5 +1,6 @@
 package com.intel.director.api.ui;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import com.intel.director.api.ImageAttributes;
@@ -9,8 +10,8 @@ public class ImageAttributesFilter extends ImageAttributes {
     protected Date from_created_date;
     protected Date to_created_date;
 
-    public ImageAttributesFilter(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id, String name,
+    public ImageAttributesFilter(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String id, String name,
             String format, String image_deployments, String status,
             Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location, Date from_created_date,

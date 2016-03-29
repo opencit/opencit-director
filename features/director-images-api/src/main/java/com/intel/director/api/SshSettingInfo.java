@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public class SshSettingInfo extends AuditFields {
 
@@ -45,8 +45,8 @@ public class SshSettingInfo extends AuditFields {
 
 	}
 
-	public SshSettingInfo(String created_by_user_id, Date created_date,
-			String edited_by_user_id, Date edited_date, String ipAddress,
+	public SshSettingInfo(String created_by_user_id, Calendar created_date,
+			String edited_by_user_id, Calendar edited_date, String ipAddress,
 			String username, SshPassword sshPassword, String name, SshKey ssh_key_id,ImageAttributes image) {
 		super(created_by_user_id, created_date, edited_by_user_id, edited_date);
 		this.ipAddress = ipAddress;

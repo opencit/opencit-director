@@ -42,7 +42,7 @@ public class DbServiceTest {
 	List<ImageAttributes> imgAttributesList;
 	List<ImageAttributes> persistedImgAttributesList;
 	User myUser, myUser2, myUser3;
-	Date currentDate, threeDaysBackDate, oneDaysBackDate, sevenDaysBackDate;
+	Calendar currentDate, threeDaysBackDate, oneDaysBackDate, sevenDaysBackDate;
 	String createdUserId, createdUserId2, createdUserId3;
 
 	@Before
@@ -75,14 +75,14 @@ public class DbServiceTest {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
 		c.add(Calendar.DATE, -3);
-		currentDate = new Date();
-		threeDaysBackDate = c.getTime();
+		currentDate = Calendar.getInstance();
+		threeDaysBackDate = Calendar.getInstance();
 
 		c.add(Calendar.DATE, 2);
-		oneDaysBackDate = c.getTime();
+		oneDaysBackDate = Calendar.getInstance();
 
 		c.add(Calendar.DATE, -5);
-		sevenDaysBackDate = c.getTime();
+		sevenDaysBackDate = Calendar.getInstance();
 
 	}
 
@@ -136,7 +136,7 @@ public class DbServiceTest {
 	public void testImageDao() throws DbException {
 
 		ImageAttributes imgAttrs = new ImageAttributes(createdUserId,
-				new Date(), createdUserId, new Date(), "img1", "qcow", "VM",
+				Calendar.getInstance(), createdUserId, Calendar.getInstance(), "img1", "qcow", "VM",
 				"ACTIVE", 512L, 24L, null, false, "C://temp");
 
 		ImageAttributes img = dBServiceImpl.saveImageMetadata(imgAttrs);

@@ -1,7 +1,11 @@
 package com.intel.mtwilson.director.dao;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -140,8 +144,7 @@ public class ImageDao {
 
 				if (imgFilter.getFrom_created_date() != null) {
 					queryString.append(" and  created_date >=  '"
-							+ (new java.sql.Date(imgFilter
-									.getFrom_created_date().getTime())) + "'");
+							+ (imgFilter.getFrom_created_date()) + "'");
 					// /
 					// predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage.<java.sql.Date>
 					// get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new
@@ -150,8 +153,7 @@ public class ImageDao {
 				}
 				if (imgFilter.getTo_created_date() != null) {
 					queryString.append(" and  created_date <=  '"
-							+ (new java.sql.Date(imgFilter.getTo_created_date()
-									.getTime())) + "'");
+							+ (imgFilter.getTo_created_date()) + "'");
 					// /
 					// predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage.<java.sql.Date>
 					// get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new
@@ -197,6 +199,7 @@ public class ImageDao {
 
 			}
 
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
 			Query query = emf.createEntityManager().createNativeQuery(
 					queryString.toString());
 			List<ImageInfo> imageInfoList = new ArrayList<ImageInfo>();
@@ -210,15 +213,29 @@ public class ImageDao {
 					imgInfo.setImage_format((String) imageObj[2]);
 					imgInfo.setImage_deployments((String) imageObj[3]);
 					imgInfo.setCreated_by_user_id((String) imageObj[4]);
-					imgInfo.setCreated_date((java.sql.Date) imageObj[5]);
+					
+					Timestamp timestamp = (Timestamp) imageObj[5];
+			        String format = dateFormat.format(timestamp);
+			        Date parse = dateFormat.parse(format);
+			        Calendar calendar = Calendar.getInstance();
+			        calendar.setTime(parse);
+					imgInfo.setCreated_date(calendar);
+					
+					
 					imgInfo.setLocation((String) imageObj[6]);
 					imgInfo.setMounted_by_user_id((String) imageObj[7]);
 					imgInfo.setSent((Long) imageObj[8]);
 					imgInfo.setStatus((String) imageObj[9]);
 					imgInfo.setEdited_by_user_id((String) imageObj[10]);
-					imgInfo.setEdited_date((java.sql.Date) imageObj[11]);
+					
+					timestamp = (Timestamp) imageObj[11];
+			        format = dateFormat.format(timestamp);
+			        parse = dateFormat.parse(format);
+			        calendar = Calendar.getInstance();
+			        calendar.setTime(parse);
+					imgInfo.setEdited_date(calendar);
+					
 					imgInfo.setDeleted((Boolean) imageObj[12]);
-
 					imgInfo.setTrust_policy_id((String) imageObj[13]);
 					imgInfo.setTrust_policy_name((String) imageObj[14]);
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
@@ -387,8 +404,7 @@ public class ImageDao {
 
 				if (imgFilter.getFrom_created_date() != null) {
 					queryString.append(" and  created_date >=  '"
-							+ (new java.sql.Date(imgFilter
-									.getFrom_created_date().getTime())) + "'");
+							+ (imgFilter.getFrom_created_date()) + "'");
 					// /
 					// predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage.<java.sql.Date>
 					// get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new
@@ -397,8 +413,7 @@ public class ImageDao {
 				}
 				if (imgFilter.getTo_created_date() != null) {
 					queryString.append(" and  created_date <=  '"
-							+ (new java.sql.Date(imgFilter.getTo_created_date()
-									.getTime())) + "'");
+							+ (imgFilter.getTo_created_date()) + "'");
 					// /
 					// predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage.<java.sql.Date>
 					// get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new
