@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-maven-java</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
         <relativePath />
     </parent>
     
@@ -33,7 +33,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-exec</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -50,13 +49,13 @@
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-common</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-kms</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- external -->

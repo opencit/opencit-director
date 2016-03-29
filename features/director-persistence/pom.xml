@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-persistence</artifactId>
-    <version>0.1-SNAPSHOT</version>
     
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
@@ -17,7 +16,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-io</artifactId>
-            <version>0.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         

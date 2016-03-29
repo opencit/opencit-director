@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-zip</artifactId>
-    <version>0.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <description>TDAAS</description>
@@ -11,7 +10,7 @@
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-core-application-zip</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
         <relativePath />
     </parent>
     
@@ -34,45 +33,42 @@
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-version</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <classifier>feature</classifier>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-configuration-settings-ws-v2</artifactId>
-            <version>${mtwilson.version}</version>
+            <version>${project.version}</version>
             <classifier>feature</classifier>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-html5</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <classifier>feature</classifier>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-html5-login-token</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <classifier>feature</classifier>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-feature-inventory</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-jetty9</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.core</groupId>
             <artifactId>mtwilson-core-login-token</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -86,10 +82,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-password-vault</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-jersey2-util</artifactId>
         </dependency>
         <!-- for the RepeatableRequestFilter -->
         <dependency>
@@ -110,20 +102,14 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-setup</artifactId>
-            <version>3.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-setup-ext</artifactId>
-            <version>3.0-SNAPSHOT</version>
         </dependency>
         <!-- replacing the original login api with our new one that uses tokens and in-memory database -->
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-ws-v2</artifactId>
-            <version>${mtwilson.version}</version>
+            <version>${project.version}</version>
         </dependency>
         -->
         
@@ -133,67 +119,79 @@
         <dependency>
             <groupId>com.intel.mtwilson.kms</groupId>
             <artifactId>kms-user-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         -->
+        
+        <!-- mtwilson -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-jersey2-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-setup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- director -->
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-glance</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-html5</artifactId>
             <classifier>feature</classifier>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-ws</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-persistence</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-async-image-processor</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-setup</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-common</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-kms</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-image-store</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-trust-policy</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- external -->

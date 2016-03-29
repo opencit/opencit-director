@@ -3,7 +3,7 @@
     
     <artifactId>director-maven-root</artifactId>
     <groupId>com.intel.mtwilson.director</groupId>
-    <version>0.1-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <description>Mystery Hill Trust Director</description>
@@ -112,61 +112,71 @@
             <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
                 <artifactId>mtwilson-configuration</artifactId>
-                <version>${mtwilson.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
                 <artifactId>mtwilson-password-vault</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
                 <artifactId>mtwilson-trustpolicy-xml</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.services</groupId>
                 <artifactId>mtwilson-setup</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.services</groupId>
                 <artifactId>mtwilson-setup-ext</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-codec</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-crypto</artifactId>
-                <version>0.4-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-extensions</artifactId>
-                <version>0.2-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.intel.mtwilson.util</groupId>
+                <artifactId>mtwilson-util-exec</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-io</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-jaxrs2</artifactId>
-                <version>3.0-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-validation</artifactId>
-                <version>0.4-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             
             <!-- kms -->
             <dependency>
                 <groupId>com.intel.mtwilson.kms</groupId>
                 <artifactId>kms-client-jaxrs2</artifactId>
-                <version>0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             
             <!-- external -->
@@ -287,8 +297,6 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mtwilson.version>3.0-SNAPSHOT</mtwilson.version> <!-- for any components that we use from the latest mt wilson build -->
-        <!--<director.version>0.1-SNAPSHOT</director.version>-->
         <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
         <license.url>http://cscenter.intel.com/portal/</license.url>
     </properties>

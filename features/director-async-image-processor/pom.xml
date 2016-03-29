@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-async-image-processor</artifactId>
-    <version>0.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <description>Async image action processor</description>
@@ -46,27 +45,27 @@
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-common</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-glance</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-trust-policy</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-ws</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.glassfish.jersey.core</groupId>
@@ -81,7 +80,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-persistence</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.json</groupId>

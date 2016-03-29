@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-glance</artifactId>
-    <version>0.1-SNAPSHOT</version>
     
     <description>Director request and response data structures</description>
     
@@ -39,7 +38,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.util</groupId>
             <artifactId>mtwilson-util-jaxrs2-client</artifactId>
-            <version>${mtwilson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -50,12 +48,12 @@
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-image-store</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- external -->

@@ -3,7 +3,6 @@
     
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-image-store</artifactId>
-    <version>0.1-SNAPSHOT</version>
     
     <packaging>jar</packaging>
     <description>Image store interface</description>
@@ -40,7 +39,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-images-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     

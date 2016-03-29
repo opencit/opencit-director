@@ -31,7 +31,6 @@
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-password-vault</artifactId>
-            <version>${mtwilson.version}</version>
         </dependency>
         
         <!-- kms -->
@@ -43,13 +42,13 @@
         <!-- director -->
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
             <artifactId>director-images-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
-            <version>0.1-SNAPSHOT</version>
             <artifactId>director-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- external -->
