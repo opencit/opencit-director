@@ -29,6 +29,10 @@ changeVersionCommand="mvn versions:set -DnewVersion=${version}"
 changeParentVersionCommand="mvn versions:update-parent -DallowSnapshots=true -DparentVersion=${version}"
 mvnInstallCommand="mvn clean install"
 
+(cd maven/director-maven-root && $changeVersionCommand)
+if [ $? -ne 0 ]; then echo "Failed to change maven version on \"maven/director-maven-root\" folder" >&2; exit 3; fi
+(cd maven/director-maven-root && $mvnInstallCommand)
+if [ $? -ne 0 ]; then echo "Failed to maven install \"maven/director-maven-root\"" >&2; exit 3; fi
 (cd maven && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"maven\" folder" >&2; exit 3; fi
 ant ready

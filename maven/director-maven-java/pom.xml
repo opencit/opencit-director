@@ -3,7 +3,6 @@
     
     <artifactId>director-maven-java</artifactId>
     <groupId>com.intel.mtwilson.director</groupId>
-    <version>3.1-SNAPSHOT</version>
     
     <packaging>pom</packaging>
     <description>Java project in trust director</description>
