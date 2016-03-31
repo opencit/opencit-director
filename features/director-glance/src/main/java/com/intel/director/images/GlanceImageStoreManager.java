@@ -141,7 +141,7 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			return (List<T>) glanceRsClient.fetchAllImages(objectProperties);
 		} catch (GlanceException e) {
 			log.error("Error  in updateMetadataGlance in Glance", e);
-			throw new StoreException("Error in updateMetadataGlance", e);
+			throw new StoreException("Error in fetching images", e);
 		}
 	}
 

@@ -73,13 +73,13 @@ public class StoreManagerFactory {
 			map.put(imageStoreDetailsTransferObject.getKey(),
 					imageStoreDetailsTransferObject.getValue());
 			if (imageStoreDetailsTransferObject.equals(passwordConfiguration)) {
-				log.info("Encrypted password is : {}",
+				log.debug("Encrypted password is : {}",
 						imageStoreDetailsTransferObject.getValue());
 				map.put(imageStoreDetailsTransferObject.getKey(),
 						imageStorePasswordUtil
 								.decryptPasswordForImageStore(imageStoreDetailsTransferObject
 										.getValue()));
-				log.info("Decrypted password is : {}",
+				log.debug("Decrypted password is : {}",
 						map.get(imageStoreDetailsTransferObject.getKey()));
 			}
 		}

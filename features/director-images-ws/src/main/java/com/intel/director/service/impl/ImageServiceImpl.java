@@ -12,8 +12,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.HashTypeObject;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
@@ -60,9 +63,11 @@ import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorPropertiesCache;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
+import com.intel.director.common.ImageDeploymentHashTypeCache;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.async.DirectorAsynchExecutor;
 import com.intel.director.images.async.DockerPullTask;
@@ -965,6 +970,20 @@ public class ImageServiceImpl implements ImageService {
 		// Save the policy to DB
 		TrustPolicy trustPolicy = trustPolicyService
 				.archiveAndSaveTrustPolicy(signedPolicyXml);
+		
+		/// Setting uploadVariabelMD5 in MwImage table
+		String dekUrl = DirectorUtil.fetchDekUrl(trustPolicy);
+		String uploadVariableMD5 = DirectorUtil.computeUploadVar(policy.getImage().getImageId(),
+				dekUrl);
+		image.setUploadVariableMD5(uploadVariableMD5);
+		try {
+			imagePersistenceManager.updateImage(image);
+		} catch (DbException e) {
+			log.error("Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
+			throw new DirectorException(
+					"Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
+		}
+		
 		return trustPolicy.getId();
 	}
 
@@ -977,7 +996,7 @@ public class ImageServiceImpl implements ImageService {
 			ImageAttributes img = imagePersistenceManager
 					.fetchImageById(imageid);
 			if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
-					.getImage_deployments()) && StringUtils.isBlank(img.getPartition())) {
+					.getImage_deployments())) {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
 
@@ -2036,13 +2055,8 @@ public class ImageServiceImpl implements ImageService {
 			// importPolicyTemplateResponse.setStatus("Success");
 			return importPolicyTemplateResponse;
 		}
-		String idendifier = "V";
 		// Check if mounted live BM has /opt/vrtm
-		if (image.getPartition() == null) {
-			idendifier = TdaasUtil.checkInstalledComponents(imageId);
-		} else {
-			idendifier = "W";
-		}
+		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
 
 		String content = null;
 		Manifest manifest;
@@ -2301,21 +2315,9 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public File createTarballOfPolicyAndManifest(String imageId) throws DirectorException {
+	public File createTarballOfPolicyAndManifest(String imageId) {
 
 		TrustPolicy policyForImage;
-		ImageInfo imageInfo;
-		try {
-			imageInfo = imagePersistenceManager
-					.fetchImageById(imageId);
-		} catch (DbException e) {
-			log.error("Unable to fetch image : " + imageId, e);
-			return null;
-		}
-		if (imageInfo == null) {
-			return null;
-		}
-
 		try {
 			policyForImage = imagePersistenceManager
 					.fetchActivePolicyForImage(imageId);
@@ -2326,17 +2328,44 @@ public class ImageServiceImpl implements ImageService {
 		if (policyForImage == null) {
 			return null;
 		}
-		TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(imageId);
-		String policyXml = policyForImage.getTrust_policy();
-		if (StringUtils.isNotBlank(imageInfo.getPartition())) {
-			policyXml = trustPolicyService.convertPolicyInWindowsFormat(policyXml);
+		String artifactsPath = Constants.TARBALL_PATH + imageId;
+		File tarballDirForImage = new File(artifactsPath);
+		if (!tarballDirForImage.exists()) {
+			if (!tarballDirForImage.mkdir()) {
+				return null;
+			}
 		}
-		trustPolicyService.writePolicyAndManifest(policyXml);
+		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 
+		String trustPolicyFilePath = artifactsPath + File.separator
+				+ "trustpolicy.xml";
+		if (!fileUtilityOperation.createNewFile(trustPolicyFilePath)) {
+			return null;
+		}
+		String manifestFilePath = artifactsPath + File.separator
+				+ "manifest.xml";
+		if (!fileUtilityOperation.createNewFile(manifestFilePath)) {
+			return null;
+		}
+		String manifest;
+		try {
+			manifest = TdaasUtil.getManifestForPolicy(policyForImage
+					.getTrust_policy());
+		} catch (JAXBException e) {
+			log.error(
+					"Cannot create manifest for policy for image: " + imageId,
+					e);
+			return null;
+		}
+
+		// Write policy
+		fileUtilityOperation.writeToFile(trustPolicyFilePath,
+				policyForImage.getTrust_policy());
+		// Write manifest
+		fileUtilityOperation.writeToFile(manifestFilePath, manifest);
 		String tarName = StringUtils.isNotEmpty(policyForImage
 				.getDisplay_name()) ? policyForImage.getDisplay_name()
 				+ ".tar.gz" : "policyandmanifest.tar.gz";
-		String artifactsPath = Constants.TARBALL_PATH + imageId;
 		try {
 
 			DirectorUtil.createTar(artifactsPath, "trustpolicy.xml",
@@ -2656,33 +2685,14 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
-		
-		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-					sshSettingRequest.getUsername(),
-					sshSettingRequest.getPassword());
-			log.debug("Inside addHost,After execution of addSshKey ");
-		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			try {
-				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
-						sshSettingRequest.getUsername(),
-						sshSettingRequest.getPassword(),
-						sshSettingRequest.getIpAddress());
-				String drives = StringUtils.join(driveFromWindowsHost, ",");
-				sshSettingRequest.setPartition(drives);
-			} catch (IOException e) {
-				log.error("Error Fetching Partition Info");
-				throw new DirectorException("Error Fetching Partition Info", e);
-			}
-		}
-		
 
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
-		
-		
+		log.info("Inside addHost, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
 		log.debug("Going to save sshSetting info in database");
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
@@ -2712,26 +2722,11 @@ public class ImageServiceImpl implements ImageService {
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
-		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-					sshSettingRequest.getUsername(),
-					sshSettingRequest.getPassword());
-			log.debug("Inside addHost,After execution of addSshKey ");
-		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			try {
-				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
-						sshSettingRequest.getUsername(),
-						sshSettingRequest.getPassword(),
-						sshSettingRequest.getIpAddress());
-				String drives = StringUtils.join(driveFromWindowsHost, ",");
-				sshSettingRequest.setPartition(drives);
-			} catch (IOException e) {
-				log.error("Error Fetching Partition Info");
-				throw new DirectorException("Error Fetching Partition Info", e);
-			}
-		}
+		log.info("Inside updateSshData, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
 
@@ -2742,7 +2737,8 @@ public class ImageServiceImpl implements ImageService {
 			if (existingSsh.getId() != null
 					&& StringUtils.isNotBlank(existingSsh.getId())) {
 				sshSettingInfo.setId(existingSsh.getId());
-				sshSettingInfo.setImage(existingSsh.getImage());
+				ImageAttributes image = existingSsh.getImage();
+				sshSettingInfo.setImage(image);
 			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
 			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
@@ -2906,8 +2902,13 @@ public class ImageServiceImpl implements ImageService {
 			long diffInMilli = current_date.getTime().getTime() - edited_date.getTime().getTime();
 			long diffInMinutes = (diffInMilli / (1000*60)) % 60;
 			
-			if(Constants.IN_PROGRESS.equals(imageInfo.getStatus()) && diffInMinutes > 2){
-				if(Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.image_deployments) && imageInfo.image_size == 0){
+			if (ShiroUtil.subjectUsernameEquals(imageInfo
+					.getCreated_by_user_id())
+					&& Constants.IN_PROGRESS.equals(imageInfo.getStatus())
+					&& diffInMinutes > 2) {
+				if (Constants.DEPLOYMENT_TYPE_DOCKER
+						.equals(imageInfo.image_deployments)
+						&& imageInfo.image_size == 0) {
 					continue;
 				}
 				stalledImages.add(imageInfo);
@@ -2917,15 +2918,26 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	@Override
-	public List<String> getDrivesForWindows(String username, String password,
-			String ipAddress) throws DirectorException {
-		try {
-			List<String> driveFromWindowsHost = DirectorUtil
-					.getDriveFromWindowsHost(username, password, ipAddress);
-			return driveFromWindowsHost;
-		} catch (IOException e) {
-			log.error("Unable to Get Drives", e);
-			throw new DirectorException("Unable to Get Drives", e);
+	public List<HashTypeObject> getImageHashType(String deploymentType)
+			throws DirectorException {
+		
+		List<HashTypeObject> hashTypeObjects = new ArrayList<HashTypeObject>();
+		HashTypeObject hashTypeObject = null;
+		
+		Map<String, String> allHashTypes = ImageDeploymentHashTypeCache.getAllHashTypes();
+		Set<String> keySet = allHashTypes.keySet();
+		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			hashTypeObject = new HashTypeObject(key, allHashTypes.get(key));			
+			if(StringUtils.isNotBlank(deploymentType)){
+				if(deploymentType.equals(key)){
+					hashTypeObjects.add(hashTypeObject);
+					break;
+				}				
+			}else{
+				hashTypeObjects.add(hashTypeObject);
+			}
 		}
+		return hashTypeObjects;
 	}
 }
