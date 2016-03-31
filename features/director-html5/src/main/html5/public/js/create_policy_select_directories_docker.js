@@ -436,9 +436,11 @@ function createPolicy() {
                 data: JSON.stringify(mountimage),
                 success: function(data, status, xhr) {
                     if (createResponse) {
+						$("#error_modal_docker_2_header").html(createResponse);
                         $("#error_modal_docker_2").modal({
                             backdrop: "static"
                         });
+						
                         $('body').removeClass("modal-open");
                         console.log("ERROR and Unmount successfully");
                         return;

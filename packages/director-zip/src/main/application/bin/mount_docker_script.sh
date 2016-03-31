@@ -40,7 +40,7 @@ mount_device_mapper() {
 		echo "Successfully created the volume from given snapshot table info"
 	fi
 	#mount the volume to specified location
-	mount "/dev/mapper/"${IMAGE_ID} $MOUNT_PATH
+	mount -r  "/dev/mapper/"${IMAGE_ID} $MOUNT_PATH
 	if [ `echo $?` -ne 0 ]
 	then
 		echo "can't mount the volume at specified location"
@@ -65,12 +65,12 @@ mount_aufs() {
 	DOCKER_AUFS_PATH="/var/lib/docker/aufs"
 	DOCKER_AUFS_LAYERS="${DOCKER_AUFS_PATH}/layers"
 	DOCKER_AUFS_DIFF="${DOCKER_AUFS_PATH}/diff"
-	BRANCH="br:${DOCKER_AUFS_DIFF}/${IMAGE_ID}=rw+wh"
+	BRANCH="br:${DOCKER_AUFS_DIFF}/${IMAGE_ID}=ro+wh"
 	while read LAYER; do
-  		BRANCH="${BRANCH}:${DOCKER_AUFS_DIFF}/${LAYER}=rw+wh"
+  		BRANCH="${BRANCH}:${DOCKER_AUFS_DIFF}/${LAYER}=ro+wh"
 	done < "${DOCKER_AUFS_LAYERS}/${IMAGE_ID}"
 
-	mount -t aufs -o "${BRANCH}" "${IMAGE_ID}" "${MOUNT_PATH}"
+	mount -r  -t aufs -o "${BRANCH}" "${IMAGE_ID}" "${MOUNT_PATH}"
 }
 
 unmount_aufs() {

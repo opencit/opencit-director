@@ -205,4 +205,13 @@ public class Constants {
 	
 	public static final String IMAGE_INFO_OBJECT = "IMAGE_INFO_OBJECT";
 	public static final String ARTIFACT_ID = "ARTIFACT_ID";
+	
+	
+	public static final String HASH_TYPE_VM = "vm.whitelist.hash.type";
+	public static final String HASH_TYPE_BAREMETAL = "bm.whitelist.hash.type";
+	public static final String HASH_TYPE_DOCKER = "docker.whitelist.hash.type";
+	
+	
+	public static final String DIRECTOR_PROPERTIES_FILE = "director.properties";
+	
 }

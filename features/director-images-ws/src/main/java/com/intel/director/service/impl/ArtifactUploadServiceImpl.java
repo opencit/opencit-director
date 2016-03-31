@@ -125,8 +125,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				fetchAllImages = imageStoreManager.fetchAllImages();
 			} catch (StoreException e) {
 				log.error("Error in fetchAllImagesFromGlance ", e);
-				throw new DirectorException(
-						"Error in fetchAllImagesFromGlance", e);
+				continue;
 			}
 			for (ImageStoreUploadResponse storeResponse : fetchAllImages) {
 				idFromImageStores.add(storeResponse.getId());

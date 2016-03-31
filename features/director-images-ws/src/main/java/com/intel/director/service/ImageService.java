@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.HashTypeObject;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
@@ -182,6 +183,8 @@ public interface ImageService {
 			throws DirectorException;
 
 	public List<ImageInfo> getStalledImages() throws DirectorException;
+
+	public List<HashTypeObject> getImageHashType(String deploymentType) throws DirectorException;
 	
 }
 

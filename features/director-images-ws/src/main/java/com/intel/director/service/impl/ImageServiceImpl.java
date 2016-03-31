@@ -12,8 +12,10 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.HashTypeObject;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.ImageInfoDetailedResponse;
@@ -60,9 +63,11 @@ import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorPropertiesCache;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
+import com.intel.director.common.ImageDeploymentHashTypeCache;
 import com.intel.director.exception.ImageStoreException;
 import com.intel.director.images.async.DirectorAsynchExecutor;
 import com.intel.director.images.async.DockerPullTask;
@@ -965,6 +970,20 @@ public class ImageServiceImpl implements ImageService {
 		// Save the policy to DB
 		TrustPolicy trustPolicy = trustPolicyService
 				.archiveAndSaveTrustPolicy(signedPolicyXml);
+		
+		/// Setting uploadVariabelMD5 in MwImage table
+		String dekUrl = DirectorUtil.fetchDekUrl(trustPolicy);
+		String uploadVariableMD5 = DirectorUtil.computeUploadVar(policy.getImage().getImageId(),
+				dekUrl);
+		image.setUploadVariableMD5(uploadVariableMD5);
+		try {
+			imagePersistenceManager.updateImage(image);
+		} catch (DbException e) {
+			log.error("Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
+			throw new DirectorException(
+					"Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
+		}
+		
 		return trustPolicy.getId();
 	}
 
@@ -2883,13 +2902,42 @@ public class ImageServiceImpl implements ImageService {
 			long diffInMilli = current_date.getTime().getTime() - edited_date.getTime().getTime();
 			long diffInMinutes = (diffInMilli / (1000*60)) % 60;
 			
-			if(Constants.IN_PROGRESS.equals(imageInfo.getStatus()) && diffInMinutes > 2){
-				if(Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.image_deployments) && imageInfo.image_size == 0){
+			if (ShiroUtil.subjectUsernameEquals(imageInfo
+					.getCreated_by_user_id())
+					&& Constants.IN_PROGRESS.equals(imageInfo.getStatus())
+					&& diffInMinutes > 2) {
+				if (Constants.DEPLOYMENT_TYPE_DOCKER
+						.equals(imageInfo.image_deployments)
+						&& imageInfo.image_size == 0) {
 					continue;
 				}
 				stalledImages.add(imageInfo);
 			}
 		}
 		return stalledImages;
+	}
+
+	@Override
+	public List<HashTypeObject> getImageHashType(String deploymentType)
+			throws DirectorException {
+		
+		List<HashTypeObject> hashTypeObjects = new ArrayList<HashTypeObject>();
+		HashTypeObject hashTypeObject = null;
+		
+		Map<String, String> allHashTypes = ImageDeploymentHashTypeCache.getAllHashTypes();
+		Set<String> keySet = allHashTypes.keySet();
+		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			hashTypeObject = new HashTypeObject(key, allHashTypes.get(key));			
+			if(StringUtils.isNotBlank(deploymentType)){
+				if(deploymentType.equals(key)){
+					hashTypeObjects.add(hashTypeObject);
+					break;
+				}				
+			}else{
+				hashTypeObjects.add(hashTypeObject);
+			}
+		}
+		return hashTypeObjects;
 	}
 }

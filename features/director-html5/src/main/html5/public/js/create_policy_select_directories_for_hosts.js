@@ -446,6 +446,7 @@ function createPolicy() {
                     console.log("Unmount successfully")
 
                     if (createResponse) {
+						$("#error_modal_bm_live_2_header").html(createResponse);
                         $("#error_modal_bm_live_2").modal({
                             backdrop: "static"
                         });

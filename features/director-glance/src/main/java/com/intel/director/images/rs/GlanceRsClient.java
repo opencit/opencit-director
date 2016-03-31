@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -552,9 +553,14 @@ public class GlanceRsClient {
 
 		Client client = ClientBuilder.newBuilder().build();
 		WebTarget target = client.target(url.toExternalForm());
-		Response response = target.path("/v1/images/detail").request()
-				.header(Constants.AUTH_TOKEN, authToken).get();
-
+		Response response = null;
+		try {
+			response = target.path("/v1/images/detail").request().header(Constants.AUTH_TOKEN, authToken).get();
+		} catch (ProcessingException pe) {
+			log.error("Unable to create valid URL", pe);
+			throw new GlanceException("Invalid API endpoint", pe);
+		}
+		
 		InputStream inputStream = (InputStream) response.getEntity();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -562,16 +568,20 @@ public class GlanceRsClient {
 
 		String output;
 		StringBuffer sb = new StringBuffer();
-
+		
 		try {
 			while ((output = br.readLine()) != null) {
 				sb.append(output);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Unable to read response from Glance");
+			throw new GlanceException("Unable to read response from Glance");
 		}
+		log.debug("Response from glance {}", sb.toString());
 		JSONObject obj = new JSONObject(sb.toString());
+		if(!obj.has("images")){
+			throw new GlanceException("Unable to fetch images from store");
+		}
 		JSONArray images = obj.getJSONArray("images");
 		for (int i = 0; i < images.length(); i++) {
 			ImageStoreUploadResponse object = new ImageStoreUploadResponse();
