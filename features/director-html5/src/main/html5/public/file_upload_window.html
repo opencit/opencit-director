@@ -687,9 +687,8 @@ input[readonly] {
 	
 	
 	function enableRadioOptions() {
-		var status = document
-				.querySelector('input[name="docker_upload_radio"]:checked').value;
-
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
 		if (status == 'uploadManually') {
 			$("input[name=docker_upload_radio][value='downloadFromHub']").attr(
 					'disabled', false);
@@ -702,8 +701,8 @@ input[readonly] {
 
 	function disableRadioOptions() {
 
-		var status = document
-				.querySelector('input[name="docker_upload_radio"]:checked').value;
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
 
 		if (status == 'uploadManually') {
 
