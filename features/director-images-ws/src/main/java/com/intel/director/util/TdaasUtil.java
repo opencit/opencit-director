@@ -33,8 +33,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import net.schmizz.sshj.SSHClient;
-
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
@@ -66,6 +64,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.ImageDeploymentHashTypeCache;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SSHManager;
@@ -77,7 +76,6 @@ import com.intel.mtwilson.manifest.xml.MeasurementType;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 import com.intel.mtwilson.trustpolicy.xml.Director;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Encryption;
@@ -89,6 +87,8 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
+
+import net.schmizz.sshj.SSHClient;
 
 /**
  * 
@@ -187,12 +187,8 @@ public class TdaasUtil {
 						.getLaunch_control_policy()));
 		policy.setDirector(director);
 		policy.setImage(image);
-		if (createTrustPolicyMetaDataRequest.deployment_type
-				.equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
-			whitelist.setDigestAlg(DigestAlgorithm.SHA_1);
-		} else {
-			whitelist.setDigestAlg(DigestAlgorithm.SHA_256);
-		}
+		whitelist.setDigestAlg(ImageDeploymentHashTypeCache
+				.getDigestAlgorithmForDeploymentType(createTrustPolicyMetaDataRequest.deployment_type));
 		policy.setWhitelist(whitelist);
 		policy = setEncryption(createTrustPolicyMetaDataRequest, policy);
 
