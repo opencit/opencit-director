@@ -46,6 +46,7 @@ public class UploadImageForPolicyTask extends UploadImageTask {
 				.fetchImageUploadByImageId(imageInfo.getId());
 		glanceId = imageInfo.getId();
 		customProperties.put(Constants.GLANCE_ID, imageInfo.getId());
+		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "NA");
 		if (imageUploadByImageId != null) {			
 			String uuid = DirectorUtil.fetchIdforUpload(trustPolicy);
 			log.info("Inside UploadImageForPolicyTask fetchUploadImageId() uuid from policy for upload::"+uuid);

@@ -175,7 +175,6 @@ public abstract class ImageActionAsyncTask {
 
 		customProperties.put(Constants.DISK_FORMAT, diskFormat);
 		customProperties.put(Constants.CONTAINER_FORMAT, containerFormat);
-		customProperties.put(Constants.VISIBILITY, "public");
 		customProperties.put(ImageInfo.class.getName(), imageInfo);
 		if (trustPolicy != null) {
 			customProperties.put(TrustPolicy.class.getName(), trustPolicy);

@@ -57,48 +57,42 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-4" for="username_for_host">Username
 										:</label>
-                                    <div class="col-md-4">
-                                        <input type="text" class="form-control" id="username_for_host" placeholder="Enter Username" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="control-label col-md-4" for="password_for_host">Password
-										:</label>
-                                    <div class="col-md-4">
-                                        <input type="password" class="form-control" id="password_for_host" placeholder="Enter Password" required>
-                                    </div>
-                                </div>
-
-
-
-                                <div class="form-group">
-                                    <label class="control-label col-md-4" for="hashtype">Hash
+										<div class="col-md-4">
+											<input type="password" class="form-control"
+											id="password_for_host" placeholder="Enter Password" required>
+										</div>
+									</div>
+									
+									
+									
+									<div class="form-group">
+										<label class="control-label col-md-4" for="hashtype_bm">Hash
 										Type :</label>
-                                    <div class="col-md-4">
-                                        <label id="hashtype" style="margin-top: 8px;">SHA1</label>
-                                    </div>
-                                </div>
-
-                                <br />
-                                <br />
-
-                                <div class="col-md-offset-1 col-md-1">
-                                    <button type="button" onclick="backToHostsPageWithoutUnmount()" class="btn btn-primary">Back To Main Page</button>
-                                </div>
-
-                                <div class="col-md-offset-8 col-md-1">
-                                    <button type="button" class="btn btn-primary" id="createBMLivePolicyNext" onclick="addhostandnext()">Next</button>
-                                </div>
-                                <!-- Modal -->
-                                <div class="modal fade" id="error_modal_bm_live_1" role="dialog">
-                                    <div class="modal-dialog">
-
-                                        <!-- Modal content-->
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">
+										<div class="col-md-4">
+											<label id="hashtype_bm" style="margin-top: 8px;">SHA1</label>
+										</div>
+									</div>
+									
+									<br />
+									<br />
+									
+									<div class="col-md-offset-1 col-md-1">
+										<button type="button" onclick="backToHostsPageWithoutUnmount()"
+										class="btn btn-primary">Back To Main Page</button>
+									</div>
+									
+									<div class="col-md-offset-8 col-md-1">
+										<button type="button" class="btn btn-primary" id="createBMLivePolicyNext" onclick="addhostandnext()">Next</button>
+									</div>
+									<!-- Modal -->
+									<div class="modal fade" id="error_modal_bm_live_1" role="dialog">
+										<div class="modal-dialog">
+											
+											<!-- Modal content-->
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal">&times;</button>
+													<h4 class="modal-title">
 														<div id="error_modal_body_bm_live_1">Error In adding ssh key to remote host</div>
 													</h4>
                                             </div>

@@ -101,6 +101,7 @@ public class Constants {
 	public static final String GLANCE_IMAGE_STORE = "Openstack_Glance";
 	public static final String GLANCE_IMAGE_STORE_SERVER = "glance.image.store.server";
 	public static final String GLANCE_IMAGE_STORE_USERNAME = "glance.image.store.username";
+	public static final String GLANCE_VISIBILITY = "glance.visibility";
 	public static final String GLANCE_IMAGE_STORE_PASSWORD = "glance.image.store.password";
 	public static final String GLANCE_TENANT_NAME = "glance.tenant.name";
 	public static final String GLANCE_API_ENDPOINT = "glance.api.endpoint";
@@ -153,6 +154,7 @@ public class Constants {
 	public static final String COMPLETE = "Complete";
 	public static final String INCOMPLETE = "Incomplete";
 	public static final String IN_PROGRESS = "In Progress";
+	public static final String QUEUED = "Queued";
 	public static final String ERROR = "Error";
 	public static final String OBSOLETE = "Obsolete";
 	public static final String SOURCE_TAG = "_source";

@@ -6,6 +6,9 @@ import java.util.Map;
 import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 
 public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
+
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(ImageDeploymentHashTypeCache.class);
 	private static Map<String, String> deploymentTypeHashTypeMap = new HashMap<String, String>();
 
 	public static void init() {
@@ -52,7 +55,12 @@ public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 		if(property == null){
 			return defaultDigestAlg;
 		}
-		DigestAlgorithm algorithm = DigestAlgorithm.fromValue(property.toLowerCase());
+		DigestAlgorithm algorithm = null;
+		try{
+			algorithm = DigestAlgorithm.fromValue(property.toLowerCase());
+		}catch(IllegalArgumentException iae){
+			log.error("Invalid input {}", property);
+		}
 		if (algorithm == null) {
 			algorithm = defaultDigestAlg;
 		}

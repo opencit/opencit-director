@@ -65,21 +65,12 @@ public class SwiftRsClient {
 	public String authToken;
 	public String storageUrl;
 
-	public SwiftRsClient(String swiftApiEndpoint, String swiftAuthEndpoint,String tenantName,
+	public SwiftRsClient(String swiftAuthEndpoint,String tenantName,
 			String accountUsername, String accountUserPassword,String swiftKeystoneService)
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
-		URL url = null;
-		try {
-			url = new URL(swiftApiEndpoint);
-		} catch (MalformedURLException e) {
-			log.error("Initialize SwiftRsClient failed");
-			throw new SwiftException("Initialize SwiftRsClient failed", e);
-		}
-		webTarget = client.target(url.toExternalForm());
-	
-		createAuthTokenFromKeystone(swiftApiEndpoint,swiftAuthEndpoint, tenantName, accountUsername,
+		createAuthTokenFromKeystone(swiftAuthEndpoint, tenantName, accountUsername,
 					accountUserPassword,swiftKeystoneService);
 		
 
@@ -553,7 +544,7 @@ public class SwiftRsClient {
 		printTimeDiff("createAuthToken swift", start, end);
 	}
 	*/
-	private void createAuthTokenFromKeystone(String swiftApiEndpoint,String swiftAuthEndpoint,
+	private void createAuthTokenFromKeystone(String swiftAuthEndpoint,
 			String tenantName, String userName, String password,String swiftKeystoneServiceName)
 			throws SwiftException {
 		long start = new Date().getTime();
@@ -561,13 +552,7 @@ public class SwiftRsClient {
 		HttpClient httpClient = null;
 		BufferedReader br = null;
 		boolean responseHasError = true;
-		// String authEndpoint = swiftAuthEndpoint + "/v2.0/tokens";
-		try {
-			URL urlSwift = new URL(swiftApiEndpoint);
-			host=urlSwift.getHost();
-		} catch (MalformedURLException e3) {
-			throw new SwiftException("Error getting swift host", e3);
-		}
+	
 		httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
 

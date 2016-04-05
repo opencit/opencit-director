@@ -200,21 +200,32 @@ function createImageStore() {
 									+ ">"
 									+ image_store_details[i].key_display_value
 									+ ": </label>"
-									+ "<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id="
+									+ "<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id=\""
 									+ image_store_details[i].id
-									+ " placeholder=\"Enter "
+									+ "\" placeholder=\"Enter "
 									+ image_store_details[i].key
 									+ "\"></div><br />";
-						} else {
-							str = str
+						} else if (image_store_details[i].key.toLowerCase().indexOf(
+								"visibility") != -1){
+								str = str
 									+ "<label class=\"control-label col-md-4\" for="
 									+ image_store_details[i].id
 									+ ">"
 									+ image_store_details[i].key_display_value
 									+ ": </label>"
-									+ "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id="
+									+ "<div class=\"col-md-8\"><select class=\"form-control\" id=\""
 									+ image_store_details[i].id
-									+ " placeholder=\"Enter "
+									+ "\"><option value=\"public\">Public</option><option value=\"private\">Private</option></div><br />";
+						} else {
+							str = str
+									+ "<label class=\"control-label col-md-4\" for=\""
+									+ image_store_details[i].id
+									+ "\">"
+									+ image_store_details[i].key_display_value
+									+ ": </label>"
+									+ "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id=\""
+									+ image_store_details[i].id
+									+ "\" placeholder=\"Enter "
 									+ image_store_details[i].key
 									+ "\"></div><br />";
 						}
@@ -465,7 +476,19 @@ function populateImageStoreDetails(image_store_details) {
 						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=\""
-						+ image_store_details[i].id + "\" ></div><br />";
+						+ image_store_details[i].id + "\"></div><br />";
+				$("#" + image_store_details[i].id).val(valueHolder);
+			} else if (image_store_details[i].key.toLowerCase().indexOf(
+								"visibility") != -1){
+								str = str
+									+ "<label align=\"right\" class=\"control-label col-md-6\" for="
+									+ image_store_details[i].id
+									+ ">"
+									+ image_store_details[i].key_display_value
+									+ ": </label>"
+									+ "<div class=\"col-md-6\"><select class=\"form-control\" id=\""
+									+ image_store_details[i].id
+									+ "\"><option value=\"public\">Public</option><option value=\"private\">Private</option></div><br />";
 				$("#" + image_store_details[i].id).val(valueHolder);
 			} else {
 				str = str
@@ -475,7 +498,7 @@ function populateImageStoreDetails(image_store_details) {
 						+ image_store_details[i].key_display_value
 						+ ": </label>"
 						+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\""
-						+ image_store_details[i].id + "\" ></div><br />";
+						+ image_store_details[i].id + "\"></div><br />";
 				$("#" + image_store_details[i].id).val(valueHolder);
 			}
 		} else {
@@ -491,6 +514,17 @@ function populateImageStoreDetails(image_store_details) {
 						+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id="
 						+ image_store_details[i].id + " placeholder=\""
 						+ valueHolder + "\"></div><br />";
+			} else if (image_store_details[i].key.toLowerCase().indexOf(
+								"visibility") != -1){
+								str = str
+									+ "<label align=\"right\" class=\"control-label col-md-6\" for="
+									+ image_store_details[i].id
+									+ ">"
+									+ image_store_details[i].key_display_value
+									+ ": </label>"
+									+ "<div class=\"col-md-6\"><select class=\"form-control\" id=\""
+									+ image_store_details[i].id
+									+ "\"><option value=\"public\">Public</option><option value=\"private\">Private</option></div><br />";
 			} else {
 				valueHolder = image_store_details[i].key;
 				str = str
