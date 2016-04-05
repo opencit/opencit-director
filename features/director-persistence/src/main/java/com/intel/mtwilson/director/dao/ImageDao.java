@@ -308,6 +308,7 @@ public class ImageDao {
 			imgInfo.setImage_size(mwImage.getContentLength());
 			imgInfo.setStatus(mwImage.getStatus());
 			imgInfo.setSent(mwImage.getSent());
+			imgInfo.setUploadVariableMD5(mwImage.getUploadVariablesMd5());
 			Collection<MwTrustPolicy> trustPolicyCollection=mwImage.getTrustPolicyCollection();
 			if (trustPolicyCollection!= null && trustPolicyCollection.size()>0 ) {
 				for(MwTrustPolicy mwtp: trustPolicyCollection){

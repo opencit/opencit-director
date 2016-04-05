@@ -445,6 +445,7 @@ function createPolicy() {
                         $("#error_modal_vm_2").modal({
                             backdrop: "static"
                         });
+						$("#error_modal_vm_2_header").html(createResponse);
                         $('body').removeClass("modal-open");
                     } else {
                         current_flow = "Wizard";

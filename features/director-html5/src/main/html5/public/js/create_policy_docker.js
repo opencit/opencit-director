@@ -3,6 +3,7 @@ var image_policies = new Array();
 
 $(document).ready(function() {
     fetchImageLaunchPolicies();
+	fetchImaheHashAlgo("Docker","hashtype_docker");
 });
 
 function CreateDockerImageMetaData(data) {

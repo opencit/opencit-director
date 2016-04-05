@@ -151,12 +151,12 @@ function createImageStore() {
 
 	if (createImageStoreRequest.name == ""
 			|| createImageStoreRequest.name.length == 0) {
-		$("#image_store_error").html("Name Cannot be empty");
+		$("#image_store_error").html("Please enter name");
 		return;
 	}
 
 	if (createImageStoreRequest.connector == "0") {
-		$("#image_store_error").html("Select Connector First");
+		$("#image_store_error").html("Please select a connector");
 		return;
 	}
 

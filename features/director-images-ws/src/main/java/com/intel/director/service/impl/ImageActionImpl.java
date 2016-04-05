@@ -191,6 +191,7 @@ public  class ImageActionImpl implements ImageActionService {
 		} else if (artifactStoreList.size() == 1) {
 			isCorrectActionList=true;
 			if(Constants.ARTIFACT_POLICY.equals(artifactStoreList.get(0).getArtifact_name())){
+				
 				String uploadId=DirectorUtil.fetchIdforUpload(trustPolicy);
 				ImageStoreUploadOrderBy imgOrder = new ImageStoreUploadOrderBy();
 				imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
@@ -207,14 +208,16 @@ public  class ImageActionImpl implements ImageActionService {
 					log.debug("ImageActionImpl, ARTIFACT_POLICY action, fetchingImageUploads for uploadId::"+uploadId);
 					if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
 						String storeId= fetchImageUploads.get(0).getStoreId();
-						if(StringUtils.isNotBlank(storeId)){
+						String uploadVariableMd5InImageUpload=fetchImageUploads.get(0).getUploadVariableMD5();
+						log.info("uploadVariableMd5InImageUpload::"+uploadVariableMd5InImageUpload+" imageInfo.getUploadVariableMD5()::"+imageInfo.getUploadVariableMD5());
+						if(StringUtils.isNotBlank(storeId) && uploadVariableMd5InImageUpload.equals(imageInfo.getUploadVariableMD5())){
 							uploadImageAgain=false;
 							artifactStoreIdMap.put(Constants.STORE_IMAGE, storeId);	
 						}
 						
 					}
 					if(uploadImageAgain){
-						throw new DirectorException("Please upload image before uploading policy");
+						throw new DirectorException("Cannot upload policy. Either image not uploaded or image uploaded is not compatible with the policy you are uploading. Hence please upload compatible image before uploading policy.");
 					}
 				} catch (DbException e) {
 					log.error("Error fetching image uploads by storageArtifactId {}", uploadId, e);

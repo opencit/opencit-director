@@ -201,9 +201,9 @@ public class DirectorUtil {
 		return result.getExitCode();
 	}
 
-	public static Properties getPropertiesFile(String path) {
+	public static Properties getPropertiesFile(String propFileName) {
 		Properties prop = new Properties();
-		File customFile = new File(Constants.configurationPath + path);
+		File customFile = new File(Constants.configurationPath + propFileName);
 		ConfigurationProvider provider;
 		try {
 			provider = ConfigurationFactory.createConfigurationProvider(customFile);

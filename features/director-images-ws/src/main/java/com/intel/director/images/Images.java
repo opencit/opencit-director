@@ -42,6 +42,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
 import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
+import com.intel.director.api.HashTypeObject;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
@@ -1629,5 +1630,49 @@ public class Images {
 					.entity(response).build();
 		}
 		return Response.ok(stalledImages).build();
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return 
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/image-hash-type
+	 * Input: deploymentType
+	 * Output:
+	 * </pre>
+	 */
+	@Path("image-hash-type")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getImageHashType(@QueryParam("deploymentType") String deploymentType) {
+		GenericResponse response = new GenericResponse();
+		List<String> deplomentTypeList = new ArrayList<String>();
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_VM);
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_DOCKER);
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
+
+		
+		if(deploymentType != null && !deplomentTypeList.contains(deploymentType)){
+			response.setError("Invalid Deployment Type");
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		
+		
+		List<HashTypeObject> imageHashType = null;
+		try {
+			imageHashType = imageService.getImageHashType(deploymentType);
+		} catch (DirectorException e) {
+			response.setError(e.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		if(imageHashType.size() == 1){
+			return Response.ok(imageHashType.get(0)).build();
+		}
+		
+		return Response.ok(imageHashType).build();
 	}
 }
