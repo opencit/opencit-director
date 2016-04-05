@@ -1,6 +1,6 @@
 var imageFormats = new Array();
 var image_policies = new Array();
-
+fetchImaheHashAlgo("BareMetal","hashtype_bm");
 function CreateBMLiveMetaData(data) {
 
     this.image_id = current_image_id;

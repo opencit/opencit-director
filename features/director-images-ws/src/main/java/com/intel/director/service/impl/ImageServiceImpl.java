@@ -423,6 +423,17 @@ public class ImageServiceImpl implements ImageService {
 					+ image_id + ": " + e.getMessage());
 			throw new DirectorException("Failed to load image metdata", e);
 		}
+
+		//Update the status of image to IN PROGRESS to mark the upload process initiation
+		if (imageInfo.getSent().intValue() == 0) {
+			imageInfo.setStatus(Constants.IN_PROGRESS);
+			try {
+				imagePersistenceManager.updateImage(imageInfo);			
+			} catch (DbException e) {
+				log.error("Error while updating metadata for uploaded image : "
+						+ e.getMessage());
+			}
+		}		
 		int bytesread = 0;
 		OutputStream out = null;
 		try {
@@ -464,8 +475,8 @@ public class ImageServiceImpl implements ImageService {
 		Calendar edited_date = Calendar.getInstance();
 		imageInfo.setSent(imageInfo.getSent() + bytesread);
 		imageInfo.setEdited_date(edited_date);
-		log.info("Sent in bytes New: " + imageInfo.getSent());
-		log.info("image size: " + imageInfo.getImage_size());
+		log.debug("Sent in bytes New: " + imageInfo.getSent());
+		log.debug("image size: " + imageInfo.getImage_size());
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
@@ -476,13 +487,13 @@ public class ImageServiceImpl implements ImageService {
 		}
 		try {
 			imagePersistenceManager.updateImage(imageInfo);
-			log.info("Image is hidden :: " + imageInfo.isDeleted());
+			log.debug("Image is hidden :: " + imageInfo.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while updating metadata for uploaded image : "
 					+ e.getMessage());
 			throw new DirectorException("Cannot update image meta data", e);
 		}
-		log.info("Updated Image upload metadata.");
+		log.debug("Updated Image upload metadata.");
 
 		return TdaasUtil
 				.mapImageAttributesToTrustDirectorImageUploadResponse(imageInfo);

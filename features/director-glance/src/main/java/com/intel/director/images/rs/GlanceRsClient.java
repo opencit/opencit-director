@@ -236,7 +236,7 @@ public class GlanceRsClient {
 				.get(Constants.NAME);
 		glanceImageUploadBody.id = glanceId;
 		glanceImageUploadBody.visibility = (String) imageProperties
-				.get(Constants.VISIBILITY);
+				.get(Constants.GLANCE_VISIBILITY);
 		if (imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION) != null) {
 			glanceImageUploadBody.mtwilson_trustpolicy_location = (String) imageProperties
 					.get(Constants.MTWILSON_TRUST_POLICY_LOCATION);
