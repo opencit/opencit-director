@@ -132,7 +132,7 @@ public class DirectoryAndFileUtil {
 		stringBuilder.append(" | cut -c " + startIndex + "-");
 		
 		//Sort
-		//stringBuilder.append(" | sort ");
+		stringBuilder.append(" | sort ");
 		
 		if (include != null && StringUtils.isNotEmpty(include)) {
 			stringBuilder.append(" | grep -E '" + include + "'");
