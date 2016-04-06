@@ -874,3 +874,15 @@ var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
             }
     });
 }
+
+function fetchImaheHashAlgo(deploymentType,hashAlgoLabel){
+	    $.ajax({
+        type: "GET",
+        url: "/v1/image-hash-type?deploymentType=" + deploymentType,
+        dataType: "json",
+        success: function(data, status, xhr) {
+			$("#" + hashAlgoLabel).html(data.hash_type.toUpperCase());
+            image_policies = data.image_launch_policies;   
+        }
+    });
+}

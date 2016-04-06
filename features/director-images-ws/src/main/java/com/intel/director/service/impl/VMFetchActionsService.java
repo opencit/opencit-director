@@ -17,10 +17,10 @@ public class VMFetchActionsService implements FetchActionsService {
 		List<ImageActionTask> imageActionsList = new ArrayList<ImageActionTask>();
 		switch (artifactType) {
 		case Constants.ARTIFACT_IMAGE:
-			if (isEncrypted) {
+	/*		if (isEncrypted) {
 				imageActionsList.add(new ImageActionTask(Constants.INCOMPLETE,
 						Constants.TASK_NAME_ENCRYPT_IMAGE));
-			}
+			}*/
 			imageActionsList.add(new ImageActionTask(Constants.INCOMPLETE,
 					artifactStoreIdMap.get(Constants.STORE_IMAGE),
 					Constants.TASK_NAME_UPLOAD_IMAGE));

@@ -4,6 +4,7 @@ var image_policies = new Array();
 edit_policy_initialize();
 
 function edit_policy_initialize() {
+	fetchImaheHashAlgo("VM","hashtype_vm");
     if (!current_trust_policy_draft_id) {
         var create_draft_request = {
             "image_id": current_image_id

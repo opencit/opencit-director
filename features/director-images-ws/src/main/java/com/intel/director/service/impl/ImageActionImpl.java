@@ -532,10 +532,14 @@ public  class ImageActionImpl implements ImageActionService {
 		imageActionResponse.setArtifactName(artifactName);
 		
 		imageActionResponse.setId(imageActionObject.getId());
-		if(StringUtils.isNotBlank(displayMessage) ){
-			imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status()+":-"+displayMessage);
-		}else{
-		imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status());
+		if (StringUtils.isNotBlank(displayMessage)) {
+			imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status() + ":-" + displayMessage);
+		} else {
+			if(Constants.INCOMPLETE.equals(imageActionObject.getCurrent_task_status())){
+				imageActionResponse.setExecutionStatus(Constants.QUEUED);
+			}else{
+				imageActionResponse.setExecutionStatus(imageActionObject.getCurrent_task_status());
+			}
 		}
 		
 		imageActionResponse.setStoreNames(commaSeperatedStoreNames);

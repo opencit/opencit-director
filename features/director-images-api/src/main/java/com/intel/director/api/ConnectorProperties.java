@@ -21,13 +21,12 @@ public enum ConnectorProperties {
 			}), 
 	SWIFT("SWIFT", "com.intel.director.swift.objectstore.SwiftObjectStoreManager",
 			new ConnectorKey[] {
-					new ConnectorKey(1, Constants.SWIFT_API_ENDPOINT),
-					new ConnectorKey(2, Constants.SWIFT_AUTH_ENDPOINT),
-					new ConnectorKey(3, Constants.SWIFT_TENANT_NAME),
-					new ConnectorKey(4, Constants.SWIFT_ACCOUNT_USERNAME),
-					new ConnectorKey(5, Constants.SWIFT_ACCOUNT_USER_PASSWORD),
-					new ConnectorKey(6, Constants.SWIFT_CONTAINER_NAME),
-					new ConnectorKey(7, Constants.SWIFT_KEYSTONE_SERVICE_NAME) },
+					new ConnectorKey(1, Constants.SWIFT_AUTH_ENDPOINT),
+					new ConnectorKey(2, Constants.SWIFT_TENANT_NAME),
+					new ConnectorKey(3, Constants.SWIFT_ACCOUNT_USERNAME),
+					new ConnectorKey(4, Constants.SWIFT_ACCOUNT_USER_PASSWORD),
+					new ConnectorKey(5, Constants.SWIFT_CONTAINER_NAME),
+					new ConnectorKey(6, Constants.SWIFT_KEYSTONE_SERVICE_NAME) },
 			new HashMap<String, String>() {
 				{
 					put(Constants.ARTIFACT_POLICY, "Policy");
@@ -40,7 +39,8 @@ public enum ConnectorProperties {
 							Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT),
 					new ConnectorKey(3, Constants.GLANCE_TENANT_NAME),
 					new ConnectorKey(4, Constants.GLANCE_IMAGE_STORE_USERNAME),
-					new ConnectorKey(5, Constants.GLANCE_IMAGE_STORE_PASSWORD) },
+					new ConnectorKey(5, Constants.GLANCE_IMAGE_STORE_PASSWORD),
+					new ConnectorKey(6, Constants.GLANCE_VISIBILITY) },
 			new HashMap<String, String>() {
 				{
 					put(Constants.ARTIFACT_IMAGE, "Image");

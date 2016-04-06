@@ -244,6 +244,7 @@ input[readonly] {
 	
 	function executeImageUpload(upload_data, urlToUploadMetadata,
 			authorizationToken) {
+			disableRadioOptions();
 		$('#upload').prop('disabled', true);
 
 		var xhrmdt = new XMLHttpRequest();
@@ -265,7 +266,7 @@ input[readonly] {
 						});
 						$('body').removeClass("modal-open");
 						$('#upload').prop('disabled', false);
-
+						enableRadioOptions();
 						return false;
 					}
 					if (isDockerManualUpload || image_deployments == "VM") {
@@ -299,6 +300,7 @@ input[readonly] {
 
 						$('body').removeClass("modal-open");
 						$('#upload').prop('disabled', false);
+						enableRadioOptions();
 						return false;
 					}
 
@@ -313,6 +315,7 @@ input[readonly] {
 
 						$('body').removeClass("modal-open");
 						$('#upload').prop('disabled', false);
+						enableRadioOptions();
 						return false;
 					}
 
@@ -321,6 +324,7 @@ input[readonly] {
 					clearInterval(refreshIntervalId);
 					alert("Failed to save image upload metdata.");
 					$('#upload').prop('disabled', false);
+					enableRadioOptions();
 					return false;
 				}
 			}
@@ -678,6 +682,38 @@ input[readonly] {
 				refresh_stalled_images_grid();
 			}
 		});
+	}
+	
+	
+	
+	function enableRadioOptions() {
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
+		if (status == 'uploadManually') {
+			$("input[name=docker_upload_radio][value='downloadFromHub']").attr(
+					'disabled', false);
+		} else {
+			$("input[name=docker_upload_radio][value='uploadManually']").attr(
+					'disabled', false);
+		}
+
+	}
+
+	function disableRadioOptions() {
+
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
+
+		if (status == 'uploadManually') {
+
+			$('input[name="docker_upload_radio"][value="downloadFromHub"]')
+					.attr('disabled', true);
+		} else {
+
+			$('input[name="docker_upload_radio"][value="uploadManually"]')
+					.attr('disabled', true);
+		}
+
 	}
 </script>
 

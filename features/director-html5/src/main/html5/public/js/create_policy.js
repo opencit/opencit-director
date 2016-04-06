@@ -3,6 +3,7 @@ var image_policies = new Array();
 
 $(document).ready(function() {
     fetchImageLaunchPolicies();
+	fetchImaheHashAlgo("VM","hashtype_vm");
 });
 
 function CreateImageMetaData(data) {

@@ -110,9 +110,12 @@ public class SshSettingRequest extends AuditFields {
 
 	public SshSettingResponse validate(String operation) {
 		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
+		String FQDN_RFC_ALL="^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)*[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?$";
+		String  IPADDR_FQDN_RFC_ALL = "(?:" + RegexPatterns.IPADDRESS + "|" + FQDN_RFC_ALL + ")";
+		
 		SshSettingResponse sshResponse = new SshSettingResponse();
-		if (!ValidationUtil.isValidWithRegex(getIpAddress(),RegexPatterns.IPADDRESS)) {
-			sshResponse.setError("No Ip adress provided or ip adress in incorrect format");
+		if (!ValidationUtil.isValidWithRegex(getIpAddress(),IPADDR_FQDN_RFC_ALL)) {
+			sshResponse.setError("No host provided or host is in incorrect format");
 		} else if (!ValidationUtil.isValidWithRegex(getUsername(),NAME_REGEX)) {
 			sshResponse.setError("No username provided or username is not in correct format");
 		} else if (!ValidationUtil.isValidWithRegex(getPassword(),RegexPatterns.PASSWORD)) {

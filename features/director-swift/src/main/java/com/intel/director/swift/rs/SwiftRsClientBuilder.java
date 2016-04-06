@@ -17,7 +17,7 @@ public class SwiftRsClientBuilder {
 
 	public static SwiftRsClient build(Map<String, String> configuration) throws SwiftException {
 
-		if (configuration == null || configuration.get(Constants.SWIFT_API_ENDPOINT) == null
+		if (configuration == null
 				|| configuration.get(Constants.SWIFT_TENANT_NAME) == null
 				|| configuration.get(Constants.SWIFT_ACCOUNT_USERNAME) == null
 				|| configuration.get(Constants.SWIFT_KEYSTONE_ENDPOINT) == null
@@ -26,14 +26,13 @@ public class SwiftRsClientBuilder {
 			throw new SwiftException("All configurations not provided for swift");
 		}
 		/// String swiftIp = (String) configuration.get(Constants.SWIFT_IP);
-		String swiftApiEndpoint = (String) configuration.get(Constants.SWIFT_API_ENDPOINT);
 		String swiftAuthEndpoint = (String) configuration.get(Constants.SWIFT_KEYSTONE_ENDPOINT);
 		String tenantName = (String) configuration.get(Constants.SWIFT_TENANT_NAME);
 		String accountUsername = (String) configuration.get(Constants.SWIFT_ACCOUNT_USERNAME);
 		String accountUserPassword = (String) configuration.get(Constants.SWIFT_ACCOUNT_USER_PASSWORD);
 		String keystoneServiceName = (String) configuration.get(Constants.SWIFT_KEYSTONE_SERVICE_NAME);
 
-		return new SwiftRsClient(swiftApiEndpoint, swiftAuthEndpoint, tenantName, accountUsername, accountUserPassword,
+		return new SwiftRsClient(swiftAuthEndpoint, tenantName, accountUsername, accountUserPassword,
 				keystoneServiceName);
 
 	}
