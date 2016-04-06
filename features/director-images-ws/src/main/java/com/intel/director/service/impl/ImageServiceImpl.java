@@ -2952,27 +2952,4 @@ public class ImageServiceImpl implements ImageService {
 		return hashTypeObjects;
 	}
 
-	@Override
-	public List<HashTypeObject> getImageHashType(String deploymentType)
-			throws DirectorException {
-		
-		List<HashTypeObject> hashTypeObjects = new ArrayList<HashTypeObject>();
-		HashTypeObject hashTypeObject = null;
-		
-		Map<String, String> allHashTypes = ImageDeploymentHashTypeCache.getAllHashTypes();
-		Set<String> keySet = allHashTypes.keySet();
-		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
-			String key = (String) iterator.next();
-			hashTypeObject = new HashTypeObject(key, allHashTypes.get(key));			
-			if(StringUtils.isNotBlank(deploymentType)){
-				if(deploymentType.equals(key)){
-					hashTypeObjects.add(hashTypeObject);
-					break;
-				}				
-			}else{
-				hashTypeObjects.add(hashTypeObject);
-			}
-		}
-		return hashTypeObjects;
-	}
 }
