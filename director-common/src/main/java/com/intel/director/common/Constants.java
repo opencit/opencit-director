@@ -218,11 +218,4 @@ public class Constants {
 	
 	
 	
-	public static final String HASH_TYPE_VM = "vm.whitelist.hash.type";
-	public static final String HASH_TYPE_BAREMETAL = "bm.whitelist.hash.type";
-	public static final String HASH_TYPE_DOCKER = "docker.whitelist.hash.type";
-	
-	
-	public static final String DIRECTOR_PROPERTIES_FILE = "director.properties";
-	
 }
