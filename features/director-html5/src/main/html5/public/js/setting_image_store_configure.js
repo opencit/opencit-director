@@ -241,11 +241,11 @@ function createImageStore() {
 			}
 			
 			jsonStr = JSON.stringify(createImageStoreRequest);
-			saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = true; updateImageStore('
+			saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
 			+ jsonStr + ', false)\'>Save</button>';
 			
-			saveAnywaysButtonStr =  '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = false; updateImageStore('
-			+ jsonStr + ', false)\'>Save Anyways</button>'
+			saveAnywaysButtonStr =  '<button type=\'button\' class=\'btn btn-default\' onclick=\'testImageStoreConnection('
+			+ jsonStr + ', false)\'>Test Connection</button>'
 			$("#image_store_details_title").html("");
 			$("#image_store_details_title").html($("#image_store_name").val());
 			$("#saveButton").html(saveButtonStr);
@@ -273,7 +273,7 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 		updateImageStoreRequest.name = $("#edit_image_store_name").val();
 		$("#image_store_details_title").html($("#edit_image_store_name").val());
 		
-		} else {
+	} else {
 		updateImageStoreRequest.artifact_types = $(
 		'input:checkbox:checked.artifacts').map(function() {
 			return this.value;
@@ -296,9 +296,8 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 		"Please select at least one supported artifact");
 		return;
 	}
-	if(!validateIS){
-		updateImageStoreRequest.deleted = false;
-	}
+	
+	updateImageStoreRequest.deleted = false;
 	$.ajax({
 		type : "PUT",
 		url : "/v1/image-stores",
@@ -312,71 +311,113 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 			if (data.error) {
 				$("#image_store_details_error").html(data.error);
 				return;
-			}
-			var activateImageStore = data;
-			if(validateIS){
-				$.ajax({
-					type : "POST",
-					url : "/v1/rpc/image-stores/" + updateImageStoreRequest.id
-							+ "/validate",
-					accept : "application/json",
-					headers : {
-						'Accept' : 'application/json'
-					},
-					success : function(data, status, xhr) {
-						console.log(xhr.status);
-						if (xhr.status == 200) {
-							console.log(data.is_valid);
-							if (data.is_valid) {
-								updateImageStoreRequest.deleted = false
-								$.ajax({
-									type : "PUT",
-									url : "/v1/image-stores",
-									contentType : "application/json",
-									data : JSON.stringify(updateImageStoreRequest),
-									accept : "application/json",
-									headers : {
-										'Accept' : 'application/json'
-									},
-									success : function(data, status, xhr) {
-										if (data.error) {
-											$("#image_store_details_error").html(data.error);
-											return;
-										}
-										resetAllFields();
-										$("#image_store_details").modal('hide');
-										imageStoreSettingPage();
-									}
-								});
-							} else {
-								$("#image_store_details_error").html(data.error);
-								$.ajax({
-									type : "PUT",
-									url : "/v1/image-stores",
-									contentType : "application/json",
-									data : JSON.stringify(current_image_store),
-									accept : "application/json",
-									headers : {
-										'Accept' : 'application/json'
-									},
-									success : function(data, status, xhr) {
-										
-									}
-								});
-								
-							}
-						} else {
-							$("#image_store_details_error").html(response);
-						}
+			}			
+			resetAllFields();
+			$("#image_store_details").modal('hide');
+			imageStoreSettingPage();
+		},
+		error : function(data, status, xhr) {
+			$("#image_store_details_error").html(data.responseJSON.error);
+			return;
+		}
+	});
+}
 
+function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
+	$("#image_store_error").html("");
+	var image_store_details = testImageStoreConnectionRequest.image_store_details;
+	if (isEdit) {
+		testImageStoreConnectionRequest.artifact_types = $(
+		'input:checkbox:checked.edit_artifacts').map(function() {
+			return this.value;
+		}).get();
+		testImageStoreConnectionRequest.name = $("#edit_image_store_name").val();
+		$("#image_store_details_title").html($("#edit_image_store_name").val());
+		
+	} else {
+		testImageStoreConnectionRequest.artifact_types = $(
+		'input:checkbox:checked.artifacts').map(function() {
+			return this.value;
+		}).get();
+		testImageStoreConnectionRequest.name = $("#image_store_name").val();
+		testImageStoreConnectionRequest.connector = $("#connector").val();
+		$("#image_store_details_title").html($("#image_store_name").val());
+	}
+	
+	for (i = 0; i < image_store_details.length; i++) {
+		console.log(image_store_details.length);
+		var id = testImageStoreConnectionRequest.image_store_details[i]["id"];
+		testImageStoreConnectionRequest.image_store_details[i]["value"] = $("#" + id)
+		.val();
+		console.log("KEY :: " + id + " :: " + $("#" + id).val());
+	}
+	
+	if (testImageStoreConnectionRequest.artifact_types.length == 0) {
+		$("#image_store_error").html(
+		"Please select at least one supported artifact");
+		return;
+	}
+	$.ajax({
+		type : "PUT",
+		url : "/v1/image-stores",
+		contentType : "application/json",
+		data : JSON.stringify(testImageStoreConnectionRequest),
+		accept : "application/json",
+		headers : {
+			'Accept' : 'application/json'
+		},
+		success : function(data, status, xhr) {
+			if (data.error) {
+				$("#image_store_details_error").html(data.error);
+				return;
+			}
+			$.ajax({
+				type : "POST",
+				url : "/v1/rpc/image-stores/" + testImageStoreConnectionRequest.id
+						+ "/validate",
+				accept : "application/json",
+				headers : {
+					'Accept' : 'application/json'
+				},
+				success : function(data, status, xhr) {
+					if (data.is_valid) {
+						$("#image_store_details_error").html("<font color=\"green\">Valid configuration</font>");
+					} else {
+						$("#image_store_details_error").html(data.error);
 					}
-				});
-			} else {
-
-				resetAllFields();
-				$("#image_store_details").modal('hide');
-				imageStoreSettingPage();
-			}
+					if(!isEdit){
+						for (i = 0; i < current_image_store.image_store_details.length; i++) {
+							var id = current_image_store.image_store_details[i]["id"];
+							current_image_store.image_store_details[i]["value"] = $("#" + id).val();
+						}
+					}
+					$.ajax({
+						type : "PUT",
+						url : "/v1/image-stores",
+						contentType : "application/json",
+						data : JSON.stringify(current_image_store),
+						accept : "application/json",
+						headers : {
+							'Accept' : 'application/json'
+						},
+						success : function(data, status, xhr) {
+							
+							if (data.error) {
+								$("#image_store_details_error").html(data.error);
+								return;
+							}
+						},
+						error : function(data, status, xhr) {
+							$("#image_store_details_error").html(data.responseJSON.error);
+							return;
+						}
+					});
+				},
+				error : function(data, status, xhr) {
+					$("#image_store_details_error").html(data.responseJSON.error);
+					return;
+				}
+			});
 		},
 		error : function(data, status, xhr) {
 			$("#image_store_details_error").html(data.responseJSON.error);
@@ -458,10 +499,10 @@ function populateImageStore(image_store) {
 	populateImageStoreDetails(image_store.image_store_details);
 	$('#edit_image_store').modal('show');
 	jsonStr = JSON.stringify(image_store);
-	saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = true; updateImageStore('
+	saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
 			+ jsonStr + ',true)\'>Save</button>';
-	saveAnywaysButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'validateIS = false; updateImageStore('
-			+ jsonStr + ',true)\'>Save Anyways</button>';
+	saveAnywaysButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'testImageStoreConnection('
+			+ jsonStr + ',true)\'>Test Connection</button>';
 	$("#saveButton").html(saveButtonStr);
 	$("#saveAnywaysButton").html(saveAnywaysButtonStr);
 }
