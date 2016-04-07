@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.intel.director.api.HashTypeObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
@@ -42,7 +44,6 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
 import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
-import com.intel.director.api.HashTypeObject;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
@@ -161,9 +162,17 @@ public class Images {
 		if (Constants.DEPLOYMENT_TYPE_DOCKER
 				.equals(uploadRequest.image_deployments)
 				&& uploadRequest.image_size == 0) {
-			boolean doesRepoTagExistInDockerHub = DockerUtil
-					.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
-							uploadRequest.getTag());
+			boolean doesRepoTagExistInDockerHub;
+			try {
+				doesRepoTagExistInDockerHub = DockerUtil
+						.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
+								uploadRequest.getTag());
+			} catch (ClientProtocolException e) {
+				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
+				
+			} catch (IOException e) {
+				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
+			}
 			
 			if(!doesRepoTagExistInDockerHub){
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();

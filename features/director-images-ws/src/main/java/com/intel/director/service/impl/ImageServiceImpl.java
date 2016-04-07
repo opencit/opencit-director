@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -63,7 +62,6 @@ import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
-import com.intel.director.common.DirectorPropertiesCache;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;

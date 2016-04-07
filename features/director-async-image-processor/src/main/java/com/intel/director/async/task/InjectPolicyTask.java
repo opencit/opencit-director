@@ -144,8 +144,8 @@ public class InjectPolicyTask extends ImageActionAsyncTask {
 			log.error("Error In Injecting Policy", e);
 			updateImageActionState(Constants.ERROR,
 					"Error while injecting policy");
+			fileUtilityOperation.deleteFileOrDirectory(new File(newLocation));
 			throw new DirectorException("Error In Injecting Policy", e);
-
 		}
 		log.info("Policy Injected Successfully");
 	}

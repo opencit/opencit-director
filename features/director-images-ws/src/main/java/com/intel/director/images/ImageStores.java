@@ -306,7 +306,7 @@ public class ImageStores {
 				imageStoreTransferObject.id);
 		if (doesImageStoreNameExist) {
 			createImageStore.setError("Image Store Name Already Exists.");
-			return Response.ok(createImageStore).build();
+			return Response.status(Status.BAD_REQUEST).entity(createImageStore).build();
 		}
 
 		try {
@@ -441,14 +441,14 @@ public class ImageStores {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ImageStoreTransferObject updateImageStores(ImageStoreTransferObject imageStoreTransferObject)
+	public Response updateImageStores(ImageStoreTransferObject imageStoreTransferObject)
 			throws DirectorException {
 		ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
 		boolean doesImageStoreNameExist = imageStoreService.doesImageStoreNameExist(imageStoreTransferObject.getName(),
 				imageStoreTransferObject.id);
 		if (doesImageStoreNameExist) {
 			updateImageStore.setError("Image Store Name Already Exists.");
-			return updateImageStore;
+			return Response.status(Status.BAD_REQUEST).entity(updateImageStore).build();
 		}
 
 		List<String> errorList = new ArrayList<String>();
@@ -462,7 +462,7 @@ public class ImageStores {
 		
 		if (!errorList.isEmpty()) {
 			updateImageStore.setError(StringUtils.join(errorList,",") + " can't be blank");
-			return updateImageStore;
+			return Response.status(Status.BAD_REQUEST).entity(updateImageStore).build();
 		}
 		
 		// Encrypt password fields
@@ -474,7 +474,8 @@ public class ImageStores {
 					.encryptPasswordForImageStore(passwordConfiguration.getValue());
 			passwordConfiguration.setValue(encryptedPassword);
 		}
-		return imageStoreService.updateImageStore(imageStoreTransferObject);
+		ImageStoreTransferObject updatedIS = imageStoreService.updateImageStore(imageStoreTransferObject);
+		return Response.ok(updatedIS).build();
 	}
 
 	/**

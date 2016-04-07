@@ -413,17 +413,20 @@ public class DirectorUtil {
 			log.error("Directorutil fetchDekUrl failed",e1);
 		}
 		
-		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getURL() : "";
+		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
 		
 	}
 	
 	public static Result executeCommand(String command, String... args)
 			throws ExecuteException, IOException {
 		Result result = ExecUtil.executeQuoted(command, args);
-		if (result.getStderr() != null
+		
+		/*if (result.getStderr() != null
 				&& StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
-		}
+		}*/
 		return result;
 	}
+	
+
 }
