@@ -65,12 +65,21 @@ public class SwiftRsClient {
 	public String authToken;
 	public String storageUrl;
 
-	public SwiftRsClient(String swiftAuthEndpoint,String tenantName,
+	public SwiftRsClient(String swiftApiEndpoint, String swiftAuthEndpoint,String tenantName,
 			String accountUsername, String accountUserPassword,String swiftKeystoneService)
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
-		createAuthTokenFromKeystone(swiftAuthEndpoint, tenantName, accountUsername,
+		URL url = null;
+		try {
+			url = new URL(swiftApiEndpoint);
+		} catch (MalformedURLException e) {
+			log.error("Initialize SwiftRsClient failed");
+			throw new SwiftException("Initialize SwiftRsClient failed", e);
+		}
+		webTarget = client.target(url.toExternalForm());
+	
+		createAuthTokenFromKeystone(swiftApiEndpoint,swiftAuthEndpoint, tenantName, accountUsername,
 					accountUserPassword,swiftKeystoneService);
 		
 
@@ -544,15 +553,32 @@ public class SwiftRsClient {
 		printTimeDiff("createAuthToken swift", start, end);
 	}
 	*/
-	private void createAuthTokenFromKeystone(String swiftAuthEndpoint,
+	private void createAuthTokenFromKeystone(String swiftApiEndpoint,String swiftAuthEndpoint,
 			String tenantName, String userName, String password,String swiftKeystoneServiceName)
 			throws SwiftException {
 		long start = new Date().getTime();
-		String host=null;
+		String hostByUser=null;
+		String hostFromKeyStone = null;
+		String protocolByUser = null;
+		String protocolFromKeyStone = null;
 		HttpClient httpClient = null;
 		BufferedReader br = null;
+		int portByUser = -1;
+		int portFormKeyStone = -1;
 		boolean responseHasError = true;
-	
+		// String authEndpoint = swiftAuthEndpoint + "/v2.0/tokens";
+		try {
+			URL urlSwift = new URL(swiftApiEndpoint);
+			hostByUser = urlSwift.getHost();
+			try {
+				protocolByUser = urlSwift.getProtocol();
+			} catch (Exception me) {
+				protocolByUser = "";
+			}
+			portByUser = urlSwift.getPort();
+		} catch (MalformedURLException e3) {
+			throw new SwiftException("Error getting swift host", e3);
+		}
 		httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
 
@@ -636,9 +662,24 @@ public class SwiftRsClient {
 								JSONObject endpoint = endpoints
 										.getJSONObject(0);
 								storageUrl = endpoint.getString("publicURL");
-								if(storageUrl.contains("Controller")){    //TODO:- read host names from /etc/hosts or find any other approach 
-									storageUrl=storageUrl.replace("Controller", host);
+								
+								try {
+									URL endPointFromSwift = new URL(storageUrl);
+									try {
+										protocolFromKeyStone = endPointFromSwift.getProtocol();
+									} catch (Exception me) {
+										protocolFromKeyStone = "";
+									}
+									portFormKeyStone = endPointFromSwift.getPort();
+									hostFromKeyStone = endPointFromSwift.getHost();
+								} catch (MalformedURLException e3) {
+									throw new SwiftException("Error getting swift host", e3);
 								}
+								
+								storageUrl=storageUrl.replace(hostFromKeyStone, hostByUser.trim());
+								storageUrl=storageUrl.replace(portFormKeyStone + "", portByUser + "");
+								storageUrl=storageUrl.replace(protocolFromKeyStone, protocolByUser.trim());
+								
 								if (org.apache.commons.lang.StringUtils
 										.isBlank(storageUrl)) {
 									responseHasError = false;
