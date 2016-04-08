@@ -1,25 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-
+    
     <artifactId>director-maven-package-makeself</artifactId>
     <groupId>com.intel.mtwilson.director</groupId>
-    <version>0.1-SNAPSHOT</version>
+    
     <packaging>pom</packaging>
     <description>Describes how to create an application self-extracting file</description>
-
+    
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-maven-root</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
         <relativePath />
     </parent>
-
+    
     <properties>
         <!-- package poms that inherit can override this; it's the folder name to unextract (when using keep option) and .bin will be appended for the installer filename -->
         <makeself.name>${project.artifactId}-${project.version}</makeself.name>
     </properties>
-
+    
     <profiles>
         <profile>
             <activation>
@@ -27,17 +26,14 @@
                     <family>unix</family>
                 </os>
             </activation>
-
+            
             <build>
                 <!-- NOTE: the order of plugins listed here is important because
                 when multiple plugins have the same phase, maven 3.0.3 and later
                 executes them in the order listed in the pom.  so first we create
                 the jar, then we copy all resources in to the feature directory,
                 then we create the zip file. -->
-        
                 <plugins>
-            
-            
                     <!-- copy all dependencies (non-transitive) to the resources folder for later packaging -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -79,7 +75,7 @@
                             </execution>
                         </executions>
                     </plugin>
-
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -95,7 +91,7 @@
                                         <!-- temporary directory for creating packages -->
                                         <mkdir dir="/tmp/makeself"/>
                                         <chmod perm="700" dir="/tmp/makeself"/>
-                                
+                                        
                                         <!-- package directory contains everything that should be included in the installer -->
                                         <mkdir dir="${project.build.directory}/${makeself.name}"/>
                                         <chmod perm="700">
@@ -117,8 +113,7 @@
                                             <arg value="bash"/>
                                             <arg value="setup.sh"/>
                                         </exec>
-
-                                    
+                                        
                                         <fail message="Cannot build self-extracting installer" status="${mavenExitMakeself}">
                                             <condition>
                                                 <not>
@@ -142,7 +137,8 @@
                                 <version>1.0b3</version>
                             </dependency>
                         </dependencies>
-                    </plugin>	    
+                    </plugin>
+                    
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
@@ -164,11 +160,9 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
-        		
             </build>
         </profile>
     </profiles>
-
+    
 </project>
