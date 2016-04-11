@@ -9,8 +9,8 @@
 	<name>TD Database Support</name>
 
 	<parent>
-		<groupId>com.intel.mtwilson.maven</groupId>
-		<artifactId>mtwilson-maven-root</artifactId>
+		<artifactId>director-maven-root</artifactId>
+		<groupId>com.intel.mtwilson.director</groupId>
 		<version>3.1-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
