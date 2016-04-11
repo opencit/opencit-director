@@ -70,8 +70,7 @@ public class UploadTarTask extends GenericUploadTask {
 				UUID uuid = new UUID();
 				customProperties.put(Constants.GLANCE_ID, uuid.toString());
 			}
-
-			customProperties.put(Constants.NAME, imageInfo.repository + ":" + imageInfo.tag);
+			customProperties.put(Constants.NAME, imageInfo.repository + ":" + trustPolicy.getDisplay_name());
 		} else {	
 			customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);

@@ -204,6 +204,7 @@ public class Constants {
 	public static final String DOCKER_HUB_USERNAME = "Username";
 	public static final String DOCKER_HUB_PASSWORD = "Password";
 	public static final String DOCKER_HUB_EMAIL = "Email";
+	public static final String DOCKER_TAG_TO_USE = "tag to use";
 	
 	public static final String IMAGE_INFO_OBJECT = "IMAGE_INFO_OBJECT";
 	public static final String ARTIFACT_ID = "ARTIFACT_ID";

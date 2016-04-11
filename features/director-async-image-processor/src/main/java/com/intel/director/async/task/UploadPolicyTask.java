@@ -77,7 +77,7 @@ public class UploadPolicyTask extends GenericUploadTask {
 			return false;
 		}
 		Collection<ImageStoreDetailsTransferObject> imgStoreDetails = imgStoreTransferObject.image_store_details;
-		log.info("ASYNCH UPLOADER, Inside upload Policy Task, imgStoreDetails::" + imgStoreDetails + " for storeid::"
+		log.debug("ASYNCH UPLOADER, Inside upload Policy Task, imgStoreDetails::" + imgStoreDetails + " for storeid::"
 				+ storeId);
 		for (ImageStoreDetailsTransferObject detailsRecord : imgStoreDetails) {
 			if (Constants.SWIFT_CONTAINER_NAME.equals(detailsRecord.getKey())) {
