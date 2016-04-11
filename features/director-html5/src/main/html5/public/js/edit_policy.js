@@ -140,10 +140,38 @@ function EditImageViewModel(data) {
                         }
 						
                         nextButton();
-                    }
+                    },
+					error : function(data, textStatus, errorThrown) {
+						if (data.responseJSON.error) {
+							hideLoading();
+							$('#for_mount_edit_vm').hide();
+							$('#default_edit_vm').show();
+							$('#error_modal_body_edit_vm_1').text(data.responseJSON.error);
+							$("#error_modal_edit_vm_1").modal({
+								backdrop: "static"
+							});
+							$("#editVMPolicyNext").prop('disabled', false);
+							return;
+							
+						}
+					}
                 });
                 // /nextButton();
-            }
+            },
+			error : function(data, textStatus, errorThrown) {
+				if (data.responseJSON.error) {
+					hideLoading();
+					$('#for_mount_edit_vm').hide();
+					$('#default_edit_vm').show();
+					$('#error_modal_body_edit_vm_1').text(data.responseJSON.error);
+					$("#error_modal_edit_vm_1").modal({
+						backdrop: "static"
+					});
+					$("#editVMPolicyNext").prop('disabled', false);
+					return;
+					
+				}
+			}
         });
 
     }

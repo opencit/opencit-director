@@ -92,7 +92,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		imageStoreUploadOrderBy.setOrderBy(OrderByEnum.ASC);
 		imageStoreUploadOrderBy.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
 		try {
-			fetchImageUploads = persistService.fetchImageUploads(imgUpFilter, null);
+			fetchImageUploads = persistService.fetchImageUploads(imgUpFilter, imageStoreUploadOrderBy);
 			if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
 				imageStoreTranserObject = fetchImageUploads.get(fetchImageUploads.size() - 1);
 				log.info("Last uploaded image to store : {},  glance id : {}", imageStoreTranserObject.getStoreId(),

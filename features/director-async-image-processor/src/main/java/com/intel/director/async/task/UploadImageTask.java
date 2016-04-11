@@ -31,7 +31,7 @@ public class UploadImageTask extends GenericUploadTask {
 			.getLogger(UploadTarTask.class);
 
 	private boolean isDockerhubUplod = false;
-
+	private String dockerTagToUse;
 	public UploadImageTask() throws DirectorException {
 		super();
 	}
@@ -106,7 +106,7 @@ public class UploadImageTask extends GenericUploadTask {
 			}
 			runFlag = super.run();
 			if (isDockerhubUplod) {
-				DockerUtil.dockerRMI(imageInfo.repository, imageInfo.tag);
+				DockerUtil.dockerRMI(imageInfo.repository, dockerTagToUse);
 			}
 		
 		return runFlag;
@@ -173,11 +173,15 @@ public class UploadImageTask extends GenericUploadTask {
 		if (storeTransferObject.getConnector().equals(
 				Constants.CONNECTOR_DOCKERHUB)) {
 			// Its a simple image upload - DI
+			isDockerhubUplod = true;
 			if (imageActionObject.getActions().size() == 1) {
+				dockerTagToUse = imageInfo.tag;
 				DockerUtil.dockerTag(imageInfo.repository, imageInfo.tag
-						+ "_source", imageInfo.repository, imageInfo.tag);
-				isDockerhubUplod = true;
+						+ "_source", imageInfo.repository, dockerTagToUse);
+			} else { // Docker Image With Policy using display name as tag
+				dockerTagToUse = trustPolicy.getDisplay_name();
 			}
+			customProperties.put(Constants.DOCKER_TAG_TO_USE, dockerTagToUse);
 		} else {
 			String imageLocation = imageInfo.getLocation();
 			String imageFilePath = null;

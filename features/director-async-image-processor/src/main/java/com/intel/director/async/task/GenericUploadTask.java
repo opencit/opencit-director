@@ -156,17 +156,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 				log.error("Error fetching policy", e);
 				throw new DirectorException(e);
 			}
-		/*	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policyObj = null;
-			try {
-				policyObj = TdaasUtil.getPolicy(trustPolicy2.getTrust_policy());
-			} catch (JAXBException e) {
-				log.error("Error converting policy xml to object", e);
-				throw new DirectorException(e);
-			}
-			String imageIdInPolicy = policyObj.getImage().getImageId();
-			if(!imageId.equals(glanceId)){
-				glanceId = imageIdInPolicy;
-			}*/
+
 			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
 		}
 		
