@@ -190,6 +190,7 @@ done
 
 
 # if properties file exists
+DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
 
 if [ -e $DIRECTOR_PROPERTIES_FILE ]; then
 	director export-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
@@ -199,7 +200,7 @@ fi
 
 
 
-DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
+
 touch "$DIRECTOR_PROPERTIES_FILE"
 chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
 chmod 600 "$DIRECTOR_PROPERTIES_FILE"
