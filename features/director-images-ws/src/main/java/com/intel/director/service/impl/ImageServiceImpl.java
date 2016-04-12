@@ -1809,7 +1809,7 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyDraft.setImgAttributes(existingTrustPolicy
 				.getImgAttributes());
 		trustPolicyDraft.setTrust_policy_draft(policyXml);
-		trustPolicyDraft.setDisplay_name(existingTrustPolicy.getDisplay_name());
+		trustPolicyDraft.setDisplay_name(TdaasUtil.getVersionedName(existingTrustPolicy.getDisplay_name()));
 		return trustPolicyDraft;
 	}
 
@@ -1934,14 +1934,12 @@ public class ImageServiceImpl implements ImageService {
 		String display_name = "";
 		try {
 			image_info = imagePersistenceManager.fetchImageById(image_id);
-			if (image_info.getTrust_policy_draft_id() != null) {
-				policy_id = image_info.getTrust_policy_draft_id();
-				display_name += imagePersistenceManager.fetchPolicyDraftById(
-						policy_id).getDisplay_name();
-			} else if (image_info.getTrust_policy_id() != null) {
+			if (image_info.getTrust_policy_id() != null) {
 				policy_id = image_info.getTrust_policy_id();
-				display_name += imagePersistenceManager.fetchPolicyById(
-						policy_id).getDisplay_name();
+				display_name += imagePersistenceManager.fetchPolicyById(policy_id).getDisplay_name();
+			} else if (image_info.getTrust_policy_draft_id() != null) {
+				policy_id = image_info.getTrust_policy_draft_id();
+				display_name += imagePersistenceManager.fetchPolicyDraftById(policy_id).getDisplay_name();
 			} else {
 				display_name += "-";
 			}

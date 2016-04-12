@@ -325,6 +325,7 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 
 function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
 	$("#image_store_error").html("");
+	$("#image_store_details_error").html("");
 	var image_store_details = testImageStoreConnectionRequest.image_store_details;
 	if (isEdit) {
 		testImageStoreConnectionRequest.artifact_types = $(

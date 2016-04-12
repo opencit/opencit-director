@@ -135,10 +135,37 @@ function EditDockerImageViewModel(data) {
                         }
 						
                         nextButtonDocker();
-                    }
+                    },
+					error : function(data, textStatus, errorThrown) {
+						if (data.responseJSON.error) {
+							hideLoading();
+							$('#for_mount_edit_docker').hide();
+							$('#default_edit_docker').show();
+							$('#error_modal_body_edit_docker_1').text(data.responseJSON.error);
+							$("#error_modal_edit_docker_1").modal({
+								backdrop: "static"
+							});
+							$("#editDockerPolicyNext").prop('disabled', false);
+							return;
+						}
+					}
                 });
 
-            }
+            },
+			error : function(data, textStatus, errorThrown) {
+				if (data.responseJSON.error) {
+					hideLoading();
+					$('#for_mount_edit_docker').hide();
+					$('#default_edit_docker').show();
+					$('#error_modal_body_edit_docker_1').text(data.responseJSON.error);
+					$("#error_modal_edit_docker_1").modal({
+						backdrop: "static"
+					});
+					$("#editDockerPolicyNext").prop('disabled', false);
+					return;
+					
+				}
+			}
         });
 
     }
