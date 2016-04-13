@@ -10,20 +10,22 @@ $(document)
             pageInitialized = true;
         });
 
-function createPolicyDocker(imageid, imagename) {
+function createPolicyDocker(imageid, tag, repository) {
     currentFlow = "Create";
     current_image_id = imageid;
-    current_image_name = imagename;
+    current_image_name = tag;
+	current_repository = repository;
     current_trust_policy_draft_id = '';
 
     goToCreatePolicyDockerWizard();
 }
 
-function editPolicyDocker(imageid, imagename, trust_policy_draft_id) {
+function editPolicyDocker(imageid, tag, repository , trust_policy_draft_id) {
 	
     currentFlow = "Edit";
     current_image_id = imageid;
-    current_image_name = imagename;
+    current_image_name = tag;
+	current_repository = repository;
     current_trust_policy_draft_id = trust_policy_draft_id;
 
     goToEditPolicyDockerWizard();

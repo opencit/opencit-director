@@ -71,8 +71,12 @@ public class CreateTarTask extends ImageActionAsyncTask {
 					.getImage_deployments())) {
 				String tarDestination = imageLocation + imageActionObject.getImage_id();
 				DirectorUtil.callExec("mkdir -p " + tarDestination);
-				int exitCode = DockerUtil.dockerSave(imageInfo.getRepository(), trustPolicy.getDisplay_name(), tarDestination,
-						trustPolicy.getDisplay_name() + ".tar");				
+				String display_name = trustPolicy.getDisplay_name();
+				int tagStart = display_name.lastIndexOf(":") + 1;
+				String repo = display_name.substring(0, tagStart - 1);
+				String tag = display_name.substring(tagStart);
+				int exitCode = DockerUtil.dockerSave(repo, tag, tarDestination,
+						trustPolicy.getDisplay_name().replace("/", "-") + ".tar");				
 				DockerUtil.dockerRMI(imageInfo.getRepository(), trustPolicy.getDisplay_name());
 				if (exitCode != 0) {
 					new FileUtilityOperation().deleteFileOrDirectory(new File(tarDestination));
@@ -116,7 +120,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 				fileUtilityOperation.writeToFile(newLocation + trustPolicyName,
 						trustPolicy.getTrust_policy());
 				String tarLocation = newLocation;
-				String tarName = trustPolicy.getDisplay_name() + ".tar";
+				String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";
 				List<String> filePaths = new ArrayList<>(2);
 				filePaths.add(imageLocation + imageName);
 				filePaths.add(newLocation + trustPolicyName);

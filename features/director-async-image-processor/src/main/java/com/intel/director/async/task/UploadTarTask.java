@@ -59,7 +59,7 @@ public class UploadTarTask extends GenericUploadTask {
 		boolean runFlag = false;
 		log.info("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
-		String tarName = trustPolicy.getDisplay_name() + ".tar";
+		String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";
 		if (Constants.DEPLOYMENT_TYPE_DOCKER
 				.equalsIgnoreCase(imageInfo.image_deployments)) {
 			ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
@@ -70,14 +70,12 @@ public class UploadTarTask extends GenericUploadTask {
 				UUID uuid = new UUID();
 				customProperties.put(Constants.GLANCE_ID, uuid.toString());
 			}
-			customProperties.put(Constants.NAME, imageInfo.repository + ":" + trustPolicy.getDisplay_name());
 		} else {	
-			customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
 			log.info("Inside Run Upload Tar task glanceId::" + glanceId);
 			customProperties.put(Constants.GLANCE_ID, glanceId);
 		}
-		
+		customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 		log.info("TAR name {}", tarName);
 		String imageLocation = imageInfo.getLocation();
 		String tarLocation = imageLocation + imageActionObject.getImage_id()

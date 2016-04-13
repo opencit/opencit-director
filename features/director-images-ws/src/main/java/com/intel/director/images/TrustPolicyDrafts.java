@@ -412,17 +412,32 @@ public class TrustPolicyDrafts {
 						.entity(createTrustPolicyMetadataResponse).build();
 
 			}
+			
+			if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+				String display_name = createTrustPolicyMetaDataRequest.display_name;
+				if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
+					createTrustPolicyMetadataResponse.setError("Invalid Repo Name");
+					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
+							.build();
+				}
+				String[] split = display_name.split(fetchImageById.getRepository() + ":");
+				if (split.length == 0 || StringUtils.isBlank(split[1])) {
+					createTrustPolicyMetadataResponse.setError("Tag cannot be empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
+							.build();
+				}
+			}
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
 		}
 
+		
+		
 		try {
 			createTrustPolicyMetadataResponse = imageService
 					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
 			log.error("createTrustPolicyMetaData failed", e);
-			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
-			createTrustPolicyMetadataResponse.setDetails(e.getMessage());
 			createTrustPolicyMetadataResponse.setError(e.getMessage());
 			return Response.ok(createTrustPolicyMetadataResponse).build();
 		}

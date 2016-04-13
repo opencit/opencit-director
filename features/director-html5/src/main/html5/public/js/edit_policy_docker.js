@@ -4,6 +4,7 @@ var image_policies = new Array();
 edit_policy_initialize();
 
 function edit_policy_initialize() {
+	$("#display_name_repo").val(current_repository);
 	fetchImaheHashAlgo("Docker","hashtype_docker");
     if (!current_trust_policy_draft_id) {
         var create_draft_request = {
@@ -83,7 +84,7 @@ function EditDockerImageViewModel(data) {
         console.log(current_image_id);
         self.editDockerImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
         self.editDockerImageMetaData.encrypted = false;
-        self.editDockerImageMetaData.display_name = $('#display_name').val();
+        self.editDockerImageMetaData.display_name = current_repository + ":" +$('#display_name').val();
         current_display_name = $('#display_name').val();
 		showLoading();
         $.ajax({
@@ -173,7 +174,7 @@ function EditDockerImageViewModel(data) {
 };
 
 function showImageLaunchPoliciesDocker(policydata) {
-    current_display_name = policydata.display_name;
+    current_display_name = policydata.display_name.substring(policydata.display_name.lastIndexOf(":") + 1);
     $("#display_name").val(current_display_name);
     $.ajax({
         type: "GET",

@@ -135,11 +135,15 @@ public class InjectPolicyTask extends ImageActionAsyncTask {
 		fileUtilityOperation.writeToFile(newLocation + trustPolicyName,
 				trustPolicy.getTrust_policy());
 
-		log.info("Injecting Policy @ /trust and creating new image with :: " + imageinfo.getRepository() + ":" +  trustPolicy.getDisplay_name());
+		String display_name = trustPolicy.getDisplay_name();
+		int tagStart = display_name.lastIndexOf(":") + 1;
+		String repo = display_name.substring(0, tagStart - 1);
+		String tag = display_name.substring(tagStart);
+		log.info("Injecting Policy @ /trust and creating new image with :: " + repo + ":" +  tag);
 		try {
 			DirectorUtil.executeCommandInExecUtil(Constants.dockerPolicyInject,
 					imageinfo.repository, imageinfo.tag + "_source",
-					imageinfo.repository, trustPolicy.getDisplay_name(), newLocation);
+					repo, tag, newLocation);
 		} catch (IOException e) {
 			log.error("Error In Injecting Policy", e);
 			updateImageActionState(Constants.ERROR,
