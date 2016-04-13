@@ -2,6 +2,7 @@ var imageFormats = new Array();
 var image_policies = new Array();
 
 $(document).ready(function() {
+	$("#display_name_repo").val(current_repository);
     fetchImageLaunchPolicies();
 	fetchImaheHashAlgo("Docker","hashtype_docker");
 });
@@ -22,7 +23,7 @@ function CreateDockerImageViewModel() {
         self.createDockerImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
         self.createDockerImageMetaData.encrypted = false;
 
-        self.createDockerImageMetaData.display_name = $('#display_name').val();
+        self.createDockerImageMetaData.display_name = current_repository + ":" +$('#display_name').val();
         current_display_name = $('#display_name').val();
 		showLoading();
         $.ajax({
@@ -33,18 +34,18 @@ function CreateDockerImageViewModel() {
                 'Accept': 'application/json'
             },
             data: ko.toJSON(self.createDockerImageMetaData), // $("#loginForm").serialize(),
-
+			$('#display_name_last').val(current_display_name);
             success: function(data, status, xhr) {
 
                 if (data.error) {
 					hideLoading();
-                    $('#for_mount').hide();
-                    $('#default').show();
-                    $('#error_modal_body_vm_1').text(data.error);
-                    $("#error_modal_vm_1").modal({
+					console.log(data.error);
+                    $('#for_mount_docker').hide();
+                    $('#default_docker').show();
+                    $('#error_modal_body_docker_1').text(data.error);
+                    $("#error_modal_docker_1").modal({
                         backdrop: "static"
                     });
-                    $('body').removeClass("modal-open");
                     $("#createDockerPolicyNext").prop('disabled', false);
                     return;
                 }
@@ -65,8 +66,8 @@ function CreateDockerImageViewModel() {
                         $("#createDockerPolicyNext").prop('disabled', false);
                         if (data.error) {
 							hideLoading();
-                            $('#default').hide();
-                            $('#for_mount').show();
+                            $('#default_docker').hide();
+                            $('#for_mount_docker').show();
                             $('#error_modal_body_docker_1').text(data.error);
                             $("#error_modal_docker_1").modal({
                                 backdrop: "static"
@@ -82,16 +83,14 @@ function CreateDockerImageViewModel() {
             error: function(data, status, xhr) {
 				hideLoading();
                 console.log(data);
-                $('#for_mount').hide();
-                $('#default').show();
+                $('#for_mount_docker').hide();
+                $('#default_docker').show();
                 $('#error_modal_body_docker_1').text("");
                 var obj = jQuery.parseJSON(data.responseText);
-
                 $('#error_modal_body_docker_1').text(obj.error);
                 $("#error_modal_docker_1").modal({
                     backdrop: "static"
                 });
-                $('body').removeClass("modal-open");
                 $("#createDockerPolicyNext").prop('disabled', false);
                 return;
             }

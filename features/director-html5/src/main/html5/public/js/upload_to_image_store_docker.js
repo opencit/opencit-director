@@ -212,8 +212,9 @@ function createPolicyDraftFromPolicy() {
                 return false;
             } else {
                 current_trust_policy_draft_id = data.id;
+				var display_name = data.display_name.substring(data.display_name.lastIndexOf(":") + 1);
 				$("#display_name_last").val(data.display_name);
-				$("#display_name").val(data.display_name);
+				$("#display_name").val(display_name);
             }
 
         }
