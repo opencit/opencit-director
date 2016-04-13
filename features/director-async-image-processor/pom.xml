@@ -90,7 +90,7 @@
         </dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<artifactId>director-dockerhub</artifactId>
 		</dependency>
 
