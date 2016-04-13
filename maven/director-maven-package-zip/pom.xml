@@ -5,7 +5,7 @@
     <artifactId>director-maven-package-zip</artifactId>
     <groupId>com.intel.mtwilson.director</groupId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <description>Describes how to create an application zip file</description>
 
     <parent>
