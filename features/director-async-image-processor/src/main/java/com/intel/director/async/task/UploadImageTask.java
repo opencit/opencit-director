@@ -173,13 +173,16 @@ public class UploadImageTask extends GenericUploadTask {
 		if (storeTransferObject.getConnector().equals(
 				Constants.CONNECTOR_DOCKERHUB)) {
 			// Its a simple image upload - DI
+			String display_name = trustPolicy.getDisplay_name();
+			int tagStart = display_name.lastIndexOf(":") + 1;
+			String tag = display_name.substring(tagStart);
 			isDockerhubUplod = true;
 			if (imageActionObject.getActions().size() == 1) {
 				dockerTagToUse = imageInfo.tag;
 				DockerUtil.dockerTag(imageInfo.repository, imageInfo.tag
 						+ "_source", imageInfo.repository, dockerTagToUse);
 			} else { // Docker Image With Policy using display name as tag
-				dockerTagToUse = trustPolicy.getDisplay_name();
+				dockerTagToUse = tag;
 			}
 			customProperties.put(Constants.DOCKER_TAG_TO_USE, dockerTagToUse);
 		} else {
