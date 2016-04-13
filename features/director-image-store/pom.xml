@@ -41,6 +41,11 @@
             <artifactId>director-images-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>0.1-SNAPSHOT</version>
+			<artifactId>director-persistence</artifactId>
+		</dependency>
     </dependencies>
     
 </project>

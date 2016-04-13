@@ -16,5 +16,7 @@
 	 <class>com.intel.mtwilson.director.data.MwSshPassword</class> 
 	 <class>com.intel.mtwilson.director.data.MwImageStoreSettings</class>
 	 <class>com.intel.mtwilson.director.data.MwPolicyTemplate</class>
+	 <class>com.intel.mtwilson.director.data.MwImageStore</class>
+	 <class>com.intel.mtwilson.director.data.MwImageStoreDetails</class>
   </persistence-unit>
 </persistence>

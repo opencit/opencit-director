@@ -193,6 +193,11 @@
             <artifactId>director-trust-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director.database</groupId>
+			<artifactId>trust-director-postgresql</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         
         <!-- external -->
         <dependency>

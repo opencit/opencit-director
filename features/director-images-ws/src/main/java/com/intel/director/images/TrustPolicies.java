@@ -15,9 +15,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.lang.StringUtils;
+
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImportPolicyTemplateResponse;
@@ -265,7 +268,7 @@ public class TrustPolicies {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deletePolicy(
 			@PathParam("trustPolicyId") String trustPolicyId) {
-		GenericResponse response = new GenericResponse();
+		GenericDeleteResponse response = new GenericDeleteResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
 			response.error = "Trust Policy Id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)

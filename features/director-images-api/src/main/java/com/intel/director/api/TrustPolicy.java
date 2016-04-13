@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 public class TrustPolicy extends AuditFields {
 
@@ -15,6 +15,8 @@ public class TrustPolicy extends AuditFields {
     protected ImageAttributes imgAttributes;
     
     protected String display_name;
+    
+    protected boolean archive;
 
     public String getDisplay_name() {
 		return display_name;
@@ -28,8 +30,8 @@ public class TrustPolicy extends AuditFields {
         super();
     }
 
-    public TrustPolicy(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id,
+    public TrustPolicy(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String id,
             String description, String trust_policy, String name,
             ImageAttributes imgAttributes) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
@@ -40,8 +42,8 @@ public class TrustPolicy extends AuditFields {
         this.imgAttributes = imgAttributes;
     }
 
-    public TrustPolicy(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date,
+    public TrustPolicy(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date,
             String description, String trust_policy, String name,
             ImageAttributes imgAttributes) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
@@ -83,7 +85,17 @@ public class TrustPolicy extends AuditFields {
         this.name = name;
     }
 
-    public ImageAttributes getImgAttributes() {
+    
+    
+    public boolean isArchive() {
+		return archive;
+	}
+
+	public void setArchive(boolean archive) {
+		this.archive = archive;
+	}
+
+	public ImageAttributes getImgAttributes() {
         return imgAttributes;
     }
 
@@ -91,14 +103,13 @@ public class TrustPolicy extends AuditFields {
         this.imgAttributes = imgAttributes;
     }
 
-    @Override
-    public String toString() {
-        return "TrustPolicy [id=" + id + ", description=" + description
-                + ", trust_policy=" + trust_policy + ", name=" + name
-                + ", imgAttributes=" + imgAttributes + ", created_by_user_id="
-                + created_by_user_id + ", created_date=" + created_date
-                + ", edited_by_user_id=" + edited_by_user_id + ", edited_date="
-                + edited_date + "]";
-    }
+	@Override
+	public String toString() {
+		return "TrustPolicy [id=" + id + ", description=" + description
+				+ ", trust_policy=" + trust_policy + ", name=" + name
+				+ ", imgAttributes=" + imgAttributes + ", display_name="
+				+ display_name + ", archive=" + archive + "]";
+	}
 
+ 
 }

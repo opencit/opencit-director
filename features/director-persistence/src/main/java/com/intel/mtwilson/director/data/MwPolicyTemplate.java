@@ -30,7 +30,7 @@ public class MwPolicyTemplate {
 	private  Character[] content;
 
 	@Column(name = "ACTIVE")
-	public boolean 	active;
+	private boolean active;
 	
 	
 	@Column(name = "DEPLOYMENT_TYPE_IDENTIFIER")

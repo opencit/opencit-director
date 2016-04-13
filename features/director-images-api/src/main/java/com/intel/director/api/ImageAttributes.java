@@ -5,8 +5,9 @@
  */
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -29,13 +30,19 @@ public class ImageAttributes extends AuditFields {
     public boolean deleted;
     @JsonProperty("image_Location")
     public String location;
-
+    
+    public String repository;
+    public String tag;
+    public String uploadVariableMD5;
+    public String tmpLocation;
+    
+    
     public ImageAttributes() {
         super();
     }
 
-    public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id, String image_name,
+    public ImageAttributes(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String id, String image_name,
             String format, String image_deployments, String status,
             Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {
@@ -54,8 +61,8 @@ public class ImageAttributes extends AuditFields {
 
     }
 
-    public ImageAttributes(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String image_name,
+    public ImageAttributes(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String image_name,
             String format, String image_deployments, String status,
             Long image_size, Long sent, String mounted_by_user_id,
             boolean deleted, String location) {
@@ -74,22 +81,41 @@ public class ImageAttributes extends AuditFields {
 
     }
 
-    @Override
-    public String toString() {
-        return "ImageAttributes [id=" + id + ", image_name=" + image_name + ", format="
-                + image_format + ", image_deployments=" + image_deployments
-                + ", status=" + status + ", image_size=" + image_size
-                + ", sent=" + sent + ", mounted_by_user_id="
-                + mounted_by_user_id + ", deleted=" + deleted + ", location="
-                + location + ", content_length="
-                + ", created_by_user_id=" + created_by_user_id
-                + ", created_date=" + created_date + ", edited_by_user_id="
-                + edited_by_user_id + ", edited_date=" + edited_date + "]";
-    }
 
     
+    
+    
+    @Override
+	public String toString() {
+		return "ImageAttributes [id=" + id + ", image_name=" + image_name
+				+ ", image_format=" + image_format + ", image_deployments="
+				+ image_deployments + ", status=" + status + ", image_size="
+				+ image_size + ", sent=" + sent + ", mounted_by_user_id="
+				+ mounted_by_user_id + ", deleted=" + deleted + ", location="
+				+ location + ", repository=" + repository + ", tag=" + tag
+				+ ", uploadVariableMD5=" + uploadVariableMD5 + ", tmpLocation="
+				+ tmpLocation + "]";
+	}
 
-    public String getId() {
+	@JsonIgnore
+    public String getUploadVariableMD5() {
+		return uploadVariableMD5;
+	}
+
+	public void setUploadVariableMD5(String uploadVariableMD5) {
+		this.uploadVariableMD5 = uploadVariableMD5;
+	}
+	
+	@JsonIgnore
+	public String getTmpLocation() {
+		return tmpLocation;
+	}
+
+	public void setTmpLocation(String tmpLocation) {
+		this.tmpLocation = tmpLocation;
+	}
+
+	public String getId() {
         return id;
     }
 
@@ -133,8 +159,8 @@ public class ImageAttributes extends AuditFields {
         return image_size;
     }
 
-    public void setImage_size(Long image_size) {
-        this.image_size = image_size;
+    public void setImage_size(long sizeInBytes) {
+        this.image_size = sizeInBytes;
     }
 
     public Long getSent() {
@@ -168,5 +194,23 @@ public class ImageAttributes extends AuditFields {
     public void setLocation(String location) {
         this.location = location;
     }
+
+	public String getRepository() {
+		return repository;
+	}
+
+	public void setRepository(String repository) {
+		this.repository = repository;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+    
+    
 
 }

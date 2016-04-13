@@ -7,16 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -28,12 +26,12 @@ import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
 import org.springframework.stereotype.Component;
 
-import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.extensions.Extensions;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
+import com.intel.director.api.HashTypeObject;
+import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageInfoDetailedResponse;
 import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ImageListResponse;
 import com.intel.director.api.ImageListResponseInfo;
@@ -55,35 +53,42 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.ui.ImageActionFields;
+import com.intel.director.api.ui.ImageActionFilter;
+import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
+import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.common.MountImage;
+import com.intel.director.common.ImageDeploymentHashTypeCache;
 import com.intel.director.exception.ImageStoreException;
+import com.intel.director.images.async.DirectorAsynchExecutor;
+import com.intel.director.images.async.DockerPullTask;
 import com.intel.director.images.exception.DirectorException;
-import com.intel.director.imagestore.ImageStoreManager;
+import com.intel.director.images.mount.MountService;
+import com.intel.director.images.mount.MountServiceFactory;
+import com.intel.director.service.DockerActionService;
 import com.intel.director.service.ImageService;
+import com.intel.director.service.TrustPolicyService;
+import com.intel.director.store.StoreManager;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
-import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
 import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
 import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.manifest.xml.MeasurementType;
-import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
-import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
-import com.jcraft.jsch.JSchException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -103,11 +108,14 @@ public class ImageServiceImpl implements ImageService {
 
 	private IPersistService imagePersistenceManager;
 
+	private DockerActionService dockerActionService;
+
 	public ImageServiceImpl() {
 		imagePersistenceManager = new DbServiceImpl();
+		dockerActionService = new DockerActionImpl();
 	}
 
-	public ImageInfo fetchImageById(String imageId) throws DirectorException{
+	public ImageInfo fetchImageById(String imageId) throws DirectorException {
 		ImageInfo image;
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
@@ -118,13 +126,12 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return image;
 	}
-	
+
 	@Override
 	public MountImageResponse mountImage(String imageId, String backendUser)
 			throws DirectorException {
-		int exitcode = 0;
-		String loggedInUser = ShiroUtil.subjectUsername() ;
-		if(StringUtils.isBlank(loggedInUser)){
+		String loggedInUser = ShiroUtil.subjectUsername();
+		if (StringUtils.isBlank(loggedInUser)) {
 			loggedInUser = backendUser;
 			log.info("Setting user for mounting to {}", loggedInUser);
 		}
@@ -134,16 +141,22 @@ public class ImageServiceImpl implements ImageService {
 		ImageAttributes image;
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
-		} catch (DbException ex) {
+			if (image == null) {
+				throw new DirectorException("No image found for id " + imageId);
+			}
+		} catch (Exception ex) {
 			log.error("Error in mounting image  ", ex);
 			throw new DirectorException("No image found with id: " + imageId,
 					ex);
 		}
-		
-		if (image.deleted) {
-			log.error("Cannot launch an image marked as deleted");
-			throw new DirectorException("Cannot launch deleted image: "
-					+ imageId);
+
+		if (image.deleted
+				|| (image.status != null && !image.status
+						.equals(Constants.COMPLETE))) {
+			String msg = "Cannot launch an image marked as deleted or incomplete image "
+					+ imageId;
+			log.error(msg);
+			throw new DirectorException(msg);
 		}
 
 		MountImageResponse mountImageResponse = TdaasUtil
@@ -171,132 +184,28 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 
-		// // log.info("Mounting image from location: " + image.location);
-
-		String mountPath = null;
-		if (image.getImage_format() == null) {
-			// BML flow
-			mountPath = TdaasUtil.getMountPath(image.id);
-		} else {
-			mountPath = DirectorUtil.getMountPath(image.id);
-		}
-		log.info("mount path is " + mountPath);
-		String mounteImageName = image.getImage_name();
-		log.info("mount image : " + mounteImageName);
-
-		try {
-			// Mount the image
-			if (image.getImage_format() != null) {
-				log.info("VM/BM image Mount ");
-				if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
-						.getImage_deployments())) {
-					log.info("BM IMage mount");
-					// Case of Bare metal Image
-					String modifiedImagePath = image.getLocation()
-							+ image.getImage_name();
-					log.info("Imagepath : " + modifiedImagePath);
-					DirectorUtil.createCopy(
-							image.getLocation() + image.getImage_name(),
-							image.getLocation() + "Modified_"
-									+ image.getImage_name());
-					exitcode = MountImage.unmountImage(mountPath);
-					if (exitcode != 0) {
-						log.error("Unable to mount image");
-						throw new DirectorException("Unable to mount image");
-					}
-					log.info("Unmounting");
-					exitcode = MountImage.mountImage(image.getLocation()
-							+ "Modified_" + image.getImage_name(), mountPath);
-					if (exitcode != 0) {
-						log.error("Unable to mount image");
-						throw new DirectorException("Unable to mount image");
-					}
-					log.info("Mount BM image complete");
-				} else {
-					log.info("VM IMage mount");
-					exitcode = MountImage.mountImage(image.getLocation()
-							+ mounteImageName, mountPath);
-					if (exitcode != 0) {
-						log.error("Unable to mount image");
-						throw new DirectorException("Unable to mount image");
-					}
-					if(exitcode != 0){
-						log.error("Unable to mount image");
-						throw new DirectorException("Unable to mount image");
-					}
-					log.info("VM IMage mount complete");
-				}
-			} else {
-				log.info("BM Live mount flow");
-				SshSettingInfo info = imagePersistenceManager
-						.fetchSshByImageId(imageId);
-				log.info("BM LIve host : " + info.toString());
-				int exitCode = MountImage.mountRemoteSystem(
-						info.getIpAddress(), info.getUsername(), info
-								.getSshPassword().getKey(), mountPath);
-
-				if (exitCode == 1) {
-					log.error("Error mounting remote host : " + info.toString());
-					throw new DirectorException(
-							"Error mounting remote host with the credentials provided : "
-									+ info.toString());
-				}
-				log.info("BM Live  mount complete");
-				// Mount Code For bare Metal Live
-			}
-		} catch (Exception ex) {
-			log.error("Unable to mount image", ex);
-			throw new DirectorException("Unable to mount image", ex);
-		}
+		MountService mountService = MountServiceFactory.getMountService(image);
+		mountService.mount();
 
 		// Mark the image mounted by the user
 		try {
-			// /image.mounted_by_user_id = user;
 			image.setMounted_by_user_id(loggedInUser);
-			Date currentDate = new Date();
+			Calendar currentDate = Calendar.getInstance();
 			image.setEdited_date(currentDate);
 			image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 			imagePersistenceManager.updateImage(image);
 			mountImageResponse = TdaasUtil
 					.mapImageAttributesToMountImageResponse(image);
 
-			log.info("Update mounted_by_user = {} for image in DB for image at location : "
-					+ image.getLocation(), loggedInUser);
-			log.info("*** Completed mounting of image");
+			log.info(
+					"Update mounted_by_user = {} for image in DB for image at location : "
+							+ image.getLocation(), loggedInUser);
 		} catch (DbException ex) {
 			log.error("Error while saving mount data to database: "
 					+ ex.getMessage());
+			mountService.unmount();
 			throw new DirectorException(
 					"Unable to reset mounted_by_user_id field", ex);
-		} catch (Exception e) {
-			log.error("Error while mounting image : " + e.getMessage());
-			try {
-				log.info("As rollback unmounting image");
-				if (image.getImage_format() != null) {
-					exitcode = MountImage.unmountImage(mountPath);
-					if (exitcode != 0) {
-						log.error("Unable to unmount image");
-						throw new DirectorException("Unable to unmount image");
-					}
-
-				} else {
-
-					exitcode = MountImage.unmountRemoteSystem(mountPath);
-					if (exitcode != 0) {
-						log.error("Unable to mount image");
-						throw new DirectorException("Unable to mount image");
-					}
-					// UnMount Code For bare Metal Live
-				}
-
-				log.info("Completed unmounting of image");
-			} catch (Exception unmountEx) {
-				log.error("*Error while unmount of image : "
-						+ unmountEx.getMessage());
-				throw new DirectorException(
-						"Failed to unmount image. The attempt was made after the DB update for mounted_by_user failed. ",
-						unmountEx);
-			}
 		}
 		log.debug("Image mounted succesfully imageId:" + imageId);
 		return mountImageResponse;
@@ -316,24 +225,12 @@ public class ImageServiceImpl implements ImageService {
 		}
 		log.info("Unmounting image : " + image.id + " with name : "
 				+ image.image_name);
-		String mountPath = null;
-		if (image.getImage_format() == null) {
-			// BML flow
-			mountPath = TdaasUtil.getMountPath(image.id);
-		} else {
-			mountPath = DirectorUtil.getMountPath(image.id);
-		}
-/*
-		if (image.getMounted_by_user_id() == null) {
-			log.info("NOT DOING ACTUAL UNMOUNT");
-			image.setMounted_by_user_id(null);
-			unmountImageResponse = TdaasUtil
-					.mapImageAttributesToUnMountImageResponse(image);
-			return unmountImageResponse;
-		}*/
+
+		MountService mountService = MountServiceFactory.getMountService(image);
+		mountService.unmount();
 
 		image.setMounted_by_user_id(null);
-		Date currentDate = new Date();
+		Calendar currentDate = Calendar.getInstance();
 		image.setEdited_date(currentDate);
 		image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
@@ -341,34 +238,6 @@ public class ImageServiceImpl implements ImageService {
 		} catch (DbException e) {
 			log.error("Error updating image " + imageId, e);
 			throw new DirectorException("Error updating image:" + imageId);
-		}
-
-		int exitCode = 0;
-
-		if (image.getImage_format() != null) {
-			exitCode = MountImage.unmountImage(mountPath);
-			if (exitCode != 0) {
-				log.error("Unable to mount image");
-				throw new DirectorException("Unable to mount image");
-			}
-			log.info("*** unmount BM/VM complete");
-		} else {
-			exitCode = MountImage.unmountRemoteSystem(mountPath);
-			if (exitCode != 0) {
-				log.error("Unable to mount image");
-				throw new DirectorException("Unable to mount image");
-			}
-			log.info("*** unmount of BM LIVE complete");
-		}
-		unmountImageResponse = TdaasUtil
-				.mapImageAttributesToUnMountImageResponse(image);
-
-		if (exitCode != 0) {
-			unmountImageResponse
-					.setError("Unmount script executed with errors");
-			// / unmountImageResponse.setStatus(Constants.ERROR);
-			// /
-			// unmountImageResponse.setDetails("Unmount script executed with errors");
 		}
 		return unmountImageResponse;
 	}
@@ -388,6 +257,7 @@ public class ImageServiceImpl implements ImageService {
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		try {
 			List<ImageInfo> fetchImages = null;
+			List<ImageInfoDetailedResponse> imageInfoDetailedResponseList = new ArrayList<ImageInfoDetailedResponse>();
 			// Fetch all images
 			if (searchImagesRequest.deploymentType == null) {
 				fetchImages = imagePersistenceManager.fetchImages(null);
@@ -405,15 +275,55 @@ public class ImageServiceImpl implements ImageService {
 				for (int i = 0; i < fetchImages.size(); i++) {
 					fetchImages.get(i).setPolicy_name(
 							getDisplayNameForImage(fetchImages.get(i).id));
+					Mapper mapper = new DozerBeanMapper();
+					ImageInfoDetailedResponse imageInfoDetailedResponse = mapper
+							.map(fetchImages.get(i),
+									ImageInfoDetailedResponse.class);
+					imageInfoDetailedResponse.setCreated_date(fetchImages
+							.get(i).getCreated_date());
+					imageInfoDetailedResponse
+							.setActionEntryCreated(checkNonObsoleteActionEntryCreated(fetchImages
+									.get(i).getId()));
+					imageInfoDetailedResponseList
+							.add(imageInfoDetailedResponse);
+
 				}
 			}
-			searchImagesResponse.images = fetchImages;
+
+			searchImagesResponse.images = imageInfoDetailedResponseList;
 		} catch (DbException de) {
 			log.error("Error while retrieving list of images", de);
 			throw new DirectorException(
 					"Error while retrieving list of images", de);
 		}
 		return searchImagesResponse;
+	}
+
+	private boolean checkNonObsoleteActionEntryCreated(String imageId) {
+		List<ImageActionObject> imageActionObjectList = new ArrayList<ImageActionObject>();
+		ImageActionFilter imageActionFilter = new ImageActionFilter();
+		ImageActionOrderBy imageActionOrderBy = new ImageActionOrderBy();
+		imageActionOrderBy.setImageActionFields(ImageActionFields.DATE);
+		imageActionOrderBy.setOrderBy(OrderByEnum.DESC);
+		imageActionFilter.setImage_id(imageId);
+
+		try {
+			imageActionObjectList = imagePersistenceManager.fetchImageActions(
+					imageActionFilter, imageActionOrderBy);
+		} catch (DbException e) {
+			log.error("unable to fetch image upload entries , checkActionEntryCreated : "
+					+ imageActionFilter);
+
+		}
+		if (imageActionObjectList != null && imageActionObjectList.size() > 0) {
+			for(ImageActionObject imageActionObject: imageActionObjectList){
+				if(!imageActionObject.getCurrent_task_status().equalsIgnoreCase(Constants.OBSOLETE)){
+					return true;	
+				}
+			}
+			
+		}
+		return false;
 	}
 
 	/**
@@ -433,7 +343,8 @@ public class ImageServiceImpl implements ImageService {
 	@Override
 	public TrustDirectorImageUploadResponse createUploadImageMetadataImpl(
 			String image_deployments, String image_format, String fileName,
-			long fileSize) throws DirectorException {
+			long fileSize, String repository, String tag)
+			throws DirectorException {
 
 		String loggedinUser = ShiroUtil.subjectUsername();
 
@@ -449,11 +360,16 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setImage_size(sizeInBytes);
 		imageAttributes.location = Constants.defaultUploadPath;
 		imageAttributes.image_format = image_format;
-		Date currentDate = new Date();
+		Calendar currentDate = Calendar.getInstance();
 		imageAttributes.setCreated_date(currentDate);
 		imageAttributes.setEdited_date(currentDate);
 		imageAttributes.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		imageAttributes.setCreated_by_user_id(ShiroUtil.subjectUsername());
+		if (image_deployments
+				.equalsIgnoreCase(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+			imageAttributes.setRepository(repository);
+			imageAttributes.setTag(tag);
+		}
 
 		ImageAttributes createdImageMetadata;
 		try {
@@ -505,35 +421,47 @@ public class ImageServiceImpl implements ImageService {
 					+ image_id + ": " + e.getMessage());
 			throw new DirectorException("Failed to load image metdata", e);
 		}
+
+		//Update the status of image to IN PROGRESS to mark the upload process initiation
+		if (imageInfo.getSent().intValue() == 0) {
+			imageInfo.setStatus(Constants.IN_PROGRESS);
+			try {
+				imagePersistenceManager.updateImage(imageInfo);			
+			} catch (DbException e) {
+				log.error("Error while updating metadata for uploaded image : "
+						+ e.getMessage());
+			}
+		}		
 		int bytesread = 0;
 		OutputStream out = null;
 		try {
 			int read;
 			byte[] bytes = new byte[1024];
 
-			out = new FileOutputStream(new File(
-					imageInfo.getLocation() + imageInfo.getImage_name()), true);
+			out = new FileOutputStream(new File(imageInfo.getLocation()
+					+ imageInfo.getImage_name()), true);
 			int bufferForFlush = 0;
 			while ((read = fileInputStream.read(bytes)) != -1) {
 				bytesread += read;
-				bufferForFlush += read; 
+				bufferForFlush += read;
 				out.write(bytes, 0, read);
-		        if (bufferForFlush >= 1024 * 1024 * 10) { //flush after 10MB
-		        	bufferForFlush = 0;
-		            out.flush();
-		        }
+				if (bufferForFlush >= 1024 * 1024 * 10) { // flush after 10MB
+					bufferForFlush = 0;
+					out.flush();
+				}
 			}
 		} catch (IOException e) {
 			log.error("Error while writing uploaded image: " + e.getMessage());
 			throw new DirectorException("Cannot write the uploaded image", e);
-		}
-		finally{
-			if(out != null){
+		} finally {
+			if (out != null) {
 				try {
 					out.flush();
 					out.close();
 				} catch (IOException e) {
-					log.error("Unable to close file output stream while uploading image to TD", e);
+					log.error(
+							"Unable to close file output stream while uploading image to TD",
+							e);
 				}
 			}
 			try {
@@ -542,28 +470,28 @@ public class ImageServiceImpl implements ImageService {
 				log.error("Error in closing stream: ", e);
 			}
 		}
-
-		imageInfo.setSent(imageInfo.getSent() + bytesread );
-		log.info("Sent in bytes New: " + imageInfo.getSent());
-		log.info("image size: " + imageInfo.getImage_size());
+		Calendar edited_date = Calendar.getInstance();
+		imageInfo.setSent(imageInfo.getSent() + bytesread);
+		imageInfo.setEdited_date(edited_date);
+		log.debug("Sent in bytes New: " + imageInfo.getSent());
+		log.debug("image size: " + imageInfo.getImage_size());
 		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
 			imageInfo.setDeleted(false);
-
 			log.info("Image upload COMPLETE..");
 		} else {
 			imageInfo.setStatus(Constants.IN_PROGRESS);
 		}
 		try {
 			imagePersistenceManager.updateImage(imageInfo);
-			log.info("Image is hidden :: " + imageInfo.isDeleted());
+			log.debug("Image is hidden :: " + imageInfo.isDeleted());
 		} catch (DbException e) {
 			log.error("Error while updating metadata for uploaded image : "
 					+ e.getMessage());
 			throw new DirectorException("Cannot update image meta data", e);
 		}
-		log.info("Updated Image upload metadata.");
+		log.debug("Updated Image upload metadata.");
 
 		return TdaasUtil
 				.mapImageAttributesToTrustDirectorImageUploadResponse(imageInfo);
@@ -575,6 +503,15 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 		log.info("Browsing files for dir: "
 				+ searchFilesInImageRequest.getDir());
+		if(searchFilesInImageRequest.init){
+			try {
+				TrustPolicyDraft fetchPolicyDraftForImage = imagePersistenceManager.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+				fetchPolicyDraftForImage.setEdited_date(Calendar.getInstance());
+				imagePersistenceManager.updatePolicyDraft(fetchPolicyDraftForImage);
+			} catch (DbException e) {
+				log.error("Error updating policy draft for image {}", searchFilesInImageRequest.id, e);
+			}
+		}
 		List<String> trustPolicyElementsList = new ArrayList<String>();
 		Set<String> fileNames = new HashSet<String>();
 		Set<String> patchFileAddSet = new HashSet<String>();
@@ -795,8 +732,7 @@ public class ImageServiceImpl implements ImageService {
 		String draft = trustPolicyDraft.getTrust_policy_draft();
 
 		draft = TdaasUtil.patch(draft, trustpolicyDraftEditRequest.patch);
-		Date currentDate = new Date();
-		trustPolicyDraft.setEdited_date(currentDate);
+		trustPolicyDraft.setEdited_date(Calendar.getInstance());
 		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		trustPolicyDraft.setTrust_policy_draft(draft);
 		trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
@@ -809,8 +745,8 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Error in editTrustPolicyDraft ", e);
 		}
 		Mapper mapper = new DozerBeanMapper();
-		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(trustPolicyDraft,
-				TrustPolicyDraftResponse.class);
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(
+				trustPolicyDraft, TrustPolicyDraftResponse.class);
 		return trustPolicyDraftResponse;
 	}
 
@@ -820,7 +756,7 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
 					.fetchPolicyDraftById(draftid);
-			if(trustPolicyDraft==null){
+			if (trustPolicyDraft == null) {
 				return null;
 			}
 			String trustPolicyDraftxml = trustPolicyDraft
@@ -853,7 +789,7 @@ public class ImageServiceImpl implements ImageService {
 		} catch (JAXBException e) {
 			String errorMsg = "Unable to get policy metadata draftid::"
 					+ draftid;
-			log.error("Unable to get policy metadata draftid::" + draftid, e);
+			log.error(errorMsg, e);
 			throw new DirectorException(errorMsg, e);
 		}
 		return metadata;
@@ -871,7 +807,7 @@ public class ImageServiceImpl implements ImageService {
 					.fetchPolicyDraftForImage(image_id);
 			if (trustPolicyDraft == null) {
 				TrustPolicy trustPolicy = imagePersistenceManager
-						.fetchPolicyForImage(image_id);
+						.fetchActivePolicyForImage(image_id);
 				if (trustPolicy == null) {
 					throw new DirectorException(
 							"Neither Policy draft nor Polci exists do not exist");
@@ -915,50 +851,85 @@ public class ImageServiceImpl implements ImageService {
 
 	}
 
-	public String createTrustPolicy(String imageId, String draft_id) throws DirectorException {
-
-		ImageAttributes image;
-
+	public String fetchImageIdByDraftOrPolicy(String draftOrPolicyId) {
+		String imageId = null;
 		TrustPolicyDraft existingDraft = null;
-		TrustPolicy existingPolicy = null;
-
-		boolean policyFound  = true;
 		try {
 			existingDraft = imagePersistenceManager
-					.fetchPolicyDraftById(draft_id);
+					.fetchPolicyDraftById(draftOrPolicyId);
+		} catch (DbException e) {
+			log.error("Unable to fetch draft for draft id::", draftOrPolicyId);
+		}
+		if (existingDraft == null) {
+			TrustPolicy existingPolicy = null;
+			try {
+				existingPolicy = imagePersistenceManager
+						.fetchPolicyById(draftOrPolicyId);
+			} catch (DbException e) {
+				log.error("Unable to fetch draft for policy id::",
+						draftOrPolicyId);
+			}
+			if (existingPolicy != null) {
+
+				imageId = existingPolicy.getImgAttributes().getId();
+
+			}
+		} else {
+			imageId = existingDraft.getImgAttributes().getId();
+
+		}
+		return imageId;
+	}
+
+	public String createTrustPolicy(String draftOrTrustPolicyId)
+			throws DirectorException {
+
+		ImageInfo image;
+		String imageId = null;
+		TrustPolicyDraft existingDraft = null;
+		TrustPolicy existingPolicy = null;
+		String policyXml = null;
+
+		boolean policyFound = true;
+		try {
+			existingDraft = imagePersistenceManager
+					.fetchPolicyDraftById(draftOrTrustPolicyId);
 			if (existingDraft == null) {
 				policyFound = false;
 			} else {
+				imageId = existingDraft.getImgAttributes().getId();
+				policyXml = existingDraft.getTrust_policy_draft();
 				policyFound = true;
 			}
 		} catch (DbException e1) {
-			log.error("Unable to fetch draft for draft id::", draft_id);
+			log.error("Unable to fetch draft for draft id::",
+					draftOrTrustPolicyId);
 			policyFound = false;
 		}
 
 		if (!policyFound) {
 			try {
 				existingPolicy = imagePersistenceManager
-						.fetchPolicyById(draft_id);
+						.fetchPolicyById(draftOrTrustPolicyId);
 				if (existingPolicy == null) {
 					policyFound = false;
 				} else {
+					imageId = existingPolicy.getImgAttributes().getId();
+					policyXml = existingPolicy.getTrust_policy();
 					policyFound = true;
 				}
 			} catch (DbException e1) {
-				log.error("Unable to fetch policy for  id::", draft_id);
+				log.error("Unable to fetch policy for  id::",
+						draftOrTrustPolicyId);
 				policyFound = false;
 			}
 		}
-		
-		if(!policyFound){
-			throw new DirectorException("no policy found for the id "+ draft_id);
+
+		if (!policyFound) {
+			throw new DirectorException("no policy found for the id "
+					+ draftOrTrustPolicyId);
 		}
-		
-		
-		Date currentDate = new Date();
-		String policyXml = null;
-		TrustPolicy trustPolicy = null;
+
 		try {
 			image = imagePersistenceManager.fetchImageById(imageId);
 		} catch (DbException ex) {
@@ -967,89 +938,29 @@ public class ImageServiceImpl implements ImageService {
 					ex);
 		}
 
-		if(existingDraft != null){
-			existingDraft.getImgAttributes().getId();
-			trustPolicy = new TrustPolicy();
-			policyXml = existingDraft.getTrust_policy_draft();
-			String display_name = existingDraft.getDisplay_name();
-			trustPolicy.setDisplay_name(display_name);
-			ImageAttributes imgAttrs = new ImageAttributes();
-			imgAttrs.setId(imageId);
-			trustPolicy.setImgAttributes(imgAttrs);
-			log.info("Going to save trust policy for image_id::" + imageId);
-			log.info("After saving trust policy for image_id::" + imageId);
-		}else{
-			policyXml = existingPolicy.getTrust_policy();
-			trustPolicy = existingPolicy;	
-			ImageAttributes imgAttrs = new ImageAttributes();
-			imgAttrs.setId(imageId);
-			trustPolicy.setImgAttributes(imgAttrs);
-	
+		TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(
+				image.id);
 
-			log.info("Existing policy id : {} for image ", existingPolicy.getId() , imageId);
-		}
-
-		// Get the hash
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		try {
-			log.info("Going to convert trust policy into string");
-
 			policy = TdaasUtil.getPolicy(policyXml);
-			if(existingPolicy != null){
-				policy.setSignature(null);
-				List<Measurement> measurements = policy.getWhitelist()
-						.getMeasurements();
-				for (Measurement measurement : measurements) {
-					measurement.setValue(null);
-				}
-			}
-			log.info("After convert trust policy into string");
-		} catch (JAXBException e2) {
-			log.error("Unable to convert string into policy object : ",
-					policyXml);
+		} catch (JAXBException e1) {
 			throw new DirectorException(
-					"Unable to convert policy string into object ", e2);
+					"Unable to convert policy xml into object");
 		}
-		try {
-			log.info("Before calculating hashes");
-			new CreateTrustPolicy(imageId).createTrustPolicy(policy);
-			log.info("After calculating hashes");
-		} catch (CryptographyException | IOException e1) {
-			log.error("Unable to create trust policy- create hashes");
-			throw new DirectorException(
-					"Unable to create policy - create hashes", e1);
-		}
-		log.info("Got the hashes for the selected files ::" + imageId);
-		// Calculate image hash and add to encryption tag
-		if (policy != null && policy.getEncryption() != null && policy.getEncryption().getChecksum().getValue().equals("1")) {
-			if (!policy.getEncryption().getKey().getValue().contains("keys")) {
-				throw new DirectorException("Unable to fetch key from KMS");
-			}
-			if (!policy.getEncryption().getKey().getValue().contains("keys")) {
-				throw new DirectorException("Unable to fetch key from KMS");
-			}
-			File imgFile = new File(image.getLocation() + image.getImage_name());
-			log.info("Calculating MD5 of file : " + image.getLocation()
-					+ image.getImage_name());
-			String computeHash = null;
-			try {
-				computeHash = TdaasUtil.computeHash(
-						MessageDigest.getInstance("MD5"), imgFile);
-			} catch (NoSuchAlgorithmException | IOException e) {
-				log.error(
-						"Unable to compute hash for image while creating policy",
-						e);
-				throw new DirectorException(
-						"Unable to compute hash for image while creating policy",
-						e);
-			}
-			policy.getEncryption().getChecksum().setValue(computeHash);
 
+		// Calculate file, dir and cumulative hashes and add to encryption tag
+		trustPolicyService.calculateHashes(policy);
+
+		// Calculate image hash inside encryption tag
+		trustPolicyService.addEncryption(policy);
+
+		if (policy.getImage() != null && policy.getImage().getImageId() == null) {
+			policy.getImage().setImageId(imageId);
 		}
-		String uuid = (new UUID()).toString();
-		policy.getImage().setImageId(uuid);
-		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"+uuid);
-		
+		log.debug("### Inside createTrustPolicy method policy xml insert uuid::"
+				+ policy.getImage().getImageId());
+
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policy);
 		} catch (JAXBException e) {
@@ -1060,140 +971,29 @@ public class ImageServiceImpl implements ImageService {
 		log.info("Convert policy in string format");
 
 		// Sign the policy with MtWilson
+		String signedPolicyXml = trustPolicyService.signTrustPolicy(policyXml);
 
-		Extensions
-				.register(
-						TlsPolicyCreator.class,
-						com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
-		log.info("Register TlsPolicyCreator");
+		// in case of live host, add the file to the host
+		trustPolicyService.copyTrustPolicyAndManifestToHost(signedPolicyXml);
 
-		Properties p = DirectorUtil
-				.getPropertiesFile(Constants.MTWILSON_PROP_FILE);// My.configuration().getClientProperties();
-		log.info("Get MTW prop file");
-
-		TrustPolicySignature client = null;
+		// Save the policy to DB
+		TrustPolicy trustPolicy = trustPolicyService
+				.archiveAndSaveTrustPolicy(signedPolicyXml);
+		
+		/// Setting uploadVariabelMD5 in MwImage table
+		String dekUrl = DirectorUtil.fetchDekUrl(trustPolicy);
+		String uploadVariableMD5 = DirectorUtil.computeUploadVar(policy.getImage().getImageId(),
+				dekUrl);
+		image.setUploadVariableMD5(uploadVariableMD5);
 		try {
-			client = new TrustPolicySignature(p);
-			log.info("MTW client init");
-
-		} catch (Exception e) {
-			log.error(
-					"Unable to create client for signing the policy with MTW",
-					e);
-			throw new DirectorException(
-					"Unable to create client for signing  policy with MTW", e);
-		}
-		String signedPolicyXml = null;
-		try {
-			signedPolicyXml = client.signTrustPolicy(policyXml);
-		} catch (Exception e) {
-			log.error("Unable to sign the policy with MTW", e);
-			throw new DirectorException("Unable to sign the policy with MTW", e);
-		}
-		log.info("****** SIGN : " + signedPolicyXml);
-
-		String trustPolicyName = null;
-		String trustPolicyFile = null;
-		String mountPath = TdaasUtil.getMountPath(imageId);
-		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
-
-		if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(image
-				.getImage_deployments())) {
-			// Writing inside bare metal modified image
-
-			String localPathForPolicyAndManifest = "/tmp/" + imageId;
-			trustPolicyName = "trustpolicy.xml";
-			trustPolicyFile = localPathForPolicyAndManifest + File.separator
-					+ trustPolicyName;
-
-			String manifestFile = localPathForPolicyAndManifest
-					+ File.separator + "manifest.xml";
-			String manifest = null;
-			try {
-				manifest = TdaasUtil.getManifestForPolicy(policyXml);
-			} catch (JAXBException e) {
-				log.error("Unable to convert policy into manifest", e);
-				throw new DirectorException(
-						"Unable to convert policy into manifest", e);
-			}
-			File dirForPolicyAndManifest = new File(
-					localPathForPolicyAndManifest);
-			if (!dirForPolicyAndManifest.exists()) {
-				dirForPolicyAndManifest.mkdir();
-			}
-
-			fileUtilityOperation.createNewFile(manifestFile);
-			fileUtilityOperation.createNewFile(trustPolicyFile);
-
-			fileUtilityOperation.writeToFile(trustPolicyFile, signedPolicyXml);
-			fileUtilityOperation.writeToFile(manifestFile, manifest);
-
-			// Push the policy and manifest to the remote host
-			SshSettingInfo existingSsh = null;
-			try {
-				existingSsh = imagePersistenceManager
-						.fetchSshByImageId(imageId);
-			} catch (DbException e) {
-				log.error("Unable to fetch SSH details for host", e);
-				throw new DirectorException(
-						"Unable to fetch SSH details for host", e);
-			}
-			String user = existingSsh.getUsername();
-			String password = existingSsh.getPassword().getKey();
-			String ip = existingSsh.getIpAddress();
-
-			log.info("Connecting to remote host : " + ip + " with user " + user);
-
-			SSHManager sshManager = new SSHManager(user, password, ip);
-			try {
-				List<String> files = new ArrayList<String>(2);
-				files.add(manifestFile);
-				files.add(trustPolicyFile);
-				sshManager.sendFileToRemoteHost(files, "/boot/trust");
-			} catch (JSchException e) {
-				// TODO Auto-generated catch block
-				log.error(
-						"Unable to send trustPolicy /manifest  file to remote host ",
-						e);
-				throw new DirectorException(
-						"Unable to send trustPolicy /manifest  file to remote host",
-						e);
-			} finally {
-				File deleteFile = new File(manifestFile);
-				deleteFile.delete();
-				deleteFile = new File(trustPolicyFile);
-				deleteFile.delete();
-				deleteFile = new File(localPathForPolicyAndManifest);
-				deleteFile.delete();
-			}
-
-		}
-
-		trustPolicy.setTrust_policy(signedPolicyXml);
-		trustPolicy.setCreated_date(currentDate);
-		trustPolicy.setEdited_date(currentDate);
-		trustPolicy.setEdited_by_user_id(ShiroUtil.subjectUsername());
-		trustPolicy.setCreated_by_user_id(ShiroUtil.subjectUsername());
-
-		TrustPolicy createdPolicy = null;
-		try {
-			createdPolicy = imagePersistenceManager.savePolicy(trustPolicy);
+			imagePersistenceManager.updateImage(image);
 		} catch (DbException e) {
-			log.error("Unable to save policy after signing", e);
-			throw new DirectorException("Unable to save policy after signing",
-					e);
+			log.error("Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
+			throw new DirectorException(
+					"Unable to update uploadVariableMD5 in image with id:"+image.getId(), e);
 		}
 		
-		if(existingDraft != null){
-			try {
-				imagePersistenceManager.destroyPolicyDraft(existingDraft);
-			} catch (DbException e) {
-				log.error("Unable to delete policy draft after creating policy", e);
-			}
-		}
-		log.info("trust policy succesfylly created , createdPolicyId::"
-				+ createdPolicy.getId());
-		return createdPolicy.getId();
+		return trustPolicy.getId();
 	}
 
 	public CreateTrustPolicyMetaDataResponse saveTrustPolicyMetaData(
@@ -1209,7 +1009,7 @@ public class ImageServiceImpl implements ImageService {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
 
-			Date currentDate = new Date();
+			Calendar currentDate = Calendar.getInstance();
 
 			TrustPolicyDraft existingDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageid);
@@ -1220,7 +1020,7 @@ public class ImageServiceImpl implements ImageService {
 			}
 			if (existingDraft == null) {
 				TrustPolicy existingPolicy = imagePersistenceManager
-						.fetchPolicyForImage(imageid);
+						.fetchActivePolicyForImage(imageid);
 				ImageInfo imageInfo = imagePersistenceManager
 						.fetchImageById(imageid);
 
@@ -1242,8 +1042,8 @@ public class ImageServiceImpl implements ImageService {
 					ImageAttributes imgAttrs = new ImageAttributes();
 					imgAttrs.setId(imageid);
 					trustPolicyDraft.setImgAttributes(imgAttrs);
-					trustPolicyDraft.setCreated_date(new Date());
-					trustPolicyDraft.setEdited_date(new Date());
+					trustPolicyDraft.setCreated_date(Calendar.getInstance());
+					trustPolicyDraft.setEdited_date(Calendar.getInstance());
 					trustPolicyDraft.setEdited_by_user_id(ShiroUtil
 							.subjectUsername());
 					trustPolicyDraft.setCreated_by_user_id(ShiroUtil
@@ -1296,8 +1096,8 @@ public class ImageServiceImpl implements ImageService {
 					imgAttrs.setId(imageid);
 					trustPolicyDraft.setImgAttributes(imgAttrs);
 					TrustPolicyDraft policyDraftCreated;
-					trustPolicyDraft.setCreated_date(new Date());
-					trustPolicyDraft.setEdited_date(new Date());
+					trustPolicyDraft.setCreated_date(Calendar.getInstance());
+					trustPolicyDraft.setEdited_date(Calendar.getInstance());
 					trustPolicyDraft.setEdited_by_user_id(ShiroUtil
 							.subjectUsername());
 					trustPolicyDraft.setCreated_by_user_id(ShiroUtil
@@ -1312,6 +1112,7 @@ public class ImageServiceImpl implements ImageService {
 					createPolicyMetadataResponse
 							.setTrustPolicy(policyDraftCreated
 									.getTrust_policy_draft());
+
 				}
 
 			} else {
@@ -1329,7 +1130,7 @@ public class ImageServiceImpl implements ImageService {
 				ImageAttributes imgAttrs = new ImageAttributes();
 				imgAttrs.setId(imageid);
 				existingDraft.setImgAttributes(imgAttrs);
-				existingDraft.setEdited_date(new Date());
+				existingDraft.setEdited_date(Calendar.getInstance());
 				existingDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 				imagePersistenceManager.updatePolicyDraft(existingDraft);
 
@@ -1624,7 +1425,7 @@ public class ImageServiceImpl implements ImageService {
 					+ policyId);
 		}
 		trustPolicy.setDisplay_name(updateTrustPolicyRequest.getDisplay_name());
-		trustPolicy.setEdited_date(new Date());
+		trustPolicy.setEdited_date(Calendar.getInstance());
 		trustPolicy.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
 			imagePersistenceManager.updatePolicy(trustPolicy);
@@ -1635,16 +1436,16 @@ public class ImageServiceImpl implements ImageService {
 
 	}
 
-	public ImageStoreManager getImageStoreImpl(String className)
+	public StoreManager getImageStoreImpl(String className)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
 
-		ImageStoreManager imgManager;
+		StoreManager imgManager;
 		Class c;
 
 		c = Class.forName(className);
 
-		imgManager = (ImageStoreManager) c.newInstance();
+		imgManager = (StoreManager) c.newInstance();
 
 		return imgManager;
 
@@ -1900,7 +1701,7 @@ public class ImageServiceImpl implements ImageService {
 			imgResponse.setTrust_policy(trust_policy);
 
 			String image_upload;
-			if (imageInfo.getUploads_count() != 0) {
+			if (imageInfo.getImage_uploads_count() != 0) {
 				image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-ok\" title=\"Uploaded Before\"></span></a>";
 			} else {
 				image_upload = "<a href=\"#\"><span class=\"glyphicon glyphicon-minus\" title=\"Never Uploaded\"></span></a>";
@@ -1940,10 +1741,10 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Cannot fetch imageid imageId::" + imageId, e);
 			throw new DirectorException("Cannot fetch image by id", e);
 		}
-		if(imageInfo==null){
+		if (imageInfo == null) {
 			throw new DirectorException("Image does not exist");
 		}
-		
+
 		TrustPolicy existingTrustPolicy;
 		try {
 			existingTrustPolicy = imagePersistenceManager
@@ -1962,7 +1763,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 		TrustPolicyDraft savePolicyDraft;
 		try {
-			trustPolicyDraft.setEdited_date(new Date());
+			trustPolicyDraft.setEdited_date(Calendar.getInstance());
 			trustPolicyDraft.setEdited_by_user_id(ShiroUtil.subjectUsername());
 			savePolicyDraft = imagePersistenceManager
 					.savePolicyDraft(trustPolicyDraft);
@@ -1970,15 +1771,15 @@ public class ImageServiceImpl implements ImageService {
 			log.error("Unable to save policy draft", e);
 			throw new DirectorException("Unable to save policy draft ", e);
 		}
+
 		Mapper mapper = new DozerBeanMapper();
-		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(savePolicyDraft,
-				TrustPolicyDraftResponse.class);
-		try {
-			imagePersistenceManager.destroyPolicy(existingTrustPolicy);
-		} catch (DbException e) {
-			log.error("Cannoot delete policy", e);
-			throw new DirectorException("Cannot delete policy draft y", e);
-		}
+		TrustPolicyDraftResponse trustPolicyDraftResponse = mapper.map(
+				savePolicyDraft, TrustPolicyDraftResponse.class);
+		/*
+		 * try { imagePersistenceManager.destroyPolicy(existingTrustPolicy); }
+		 * catch (DbException e) { log.error("Cannoot delete policy", e); throw
+		 * new DirectorException("Cannot delete policy draft y", e); }
+		 */
 		return trustPolicyDraftResponse;
 	}
 
@@ -2008,7 +1809,7 @@ public class ImageServiceImpl implements ImageService {
 		trustPolicyDraft.setImgAttributes(existingTrustPolicy
 				.getImgAttributes());
 		trustPolicyDraft.setTrust_policy_draft(policyXml);
-		trustPolicyDraft.setDisplay_name(existingTrustPolicy.getDisplay_name());
+		trustPolicyDraft.setDisplay_name(TdaasUtil.getVersionedName(existingTrustPolicy.getDisplay_name()));
 		return trustPolicyDraft;
 	}
 
@@ -2133,14 +1934,12 @@ public class ImageServiceImpl implements ImageService {
 		String display_name = "";
 		try {
 			image_info = imagePersistenceManager.fetchImageById(image_id);
-			if (image_info.getTrust_policy_draft_id() != null) {
-				policy_id = image_info.getTrust_policy_draft_id();
-				display_name += imagePersistenceManager.fetchPolicyDraftById(
-						policy_id).getDisplay_name();
-			} else if (image_info.getTrust_policy_id() != null) {
+			if (image_info.getTrust_policy_id() != null) {
 				policy_id = image_info.getTrust_policy_id();
-				display_name += imagePersistenceManager.fetchPolicyById(
-						policy_id).getDisplay_name();
+				display_name += imagePersistenceManager.fetchPolicyById(policy_id).getDisplay_name();
+			} else if (image_info.getTrust_policy_draft_id() != null) {
+				policy_id = image_info.getTrust_policy_draft_id();
+				display_name += imagePersistenceManager.fetchPolicyDraftById(policy_id).getDisplay_name();
 			} else {
 				display_name += "-";
 			}
@@ -2205,21 +2004,20 @@ public class ImageServiceImpl implements ImageService {
 	public ImportPolicyTemplateResponse importPolicyTemplate(String imageId)
 			throws DirectorException {
 		ImportPolicyTemplateResponse importPolicyTemplateResponse;
-		ImageAttributes image=null;
-		
-			try {
-				image = imagePersistenceManager.fetchImageById(imageId);
-			} catch (DbException e3) {
-				log.error("Internal error occurred in fetching image");
-				throw new DirectorException(
-						"Internal error occurred in fetching image " + imageId,
-						e3);
-			}
-			if(image==null){
+		ImageAttributes image = null;
+
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e3) {
+			log.error("Internal error occurred in fetching image");
+			throw new DirectorException(
+					"Internal error occurred in fetching image " + imageId, e3);
+		}
+		if (image == null) {
 			log.info("No image found during import of policy");
 			throw new DirectorException("No image found with id: " + imageId);
-		
-			}
+
+		}
 		if (image != null
 				&& !(image.getImage_deployments().equals(
 						Constants.DEPLOYMENT_TYPE_BAREMETAL) && image
@@ -2264,7 +2062,6 @@ public class ImageServiceImpl implements ImageService {
 			// importPolicyTemplateResponse.setStatus("Success");
 			return importPolicyTemplateResponse;
 		}
-
 		// Check if mounted live BM has /opt/vrtm
 		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
 
@@ -2334,9 +2131,9 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		policyDraftForImage.setTrust_policy_draft(policyXmlWithImports);
-		policyDraftForImage.setEdited_date(new Date());
+		policyDraftForImage.setEdited_date(Calendar.getInstance());
 		policyDraftForImage.setEdited_by_user_id(ShiroUtil.subjectUsername());
-		policyDraftForImage.setCreated_date(new Date());
+		policyDraftForImage.setCreated_date(Calendar.getInstance());
 		policyDraftForImage.setCreated_by_user_id(ShiroUtil.subjectUsername());
 
 		try {
@@ -2410,13 +2207,15 @@ public class ImageServiceImpl implements ImageService {
 					+ trust_policy_id, e);
 		}
 		if (policy != null) {
+			policy.setArchive(true);
 			try {
-				imagePersistenceManager.destroyPolicy(policy);
-			} catch (DbException e) {
-				log.error("Error deleting policy with id " + trust_policy_id);
-				throw new DirectorException("Error deleting policy with id "
-						+ trust_policy_id, e);
+				imagePersistenceManager.updatePolicy(policy);
+			} catch (DbException e1) {
+				log.error("Unable in archiving policy, deleteTrustPolicy", e1);
+				throw new DirectorException(
+						"Unable in archiving policy, deleteTrustPolicy", e1);
 			}
+
 			ImageInfo image;
 			try {
 				image = imagePersistenceManager.fetchImageById(policy
@@ -2528,7 +2327,7 @@ public class ImageServiceImpl implements ImageService {
 		TrustPolicy policyForImage;
 		try {
 			policyForImage = imagePersistenceManager
-					.fetchPolicyForImage(imageId);
+					.fetchActivePolicyForImage(imageId);
 		} catch (DbException e) {
 			log.error("Unable to fetch policy for image : " + imageId, e);
 			return null;
@@ -2600,7 +2399,8 @@ public class ImageServiceImpl implements ImageService {
 					.fetchSshByImageId(image_id);
 			settingRequest.setId(ssh.getId());
 			settingRequest.setName(ssh.getName());
-		////	settingRequest.setPolicy_name(getDisplayNameForImage(image_id));
+			// //
+			// settingRequest.setPolicy_name(getDisplayNameForImage(image_id));
 			settingRequest.setIpAddress(ssh.getIpAddress());
 			settingRequest.setUsername(ssh.getUsername());
 		} catch (DbException e) {
@@ -2643,8 +2443,20 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			ImageInfo imageInfo = imagePersistenceManager
 					.fetchImageById(imageId);
-			
+
 			log.debug("image fetched for id: " + imageId);
+			if (Constants.DEPLOYMENT_TYPE_DOCKER
+					.equalsIgnoreCase(imageInfo.image_deployments)) {
+				try {
+					log.info("Performing docker rmi for image ::"
+							+ imageInfo.id);
+					DockerUtil.dockerRMI(imageInfo.repository, imageInfo.tag
+							+ "_source");
+				} catch (Exception e) {
+					log.error("Error in docker rmi: " + imageId, e);
+					throw new DirectorException("Error in docker rmi", e);
+				}
+			}
 			imageInfo.setDeleted(true);
 			imagePersistenceManager.updateImage(imageInfo);
 
@@ -2779,26 +2591,25 @@ public class ImageServiceImpl implements ImageService {
 		return existingDraft.getImgAttributes().id;
 
 	}
-	
+
 	public ImageInfoResponse getImageDetails(String imageId)
 			throws DirectorException {
 		ImageInfoResponse imageInfoResponse = null;
 		try {
-			ImageInfo imageInfo =  imagePersistenceManager
+			ImageInfo imageInfo = imagePersistenceManager
 					.fetchImageById(imageId);
 			if (imageInfo == null) {
 				return null;
-			}	
+			}
 			Mapper mapper = new DozerBeanMapper();
-			imageInfoResponse = mapper.map(imageInfo,
-					ImageInfoResponse.class);
-		
+			imageInfoResponse = mapper.map(imageInfo, ImageInfoResponse.class);
+
 		} catch (DbException e1) {
 
 			log.error("Error in fetchImageById for imageId::" + imageId);
 			throw new DirectorException("unable to fetchImageById", e1);
 		}
-		
+
 		if (StringUtils.isNotBlank(imageInfoResponse.getImage_deployments())
 				&& imageInfoResponse.getImage_deployments().equals(
 						Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
@@ -2815,9 +2626,11 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return imageInfoResponse;
 	}
-	
-	@Override	
-	public List<TrustPolicyDraft> getTrustPolicyDrafts(TrustPolicyDraftFilter trustPolicyDraftFilter) throws DirectorException{
+
+	@Override
+	public List<TrustPolicyDraft> getTrustPolicyDrafts(
+			TrustPolicyDraftFilter trustPolicyDraftFilter)
+			throws DirectorException {
 		List<TrustPolicyDraft> fetchPolicyDrafts = null;
 		try {
 			if (trustPolicyDraftFilter == null) {
@@ -2829,7 +2642,7 @@ public class ImageServiceImpl implements ImageService {
 			throw new DirectorException("Error Fetching drafts", e);
 		}
 	}
-	
+
 	public List<SshSettingRequest> sshData() throws DirectorException {
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		List<SshSettingInfo> fetchSsh;
@@ -2857,7 +2670,8 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
-		SshSettingInfo sshSetingInfo = tdaasUtil.fromSshSettingRequest(sshSettingRequest);
+		SshSettingInfo sshSetingInfo = tdaasUtil
+				.fromSshSettingRequest(sshSettingRequest);
 
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername(),
@@ -2873,7 +2687,6 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 	}
-
 
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
@@ -2920,6 +2733,7 @@ public class ImageServiceImpl implements ImageService {
 		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
 				sshSettingRequest.getUsername(),
 				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
 
@@ -2930,8 +2744,8 @@ public class ImageServiceImpl implements ImageService {
 			if (existingSsh.getId() != null
 					&& StringUtils.isNotBlank(existingSsh.getId())) {
 				sshSettingInfo.setId(existingSsh.getId());
-				sshSettingInfo.setImage(existingSsh.getImage());
-				// /sshSettingRequest.setId(existingSsh.getId());
+				ImageAttributes image = existingSsh.getImage();
+				sshSettingInfo.setImage(image);
 			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
 			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
@@ -2944,12 +2758,12 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 	}
+
 	public void updateSshDataById(String sshId) throws DirectorException {
-				try{
-		imagePersistenceManager.updateSshById(sshId);
-		}catch(Exception e){
-			throw new DirectorException(
-					"Unable to updateSshDataById", e);
+		try {
+			imagePersistenceManager.updateSshById(sshId);
+		} catch (Exception e) {
+			throw new DirectorException("Unable to updateSshDataById", e);
 		}
 	}
 
@@ -2966,25 +2780,171 @@ public class ImageServiceImpl implements ImageService {
 
 	public SshSettingRequest fetchSshInfoByImageId(String image_id)
 			throws DirectorException {
-		try{	
-		TdaasUtil tdaasUtil = new TdaasUtil();
-		SshSettingInfo sshInfo = imagePersistenceManager
-				.fetchSshByImageId(image_id);
+		try {
+			TdaasUtil tdaasUtil = new TdaasUtil();
+			SshSettingInfo sshInfo = imagePersistenceManager
+					.fetchSshByImageId(image_id);
 
-		return tdaasUtil.toSshSettingRequest(sshInfo);
-		}catch(Exception e){
-			throw new DirectorException(
-					"Unable to updateSshDataById", e);
+			return tdaasUtil.toSshSettingRequest(sshInfo);
+		} catch (Exception e) {
+			throw new DirectorException("Unable to updateSshDataById", e);
 		}
 	}
 
 	@Override
 	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId) {
 		try {
-			return imagePersistenceManager.fetchPolicyDraftById(trustPolicyDraftId);
+			return imagePersistenceManager
+					.fetchPolicyDraftById(trustPolicyDraftId);
 		} catch (DbException e) {
 			return null;
 		}
 	}
-	
+
+	@Override
+	public void dockerPull(String imageId) throws DirectorException {
+		ImageInfo image = null;
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			log.error("Error in fetching image  ", e);
+			throw new DirectorException("Error in fetching image");
+		}
+		if (image == null) {
+			log.error("DockerPullTask, no image found for imageId::" + imageId);
+			throw new DirectorException("No image found for imageId");
+		}
+		
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())
+				|| StringUtils.isBlank(image.getRepository())
+				|| StringUtils.isBlank(image.getTag())) {
+			log.error("Cannot Perform Docker Pull Operation in this Image ::" + imageId);
+			throw new DirectorException("Cannot Perform Docker Setup Operation in this Image");
+		}
+		DockerPullTask dockerPullTask = new DockerPullTask(imageId);
+		DirectorAsynchExecutor.submitTask(dockerPullTask);
+	}
+
+	@Override
+	public void dockerSetup(String imageId) throws DirectorException {
+
+		ImageInfo image = null;
+
+		try {
+			image = imagePersistenceManager.fetchImageById(imageId);
+		} catch (DbException e) {
+			log.error("Error in fetching image  ", e);
+
+		}
+		if (image == null) {
+			log.error("dockerSetup, no image found for imageId::" + imageId);
+			return;
+		}
+
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())
+				|| StringUtils.isBlank(image.getRepository())
+				|| StringUtils.isBlank(image.getTag())) {
+			log.error("Cannot Perform Docker Setup Operation in this Image ::"
+					+ imageId);
+			throw new DirectorException(
+					"Cannot Perform Docker Setup Operation in this Image");
+		}
+
+		String repository = image.getRepository();
+		String tag = image.getTag();
+
+		log.info("Inside dockerSetup, repository::" + repository + " tag::"
+				+ tag);
+
+		boolean dockerSetupOperation = false;
+
+		String newTag = tag + Constants.SOURCE_TAG;
+		try {
+			dockerActionService.dockerLoad(imageId);
+
+			dockerActionService.dockerTag(imageId, repository, newTag);
+			dockerSetupOperation = true;
+
+		} catch (DirectorException e) {
+			image.setStatus(Constants.ERROR);
+			log.error(" DockerSetup failed", e);
+		} finally {
+			if (dockerSetupOperation) {
+				dockerActionService.dockerRMI(imageId);
+				image.setStatus(Constants.COMPLETE);
+			}
+		}
+
+		try {
+			imagePersistenceManager.updateImage(image);
+		} catch (DbException e) {
+			log.error(
+					"Unable to update image action, set status in DockerSetup",
+					e);
+		}
+
+		if (image.getStatus().equals(Constants.ERROR)) {
+			throw new DirectorException("Error while performing docker setup");
+		}
+
+	}
+
+	@Override
+	public List<ImageInfo> getStalledImages() throws DirectorException {
+		List<ImageInfo> fetchImages = null;
+		try {
+			fetchImages = imagePersistenceManager.fetchImages(null, null);
+		} catch (DbException e) {
+			log.error("Error while retrieving list of images", e);
+			throw new DirectorException(
+					"Error while retrieving list of images", e);
+		}
+		List<ImageInfo> stalledImages = new ArrayList<ImageInfo>();
+		for (ImageInfo imageInfo : fetchImages) {
+			Calendar edited_date = imageInfo.getEdited_date();
+			Calendar current_date = Calendar.getInstance();
+			
+			long diffInMilli = current_date.getTime().getTime() - edited_date.getTime().getTime();
+			long diffInMinutes = (diffInMilli / (1000*60)) % 60;
+			
+			if (ShiroUtil.subjectUsernameEquals(imageInfo
+					.getCreated_by_user_id())
+					&& Constants.IN_PROGRESS.equals(imageInfo.getStatus())
+					&& diffInMinutes > 2) {
+				if (Constants.DEPLOYMENT_TYPE_DOCKER
+						.equals(imageInfo.image_deployments)
+						&& imageInfo.image_size == 0) {
+					continue;
+				}
+				stalledImages.add(imageInfo);
+			}
+		}
+		return stalledImages;
+	}
+
+	@Override
+	public List<HashTypeObject> getImageHashType(String deploymentType)
+			throws DirectorException {
+		
+		List<HashTypeObject> hashTypeObjects = new ArrayList<HashTypeObject>();
+		HashTypeObject hashTypeObject = null;
+		
+		Map<String, String> allHashTypes = ImageDeploymentHashTypeCache.getAllHashTypes();
+		Set<String> keySet = allHashTypes.keySet();
+		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			hashTypeObject = new HashTypeObject(key, allHashTypes.get(key));			
+			if(StringUtils.isNotBlank(deploymentType)){
+				if(deploymentType.equals(key)){
+					hashTypeObjects.add(hashTypeObject);
+					break;
+				}				
+			}else{
+				hashTypeObjects.add(hashTypeObject);
+			}
+		}
+		return hashTypeObjects;
+	}
 }

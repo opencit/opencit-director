@@ -3,8 +3,6 @@ package com.intel.director.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
@@ -24,7 +22,7 @@ public class CreateTrustPolicyMetaDataRequest {
 	public String selected_image_format;
 
 	public String deployment_type;
-
+	
 	public boolean encrypted = false;
 
 	public String image_name;
@@ -49,6 +47,7 @@ public class CreateTrustPolicyMetaDataRequest {
 		this.display_name = display_name;
 	}
 
+	
 	public String getHostid() {
 		return hostid;
 	}
@@ -125,7 +124,7 @@ public class CreateTrustPolicyMetaDataRequest {
 	 */
 
 	public String validate(String type) {
-		String NAME_REGEX = "[a-zA-Z0-9,;. @_-]+";
+		String NAME_REGEX = "[a-zA-Z:0-9,;. @_-]+";
 		List<String> errors = new ArrayList<>();
 		if ("draft".equals(type)) {
 			if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {

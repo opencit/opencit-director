@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import com.intel.director.api.HashTypeObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,26 +32,29 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CommonValidations;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.GetImageStoresResponse;
 import com.intel.director.api.ImageInfoResponse;
-import com.intel.director.api.ImageStoreObject;
 import com.intel.director.api.ListImageDeploymentsResponse;
 import com.intel.director.api.ListImageFormatsResponse;
 import com.intel.director.api.ListImageLaunchPolicyResponse;
 import com.intel.director.api.MountImageRequest;
 import com.intel.director.api.MountImageResponse;
+import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.SearchFilesInImageRequest;
 import com.intel.director.api.SearchFilesInImageResponse;
 import com.intel.director.api.SearchImagesRequest;
@@ -62,9 +67,15 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DockerUtil;
+import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ArtifactUploadService;
+import com.intel.director.service.DockerActionService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.LookupService;
+import com.intel.director.service.impl.ArtifactUploadServiceImpl;
+import com.intel.director.service.impl.DockerActionImpl;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
@@ -85,6 +96,8 @@ public class Images {
 	ImageService imageService = new ImageServiceImpl();
 	LookupService lookupService = new LookupServiceImpl();
 	SettingImpl settingimpl = new SettingImpl();
+	ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
+	DockerActionService dockerActionService = new DockerActionImpl();
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(Images.class);
 
@@ -124,7 +137,7 @@ public class Images {
 	 * }
 	 * </pre>
 	 * 
-	 * @param uploadRequest
+	 * @param TrustDirectorImageUploadRequest
 	 *            object which includes metadata information
 	 * @return Response object contains newly created
 	 *         image metadata along with image_id
@@ -137,8 +150,9 @@ public class Images {
 	public Response createUploadImageMetadata(
 			TrustDirectorImageUploadRequest uploadRequest)
 			throws DirectorException {
+		
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
-
+		
 		String errors = uploadRequest.validate();
 		if (StringUtils.isNotBlank(errors)) {
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
@@ -148,21 +162,60 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(uploadImageToTrustDirector).build();
 		}
-		imageService = new ImageServiceImpl();
-
+		
+		if (Constants.DEPLOYMENT_TYPE_DOCKER
+				.equals(uploadRequest.image_deployments)
+				&& uploadRequest.image_size == 0) {
+			boolean doesRepoTagExistInDockerHub;
+			try {
+				doesRepoTagExistInDockerHub = DockerUtil
+						.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
+								uploadRequest.getTag());
+			} catch (ClientProtocolException e) {
+				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
+				
+			} catch (IOException e) {
+				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
+			}
+			
+			if(!doesRepoTagExistInDockerHub){
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with repo tag not available in docker hub";
+				return Response.ok(uploadImageToTrustDirector).status(Response.Status.NOT_FOUND).build();
+			}
+		}
+		
+		imageService = new ImageServiceImpl();	
+		String imageName=uploadRequest.image_name;
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
+			String repositoryInName = uploadRequest.repository;
+			imageName = repositoryInName.replace("/", "-") + ":"
+					+ uploadRequest.tag;
+		}
 		try {
-			if (imageService.doesImageNameExist(uploadRequest.image_name)) {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && dockerActionService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
+				return Response.ok(uploadImageToTrustDirector).build();
+			}
+			
+			if (imageService.doesImageNameExist(imageName)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
+			
+		
+			
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
 							uploadRequest.image_deployments,
-							uploadRequest.image_format,
-							uploadRequest.image_name, uploadRequest.image_size);
-			uploadImageToTrustDirector.state = Constants.SUCCESS;
+							uploadRequest.image_format, imageName,
+							uploadRequest.image_size, uploadRequest.repository, uploadRequest.tag);
+			uploadImageToTrustDirector.status = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
 			return Response.ok().entity(uploadImageToTrustDirector).build();
@@ -310,7 +363,6 @@ public class Images {
 	public Response getImagesByDeploymentType(
 			@QueryParam("deploymentType") String deployment_type)
 			throws DirectorException {
-		
 		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
 		if(!CommonValidations.validateImageDeployments(deployment_type)){
@@ -478,8 +530,6 @@ public class Images {
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
 		}
-		
-		
 		log.info("inside mounting image in web service");
 		String user = ShiroUtil.subjectUsername();
 		log.info("User mounting image : " + user);
@@ -528,10 +578,12 @@ public class Images {
 	 * }
 	 * 
 	 * In case of error:
-	 * { “error”: “error message ” }
+	 * { â€œerrorâ€: â€œerror message â€ }
 	 * 
 	 * </pre>
 	 * 
+	 * @param imageId
+	 *            Id of the image to be un-mounted
 	 * @param httpServletRequest
 	 * @param httpServletResponse
 	 * @return UnmountImageResponse containing the details of the unmount
@@ -822,41 +874,14 @@ public class Images {
 	}
 
 	/**
-	 * List configured image stores
+	 * Utility methods
 	 * 
-	 * 
-	 * @mtwContentTypeReturned JSON
-	 * @mtwMethodType GET
-	 * 
-	 * @return GetImageStoresResponse
-	 * @throws DirectorException
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/image-stores
-	 * Input: NA
-	 * Output:
-	 * {
-	 *   "image_stores": [
-	 *     { "name": "Glance" },
-	 *     { "name": "Swift" }
-	 *   ]
-	 * }
-	 * </pre>
+	 * @param httpServletRequest
+	 * @return
 	 */
-	@Deprecated
-	@Path("image-stores")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public GetImageStoresResponse getImageStores() throws DirectorException {
-		GetImageStoresResponse imageStores = new GetImageStoresResponse();
-		imageStores.image_stores = new ArrayList<ImageStoreObject>();
-		ImageStoreObject imageStore = new ImageStoreObject();
-		imageStore.setName("Glance");
-		imageStores.image_stores.add(imageStore);
-		imageStore = new ImageStoreObject();
-		imageStore.setName("Swift");
-		imageStores.image_stores.add(imageStore);
-		return imageStores;
+	protected String getLoginUsername() {
+		return ShiroUtil.subjectUsername();
+
 	}
 
 	/**
@@ -955,6 +980,106 @@ public class Images {
 
 	/**
 	 * 
+	 * Method lets the user download the manifest from the grids page. The user
+	 * can visit the grid any time and download the policy. This method looks
+	 * into the MW_TRUST_POLICY table and gets the policy string and sends it as
+	 * an xml content to the user
+	 * 
+	 * In case the policy is not found for the image id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 *  https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/manifest
+	 * Input: Image id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * </pre>
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * Input: Image id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * </pre>
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * <pre>
+	 * Input: Image id as path param
+	 *	Output: Content sent as stream
+     *
+	 * </pre>
+	 * @param imageId
+	 *            the image for which the policy is downloaded
+	 * @return XML content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/manifest")
+	@GET
+	@Produces(MediaType.APPLICATION_XML)
+	public Response downloadManifestForImageId(
+			@PathParam("imageId") String imageId) {
+		TrustPolicy policy = null;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		ImageInfo imageInfo=null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if(imageInfo == null){
+			genericResponse.error = "No image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		
+		String trust_policy_id = imageInfo.getTrust_policy_id();
+		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+
+		if(trustPolicyByTrustId == null){
+			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		
+
+		try {
+			policy = imageService.getTrustPolicyByImageId(imageId);
+		} catch (DirectorException e) {
+			String msg = "Unable to fetch trust policy for image id : "
+					+ imageId;
+			log.error(msg, e);
+			log.info("Returning HTTP 404");
+		}
+		if (policy == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		String manifestForPolicy = null;
+		try {
+			manifestForPolicy = TdaasUtil.getManifestForPolicy(policy.getTrust_policy());
+		} catch (JAXBException e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		
+		ResponseBuilder response = Response.ok(manifestForPolicy);
+		response.header("Content-Disposition", "attachment; filename=manifest_"
+				+ policy.getImgAttributes().getImage_name() + ".xml");
+		return response.build();
+	}
+	
+	/**
+	 * 
 	 * Method lets the user download the policy and manifest as a tarball from
 	 * the grids page. The user can visit the grid any time and download the
 	 * policy and manifest as it was created in the wizrd. This method looks
@@ -1033,11 +1158,9 @@ public class Images {
 					log.info("Deleting temporary files "
 							+ Constants.TARBALL_PATH + imageId);
 					super.close();
+					FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 					final File dir = new File(Constants.TARBALL_PATH + imageId);
-					for (File file : dir.listFiles()) {
-						file.delete();
-					}
-					dir.delete();
+					fileUtilityOperation.deleteFileOrDirectory(dir);
 				}
 			};
 		} catch (FileNotFoundException e) {
@@ -1053,6 +1176,78 @@ public class Images {
 		return downloadResponse;
 	}
 
+	/**
+	 * 
+	 * Method lets the user download the image from the grids page. The user can
+	 * visit the grid any time and download image. T
+	 * 
+	 * In case the image is not found for the image id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned File
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/image
+	 * Input: Image UUID
+	 * Output: Content of image as stream
+	 * </pre>
+	 * 
+	 * @param imageId
+	 *            the image for which the policy and manifest is downloaded
+	 * @return TAR ball content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/image")
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadImage(
+			@PathParam("imageId") final String imageId) {
+
+		File tarBall = null;
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+			genericResponse.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		ImageInfo imageInfo = null;
+		try {
+			imageInfo = imageService.fetchImageById(imageId);
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+
+		tarBall = new File(imageInfo.getLocation() + File.separator + imageInfo.getImage_name());
+	
+		FileInputStream tarInputStream = null;
+		try {
+			tarInputStream = new FileInputStream(tarBall) {
+				@Override
+				public void close() throws IOException {
+					super.close();
+				}
+			};
+		} catch (FileNotFoundException e) {
+			log.error("Error while dowloading Image", e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		ResponseBuilder response = Response.ok(tarInputStream);
+
+		response.header("Content-Disposition", "attachment; filename="
+				+ tarBall.getName());
+
+		Response downloadResponse = response.build();
+		return downloadResponse;
+	}
+	
 	/**
 	 * 
 	 * Mark image as deleted. We turn the deleted flag=true in the MW_IMAGE
@@ -1080,12 +1275,12 @@ public class Images {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImage(@PathParam("imageId") String imageId) {
-		GenericResponse response = new GenericResponse();
-		GenericResponse genericResponse= new GenericResponse();
+		GenericDeleteResponse response = new GenericDeleteResponse();
+	///	GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
-			genericResponse.error = "Imaged id is empty or not in uuid format";
+			response.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+					.entity(response).build();
 		}
 		try {
 			if (imageService.fetchImageById(imageId) != null) {
@@ -1159,7 +1354,7 @@ public class Images {
 		}
 		return Response.ok(sshResponse).build();
 	}
-
+	
 	/**
 	 * This method updates the host related details provided by the user. The
 	 * connection details are used to verify whether connection can be
@@ -1221,5 +1416,256 @@ public class Images {
 		return Response.ok(sshResponse).build();
 
 	}
+	
+	
+	
+	/**
+	 * This method initiates docker pull task for given image_id provided that
+	 * deployment_type of image must be 'Docker' and repo tag should be given
+	 * before.
+	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/docker-pull/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Output: {"details":"Docker Image succesfully queued for download","status":"Success"}
+	 * 
+	 * In case of error:
+	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
+	 * Lets say the user provide the image id which does not have image_deployment as 'Docker':
+	 * {
+	 *   "error": "Cannot Perform Docker Pull Operation in this Image"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param Pathparam
+	 *            : image_id
+	 * @return Response containing details of docker-pull
+	 */
+	@Path("rpc/docker-pull/{image_id: [0-9a-zA-Z_-]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public Response dockerPull(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker Pull for imageId::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		GenericResponse monitorStatus = new GenericResponse();
+		try {
+			imageService.dockerPull(image_id);
+		} catch (DirectorException e) {
+			log.error("Error while performing docker pull");
+			monitorStatus.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(monitorStatus).build();
+		}
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully queued for download");
+		return Response.ok(monitorStatus).build();
+	}
+	
+	/**
+	 * This method sets up docker image uploaded manually for given image_id for furhter operation provided that
+	 * deployment_type of image must be 'Docker' and repo tag should be given
+	 * before.
+	 * This is mandatory step before performing any further operation on docker image.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/docker-setup/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * 
+	 * Output: {"details":"Docker Image succesfully uploaded","status":"Success"}
+	 * 
+	 * In case of error:
+	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
+	 * Lets say the user provide the image id which does not have image_deployment as 'Docker':
+	 * {
+	 *   "error": "Cannot Perform Docker Setup Operation in this Image"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param Pathparam
+	 *            : image_id
+	 * @return Response containing details of docker-setup
+	 */
+	@Path("rpc/docker-setup/{image_id: [0-9a-zA-Z_-]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public Response dockerSetup(@PathParam("image_id") String image_id) {
+		log.info("Performing Director Docker setup for imageid::"+image_id);
+		GenericResponse response = new GenericDeleteResponse();
+		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
+			response.error = "Imaged id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		GenericResponse monitorStatus = new GenericResponse();
+		try {
+			imageService.dockerSetup(image_id);
+		} catch (DirectorException e) {
+			log.error("Error while performing docker setup");
+			monitorStatus = new GenericResponse();
+			monitorStatus.error = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(monitorStatus).build();
+		}
+		monitorStatus.setStatus(Constants.SUCCESS);
+		monitorStatus.setDetails("Docker Image succesfully uploaded");
+		return Response.ok(monitorStatus).build();
+	}
+	
+	
+	/**
+	 * This method removes policies from configured external storages whose
+	 * associated image is deleted from one or more configured external storages.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/rpc/remove-orphan-policies
+	 * 
+	 * Input: NA
+	 * 
+	 * Output: {}
+	 * 
+	 * In case of error:
+	 * Input: NA
+	 * 
+	 * Output:
+	 * {
+	 *   "error": "No image stores configured"
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param
+	 * @return Response containing list of details of policies removed
+	 */
+	@Path("rpc/remove-orphan-policies")
+	@Produces(MediaType.APPLICATION_JSON)
+	@POST
+	public Response removeOrphanPolicies() throws DirectorException {
+		log.info("Removing Orphan Policies");
+		try {
+			List<PolicyUploadTransferObject> removedOrphanPolicies = artifactUploadService.removeOrphanPolicies();
+			return Response.ok(removedOrphanPolicies).build();
+		} catch (DirectorException e) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.setError(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+		}
+	}
+	
 
+	/**
+	 * This method returns list of deployment types which allow image encryption
+	 * 
+	 * @return list of deployment types which allow image encryption
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/encryption-supported
+	 * Input: NA
+	 * Output:
+	 * [
+	 *   "VM"
+	 * ]
+	 * </pre>
+	 */
+	@Path("encryption-supported")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response listEncryptionSupported() {
+		List<String> imgEncryptSupported = new ArrayList<String>();
+		imgEncryptSupported.add(Constants.DEPLOYMENT_TYPE_VM);
+		return Response.ok(imgEncryptSupported).build();
+	}
+	
+	
+	/**
+	 * This method returns list of stalled images
+	 * 
+	 * @return list of stalled images
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/images-stalled
+	 * Input: NA
+	 * Output:
+	 * [
+	 *   "VM"
+	 * ]
+	 * </pre>
+	 */
+	@Path("images-stalled")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getStalledImages() {
+		List<ImageInfo> stalledImages = null;
+		GenericResponse response = new GenericResponse();
+		try {
+			stalledImages = imageService.getStalledImages();
+		} catch (DirectorException e) {
+			response.setError(e.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		return Response.ok(stalledImages).build();
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return 
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * https://{IP/HOST_NAME}/v1/image-hash-type
+	 * Input: deploymentType
+	 * Output:
+	 * </pre>
+	 */
+	@Path("image-hash-type")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getImageHashType(@QueryParam("deploymentType") String deploymentType) {
+		GenericResponse response = new GenericResponse();
+		List<String> deplomentTypeList = new ArrayList<String>();
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_VM);
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_DOCKER);
+		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
+
+		
+		if(deploymentType != null && !deplomentTypeList.contains(deploymentType)){
+			response.setError("Invalid Deployment Type");
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		
+		
+		List<HashTypeObject> imageHashType = null;
+		try {
+			imageHashType = imageService.getImageHashType(deploymentType);
+		} catch (DirectorException e) {
+			response.setError(e.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
+		}
+		if(imageHashType.size() == 1){
+			return Response.ok(imageHashType.get(0)).build();
+		}
+		
+		return Response.ok(imageHashType).build();
+	}
 }

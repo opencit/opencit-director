@@ -7,25 +7,44 @@ package com.intel.director.common;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.configuration.Configuration;
+import com.intel.director.api.TrustPolicy;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.util.exec.ExecUtil;
@@ -40,7 +59,7 @@ public class DirectorUtil {
 			String trustPolicyName, String tarLocation, String tarName)
 			throws IOException {
 
-		String command = "tar -cf '" + tarLocation + tarName + "' -C " + imageDir
+		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir
 				+ " " + imageName + " " + trustPolicyName;
 		// / String tarName = imageName + "-" + new
 		// SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
@@ -87,12 +106,6 @@ public class DirectorUtil {
 		}
 		return null;
 	}
-
-	public static String computeHash(MessageDigest md, File file) {
-		return null;
-
-	}
-
 	public static String getSymbolicLink(String filePath) {
 		return filePath;
 
@@ -186,9 +199,9 @@ public class DirectorUtil {
 		return result.getExitCode();
 	}
 
-	public static Properties getPropertiesFile(String path) {
+	public static Properties getPropertiesFile(String propFileName) {
 		Properties prop = new Properties();
-		File customFile = new File(Constants.configurationPath + path);
+		File customFile = new File(Constants.configurationPath + propFileName);
 		ConfigurationProvider provider;
 		try {
 			provider = ConfigurationFactory.createConfigurationProvider(customFile);
@@ -249,26 +262,171 @@ public class DirectorUtil {
 		provider.save(loadedConfiguration);
 	}
 
-	public static String getKeyIdFromUrl(String url) {
-		log.debug("URL :: " + url);
-		String[] split = url.split("/");
-		int index = 0;
-		for (int i = 0; i < split.length; i++) {
-			if (split[i].equals("keys")) {
-				log.debug("Keys index :: " + i);
-				index = ++i;
-				break;
-			}
-		}
-
-		log.debug("Index :: " + index);
-
-		if (index != 0) {
-			return split[index];
-		} else {
+	
+	public static String computeUploadVar(String uuid, String dekUrl){
+		if(uuid == null){
 			return null;
 		}
-
+		String uploadvar = null;
+		StringBuilder builder = new StringBuilder(uuid);
+		if(StringUtils.isNotBlank(dekUrl)){
+			builder.append(dekUrl);
+		}
+		try {
+			uploadvar = computeHash(MessageDigest.getInstance("MD5"), builder.toString());
+		} catch (NoSuchAlgorithmException e) {
+			log.error("Error Calcaulating upload var for {}", uuid);
+			return null;
+		}
+		return uploadvar;
 	}
+
+	public static String computeHash(MessageDigest md, File file)
+			throws IOException {
+		if (!file.exists()) {
+			return null;
+		}
+	
+		md.reset();
+		byte[] bytes = new byte[2048];
+		int numBytes;
+		FileInputStream is;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			log.error("error :: input file doesn't exists", e);
+			throw new IOException("input file doesn't exists", e);
+		}
+	
+		try {
+			while ((numBytes = is.read(bytes)) != -1) {
+				md.update(bytes, 0, numBytes);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error("error in reading from file", e);
+	
+			throw new IOException("error in reading from file", e);
+		} finally {
+			try {
+				is.close();
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				log.error("error in closing stream", ioe);
+				throw new IOException("error in closing stream", ioe);
+			}
+		}
+		byte[] digest = md.digest();
+		String result = new String(Hex.encodeHex(digest));
+	
+		return result;
+	
+	}
+	
+
+	public static String computeHash(MessageDigest md, String str){
+		if(str == null){
+			return null;
+		}
+		md.update(str.getBytes());
+		byte[] digest = md.digest();
+		String result = new String(Hex.encodeHex(digest));	
+		return result;	
+	}
+
+	public static String fetchIdforUpload(TrustPolicy trustPolicy){	
+		String policyXml = trustPolicy.getTrust_policy();
+		log.debug("Inside Run Upload Policy task policyXml::" + policyXml);
+		StringReader reader = new StringReader(policyXml);
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
+		JAXBContext jaxbContext = null;
+		try {
+			jaxbContext = JAXBContext
+					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+		} catch (JAXBException e) {
+			log.error("Unable to instantiate the jaxbcontext", e);
+			return null;
+			
+		}
+		Unmarshaller unmarshaller = null;
+		try {
+			unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
+		} catch (JAXBException e) {
+			log.error("Unable to instantiate the unmarshaller", e);
+			return null;
+		}
+		try {
+			policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
+					.unmarshal(reader);
+		} catch (JAXBException e) {
+			log.error("Unable to unmarshall the policy", e);
+			return null;	
+		}
+		return policy.getImage().getImageId();
+	}
+
+	public static String prettifyXml(String xml) {
+		final InputSource src = new InputSource(new StringReader(xml));
+		Node document;
+		try {
+			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			log.error("Error parsing string {}", xml, e);
+			return null;
+		}
+		final Boolean keepDeclaration = Boolean.valueOf(xml.startsWith("<?xml"));
+
+		DOMImplementationRegistry registry = null;
+		try {
+			registry = DOMImplementationRegistry.newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException e) {
+			log.error("Error initializing DOMImplementationRegistry {}", e);
+			return null;
+		}
+		final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+		final LSSerializer writer = impl.createLSSerializer();
+
+		// Set this to true if the output needs to be beautified.
+		writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+		// Set this to true if the declaration is needed to be outputted.
+		writer.getDomConfig().setParameter("xml-declaration", keepDeclaration);
+
+		return writer.writeToString(document);
+	}
+
+	
+	public static String fetchDekUrl(TrustPolicy policy){
+		if(policy==null){
+			return "";
+		}
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
+
+			StringReader reader = new StringReader(policy.getTrust_policy());
+			trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+			///trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
+		} catch (JAXBException e1) {
+			log.error("Directorutil fetchDekUrl failed",e1);
+		}
+		
+		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
+		
+	}
+	
+	public static Result executeCommand(String command, String... args)
+			throws ExecuteException, IOException {
+		Result result = ExecUtil.executeQuoted(command, args);
+		
+		/*if (result.getStderr() != null
+				&& StringUtils.isNotEmpty(result.getStderr())) {
+			log.error(result.getStderr());
+		}*/
+		return result;
+	}
+	
 
 }

@@ -8,8 +8,10 @@ package com.intel.director.quartz;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.intel.director.api.ImageActionObject;
@@ -19,6 +21,8 @@ import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
+import com.intel.mtwilson.director.dbservice.DbServiceImpl;
+import com.intel.mtwilson.director.dbservice.IPersistService;
 
 /**
  * Poller that runs every one minute. Check the entries in the Action table
@@ -28,6 +32,11 @@ import com.intel.mtwilson.director.db.exception.DbException;
 public class ImageActionPoller {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActionPoller.class);
+	public static Map<String, Integer> imageActionToRunCountMap = new HashMap();
+	IPersistService persistService = new DbServiceImpl();
+	ImageActionService imageActionImpl = new ImageActionImpl();
+	public static Set<String> imageIdsInProcess = new HashSet<>();
+
 
 	/**
 	 * Fetches the entries from the MW_ACTION table for processing
@@ -41,13 +50,11 @@ public class ImageActionPoller {
 		// Inastantiate the task by ImageActionTaskFactory.getImageActionTask
 		// Set the ImageActionObject
 		// Submit the task to the executor
-		ImageActionService imageActionImpl = new ImageActionImpl();
 		SimpleDateFormat dateFormat = new SimpleDateFormat(
 				"dd/MM/yyyy HH:mm:ss");
 		log.info("*** Executing poller at : " + dateFormat.format(new Date()));
 		List<ImageActionObject> incompleteImageActionObjects = new ArrayList<ImageActionObject>();
 		// Fetching the 10 records from DB
-		Set<String> imageIdsInProcess = new HashSet<>();
 		try {
 			incompleteImageActionObjects = imageActionImpl
 					.searchIncompleteImageAction(5);
@@ -67,11 +74,38 @@ public class ImageActionPoller {
 					+ imageActionObj.getActions().size());
 			log.info("Current status of image action object:"
 					+ imageActionObj.getCurrent_task_status());
-			if (imageIdsInProcess.contains(imageActionObj.getImage_id())) {
-				continue;
-			} else {
-				imageIdsInProcess.add(imageActionObj.getImage_id());
+			
+			if(imageActionToRunCountMap.containsKey(imageActionObj.getId())){
+				Integer currentCount = imageActionToRunCountMap.get(imageActionObj.getId());
+				if(currentCount < 10){
+					addEntryFromImageActionCountMap(imageActionObj.getId(), ++currentCount);
+				}else{
+					//mark error
+					log.info("mark image action {} to error after 10 tries", imageActionObj.getId());
+					imageIdsInProcess.remove(imageActionObj.getImage_id());
+					imageActionObj.setCurrent_task_status(Constants.ERROR);
+					try {
+						persistService.updateImageAction(imageActionObj);
+						
+
+						continue;
+					} catch (DbException e) {
+						log.error("Error in Poller",e);
+					}	
+					finally{
+						removeEntryFromImageActionCountMap(imageActionObj.getId());
+					}
+				}
+			}else{				
+				addEntryFromImageActionCountMap(imageActionObj.getId(), 1);
 			}
+
+			if (imageIdsInProcess.contains(imageActionObj.getImage_id())) {
+				log.info("Image already in process. Skipping");
+				continue;
+			}
+
+			imageIdsInProcess.add(imageActionObj.getImage_id());
 
 			if (imageActionObj.getCurrent_task_status() != null
 					&& imageActionObj.getCurrent_task_status().equals(
@@ -84,5 +118,35 @@ public class ImageActionPoller {
 
 		}
 
+	}
+	
+	
+	public static void removeEntryFromImageActionCountMap(String imageActionId){
+		imageActionToRunCountMap.remove(imageActionId);
+		log.info("Number of elements in map after remove {}", imageActionToRunCountMap.size());
+	}
+
+	public static void removeEntryFromUniqueImageActionlist(String imageId){
+		imageIdsInProcess.remove(imageId);
+	}
+	
+
+
+	public static void addEntryFromImageActionCountMap(String imageActionId, Integer count){
+		imageActionToRunCountMap.put(imageActionId, count);
+		log.info("Elements in map after add/update {}:{}", imageActionId, count);
+		log.info("Number of elements in map: {}", imageActionToRunCountMap.size());
+	}
+	
+	
+
+	private void markImageActionWithError(ImageActionObject  imageActionObj) {
+		imageActionObj.setCurrent_task_status(Constants.ERROR);
+		try {
+			persistService.updateImageAction(imageActionObj);
+		} catch (DbException e) {
+			log.error("Erorr in ExecuteActionTask",e);
+		}
+		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
 	}
 }

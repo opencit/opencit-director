@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,15 +17,15 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import com.intel.mtwilson.shiro.ShiroUtil;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBContext;
@@ -35,9 +33,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import net.schmizz.sshj.SSHClient;
-
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
@@ -69,6 +64,7 @@ import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.ImageDeploymentHashTypeCache;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SSHManager;
@@ -77,9 +73,9 @@ import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.manifest.xml.MeasurementType;
+import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
 import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 import com.intel.mtwilson.trustpolicy.xml.Director;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Encryption;
@@ -92,13 +88,15 @@ import com.intel.mtwilson.trustpolicy.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 
+import net.schmizz.sshj.SSHClient;
+
 /**
  * 
  * @author GS-0681
  */
 public class TdaasUtil {
 
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(TdaasUtil.class);
 
 	public static MountImageResponse mapImageAttributesToMountImageResponse(
@@ -178,11 +176,9 @@ public class TdaasUtil {
 			throws JAXBException {
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = new com.intel.mtwilson.trustpolicy.xml.TrustPolicy();
 		Director director = new Director();
-		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
-				: DirectorUtil.getDirectorId());
-		if(ShiroUtil.subjectUsername() != null){
-			director.setCustomerId(ShiroUtil.subjectUsername());
-		}
+/*		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
+				: DirectorUtil.getDirectorId());*/
+		director.setCustomerId(ShiroUtil.subjectUsername());
 		Image image = new Image();
 		image.setImageId(createTrustPolicyMetaDataRequest.getImage_id());
 		Whitelist whitelist = new Whitelist();
@@ -191,12 +187,8 @@ public class TdaasUtil {
 						.getLaunch_control_policy()));
 		policy.setDirector(director);
 		policy.setImage(image);
-		if (createTrustPolicyMetaDataRequest.deployment_type
-				.equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
-			whitelist.setDigestAlg(DigestAlgorithm.SHA_1);
-		} else {
-			whitelist.setDigestAlg(DigestAlgorithm.SHA_256);
-		}
+		whitelist.setDigestAlg(ImageDeploymentHashTypeCache
+				.getDigestAlgorithmForDeploymentType(createTrustPolicyMetaDataRequest.deployment_type));
 		policy.setWhitelist(whitelist);
 		policy = setEncryption(createTrustPolicyMetaDataRequest, policy);
 
@@ -484,15 +476,15 @@ public class TdaasUtil {
 		 * c.add(Calendar.DATE, -3); Date currentDate = new Date();
 		 */
 		ImageAttributes img = new ImageAttributes();
-		img.setCreated_date(new Date());
-		img.setEdited_date(new Date());
+		img.setCreated_date(Calendar.getInstance());
+		img.setEdited_date(Calendar.getInstance());
 		img.setDeleted(false);
 		if (StringUtils.isNotBlank(id)) {
 			img.setId(id);
 		}
 		img.setImage_deployments("BareMetal");
 		img.setImage_format(null);
-		img.setImage_size(null);
+		img.setImage_size(0L);
 		img.setLocation(null);
 		img.setImage_name(ip);
 		img.setSent(null);
@@ -746,55 +738,11 @@ public class TdaasUtil {
 		return result;
 	}
 
-	public static String computeHash(MessageDigest md, File file)
-			throws IOException {
-		if (!file.exists()) {
-			return null;
-		}
-
-		md.reset();
-		byte[] bytes = new byte[2048];
-		int numBytes;
-		FileInputStream is;
-		try {
-			is = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			log.error("error :: input file doesn't exists", e);
-			throw new IOException("input file doesn't exists", e);
-		}
-
-		try {
-			while ((numBytes = is.read(bytes)) != -1) {
-				md.update(bytes, 0, numBytes);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			log.error("error in reading from file", e);
-
-			throw new IOException("error in reading from file", e);
-		} finally {
-			try {
-				is.close();
-			} catch (IOException ioe) {
-				// TODO Auto-generated catch block
-				log.error("error in closing stream", ioe);
-				throw new IOException("error in closing stream", ioe);
-			}
-		}
-		byte[] digest = md.digest();
-		String result = new String(Hex.encodeHex(digest));
-
-		return result;
-
-	}
-
 	public static SshSettingResponse convertSshInfoToResponse(SshSettingInfo info) {
 		SshSettingResponse sshResponse = new SshSettingResponse();
 		sshResponse.setImage_id(info.getImage().getId());
 		sshResponse.setImage_name(info.getImage().getImage_name());
 		sshResponse.setIp_address(info.getIpAddress());
-		///sshResponse.setKey(info.getK);
 		sshResponse.setUsername(info.getUsername());
 		return sshResponse;
 	}
@@ -883,5 +831,22 @@ public class TdaasUtil {
 
 		return tpr;
 		
+	}
+	
+	public static String getVersionedName(String name) {
+		String REGEX = ".*[-]{1}[v]{1}[0-9]*$";
+		Pattern p = Pattern.compile(REGEX);
+		Matcher m = p.matcher(name);
+		StringBuffer sb = new StringBuffer(name);
+		if (m.find()) {
+			int last = name.lastIndexOf("-v");
+			String substring = name.substring(last + 2);
+			int parseInt = Integer.parseInt(substring);
+			parseInt++;
+			sb.replace(last + 2, name.length(), parseInt + "");
+		} else {
+			sb.append("-v1");
+		}
+		return sb.toString();
 	}
 }

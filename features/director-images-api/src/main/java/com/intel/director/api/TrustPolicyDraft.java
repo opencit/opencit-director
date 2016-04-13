@@ -1,6 +1,6 @@
 package com.intel.director.api;
 
-import java.util.Date;
+import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 public class TrustPolicyDraft extends AuditFields {
@@ -38,8 +38,8 @@ public class TrustPolicyDraft extends AuditFields {
         super();
     }
 
-    public TrustPolicyDraft(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date, String id,
+    public TrustPolicyDraft(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date, String id,
             String trust_policy_draft, String name,
             ImageAttributes imgAttributes) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);
@@ -49,8 +49,8 @@ public class TrustPolicyDraft extends AuditFields {
         this.imgAttributes = imgAttributes;
     }
 
-    public TrustPolicyDraft(String created_by_user_id, Date created_date,
-            String edited_by_user_id, Date edited_date,
+    public TrustPolicyDraft(String created_by_user_id, Calendar created_date,
+            String edited_by_user_id, Calendar edited_date,
             String trust_policy_draft, String name,
             ImageAttributes imgAttributes) {
         super(created_by_user_id, created_date, edited_by_user_id, edited_date);

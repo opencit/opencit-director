@@ -1,14 +1,44 @@
 package com.intel.director.api;
 
 public class ImageActionTask {
-	private String status,storename,task_name,location,uri,executionDetails,error;
+	private String status, task_name, location, uri,
+			executionDetails, message, storeId;
 
-	public String getError() {
-		return error;
+	
+	
+	public ImageActionTask(String status, String storeId, String task_name) {
+		super();
+		this.status = status;
+		this.task_name = task_name;
+		this.storeId = storeId;
+	}
+	
+	public ImageActionTask(String status,  String task_name) {
+		super();
+		this.status = status;
+		this.task_name = task_name;
+	}
+	
+	public ImageActionTask(){
+		
 	}
 
-	public void setError(String error) {
-		this.error = error;
+	public String getStoreId() {
+		return storeId;
+	}
+
+	public void setStoreId(String storeId) {
+		this.storeId = storeId;
+	}
+
+
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public String getStatus() {
@@ -17,14 +47,6 @@ public class ImageActionTask {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public String getStorename() {
-		return storename;
-	}
-
-	public void setStorename(String storename) {
-		this.storename = storename;
 	}
 
 	public String getTask_name() {
@@ -61,12 +83,10 @@ public class ImageActionTask {
 
 	@Override
 	public String toString() {
-		return "ImageActionActions [status=" + status + ", storename="
-				+ storename + ", task_name=" + task_name + ", location="
+		return "ImageActionActions [status=" + status + ", storeId="
+				+ storeId + ", task_name=" + task_name + ", location="
 				+ location + ", uri=" + uri + ", executionDetails="
 				+ executionDetails + "]";
 	}
-	
-	
-	
+
 }

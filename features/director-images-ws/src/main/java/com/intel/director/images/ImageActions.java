@@ -5,6 +5,8 @@
  */
 package com.intel.director.images;
 
+import java.util.Calendar;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,8 +25,10 @@ import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
+import com.intel.director.api.ListImageActionResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ActionServiceBuilder;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageActionImpl;
@@ -41,82 +45,82 @@ import com.intel.mtwilson.launcher.ws.ext.V2;
 @Path("/")
 public class ImageActions {
 
-	ImageActionService actionService = new ImageActionImpl();
 	ImageService imageService = new ImageServiceImpl();
+	ImageActionService actionService = new ImageActionImpl();
+
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageActions.class);
-
+	
 	/**
-	  This method will fetch an image-action based on actionId on which
-	  actions are performed, list of actions to be performed, etc.
-	  if actionId do not exist it give 404 Not Found.
-	  
-	  action_count and action_completed are provided for convenience. These two
-	  attributes are guaranteed to have the right data corresponding to the
-	  actions collection. action size - is the data uploaded, action_size_max 
-	  - total size of the image uploaded
-	  
-	  The tasks in "action" attribute are processed sequentially. The current
-	  task holds the name of the task in the "action" array that is currently
-	  being processed.
-	  
+	 * This method will fetch an image-action based on actionId on which actions
+	 * are performed, list of actions to be performed, etc. if actionId do not
+	 * exist it give 404 Not Found.
+	 * 
+	 * action_count and action_completed are provided for convenience. These two
+	 * attributes are guaranteed to have the right data corresponding to the
+	 * actions collection. action size - is the data uploaded, action_size_max -
+	 * total size of the image uploaded
+	 * 
+	 * The tasks in "action" attribute are processed sequentially. The current
+	 * task holds the name of the task in the "action" array that is currently
+	 * being processed.
+	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
-	  https://{IP/HOST_NAME}/v1/image-actions/<action_id>
-	  Input: PathParam : action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
-	  Output: {
-	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	  "action_count": 2,
-	  "action_completed": 2,
-	  "action_size": 66570,
-	  "action_size_max": 66570,
-	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	   "status": "Complete", "storename": "Glance", "task_name": "Upload Tar" }],
-	  "current_task_status": "Complete",
-	  "current_task_name": "Upload Tar" }
-	  
-	   {
-	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	  "action_count": 2,
-	  "action_completed": 1,
-	  "action_size": 66570,
-	  "action_size_max": 66570,
-	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	   "status": "In Progress", "storename": "Glance", "task_name": "Upload Tar" }],
-	  "current_task_status": "Complete",
-	  "current_task_name": "Create Tar" }
-	  
-	  
-	  In case of error creating tar : 
-	  {
-	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	  "action_count": 2,
-	  "action_completed": 0,
-	  "action_size": 66570,
-	  "action_size_max": 66570,
-	  "action": [ { "status": "Error","task_name": "Create Tar","error":"Error Creating tar"},
-	  "status": "Incomplete", "storename": "Glance", "task_name": "Upload Tar" }],
-	  "current_task_status": "Error : Error Creating tar ",
-	  "current_task_name": "Create Tar" }
-	  
-	  In case of error uploading tar : 
-	  {
-	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	  "action_count": 2,
-	  "action_completed": 1,
-	  "action_size": 66570,
-	  "action_size_max": 66570,
-	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	  "status": "Error", "storename": "Glance", "task_name": "Upload Tar","error":"Error Uploading tar"}],
-	  "current_task_status": "Error : Error Uploading tar ",
-	  "current_task_name": "Upload Tar" }
-	  
-	  </pre>
+	 * 	  https://{IP/HOST_NAME}/v1/image-actions/<action_id>
+	 * 	  Input: PathParam : action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
+	 * 	  Output: {
+	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * 	  "action_count": 2,
+	 * 	  "action_completed": 2,
+	 * 	  "action_size": 66570,
+	 * 	  "action_size_max": 66570,
+	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
+	 * 	   "status": "Complete", "storename": "Glance", "task_name": "Upload Tar" }],
+	 * 	  "current_task_status": "Complete",
+	 * 	  "current_task_name": "Upload Tar" }
+	 * 	  
+	 * 	   {
+	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * 	  "action_count": 2,
+	 * 	  "action_completed": 1,
+	 * 	  "action_size": 66570,
+	 * 	  "action_size_max": 66570,
+	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
+	 * 	   "status": "In Progress", "storename": "Glance", "task_name": "Upload Tar" }],
+	 * 	  "current_task_status": "Complete",
+	 * 	  "current_task_name": "Create Tar" }
+	 * 	  
+	 * 	  
+	 * 	  In case of error creating tar : 
+	 * 	  {
+	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * 	  "action_count": 2,
+	 * 	  "action_completed": 0,
+	 * 	  "action_size": 66570,
+	 * 	  "action_size_max": 66570,
+	 * 	  "action": [ { "status": "Error","task_name": "Create Tar","error":"Error Creating tar"},
+	 * 	  "status": "Incomplete", "storename": "Glance", "task_name": "Upload Tar" }],
+	 * 	  "current_task_status": "Error : Error Creating tar ",
+	 * 	  "current_task_name": "Create Tar" }
+	 * 	  
+	 * 	  In case of error uploading tar : 
+	 * 	  {
+	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
+	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
+	 * 	  "action_count": 2,
+	 * 	  "action_completed": 1,
+	 * 	  "action_size": 66570,
+	 * 	  "action_size_max": 66570,
+	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
+	 * 	  "status": "Error", "storename": "Glance", "task_name": "Upload Tar","error":"Error Uploading tar"}],
+	 * 	  "current_task_status": "Error : Error Uploading tar ",
+	 * 	  "current_task_name": "Upload Tar" }
+	 * </pre>
 	 * 
 	 * @param actionId
 	 * @return ImageActionResponse
@@ -150,44 +154,35 @@ public class ImageActions {
 
 	/**
 	 * This method will create an image-action. Data required by this method is
-	 * image_id and list of task and other parameter associated with it(Ex.
-	 * store_name in case of Upload Tar task). Output contains actionId(id),image_id, actions etc.
-	 * 
-	 * 
+	 * image_id and artifacts and store id user want to upload. Output contains
+	 * actionId(id),image_id, actions etc.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-actions
-	 * Input: { "image_id":"08EB37D7-2678-495D-B485-59233EB51996",
-	 * "actions":[ {"task_name":"Create Tar"},
-	 * {"task_name":"Upload Tar","storename":"Glance"}]
-	 * }
-	 * Output:
-	 * {
-	 * 	"id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	"image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	"action_count": 2,
-	 * 	"action_completed": 2,
-	 * 	"action_size": 66570,
-	 * 	"action_size_max": 66570,
-	 * 	"actions": [ 
-	 * 		{
-	 * 			"status": "Incomplete",
-	 * 			"task_name": "Create Tar"
-	 * 		}, {
-	 * 			"status": "Incomplete", 
-	 * 			"storename": "Glance", 
-	 * 			"task_name": "Upload Tar" 
-	 * 		}],
-	 * 	"current_task_status": "Incomplete",
-	 * 	"current_task_name": "Create Tar" 
-	 * }
 	 * 
+	 * Input: {"artifact_store_list":[{"artifact_name":"Tarball","image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB"}],
+	 * "image_id":"64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF"}
+	 * 
+	 * Output:
+	 * {"id":"30869EF3-9809-48F6-AC36-21994318313F",
+	 * "image_id":"64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF",
+	 * "action_count":3,
+	 * "action_completed":0,
+	 * "action_size":0,
+	 * "action_size_max":0,
+	 * "actions":[{"status":"Incomplete","task_name":"Recreate Policy"},{"status":"Incomplete","task_name":"Create Tar"},
+	 * 			{"status":"Incomplete","task_name":"Upload Tar","store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB"}],
+	 * "current_task_status":"Incomplete",
+	 * "current_task_name":"Recreate Policy",
+	 * "created_date_time":1458630019513,
+	 * "deleted":false
+	 * }
 	 * 
 	 * </pre>
 	 * 
-	 * @param imageActionRequest 
+	 * @param imageActionRequest
 	 * @return ImageActionResponse containing action_id.
 	 */
 
@@ -199,14 +194,14 @@ public class ImageActions {
 			ImageActionRequest imageActionRequest) {
 		ImageActionResponse imageActionResponse = new ImageActionResponse();
 		ImageActionObject imageActionObject;
-		String error=imageActionRequest.vaidate();
+		String error=imageActionRequest.validate();
 		if(!StringUtils.isBlank(error)){
 			imageActionResponse.error=error;
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(imageActionResponse).build();
 		}
 		
-		ImageInfo fetchImageById = null;
+		ImageInfo fetchImageById = null;;
 		try {
 			fetchImageById = imageService
 					.fetchImageById(imageActionRequest.image_id);
@@ -222,6 +217,9 @@ public class ImageActions {
 		}
 		
 		try {
+			
+			actionService = ActionServiceBuilder.build(imageActionRequest
+					.getImage_id());
 			imageActionObject = actionService
 					.createImageAction(imageActionRequest);
 		} catch (DirectorException e) {
@@ -240,6 +238,7 @@ public class ImageActions {
 				.getCurrent_task_name());
 		imageActionResponse.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
+		imageActionResponse.setCreatedDateTime(Calendar.getInstance());
 		return Response.ok(imageActionResponse).build();
 	}
 
@@ -292,6 +291,48 @@ public class ImageActions {
 			return Response.ok(imageActionResponse).build();
 		}
 		return Response.ok(imageActionResponse).build();
+	}
+	
+	
+	/**
+	 * This method will fetch image upload history of given imageId.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall <pre>
+	 * 	  https://{IP/HOST_NAME}/v1/image-actions/history/64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF
+	 * 	  Input: PathParam : imageId = 64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF
+	 * 	  Output:
+	 * 	{"image_action_history_list":[
+	 * 		{"store_names":"Glance-36","execution_status":"Complete","id":"30869EF3-9809-48F6-AC36-21994318313F","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 22 12:30:46"},
+	 * 		{"store_names":"Glance-36","execution_status":"Complete","id":"689AF185-2232-4E61-A1ED-2435FF7DF337","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 18 15:34:36"}]
+	 * 	}
+	 * </pre>
+	 * 
+	 * @param imageId
+	 * @return Response containing list of image-action-history for given imageId
+	 */
+	@Path("image-actions/history/{imageId: [0-9a-zA-Z_-]+}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	public Response getImageActionHistory(@PathParam("imageId") String imageId) {
+		ListImageActionResponse imageActionResponseList = new ListImageActionResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
+			imageActionResponseList.error = "ImageId is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(imageActionResponseList).build();
+		}
+
+		try {
+			imageActionResponseList.setImageActionResponseList(actionService
+					.getImageActionHistory(imageId));
+
+		} catch (Exception e) {
+			log.error("getImageActionHistory failed",e);
+			return Response.status(500).build();
+		}
+		return Response.ok(imageActionResponseList).build();
+
 	}
 
 }

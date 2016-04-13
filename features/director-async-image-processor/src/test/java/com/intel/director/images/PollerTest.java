@@ -25,17 +25,17 @@ public class PollerTest {
         configuration.set(Constants.GLANCE_IMAGE_STORE_PASSWORD,"intelmh");
         configuration.set(Constants.GLANCE_TENANT_NAME,"admin");
         
-        GlanceImageStoreManager glanceImageStoreManager = new GlanceImageStoreManager(configuration);
+        GlanceImageStoreManager glanceImageStoreManager = new GlanceImageStoreManager();
         /*ImageStoreRequest imageStoreRequest = new ImageStoreRequest();
         imageStoreRequest.disk_format = "qcow2";*/
         Map<String, String> imageProperties = new HashMap<>();
         imageProperties.put(com.intel.director.constants.Constants.NAME, "test_upload");
         imageProperties.put(com.intel.director.constants.Constants.DISK_FORMAT, "qcow2");
         imageProperties.put(com.intel.director.constants.Constants.CONTAINER_FORMAT,"bare");
-        imageProperties.put(com.intel.director.constants.Constants.IS_PUBLIC, "true");
+    //    imageProperties.put(com.intel.director.constants.Constants.VISIBILITY, "true");
         File file = new File("C:/MysteryHill/DirectorAll/Docs/vm_launch.txt");
-        String id=glanceImageStoreManager.upload(file ,imageProperties);
-        ImageStoreUploadResponse resp=glanceImageStoreManager.fetchDetails(null, id);
+        String id=glanceImageStoreManager.upload();
+        ImageStoreUploadResponse resp=glanceImageStoreManager.fetchDetails();
         System.out.println("ImageStoreUploadResponse::"+resp);
         
         

@@ -3,177 +3,148 @@
 <head>
 
 
-<title>Create Policy</title>
-<meta name="author" directoryTree="aakash">
+    <title>Create Policy</title>
+    <meta name="author" directoryTree="aakash">
 </head>
+
 <body>
-	<div id="select_directories_page" class="row">
-		<div class="col-md-2"></div>
-		<div class="col-md-8" style="margin-top: 10px;">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h1>Select Directories Page&nbsp;<a href='#' ><span class='glyphicon glyphicon-question-sign'  title='Help' onclick='show_dialog_content_trust_policy_tab("Select Directories help","All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated. All the content for Select Directories help will be shown here. This content will be soon updated.")'></span></a></h1>
-					<span id="saveMessage"></span>
-				</div>
-				<div class="panel-body"
-					style="padding-top: 0px; padding-bottom: 0px;">
+    <div id="select_directories_page" class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8" style="margin-top: 10px;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1>Select Directories Page&nbsp;<a href='#' ><span class='glyphicon glyphicon-question-sign'  title='Help' onclick='show_dialog_content_trust_policy_tab("Select Directories help","All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated.All the content for Select Directories help will be shown here. This content will be soon updated. All the content for Select Directories help will be shown here. This content will be soon updated.")'></span></a></h1>
+                    <span id="saveMessage"></span>
+                </div>
+                <div class="panel-body" style="padding-top: 0px; padding-bottom: 0px;">
 
 
 
-					<div class="row">
-						<div class="col-md-12" id="directoryTree" class=""
-							style="height: 500px; padding-left: 0px; padding-right: 0px; float: left;">
+                    <div class="row">
+                        <div class="col-md-12" id="directoryTree" class="" style="height: 500px; padding-left: 0px; padding-right: 0px; float: left;">
 
-							<!-- <div class="col-md-12">
+                            <!-- <div class="col-md-12">
 								<button class="btn-primary btn-large btn" id="collapse_button">Collapse
 									regexPanel</button>
 							</div> -->
 
-							<div data-bind="with: SelectDirectoriesViewModel"
-								class="col-md-12" style="padding-left: 0px; padding-right: 0px;">
-								<form class="form-horizontal" role="form"
-									data-bind="submit: selectDirectoriesSubmit">
-									<div data-bind="with: selectDirectoriesMetaData">
-										<div id="jstree2" class="divScroll-2" style="overflow: auto;"></div>
+                            <div data-bind="with: SelectDirectoriesViewModel" class="col-md-12" style="padding-left: 0px; padding-right: 0px;">
+                                <form class="form-horizontal" role="form" data-bind="submit: selectDirectoriesSubmit">
+                                    <div data-bind="with: selectDirectoriesMetaData">
+                                        <div id="jstree2" class="divScroll-2" style="overflow: auto;"></div>
 
-										<div class="col-md-offset-1 col-md-1">
-											<button type="button" onclick="backToFirstPage()"
-												class="btn btn-primary">Previous</button>
-										</div>
+                                        <div class="col-md-offset-1 col-md-1">
+                                            <button type="button" onclick="backToFirstPage()" class="btn btn-primary">Previous</button>
+                                        </div>
 
 
-										<div class="col-md-offset-6 col-md-1 " id="dirNextButton">
-											<button type="submit" id="createVmPolicyDirNext" class="btn btn-primary gotonext">Next</button>
-										</div>
-										<!-- Modal -->
-										<div class="modal fade" id="error_modal_vm_2" role="dialog">
-											<div class="modal-dialog">
+                                        <div class="col-md-offset-6 col-md-1 " id="dirNextButton">
+                                            <button type="submit" id="createVmPolicyDirNext" class="btn btn-primary gotonext">Next</button>
+                                        </div>
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="error_modal_vm_2" role="dialog">
+                                            <div class="modal-dialog">
 
-												<!-- Modal content-->
-												<div class="modal-content">
-													<div class="modal-header">
-														<button type="button" class="close" data-dismiss="modal">&times;</button>
-														<h4 class="modal-title">Error In Creating Policy</h4>
-													</div>
+                                                <!-- Modal content-->
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                        <h4 class="modal-title" id="error_modal_vm_2_header">Error In Creating Policy</h4>
+                                                    </div>
 
-													<div class="modal-footer">
-														<button type="button" class="btn btn-default"
-															data-dismiss="modal" onclick="backToVmImagesPage()">Close</button>
-													</div>
-												</div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="backToVmImagesPage()">Close</button>
+                                                    </div>
+                                                </div>
 
-											</div>
-										</div>
+                                            </div>
+                                        </div>
 
-									</div>
-								</form>
+                                    </div>
+                                </form>
 
-							</div>
+                            </div>
 
 
-						</div>
-						<div class="hidden" id="regexPanel"
-							data-bind="with: applyRegExViewModel"
-							style="height: 500px; float: left; padding-left: 0px; padding-right: 0px; border-left: 1px solid #ddd">
+                        </div>
+                        <div class="hidden" id="regexPanel" data-bind="with: applyRegExViewModel" style="height: 500px; float: left; padding-left: 0px; padding-right: 0px; border-left: 1px solid #ddd">
 
 
 
 
-							<form class="form-horizontal" name="form-horizontal" role="form"
-								data-bind="submit: applyRegEx">
-								<input type="hidden" id="sel_dir" />
+                            <form class="form-horizontal" name="form-horizontal" role="form" data-bind="submit: applyRegEx">
+                                <input type="hidden" id="sel_dir" />
 
-								<div>
-									<div class="panel panel-default">
+                                <div>
+                                    <div class="panel panel-default">
 
-										<div class="panel-heading"
-											style="height: 40px; background: #0071c5;">
-											<h4
-												style="color: #ddd; font-weight: bold; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">
+                                        <div class="panel-heading" style="height: 40px; background: #0071c5;">
+                                            <h4 style="color: #ddd; font-weight: bold; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; margin-top: 0px;">
 												<center>Apply RegEx</center>
 											</h4>
-										</div>
-										<div class="panel body" style="height: 435px;">
-											<div data-bind="with: applyRegexMetaData">
-												<input type="hidden" name="dir_path" value="Norway">
-												<!-- <div
+                                        </div>
+                                        <div class="panel body" style="height: 435px;">
+                                            <div data-bind="with: applyRegexMetaData">
+                                                <input type="hidden" name="dir_path" value="Norway">
+                                                <!-- <div
 								style="height: 154px; float: left; padding-left: 0px; padding-right: 0px; padding-top: 25px;"> -->
-												<div class="form-group">
-													<label class="control-label col-md-6"
-														style="padding-left: 4px; padding-right: 17px; padding-top: 10px;"
-														for="create_policy_regex_filename">Folder Path:</label>
-													<div id="folderPathDiv" class="col-md-5"
-														style="padding-left: 0px; padding-right: 0px; padding-top: 10px;">
-													</div>
-												</div>
-												<div class="form-group">
-													<label class="control-label col-md-6" id=""
-														style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-														for="create_policy_regex_include">Include Filter:</label>
-													<div class="col-md-5"
-														style="padding-left: 0px; padding-right: 0px;">
-														<input type="text" class="form-control"
-															id="create_policy_regex_include"
-															placeholder="Enter RegEx" />
-													</div>
-												</div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 10px;" for="create_policy_regex_filename">Folder Path:</label>
+                                                    <div id="folderPathDiv" class="col-md-5" style="padding-left: 0px; padding-right: 0px; padding-top: 10px;">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" id="" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_include">Include Filter:</label>
+                                                    <div class="col-md-5" style="padding-left: 0px; padding-right: 0px;">
+                                                        <input type="text" class="form-control" id="create_policy_regex_include" placeholder="Enter RegEx" />
+                                                    </div>
+                                                </div>
 
 
-												<div class="form-group">
-													<label class="control-label col-md-6"
-														style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-														for="create_policy_regex_exclude">Exclude Filter:</label>
-													<div class="col-md-5"
-														style="padding-left: 0px; padding-right: 0px;">
-														<input type="text" class="form-control"
-															id="create_policy_regex_exclude"
-															placeholder="Enter RegEx" />
-													</div>
-												</div>
-												<div class="form-group">
-													<label class="control-label col-md-6"
-														style="padding-left: 4px; padding-right: 17px; padding-top: 6px;"
-														for="create_policy_regex_includeRecursive">Recursive:</label>
-													<div class="col-md-5">
-														<div class="checkbox">
-															&nbsp;&nbsp;<input type="checkbox"
-																id="create_policy_regex_includeRecursive"
-																name="create_policy_regex_includeRecursive" />
-														</div>
-													</div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_exclude">Exclude Filter:</label>
+                                                    <div class="col-md-5" style="padding-left: 0px; padding-right: 0px;">
+                                                        <input type="text" class="form-control" id="create_policy_regex_exclude" placeholder="Enter RegEx" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_includeRecursive">Recursive:</label>
+                                                    <div class="col-md-5">
+                                                        <div class="checkbox">
+                                                            &nbsp;&nbsp;
+                                                            <input type="checkbox" id="create_policy_regex_includeRecursive" name="create_policy_regex_includeRecursive" />
+                                                        </div>
+                                                    </div>
 
-												</div>
-												<div class="form-group">
-													<label style="padding-left: 100px;"
-														for="regex_error_vm"><div id="regex_error_vm"></div></label>
-												</div>
-											</div>
-											<div class="col-md-offset-3 col-md-3"
-												style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
-												<button type="submit" id="applyRegexVMBtn" class="btn btn-primary">Apply</button>
-											</div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label style="padding-left: 100px;" for="regex_error_vm">
+                                                        <div id="regex_error_vm"></div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-offset-3 col-md-3" style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
+                                                <button id="applyRegexVMBtn" type="submit" class="btn btn-primary">Apply</button>
+                                            </div>
 
-											<div class=" col-md-3"
-												style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
-												<button id="resetRegexVMBtn" class="btn btn-primary"
-													data-bind="click: resetRegEx">Reset</button>
-											</div>
+                                            <div class=" col-md-3" style="padding-left: 0px; padding-right: 0px; padding-top: 8px;">
+                                                <button id="resetRegexVMBtn" class="btn btn-primary" data-bind="click: resetRegEx">Reset</button>
+                                            </div>
 
-										</div>
-									</div>
-								</div>
-							</form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
 
 
-						</div>
+                        </div>
 
 
-					</div>
+                    </div>
 
-				</div>
-				<script
-					src="/v1/html5/public/director-html5/js/create_policy_select_directories.js">
-					
-				</script>
+                </div>
+                <script src="/v1/html5/public/director-html5/js/create_policy_select_directories.js">
+                </script>
 </body>
+
 </html>
