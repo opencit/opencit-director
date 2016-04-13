@@ -40,22 +40,22 @@
 		<!-- Director -->
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-trust-policy</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-persistence</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-image-store</artifactId>
 		</dependency>
 		<!-- MTW -->
@@ -63,7 +63,7 @@
 		<dependency>
 			<artifactId>mtwilson-util-xml</artifactId>
 			<groupId>com.intel.mtwilson.util</groupId>
-			<version>0.2-SNAPSHOT</version>
+            <version>${project.version}</version>
 		</dependency>
 
 		<!-- Others -->
