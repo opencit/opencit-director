@@ -212,7 +212,7 @@
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-crypto</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <version>0.4-SNAPSHOT</version>
                 <type>jar</type>
             </dependency>
             <dependency>
@@ -256,7 +256,7 @@
             <dependency>
                 <groupId>com.intel.mtwilson.util</groupId>
                 <artifactId>mtwilson-util-validation</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <version>0.4-SNAPSHOT</version>
             </dependency>
 
 
