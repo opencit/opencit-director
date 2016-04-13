@@ -22,9 +22,9 @@ function CreateDockerImageViewModel() {
 
         self.createDockerImageMetaData.launch_control_policy = $('input[name=launch_control_policy]:checked').val();
         self.createDockerImageMetaData.encrypted = false;
-
-        self.createDockerImageMetaData.display_name = current_repository + ":" +$('#display_name').val();
-        current_display_name = $('#display_name').val();
+		current_display_name = current_repository + ":" + $("#display_name").val();
+        self.createDockerImageMetaData.display_name = current_display_name;
+		$('#display_name_last').val(current_display_name);
 		showLoading();
         $.ajax({
             type: "POST",
@@ -34,7 +34,6 @@ function CreateDockerImageViewModel() {
                 'Accept': 'application/json'
             },
             data: ko.toJSON(self.createDockerImageMetaData), // $("#loginForm").serialize(),
-			$('#display_name_last').val(current_display_name);
             success: function(data, status, xhr) {
 
                 if (data.error) {
