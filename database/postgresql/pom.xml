@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>trust-director-postgresql</artifactId>
+  <groupId>com.intel.mtwilson.director.database</groupId>
+  <packaging>jar</packaging>
+  <name>Postgres Support</name>
+  <description>SQL and Java code to support PostgresQL storage in TD</description>
+
+    <parent>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-java</artifactId>
+        <version>3.1-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
+
+</project>

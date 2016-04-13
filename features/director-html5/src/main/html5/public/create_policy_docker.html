@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Create Policy</title>
+
+</head>
+
+<body>
+
+    <div data-bind="with: createDockerImageViewModel">
+        <form class="form-horizontal" role="form" data-bind="submit: createDockerImage">
+            <div data-bind="with: createDockerImageMetaData">
+
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8" style="margin-top: 10px;">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h1>Create Trust Policy</h1>
+                            </div>
+                            <div class="panel-body">
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="display_name">Policy Name:</label>
+									<div class="col-md-4">
+                                        <input type="text" class="form-control" id="display_name_repo" disabled>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="display_name" placeholder="Enter Policy Name">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="hashtype_docker">Hash Type :</label>
+                                    <div class="col-md-4">
+                                        <label id="hashtype_docker" style="margin-top: 8px;">SHA256</label>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="launch_control_policy">Workload Integrity:</label>
+                                    <div id="launch_control_policy" class="col-md-8">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-offset-1 col-md-1">
+                                    <button type="button" id="backToImages_createpolicy1" onclick="backToDockerPageWithountUnmount()" class="btn btn-primary">Back To Images</button>
+                                </div>
+
+
+                                <div class="col-md-offset-6 col-md-1">
+                                    <button type="submit" class="btn btn-primary" id="createDockerPolicyNext">Next</button>
+                                </div>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="error_modal_docker_1" role="dialog">
+                                    <div class="modal-dialog">
+
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title"><div id="error_modal_body_docker_1">Error In Creating Policy</div></h4>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <div id="for_mount_docker">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="backToDockerPageWithountUnmount()">Okay</button>
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="backToDockerPage()">Force Unmount</button>
+                                                </div>
+                                                <div id="default_docker">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+
+
+
+
+
+    <script src="/v1/html5/public/director-html5/js/create_policy_docker.js"></script>
+
+</body>
+
+</html>

@@ -2,7 +2,7 @@ package com.intel.mtwilson.director.data;
 
 
 
-import java.sql.Date;
+import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
@@ -44,18 +46,38 @@ public class MwImageUpload {
 		private String status;
 		
 		@Column(name = "DATE")
-		private Date date;
+		@Temporal(TemporalType.TIMESTAMP)
+		private Calendar date;
 		
-		@Column(name = "IS_TARBALL_UPLOAD")
-		private boolean isTarballUpload;
+		@Column(name = "UPLOAD_VARIABLES_MD5", length = 32)
+		private String uploadVariablesMd5;
 		
+	  	@Column(name = "POLICY_UPLOAD_ID", length = 36)
+		private String policyUploadId;
+	
+	  	@ManyToOne(optional = false)
+		@JoinColumn(name = "STORE_ID", referencedColumnName = "id")
+		private MwImageStore store;
+	  	
 		@Column(name = "CONTENT_LENGTH")
 		private Long contentlength;
 		
 		@Column(name = "SENT")
 		private Long sent;
 
-
+		@Column(name = "STORE_ARTIFACT_ID", length = 36)
+		private String storeArtifactId;
+		
+		@Column(name = "STORE_ARTIFACT_NAME")
+		private String storeArtifactName;
+		
+		@Column(name = "ACTION_ID", length = 36)
+		private String actionId;
+		
+		@Column(name = "IS_DELETED")
+		private boolean isDeleted; 
+		
+		
 		public MwImageUpload(){
 			super();
 		}
@@ -78,7 +100,47 @@ public class MwImageUpload {
 		}
 
 
-	
+		
+
+		public String getActionId() {
+			return actionId;
+		}
+
+		public void setActionId(String actionId) {
+			this.actionId = actionId;
+		}
+
+		public String getStoreArtifactName() {
+			return storeArtifactName;
+		}
+
+		public void setStoreArtifactName(String storeArtifactName) {
+			this.storeArtifactName = storeArtifactName;
+		}
+
+		public MwImageStore getStore() {
+			return store;
+		}
+
+		public void setStore(MwImageStore store) {
+			this.store = store;
+		}
+
+		public String getUploadVariablesMd5() {
+			return uploadVariablesMd5;
+		}
+
+		public void setUploadVariablesMd5(String uploadVariablesMd5) {
+			this.uploadVariablesMd5 = uploadVariablesMd5;
+		}
+
+		public String getPolicyUploadId() {
+			return policyUploadId;
+		}
+
+		public void setPolicyUploadId(String policyUploadId) {
+			this.policyUploadId = policyUploadId;
+		}
 
 		public Character[] getImageUri() {
 			return imageUri;
@@ -112,22 +174,15 @@ public class MwImageUpload {
 			this.status = status;
 		}
 
-		public Date getDate() {
+		public Calendar getDate() {
 			return date;
 		}
 
-		public void setDate(Date date) {
+		public void setDate(Calendar date) {
 			this.date = date;
 		}
 
-		public boolean isTarballUpload() {
-			return isTarballUpload;
-		}
-
-		public void setTarballUpload(boolean isTarballUpload) {
-			this.isTarballUpload = isTarballUpload;
-		}
-
+	
 		public Long getContentlength() {
 			return contentlength;
 		}
@@ -142,6 +197,22 @@ public class MwImageUpload {
 
 		public void setSent(Long sent) {
 			this.sent = sent;
+		}
+
+		public String getStoreArtifactId() {
+			return storeArtifactId;
+		}
+
+		public void setStoreArtifactId(String storeArtifactId) {
+			this.storeArtifactId = storeArtifactId;
+		}
+
+		public boolean isDeleted() {
+			return isDeleted;
+		}
+
+		public void setDeleted(boolean isDeleted) {
+			this.isDeleted = isDeleted;
 		}
 
 		

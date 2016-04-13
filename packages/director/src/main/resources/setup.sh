@@ -35,6 +35,7 @@ export DIRECTOR_ENV=$DIRECTOR_HOME/env
 # load application environment variables if already defined
 
 
+
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
   for env_file in $DIRECTOR_ENV_FILES; do
@@ -132,6 +133,7 @@ export DIRECTOR_ENV=$DIRECTOR_HOME/env
 director_backup_configuration() {
   if [ -n "$DIRECTOR_CONFIGURATION" ] && [ -d "$DIRECTOR_CONFIGURATION" ]; then
     datestr=`date +%Y%m%d.%H%M`
+	mkdir -p /var/backup/
     backupdir=/var/backup/director.configuration.$datestr
     cp -r $DIRECTOR_CONFIGURATION $backupdir
   fi
@@ -139,6 +141,7 @@ director_backup_configuration() {
 
 director_backup_repository() {
   if [ -n "$DIRECTOR_REPOSITORY" ] && [ -d "$DIRECTOR_REPOSITORY" ]; then
+	mkdir -p /var/backup/
     datestr=`date +%Y%m%d.%H%M`
     backupdir=/var/backup/director.repository.$datestr
     cp -r $DIRECTOR_REPOSITORY $backupdir
@@ -185,7 +188,19 @@ do
   echo "export $env_file_var_name=$env_file_var_value" >> $DIRECTOR_ENV/director-setup
 done
 
+
+# if properties file exists
 DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"$DIRECTOR_CONFIGURATION/director.properties"}
+
+if [ -e $DIRECTOR_PROPERTIES_FILE ]; then
+	director export-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
+	director export-config --in=/opt/director/configuration/kms.properties --out=/opt/director/configuration/kms.properties
+	director export-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
+fi
+
+
+
+
 touch "$DIRECTOR_PROPERTIES_FILE"
 chown "$DIRECTOR_USERNAME":"$DIRECTOR_USERNAME" "$DIRECTOR_PROPERTIES_FILE"
 chmod 600 "$DIRECTOR_PROPERTIES_FILE"
@@ -224,22 +239,14 @@ load_director_defaults
 #prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
 
 # required TD properties
-prompt_with_default DIRECTOR_ID "Trust Director ID:" "$DIRECTOR_ID"
-update_property_in_file "director.id" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_ID"
-#prompt_with_default VM_WHITELIST_HASH_TYPE "Specify the hash type algorithm to use during VM whitelist:" "$VM_WHITELIST_HASH_TYPE"
-update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$VM_WHITELIST_HASH_TYPE"
+prompt_with_default DIRECTOR_VM_WHITELIST_HASH_TYPE "vm.whitelist.hash.type:" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
+update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
+prompt_with_default DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE "bm.whitelist.hash.type:" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
+update_property_in_file "bm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
+prompt_with_default DIRECTOR_DOCKER_WHITELIST_HASH_TYPE "docker.whitelist.hash.type:" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
+update_property_in_file "docker.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
+
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
-
-
-
-#------------------ Glance properties
-
-update_property_in_file "glance.api.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_API_ENDPOINT"
-update_property_in_file "glance.keystone.public.endpoint" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_KEYSTONE_PUBLIC_ENDPOINT"
-update_property_in_file "glance.image.store.username" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_USERNAME"
-update_property_in_file "glance.image.store.password" "$DIRECTOR_PROPERTIES_FILE" "$GLANCE_IMAGE_STORE_PASSWORD"
-update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
-
 
 
 #-------------------
@@ -247,18 +254,24 @@ update_property_in_file "glance.tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENAN
 
 #required database properties
 
-prompt_with_default DIRECTOR_DB_NAME "Drector db name:" "$DIRECTOR_DB_NAME"
+prompt_with_default DIRECTOR_DB_NAME "Director db name:" "$DIRECTOR_DB_NAME"
 update_property_in_file "director.db.name" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_NAME"
-prompt_with_default DIRECTOR_DB_HOSTNAME "Drector db Hostname:" "$DIRECTOR_DB_HOSTNAME"
+
+prompt_with_default DIRECTOR_DB_HOSTNAME "Director db Hostname:" "$DIRECTOR_DB_HOSTNAME"
 update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_HOSTNAME"
-prompt_with_default DIRECTOR_DB_PORTNUM "Drector db Portno:" "$DIRECTOR_DB_PORTNUM"
+
+prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
+
 prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
+
 prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
 update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
+
 prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
 update_property_in_file "director.db.driver" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_DRIVER"
+
 
 export DIRECTOR_DB_URL="jdbc:postgresql://${DIRECTOR_DB_HOSTNAME}:${DIRECTOR_DB_PORTNUM}/${DIRECTOR_DB_NAME}"
 update_property_in_file "director.db.url" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_URL"
@@ -378,7 +391,9 @@ export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
     if [ -d "/etc/apt" ]; then
       mkdir -p /etc/apt/trusted.gpg.d
       chmod 755 /etc/apt/trusted.gpg.d
-      cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+      if [ -e ACCC4CF8.asc ]; then
+	cp ACCC4CF8.asc "/etc/apt/trusted.gpg.d"
+      fi
       POSTGRES_SERVER_APT_PACKAGES="postgresql-9.3"
       add_postgresql_install_packages "POSTGRES_SERVER"
     fi
@@ -490,36 +505,8 @@ if [ -z "$EXISTING_DIRECTOR_COMMAND" ]; then
 fi
 
 
-
  
-postgres_test_dbtables(){
-is_postgres_tables_available=""
-echo "inside db table created  check method"
-res_tables=`sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -c "SELECT table_name FROM information_schema.tables ORDER BY table_name;"|grep -x "\s*mw_image\s*"`
-echo "result of db table exist ${res_tables}"
-if [ -n "$res_tables" ]; then
-   is_postgres_tables_available="yes"
-   return 0
-	
-fi	
 
-return 1
-
-}
-
-
-postgres_test_dbtables
-if [ -n "$is_postgres_tables_available" ]; then
-    echo_success "Database tables in [${POSTGRES_DATABASE}] already exists"
-    return 0
-  else
-   echo "before running scripts"
-        #cp psql.sql /tmp
-        #chmod 777 /tmp/psql.sql
-        psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -a -f psql.sql 2>/tmp/intel.postgres.err >> $INSTALL_LOG_FILE
-        #sudo -u postgres  psql postgres  -d ${POSTGRES_DATABASE} -a -f  "/tmp/psql.sql">> $INSTALL_LOG_FILE
-	echo "after running scripts"
-fi
 
 
 # register linux startup script
@@ -531,9 +518,7 @@ disable_tcp_timestamps
 if [ -z "$DIRECTOR_NOSETUP" ]; then
   # the master password is required
   if [ -z "$DIRECTOR_PASSWORD" ] && [ ! -f $DIRECTOR_CONFIGURATION/.director_password ]; then
-    touch $DIRECTOR_CONFIGURATION/.director_password
-    chown $DIRECTOR_USERNAME:$DIRECTOR_USERNAME $DIRECTOR_CONFIGURATION/.director_password
-	director generate-password > $DIRECTOR_CONFIGURATION/.director_password
+    director generate-password > $DIRECTOR_CONFIGURATION/.director_password
   fi
 
   director config mtwilson.extensions.fileIncludeFilter.contains "${MTWILSON_EXTENSIONS_FILEINCLUDEFILTER_CONTAINS:-mtwilson,director}" >/dev/null
@@ -549,6 +534,55 @@ if [ -z "$DIRECTOR_NOSETUP" ]; then
   director setup
 fi
 
+
+director setup apply-database-patches
+## Installing Docker
+## already installed needs to be checked not implemented in code
+version_gt() { 
+	test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; 
+}
+
+MINIMUM_KERNEL_VERSION_REQUIRED="3.10"
+CURRENT_KERNEL_VERSION=`uname -r | awk -F. '{print $1 FS $2}'`
+echo "CURRENT_KERNEL_VERSION=$CURRENT_KERNEL_VERSION"
+echo "MINIMUM_KERNEL_VERSION_REQUIRED=$MINIMUM_KERNEL_VERSION_REQUIRED"
+
+if ! version_gt $CURRENT_KERNEL_VERSION $MINIMUM_KERNEL_VERSION_REQUIRED; then
+	echo "Sorry Your kernel doesn't this version of docker..!!"
+	exit 1
+fi
+
+CODENAME=`lsb_release -c | awk --field-separator=: '{print $2}'`
+CODENAME=`echo $CODENAME | tr " " "\n"`
+
+LIST="precise trusty vivid wily"
+
+if echo "$LIST" | grep -q "$CODENAME"; then
+  echo "Valid ubuntu version";
+else
+  echo "Sorry Your Ubuntu Version is not supported";
+  exit 1;
+fi
+
+REPO_ADDRESS=`echo "deb https://apt.dockerproject.org/repo ubuntu-$CODENAME main"`
+
+apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+
+
+echo $REPO_ADDRESS 
+if grep -Fxq "$REPO_ADDRESS" /etc/apt/sources.list.d/docker.list
+then
+	echo "repo already set"
+else
+	echo "updating repo..."
+	echo $REPO_ADDRESS > /etc/apt/sources.list.d/docker.list
+	apt-get update
+fi
+
+echo "Installing docker....!!!!!"
+apt-get -y install docker-engine=1.9.1-0~$CODENAME --force-yes
+## Docker 
+
 # delete the temporary setup environment variables file
 rm -f $DIRECTOR_ENV/director-setup
 
@@ -560,6 +594,7 @@ done
 director import-config --in=/opt/director/configuration/mtwilson.properties --out=/opt/director/configuration/mtwilson.properties
 director import-config --in=/opt/director/configuration/kms.properties --out=/opt/director/configuration/kms.properties
 director import-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
+
 # start the server, unless the NOSETUP variable is defined
 if [ -z "$DIRECTOR_NOSETUP" ]; then director start; fi
 echo_success "Installation complete"

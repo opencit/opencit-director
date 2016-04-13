@@ -13,7 +13,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.TrustPolicyFields;
 import com.intel.director.api.ui.TrustPolicyFilter;
@@ -47,13 +46,9 @@ public class TrustPolicyDao {
 	public MwTrustPolicy createTrustPolicy(MwTrustPolicy mwTrustPolicy) throws DbException {
 		EntityManager em = getEntityManager();
 		try {
-			em.getTransaction().begin();
-			String imageId=mwTrustPolicy.getImage().getId();
-			MwImage mwImage=em.find(MwImage.class,imageId);
-			mwTrustPolicy.setId((new UUID()).toString());
-			mwImage.setTrustPolicy(mwTrustPolicy);
-			em.merge(mwImage);
-			em.getTransaction().commit();
+			  em.getTransaction().begin();
+	            em.persist(mwTrustPolicy);
+	            em.getTransaction().commit();
 		} catch(Exception e){
 			log.error("createTrustPolicy failed",e);
 			throw new DbException("TrustPolicyDao,createTrustPolicy method",e);
@@ -68,13 +63,9 @@ public class TrustPolicyDao {
 	public void updateTrustPolicy(MwTrustPolicy mwTrustPolicy) throws DbException {
 		EntityManager em = getEntityManager();
 		try {
-			em.getTransaction().begin();
-			String imageId=mwTrustPolicy.getImage().getId();
-			MwImage mwImage=em.find(MwImage.class,imageId);
-			mwImage.setTrustPolicy(mwTrustPolicy);
-			em.merge(mwTrustPolicy);
-			em.merge(mwImage);
-			em.getTransaction().commit();
+			  em.getTransaction().begin();
+	          em.merge(mwTrustPolicy);
+	          em.getTransaction().commit();
 		} 
 		catch(Exception e){
 			log.error("updateTrustPolicy failed",e);
@@ -90,11 +81,8 @@ public class TrustPolicyDao {
 		try {
 			
 			em.getTransaction().begin();
-			MwTrustPolicy mwTrustPolicy = em.getReference(MwTrustPolicy.class, trustPolicy.getId());
-			MwImage mwImage=mwTrustPolicy.getImage();
-			mwImage.setTrustPolicy(null);
-			em.merge(mwImage);
-			em.remove(mwTrustPolicy);
+			MwTrustPolicy mwPolicyUpload = em.getReference(MwTrustPolicy.class, trustPolicy.getId());
+            em.remove(mwPolicyUpload);;
 			
 			em.getTransaction().commit();
 		} 
@@ -136,68 +124,116 @@ public class TrustPolicyDao {
 			 
 
 			 
-			if(trustPolicyFilter!=null){	
-			List<Predicate> predicates = new ArrayList<Predicate>();
-			if(trustPolicyFilter.getId()!=null){
-				predicates.add(criteriaBuilder.like(mwTrustPolicy.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.ID)),
-						"%"+trustPolicyFilter.getId()+"%"));
-			}
-			if(trustPolicyFilter.getName()!=null){
-				predicates.add(criteriaBuilder.like(mwTrustPolicy.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.NAME)),
-						"%"+trustPolicyFilter.getName()+"%"));
-			}
-			
-			
-			if(trustPolicyFilter.getImage_name()!=null){
-				predicates.add(criteriaBuilder.like(mwImage.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.IMAGE_NAME)),
-						"%"+trustPolicyFilter.getImage_name()+"%"));
-			}
-			
-			if(trustPolicyFilter.getImage_id()!=null){
-				predicates.add(criteriaBuilder.like(mwImage.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.IMAGE_ID)),
-						"%"+trustPolicyFilter.getImage_id()+"%"));
-			}
-			
-			if(trustPolicyFilter.getImage_format()!=null){
-				predicates.add(criteriaBuilder.like(mwImage.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.IMAGE_FORMAT)),
-						"%"+trustPolicyFilter.getImage_format()+"%"));
-			}
-		
-			
-			if(trustPolicyFilter.getCreated_by_user_id()!=null){
-				predicates.add(criteriaBuilder.like(mwTrustPolicy.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_BY_USER_ID)),
-						trustPolicyFilter.getCreated_by_user_id()));
-			}
-			
-			if(trustPolicyFilter.getEdited_by_user_id()!=null){
-				predicates.add(criteriaBuilder.like(mwTrustPolicy.<String> get(policyAttributestoDataMapper.get(TrustPolicyFields.EDITED_BY_USER_ID)),
-						trustPolicyFilter.getEdited_by_user_id()));
-			}
+			if (trustPolicyFilter != null) {
+				List<Predicate> predicates = new ArrayList<Predicate>();
+				if (trustPolicyFilter.getId() != null) {
+					predicates.add(criteriaBuilder.like(mwTrustPolicy
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.ID)), "%"
+							+ trustPolicyFilter.getId() + "%"));
+				}
+				if (trustPolicyFilter.getName() != null) {
+					predicates.add(criteriaBuilder.like(mwTrustPolicy
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.NAME)), "%"
+							+ trustPolicyFilter.getName() + "%"));
+				}
 
-			if(trustPolicyFilter.getFrom_created_date()!=null){
-				predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getFrom_created_date().getTime()) ));
-			}
-			if(trustPolicyFilter.getTo_created_date()!=null){
-				predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.CREATED_DATE)),new java.sql.Date(trustPolicyFilter.getTo_created_date().getTime()) ));
-			}
-			
-			if(trustPolicyFilter.getFrom_image_created_date()!=null){
-				predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwTrustPolicy.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.IMAGE_CREATION_DATE)),new java.sql.Date(trustPolicyFilter.getFrom_image_created_date().getTime()) ));
-			}
-			if(trustPolicyFilter.getTo_image_created_date()!=null){
-				predicates.add(criteriaBuilder.lessThanOrEqualTo(mwTrustPolicy.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.IMAGE_CREATION_DATE)),new java.sql.Date(trustPolicyFilter.getTo_image_created_date().getTime()) ));
-			}
-			
-			
-			if(trustPolicyFilter.getFrom_edited_date()!=null){
-				predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwTrustPolicy.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.EDITED_DATE)),new java.sql.Date(trustPolicyFilter.getFrom_edited_date().getTime()) ));
-			}
-			if(trustPolicyFilter.getTo_edited_date()!=null){
-				predicates.add(criteriaBuilder.lessThanOrEqualTo(mwTrustPolicy.<java.sql.Date> get(policyAttributestoDataMapper.get(TrustPolicyFields.EDITED_DATE)),new java.sql.Date(trustPolicyFilter.getTo_edited_date().getTime()) ));
-			}
+				if (trustPolicyFilter.getImage_name() != null) {
+					predicates.add(criteriaBuilder.like(mwImage
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.IMAGE_NAME)), "%"
+							+ trustPolicyFilter.getImage_name() + "%"));
+				}
+
+				if (trustPolicyFilter.getImage_id() != null) {
+					predicates.add(criteriaBuilder.like(mwImage
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.IMAGE_ID)), "%"
+							+ trustPolicyFilter.getImage_id() + "%"));
+				}
+
+				if (trustPolicyFilter.getImage_format() != null) {
+					predicates.add(criteriaBuilder.like(mwImage
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.IMAGE_FORMAT)), "%"
+							+ trustPolicyFilter.getImage_format() + "%"));
+				}
+
+				if (trustPolicyFilter.getCreated_by_user_id() != null) {
+					predicates
+							.add(criteriaBuilder.like(
+									mwTrustPolicy
+											.<String> get(policyAttributestoDataMapper
+													.get(TrustPolicyFields.CREATED_BY_USER_ID)),
+									trustPolicyFilter.getCreated_by_user_id()));
+				}
+
+				if (trustPolicyFilter.getEdited_by_user_id() != null) {
+					predicates.add(criteriaBuilder.like(mwTrustPolicy
+							.<String> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.EDITED_BY_USER_ID)),
+							trustPolicyFilter.getEdited_by_user_id()));
+				}
+
+				if (trustPolicyFilter.getFrom_created_date() != null) {
+					predicates.add(criteriaBuilder.greaterThanOrEqualTo(mwImage
+							.<java.sql.Date> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.CREATED_DATE)),
+							new java.sql.Date(trustPolicyFilter
+									.getFrom_created_date().getTime())));
+				}
+				if (trustPolicyFilter.getTo_created_date() != null) {
+					predicates.add(criteriaBuilder.lessThanOrEqualTo(mwImage
+							.<java.sql.Date> get(policyAttributestoDataMapper
+									.get(TrustPolicyFields.CREATED_DATE)),
+							new java.sql.Date(trustPolicyFilter
+									.getTo_created_date().getTime())));
+				}
+
 		
-			
-			cq.where(criteriaBuilder.and(predicates.toArray(new Predicate[] {})));
+				if (trustPolicyFilter.getFrom_image_created_date() != null) {
+					predicates
+							.add(criteriaBuilder.greaterThanOrEqualTo(
+									mwTrustPolicy
+											.<java.sql.Date> get(policyAttributestoDataMapper
+													.get(TrustPolicyFields.IMAGE_CREATION_DATE)),
+									new java.sql.Date(trustPolicyFilter
+											.getFrom_image_created_date()
+											.getTime())));
+				}
+				if (trustPolicyFilter.getTo_image_created_date() != null) {
+					predicates
+							.add(criteriaBuilder.lessThanOrEqualTo(
+									mwTrustPolicy
+											.<java.sql.Date> get(policyAttributestoDataMapper
+													.get(TrustPolicyFields.IMAGE_CREATION_DATE)),
+									new java.sql.Date(trustPolicyFilter
+											.getTo_image_created_date()
+											.getTime())));
+				}
+
+				if (trustPolicyFilter.getFrom_edited_date() != null) {
+					predicates
+							.add(criteriaBuilder.greaterThanOrEqualTo(
+									mwTrustPolicy
+											.<java.sql.Date> get(policyAttributestoDataMapper
+													.get(TrustPolicyFields.EDITED_DATE)),
+									new java.sql.Date(trustPolicyFilter
+											.getFrom_edited_date().getTime())));
+				}
+				if (trustPolicyFilter.getTo_edited_date() != null) {
+					predicates
+							.add(criteriaBuilder.lessThanOrEqualTo(
+									mwTrustPolicy
+											.<java.sql.Date> get(policyAttributestoDataMapper
+													.get(TrustPolicyFields.EDITED_DATE)),
+									new java.sql.Date(trustPolicyFilter
+											.getTo_edited_date().getTime())));
+				}
+
+				cq.where(criteriaBuilder.and(predicates
+						.toArray(new Predicate[] {})));
 			}
 			
 			

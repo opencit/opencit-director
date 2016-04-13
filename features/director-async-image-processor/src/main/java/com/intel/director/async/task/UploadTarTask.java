@@ -7,26 +7,23 @@ package com.intel.director.async.task;
 
 import java.io.File;
 
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
-import java.io.StringReader;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-
+import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.FileUtilityOperation;
+import com.intel.director.images.exception.DirectorException;
+import com.intel.director.service.ArtifactUploadService;
+import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 
 /**
  * Task to upload the tar of image and policy
  * 
  * @author GS-0681
  */
-public class UploadTarTask extends UploadTask {
-	public UploadTarTask() {
+public class UploadTarTask extends GenericUploadTask {
+	public UploadTarTask() throws DirectorException {
 		super();
-		uploadType = Constants.TASK_NAME_UPLOAD_TAR;
-	}
-
-	public UploadTarTask(String imageStoreName) {
-		super(imageStoreName);
 	}
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
@@ -41,9 +38,10 @@ public class UploadTarTask extends UploadTask {
 		if (previousTasksCompleted(taskAction.getTask_name())) {
 			if (Constants.INCOMPLETE.equalsIgnoreCase(taskAction.getStatus())) {
 				updateImageActionState(Constants.IN_PROGRESS, "Started");
-				super.initProperties();
-				runFlag  = runUploadTarTask();
+				runFlag = runUploadTarTask();
 			}
+		} else {
+			log.info("Just returning");
 		}
 		return runFlag;
 
@@ -59,62 +57,57 @@ public class UploadTarTask extends UploadTask {
 
 	public boolean runUploadTarTask() {
 		boolean runFlag = false;
-		log.debug("Inside runUploadTarTask for ::"
+		log.info("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
-		try {
-			String imageLocation = imageInfo.getLocation();
-			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-					.createUnmarshaller();
-			String tarName = trustPolicy.getDisplay_name() + ".tar";
-			String policyXml= trustPolicy.getTrust_policy();
-			log.debug("Inside Run Upload Tar task policyXml::"+policyXml);
-			StringReader reader = new StringReader(policyXml);
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
-			String glanceId=policy.getImage().getImageId();
-			log.info("Inside Run Upload Tar task glanceId::"+glanceId);
-			imageProperties.put(Constants.GLANCE_ID, glanceId);
-			imageProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
-			imageProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
-			String tarLocation = imageLocation+imageActionObject.getImage_id()+File.separator;
-			log.debug("runUploadTarTask tarname::" + tarName
-					+ " ,tarLocation ::" + tarLocation);
-			content = new File(tarLocation + tarName);
-			boolean parentRunStatus = super.run();
-			runFlag = parentRunStatus;
-			//Cleanup of folder
-			File uuidFolder = new File(tarLocation);
-			File[] listFiles = uuidFolder.listFiles();
-			boolean deleteFileFlag = true;
-			for (File file : listFiles) {
-				log.info("Deleteing file "+file.getAbsolutePath()+" after successful upload");
-				if(!file.delete()){
-					log.info("!!!!! File could not be deleted");
-					deleteFileFlag = false;
-				}
-				
+		String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";
+		if (Constants.DEPLOYMENT_TYPE_DOCKER
+				.equalsIgnoreCase(imageInfo.image_deployments)) {
+			ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
+			ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
+					.fetchImageUploadByImageId(imageInfo.getId());
+			customProperties.put(Constants.GLANCE_ID, imageInfo.getId());
+			if (imageUploadByImageId != null) {
+				UUID uuid = new UUID();
+				customProperties.put(Constants.GLANCE_ID, uuid.toString());
 			}
-			if(deleteFileFlag){
-				deleteFileFlag = uuidFolder.delete();
-				log.info("Is folder deleted == "+deleteFileFlag);
-			}else{
-				log.info("UUID : "+tarLocation +" cannot be cleaned up");
-			}
-			String encImageFileName = imageInfo.getLocation()+File.separator+imageInfo.getImage_name() + "-enc";
-			File encImageFile = new File(encImageFileName);
-			if(encImageFile.exists()){
-				encImageFile.delete();
-			}
-			return runFlag;
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.debug(
-					"Upload tar task fail for::"
-							+ imageActionObject.getImage_id(), e);
-
+		} else {	
+			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
+			log.info("Inside Run Upload Tar task glanceId::" + glanceId);
+			customProperties.put(Constants.GLANCE_ID, glanceId);
 		}
+		customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
+		log.info("TAR name {}", tarName);
+		String imageLocation = imageInfo.getLocation();
+		String tarLocation = imageLocation + imageActionObject.getImage_id()
+				+ File.separator;
+
+	
+		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
+				"glance_image_tar");
+
+	
+		log.info("runUploadTarTask tarname::" + tarName + " ,tarLocation ::"
+				+ tarLocation);
+		//File content = new File(tarLocation + tarName);
+		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, tarLocation + tarName);
+		log.info("Before transferring to generic upload");
+		runFlag = super.run();
+		log.info("After transferring to generic upload");
+
+		// Cleanup of folder
+		cleanupDirectories(tarLocation);
 		return runFlag;
 
 	}
+	
+	private void cleanupDirectories(String tarLocation){
+		File uuidFolder = new File(tarLocation);
+		FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
+		fileUtilityOperation.deleteFileOrDirectory(uuidFolder);
 
+		String encImageFileName = imageInfo.getLocation() + File.separator
+				+ imageInfo.getImage_name() + "-enc";
+		File encImageFile = new File(encImageFileName);
+		fileUtilityOperation.deleteFileOrDirectory(encImageFile);
+	}
 }

@@ -52,6 +52,8 @@ CREATE OR REPLACE VIEW mw_image_info_view AS
     mwimg.mounted_by_user_id,
     mwimg.sent,
     mwimg.status,
+	mwimg.tmp_location,
+	mwimg.upload_variables_md5,
     mwtrustpolicy.id AS trust_policy_id,
     mwtrustpolicy.name AS trust_policy_name,
     mwpolicydraft.id AS trust_policy_draft_id,
@@ -63,10 +65,13 @@ CREATE OR REPLACE VIEW mw_image_info_view AS
     mwpolicydraft.edited_date AS trust_policy_draft_edited_date,
     ( SELECT count(*) AS count
            FROM mw_image_upload mwimageupload
-          WHERE mwimageupload.image_id::text = mwimg.id::text) AS image_upload_count
+          WHERE mwimageupload.image_id::text = mwimg.id::text) AS image_upload_count,
+	 ( SELECT count(*) AS count
+           FROM mw_policy_upload mwpolicyupload
+          WHERE mwpolicyupload.policy_id::text = mwtrustpolicy.id::text) AS policy_upload_count	  
    FROM mw_image mwimg
-     LEFT JOIN mw_trust_policy mwtrustpolicy ON mwimg.trust_policy_id::text = mwtrustpolicy.id::text
-     LEFT JOIN mw_trust_policy_draft mwpolicydraft ON mwpolicydraft.id::text = mwimg.trust_policy_draft_id::text;
+     LEFT JOIN mw_trust_policy mwtrustpolicy ON mwimg.id::text = mwtrustpolicy.image_id::text
+     LEFT JOIN mw_trust_policy_draft mwpolicydraft ON mwpolicydraft.id::text = mwimg.trust_policy_draft_id::text  WHERE mwtrustpolicy.archive IS NOT TRUE;
 
 ALTER TABLE mw_image_info_view
   OWNER TO postgres;

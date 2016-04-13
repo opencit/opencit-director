@@ -11,8 +11,6 @@ import java.io.IOException;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
-import com.intel.director.api.TrustPolicy;
-import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.EncryptImage;
 import com.intel.director.images.exception.DirectorException;
@@ -26,6 +24,10 @@ import com.intel.mtwilson.director.features.director.kms.KmsUtil;
  * @author GS-0681
  */
 public class EncryptImageTask extends ImageActionAsyncTask {
+
+	public EncryptImageTask() throws DirectorException {
+		super();
+	}
 
 	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(EncryptImageTask.class);
@@ -41,21 +43,17 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 		if (taskAction.getStatus().equals(Constants.INCOMPLETE)) {
 			log.debug("Running encrypt task for "
 					+ imageActionObject.getImage_id());
-			updateImageActionState(Constants.IN_PROGRESS, "Started");
+			updateImageActionState(Constants.IN_PROGRESS,"Started");
 			try {
 				encryptImage();
-				updateImageActionState(
-						Constants.COMPLETE,
+				updateImageActionState(Constants.COMPLETE,
 						"Completed encrypting image : "
 								+ imageActionObject.getImage_id());
 				runFlag = true;
 			} catch (DirectorException e) {
 				log.error("Error in EnryptImageTask", e);
-				updateImageActionState(
-						Constants.ERROR,
-						"Error while encrypting image : "
-								+ imageActionObject.getImage_id() + " Error: "
-								+ e.getMessage());
+				updateImageActionState(Constants.ERROR,
+						"Error while encrypting image");
 			}
 			
 		}
@@ -68,22 +66,7 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 	 * @throws DirectorException
 	 */
 	private void encryptImage() throws DirectorException {
-		TrustPolicy tp = null;
 		try {
-			tp = persistService.fetchPolicyForImage(imageActionObject
-					.getImage_id());
-			log.debug("EncryptImageTask: Got the trust policy ");
-		} catch (DbException e1) {
-			log.error("Error while fetching Trustpolicy for image : "+imageActionObject.getImage_id(), e1);
-			throw new DirectorException(
-					"Error while encrypting image. DB Error while fetching policy from DB",
-					e1);
-		}
-		log.debug("Policy in DB for image : " + tp.getId());
-
-		try {
-			ImageInfo imageInfo = persistService
-					.fetchImageById(imageActionObject.getImage_id());
 			log.debug("EncryptImageTask: Got the image info");
 			String imageLocation = imageInfo.getLocation();
 			if (!imageLocation.endsWith(File.separator)) {
@@ -92,7 +75,7 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 			
 			imageLocation += imageInfo.getImage_name();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(tp.getTrust_policy());
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
 			if (policy.getEncryption() == null) {
 				log.debug("EncryptImageTask: No encryption required,. retun");
 				return;
@@ -105,6 +88,8 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 			log.debug("EncryptImageTask: Key id for KMS : "+keyId);
 			if (keyId == null) {
 				log.error("Null key retrieved for url : " + url);
+				updateImageActionState(Constants.ERROR,
+						"Null key retrieved for url : " + url);
 				throw new DirectorException("Null key retrieved for url : " + url);
 			}
 
@@ -113,6 +98,8 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 			String keyFromKMS = new KmsUtil().getKeyFromKMS(keyId);
 			if(keyFromKMS == null){
 				log.error("Null key retrieved for keyId : " + keyId);
+				updateImageActionState(Constants.ERROR,
+						"Null key retrieved from kms");
 				throw new DirectorException("Null key retrieved for keyId : " + keyId);
 			}
 			log.debug("EncryptImageTask: Key from  KMS : "+keyFromKMS);
@@ -123,12 +110,18 @@ public class EncryptImageTask extends ImageActionAsyncTask {
 			log.info("Completed encryption task  ");
 		} catch (JAXBException | IOException | XMLStreamException e) {
 			log.error("Error while creating Trustpolicy", e);
+			updateImageActionState(Constants.ERROR,
+					"Error while encrypting image");
 			throw new DirectorException("Error while encrypting image", e);
 		} catch (DbException ex) {
 			log.error("DB Error while encrypting image task", ex);
+			updateImageActionState(Constants.ERROR,
+					"Error while encrypting image");
 			throw new DirectorException("Error while encrypting image", ex);
 		} catch (Exception exx) {
 			log.error("Error while encrypting image task", exx);
+			updateImageActionState(Constants.ERROR,
+					"Error while encrypting image");
 			throw new DirectorException("Error while encrypting image", exx);
 		}
 	}

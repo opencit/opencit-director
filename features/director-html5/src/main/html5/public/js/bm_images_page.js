@@ -293,7 +293,11 @@ function nextButtonLiveBM() {
 	if (isEmpty == true) {
 		$("#" + active_wizard_page + "_content_step_" + nextStepNum).load(
 				htmlpage);
-	}
+	}else{
+        $("#director_loading_icon").hide();
+        $("#loading_icon_container").hide();
+        $("#director_loading_icon").html("");
+    }
 
 	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
 	$("#" + active_wizard_page + "_step_" + stepNum).removeClass("selected");
@@ -358,83 +362,6 @@ function downloadPolicyFromLastPage() {
 function downloadImageFromLastPage() {
 	downloadImage(current_image_id);
 }
-
-function downloadPolicy(imageid, trust_policy_id) {
-
-var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-            type: "POST",
-            url: "/v1/login/tokens",
-            accept: "application/json",
-            contentType: "application/json",
-            headers: {'Accept': 'application/json'},
-     		data: token_request_json,
-            success: function(data, status, xhr) {
-		var authtoken= authtoken=data.data[0].token;
-		window.location = encodeURI("/v1/images/" + imageid + "/downloads/policy?Authorization="+authtoken);
-                   
-            },
-            error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
-            }
-        });
-
-
-	///window.location = "/v1/images/" + imageid + "/downloads/policy";
-}
-
-
-
-function downloadPolicyAndManifest(imageid, trust_policy_id) {
-
-var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-            type: "POST",
-            url: "/v1/login/tokens",
-            accept: "application/json",
-            contentType: "application/json",
-            headers: {'Accept': 'application/json'},
-     		data: token_request_json,
-            success: function(data, status, xhr) {
-		var authtoken= authtoken=data.data[0].token;
-		var url="/v1/images/" + imageid + "/downloads/policyAndManifest?Authorization="+encodeURIComponent(authtoken);
-		window.location = url;                  
-            },
-            error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
-            }
-        });
-
-
-	
-}
-
-function downloadImage(imageid) {
-
-var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-	$.ajax({
-            type: "POST",
-            url: "/v1/login/tokens",
-            accept: "application/json",
-            contentType: "application/json",
-            headers: {'Accept': 'application/json'},
-     		data: token_request_json,
-            success: function(data, status, xhr) {
-		var authtoken= authtoken=data.data[0].token;
-		var url="/v1/images/" + imageid + "/downloadImage?modified=true&Authorization="+encodeURIComponent(authtoken);
-		window.location = url;            
-            },
-            error: function(xhr, status, errorMessage) {
-              alert("error in downloading");
-            }
-        });
-
-	
-}
-
 
 function deletePolicyBM(imageid) {
 	$.ajax({

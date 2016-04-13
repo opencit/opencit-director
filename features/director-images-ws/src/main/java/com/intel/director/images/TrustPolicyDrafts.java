@@ -20,6 +20,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.CreateTrustPolicyResponse;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericRequest;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ListTrustPolicyDrafts;
@@ -350,29 +351,11 @@ public class TrustPolicyDrafts {
 			CreateTrustPolicyMetaDataRequest createPolicyRequest) {
 		CreateTrustPolicyResponse createTrustPolicyDraftResponse = new CreateTrustPolicyResponse();
 		try {
-			String error=createPolicyRequest.validate("policy");
-			if(!StringUtils.isBlank(error)){
-				createTrustPolicyDraftResponse.error = error;
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
-			if(imageInfo == null){
-				createTrustPolicyDraftResponse.error = "No image with id : "+createPolicyRequest.image_id+" exists.";
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			TrustPolicyDraft fetchTrustpolicydraftById = imageService
-					.fetchTrustpolicydraftById(createPolicyRequest.trust_policy_draft_id);
-			if (fetchTrustpolicydraftById == null) {
-				createTrustPolicyDraftResponse.error = "No trust policy draft with id : "+createPolicyRequest.trust_policy_draft_id+" exists.";
-				return Response.status(Response.Status.BAD_REQUEST)
-						.entity(createTrustPolicyDraftResponse).build();
-			}
-			
-			String imageId = imageInfo.id;
+		String imageId=imageService.fetchImageIdByDraftOrPolicy(createPolicyRequest.getTrust_policy_draft_id());
+		/*	ImageInfo imageInfo = imageService.fetchImageById(createPolicyRequest.image_id);
+			String imageId = imageInfo.id;*/
 			String trustPolicyId = imageService
-					.createTrustPolicy(imageId, createPolicyRequest.trust_policy_draft_id);
+					.createTrustPolicy(createPolicyRequest.trust_policy_draft_id);
 			createTrustPolicyDraftResponse.setId(trustPolicyId);
 			imageService.deletePasswordForHost(imageId);
 			// / response.setStatus(Constants.SUCCESS);
@@ -429,17 +412,33 @@ public class TrustPolicyDrafts {
 						.entity(createTrustPolicyMetadataResponse).build();
 
 			}
+			
+			if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+				String display_name = createTrustPolicyMetaDataRequest.display_name;
+				if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
+					createTrustPolicyMetadataResponse.setError("Invalid Repo Name");
+					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
+							.build();
+				}
+				String[] split = display_name.split(fetchImageById.getRepository() + ":");
+				if (split.length == 0 || StringUtils.isBlank(split[1])) {
+					createTrustPolicyMetadataResponse.setError("Tag cannot be empty");
+					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
+							.build();
+				}
+			}
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
 		}
 
+		
+		
 		try {
 			createTrustPolicyMetadataResponse = imageService
 					.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
 			log.error("createTrustPolicyMetaData failed", e);
-			createTrustPolicyMetadataResponse.setStatus(Constants.ERROR);
-			createTrustPolicyMetadataResponse.setDetails(e.getMessage());			
+			createTrustPolicyMetadataResponse.setError(e.getMessage());
 			return Response.ok(createTrustPolicyMetadataResponse).build();
 		}
 
@@ -537,7 +536,7 @@ public class TrustPolicyDrafts {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deletePolicyDraft(
 			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
-		GenericResponse genericResponse = new GenericResponse();
+		GenericDeleteResponse genericResponse = new GenericDeleteResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyDraftId,RegexPatterns.UUID)){
 			genericResponse.error = "Trust Policy Draft Id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)

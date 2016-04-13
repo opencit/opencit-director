@@ -14,18 +14,25 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreSettings;
+import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyTemplateInfo;
+import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageActionFilter;
+import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.ImageInfoOrderBy;
 import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
+import com.intel.director.api.ui.PolicyUploadFilter;
+import com.intel.director.api.ui.PolicyUploadOrderBy;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftOrderBy;
 import com.intel.director.api.ui.TrustPolicyFilter;
@@ -39,9 +46,12 @@ import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.director.dao.ImageActionDao;
 import com.intel.mtwilson.director.dao.ImageDao;
+import com.intel.mtwilson.director.dao.ImageStoreDao;
+import com.intel.mtwilson.director.dao.ImageStoreDetailsDao;
 import com.intel.mtwilson.director.dao.ImageStoreSettingsDao;
 import com.intel.mtwilson.director.dao.ImageStoreUploadDao;
 import com.intel.mtwilson.director.dao.PolicyTemplateDao;
+import com.intel.mtwilson.director.dao.PolicyUploadDao;
 import com.intel.mtwilson.director.dao.SshSettingDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDao;
 import com.intel.mtwilson.director.dao.TrustPolicyDraftDao;
@@ -49,9 +59,11 @@ import com.intel.mtwilson.director.dao.UserDao;
 import com.intel.mtwilson.director.data.MwHost;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
+import com.intel.mtwilson.director.data.MwImageStore;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.data.MwImageUpload;
 import com.intel.mtwilson.director.data.MwPolicyTemplate;
+import com.intel.mtwilson.director.data.MwPolicyUpload;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
 import com.intel.mtwilson.director.data.MwTrustPolicyDraft;
 import com.intel.mtwilson.director.data.MwUser;
@@ -72,10 +84,12 @@ public class DbServiceImpl implements IPersistService {
 	ImageActionDao imageActionDao;
 	SshSettingDao sshDao;
 	PolicyTemplateDao policyTemplateDao;
+	ImageStoreDao imageStoreDao;
+	ImageStoreDetailsDao imageStoreDetailsDao;
 	SettingFileProperties settingFileProperties;
+	PolicyUploadDao polUploadDao;
 
 	public DbServiceImpl() {
-		
 		File customFile = new File( Folders.configuration() + File.separator + "director.properties" );
 		ConfigurationProvider provider;
 		Properties jpaProperties=new Properties();
@@ -104,7 +118,9 @@ public class DbServiceImpl implements IPersistService {
 		sshDao = new SshSettingDao(emf);
 		settingFileProperties = new SettingFileProperties();
 		policyTemplateDao = new PolicyTemplateDao(emf);
-		
+		imageStoreDao = new ImageStoreDao(emf);
+		imageStoreDetailsDao = new ImageStoreDetailsDao(emf);
+		polUploadDao = new PolicyUploadDao(emf);
 
 	}
 
@@ -146,8 +162,7 @@ public class DbServiceImpl implements IPersistService {
 	public void updateImage(ImageAttributes img) throws DbException {
 		MwImage mwImage = imgDao.getMwImage(img.getId());
 		if (img.getCreated_date() != null) {
-			mwImage.setCreatedDate(new java.sql.Date(img.getCreated_date()
-					.getTime()));
+			mwImage.setCreatedDate(img.getCreated_date());
 		}
 		if (img.getCreated_by_user_id() != null) {
 			mwImage.setCreatedByUserId(img.getCreated_by_user_id());
@@ -155,13 +170,24 @@ public class DbServiceImpl implements IPersistService {
 		if (img.getStatus() != null) {
 			mwImage.setStatus(img.getStatus());
 		}
+		if (img.getUploadVariableMD5() != null) {
+			mwImage.setUploadVariablesMd5(img.getUploadVariableMD5());
+		}
+		
+		if (img.getTmpLocation() != null) {
+			mwImage.setTmpLocation(img.getTmpLocation());
+		}
+		
+		if (img.getStatus() != null) {
+			mwImage.setStatus(img.getStatus());
+		}
+		
 		mwImage.setMountedByUserId(img.getMounted_by_user_id());
 		if (img.getEdited_by_user_id() != null) {
 			mwImage.setEditedByUserId(img.getEdited_by_user_id());
 		}
 		if (img.getEdited_date() != null) {
-			mwImage.setEditedDate(new java.sql.Date(img.getEdited_date()
-					.getTime()));
+			mwImage.setEditedDate(img.getEdited_date());
 		}
 		if (img.getLocation() != null) {
 			mwImage.setLocation(img.getLocation());
@@ -213,14 +239,7 @@ public class DbServiceImpl implements IPersistService {
 	 * .intel.director.api.ImageInfoFilter,
 	 * com.intel.director.api.ImageInfoOrderBy, int, int)
 	 */
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchImages(com.intel
-	 * .director.api.ImageInfoFilter, com.intel.director.api.ImageInfoOrderBy,
-	 * int, int)
-	 */
+
 	public List<ImageInfo> fetchImages(ImageInfoFilter imgFilter,
 			ImageInfoOrderBy orderBy, int firstRecord, int maxRecords)
 			throws DbException {
@@ -229,13 +248,7 @@ public class DbServiceImpl implements IPersistService {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchImageById(
-	 * java.lang.String)
-	 */
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -355,16 +368,59 @@ public class DbServiceImpl implements IPersistService {
 	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyForImage
 	 * (java.lang.String)
 	 */
-	public TrustPolicy fetchPolicyForImage(String imageId) throws DbException {
-
+	public TrustPolicy fetchActivePolicyForImage(String imageId) throws DbException {
+		TrustPolicy trustPolicy=null;
 		TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
 		trustPolicyFilter.setImage_id(imageId);
 		List<MwTrustPolicy> mwTrustPolicyList = policyDao
 				.findMwTrustPolicyEntities(trustPolicyFilter, null);
-		if (mwTrustPolicyList.size() == 0) {
-			return null;
+		for(MwTrustPolicy tp: mwTrustPolicyList){
+			if(!tp.isArchive()){
+				trustPolicy= mapper.toTransferObject(tp);
+				break;
+			}
 		}
-		return mapper.toTransferObject(mwTrustPolicyList.get(0));
+		
+		return trustPolicy;
+	}
+	
+	
+	
+
+	public  List<TrustPolicy> fetchPoliciesForImage(String imageId)
+			throws DbException{
+		
+		List<TrustPolicy> trustPolicyList=new ArrayList<TrustPolicy>();
+		TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
+		trustPolicyFilter.setImage_id(imageId);
+		List<MwTrustPolicy> mwTrustPolicyList = policyDao
+				.findMwTrustPolicyEntities(trustPolicyFilter, null);
+		for(MwTrustPolicy tp: mwTrustPolicyList){
+			
+			trustPolicyList.add(mapper.toTransferObject(tp)) ;
+				
+		}
+		
+		return trustPolicyList;
+	}
+	
+	
+	public  List<TrustPolicy> fetchArchivedPoliciesForImage(String imageId)
+			throws DbException{
+		
+		List<TrustPolicy> trustPolicyList=new ArrayList<TrustPolicy>();
+		TrustPolicyFilter trustPolicyFilter = new TrustPolicyFilter();
+		trustPolicyFilter.setImage_id(imageId);
+		List<MwTrustPolicy> mwTrustPolicyList = policyDao
+				.findMwTrustPolicyEntities(trustPolicyFilter, null);
+		for(MwTrustPolicy tp: mwTrustPolicyList){
+			if(tp.isArchive()){
+			trustPolicyList.add(mapper.toTransferObject(tp)) ;
+			}
+				
+		}
+		
+		return trustPolicyList;
 	}
 
 	/*
@@ -659,7 +715,9 @@ public class DbServiceImpl implements IPersistService {
 	 */
 	public TrustPolicy savePolicy(TrustPolicy trustPolicy) throws DbException {
 		MwTrustPolicy mwTrustPolicy = mapper.toData(trustPolicy);
-
+		String imageId=trustPolicy.getImgAttributes().getId();
+		MwImage mwImage=imgDao.findMwImageById(imageId);
+		mwTrustPolicy.setImage(mwImage);
 		MwTrustPolicy createdPolicy = policyDao
 				.createTrustPolicy(mwTrustPolicy);
 		return mapper.toTransferObject(createdPolicy);
@@ -1143,9 +1201,16 @@ public class DbServiceImpl implements IPersistService {
 	 */
 	public ImageStoreUploadTransferObject saveImageUpload(
 			ImageStoreUploadTransferObject imgUpload) throws DbException {
-		MwImageUpload MwImageUpload = mapper.toData(imgUpload);
+		MwImageUpload mwImageUpload = mapper.toData(imgUpload);
+	
+		if(imgUpload.getStoreId()!=null){
+			MwImageStore mwImageStore=	imageStoreDao.getImageStoreByID(imgUpload.getStoreId());
+			log.info(" Inside saveImageUpload , mwImageStore::"+mwImageStore);
+			mwImageUpload.setStore(mwImageStore);
+		}
+		
 		MwImageUpload createdImageUpload = imgUploadDao
-				.createImageUpload(MwImageUpload);
+				.createImageUpload(mwImageUpload);
 		return mapper.toTransferObject(createdImageUpload);
 	}
 
@@ -1165,8 +1230,18 @@ public class DbServiceImpl implements IPersistService {
 	 */
 	public void updateImageUpload(ImageStoreUploadTransferObject imgUpload)
 			throws DbException {
-		MwImageUpload MwImageUpload = mapper.toData(imgUpload);
-		imgUploadDao.updateImageUpload(MwImageUpload);
+		MwImageUpload mwImageUpload = mapper.toData(imgUpload);
+		if(imgUpload.getStoreId()!=null){
+			MwImageStore mwImageStore=	imageStoreDao.getImageStoreByID(imgUpload.getStoreId());
+			log.info(" Inside updateImageUpload , mwImageStore::"+mwImageStore);
+			mwImageUpload.setStore(mwImageStore);
+		}
+		if(imgUpload.getImg().getId()!=null){
+		String imageId=imgUpload.getImg().getId();
+		MwImage mwImage=imgDao.findMwImageById(imageId);
+		mwImageUpload.setImage(mwImage);
+		}
+		imgUploadDao.updateImageUpload(mwImageUpload);
 
 	}
 
@@ -1363,6 +1438,249 @@ public class DbServiceImpl implements IPersistService {
 		return imgUploadList;
 	}
 
+	
+	/*
+	 * ##########################################################################
+	 * ##################################################
+	 * ################################################### POLICY
+	 * UPLOADS############################################################
+	 * ######
+	 * ####################################################################
+	 * ###################################################
+	 */
+	
+	public PolicyUploadTransferObject savePolicyUpload(
+			PolicyUploadTransferObject polUpload) throws DbException {
+		MwPolicyUpload mwPolicyUpload = mapper.toData(polUpload);
+		if(polUpload.getStoreId()!=null){
+		MwImageStore mwImageStore=	imageStoreDao.getImageStoreByID(polUpload.getStoreId());
+		log.info(" Inside savePolicyUpload , mwImageStore::"+mwImageStore);
+		mwPolicyUpload.setStore(mwImageStore);
+		}
+		MwPolicyUpload createdPolicyUpload = polUploadDao
+				.createPolicyUpload(mwPolicyUpload);
+		return mapper.toTransferObject(createdPolicyUpload);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#updatePolicyUpload
+	 * (com.intel.director.api.PolicyUploadTransferObject)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#updatePolicyUpload(com
+	 * .intel.director.api.PolicyUploadTransferObject)
+	 */
+	public void updatePolicyUpload(PolicyUploadTransferObject polUpload)
+			throws DbException {
+		MwPolicyUpload mwPolicyUpload = mapper.toData(polUpload);
+		if(polUpload.getStoreId()!=null){
+			MwImageStore mwImageStore=	imageStoreDao.getImageStoreByID(polUpload.getStoreId());
+			log.info(" Inside updatePolicyUpload , mwImageStore::"+mwImageStore);
+			mwPolicyUpload.setStore(mwImageStore);
+		}
+		polUploadDao.updatePolicyUpload(mwPolicyUpload);
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchPolicyUploads
+	 * (com.intel.director.api.PolicyUploadFilter,
+	 * com.intel.director.api.PolicyUploadOrderBy)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyUploads(com
+	 * .intel.director.api.PolicyUploadFilter,
+	 * com.intel.director.api.PolicyUploadOrderBy)
+	 */
+	public List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadFilter polUploadFilter,
+			PolicyUploadOrderBy orderBy) throws DbException {
+		List<MwPolicyUpload> mwPolicyUploadList = polUploadDao
+				.findMwPolicyUploadEntities(polUploadFilter, orderBy);
+		List<PolicyUploadTransferObject> polUploadList = new ArrayList<PolicyUploadTransferObject>();
+
+		for (MwPolicyUpload MwPolicyUpload : mwPolicyUploadList) {
+			polUploadList.add(mapper.toTransferObject(MwPolicyUpload));
+		}
+		return polUploadList;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchPolicyUploads
+	 * (com.intel.director.api.PolicyUploadFilter,
+	 * com.intel.director.api.PolicyUploadOrderBy, int, int)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyUploads(com
+	 * .intel.director.api.PolicyUploadFilter,
+	 * com.intel.director.api.PolicyUploadOrderBy, int, int)
+	 */
+	public List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadFilter polUploadFilter,
+			PolicyUploadOrderBy orderBy, int firstRecord, int maxRecords)
+			throws DbException {
+		List<MwPolicyUpload> mwPolicyUploadList = polUploadDao
+				.findMwPolicyUploadEntities(firstRecord, maxRecords,
+						polUploadFilter, orderBy);
+		List<PolicyUploadTransferObject> polUploadList = new ArrayList<PolicyUploadTransferObject>();
+
+		for (MwPolicyUpload MwPolicyUpload : mwPolicyUploadList) {
+			polUploadList.add(mapper.toTransferObject(MwPolicyUpload));
+		}
+		return polUploadList;
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchPolicyUploadById
+	 * (java.lang.String)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyUploadById
+	 * (java.lang.String)
+	 */
+	public PolicyUploadTransferObject fetchPolicyUploadById(String id)
+			throws DbException {
+		return mapper.toTransferObject(polUploadDao.findMwPolicyUpload(id));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#destroyPolicyUpload
+	 * (com.intel.director.api.PolicyUploadTransferObject)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#destroyPolicyUpload(
+	 * com.intel.director.api.PolicyUploadTransferObject)
+	 */
+	public void destroyPolicyUpload(
+			PolicyUploadTransferObject PolicyUploadTransferObject)
+			throws DbException {
+		MwPolicyUpload MwPolicyUpload = mapper
+				.toData(PolicyUploadTransferObject);
+		polUploadDao.destroyPolicyUpload(MwPolicyUpload);
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.mtwilson.director.dbservice.IPersistService#
+	 * getTotalPolicyUploadsCount()
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#getTotalPolicyUploadsCount
+	 * ()
+	 */
+	public int getTotalPolicyUploadsCount() throws DbException {
+		return polUploadDao.getMwPolicyUploadCount();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.intel.mtwilson.director.dbservice.IPersistService#
+	 * getTotalPolicyUploadsCount(com.intel.director.api.PolicyUploadFilter)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#getTotalPolicyUploadsCount
+	 * (com.intel.director.api.PolicyUploadFilter)
+	 */
+	public int getTotalPolicyUploadsCount(PolicyUploadFilter polUploadFilter)
+			throws DbException {
+		return polUploadDao.getMwPolicyUploadCount(polUploadFilter);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchPolicyUploads
+	 * (com.intel.director.api.PolicyUploadOrderBy)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyUploads(com
+	 * .intel.director.api.PolicyUploadOrderBy)
+	 */
+	public List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadOrderBy orderBy) throws DbException {
+		List<MwPolicyUpload> mwPolicyUploadList = polUploadDao
+				.findMwPolicyUploadEntities(null, orderBy);
+		List<PolicyUploadTransferObject> polUploadList = new ArrayList<PolicyUploadTransferObject>();
+
+		for (MwPolicyUpload MwPolicyUpload : mwPolicyUploadList) {
+			polUploadList.add(mapper.toTransferObject(MwPolicyUpload));
+		}
+		return polUploadList;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistService#fetchPolicyUploads
+	 * (com.intel.director.api.PolicyUploadOrderBy, int, int)
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.intel.mtwilson.director.dbservice.IPersistDao#fetchPolicyUploads(com
+	 * .intel.director.api.PolicyUploadOrderBy, int, int)
+	 */
+	public List<PolicyUploadTransferObject> fetchPolicyUploads(
+			PolicyUploadOrderBy orderBy, int firstRecord, int maxRecords)
+			throws DbException {
+		List<MwPolicyUpload> mwPolicyUploadList = polUploadDao
+				.findMwPolicyUploadEntities(firstRecord, maxRecords, null,
+						orderBy);
+		List<PolicyUploadTransferObject> polUploadList = new ArrayList<PolicyUploadTransferObject>();
+
+		for (MwPolicyUpload mwPolicyUploadTransferObject : mwPolicyUploadList) {
+			polUploadList.add(mapper
+					.toTransferObject(mwPolicyUploadTransferObject));
+		}
+		return polUploadList;
+	}
+	
 	/*
 	 * ##########################################################################
 	 * ##################################################
@@ -1549,6 +1867,20 @@ public class DbServiceImpl implements IPersistService {
 		}
 		return imageActionObject;
 	}
+	
+	
+	public List<ImageActionObject> fetchImageActions(ImageActionFilter imageActionFilter, ImageActionOrderBy imageActionOrderBy)
+			throws DbException{
+		List<ImageActionObject> imageActionObjectList= new ArrayList<ImageActionObject>();
+		List<MwImageAction> mwImageActionList = imageActionDao.findMwImageAction(imageActionFilter, imageActionOrderBy);
+		if(mwImageActionList==null){
+			return imageActionObjectList;
+		}
+		for(MwImageAction mwActionObj: mwImageActionList){
+			imageActionObjectList.add(mapper.toTransferObject(mwActionObj));
+		}
+		return imageActionObjectList;
+	}
 
 	@Override
 	public void deleteImageActionById(String image_action_id)
@@ -1723,5 +2055,60 @@ public class DbServiceImpl implements IPersistService {
 	public void destroySshPassword(String id) throws DbException {
 		sshDao.destroyPassword(id);
 	}
+	
+	
+	//==============================================================
+	
+	@Override
+	public ImageStoreTransferObject saveImageStore(
+			ImageStoreTransferObject imageStoreTO) throws DbException {
+		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		MwImageStore createdImageStore = imageStoreDao
+				.createImageStore(mwImageStore);
+		return mapper.toTransferObject(createdImageStore);
+	}	
+	
+	@Override
+	public List<ImageStoreTransferObject> fetchImageStores(
+			ImageStoreFilter imageStoreFilter) throws DbException {
+		List<MwImageStore> mwImageStores = imageStoreDao
+				.findMwImageStore(imageStoreFilter);
+		if (mwImageStores == null) {
+			return null;
+		}
+		List<ImageStoreTransferObject> imageStoreTransferObjects = new ArrayList<ImageStoreTransferObject>();
+		for (MwImageStore mwImageStore : mwImageStores) {
+			ImageStoreTransferObject transferObject = mapper
+					.toTransferObject(mwImageStore);
+			imageStoreTransferObjects.add(transferObject);
+		}
+		return imageStoreTransferObjects;
+	}
+	
+	@Override
+	public void updateImageStore(ImageStoreTransferObject imageStoreTO)
+			throws DbException {
+		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		imageStoreDao.updateImageStore(mwImageStore);
+	}
+	
+	@Override
+	public void destroyImageStore(ImageStoreTransferObject imageStoreTO)
+			throws DbException {
+		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		imageStoreDao.deleteImageStore(mwImageStore);
+	}
 
+	@Override
+	public void destroyImageStoreByID(String image_store_id) throws DbException {
+		imageStoreDao.deleteImageStoreByID(image_store_id);
+	}
+	
+	@Override
+	public ImageStoreTransferObject fetchImageStorebyId(String id) throws DbException {
+		MwImageStore imageStore = imageStoreDao.getImageStoreByID(id);
+		return mapper.toTransferObject(imageStore);
+	}
+
+	
 }

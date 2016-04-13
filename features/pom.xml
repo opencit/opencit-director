@@ -22,6 +22,8 @@
         <module>director-images-ws</module>
         <module>director-kms</module>
         <module>director-persistence</module>
+		<module>director-dockerhub</module>
+		<module>director-swift</module>		
     </modules>
     
 </project>

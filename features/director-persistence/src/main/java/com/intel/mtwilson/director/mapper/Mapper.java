@@ -1,6 +1,9 @@
 package com.intel.mtwilson.director.mapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -13,28 +16,39 @@ import com.google.gson.Gson;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreSettings;
+import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyTemplateInfo;
+import com.intel.director.api.PolicyUploadTransferObject;
 import com.intel.director.api.SshKey;
 import com.intel.director.api.SshPassword;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.User;
+import com.intel.director.api.ui.ImageActionFields;
 import com.intel.director.api.ui.ImageAttributeFields;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFields;
+import com.intel.director.api.ui.ImageStoreDetailsField;
+import com.intel.director.api.ui.ImageStoreFields;
 import com.intel.director.api.ui.ImageStoreUploadFields;
+import com.intel.director.api.ui.PolicyUploadFields;
 import com.intel.director.api.ui.TrustPolicyDraftFields;
 import com.intel.director.api.ui.TrustPolicyFields;
 import com.intel.director.api.ui.UserFields;
+import com.intel.director.common.Constants;
 import com.intel.mtwilson.director.data.MwHost;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwImageAction;
+import com.intel.mtwilson.director.data.MwImageStore;
+import com.intel.mtwilson.director.data.MwImageStoreDetails;
 import com.intel.mtwilson.director.data.MwImageStoreSettings;
 import com.intel.mtwilson.director.data.MwImageUpload;
 import com.intel.mtwilson.director.data.MwPolicyTemplate;
+import com.intel.mtwilson.director.data.MwPolicyUpload;
 import com.intel.mtwilson.director.data.MwSshKey;
 import com.intel.mtwilson.director.data.MwSshPassword;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
@@ -138,6 +152,65 @@ public class Mapper {
 		return userAttributestoDataMapper;
 	}
 
+	Map<ImageStoreFields, String> imageStoreAttributestoDataMapper;
+
+	public Map<ImageStoreFields, String> getImageStoreAttributesMapper() {
+
+		if (imageStoreAttributestoDataMapper == null) {
+			imageStoreAttributestoDataMapper = new EnumMap<ImageStoreFields, String>(
+					ImageStoreFields.class);
+			imageStoreAttributestoDataMapper.put(ImageStoreFields.ID, "id");
+			imageStoreAttributestoDataMapper.put(
+					ImageStoreFields.ARTIFACT_TYPE, "artifact_type");
+			imageStoreAttributestoDataMapper.put(ImageStoreFields.DELETED,
+					"deleted");
+			imageStoreAttributestoDataMapper.put(ImageStoreFields.NAME, "name");
+			imageStoreAttributestoDataMapper.put(ImageStoreFields.CONNECTOR,
+					"connector");
+		}
+		return imageStoreAttributestoDataMapper;
+	}
+	
+	Map<ImageActionFields, String> imageActionsAttributestoDataMapper;
+
+	public Map<ImageActionFields, String> getImageActionsAttributesMapper() {
+
+		if (imageActionsAttributestoDataMapper == null) {
+			imageActionsAttributestoDataMapper = new EnumMap<ImageActionFields, String>(
+					ImageActionFields.class);
+			imageActionsAttributestoDataMapper.put(ImageActionFields.ID, "id");
+			imageActionsAttributestoDataMapper.put(
+					ImageActionFields.CURRENT_TASK_NAME, "current_task_name");
+			imageActionsAttributestoDataMapper.put(
+					ImageActionFields.CURRENT_TASK_STATUS, "current_task_status");
+			imageActionsAttributestoDataMapper.put(
+					ImageActionFields.IMAGE_ID, "image_id");
+			imageActionsAttributestoDataMapper.put(
+					ImageActionFields.DATE, "executionTime");
+		
+		}
+		return imageActionsAttributestoDataMapper;
+	}
+
+	Map<ImageStoreDetailsField, String> imageStoreDetailsAttributestoDataMapper;
+
+	public Map<ImageStoreDetailsField, String> getImageStoreDetailsAttributesMapper() {
+
+		if (imageStoreDetailsAttributestoDataMapper == null) {
+			imageStoreDetailsAttributestoDataMapper = new EnumMap<ImageStoreDetailsField, String>(
+					ImageStoreDetailsField.class);
+			imageStoreDetailsAttributestoDataMapper.put(
+					ImageStoreDetailsField.ID, "id");
+			imageStoreDetailsAttributestoDataMapper.put(
+					ImageStoreDetailsField.IMAGE_STORE_ID, "image_store_id");
+			imageStoreDetailsAttributestoDataMapper.put(
+					ImageStoreDetailsField.KEY, "key");
+			imageStoreDetailsAttributestoDataMapper.put(
+					ImageStoreDetailsField.VALUE, "value");
+		}
+		return imageStoreDetailsAttributestoDataMapper;
+	}
+
 	Map<TrustPolicyFields, String> policyAttributestoDataMapper;
 
 	public Map<TrustPolicyFields, String> getPolicyAttributestoDataMapper() {
@@ -225,6 +298,10 @@ public class Mapper {
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.IMAGE_URI, "imageUri");
 			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.ACTION_ID, "actionId");
+			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.STORE_ARTIFACT_NAME, "storeArtifactName");
+			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.CHECKSUM, "checksum");
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.TMP_LOCATION, "tmpLocation");
@@ -245,9 +322,43 @@ public class Mapper {
 			imageUploadtAttributestoDataMapper.put(
 					ImageStoreUploadFields.IMAGE_DEPOLYMENT,
 					"imageDeploymentType");
+			imageUploadtAttributestoDataMapper
+					.put(ImageStoreUploadFields.STORE_ARTIFACT_ID,
+							"storeArtifactId");
+			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.IS_DELETED, "isDeleted");
+			imageUploadtAttributestoDataMapper.put(
+					ImageStoreUploadFields.UPLOAD_VARIABLES_MD5, "uploadVariablesMd5");
 
 		}
 		return imageUploadtAttributestoDataMapper;
+	}
+
+	Map<PolicyUploadFields, String> policyUploadtAttributestoDataMapper;
+
+	public Map<PolicyUploadFields, String> getPolicyUploadtAttributestoDataMapper() {
+
+		if (policyUploadtAttributestoDataMapper == null) {
+			policyUploadtAttributestoDataMapper = new EnumMap<PolicyUploadFields, String>(
+					PolicyUploadFields.class);
+			policyUploadtAttributestoDataMapper
+					.put(PolicyUploadFields.ID, "id");
+			policyUploadtAttributestoDataMapper.put(PolicyUploadFields.DATE,
+					"date");
+			policyUploadtAttributestoDataMapper.put(
+					PolicyUploadFields.POLICY_URI, "policyUri");
+
+			policyUploadtAttributestoDataMapper.put(PolicyUploadFields.STATUS,
+					"status");
+			policyUploadtAttributestoDataMapper.put(
+					PolicyUploadFields.STORE_ARTIFACT_ID, "storeArtifactId");
+			policyUploadtAttributestoDataMapper.put(
+					PolicyUploadFields.IS_DELETED, "isDeleted");
+			policyUploadtAttributestoDataMapper.put(
+					PolicyUploadFields.TRUST_POLICY_ID, "id");
+
+		}
+		return policyUploadtAttributestoDataMapper;
 	}
 
 	public MwImage toData(ImageAttributes imgAttributes) {
@@ -264,19 +375,25 @@ public class Mapper {
 		mwImage.setSent(imgAttributes.getSent());
 		mwImage.setCreatedByUserId(imgAttributes.getCreated_by_user_id());
 		mwImage.setEditedByUserId(imgAttributes.getEdited_by_user_id());
+		mwImage.setTmpLocation(imgAttributes.getTmpLocation());
+		mwImage.setUploadVariablesMd5(imgAttributes.getUploadVariableMD5());
 		if (imgAttributes.getCreated_date() != null) {
-			mwImage.setCreatedDate(new java.sql.Date(imgAttributes
-					.getCreated_date().getTime()));
+			mwImage.setCreatedDate(imgAttributes.getCreated_date());
 		}
 		if (imgAttributes.getEdited_date() != null) {
-			mwImage.setEditedDate(new java.sql.Date(imgAttributes
-					.getEdited_date().getTime()));
+			mwImage.setEditedDate(imgAttributes.getEdited_date());
+		}
+		if (imgAttributes.getRepository() != null) {
+			mwImage.setRepository(imgAttributes.getRepository());
+		}
+		if (imgAttributes.getTag() != null) {
+			mwImage.setTag(imgAttributes.getTag());
 		}
 		return mwImage;
 	}
 
 	public ImageInfo toTransferObject(MwImage mwImage) {
-		if(mwImage == null){
+		if (mwImage == null) {
 			return null;
 		}
 		ImageInfo imgInfo = new ImageInfo();
@@ -291,9 +408,21 @@ public class Mapper {
 		imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 		imgInfo.setCreated_date(mwImage.getCreatedDate());
 		imgInfo.setEdited_date(mwImage.getEditedDate());
-		imgInfo.setImage_size(mwImage.getContentLength());
+		if (mwImage.getContentLength() != null) {
+			imgInfo.setImage_size(mwImage.getContentLength());
+		}
 		imgInfo.setStatus(mwImage.getStatus());
-		imgInfo.setSent(mwImage.getSent());
+		if (mwImage.getSent() != null) {
+			imgInfo.setSent(mwImage.getSent());
+		}
+		imgInfo.setUploadVariableMD5(mwImage.getUploadVariablesMd5());
+		imgInfo.setTmpLocation(mwImage.getTmpLocation());
+		if (mwImage.getRepository() != null) {
+			imgInfo.setRepository(mwImage.getRepository());
+		}
+		if (mwImage.getTag() != null) {
+			imgInfo.setTag(mwImage.getTag());
+		}
 		return imgInfo;
 	}
 
@@ -331,13 +460,12 @@ public class Mapper {
 		mwTrustPolicy.setDescription(trustPolicy.getDescription());
 		mwTrustPolicy.setCreatedByUserId(trustPolicy.getCreated_by_user_id());
 		mwTrustPolicy.setEditedByUserId(trustPolicy.getEdited_by_user_id());
+		mwTrustPolicy.setArchive(trustPolicy.isArchive());
 		if (trustPolicy.getCreated_date() != null) {
-			mwTrustPolicy.setCreatedDate(new java.sql.Date(trustPolicy
-					.getCreated_date().getTime()));
+			mwTrustPolicy.setCreatedDate(trustPolicy.getCreated_date());
 		}
 		if (trustPolicy.getEdited_date() != null) {
-			mwTrustPolicy.setEditedDate(new java.sql.Date(trustPolicy
-					.getEdited_date().getTime()));
+			mwTrustPolicy.setEditedDate(trustPolicy.getEdited_date());
 		}
 		mwTrustPolicy.setDisplay_name(trustPolicy.getDisplay_name());
 		return mwTrustPolicy;
@@ -353,6 +481,7 @@ public class Mapper {
 		ImageAttributes imgAttributes = toTransferObject(mwTrustPolicy
 				.getImage());
 		trustPolicy.setImgAttributes(imgAttributes);
+		trustPolicy.setArchive(mwTrustPolicy.isArchive());
 		trustPolicy.setCreated_by_user_id(mwTrustPolicy.getCreatedByUserId());
 		trustPolicy.setEdited_by_user_id(mwTrustPolicy.getEditedByUserId());
 		trustPolicy.setCreated_date(mwTrustPolicy.getCreatedDate());
@@ -377,12 +506,11 @@ public class Mapper {
 		mwTrustPolicyDraft.setEditedByUserId(trustPolicyDraft
 				.getEdited_by_user_id());
 		if (trustPolicyDraft.getCreated_date() != null) {
-			mwTrustPolicyDraft.setCreatedDate(new java.sql.Date(
-					trustPolicyDraft.getCreated_date().getTime()));
+			mwTrustPolicyDraft.setCreatedDate(trustPolicyDraft
+					.getCreated_date());
 		}
 		if (trustPolicyDraft.getEdited_date() != null) {
-			mwTrustPolicyDraft.setEditedDate(new java.sql.Date(trustPolicyDraft
-					.getEdited_date().getTime()));
+			mwTrustPolicyDraft.setEditedDate(trustPolicyDraft.getEdited_date());
 		}
 		mwTrustPolicyDraft.setDisplay_name(trustPolicyDraft.getDisplay_name());
 		return mwTrustPolicyDraft;
@@ -390,7 +518,7 @@ public class Mapper {
 
 	public TrustPolicyDraft toTransferObject(
 			MwTrustPolicyDraft mwTrustPolicyDraft) {
-		if(mwTrustPolicyDraft!=null){
+		if (mwTrustPolicyDraft != null) {
 			TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
 			trustPolicyDraft.setId(mwTrustPolicyDraft.getId());
 			trustPolicyDraft
@@ -404,9 +532,11 @@ public class Mapper {
 					.getCreatedByUserId());
 			trustPolicyDraft.setEdited_by_user_id(mwTrustPolicyDraft
 					.getEditedByUserId());
-			trustPolicyDraft.setCreated_date(mwTrustPolicyDraft.getCreatedDate());
+			trustPolicyDraft.setCreated_date(mwTrustPolicyDraft
+					.getCreatedDate());
 			trustPolicyDraft.setEdited_date(mwTrustPolicyDraft.getEditedDate());
-			trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft.getDisplay_name());
+			trustPolicyDraft.setDisplay_name(mwTrustPolicyDraft
+					.getDisplay_name());
 			return trustPolicyDraft;
 		}
 		return null;
@@ -418,9 +548,20 @@ public class Mapper {
 		mwImageUpload.setId(imageStoreUploadTO.getId());
 		mwImageUpload.setChecksum(imageStoreUploadTO.getChecksum());
 		mwImageUpload.setContentlength(imageStoreUploadTO.getImage_size());
+		mwImageUpload.setStoreArtifactId(imageStoreUploadTO
+				.getStoreArtifactId());
+		mwImageUpload.setStoreArtifactName(imageStoreUploadTO.getStoreArtifactName());
+		mwImageUpload.setActionId(imageStoreUploadTO.getActionId());
+		mwImageUpload.setDeleted(imageStoreUploadTO.isDeleted());
 		MwImage mwImage = toData(imageStoreUploadTO.getImg());
 		mwImageUpload.setImage(mwImage);
-
+		if (imageStoreUploadTO.getPolicyUploadId() != null) {
+			mwImageUpload.setPolicyUploadId(imageStoreUploadTO
+					.getPolicyUploadId());
+		}
+		mwImageUpload.setTmpLocation(imageStoreUploadTO.getTmp_location());
+		mwImageUpload.setUploadVariablesMd5(imageStoreUploadTO
+				.getUploadVariableMD5());
 		mwImageUpload.setSent(imageStoreUploadTO.getSent());
 		if (imageStoreUploadTO.getImage_uri() != null) {
 			mwImageUpload.setImageUri(toCharacterArray(imageStoreUploadTO
@@ -429,11 +570,36 @@ public class Mapper {
 		mwImageUpload.setTmpLocation(imageStoreUploadTO.getTmp_location());
 		mwImageUpload.setStatus(imageStoreUploadTO.getStatus());
 		if (imageStoreUploadTO.getDate() != null) {
-			mwImageUpload.setDate(new java.sql.Date(imageStoreUploadTO
-					.getDate().getTime()));
+			mwImageUpload.setDate(imageStoreUploadTO
+					.getDate());
 		}
 
 		return mwImageUpload;
+	}
+
+	public MwPolicyUpload toData(PolicyUploadTransferObject policyUploadTO) {
+		MwPolicyUpload mwPolicyUpload = new MwPolicyUpload();
+		mwPolicyUpload.setId(policyUploadTO.getId());
+
+		MwTrustPolicy mwPolicy = toData(policyUploadTO.getTrust_policy());
+		mwPolicyUpload.setTrustPolicy(mwPolicy);
+
+		if (policyUploadTO.getPolicy_uri() != null) {
+			mwPolicyUpload.setPolicyUri(toCharacterArray(policyUploadTO
+					.getPolicy_uri()));
+		}
+
+		mwPolicyUpload.setStatus(policyUploadTO.getStatus());
+		if (policyUploadTO.getDate() != null) {
+			mwPolicyUpload.setDate(policyUploadTO.getDate()					);
+		}
+		mwPolicyUpload.setStoreArtifactId(policyUploadTO.getStoreArtifactId());
+
+		mwPolicyUpload.setDeleted(policyUploadTO.isDeleted());
+		mwPolicyUpload.setUploadVariablesMd5(policyUploadTO
+				.getUploadVariableMD5());
+
+		return mwPolicyUpload;
 	}
 
 	public ImageStoreUploadTransferObject toTransferObject(
@@ -445,14 +611,55 @@ public class Mapper {
 		imageStoreUploadTO.setImage_size(mwImageUpload.getContentlength());
 		imageStoreUploadTO.setSent(mwImageUpload.getSent());
 		imageStoreUploadTO.setStatus(mwImageUpload.getStatus());
+		imageStoreUploadTO.setPolicyUploadId(mwImageUpload.getPolicyUploadId());
+		imageStoreUploadTO.setUploadVariableMD5(mwImageUpload
+				.getUploadVariablesMd5());
+		imageStoreUploadTO.setTmp_location(mwImageUpload.getTmpLocation());
+		imageStoreUploadTO.setDeleted(mwImageUpload.isDeleted());
+		imageStoreUploadTO.setStoreArtifactId(mwImageUpload
+				
+				.getStoreArtifactId());
+		imageStoreUploadTO.setActionId(mwImageUpload.getActionId());
+		imageStoreUploadTO.setStoreArtifactName(mwImageUpload.getStoreArtifactName());
 		if (mwImageUpload.getImageUri() != null) {
 			imageStoreUploadTO.setImage_uri(fromCharacterArray(mwImageUpload
 					.getImageUri()));
+		}
+
+		if (mwImageUpload.getStore() != null) {
+			imageStoreUploadTO.setStoreId(mwImageUpload.getStore().getId());
+			imageStoreUploadTO.setStoreName(mwImageUpload.getStore().getName());
 		}
 		ImageAttributes imgAttributes = toTransferObject(mwImageUpload
 				.getImage());
 		imageStoreUploadTO.setImg(imgAttributes);
 		return imageStoreUploadTO;
+	}
+
+	public PolicyUploadTransferObject toTransferObject(
+			MwPolicyUpload mwPolicyUpload) {
+		PolicyUploadTransferObject policyUploadTO = new PolicyUploadTransferObject();
+		policyUploadTO.setId(mwPolicyUpload.getId());
+
+		policyUploadTO.setDate(mwPolicyUpload.getDate());
+
+		policyUploadTO.setStatus(mwPolicyUpload.getStatus());
+		policyUploadTO.setStoreArtifactId(mwPolicyUpload.getStoreArtifactId());
+		policyUploadTO.setDeleted(mwPolicyUpload.isDeleted());
+		policyUploadTO.setUploadVariableMD5(mwPolicyUpload
+				.getUploadVariablesMd5());
+		if (mwPolicyUpload.getPolicyUri() != null) {
+			policyUploadTO.setPolicy_uri(fromCharacterArray(mwPolicyUpload
+					.getPolicyUri()));
+		}
+		TrustPolicy tp = toTransferObject(mwPolicyUpload.getTrustPolicy());
+		policyUploadTO.setTrust_policy(tp);
+		if (mwPolicyUpload.getStore() != null) {
+			policyUploadTO.setStoreId(mwPolicyUpload.getStore().getId());
+			policyUploadTO.setStoreName(mwPolicyUpload.getStore().getName());
+		}
+		// / policyUploadTO.setImg(tp);
+		return policyUploadTO;
 	}
 
 	public MwImageStoreSettings toData(ImageStoreSettings imgSettings) {
@@ -472,7 +679,7 @@ public class Mapper {
 	}
 
 	public Character[] toCharacterArray(String str) {
-		if(StringUtils.isBlank(str)){
+		if (StringUtils.isBlank(str)) {
 			return null;
 		}
 		char[] chars = str.toCharArray();
@@ -486,7 +693,7 @@ public class Mapper {
 	}
 
 	public String fromCharacterArray(Character[] chars) {
-		if(ArrayUtils.isEmpty(chars)){
+		if (ArrayUtils.isEmpty(chars)) {
 			return null;
 		}
 		StringBuilder sb = new StringBuilder(chars.length);
@@ -497,25 +704,32 @@ public class Mapper {
 		return str;
 	}
 
-	public MwImageAction toData(ImageActionObject imageaction) {
+	public MwImageAction toData(ImageActionObject imageAction) {
 		MwImageAction mwImageAction = new MwImageAction();
 		Gson gson = new Gson();
-		mwImageAction.setImage_id(imageaction.getImage_id());
-		mwImageAction.setAction_size_max(imageaction.getAction_size_max());
-		mwImageAction.setAction_size(imageaction.getAction_size());
-		mwImageAction.setAction_count(imageaction.getAction_count());
-		mwImageAction.setAction_completed(imageaction.getAction_completed());
-		if (imageaction.getActions() != null) {
-			mwImageAction.setAction(gson.toJson(imageaction.getActions()));
+		mwImageAction.setImage_id(imageAction.getImage_id());
+		mwImageAction.setAction_size_max(imageAction.getAction_size_max());
+		mwImageAction.setAction_size(imageAction.getAction_size());
+		mwImageAction.setAction_count(imageAction.getAction_count());
+		mwImageAction.setAction_completed(imageAction.getAction_completed());
+		if (imageAction.getActions() != null) {
+			mwImageAction.setAction(gson.toJson(imageAction.getActions()));
 		}
-		mwImageAction.setCurrent_task_name(imageaction.getCurrent_task_name());
-		mwImageAction.setCurrent_task_status(imageaction
+		mwImageAction.setCurrent_task_name(imageAction.getCurrent_task_name());
+		mwImageAction.setCurrent_task_status(imageAction
 				.getCurrent_task_status());
+		if (imageAction.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageAction.getDatetime());
+		}
+		if (imageAction.getCreatedDateTime() != null) {
+			mwImageAction.setCreatedTime(imageAction.getCreatedDateTime());
+		}
+
 		return mwImageAction;
 	}
 
 	public ImageActionObject toTransferObject(MwImageAction mwImageAction) {
-		if(mwImageAction==null){
+		if (mwImageAction == null) {
 			return null;
 		}
 		ImageActionObject imageActionObject = new ImageActionObject();
@@ -531,27 +745,35 @@ public class Mapper {
 				.getCurrent_task_name());
 		imageActionObject.setCurrent_task_status(mwImageAction
 				.getCurrent_task_status());
-
+		if (mwImageAction.getExecutionTime() != null) {
+			imageActionObject.setDatetime(mwImageAction.getExecutionTime());
+		}
+		if (mwImageAction.getCreatedTime() != null) {
+			imageActionObject
+					.setCreatedDateTime(mwImageAction.getCreatedTime());
+		}
 		List<ImageActionTask> taskList = new ArrayList<>();
-		String actions = mwImageAction.getAction();
-		if (actions != null) {
-			actions = actions.replace("[", "").replace("]", "");
-			String[] split = actions.split("},");
-			ObjectMapper mapper = new ObjectMapper();
-			for (String s : split) {				
-				if (!s.endsWith("}")) {
-					s = s.concat("}");
-				}
-				ImageActionTask fromJson;
-				try {
-					fromJson = mapper.readValue(s, ImageActionTask.class);
-					log.debug("TASK CREATED : " + fromJson.toString());
-					taskList.add(fromJson);
+		if (!Constants.OBSOLETE.equals(mwImageAction.getCurrent_task_status())) {
+			String actions = mwImageAction.getAction();
+			if (actions != null) {
+				actions = actions.replace("[", "").replace("]", "");
+				String[] split = actions.split("},");
+				ObjectMapper mapper = new ObjectMapper();
+				for (String s : split) {
+					if (!s.endsWith("}")) {
+						s = s.concat("}");
+					}
+					ImageActionTask fromJson;
+					try {
+						fromJson = mapper.readValue(s, ImageActionTask.class);
+						log.debug("TASK CREATED : " + fromJson.toString());
+						taskList.add(fromJson);
 
-				} catch (Exception e) {
-					log.error("Error in action mapping ", e);
-				}
+					} catch (Exception e) {
+						log.error("Error in action mapping ", e);
+					}
 
+				}
 			}
 		}
 		log.debug("No of tasks : " + taskList.size());
@@ -576,13 +798,14 @@ public class Mapper {
 				.getCurrent_task_name());
 		mwImageAction.setCurrent_task_status(imageActionObject
 				.getCurrent_task_status());
+		if (imageActionObject.getDatetime() != null) {
+			mwImageAction.setExecutionTime(imageActionObject.getDatetime());
+		}
 		return mwImageAction;
 	}
 
 	public MwHost toData(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		java.util.Date utilDate = new java.util.Date();
-		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		mwHost.setIpAdsress(sshSetting.getIpAddress());
 		mwHost.setName(sshSetting.getName());
 		mwHost.setUsername(sshSetting.getUsername());
@@ -597,8 +820,8 @@ public class Mapper {
 			mwHost.setEditedByUserId(sshSetting.getEdited_by_user_id());
 		}
 
-		mwHost.setCreatedDate(sqlDate);
-		mwHost.setEditedDate(sqlDate);
+		mwHost.setCreatedDate(Calendar.getInstance());
+		mwHost.setEditedDate(Calendar.getInstance());
 		return mwHost;
 	}
 
@@ -620,8 +843,6 @@ public class Mapper {
 
 	public MwHost toDataUpdate(SshSettingInfo sshSetting) {
 		MwHost mwHost = new MwHost();
-		java.util.Date utilDate = new java.util.Date();
-		java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
 		// ssh = toMw(sshSetting.getPassword());
 		mwHost.setId(sshSetting.getId());
 		mwHost.setIpAdsress(sshSetting.getIpAddress());
@@ -637,18 +858,18 @@ public class Mapper {
 		}
 		mwHost.setImageId(toData(sshSetting.getImage()));
 		mwHost.getImageId().setName(sshSetting.getName());
-		mwHost.setCreatedDate(sqlDate);
-		mwHost.setEditedDate(sqlDate);
+		mwHost.setCreatedDate(Calendar.getInstance());
+		mwHost.setEditedDate(Calendar.getInstance());
 		return mwHost;
 	}
 
 	public MwSshPassword toData(SshPassword sshPassword) {
-		if(sshPassword == null){
+		if (sshPassword == null) {
 			return null;
 		}
 		MwSshPassword mwSshPassword = new MwSshPassword();
 		mwSshPassword.setId(sshPassword.getId());
-		if(sshPassword == null || sshPassword.getKey() == null){
+		if (sshPassword == null || sshPassword.getKey() == null) {
 			mwSshPassword.setSshKey(null);
 		} else if (sshPassword.getKey() != null) {
 			mwSshPassword.setSshKey(toCharacterArray(sshPassword.getKey()));
@@ -658,7 +879,7 @@ public class Mapper {
 	}
 
 	public SshPassword toTransferObject(MwSshPassword mwSshPassword) {
-		if(mwSshPassword == null){
+		if (mwSshPassword == null) {
 			return null;
 		}
 		SshPassword sshPassword = new SshPassword();
@@ -705,7 +926,7 @@ public class Mapper {
 	}
 
 	public SshKey toTransferObject(MwSshKey mwSshKey) {
-		if(mwSshKey == null){
+		if (mwSshKey == null) {
 			return null;
 		}
 		SshKey sshKey = new SshKey();
@@ -725,28 +946,129 @@ public class Mapper {
 		if (policytemplate.getId() != null) {
 			mwpolicytemplate.setId(policytemplate.getId());
 		}
-		mwpolicytemplate
-		.setContent(toCharacterArray(policytemplate.getContent()));
-		
-		
+		mwpolicytemplate.setContent(toCharacterArray(policytemplate
+				.getContent()));
+
 		mwpolicytemplate
 				.setDeployment_type(policytemplate.getDeployment_type());
 		mwpolicytemplate.setActive(policytemplate.isActive());
 		mwpolicytemplate.setName(policytemplate.getName());
 		mwpolicytemplate.setPolicy_type(policytemplate.getPolicy_type());
-		mwpolicytemplate.setDeployment_type_identifier(policytemplate.getDeployment_type_identifier());
+		mwpolicytemplate.setDeployment_type_identifier(policytemplate
+				.getDeployment_type_identifier());
 		return mwpolicytemplate;
 	}
 
 	public PolicyTemplateInfo toTransferObject(MwPolicyTemplate mwpolicytemplate) {
 		PolicyTemplateInfo policytemplate = new PolicyTemplateInfo();
 		policytemplate.setId(mwpolicytemplate.getId());
-		policytemplate.setContent(fromCharacterArray(mwpolicytemplate.getContent()));
-		policytemplate.setDeployment_type(mwpolicytemplate.getDeployment_type());
+		policytemplate.setContent(fromCharacterArray(mwpolicytemplate
+				.getContent()));
+		policytemplate
+				.setDeployment_type(mwpolicytemplate.getDeployment_type());
 		policytemplate.setActive(mwpolicytemplate.isActive());
 		policytemplate.setName(mwpolicytemplate.getName());
 		policytemplate.setPolicy_type(mwpolicytemplate.getPolicy_type());
-		policytemplate.setDeployment_type_identifier(mwpolicytemplate.getDeployment_type_identifier());
+		policytemplate.setDeployment_type_identifier(mwpolicytemplate
+				.getDeployment_type_identifier());
 		return policytemplate;
 	}
+
+	public MwImageStore toData(ImageStoreTransferObject imageStoreTO) {
+		if (imageStoreTO == null) {
+			return null;
+		}
+		MwImageStore mwImageStore = new MwImageStore();
+		if (imageStoreTO.getId() != null) {
+			mwImageStore.setId(imageStoreTO.getId());
+		}
+		String[] artifact_types = imageStoreTO.getArtifact_types();
+		Arrays.sort(artifact_types);
+		if (artifact_types.length != 0) {
+			String artifact_type = "";
+			for (String artifact : artifact_types) {
+				artifact_type += artifact;
+				artifact_type += ",";
+			}
+			String substring = artifact_type.substring(0,
+					artifact_type.length() - 1);
+			mwImageStore.setArtifact_type(substring);
+		}
+		mwImageStore.setConnector(imageStoreTO.getConnector());
+		mwImageStore.setName(imageStoreTO.getName());
+		mwImageStore.setDeleted(imageStoreTO.isDeleted());
+
+		Collection<MwImageStoreDetails> mwImageStoreDetailsCollection = new ArrayList<MwImageStoreDetails>();
+
+		if (imageStoreTO.getImage_store_details() != null
+				&& imageStoreTO.getImage_store_details().size() != 0) {
+			Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTO
+					.getImage_store_details();
+			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+				MwImageStoreDetails data = toData(
+						imageStoreDetailsTransferObject, mwImageStore);
+				mwImageStoreDetailsCollection.add(data);
+			}
+		}
+		mwImageStore
+				.setMwImageStoreDetailsCollection(mwImageStoreDetailsCollection);
+		return mwImageStore;
+	}
+
+	private MwImageStoreDetails toData(
+			ImageStoreDetailsTransferObject imageStoreDetailsTO,
+			MwImageStore mwImageStore) {
+		if (imageStoreDetailsTO == null) {
+			return null;
+		}
+		MwImageStoreDetails mwImageStoreDetails = new MwImageStoreDetails();
+		if (imageStoreDetailsTO.getId() != null) {
+			mwImageStoreDetails.setId(imageStoreDetailsTO.getId());
+		}
+		mwImageStoreDetails.setKey(imageStoreDetailsTO.getKey());
+		mwImageStoreDetails.setValue(imageStoreDetailsTO.getValue());
+		mwImageStoreDetails.setImage_store(mwImageStore);
+		return mwImageStoreDetails;
+	}
+
+	public ImageStoreTransferObject toTransferObject(MwImageStore mwImageStore) {
+		if (mwImageStore == null) {
+			return null;
+		}
+		Collection<ImageStoreDetailsTransferObject> imageStoreDetailsTransferObjects = new ArrayList<ImageStoreDetailsTransferObject>();
+		ImageStoreTransferObject imageStoreTO = new ImageStoreTransferObject();
+		imageStoreTO.setId(mwImageStore.getId());
+		imageStoreTO.setArtifact_types(mwImageStore.getArtifact_type().split(
+				","));
+		imageStoreTO.setConnector(mwImageStore.getConnector());
+		imageStoreTO.setName(mwImageStore.getName());
+		imageStoreTO.setDeleted(mwImageStore.isDeleted());
+		Collection<MwImageStoreDetails> mwImageStoreDetailsCollection = mwImageStore
+				.getMwImageStoreDetailsCollection();
+		if (mwImageStoreDetailsCollection != null) {
+			for (MwImageStoreDetails mwISD : mwImageStoreDetailsCollection) {
+				imageStoreDetailsTransferObjects.add(toTransferObject(mwISD,
+						imageStoreTO));
+			}
+		}
+		imageStoreTO.setImage_store_details(imageStoreDetailsTransferObjects);
+		return imageStoreTO;
+	}
+
+	public ImageStoreDetailsTransferObject toTransferObject(
+			MwImageStoreDetails mwImageStoreDetails,
+			ImageStoreTransferObject imageStoreTransferObject) {
+		if (mwImageStoreDetails == null) {
+			return null;
+		}
+		ImageStoreDetailsTransferObject imageStoreDetailsTO = new ImageStoreDetailsTransferObject();
+		if (mwImageStoreDetails.getId() != null) {
+			imageStoreDetailsTO.setId(mwImageStoreDetails.getId());
+		}
+		imageStoreDetailsTO.setKey(mwImageStoreDetails.getKey());
+		imageStoreDetailsTO.setValue(mwImageStoreDetails.getValue());
+		imageStoreDetailsTO.setImage_store_id(imageStoreTransferObject.id);
+		return imageStoreDetailsTO;
+	}
+
 }

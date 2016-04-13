@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
-import com.intel.director.common.DirectorUtil;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
 import com.intel.mtwilson.trustpolicy.xml.Checksum;
@@ -66,7 +65,7 @@ public class CreateTrustPolicy {
 	 * @throws IOException
 	 */
 	public void createTrustPolicy(TrustPolicy trustPolicy)
-			throws CryptographyException, IOException {
+			throws CryptographyException, IOException, Exception {
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
 
@@ -79,6 +78,8 @@ public class CreateTrustPolicy {
 				log.error(
 						"Error in createTrustPolicy() in CreateTrustPolicy.java",
 						e);
+				throw e;
+				
 			}
 		}
 	}
@@ -96,13 +97,13 @@ public class CreateTrustPolicy {
 	 */
 	private void addEncryption(TrustPolicy trustPolicy)
 			throws CryptographyException, IOException, JAXBException,
-			XMLStreamException {
+			XMLStreamException, Exception {
 		// get DEK
 		KmsUtil kmsUtil = null;
 		try {
 			kmsUtil = new KmsUtil();
-		} catch (Exception e1) {
-			log.error("Error in initialization of KMS Util");
+		} catch (Exception e1) {			
+			log.error("Error in initialization of KMS Util {}", e1);
 			return;
 		}
 		
@@ -111,7 +112,7 @@ public class CreateTrustPolicy {
 		//If so, return
 		if(StringUtils.isNotBlank(trustPolicy.getEncryption().getKey().getValue()) && trustPolicy.getEncryption().getKey().getValue().contains("keys")){
 			String url = trustPolicy.getEncryption().getKey().getValue();
-			String keyIdFromUrl = DirectorUtil.getKeyIdFromUrl(url);
+			String keyIdFromUrl = getKeyIdFromUrl(url);
 			String keyFromKMS = kmsUtil.getKeyFromKMS(keyIdFromUrl);
 			if(StringUtils.isNotBlank(keyFromKMS)){
 				log.info("Existing key is still valid. Not creating a new one.");
@@ -138,6 +139,7 @@ public class CreateTrustPolicy {
 		} catch (Exception e) {
 			// TODO Handle Error
 			log.error("Error in KmsUtil().createKey() in addEncryption() in CreateTrustPolicy.java", e);
+			throw e;
 		}
 	}
 
@@ -193,4 +195,26 @@ public class CreateTrustPolicy {
 		trustPolicy.getImage().setImageHash(imageHash);
 	}
 
+
+	private String getKeyIdFromUrl(String url) {
+		log.debug("URL :: " + url);
+		String[] split = url.split("/");
+		int index = 0;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("keys")) {
+				log.debug("Keys index :: " + i);
+				index = ++i;
+				break;
+			}
+		}
+
+		log.debug("Index :: " + index);
+
+		if (index != 0) {
+			return split[index];
+		} else {
+			return null;
+		}
+
+	}
 }

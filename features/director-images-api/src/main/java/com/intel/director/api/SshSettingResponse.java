@@ -6,6 +6,7 @@ public class SshSettingResponse extends GenericResponse {
 	String image_name;
 	String key;
 	String image_id;
+	
 	public String getIp_address() {
 		return ip_address;
 	}

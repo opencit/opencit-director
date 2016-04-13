@@ -5,135 +5,155 @@
  */
 package com.intel.director.images;
 
-import java.io.File;
-import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
-import com.intel.director.api.ImageStoreUploadResponse;
-import com.intel.director.exception.ImageStoreException;
-import com.intel.director.images.async.GlanceImageExecutor;
-import com.intel.director.images.async.ImageTransferTask;
+import org.apache.commons.lang.StringUtils;
+
+import com.intel.director.api.GenericResponse;
+import com.intel.director.api.StoreResponse;
+import com.intel.director.common.Constants;
+import com.intel.director.images.rs.GlanceException;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
-import com.intel.director.imagestore.ImageStoreManager;
-import com.intel.mtwilson.configuration.ConfigurationFactory;
+import com.intel.director.store.exception.StoreException;
+import com.intel.director.store.impl.StoreManagerImpl;
 
 /**
- *
- * @author GS-0681
+ * 
+ * @author Aakash
  */
-public class GlanceImageStoreManager implements ImageStoreManager {
+public class GlanceImageStoreManager extends StoreManagerImpl {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
+			.getLogger(GlanceImageStoreManager.class);
 
-    GlanceRsClient glanceRsClient;
-    String url;
+	private GlanceRsClient glanceRsClient;
 
-    public GlanceImageStoreManager(Configuration configuration) throws IOException {
-        glanceRsClient = GlanceRsClientBuilder.build(configuration);
-    }
+	private void uploadImage(Map<String, Object> imageProperties)
+			throws StoreException {
 
-    public GlanceImageStoreManager() throws IOException {
-        Configuration configuration = ConfigurationFactory.getConfiguration();
-        glanceRsClient = GlanceRsClientBuilder.build(configuration);
-    }
-
-	@Override
-	public String upload(File file, Map<String, String> imageProperties)
-			throws ImageStoreException {
-		String glanceid;
 		try {
-			// this is a 2 step process
-			// 1) We will push the metadata and create an image id, which would
-			// be used later on for checking the status
-			// http://docs.openstack.org/developer/glance/glanceapi.html#reserve-a-new-image
-			glanceid = glanceRsClient.uploadImageMetaData(imageProperties);
-			// / glanceResponse.id = "123";
-			// 2) The actual transfer of image. This is an async process
-			// http://docs.openstack.org/developer/glance/glanceapi.html#add-a-new-image
-			uploadImage(file, imageProperties, glanceid);
-			return glanceid;
-			// //startPolling(file.geimageProperties, glanceid);
-		} catch (Exception e) {
-			throw new ImageStoreException(
-					"Error while uploading image to Glance", e);
+			glanceRsClient.uploadImage(imageProperties);
+		} catch (GlanceException e) {
+			throw new StoreException("Error in uploadImage to Glance", e);
 		}
 
 	}
 
-
-    
-	public ImageStoreUploadResponse fetchDetails(
-			Map<String, String> imageProperties, String glanceId)
-			throws ImageStoreException {
-
+	public void update(Map<String, Object> imageProperties)
+			throws StoreException {
 		try {
-			return glanceRsClient.fetchDetails(imageProperties, glanceId);
+			glanceRsClient.updateMetadata(imageProperties);
+		} catch (GlanceException e) {
+			throw new StoreException("Error in update to Glance", e);
+		}
+	}
 
-		} catch (Exception e) {
+	@Override
+	public String upload() throws StoreException {
+		String glanceid = null;
+		try {
+			log.info("uploading metadata");
+			 glanceid = glanceRsClient
+					.uploadImageMetaData(objectProperties);
+			log.info("uploading image");
+			uploadImage(objectProperties);
+			return glanceid;
+			// //startPolling(file.geimageProperties, glanceid);
+		} catch (GlanceException e) {
+			log.error("Error  upload to Glance", e);
+			if(StringUtils.isNotBlank(glanceid)){
+				//delete
+				throw new StoreException(Constants.ARTIFACT_ID+":"+glanceid, e);
+			} else if(e.getMessage().startsWith(Constants.ARTIFACT_ID)){
+				throw new StoreException(e.getMessage(), e);
+			}
+			throw new StoreException("Error  upload to Glance", e);
+		}
 
-			throw new ImageStoreException(
+	}
+
+	public void uploadImageMetadata() throws StoreException {
+		try {
+			glanceRsClient.uploadImage(objectProperties);
+		} catch (GlanceException e) {
+			throw new StoreException(
+					e);
+		}
+	}
+
+	public void uploadImageMetadataPOST() throws StoreException {
+		try {
+			glanceRsClient.uploadImageMetaData(objectProperties);
+		} catch (GlanceException e) {
+			throw new StoreException(
+					"Error while uploadImageMetadataPOST in Glance", e);
+		}
+	}
+
+	@Override
+	public <T extends StoreResponse> T fetchDetails() throws StoreException {
+		try {
+			return (T) glanceRsClient.fetchDetails(objectProperties);
+		} catch (GlanceException e) {
+			log.error("Error  fetchDetails in Glance", e);
+			throw new StoreException(
 					"Error while fetchDetails if upload from Glance", e);
 
 		}
 	}
-    
-    
 
-	private void uploadImage(File file, Map<String, String> imageProperties,
-			String id) throws IOException {
-		// glanceRsClient.uploadImage(file,imageProperties,id);
-
-		System.out.println("Inside async uploadImage");
-		ImageTransferTask imageTransferTask = new ImageTransferTask(file,
-				imageProperties, id, glanceRsClient);
-		System.out.println("Created TASK");
-		GlanceImageExecutor.submitTask(imageTransferTask);
-		System.out.println("Task submitted");
-	}
-    
-    
-    
-  /*  private void startPolling(Map<String, String> imageProperties,String glanceid){
-    	 
-        System.out.println("Inside start polling method");
-
-		System.out.println("Inside static block of ImageStoreStatusPoller");
-		SchedulerFactory sf = new StdSchedulerFactory();
+	@Override
+	public void build(Map<String, String> configuration) throws StoreException {
+		super.build(configuration);
 		try {
-			Scheduler sched = sf.getScheduler();
-
-			JobDetail job = JobBuilder.newJob()
-					.withIdentity("StatusPoller", "poller") // name "myJob",
-															// group "group1"
-					.ofType(ImageStoreStatusPoller.class).build();
-			job.getJobDataMap().put("glanceid", glanceid);
-			job.getJobDataMap().put("glancersclient", glanceRsClient);
-			job.getJobDataMap().put("imagepropertiesmap", imageProperties);
-
-			// Trigger the job to run now, and then every 40 seconds
-			Trigger trigger = TriggerBuilder
-					.newTrigger()
-					.withIdentity("PollerTrigger", "poller")
-					.withSchedule(
-							CronScheduleBuilder.cronSchedule("0 0/1 * * * ?"))
-					.build();
-			// Tell quartz to schedule the job using our trigger
-			sched.start();
-			sched.scheduleJob(job, trigger);
-			System.out
-					.println("Inside static block of ImageStoreStatusPoller  sched.start()");
-		} catch (SchedulerException ex) {
-			Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(
-					Level.SEVERE, null, ex);
-		} catch (Exception ex) {
-			Logger.getLogger(ImageStoreStatusPoller.class.getName()).log(
-					Level.SEVERE, null, ex);
+			glanceRsClient = GlanceRsClientBuilder.build(configuration);
+		} catch (GlanceException e) {
+			log.error("Error in creating GlanceRsclient", e);
+			throw new StoreException("Error in creating GlanceRsclient", e);
 		}
 
-	
-        	/// ImageStoreStatusPoller imgPoller=new ImageStoreStatusPoller(glanceRsClient,imageProperties,glanceid);
+	}
 
-        
+	@Override
+	public void update() throws StoreException {
+		// TODO Auto-generated method stub
+		// /System.out.println("objectProperties::"+objectProperties);
+		try {
+			glanceRsClient.updateMetadata(objectProperties);
+		} catch (GlanceException e) {
+			log.error("Error  in updateMetadataGlance in Glance", e);
+			throw new StoreException("Error in updateMetadataGlance", e);
+		}
+	}
 
-    }*/
+	@Override
+	public void delete(URL url) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public <T extends StoreResponse> List<T> fetchAllImages() throws StoreException {
+		// TODO Auto-generated method stub
+		try {
+			return (List<T>) glanceRsClient.fetchAllImages(objectProperties);
+		} catch (GlanceException e) {
+			log.error("Error  in updateMetadataGlance in Glance", e);
+			throw new StoreException("Error in fetching images", e);
+		}
+	}
+
+	@Override
+	public GenericResponse validate() throws StoreException {
+		GenericResponse response = new GenericResponse();
+		try {
+			glanceRsClient.fetchAllImages(objectProperties);
+		} catch (GlanceException e) {
+			response.setError("Invalid API Endpoint");
+		}
+		return response;
+	}
+
 }

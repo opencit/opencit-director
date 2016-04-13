@@ -6,19 +6,28 @@ package com.intel.director.common;
  * and open the template in the editor.
  */
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
+import org.kamranzafar.jtar.TarEntry;
+import org.kamranzafar.jtar.TarOutputStream;
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
+
 
 public class FileUtilityOperation {
 
@@ -35,7 +44,7 @@ public class FileUtilityOperation {
 
 		try {
 			if (destDir.exists()) {
-				deleteDir(destDir);
+				deleteFileOrDirectory(destDir);
 			}
 			archiver.extract(sourceFile, destDir);
 		} catch (IOException ex) {
@@ -46,7 +55,7 @@ public class FileUtilityOperation {
 	}
 
 	// Delete the directory with its contents
-	public void deleteDir(File file) {
+	public void deleteFileOrDirectory(File file) {
 		if (file == null) {
 			return;
 		}
@@ -59,7 +68,7 @@ public class FileUtilityOperation {
 				String files[] = file.list();
 				for (String temp : files) {
 					File fileDelete = new File(file, temp);
-					deleteDir(fileDelete);
+					deleteFileOrDirectory(fileDelete);
 				}
 				// check the directory again, if empty then delete it
 				if (file.list() == null || file.list().length == 0) {
@@ -191,5 +200,85 @@ public class FileUtilityOperation {
 			}
 		}
 		return ret;
+	}
+	
+	public int createTar(String tarFilePath, List<String> filePaths) {
+		FileOutputStream dest;
+		try {
+			dest = new FileOutputStream(tarFilePath);
+		} catch (FileNotFoundException e) {
+			log.error("Error creating tar file", e);
+			return 1;
+		}
+
+		// Create a TarOutputStream
+		TarOutputStream out = new TarOutputStream(
+				new BufferedOutputStream(dest));
+
+		// Files to tar
+		File[] filesToTar = new File[filePaths.size()];
+		int i = 0;
+		for (String filePath : filePaths) {
+			filesToTar[i++] = new File(filePath);
+		}
+
+		for (File f : filesToTar) {
+			try {
+				out.putNextEntry(new TarEntry(f, f.getName()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			BufferedInputStream origin;
+			try {
+				origin = new BufferedInputStream(new FileInputStream(f));
+			} catch (FileNotFoundException e) {
+				log.error("Error reading source file {}", f.getAbsolutePath(),
+						e);
+				return 1;
+			}
+			int count;
+			byte data[] = new byte[2048];
+
+			try {
+				while ((count = origin.read(data)) != -1) {
+					out.write(data, 0, count);
+				}
+			} catch (IOException e) {
+				log.error("Error reding content from origin file", e);
+				closeOriginStream(origin);
+				return 1;
+			}
+
+			try {
+				out.flush();
+			} catch (IOException e) {
+				log.error("Error flushing TAR stream", e);
+				closeOriginStream(origin);
+				return 1;
+			}
+			if (closeOriginStream(origin) == 1) {
+				return 1;
+			}
+
+		}
+
+		try {
+			out.close();
+		} catch (IOException e) {
+			log.error("Error closing TAR stream", e);
+			return 1;
+		}
+		return 0;
+	}
+
+	private int closeOriginStream(BufferedInputStream origin) {
+		try {
+			origin.close();
+		} catch (IOException e) {
+			log.error("Error flushing origin file stream", e);
+			return 1;
+		}
+		return 0;
 	}
 }
