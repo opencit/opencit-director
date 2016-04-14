@@ -124,6 +124,10 @@ public class UnmountImageHandler {
 			try {
 				TrustPolicyDraft trustPolicyDraft = persistService
 						.fetchPolicyDraftForImage(imageId);
+				if(trustPolicyDraft == null){
+					imagesToBeUnmounted.add(imageId);
+					continue;
+				}
 				Calendar trustPolicyDraftEditDate = trustPolicyDraft
 						.getEdited_date();
 				trustPolicyDraftEditDate.set(Calendar.SECOND, 59);
