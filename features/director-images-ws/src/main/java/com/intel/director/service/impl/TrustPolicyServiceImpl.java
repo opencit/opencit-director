@@ -231,16 +231,17 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			policyXml = convertPolicyInWindowsFormat(policyXml);
 			writePolicyAndManifest(policyXml);
 			String[] partition = imageInfo.getPartition().split(",");
-			String mountpath = TdaasUtil.getMountPath(imageInfo.getId()) + File.separator + partition[0];
+			String mountpath = TdaasUtil.getMountPath(imageInfo.getId()) + File.separator + "C:";
 			MountImage.unmountRemoteSystem(mountpath);
 			MountImage.mountWindowsRemoteSystem(ip, user, password, mountpath,
 					partition[0], new String("0666"), new String("0666"));
 			
 			log.info("Pushing Policy To Windows Host");
-			String trustPolicyPath = mountpath + File.separator + "boot"+ File.separator +"trust";
+			//String trustPolicyPath = mountpath + File.separator + "boot"+ File.separator +"trust";
+			String trustPolicyPath = mountpath ;
 			
 			File trustPolicyDir = new File(trustPolicyPath);
-			trustPolicyDir.mkdirs();
+			//trustPolicyDir.mkdirs();
 			
 			try {
 				FileUtils.copyFile(new File(trustPolicyFile), new File(
