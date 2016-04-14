@@ -98,12 +98,14 @@
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>mtwilson-jersey2-util</artifactId>
+			<version>3.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- for the RepeatableRequestFilter -->
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>mtwilson-http-servlets</artifactId>
+			<version>3.1-SNAPSHOT</version>
 		</dependency>
 
 
