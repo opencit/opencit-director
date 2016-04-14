@@ -217,6 +217,7 @@ public class Constants {
 	
 	public static final String DIRECTOR_PROPERTIES_FILE = "director.properties";
 	
-	
-	
+	public static final String HOST_TYPE_WINDOWS="Windows";
+	public static final String HOST_TYPE_LINUX="Linux";
+
 }
