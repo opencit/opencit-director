@@ -12,6 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -560,6 +561,51 @@ public class TrustPolicyDrafts {
 			genericResponse.setError("Error in deletePolicyDraft");
 		}
 		return Response.ok(genericResponse).build();
-
+	}
+	
+	/**
+	 * 
+	 * This method looks into the MW_TRUST_POLICY_DRAFTS table and gets the policy
+	 * string and sends it as an xml content to the user.
+	 * 
+	 * In case the policy is not found for the image id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 *  https://{IP/HOST_NAME}/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996/download
+	 * Input: Trust policy id as path param
+	 * Output: Content sent as stream
+	 * 
+	 *                    </pre>
+	 * 
+	 *                    *
+	 * @param imageId
+	 *            the image for which the policy is downloaded
+	 * @return XML content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}/download")
+	@GET
+	@Produces(MediaType.APPLICATION_XML)
+	public Response downloadPolicyForImageId(
+			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyDraftId,RegexPatterns.UUID)){
+			genericResponse.error = "Trust Policy id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		TrustPolicyDraft trustPolicyDraft = imageService.fetchTrustpolicydraftById(trustPolicyDraftId);
+		if(trustPolicyDraft == null){
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+		ResponseBuilder response = Response.ok(trustPolicyDraft.getTrust_policy_draft());
+		response.header("Content-Disposition", "attachment; filename=policy_"
+				+ trustPolicyDraft.getImgAttributes().getImage_name() + ".xml");
+		return response.build();
 	}
 }
