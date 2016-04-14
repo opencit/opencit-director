@@ -117,7 +117,7 @@ public class ImageDao {
 			StringBuffer queryString = new StringBuffer(
 					"select id,name,image_format,image_deployments,created_by_user_id,created_date,"
 							+ "location,mounted_by_user_id,sent,status,edited_by_user_id,edited_date,deleted,"
-							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,content_length,repository,tag,policy_upload_count,upload_variables_md5,tmp_location from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
+							+ "trust_policy_id,trust_policy_name,trust_policy_draft_id,trust_policy_draft_name,image_upload_count,content_length,repository,tag,policy_upload_count,upload_variables_md5,tmp_location,drives from mw_image_info_view where deleted=false and (status='In Progress' or status='Complete') and 1=1");
 
 			if (imgFilter != null) {
 				if (imgFilter.getId() != null) {
@@ -247,6 +247,7 @@ public class ImageDao {
 					imgInfo.setPolicy_uploads_count(((Long) imageObj[21]).intValue());
 					imgInfo.setUploadVariableMD5((String) imageObj[22]);
 					imgInfo.setTmpLocation((String) imageObj[23]);
+					imgInfo.setPartition((String) imageObj[24]);
 					imageInfoList.add(imgInfo);
 				}
 			}
@@ -314,6 +315,7 @@ public class ImageDao {
 				}
 			
 			}
+			imgInfo.setPartition(mwImage.getPartition());
 			if (mwImage.getTrustPolicyDraft() != null) {
 				imgInfo.setTrust_policy_draft_id(mwImage.getTrustPolicyDraft()
 						.getId());
