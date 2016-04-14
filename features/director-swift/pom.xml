@@ -40,12 +40,12 @@
 		<!-- Director -->
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-images-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-			<version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 			<artifactId>director-image-store</artifactId>
 		</dependency>
 
@@ -54,7 +54,6 @@
 		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-jaxrs2-client</artifactId>
-			<version>${mtwilson.version}</version>
 		</dependency>
 
 		<dependency>
