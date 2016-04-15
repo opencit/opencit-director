@@ -565,10 +565,10 @@ public class TrustPolicyDrafts {
 	
 	/**
 	 * 
-	 * This method looks into the MW_TRUST_POLICY_DRAFTS table and gets the policy
+	 * This method looks into the MW_TRUST_POLICY_DRAFTS table and gets the policy draft
 	 * string and sends it as an xml content to the user.
 	 * 
-	 * In case the policy is not found for the image id, HTTP 404 is returned
+	 * In case the policy draft is not found for the trust policy draft id, HTTP 404 is returned
 	 * 
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
@@ -576,21 +576,21 @@ public class TrustPolicyDrafts {
 	 * 
 	 *                    <pre>
 	 *  https://{IP/HOST_NAME}/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996/download
-	 * Input: Trust policy id as path param
+	 * Input: Trust policy draft id as path param
 	 * Output: Content sent as stream
 	 * 
 	 *                    </pre>
 	 * 
 	 *                    *
-	 * @param imageId
-	 *            the image for which the policy is downloaded
+	 * @param trustPolicyDraftId
+	 *            the trust policy draft for which the draft is downloaded
 	 * @return XML content of the policy
 	 * @throws DirectorException
 	 */
 	@Path("trust-policy-drafts/{trustPolicyDraftId: [0-9a-zA-Z_-]+}/download")
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public Response downloadPolicyForImageId(
+	public Response downloadPolicyForTrustPolicyDraftId(
 			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
 		GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyDraftId,RegexPatterns.UUID)){

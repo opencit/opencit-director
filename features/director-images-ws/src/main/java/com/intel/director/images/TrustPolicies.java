@@ -300,7 +300,7 @@ public class TrustPolicies {
 	 * This method looks into the MW_TRUST_POLICY table and gets the policy
 	 * string and sends it as an xml content to the user.
 	 * 
-	 * In case the policy is not found for the image id, HTTP 404 is returned
+	 * In case the policy is not found for the trust policy id, HTTP 404 is returned
 	 * 
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
@@ -314,15 +314,15 @@ public class TrustPolicies {
 	 *                    </pre>
 	 * 
 	 *                    *
-	 * @param imageId
-	 *            the image for which the policy is downloaded
+	 * @param trustPolicyId
+	 *            the trust policy for which the policy is downloaded
 	 * @return XML content of the policy
 	 * @throws DirectorException
 	 */
 	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+}/download")
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public Response downloadPolicyForImageId(
+	public Response downloadPolicyForTrustPolicyId(
 			@PathParam("trustPolicyId") String trustPolicyId) {
 		GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
