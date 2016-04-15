@@ -390,9 +390,14 @@ public class DirectorUtil {
 		// Set this to true if the output needs to be beautified.
 		writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
 		// Set this to true if the declaration is needed to be outputted.
-		writer.getDomConfig().setParameter("xml-declaration", keepDeclaration);
+		writer.getDomConfig().setParameter("xml-declaration", false);
 
-		return writer.writeToString(document);
+		String formatted = writer.writeToString(document);
+		if (keepDeclaration) {
+			formatted = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"+System.getProperty("line.separator")+formatted;	
+		}		
+
+		return formatted;
 	}
 
 	

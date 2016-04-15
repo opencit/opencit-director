@@ -77,7 +77,7 @@ public class CreateTarTask extends ImageActionAsyncTask {
 				String tag = display_name.substring(tagStart);
 				int exitCode = DockerUtil.dockerSave(repo, tag, tarDestination,
 						trustPolicy.getDisplay_name().replace("/", "-") + ".tar");				
-				DockerUtil.dockerRMI(imageInfo.getRepository(), trustPolicy.getDisplay_name());
+				DockerUtil.dockerRMI(repo, tag);
 				if (exitCode != 0) {
 					new FileUtilityOperation().deleteFileOrDirectory(new File(tarDestination));
 					log.error("Docker save for image {} failed", imageInfo.id);
