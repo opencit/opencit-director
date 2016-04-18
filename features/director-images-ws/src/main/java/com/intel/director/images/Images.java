@@ -1641,14 +1641,32 @@ public class Images {
 	 * https://{IP/HOST_NAME}/v1/images-stalled
 	 * Input: NA
 	 * Output:
-	 * []
+	 * [
+	{
+	"created_by_user_id": "admin",
+	"created_date": "2016-04-14 18:49:11",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-04-14 18:49:11",
+	"id": "AC4750E4-4018-449D-B471-9517122FE29B",
+	"image_name": "123.img",
+	"image_format": "qcow2",
+	"image_deployments": "VM",
+	"image_size": 13631488,
+	"sent": 0,
+	"deleted": false,
+	"image_uploads_count": 0,
+	"policy_uploads_count": 0,
+	"image_upload_status": "In Progress",
+	"image_Location": "/mnt/images/"
+	}
+	]
 	 *                    </pre>
 	 */
 	@Path("images-stalled")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStalledImages() {
-		List<ImageInfo> stalledImages = null;
+		List<ImageInfo> stalledImages;
 		GenericResponse response = new GenericResponse();
 		try {
 			stalledImages = imageService.getStalledImages();
@@ -1709,7 +1727,7 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
 		}
 
-		List<HashTypeObject> imageHashType = null;
+		List<HashTypeObject> imageHashType;
 		try {
 			imageHashType = imageService.getImageHashType(deploymentType);
 		} catch (DirectorException e) {

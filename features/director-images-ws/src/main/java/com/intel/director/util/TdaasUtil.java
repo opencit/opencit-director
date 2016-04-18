@@ -636,8 +636,7 @@ public class TdaasUtil {
 	public static boolean addSshKey(String ip, String username, String password)
 			throws DirectorException {
 
-		// TODO Unused after assignment
-		boolean flag = false;
+		boolean flag;
 		try {
 
 			SSHManager instance = new SSHManager(username, password, ip,
@@ -718,7 +717,6 @@ public class TdaasUtil {
 
 		for (Measurement measurement : measurements) {
 			if (measurement instanceof DirectoryMeasurement) {
-				DirectoryMeasurement directoryMeasurement = (DirectoryMeasurement) measurement;
 				DirectoryMeasurementType directoryMeasurementType = new DirectoryMeasurementType();
 				directoryMeasurementType.setPath(measurement.getPath());
 				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude()); 

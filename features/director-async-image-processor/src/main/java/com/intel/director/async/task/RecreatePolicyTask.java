@@ -62,7 +62,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		// try {
 		log.info("Inside runRecreatePolicyTask for ::" + imageActionObject.getImage_id());
 
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyObj = null;
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyObj;
 		try {
 			trustPolicyObj = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
 		} catch (JAXBException e) {
@@ -78,7 +78,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		imgOrder.setImgStoreUploadFields(ImageStoreUploadFields.DATE);
 		imgOrder.setOrderBy(OrderByEnum.DESC);
 		boolean regenPolicy = false;
-		List<ImageStoreUploadTransferObject> imageUploads = null;
+		List<ImageStoreUploadTransferObject> imageUploads;
 		try {
 			imageUploads = persistService.fetchImageUploads(imgOrder);
 		} catch (DbException e) {
@@ -86,6 +86,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 			log.error("Error in fetchImageUploads , Recreate task", e);
 			return false;
 		}
+
 		for (ImageStoreUploadTransferObject imageTransfer : imageUploads) {
 			if (imageTransfer.getStoreArtifactId().equals(trustPolicyObj.getImage().getImageId())) {
 				log.info("Found an image in glance");
@@ -101,7 +102,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 			UUID uuid = new UUID();
 			trustPolicyObj.getImage().setImageId(uuid.toString());
 			trustPolicyObj.setSignature(null);
-			TrustPolicyService trustPolicyService = null;
+			TrustPolicyService trustPolicyService;
 			try {
 				trustPolicyService = new TrustPolicyServiceImpl(imageInfo.getId());
 			} catch (DirectorException e1) {

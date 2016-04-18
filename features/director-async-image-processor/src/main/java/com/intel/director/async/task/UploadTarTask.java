@@ -56,7 +56,7 @@ public class UploadTarTask extends GenericUploadTask {
 	}
 
 	public boolean runUploadTarTask() {
-		boolean runFlag = false;
+		boolean runFlag;
 		log.info("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";

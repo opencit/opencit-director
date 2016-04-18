@@ -985,14 +985,13 @@ public class Mapper {
 		String[] artifact_types = imageStoreTO.getArtifact_types();
 		Arrays.sort(artifact_types);
 		if (artifact_types.length != 0) {
-			String artifact_type = "";
+			StringBuffer bufferForArtifactString = new StringBuffer("");
 			for (String artifact : artifact_types) {
-				artifact_type += artifact;
-				artifact_type += ",";
+				bufferForArtifactString = bufferForArtifactString.append(artifact).append(",");
 			}
-			String substring = artifact_type.substring(0,
-					artifact_type.length() - 1);
-			mwImageStore.setArtifact_type(substring);
+			String artifactString = bufferForArtifactString.toString().substring(0,
+					bufferForArtifactString.length() - 1);
+			mwImageStore.setArtifact_type(artifactString);
 		}
 		mwImageStore.setConnector(imageStoreTO.getConnector());
 		mwImageStore.setName(imageStoreTO.getName());

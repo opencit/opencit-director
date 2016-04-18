@@ -87,7 +87,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	@SuppressWarnings("deprecation")
 	@Override
 	public String signTrustPolicy(String policyXml) throws DirectorException {
-		String signedPolicyXml = null;
+		String signedPolicyXml;
 		Extensions.register(TlsPolicyCreator.class,
 				com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
 		log.info("Register TlsPolicyCreator");
@@ -189,7 +189,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		String trustPolicyFile = localPathForPolicyAndManifest + File.separator + trustPolicyName;
 
 		String manifestFile = localPathForPolicyAndManifest + File.separator + "manifest.xml";
-		String manifest = null;
+		String manifest;
 		try {
 			String unformattedManifest = TdaasUtil.getManifestForPolicy(policyXml);
 			manifest = DirectorUtil.prettifyXml(unformattedManifest);
@@ -213,7 +213,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		fileUtilityOperation.writeToFile(manifestFile, manifest);
 
 		// Push the policy and manifest to the remote host
-		SshSettingInfo existingSsh = null;
+		SshSettingInfo existingSsh;
 		try {
 			existingSsh = persistService.fetchSshByImageId(imageInfo.id);
 		} catch (DbException e) {

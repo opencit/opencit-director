@@ -42,23 +42,23 @@ public class UploadImageTask extends GenericUploadTask {
 	}
 	
 	
-	public String fetchUploadImageId(){
+	public String fetchUploadImageId() {
 		log.info("Inside UploadImageTask fetchUploadImageId()");
-		String glanceId=null;
+		String glanceId;
 		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
 		ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
 				.fetchImageUploadByImageId(imageInfo.getId());
-		glanceId= imageInfo.getId();
-		
+		glanceId = imageInfo.getId();
+
 		if (imageUploadByImageId != null) {
 			UUID uuid = new UUID();
-			glanceId= uuid.toString();
+			glanceId = uuid.toString();
 		}
-		log.info("Inside UploadImageTask fetchUploadImageId() glanceId::"+glanceId);
+		log.info("Inside UploadImageTask fetchUploadImageId() glanceId::" + glanceId);
 		return glanceId;
 	}
 	
-	public String fetchUploadImageName(){
+	public String fetchUploadImageName() {
 		return imageInfo.getImage_name();
 	}
 
@@ -83,7 +83,7 @@ public class UploadImageTask extends GenericUploadTask {
 	 * Actual implementation of task for uploading image
 	 */
 	public boolean runUploadImageTask() {
-		boolean runFlag = false;
+		boolean runFlag;
 
 		log.info("Inside runUploadImageTask for ::"
 				+ imageActionObject.getImage_id());
@@ -187,8 +187,7 @@ public class UploadImageTask extends GenericUploadTask {
 			customProperties.put(Constants.DOCKER_TAG_TO_USE, dockerTagToUse);
 		} else {
 			String imageLocation = imageInfo.getLocation();
-			String imageFilePath = null;
-			imageFilePath = imageLocation + imageInfo.getImage_name();
+			String imageFilePath = imageLocation + imageInfo.getImage_name();
 			//File content = new File(imageFilePath);
 			customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 			customProperties.put(Constants.NAME, imageInfo.getRepository()

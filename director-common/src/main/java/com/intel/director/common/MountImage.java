@@ -32,7 +32,7 @@ public class MountImage {
 	}
 
 	public static int unmountImage(String mountPath) {
-		int exitcode = 0; 
+		int exitcode; 
 		String command = Constants.mountScript + SPACE + mountPath;
 		log.debug("Unmounting the vm image with mount path : " + mountPath);
 		log.debug("\n" + "unmounting the vm image : " + mountPath);
@@ -81,7 +81,7 @@ public class MountImage {
 	
 	
 	public static int mountDocker(String mountpath,String repository,String tag) {
-		int exitcode = 0; 
+		int exitcode = 1; 
 		String command = Constants.mountDockerScript + SPACE
 				+ "mount" + SPACE + mountpath + SPACE + repository + SPACE + tag;
 		log.info("\n" + "Mounting the docker image : " + mountpath
@@ -91,10 +91,9 @@ public class MountImage {
 					Constants.mountDockerScript, "mount", mountpath,
 					repository, tag);
 		} catch (IOException e) {
-			if(exitcode == 0){
+			if (exitcode == 0) {
 				exitcode = 1;
 			}
-
 			log.error("Error in mounting docker image" + e);
 		}
 		return exitcode;
@@ -122,12 +121,12 @@ public class MountImage {
 	
 	public static int mountWindowsRemoteSystem(String ipAddress,
 			String userName, String password, String mountpath, String partition) {
-		int exitcode = 0;
+		int exitcode;
 		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE
 				+ ipAddress + SPACE + partition + SPACE + mountpath + SPACE
 				+ userName + SPACE + password;
 
-		log.info("MOunting To Windows Remote Host Using :: " + command);
+		log.info("Mounting To Windows Remote Host Using :: " + command);
 
 		try {
 			exitcode = DirectorUtil.executeCommandInExecUtil(
@@ -141,13 +140,10 @@ public class MountImage {
 	}
 	
 	public static int unmountWindowsRemoteSystem(String mountPath) {
-		int exitcode = 0;
-
-		log.debug("Unmounting the Remote File System in mount path : "
-				+ mountPath);
+		int exitcode;
+		log.debug("Unmounting the Remote File System in mount path : " + mountPath);
 		try {
-			exitcode = DirectorUtil.executeCommandInExecUtil("umount",
-					mountPath);
+			exitcode = DirectorUtil.executeCommandInExecUtil("umount", mountPath);
 		} catch (IOException e) {
 			exitcode = 1;
 			log.error("Error in unmounting remote host" + e);

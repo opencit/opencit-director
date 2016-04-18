@@ -13,12 +13,18 @@ public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 
 	public static void init() {
 		getAllValues();
-		deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_VM,
-				getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_VM).value());
-		deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_BAREMETAL,
-				getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL).value());
-		deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_DOCKER,
-				getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER).value());
+		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_VM) != null) {
+			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_VM,
+					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_VM).value());
+		}
+		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL) != null) {
+			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_BAREMETAL,
+					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL).value());
+		}
+		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER) != null) {
+			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_DOCKER,
+					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER).value());
+		}
 	}
 
 	public static Map<String, String> getAllHashTypes() {

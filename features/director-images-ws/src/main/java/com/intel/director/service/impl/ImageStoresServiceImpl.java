@@ -234,7 +234,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 
 	@Override
 	public void validateImageStore(String imageStoreId) throws DirectorException {
-		StoreManager manager = null;
+		StoreManager manager;
 		try {
 			manager = StoreManagerFactory
 					.getStoreManager(imageStoreId);

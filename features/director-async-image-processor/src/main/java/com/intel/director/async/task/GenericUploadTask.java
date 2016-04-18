@@ -56,7 +56,7 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		}
 		boolean runFlag = true;
 		// Select the image store for upload
-		StoreManager imageStoreManager =null;
+		StoreManager imageStoreManager;
 		try {
 			imageStoreManager = StoreManagerFactory
 					.getStoreManager(taskAction.getStoreId());
@@ -134,12 +134,16 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		ImageStoreUploadTransferObject imageUploadTransferObject = new ImageStoreUploadTransferObject();
 		imageUploadTransferObject.setStatus(storeResponse.getStatus());
 		ImageAttributes imageAttr = new ImageAttributes();
-		ImageInfo image = null;
+		ImageInfo image;
 		try {
 			image = persistService.fetchImageById(imageInfo.id);
 		} catch (DbException e) {
 			log.error("Error fetching image", e);
 			throw new DirectorException(e);
+		}
+		if (image == null) {
+			log.error("No Image Found with id " + imageInfo.id);
+			throw new DirectorException("No Image Found with id " + imageInfo.id);
 		}
 		String trustPolicyId = image.getTrust_policy_id();
 

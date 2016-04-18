@@ -10,7 +10,6 @@ import org.apache.commons.lang.NotImplementedException;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageStoreUploadResponse;
 import com.intel.director.api.StoreResponse;
-import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.store.exception.StoreException;
@@ -28,12 +27,7 @@ public class DockerHubManager extends StoreManagerImpl {
 		ImageInfo imageinfo = (ImageInfo) objectProperties
 				.get(ImageInfo.class.getName());
 		
-		
-		TrustPolicy trustPolicy = (TrustPolicy) objectProperties
-		.get(TrustPolicy.class.getName());
-
 		String dockerTagToUse = (String) objectProperties.get(Constants.DOCKER_TAG_TO_USE);
-		
 		
 		log.info("Executing /opt/director/bin/dockerhubUpload.sh" + SPACE
 				+ (String) objectProperties.get(Constants.DOCKER_HUB_USERNAME)
@@ -66,7 +60,10 @@ public class DockerHubManager extends StoreManagerImpl {
 		StoreResponse imageStoreResponse = new ImageStoreUploadResponse();
 		imageStoreResponse.setStatus(com.intel.director.common.Constants.COMPLETE);
 		ImageInfo  imageInfo = (ImageInfo) objectProperties.get(ImageInfo.class.getName());
-		imageStoreResponse.setId(imageInfo.id);
+
+		if (imageInfo != null) {
+			imageStoreResponse.setId(imageInfo.id);
+		}
 		return (T) imageStoreResponse;
 	}
 

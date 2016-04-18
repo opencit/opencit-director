@@ -29,7 +29,6 @@ public class BMLinuxMountServiceImpl extends MountServiceImpl {
 			throw new DirectorException(msg, e);
 		}
 		log.info("BM Live host : " + info.toString());
-		persistService = null;
 		return MountImage.mountRemoteSystem(info.getIpAddress(), info.getUsername(), info.getSshPassword().getKey(),
 				mountPath);
 	}

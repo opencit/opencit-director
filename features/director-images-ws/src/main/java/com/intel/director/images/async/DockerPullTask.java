@@ -40,7 +40,7 @@ public class DockerPullTask implements Runnable {
 
 	@Override
 	public void run() {
-		ImageInfo image = null;
+		ImageInfo image;
 		log.info("Inside DockerPullTask run()");
 		try {
 			image = persistenceManager.fetchImageById(imageId);

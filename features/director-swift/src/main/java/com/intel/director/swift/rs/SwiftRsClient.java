@@ -70,7 +70,7 @@ public class SwiftRsClient {
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(swiftApiEndpoint);
 		} catch (MalformedURLException e) {
@@ -233,7 +233,7 @@ public class SwiftRsClient {
 			throw new SwiftException("getObject malformed url", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
 		response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -426,8 +426,9 @@ public class SwiftRsClient {
 
 		
 		HttpResponse response;
+		InputStream ist = null;
 		try {
-			InputStream ist = new FileInputStream(file);
+			ist = new FileInputStream(file);
 
 			HttpEntity inputHttp = new InputStreamEntity(ist);
 
@@ -450,11 +451,19 @@ public class SwiftRsClient {
 		} catch (Exception e) {
 			log.error("createOrReplaceObject I/O Failed ", e);
 			throw new SwiftException("createOrReplaceObject I/O Failed ", e);
+		} finally {
+			try {
+				ist.close();
+			} catch (IOException e) {
+				log.error("Error while closing file stream", e);
+			}
 		}
-		if((response.getStatusLine().getStatusCode()<200) && (response.getStatusLine().getStatusCode()>204) ){
-			log.error("Swift createOrReplaceObject failed,"+response.getStatusLine());
-			throw new SwiftException("Swift createOrReplaceObject failed,"+response.getStatusLine());
+		
+		if ((response.getStatusLine().getStatusCode() < 200) && (response.getStatusLine().getStatusCode() > 204)) {
+			log.error("Swift createOrReplaceObject failed," + response.getStatusLine());
+			throw new SwiftException("Swift createOrReplaceObject failed," + response.getStatusLine());
 		}
+		
 		long end = new Date().getTime();
 		printTimeDiff("createOrReplaceObject swift", start, end);
 		return storageUrl + "/" + containerName + "/"
@@ -505,66 +514,17 @@ public class SwiftRsClient {
 		+ objectName;
 	}
 
-/*	private void createAuthToken(String swiftAuthEndpoint,String accountName, String accountUsername,
-			String accountUserPassword) throws SwiftException {
-		
-		long start = new Date().getTime();
-		Response response=null;
-		WebTarget authWebTarget;
-		Client authWebClient;
-		authWebClient = ClientBuilder.newBuilder().build();
-		URL authUrl = null;
-		try {
-			authUrl = new URL(swiftAuthEndpoint);
-		} catch (MalformedURLException e) {
-			log.error("Initialize SwiftRsClient failed");
-			throw new SwiftException("Initialize SwiftRsClient failed", e);
-		}
-		authWebTarget = authWebClient.target(authUrl.toExternalForm());
-		try {
-			response = webTarget
-					.path("/auth/v1.0")
-					.request()
-					.header(Constants.SWIFT_STORAGE_USER,
-							accountName + ":" + accountUsername)
-					.header(Constants.SWIFT_STORAGE_PASSWORD,
-							accountUserPassword).get();
-			response = authWebTarget
-					.request()
-					.header(Constants.SWIFT_STORAGE_USER,
-							accountName + ":" + accountUsername)
-					.header(Constants.SWIFT_STORAGE_PASSWORD,
-							accountUserPassword).get();
-			
-		}catch (Exception e) {
-			throw new SwiftException("createAuthToken Failed ", e);
-		}
-		
-		if((response.getStatus()<200) && (response.getStatus()>204)){
-			log.error("Swift createAuthToken failed,"+response.getStatus());
-			throw new SwiftException("Swift createAuthToken failed,"+response.getStatus());
-		}
-		
-		authToken = response.getHeaderString(Constants.AUTH_TOKEN);
-		storageUrl = response.getHeaderString(Constants.SWIFT_STORAGE_URL);
-
-		System.out.println("Inside authToken::" + authToken);
-		long end = new Date().getTime();
-		printTimeDiff("createAuthToken swift", start, end);
-	}
-	*/
 	private void createAuthTokenFromKeystone(String swiftApiEndpoint,String swiftAuthEndpoint,
 			String tenantName, String userName, String password,String swiftKeystoneServiceName)
 			throws SwiftException {
 		long start = new Date().getTime();
-		String hostByUser=null;
-		String hostFromKeyStone = null;
-		String protocolByUser = null;
-		String protocolFromKeyStone = null;
-		HttpClient httpClient = null;
+		String hostByUser;
+		String hostFromKeyStone;
+		String protocolByUser;
+		String protocolFromKeyStone;
 		BufferedReader br = null;
-		int portByUser = -1;
-		int portFormKeyStone = -1;
+		int portByUser;
+		int portFormKeyStone;
 		boolean responseHasError = true;
 		// String authEndpoint = swiftAuthEndpoint + "/v2.0/tokens";
 		try {
@@ -579,7 +539,7 @@ public class SwiftRsClient {
 		} catch (MalformedURLException e3) {
 			throw new SwiftException("Error getting swift host", e3);
 		}
-		httpClient = HttpClientBuilder.create().build();
+		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
 
 		AuthTokenBody authTokenBody = new AuthTokenBody();

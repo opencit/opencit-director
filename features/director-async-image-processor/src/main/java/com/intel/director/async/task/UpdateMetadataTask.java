@@ -113,7 +113,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		PolicyUploadFilter policyUploadFilter = new PolicyUploadFilter();
 		policyUploadFilter.setTrust_policy_id(trustPolicy.getId());
 			
-		List<PolicyUploadTransferObject> policyUploads = null;
+		List<PolicyUploadTransferObject> policyUploads;
 		try {
 			policyUploads = persistService.fetchPolicyUploads(policyUploadFilter, null);
 		} catch (DbException e1) {
@@ -121,21 +121,34 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			updateImageActionState(Constants.ERROR, "Error in Updating metadata in imagestore");
 			return false;
 		}
+		
+		if(policyUploads == null){
+			log.error("No policy upload entry found");
+			updateImageActionState(Constants.ERROR,
+					"Error in Updating metadata in imagestore because No policy upload entry found");
+			return false;
+		}
+		
 		PolicyUploadTransferObject policyUploadTransferObject = policyUploads.get(policyUploads.size() - 1);
 		String policyUri = policyUploadTransferObject.getPolicy_uri();
 		String previousStoreId = policyUploadTransferObject.getStoreId();
 		ImageStoreTransferObject previousUploadImageStoreDTO = null;
 		ImageStoreTransferObject currentImageStoreDTO = null;
 		try {
-			currentImageStoreDTO=persistService.fetchImageStorebyId(storeId);
+			currentImageStoreDTO = persistService.fetchImageStorebyId(storeId);
 			previousUploadImageStoreDTO = persistService.fetchImageStorebyId(previousStoreId);
 			
 		} catch (DbException e) {
 			log.error("No store exists for id {}", previousStoreId);
-
+		}
+		
+		if(previousUploadImageStoreDTO == null){
+			log.error("No previous upload Image store exists");
+			return false;
 		}
 
-		String updateMessage="Policy attached to Image "+updatedArtifactName+" in store "+currentImageStoreDTO.getName();
+		String updateMessage = "Policy attached to Image " + updatedArtifactName + " in store "
+				+ currentImageStoreDTO.getName();
 		String connectorName = previousUploadImageStoreDTO.getConnector();
 		String trustPolicyLocationTag = connectorName.toLowerCase() + ":" + policyUri;
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, trustPolicyLocationTag);

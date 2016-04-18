@@ -117,7 +117,7 @@ public  class ImageActionImpl implements ImageActionService {
 			ImageActionRequest imageActionRequest) throws DirectorException {
 		
 
-		ImageInfo imageInfo = null;
+		ImageInfo imageInfo;
 		try {
 			imageInfo = persistService
 					.fetchImageById(imageActionRequest.image_id);
@@ -127,14 +127,10 @@ public  class ImageActionImpl implements ImageActionService {
 			throw new DirectorException("Image with id :"
 					+ imageActionRequest.image_id + " does'nt exist", e1);
 		}
-		if(imageInfo==null){
+		if (imageInfo == null) {
 			throw new DirectorException("Image does not exist");
 		}
 		
-		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
-		
-		
-
 		TrustPolicy trustPolicy = null;
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
 		if (imageInfo.getTrust_policy_id() != null) {
@@ -200,7 +196,7 @@ public  class ImageActionImpl implements ImageActionService {
 				imgUpFilter.setStoreArtifactId(uploadId);
 				imgUpFilter.setEnableDeletedCheck(true);
 				imgUpFilter.setDeleted(false);
-				List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+				List<ImageStoreUploadTransferObject> fetchImageUploads;
 				try {
 					fetchImageUploads = persistService.fetchImageUploads(
 							imgUpFilter, imgOrder);
@@ -343,7 +339,7 @@ public  class ImageActionImpl implements ImageActionService {
 			if(!(ValidationUtil.isValidWithRegex(artifactStoreDetails.artifact_name, Constants.ARTIFACT_POLICY))){
 				return errors;
 			}
-		}else{
+		} else {
 			return errors;
 		}
 	
@@ -364,19 +360,20 @@ public  class ImageActionImpl implements ImageActionService {
 		if(trustPolicyId == null){
 			throw new DirectorException("No policy associated with the image");
 		}
-		TrustPolicy fetchPolicyById = null;
+		TrustPolicy fetchPolicyById;
 		try {
 			fetchPolicyById = persistService.fetchPolicyById(trustPolicyId);
-			if(fetchPolicyById == null){
-				throw new DirectorException("No policy found for id "+trustPolicyId);
-			}
 		} catch (DbException e1) {
-			throw new DirectorException("No policy found for id "+trustPolicyId, e1);
+			log.error("Error while fetching policy for id " + trustPolicyId);
+			throw new DirectorException("Error while fetching policy for id " + trustPolicyId, e1);
+		}
+		if(fetchPolicyById == null){
+			throw new DirectorException("No policy found for id "+trustPolicyId);
 		}
 		
 		
 		//Now check for the upload var
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy;
 		try {
 			trustPolicy = TdaasUtil.getPolicy(fetchPolicyById.getTrust_policy());
 		} catch (JAXBException e1) {
@@ -432,19 +429,20 @@ public  class ImageActionImpl implements ImageActionService {
 
 	}
 	
-	public ImageActionHistoryResponse fetchActionHistoryResponse(
-			ImageActionObject imageActionObject) {
+	public ImageActionHistoryResponse fetchActionHistoryResponse(ImageActionObject imageActionObject) {
 		String artifactName = null;
-		List<ImageActionTask> imageActiontaskList = imageActionObject
-				.getActions();
-		ImageInfo image =null;
+		List<ImageActionTask> imageActiontaskList = imageActionObject.getActions();
+		ImageInfo image = null;
 		try {
-			 image = imageService.fetchImageById(imageActionObject.getImage_id());
-			
+			image = imageService.fetchImageById(imageActionObject.getImage_id());
 		} catch (DirectorException e) {
 			log.error("fetchActionHistoryResponse ,Unable to fetch image");
-			
 		}
+
+		if (image == null) {
+			log.error("Image with id " + imageActionObject.getImage_id() + "does not exist");
+		}
+
 		boolean isDockerImage=false;
 		if(Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image.getImage_deployments())){
 			isDockerImage=true;
@@ -491,9 +489,9 @@ public  class ImageActionImpl implements ImageActionService {
 			previousTaskname=imageActionTask.getTask_name();
 		}
 
-		ImageStoreTransferObject imageStoreDTO = null;
-		List<ImageActionTask> imageActionTaskList = imageActionObject
-				.getActions();
+		ImageStoreTransferObject imageStoreDTO;
+		List<ImageActionTask> imageActionTaskList = imageActionObject.getActions();
+
 		Set<String> storeNames = new HashSet<String>();
 
 		for (ImageActionTask imageActiontask : imageActionTaskList) {

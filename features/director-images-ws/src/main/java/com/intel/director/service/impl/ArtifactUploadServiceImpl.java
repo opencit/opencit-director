@@ -93,7 +93,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 
 		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
 		imageStoreFilter.setConnector(Constants.CONNECTOR_GLANCE);
-		List<ImageStoreTransferObject> fetchImageStores = null;
+		List<ImageStoreTransferObject> fetchImageStores;
 		try {
 			fetchImageStores = persistenceManager
 					.fetchImageStores(imageStoreFilter);
@@ -112,7 +112,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 			if (imageStoreTransferObject.isDeleted()) {
 				continue;
 			}
-			StoreManager imageStoreManager = null;
+			StoreManager imageStoreManager;
 			try {
 				imageStoreManager = StoreManagerFactory
 						.getStoreManager(imageStoreTransferObject.getId());
@@ -120,7 +120,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				log.error("Error in getting imageStoreManager ", e);
 				continue;
 			}
-			List<ImageStoreUploadResponse> fetchAllImages = null;
+			List<ImageStoreUploadResponse> fetchAllImages;
 			try {
 				fetchAllImages = imageStoreManager.fetchAllImages();
 			} catch (StoreException e) {

@@ -134,12 +134,12 @@ public class ImageStoreDao {
 				if (imageStoreFilter.getArtifact_types() != null && imageStoreFilter.getArtifact_types().length != 0) {
 					String[] artifact_types = imageStoreFilter.getArtifact_types();
 					Arrays.sort(artifact_types);
-					String artifactString = "";
+					StringBuffer bufferForArtifactString = new StringBuffer("");
 					for (String artifact : artifact_types) {
-						artifactString += artifact;
-						artifactString += "%";
+						bufferForArtifactString = bufferForArtifactString.append(artifact).append("%");
 					}
-					artifactString = artifactString.substring(0, artifactString.length() - 1);
+					String artifactString = bufferForArtifactString.toString().substring(0,
+							bufferForArtifactString.length() - 1);
 					predicates.add(criteriaBuilder.like(mwImageStore
 							.<String> get(imageStoreAttributestoDataMapper
 									.get(ImageStoreFields.ARTIFACT_TYPE)), "%"

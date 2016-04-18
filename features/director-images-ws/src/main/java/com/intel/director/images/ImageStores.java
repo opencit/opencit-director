@@ -115,7 +115,7 @@ public class ImageStores {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getImageStores(@QueryParam("artifacts") String artifacts) throws DirectorException {
 		ImageStoreResponse imageStoreResponse = new ImageStoreResponse();
-		List<ImageStoreTransferObject> imageStores = null;
+		List<ImageStoreTransferObject> imageStores;
 
 		List<ImageStoreTransferObject> activeImageStores = new ArrayList<>();
 		if (StringUtils.isBlank(artifacts)) {
