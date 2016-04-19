@@ -120,12 +120,11 @@ public class MountImage {
 	}
 	
 	
-	public static int mountWindowsRemoteSystem(String ipAddress,
-			String userName, String password, String mountpath, String partition,String fileMode,String DirMode) {
+	public static int mountWindowsRemoteSystem(String ipAddress, String userName, String password, String mountpath,
+			String partition, String fileMode, String DirMode) {
 		int exitcode = 0;
-		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE
-				+ ipAddress + SPACE + partition + SPACE + mountpath + SPACE
-				+ userName + SPACE + password;
+		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE + ipAddress + SPACE + partition + SPACE
+				+ mountpath + SPACE + userName + SPACE + fileMode + SPACE + DirMode;
 
 		String domain = "";
 
@@ -135,10 +134,10 @@ public class MountImage {
 			domain = splitUserName[1];
 		}
 
-		if(partition.contains(":")){
+		if (partition.contains(":")) {
 			partition = partition.replace(":", "");
 		}
-		
+
 		log.info("MOunting To Windows Remote Host Using :: " + command);
 		try {
 			DirectorUtil.callExec("mkdir -p " + mountpath);
@@ -147,10 +146,8 @@ public class MountImage {
 			log.error(msg);
 		}
 		try {
-			exitcode = DirectorUtil.executeCommandInExecUtil(
-					Constants.mountWindowsRemoteFileSystemScript, ipAddress,
-					partition, mountpath, userName, password, fileMode,
-					DirMode, domain);
+			exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountWindowsRemoteFileSystemScript, ipAddress,
+					partition, mountpath, userName, password, fileMode, DirMode, domain);
 		} catch (Exception e) {
 			exitcode = 1;
 			log.error("Error in mounting remote host" + e);

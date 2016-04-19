@@ -8,6 +8,7 @@ import java.util.List;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.common.MountImage;
 import com.intel.director.images.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -47,18 +48,17 @@ public class BMWindowsMountServiceImpl extends MountServiceImpl {
 					throw new DirectorException(msg);
 				}
 			}
-			int mountWindowsRemoteSystem = MountImage.mountWindowsRemoteSystem(
-					info.getIpAddress(), info.getUsername(), info
-							.getSshPassword().getKey(), mountDir, partition,
-					new String("0444"),new String("0444"));
+			int mountWindowsRemoteSystem = MountImage.mountWindowsRemoteSystem(info.getIpAddress(), info.getUsername(),
+					info.getSshPassword().getKey(), mountDir, partition, new String("0444"), new String("0444"));
 			if (mountWindowsRemoteSystem != 0) {
-				for (String mountedPath : successfulMounts) {
-					MountImage.unmountWindowsRemoteSystem(mountedPath);
-				}
-				throw new DirectorException(
-						"Error mounting partition at location " + mountDir);
+				log.error("Error mounting partition " + mountDir);
+				new FileUtilityOperation().deleteFileOrDirectory(file);
+			} else {
+				successfulMounts.add(mountDir);
 			}
-			successfulMounts.add(mountDir);
+		}
+		if (successfulMounts.size() == 0) {
+			throw new DirectorException("Unable to mount any partition from remote host");
 		}
 		return 0;
 	}
@@ -67,9 +67,10 @@ public class BMWindowsMountServiceImpl extends MountServiceImpl {
 	public int unmount() throws DirectorException {
 		String[] partitions = imageInfo.getPartition().split(",");
 		for (String partition : partitions) {
-			int unmountWindowsRemoteSystem = MountImage.unmountWindowsRemoteSystem(mountPath + File.separator + partition);
-			if(unmountWindowsRemoteSystem != 0){
-				throw new DirectorException("Error unmounting partition  "+partition);
+			int unmountWindowsRemoteSystem = MountImage
+					.unmountWindowsRemoteSystem(mountPath + File.separator + partition);
+			if (unmountWindowsRemoteSystem != 0) {
+				throw new DirectorException("Error unmounting partition  " + partition);
 			}
 		}
 		return 0;
