@@ -31,7 +31,7 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;
@@ -300,11 +300,6 @@ public class TrustPolicyDrafts {
 			policyDraft = imageService
 					.editTrustPolicyDraft(trustPolicyDraftEditRequest);
 			policyDraft.setImgAttributes(null);
-			/*
-			 * trustPolicyDraftXML= policyDraft.getTrust_policy_draft();
-			 * response.setStatus(Constants.SUCCESS);
-			 * response.setDetails(trustPolicyDraftXML);
-			 */
 			log.debug("Updated policy draft trustPolicyXML : "
 					+ trustPolicyDraftXML);
 		} catch (Exception e) {

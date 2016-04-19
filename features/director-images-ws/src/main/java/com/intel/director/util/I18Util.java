@@ -13,10 +13,11 @@ public class I18Util {
 	static final ResourceBundle bundle = ResourceBundle.getBundle("ImageStoreKeys", currentLocale);
 
 	public static String format(String key) {
-		String value = key;
+		String value;
 		try {
 			value = bundle.getString(key);
 		} catch (MissingResourceException exception) {
+			value = key;
 			log.error("No value found for key {}", key);
 		}
 		return value;

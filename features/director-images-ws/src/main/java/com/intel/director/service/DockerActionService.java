@@ -1,6 +1,6 @@
 package com.intel.director.service;
 
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 
 public interface DockerActionService {
 

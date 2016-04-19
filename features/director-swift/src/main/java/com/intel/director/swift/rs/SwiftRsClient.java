@@ -93,7 +93,7 @@ public class SwiftRsClient {
 
 		getRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
-		int status = -1;
+		int status;
 		HttpResponse response;
 		try {
 			response = httpClient.execute(getRequest);
@@ -143,7 +143,7 @@ public class SwiftRsClient {
 	public List<SwiftObject> getObjectsList(String containerName) throws SwiftException {
 		List<SwiftObject> objectsList = new ArrayList<SwiftObject>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "?format=json");
 		} catch (MalformedURLException e) {
@@ -151,7 +151,7 @@ public class SwiftRsClient {
 			throw new SwiftException("Error forming url", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response = null;
+		Response response;
 		try{
 		 response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -226,7 +226,7 @@ public class SwiftRsClient {
 			String objectName, String writeToFilePath) throws SwiftException {
 		Map<String, String> objectMetadata = new HashMap<String, String>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
@@ -253,7 +253,7 @@ public class SwiftRsClient {
 				// write the inputStream to a FileOutputStream
 				outputStream = new FileOutputStream(new File(writeToFilePath));
 
-				int read = 0;
+				int read;
 				byte[] bytes = new byte[1024];
 
 				while ((read = inputStream.read(bytes)) != -1) {
@@ -311,14 +311,14 @@ public class SwiftRsClient {
 			String objectName) throws SwiftException {
 		Map<String, String> objectMetadata = new HashMap<String, String>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
 			throw new SwiftException("getObjectMetadata Failed ", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
 		 response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -344,10 +344,8 @@ public class SwiftRsClient {
 		return objectMetadata;
 	}
 
-	public int deleteObject(String containerName, String objectName)
-			throws SwiftException {
-
-		URL url = null;
+	public int deleteObject(String containerName, String objectName) throws SwiftException {
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
@@ -360,10 +358,9 @@ public class SwiftRsClient {
 
 		long start = new Date().getTime();
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
-		response = target.request()
-				.header(Constants.AUTH_TOKEN, authToken).delete();
+			response = target.request().header(Constants.AUTH_TOKEN, authToken).delete();
 		} catch (Exception e) {
 			throw new SwiftException("deleteObject Failed ", e);
 		}
@@ -388,7 +385,7 @@ public class SwiftRsClient {
 		putRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
 		putRequest.setEntity(null);
-		int status = -1;
+		int status;
 		HttpResponse response;
 		try {
 			response = httpClient.execute(putRequest);
@@ -550,15 +547,15 @@ public class SwiftRsClient {
 		authTokenBody.auth.passwordCredentials.password = password;
 
 		ObjectMapper mapper = new ObjectMapper();
-		String body = null;
+		String body;
 		try {
 			body = mapper.writeValueAsString(authTokenBody);
 		} catch (JsonProcessingException e2) {
 			log.error("Error while creating auth token", e2);
 			throw new SwiftException("Error while creating auth token", e2);
 		}
-		// log.info("Auth token body {}", body);
-		HttpEntity entity = null;
+
+		HttpEntity entity;
 		try {
 			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
@@ -569,7 +566,7 @@ public class SwiftRsClient {
 		postRequest.setEntity(entity);
 		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-		HttpResponse response = null;
+		HttpResponse response;
 		try {
 			response = httpClient.execute(postRequest);
 		} catch (Exception e1) {

@@ -106,7 +106,6 @@ public class DirectoryAndFileUtil {
 		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir;
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
-		String command = null;
 		StringBuilder stringBuilder = new StringBuilder("find " + directoryAbsolutePath);
 
 		if (dirMeasurement.isRecursive() == null) {
@@ -140,7 +139,7 @@ public class DirectoryAndFileUtil {
 		if (exclude != null && StringUtils.isNotEmpty(exclude)) {
 			stringBuilder.append(" | grep -vE '" + exclude + "'");
 		}
-		command = stringBuilder.toString();
+		String command = stringBuilder.toString();
 		log.debug("Command to filter files {}", command);
 		return command;
 	}

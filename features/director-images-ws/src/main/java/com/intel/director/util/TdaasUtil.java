@@ -65,7 +65,7 @@ import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.ImageDeploymentHashTypeCache;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SSHManager;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -333,7 +333,7 @@ public class TdaasUtil {
 			reader = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));
 			StringBuffer result = new StringBuffer();
-			String line = "";
+			String line;
 			while ((line = reader.readLine()) != null) {
 				result.append(line + "\n");
 			}
@@ -615,19 +615,20 @@ public class TdaasUtil {
 
 	}
 
-	public static String checkInstalledComponents(String imageid) throws DirectorException{
-		String idendifier = "NV";
+	public static String checkInstalledComponents(String imageid) throws DirectorException {
+		String idendifier;
 		String vrtmDirPath = "/opt/vrtm";
 		String tbootDirPath = "/opt/tbootxm";
 		String trustagentDirPath = "/opt/trustagent";
-		File vrtmDir = new File(getMountPath(imageid) +File.separator+ vrtmDirPath);
-		File tbootDir = new File(getMountPath(imageid) +File.separator+ tbootDirPath);
-		File trustagentDir = new File(getMountPath(imageid) +File.separator+ trustagentDirPath);
+		File vrtmDir = new File(getMountPath(imageid) + File.separator + vrtmDirPath);
+		File tbootDir = new File(getMountPath(imageid) + File.separator + tbootDirPath);
+		File trustagentDir = new File(getMountPath(imageid) + File.separator + trustagentDirPath);
 		if (vrtmDir.exists() && vrtmDir.isDirectory()) {
 			idendifier = "V";
-		}else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists() && trustagentDir.isDirectory()) {
+		} else if (tbootDir.exists() && tbootDir.isDirectory() && trustagentDir.exists()
+				&& trustagentDir.isDirectory()) {
 			idendifier = "NV";
-		}else{
+		} else {
 			throw new DirectorException("Expected CIT components not present");
 		}
 		return idendifier;

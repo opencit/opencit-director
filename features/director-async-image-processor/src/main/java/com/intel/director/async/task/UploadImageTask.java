@@ -12,7 +12,7 @@ import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DockerUtil;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 import com.intel.director.util.TdaasUtil;
@@ -85,69 +85,63 @@ public class UploadImageTask extends GenericUploadTask {
 	public boolean runUploadImageTask() {
 		boolean runFlag;
 
-		log.info("Inside runUploadImageTask for ::"
-				+ imageActionObject.getImage_id());
-		
-			if (imageInfo.getImage_deployments().equals(
-					Constants.DEPLOYMENT_TYPE_VM)) {
-				try {
-					setupUploadVmImage();
-				} catch (DirectorException e) {
-					updateImageActionState(Constants.ERROR, "Error in uploading Image");
-					
-				}
-			} else if (imageInfo.getImage_deployments().equals(
-					Constants.DEPLOYMENT_TYPE_DOCKER)) {
-				try {
-					setupUploadDockerImage();
-				} catch (DirectorException e) {
-					updateImageActionState(Constants.ERROR, "Error in uploading Image");
-				}
+		log.info("Inside runUploadImageTask for ::" + imageActionObject.getImage_id());
+
+		if (imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_VM)) {
+			try {
+				setupUploadVmImage();
+			} catch (DirectorException e) {
+				updateImageActionState(Constants.ERROR, "Error in uploading Image");
+
 			}
-			runFlag = super.run();
-			if (isDockerhubUplod) {
-				DockerUtil.dockerRMI(imageInfo.repository, dockerTagToUse);
+		} else if (imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+			try {
+				setupUploadDockerImage();
+			} catch (DirectorException e) {
+				updateImageActionState(Constants.ERROR, "Error in uploading Image");
 			}
-		
+		}
+		runFlag = super.run();
+		if (isDockerhubUplod) {
+			DockerUtil.dockerRMI(imageInfo.repository, dockerTagToUse);
+		}
+
 		return runFlag;
 
 	}
 
 	
 	private void setupUploadVmImage() throws DirectorException {
-		String imageFilePath = null;
+
 		String imageLocation = imageInfo.getLocation();
-		boolean encrypt = false;
 		log.info("Inside setupUploadVmImage");
-		
-		String glanceId=fetchUploadImageId();
-		customProperties.put(Constants.GLANCE_ID,glanceId);
-		String uploadImageName=fetchUploadImageName();
+
+		String glanceId = fetchUploadImageId();
+		customProperties.put(Constants.GLANCE_ID, glanceId);
+		String uploadImageName = fetchUploadImageName();
 		customProperties.put(Constants.NAME, uploadImageName);
-		imageFilePath = imageLocation + imageInfo.getImage_name();
+		String imageFilePath = imageLocation + imageInfo.getImage_name();
 		if (trustPolicy != null) {
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
 			try {
 				policy = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
 			} catch (JAXBException e) {
 				log.error("Unable to convert policy xml to object", e);
 				updateImageActionState(Constants.ERROR, "Error in uploading Image for vm");
-				throw new DirectorException(
-						"Unable to convert policy xml to object", e);
+				throw new DirectorException("Unable to convert policy xml to object", e);
 			}
 
-			
 			if (policy != null && policy.getEncryption() != null) {
 				imageFilePath += "-enc";
 			}
-			 
+
 		}
 
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 	}
 
 	private void setupUploadDockerImage() throws DirectorException {
-		
+
 		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
 		ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
 				.fetchImageUploadByImageId(imageInfo.getId());
@@ -156,22 +150,16 @@ public class UploadImageTask extends GenericUploadTask {
 			UUID uuid = new UUID();
 			customProperties.put(Constants.GLANCE_ID, uuid.toString());
 		}
-		customProperties.put(Constants.NAME, imageInfo.getRepository() + ":"
-				+ imageInfo.getTag());
-		ImageStoreTransferObject storeTransferObject = null;
+		customProperties.put(Constants.NAME, imageInfo.getRepository() + ":" + imageInfo.getTag());
+		ImageStoreTransferObject storeTransferObject;
 		try {
-			storeTransferObject = persistService.fetchImageStorebyId(taskAction
-					.getStoreId());
+			storeTransferObject = persistService.fetchImageStorebyId(taskAction.getStoreId());
 		} catch (DbException e) {
-			log.error(
-					"Error fetching image store for id "
-							+ taskAction.getStoreId(), e);
+			log.error("Error fetching image store for id " + taskAction.getStoreId(), e);
 			updateImageActionState(Constants.ERROR, "Upload Image Task for docker failed");
-			throw new DirectorException("Error fetching image store for id "
-					+ taskAction.getStoreId(), e);
+			throw new DirectorException("Error fetching image store for id " + taskAction.getStoreId(), e);
 		}
-		if (storeTransferObject.getConnector().equals(
-				Constants.CONNECTOR_DOCKERHUB)) {
+		if (storeTransferObject.getConnector().equals(Constants.CONNECTOR_DOCKERHUB)) {
 			// Its a simple image upload - DI
 			String display_name = trustPolicy.getDisplay_name();
 			int tagStart = display_name.lastIndexOf(":") + 1;
@@ -179,8 +167,8 @@ public class UploadImageTask extends GenericUploadTask {
 			isDockerhubUplod = true;
 			if (imageActionObject.getActions().size() == 1) {
 				dockerTagToUse = imageInfo.tag;
-				DockerUtil.dockerTag(imageInfo.repository, imageInfo.tag
-						+ "_source", imageInfo.repository, dockerTagToUse);
+				DockerUtil.dockerTag(imageInfo.repository, imageInfo.tag + "_source", imageInfo.repository,
+						dockerTagToUse);
 			} else { // Docker Image With Policy using display name as tag
 				dockerTagToUse = tag;
 			}
@@ -188,10 +176,9 @@ public class UploadImageTask extends GenericUploadTask {
 		} else {
 			String imageLocation = imageInfo.getLocation();
 			String imageFilePath = imageLocation + imageInfo.getImage_name();
-			//File content = new File(imageFilePath);
+			// File content = new File(imageFilePath);
 			customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
-			customProperties.put(Constants.NAME, imageInfo.getRepository()
-					+ ":" + imageInfo.getTag());
+			customProperties.put(Constants.NAME, imageInfo.getRepository() + ":" + imageInfo.getTag());
 		}
 
 	}

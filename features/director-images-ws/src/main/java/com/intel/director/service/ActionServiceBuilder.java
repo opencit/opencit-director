@@ -2,7 +2,7 @@ package com.intel.director.service;
 
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.impl.BMFetchActionsService;
 import com.intel.director.service.impl.DockerFetchActionsService;
 import com.intel.director.service.impl.ImageActionImpl;

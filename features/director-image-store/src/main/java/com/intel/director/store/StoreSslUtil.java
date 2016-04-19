@@ -41,7 +41,7 @@ public class StoreSslUtil {
 			log.info("Not adding SSL spec data as url is not https");
 			return;
 		}
-		KeyStore trustStore = null;
+		KeyStore trustStore;
 		try {
 			trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			// log.info("Got the keystore");

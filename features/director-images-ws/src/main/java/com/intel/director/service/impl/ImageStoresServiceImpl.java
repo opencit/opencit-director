@@ -16,7 +16,7 @@ import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageStoresService;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
@@ -55,7 +55,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	
 	@Override
 	public ImageStoreTransferObject createImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-		ImageStoreTransferObject savedImageStore = null;
+		ImageStoreTransferObject savedImageStore;
 		Collection<ImageStoreDetailsTransferObject> image_store_details_final = new ArrayList<ImageStoreDetailsTransferObject>();
 
 		ConnectorKey[] propertiesForConnector = propertiesForConnector(imageStoreTransferObject.getConnector());
@@ -97,7 +97,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	public ImageStoreTransferObject getImageStoreById(String imageStoreId)
 			throws DirectorException {
 
-		ImageStoreTransferObject fetchImageStorebyId = null;
+		ImageStoreTransferObject fetchImageStorebyId;
 		try {
 			fetchImageStorebyId = imagePersistenceManager
 					.fetchImageStorebyId(imageStoreId);
@@ -139,7 +139,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	
 	@Override
 	public GenericDeleteResponse deleteImageStore(String imageStoreId) throws DirectorException {
-		ImageStoreTransferObject fetchImageStorebyId = null;
+		ImageStoreTransferObject fetchImageStorebyId;
 		try {
 			fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
 					

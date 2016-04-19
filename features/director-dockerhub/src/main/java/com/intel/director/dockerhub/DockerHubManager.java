@@ -93,39 +93,34 @@ public class DockerHubManager extends StoreManagerImpl {
 	@Override
 	public GenericResponse validate() throws StoreException {
 		GenericResponse response = new GenericResponse();
-		Result result = null;
-		int exitCode = 0;
+		Result result;
 		try {
-			result = DirectorUtil.executeCommand("docker", "login", "-u",(String) objectProperties
-								.get(Constants.DOCKER_HUB_USERNAME), "-e",(String) objectProperties
-								.get(Constants.DOCKER_HUB_EMAIL), "-p",(String) objectProperties
-								.get(Constants.DOCKER_HUB_PASSWORD));
+			result = DirectorUtil.executeCommand("docker", "login", "-u",
+					(String) objectProperties.get(Constants.DOCKER_HUB_USERNAME), "-e",
+					(String) objectProperties.get(Constants.DOCKER_HUB_EMAIL), "-p",
+					(String) objectProperties.get(Constants.DOCKER_HUB_PASSWORD));
 			String newLine = System.getProperty("line.separator");
 			String[] splitStdOut = result.getStdout().split(newLine);
-			
-			exitCode = result.getExitCode();
-			
+
 			for (String stdOut : splitStdOut) {
 				if (Constants.DOCKER_LOGIN_SUCCESS.equalsIgnoreCase(stdOut)) {
 					break;
-				} else if (Constants.DOCKER_LOGIN_ACCOUNT_NOT_ACTIVATED
-						.contains(stdOut)) {
+				} else if (Constants.DOCKER_LOGIN_ACCOUNT_NOT_ACTIVATED.contains(stdOut)) {
 					response.setError("Account is not Activated");
 					break;
 				} else if (stdOut.contains("Error")) {
 					response.setError("Invalid Credentials");
 					break;
-				} else if (Constants.DOCKER_LOGIN_ACCOUNT_CREATED.equalsIgnoreCase(stdOut)){
+				} else if (Constants.DOCKER_LOGIN_ACCOUNT_CREATED.equalsIgnoreCase(stdOut)) {
 					response.setDetails(Constants.DOCKER_LOGIN_ACCOUNT_CREATED);
 					break;
 				}
 			}
-			
+
 		} catch (IOException e) {
 			log.error("Error in executing docker login command");
 			response.setError(e.getMessage());
-		}
-		finally{
+		} finally {
 			try {
 				DirectorUtil.executeCommandInExecUtil("docker", "logout");
 			} catch (IOException e) {

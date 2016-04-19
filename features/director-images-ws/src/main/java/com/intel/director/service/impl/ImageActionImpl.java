@@ -33,7 +33,7 @@ import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.FetchActionsService;
 import com.intel.director.service.ImageActionService;
@@ -325,39 +325,39 @@ public  class ImageActionImpl implements ImageActionService {
 	}
 
 	@Override
-	public List<String> validateCreationOfImageAction(String imageId,
-			List<ArtifactStoreDetails> stores) throws DirectorException {
+	public List<String> validateCreationOfImageAction(String imageId, List<ArtifactStoreDetails> stores)
+			throws DirectorException {
 		List<String> errors = new ArrayList<String>();
-		
-		if(stores == null ){
+
+		if (stores == null) {
 			errors.add("No stores selected for upload");
 			return errors;
 		}
-		
-		if(stores.size() == 1) {
-			ArtifactStoreDetails artifactStoreDetails = stores.get(0);			
-			if(!(ValidationUtil.isValidWithRegex(artifactStoreDetails.artifact_name, Constants.ARTIFACT_POLICY))){
+
+		if (stores.size() == 1) {
+			ArtifactStoreDetails artifactStoreDetails = stores.get(0);
+			if (!(ValidationUtil.isValidWithRegex(artifactStoreDetails.artifact_name, Constants.ARTIFACT_POLICY))) {
 				return errors;
 			}
 		} else {
 			return errors;
 		}
-	
+
 		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
-		String uploadVar = null;
+		String uploadVar;
 		ImageInfo imageById = null;
 		try {
 			imageById = persistService.fetchImageById(imageId);
-			if(imageById == null){				
-				throw new DirectorException("No image found for id "+imageId);
+			if (imageById == null) {
+				throw new DirectorException("No image found for id " + imageId);
 			}
 		} catch (DbException e1) {
 			log.error("Error fetching image", e1);
 			throw new DirectorException("Error fetching image", e1);
 		}
-		
+
 		String trustPolicyId = imageById.getTrust_policy_id();
-		if(trustPolicyId == null){
+		if (trustPolicyId == null) {
 			throw new DirectorException("No policy associated with the image");
 		}
 		TrustPolicy fetchPolicyById;
@@ -367,44 +367,43 @@ public  class ImageActionImpl implements ImageActionService {
 			log.error("Error while fetching policy for id " + trustPolicyId);
 			throw new DirectorException("Error while fetching policy for id " + trustPolicyId, e1);
 		}
-		if(fetchPolicyById == null){
-			throw new DirectorException("No policy found for id "+trustPolicyId);
+		if (fetchPolicyById == null) {
+			throw new DirectorException("No policy found for id " + trustPolicyId);
 		}
-		
-		
-		//Now check for the upload var
+
+		// Now check for the upload var
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy;
 		try {
 			trustPolicy = TdaasUtil.getPolicy(fetchPolicyById.getTrust_policy());
 		} catch (JAXBException e1) {
 			throw new DirectorException("Error converting polocy string to object", e1);
 		}
-		
-		String dekUrl = trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getURL() : "";
-		
-		uploadVar = DirectorUtil.computeUploadVar(trustPolicy.getImage().getImageId(),dekUrl);
-		
-		
-		List<ImageStoreUploadTransferObject> fetchImageUploadsByUploadVariable=null;
+
+		String dekUrl = trustPolicy.getEncryption() != null ? trustPolicy.getEncryption().getKey().getURL() : "";
+
+		uploadVar = DirectorUtil.computeUploadVar(trustPolicy.getImage().getImageId(), dekUrl);
+
+		List<ImageStoreUploadTransferObject> fetchImageUploadsByUploadVariable;
 		try {
-		
-			fetchImageUploadsByUploadVariable= artifactUploadService.fetchImageUploadsByUploadVariable(uploadVar);
-			log.info("Inside validateCreationOfImageAction, seraching image uploads for uploadva::"+uploadVar);
-			if(!(fetchImageUploadsByUploadVariable != null && fetchImageUploadsByUploadVariable.size() > 0)){
-				errors.add("No image has been uploaded to an image store for the trust policy. Please choose the "+ Constants.ARTIFACT_IMAGE_WITH_POLICY +" option");
+
+			fetchImageUploadsByUploadVariable = artifactUploadService.fetchImageUploadsByUploadVariable(uploadVar);
+			log.info("Inside validateCreationOfImageAction, seraching image uploads for uploadva::" + uploadVar);
+			if (!(fetchImageUploadsByUploadVariable != null && fetchImageUploadsByUploadVariable.size() > 0)) {
+				errors.add("No image has been uploaded to an image store for the trust policy. Please choose the "
+						+ Constants.ARTIFACT_IMAGE_WITH_POLICY + " option");
 			}
 		} catch (DirectorException e) {
-			throw new DirectorException("unable to fetch image upload entries for upload var : "+uploadVar, e);
+			throw new DirectorException("unable to fetch image upload entries for upload var : " + uploadVar, e);
 		}
 		return errors;
-		
+
 	}
 	
 	public List<ImageActionHistoryResponse> getImageActionHistory(String imageId)
 			throws DirectorException {
 
 		List<ImageActionHistoryResponse> imageActionResponseList = new ArrayList<ImageActionHistoryResponse>();
-		List<ImageActionObject> imageActionObjectList = new ArrayList<ImageActionObject>();
+		List<ImageActionObject> imageActionObjectList;
 		ImageActionFilter imageActionFilter = new ImageActionFilter();
 		ImageActionOrderBy imageActionOrderBy = new ImageActionOrderBy();
 		imageActionOrderBy.setImageActionFields(ImageActionFields.DATE);
@@ -412,17 +411,14 @@ public  class ImageActionImpl implements ImageActionService {
 		imageActionFilter.setImage_id(imageId);
 
 		try {
-			imageActionObjectList = persistService.fetchImageActions(
-					imageActionFilter, imageActionOrderBy);
+			imageActionObjectList = persistService.fetchImageActions(imageActionFilter, imageActionOrderBy);
 		} catch (DbException e) {
 			throw new DirectorException(
-					"unable to fetch image upload entries for upload imageActionFilter : "
-							+ imageActionFilter, e);
+					"unable to fetch image upload entries for upload imageActionFilter : " + imageActionFilter, e);
 		}
 		for (ImageActionObject imageActionObject : imageActionObjectList) {
-			if(!Constants.OBSOLETE.equalsIgnoreCase(imageActionObject.getCurrent_task_status())){
-			imageActionResponseList
-					.add(fetchActionHistoryResponse(imageActionObject));
+			if (!Constants.OBSOLETE.equalsIgnoreCase(imageActionObject.getCurrent_task_status())) {
+				imageActionResponseList.add(fetchActionHistoryResponse(imageActionObject));
 			}
 		}
 		return imageActionResponseList;

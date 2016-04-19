@@ -4,7 +4,7 @@ import com.github.dnault.xmlpatch.internal.Log;
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.common.MountImage;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;

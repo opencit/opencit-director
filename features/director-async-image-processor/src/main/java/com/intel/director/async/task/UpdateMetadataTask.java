@@ -19,7 +19,7 @@ import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.PolicyUploadFilter;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
@@ -86,7 +86,7 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		ImageStoreUploadTransferObject imageStoreTranserObject = null;
 		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 		imgUpFilter.setImage_id(imageInfo.getId());
-		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		List<ImageStoreUploadTransferObject> fetchImageUploads;
 		
 		ImageStoreUploadOrderBy imageStoreUploadOrderBy = new ImageStoreUploadOrderBy();
 		imageStoreUploadOrderBy.setOrderBy(OrderByEnum.ASC);
@@ -98,13 +98,13 @@ public class UpdateMetadataTask extends GenericUploadTask {
 				log.info("Last uploaded image to store : {},  glance id : {}", imageStoreTranserObject.getStoreId(),
 						imageStoreTranserObject.getStoreArtifactId());
 				log.info("Glance id from policy {}", glanceId);
-			}
+			} 
 		} catch (DbException e) {
 			log.error("Error fetching image uploads {}", e);
-			runFlag = false;
 			updateImageActionState(Constants.ERROR, "Error in update metadata task");
-
+			return false;
 		}
+		
 		String storeId = imageStoreTranserObject.getStoreId();
 		if (!imageStoreTranserObject.getStoreArtifactId().equals(glanceId)) {
 			glanceId = imageStoreTranserObject.getStoreArtifactId();
@@ -153,9 +153,8 @@ public class UpdateMetadataTask extends GenericUploadTask {
 		String trustPolicyLocationTag = connectorName.toLowerCase() + ":" + policyUri;
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, trustPolicyLocationTag);
 		customProperties.put(Constants.GLANCE_ID, glanceId);
-		//// customProperties.put(Constants.NAME,
-		//// trustPolicy.getDisplay_name());
-		StoreManager imageStoreManager = null;
+		
+		StoreManager imageStoreManager;
 		try {
 			imageStoreManager = StoreManagerFactory.getStoreManager(taskAction.getStoreId());
 		} catch (StoreException e1) {
@@ -178,7 +177,6 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			try {
 				imageStoreManager.update();
 			} catch (StoreException e) {
-				runFlag = false;
 				log.error("Error updating imageuploads", e);
 				updateImageActionState(Constants.ERROR, "Error in Updating metadata task");
 				return false;

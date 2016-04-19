@@ -29,7 +29,7 @@ public class StoreManagerFactory {
 	public static StoreManager getStoreManager(String storeId)
 			throws StoreException {
 		IPersistService persistService = new DbServiceImpl();
-		StoreManager storeManager = null;
+		
 		ImageStoreTransferObject imageStoreDTO;
 		try {
 			imageStoreDTO = persistService.fetchImageStorebyId(storeId);
@@ -44,6 +44,7 @@ public class StoreManagerFactory {
 			return null;
 		}
 
+		StoreManager storeManager;
 		try {
 			storeManager = (StoreManager) Class.forName(connector.getDriver())
 					.newInstance();

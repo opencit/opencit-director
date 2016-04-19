@@ -65,7 +65,7 @@ import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.DockerActionService;
 import com.intel.director.service.ImageService;
@@ -1061,7 +1061,7 @@ public class Images {
 		if (policy == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
-		String manifestForPolicy = null;
+		String manifestForPolicy;
 		try {
 			manifestForPolicy = TdaasUtil.getManifestForPolicy(policy.getTrust_policy());
 		} catch (JAXBException e) {

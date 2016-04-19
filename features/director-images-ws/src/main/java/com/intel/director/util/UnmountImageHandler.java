@@ -15,7 +15,7 @@ import com.intel.director.api.SearchImagesResponse;
 import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.MountImage;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.configuration.ConfigurationFactory;

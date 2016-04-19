@@ -92,7 +92,7 @@ public class GlanceRsClient {
 				(String) customProperties
 						.get(com.intel.director.common.Constants.UPLOAD_TO_IMAGE_STORE_FILE));
 
-		HttpResponse response = null;
+		HttpResponse response;
 		try {
 			ist = new FileInputStream(file);
 
@@ -137,15 +137,11 @@ public class GlanceRsClient {
 		log.debug("# Inside fetchDetails::" + customProperties);
 		String glanceId = (String) customProperties.get(Constants.GLANCE_ID);
 		ImageStoreUploadResponse imageImageStoreUploadResponse = new ImageStoreUploadResponse();
-		// / System.out.println("Fetach details glanceId::" + glanceId);
 		InputStream inputStream = null;
 		BufferedReader br = null;
-		Response response = null;
+		Response response = webTarget.path(GLANCE_API_VERSION + "/" + glanceId).request()
+				.header(Constants.AUTH_TOKEN, authToken).get();
 
-		response = webTarget.path(GLANCE_API_VERSION + "/" + glanceId)
-				.request().header(Constants.AUTH_TOKEN, authToken).get();
-
-		// /System.out.println("Inside fetch details reponse::" + response);
 		log.info("###### fetch details status::" + response.getStatus());
 		if (response.getStatus() < 200 && response.getStatus() > 204) {
 			log.error("fetchDetails failed," + response.getStatus());
@@ -255,7 +251,7 @@ public class GlanceRsClient {
 
 		postRequest.setHeader("X-Auth-Token", authToken);
 
-		HttpResponse httpResponse = null;
+		HttpResponse httpResponse;
 
 		try {
 			httpResponse = httpClient.execute(postRequest);
@@ -310,9 +306,7 @@ public class GlanceRsClient {
 
 		String glanceId = null;
 
-		ImageStoreUploadResponse storeUploadResponse = null;
-
-		storeUploadResponse = fetchDetails(imageProperties);
+		ImageStoreUploadResponse storeUploadResponse = fetchDetails(imageProperties);
 
 		if (imageProperties.get(Constants.GLANCE_ID) != null) {
 			glanceId = (String) imageProperties.get(Constants.GLANCE_ID);
@@ -433,7 +427,7 @@ public class GlanceRsClient {
 		authTokenBody.auth.passwordCredentials.password = password;
 
 		ObjectMapper mapper = new ObjectMapper();
-		String body = null;
+		String body;
 		try {
 			body = mapper.writeValueAsString(authTokenBody);
 		} catch (JsonProcessingException e2) {
@@ -452,7 +446,7 @@ public class GlanceRsClient {
 		postRequest.setEntity(entity);
 		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-		HttpResponse response = null;
+		HttpResponse response;
 		try {
 			response = httpClient.execute(postRequest);
 		} catch (ClientProtocolException e1) {
@@ -520,7 +514,7 @@ public class GlanceRsClient {
 		String glanceIP = (String) (configuration
 				.get(Constants.GLANCE_API_ENDPOINT) == null ? ""
 				: configuration.get(Constants.GLANCE_API_ENDPOINT));
-		URL url = null;
+		URL url;
 		try {
 			if (glanceIP.contains("http")) {
 				url = new URL(glanceIP);

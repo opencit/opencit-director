@@ -15,7 +15,7 @@ import com.intel.director.api.ui.ImageStoreUploadFields;
 import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.TrustPolicyService;
 import com.intel.director.service.impl.TrustPolicyServiceImpl;
 import com.intel.director.util.TdaasUtil;
@@ -109,7 +109,7 @@ public class RecreatePolicyTask extends GenericUploadTask {
 				log.error("Error init TrustPolicyService", e1);
 				return false;
 			}
-			String policyXml = null;
+			String policyXml;
 			try {
 				policyXml = TdaasUtil.convertTrustPolicyToString(trustPolicyObj);
 			} catch (JAXBException e) {

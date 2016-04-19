@@ -30,7 +30,7 @@ import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;

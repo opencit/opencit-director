@@ -15,7 +15,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
@@ -153,14 +153,13 @@ public abstract class GenericUploadTask extends ImageActionAsyncTask {
 		String glanceId = storeResponse.getId();
 
 		if (StringUtils.isNotBlank(trustPolicyId)) {
-			TrustPolicy trustPolicy2 = null;
+			TrustPolicy trustPolicy2;
 			try {
 				trustPolicy2 = persistService.fetchPolicyById(trustPolicyId);
 			} catch (DbException e) {
 				log.error("Error fetching policy", e);
 				throw new DirectorException(e);
 			}
-
 			dekUrl = DirectorUtil.fetchDekUrl(trustPolicy2);
 		}
 		
