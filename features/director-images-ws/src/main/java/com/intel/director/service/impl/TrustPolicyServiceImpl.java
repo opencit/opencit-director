@@ -188,30 +188,6 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		}
 
 
-		String manifestFile = localPathForPolicyAndManifest + File.separator + "manifest.xml";
-		String manifest;
-		try {
-			String unformattedManifest = TdaasUtil.getManifestForPolicy(policyXml);
-			manifest = DirectorUtil.prettifyXml(unformattedManifest);
-			if(manifest == null){
-				throw new DirectorException("Unable to format the manifest xml");
-			}
-		} catch (JAXBException e) {
-			log.error("Unable to convert policy into manifest", e);
-			throw new DirectorException("Unable to convert policy into manifest", e);
-		}
-		File dirForPolicyAndManifest = new File(localPathForPolicyAndManifest);
-		if (!dirForPolicyAndManifest.exists()) {
-			dirForPolicyAndManifest.mkdir();
-		}
-
-		
-		fileUtilityOperation.createNewFile(manifestFile);
-		fileUtilityOperation.createNewFile(trustPolicyFile);
-
-		fileUtilityOperation.writeToFile(trustPolicyFile, policyXml);
-		fileUtilityOperation.writeToFile(manifestFile, manifest);
-
 		// Push the policy and manifest to the remote host
 		SshSettingInfo existingSsh;
 		try {
