@@ -140,10 +140,8 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
     
     
     private HashSet<Long> fetchChangesToApply() throws SetupException, IOException, SQLException{
-    	 HashSet<Long> changesToApply =null;
-    	log.debug("Inside fetchChangesToApply()", databaseVendor);
-        sql = getSql(databaseVendor); 
-        
+		log.debug("Inside fetchChangesToApply()", databaseVendor);
+		sql = getSql(databaseVendor);        
 
         
         log.debug("Connecting to {}", databaseVendor);
@@ -151,14 +149,14 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
         try {
             c = DirectorDbConnect.getConnection();  // username and password should already be set in the datasource
         }
-        catch(SQLException e) {
-            log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage()); 
-                return changesToApply;
-        } catch (ClassNotFoundException e) {
-        	 log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage()); 
-             return changesToApply;
+		catch (SQLException e) {
+			log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage());
+			return null;
+		} catch (ClassNotFoundException e) {
+			log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage());
+			return null;
 		}
-        List<ChangelogEntry> changelog=null; 
+        List<ChangelogEntry> changelog; 
        
         changelog = getChangelog(c);
        
@@ -185,9 +183,9 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
                     log.info(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
                 }
             }
-        changesToApply = new HashSet<>(sql.keySet());
-        changesToApply.removeAll(presentChanges.keySet());
-        return changesToApply;
+		HashSet<Long> changesToApply = new HashSet<>(sql.keySet());
+		changesToApply.removeAll(presentChanges.keySet());
+		return changesToApply;
     }
     
     private void checkAvailableUpdates() throws SetupException, IOException, SQLException {

@@ -27,7 +27,7 @@ import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
 import com.intel.director.api.ListImageActionResponse;
 import com.intel.director.api.ui.ImageInfo;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ActionServiceBuilder;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.ImageService;

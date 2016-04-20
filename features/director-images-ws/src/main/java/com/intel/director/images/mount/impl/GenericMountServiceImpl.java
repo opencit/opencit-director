@@ -1,7 +1,7 @@
 package com.intel.director.images.mount.impl;
 
 import com.intel.director.api.ImageAttributes;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.images.mount.MountService;
 
 public class GenericMountServiceImpl implements MountService {

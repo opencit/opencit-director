@@ -180,14 +180,20 @@ public class DirectorUtil {
 		} catch (InterruptedException | IOException ex) {
 			log.error(null, ex);
 		} finally {
-			if(reader != null){
-				reader.close();
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					log.error("error in closing reader in executeShellCommand()", e);
+				}
 			}
-			
 			if (p != null && p.getInputStream() != null) {
-				p.getInputStream().close();
+				try {
+					p.getInputStream().close();
+				} catch (IOException e) {
+					log.error("error in closing p.getInputStream() in executeShellCommand()", e);
+				}
 			}
-
 		}
 		log.debug(output.toString());
 		log.trace("Exec command output : " + output.toString());
@@ -269,7 +275,7 @@ public class DirectorUtil {
 		if(uuid == null){
 			return null;
 		}
-		String uploadvar = null;
+		String uploadvar;
 		StringBuilder builder = new StringBuilder(uuid);
 		if(StringUtils.isNotBlank(dekUrl)){
 			builder.append(dekUrl);
@@ -341,8 +347,8 @@ public class DirectorUtil {
 		String policyXml = trustPolicy.getTrust_policy();
 		log.debug("Inside Run Upload Policy task policyXml::" + policyXml);
 		StringReader reader = new StringReader(policyXml);
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
-		JAXBContext jaxbContext = null;
+		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
+		JAXBContext jaxbContext;
 		try {
 			jaxbContext = JAXBContext
 					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
@@ -351,7 +357,7 @@ public class DirectorUtil {
 			return null;
 			
 		}
-		Unmarshaller unmarshaller = null;
+		Unmarshaller unmarshaller;
 		try {
 			unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
 		} catch (JAXBException e) {
@@ -379,7 +385,7 @@ public class DirectorUtil {
 		}
 		final Boolean keepDeclaration = Boolean.valueOf(xml.startsWith("<?xml"));
 
-		DOMImplementationRegistry registry = null;
+		DOMImplementationRegistry registry;
 		try {
 			registry = DOMImplementationRegistry.newInstance();
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException e) {
@@ -392,14 +398,19 @@ public class DirectorUtil {
 		// Set this to true if the output needs to be beautified.
 		writer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
 		// Set this to true if the declaration is needed to be outputted.
-		writer.getDomConfig().setParameter("xml-declaration", keepDeclaration);
+		writer.getDomConfig().setParameter("xml-declaration", false);
 
-		return writer.writeToString(document);
+		String formatted = writer.writeToString(document);
+		if (keepDeclaration) {
+			formatted = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"+System.getProperty("line.separator")+formatted;	
+		}		
+
+		return formatted;
 	}
 
 	
 	public static String fetchDekUrl(TrustPolicy policy){
-		if(policy==null){
+		if (policy == null) {
 			return "";
 		}
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;

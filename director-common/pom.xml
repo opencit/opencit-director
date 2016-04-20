@@ -25,6 +25,11 @@
 			<artifactId>mtwilson-password-vault</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>mtwilson-trustpolicy-xml</artifactId>
+			<type>jar</type>
+		</dependency>		
+		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-codec</artifactId>
 		</dependency>
@@ -32,11 +37,7 @@
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-exec</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-trustpolicy-xml</artifactId>
-			<type>jar</type>
-		</dependency>
+	
 
 		<!-- kms -->
 		<dependency>
@@ -80,7 +81,6 @@
 			<groupId>org.rauschig</groupId>
 			<artifactId>jarchivelib</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.kamranzafar</groupId>
 			<artifactId>jtar</artifactId>
@@ -90,7 +90,7 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.3.4</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
 
 </project>

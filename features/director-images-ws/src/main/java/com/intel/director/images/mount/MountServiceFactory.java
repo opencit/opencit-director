@@ -2,7 +2,7 @@ package com.intel.director.images.mount;
 
 import com.intel.director.api.ImageAttributes;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.images.mount.impl.BMLinuxMountServiceImpl;
 import com.intel.director.images.mount.impl.BMWindowsMountServiceImpl;
 import com.intel.director.images.mount.impl.DockerMountServiceImpl;

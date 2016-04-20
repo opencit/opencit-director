@@ -12,7 +12,7 @@ import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 
@@ -56,7 +56,7 @@ public class UploadTarTask extends GenericUploadTask {
 	}
 
 	public boolean runUploadTarTask() {
-		boolean runFlag = false;
+		boolean runFlag;
 		log.info("Inside runUploadTarTask for ::"
 				+ imageActionObject.getImage_id());
 		String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";

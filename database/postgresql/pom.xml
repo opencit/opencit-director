@@ -8,10 +8,11 @@
   <description>SQL and Java code to support PostgresQL storage in TD</description>
 
     <parent>
-    <groupId>com.intel.mtwilson.maven</groupId>
-    <artifactId>mtwilson-maven-java</artifactId>
-    <version>3.0-SNAPSHOT</version>
-    <relativePath/>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-java</artifactId>
+        <version>3.2-SNAPSHOT</version>
+        <relativePath />
     </parent>
+    
 
 </project>

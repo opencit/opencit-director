@@ -32,7 +32,7 @@ import com.intel.director.api.ImageStoreResponse;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ui.ImageStoreConnector;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageStoresService;
 import com.intel.director.service.LookupService;
 import com.intel.director.service.impl.ImageStoresServiceImpl;
@@ -115,7 +115,7 @@ public class ImageStores {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getImageStores(@QueryParam("artifacts") String artifacts) throws DirectorException {
 		ImageStoreResponse imageStoreResponse = new ImageStoreResponse();
-		List<ImageStoreTransferObject> imageStores = null;
+		List<ImageStoreTransferObject> imageStores;
 
 		List<ImageStoreTransferObject> activeImageStores = new ArrayList<>();
 		if (StringUtils.isBlank(artifacts)) {
@@ -507,7 +507,7 @@ public class ImageStores {
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImageStores(@PathParam("imageStoreId") String imageStoreId) throws DirectorException {
-		GenericDeleteResponse deleteImageStore = null;
+		GenericDeleteResponse deleteImageStore;
 		GenericDeleteResponse response = new GenericDeleteResponse();
 		if (!ValidationUtil.isValidWithRegex(imageStoreId, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";

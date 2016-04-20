@@ -141,12 +141,10 @@ function addhostandnext() {
                             data: ko.toJSON(self.BMLiveMetaData),
                             success: function(data, status, xhr) {
 
-                                if (data.status == "Error") {
-								hideLoading();
+                                if (data.error) {
+                                	hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
-                                    show_error_in_bmlivemodal(data.details);
-
-
+                                    show_error_in_bmlivemodal(data.error);
                                     $.ajax({
                                         type: "POST",
                                         url: "/v1/rpc/unmount-image",
@@ -159,7 +157,6 @@ function addhostandnext() {
                                             console.log("IMAGE UNMOUNTED");
                                         }
                                     });
-
                                     return;
                                 }
                                 current_trust_policy_draft_id = data.id;
@@ -258,10 +255,10 @@ function addhostandnext() {
                             },
                             data: ko.toJSON(self.BMLiveMetaData),
                             success: function(data, status, xhr) {
-                                if (data.status == "Error") {
+                                if (data.error) {
 								hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
-                                    show_error_in_bmlivemodal(data.details);
+                                    show_error_in_bmlivemodal(data.error);
                                     $.ajax({
                                         type: "POST",
                                         url: "/v1/rpc/unmount-image",

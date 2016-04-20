@@ -55,6 +55,11 @@
             <artifactId>director-image-store</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.director</groupId>
+			<version>${project.version}</version>
+			<artifactId>director-common</artifactId>
+		</dependency>
         
         <!-- external -->
         <dependency>

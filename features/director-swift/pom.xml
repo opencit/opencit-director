@@ -4,7 +4,7 @@
 	<groupId>com.intel.mtwilson.director</groupId>
 	<artifactId>director-swift</artifactId>
 
-	<description>Director request and response data structures</description>
+	<description>Director swift integration</description>
 	<parent>
 		<groupId>com.intel.mtwilson.maven</groupId>
 		<artifactId>mtwilson-core-feature-zip</artifactId>
@@ -40,12 +40,12 @@
 		<!-- Director -->
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-            <version>${project.version}</version>
+			<version>${project.version}</version>
 			<artifactId>director-images-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.director</groupId>
-            <version>${project.version}</version>
+			<version>${project.version}</version>
 			<artifactId>director-image-store</artifactId>
 		</dependency>
 
@@ -54,11 +54,13 @@
 		<dependency>
 			<groupId>com.intel.mtwilson.util</groupId>
 			<artifactId>mtwilson-util-jaxrs2-client</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-configuration</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Other -->

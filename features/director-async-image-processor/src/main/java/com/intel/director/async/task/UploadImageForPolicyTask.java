@@ -8,7 +8,7 @@ package com.intel.director.async.task;
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 
@@ -40,16 +40,15 @@ public class UploadImageForPolicyTask extends UploadImageTask {
 	@Override
 	public String fetchUploadImageId() {
 		log.info("Inside UploadImageForPolicyTask fetchUploadImageId()");
-		String glanceId = null;
 		ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
 		ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
 				.fetchImageUploadByImageId(imageInfo.getId());
-		glanceId = imageInfo.getId();
+		String glanceId = imageInfo.getId();
 		customProperties.put(Constants.GLANCE_ID, imageInfo.getId());
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "NA");
-		if (imageUploadByImageId != null) {			
+		if (imageUploadByImageId != null) {
 			String uuid = DirectorUtil.fetchIdforUpload(trustPolicy);
-			log.info("Inside UploadImageForPolicyTask fetchUploadImageId() uuid from policy for upload::"+uuid);
+			log.info("Inside UploadImageForPolicyTask fetchUploadImageId() uuid from policy for upload::" + uuid);
 			glanceId = uuid;
 		}
 		return glanceId;

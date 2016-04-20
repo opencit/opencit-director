@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.intel.director.api.ImageActionTask;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 
 public interface FetchActionsService {
 

@@ -41,7 +41,7 @@ public class StoreSslUtil {
 			log.info("Not adding SSL spec data as url is not https");
 			return;
 		}
-		KeyStore trustStore = null;
+		KeyStore trustStore;
 		try {
 			trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			// log.info("Got the keystore");
@@ -50,12 +50,11 @@ public class StoreSslUtil {
 			log.error(msg, e);
 			throw new ImageStoreException(msg, e);
 		}
-		String keystorePath = null;
 
 		String systemJavaHome = System.getenv("JAVA_HOME");
 		// log.info("systemJavaHome::" + systemJavaHome);
 
-		keystorePath = systemJavaHome + "/jre/lib/security/cacerts";
+		String keystorePath = systemJavaHome + "/jre/lib/security/cacerts";
 		// log.info("keystorePath  :: " + keystorePath);
 
 		File keystoreFile = new File(keystorePath);
@@ -63,7 +62,7 @@ public class StoreSslUtil {
 			throw new ImageStoreException(
 					"Director Keystore file does not exist");
 		}
-		FileInputStream instream = null;
+		FileInputStream instream;
 		try {
 			instream = new FileInputStream(keystoreFile);
 			// log.info("Got the stream opened to the keystore");
@@ -99,7 +98,7 @@ public class StoreSslUtil {
 			}
 		}
 
-		SSLSocketFactory socketFactory = null;
+		SSLSocketFactory socketFactory;
 		try {
 			socketFactory = new SSLSocketFactory(trustStore);
 			// log.info("Got the socket factory");

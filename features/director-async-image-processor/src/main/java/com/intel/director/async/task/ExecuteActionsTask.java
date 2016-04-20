@@ -6,7 +6,7 @@ import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionTask;
 import com.intel.director.async.ImageActionTaskFactory;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.quartz.ImageActionPoller;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;

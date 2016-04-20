@@ -24,6 +24,6 @@
 		<module>director-html5</module>
 		<module>director-images-ws</module>
 		<module>director-kms</module>
-	</modules>
-
+    </modules>
+    
 </project>

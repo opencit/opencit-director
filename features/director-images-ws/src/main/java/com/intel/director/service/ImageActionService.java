@@ -7,7 +7,7 @@ import com.intel.director.api.ImageActionHistoryResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionTask;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 public interface ImageActionService {
