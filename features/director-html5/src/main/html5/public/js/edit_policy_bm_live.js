@@ -23,7 +23,7 @@ function edit_policy_bmlive_initialize() {
             url: "/v1/rpc/create-draft-from-policy",
             success: function(data, status, xhr) {
 
-                if (data.status == "Error" || data.error) {
+                if (data.error) {
                     return false;
                 } else {
                     current_trust_policy_draft_id = data.id;

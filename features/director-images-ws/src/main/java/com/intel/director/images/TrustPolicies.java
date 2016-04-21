@@ -250,7 +250,9 @@ public class TrustPolicies {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: UUID of the policy to be deleted
 	 * Output: In case of successful deletion:
@@ -258,7 +260,7 @@ public class TrustPolicies {
 	 * 
 	 * In case of error:
 	 * {"deleted":false; "error":"Error in deleting trust policy: <UUID>"}
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param trustPolicyId
 	 * @return GenericResponse
@@ -300,7 +302,8 @@ public class TrustPolicies {
 	 * This method looks into the MW_TRUST_POLICY table and gets the policy
 	 * string and sends it as an xml content to the user.
 	 * 
-	 * In case the policy is not found for the trust policy id, HTTP 404 is returned
+	 * In case the policy is not found for the trust policy id, HTTP 404 is
+	 * returned
 	 * 
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
@@ -312,8 +315,6 @@ public class TrustPolicies {
 	 * Output: Content sent as stream
 	 * 
 	 *                    </pre>
-	 * 
-	 *                    *
 	 * @param trustPolicyId
 	 *            the trust policy for which the policy is downloaded
 	 * @return XML content of the policy

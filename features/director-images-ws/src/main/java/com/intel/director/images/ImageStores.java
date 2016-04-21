@@ -60,18 +60,20 @@ public class ImageStores {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageStores.class);
 
 	/**
-	 * List of configured image stores
-	 * 
+	 * This method will return list of active image stores based on artifacts
+	 * supported by that image stores. Multiple artifacts can be given with
+	 * delimited by ','.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
+	 * @param artifacts
+	 *            comma separated as QueryParam
 	 * 
-	 * @return GetImageStoresResponse
+	 * @return Response
 	 * @throws DirectorException
-	 * @TDMethodType GET
-	 * @TDSampleRestCall
+	 * @mtwSampleRestCall
 	 * 
-	 *                   <pre>
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/image-stores
 	 * Input: Query parameter is optional If provided: - "artifacts"
 	 * 
@@ -108,7 +110,7 @@ public class ImageStores {
 	 *     }
 	 *   ]
 	 * }
-	 *                   </pre>
+	 *                    </pre>
 	 */
 	@Path("image-stores")
 	@GET
@@ -163,48 +165,49 @@ public class ImageStores {
 	 * Output:
 	 * 
 	 * {
-	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	"name": "ExtStore_1",
-	"artifact_types": [
-	"Image",
-	"Tarball"
-	],
-	"connector": "Glance",
-	"deleted": false,
-	"image_store_details": [
-	{
-	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.image.store.username"
-	},
-	{
-	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.api.endpoint"
-	},
-	{
-	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.tenant.name"
-	},
-	{
-	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.keystone.public.endpoint"
-	},
-	{
-	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	  "key": "glance.image.store.password"
-	}
-	]
+		"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+		"name": "ExtStore_1",
+		"artifact_types": [
+			"Image",
+			"Tarball"
+		],
+		"connector": "Glance",
+		"deleted": false,
+		"image_store_details": [
+			{
+	  			"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			  	"key": "glance.image.store.username"
+			},
+			{
+				"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.api.endpoint"
+			},
+			{
+				"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			  	"key": "glance.tenant.name"
+			},
+			{
+			  	"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			  	"key": "glance.keystone.public.endpoint"
+			},
+			{
+			  	"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			  	"key": "glance.image.store.password"
+			}
+		]
 	}
 	
 	If an invalid ID for image store is give, a HTTP 404 is returned
 	 *                    </pre>
 	 * 
 	 * @param imageStoreId
-	 * @return
+	 *            as PathParam
+	 * @return Response
 	 * @throws DirectorException
 	 */
 	@Path("image-stores/{imageStoreId: [0-9a-zA-Z_-]+}")
@@ -225,8 +228,8 @@ public class ImageStores {
 
 	/**
 	 * 
-	 * Creates the external store. the user can either pass the whole object, if
-	 * the details are knows or just the name, artifacts and connector to
+	 * Creates the external store. The user can either pass the whole object, if
+	 * the details are known or just the name, artifacts and connector to
 	 * reserve a external store. The user can then call the PUT call to update
 	 * the values of the connection properties.
 	 * 
@@ -239,43 +242,40 @@ public class ImageStores {
 	 *   	https://{IP/HOST_NAME}/v1/image-stores
 	 *   {"name":"ExtStore_1", "connector":"Glance", "artifact_types":["Image", "Tarball"]}
 	 * 
-	 *   Output: {
-	 * "id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "name": "ExtStore_1",
-	 * "artifact_types": [
-	 * "Image",
-	 * "Tarball"
-	 * ],
-	 * "connector": "Glance",
-	 * "deleted": false,
-	 * "image_store_details": [
-	 * {
-	 * "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "key": "glance.api.endpoint"
-	 * },
-	 * {
-	 * "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "key": "glance.keystone.public.endpoint"
-	 * },
-	 * {
-	 * "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "key": "glance.image.store.username"
-	 * },
-	 * {
-	 * "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "key": "glance.image.store.password"
-	 * },
-	 * {
-	 * "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-	 * "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * "key": "glance.tenant.name"
-	 * }
-	 * ]
-	 * }
+	 *   Output:
+		{
+			"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			"name": "ExtStore_1",
+			"artifact_types": ["Image",
+			"Tarball"],
+			"connector": "Glance",
+			"deleted": false,
+			"image_store_details": [{
+				"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.api.endpoint"
+			},
+			{
+				"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.keystone.public.endpoint"
+			},
+			{
+				"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.image.store.username"
+			},
+			{
+				"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.image.store.password"
+			},
+			{
+				"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.tenant.name"
+			}]
+		}
 	 * 	
 	 *   There are validations for the connector and artifact_types fields. 
 	 *   If incorrect values are given
@@ -283,10 +283,10 @@ public class ImageStores {
 	 *   following is the reponse:	   
 	 *   Connector Doesn't Support Given Artifact(s)
 	 * 
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param imageStoreTransferObject
-	 * @return
+	 * @return Response
 	 * @throws DirectorException
 	 */
 	@Path("image-stores")
@@ -320,7 +320,7 @@ public class ImageStores {
 
 	/**
 	 * 
-	 * Edits the external store.
+	 * This method updates the image store record.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType PUT
@@ -431,19 +431,22 @@ public class ImageStores {
 	 *   following is the reponse:	   
 	 *   Connector Doesn't Support Given Artifact(s)
 	 * 
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param imageStoreTransferObject
-	 * @return ImageStoreTransferObject
+	 * @return Response
 	 * @throws DirectorException
 	 */
 	@Path("image-stores")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateImageStores(ImageStoreTransferObject imageStoreTransferObject)
-			throws DirectorException {
+	public Response updateImageStores(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
 		ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
+		ImageStoreTransferObject imageStoreById = imageStoreService.getImageStoreById(imageStoreTransferObject.getId());
+		if (imageStoreById == null) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
 		boolean doesImageStoreNameExist = imageStoreService.doesImageStoreNameExist(imageStoreTransferObject.getName(),
 				imageStoreTransferObject.id);
 		if (doesImageStoreNameExist) {
@@ -452,24 +455,25 @@ public class ImageStores {
 		}
 
 		List<String> errorList = new ArrayList<String>();
-		
-		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject.getImage_store_details();
+
+		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject
+				.getImage_store_details();
 		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
-			if(StringUtils.isBlank(imageStoreDetailsTransferObject.getValue())){
+			if (StringUtils.isBlank(imageStoreDetailsTransferObject.getValue())) {
 				errorList.add(I18Util.format(imageStoreDetailsTransferObject.getKey()));
 			}
 		}
-		
+
 		if (!errorList.isEmpty()) {
-			updateImageStore.setError(StringUtils.join(errorList,",") + " can't be blank");
+			updateImageStore.setError(StringUtils.join(errorList, ",") + " can't be blank");
 			return Response.status(Status.BAD_REQUEST).entity(updateImageStore).build();
 		}
-		
+
 		// Encrypt password fields
 		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.fetchPasswordConfiguration();
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 
-		if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
+		if (StringUtils.isNotBlank(passwordConfiguration.getValue())) {
 			String encryptedPassword = imageStorePasswordUtil
 					.encryptPasswordForImageStore(passwordConfiguration.getValue());
 			passwordConfiguration.setValue(encryptedPassword);
@@ -495,12 +499,12 @@ public class ImageStores {
 	 * In case of successful deletion:
 	 * {"deleted" : true}
 	 * 
-	 * In case ImageStore doesn't exist, gives HTTP 404 Not Found
+	 * In case ImageStore with given id does not exist, returns HTTP 404 Not Found
 	 * 
 	 *                    </pre>
 	 * 
 	 * @param imageStoreId
-	 * @return
+	 * @return Response
 	 * @throws DirectorException
 	 */
 	@Path("image-stores/{imageStoreId: [0-9a-zA-Z_-]+}")
@@ -528,72 +532,154 @@ public class ImageStores {
 	}
 
 	/**
-	 * List the configured supported artifacts for the deployment type
+	 * This method returns list of configured supported artifacts for the
+	 * deployment type
 	 * 
-	 * 
+	 * @param deployment
+	 *            type as QueryPAram
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * 
-	 * @return List of supported artifacts
-	 * @TDMethodType GET
-	 * @TDSampleRestCall
+	 * @return Response List of supported artifacts
+	 * @mtwSampleRestCall
 	 * 
-	 *                   <pre>
-	 * 	https://{IP/HOST_NAME}/v1/deployment-artifacts?depolymentType=VM
+	 *                    <pre>
+	 * 	https://{IP/HOST_NAME}/v1/deployment-artifacts?deploymentType=VM
 	
 	 * Input: Required: Name of deploymentType: VM or Docker
 	 * 
+		{
+			"Policy": "Policy",
+			"Image": "Image",
+			"Tarball": "Image With Policy",
+			"ImageWithPolicy": "Image with Policy Separated"
+		}
+	 * 
+	 * In case no deployment type is provided, gives error:
+		{
+			"error": "Please provide depolyment type"
+		}
 	 * 
 	 * Output:
 	 * 
 	 * If invalid deployment type is provided, empty list is returned
-	 *                   </pre>
+	 *                    </pre>
 	 */
 	@Path("deployment-artifacts")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getArtifactsForDeployment(@QueryParam("depolymentType") String depolymentType) {
+	public Response getArtifactsForDeployment(@QueryParam("deploymentType") String deploymentType) {
 		GenericResponse genericResponse = new GenericResponse();
-		if (StringUtils.isBlank(depolymentType)) {
+		if (StringUtils.isBlank(deploymentType)) {
 			genericResponse.error = "Please provide depolyment type";
 			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		if (!CommonValidations.validateImageDeployments(depolymentType)) {
+		if (!CommonValidations.validateImageDeployments(deploymentType)) {
 			genericResponse.error = "Incorrect deployment_type";
 			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		switch (depolymentType) {
+		switch (deploymentType) {
 		case Constants.DEPLOYMENT_TYPE_VM:
 			return Response.ok(ArtifactsForDeploymentType.VM.getArtifacts()).build();
 
 		case Constants.DEPLOYMENT_TYPE_DOCKER:
 			return Response.ok(ArtifactsForDeploymentType.DOCKER.getArtifacts()).build();
 		}
-		return null;
+		genericResponse.setDetails("No supported artifacts for given deployment type");
+		return Response.ok(genericResponse).build();
 	}
 
 	/**
-	 * List the configured connectors or the connector by the name provided
+	 * List the connector properties by the connector name provided
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
+	 * @param connector
+	 *            type as path param
+	 * @return External store connector properties details
+	 * @mtwSampleRestCall
 	 * 
-	 * @return External store connector details
-	 * @TDMethodType GET
-	 * @TDSampleRestCall
-	 * 
-	 *                   <pre>
+	 *                    <pre>
 	 * 	https://{IP/HOST_NAME}/v1/image-store-connectors
 	
-	 * Input: Optional : Name of connector
-	 * https://{IP/HOST_NAME}/v1/Docker
-	 * https://{IP/HOST_NAME}/v1/Glance
-	 * https://{IP/HOST_NAME}/v1/Swift
-	 * 
+	 * Input: Name of connector Docker,Glance,Swift
 	 * Output:
+	 * https://{IP/HOST_NAME}/v1/Docker
+		{
+			"name": "DOCKER",
+			"driver": "com.intel.director.dockerhub.DockerHubManager",
+			"properties": [{
+				"key": "Username"
+			},
+			{
+				"key": "Password"
+			},
+			{
+				"key": "Email"
+			}],
+			"supported_artifacts": {
+				"Docker": "Docker"
+			}
+		}
+	 * https://{IP/HOST_NAME}/v1/Glance
+		{
+			"name": "GLANCE",
+			"driver": "com.intel.director.images.GlanceImageStoreManager",
+			"properties": [{
+				"key": "glance.api.endpoint"
+			},
+			{
+				"key": "glance.keystone.public.endpoint"
+			},
+			{
+				"key": "glance.tenant.name"
+			},
+			{
+				"key": "glance.image.store.username"
+			},
+			{
+				"key": "glance.image.store.password"
+			},
+			{
+				"key": "glance.visibility"
+			}],
+			"supported_artifacts": {
+				"Image": "Image",
+				"Docker": "Docker",
+				"Tarball": "Tarball"
+			}
+		}
+	 * https://{IP/HOST_NAME}/v1/Swift
+		{
+			"name": "GLANCE",
+			"driver": "com.intel.director.images.GlanceImageStoreManager",
+			"properties": [{
+				"key": "glance.api.endpoint"
+			},
+			{
+				"key": "glance.keystone.public.endpoint"
+			},
+			{
+				"key": "glance.tenant.name"
+			},
+			{
+				"key": "glance.image.store.username"
+			},
+			{
+				"key": "glance.image.store.password"
+			},
+			{
+				"key": "glance.visibility"
+			}],
+			"supported_artifacts": {
+				"Image": "Image",
+				"Docker": "Docker",
+				"Tarball": "Tarball"
+			}
+		}
 	 * 
-	 *                   </pre>
+	 *                    </pre>
 	 */
 	@Path("/image-store-connectors/{connector: [0-9a-zA-Z_-]+|}")
 	@GET
@@ -629,59 +715,53 @@ public class ImageStores {
 	}
 
 	/**
-	 * Validate Image Store
+	 * This methods validates given image store associated with id. If image
+	 * store id does not exist return HTTP 404.
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
-	 * @TDMethodType POST
-	 * @return Status of the connection
-	 * @TDSampleRestCall
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
 	 * 
-	 *                   <pre>
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/<IMAGE_STORE_UUID>/validate
 	 * Input: the UUID of the image store would be sent as part of the request
 	 * Output:
-	 * {
-	 * 	"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	"name": "ExtStore_1",
-	 * 	"artifact_types": [
-	 * 	"Image",
-	 * 	"Tarball"
-	 * 	],
-	 * 	"connector": "Glance",
-	 * 	"deleted": false,
-	 * 	"is_valid": true,
-	 * 	"image_store_details": [
-	 * 	{
-	 * 	  "id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	  "key": "glance.image.store.username"
-	 * 	},
-	 * 	{
-	 * 	  "id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	  "key": "glance.api.endpoint"
-	 * 	},
-	 * 	{
-	 * 	  "id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	  "key": "glance.tenant.name"
-	 * 	},
-	 * 	{
-	 * 	  "id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	  "key": "glance.keystone.public.endpoint"
-	 * 	},
-	 * 	{
-	 * 	  "id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-	 * 	  "image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-	 * 	  "key": "glance.image.store.password"
-	 * 	}
-	 * 	]
-	 * 	}
-	 * 
-	 * 
-	 * </pre>
+		{
+			"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+			"name": "ExtStore_1",
+			"artifact_types": ["Image",
+			"Tarball"],
+			"connector": "Glance",
+			"deleted": false,
+			"is_valid": true,
+			"image_store_details": [{
+				"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.image.store.username"
+			},
+			{
+				"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.api.endpoint"
+			},
+			{
+				"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.tenant.name"
+			},
+			{
+				"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.keystone.public.endpoint"
+			},
+			{
+				"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
+				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+				"key": "glance.image.store.password"
+			}]
+		}
+	 *                    </pre>
 	 * 
 	 * @param imageStoreId
 	 * @return Response containing the status
@@ -717,7 +797,7 @@ public class ImageStores {
 			imageStoreTransferObject.setError(e.getMessage());
 			imageStoreTransferObject.setIsValid(false);
 		}
-		
+
 		try {
 			persistService.updateImageStore(imageStoreTransferObject);
 		} catch (DbException e) {

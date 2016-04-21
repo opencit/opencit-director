@@ -1360,7 +1360,9 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType PUT
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images/host
 	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9","name":"10.35.35.182"}
 	 * 
@@ -1384,7 +1386,7 @@ public class Images {
 	 * 
 	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param sshSettingRequest
 	 *            JSON representation of the connection details
@@ -1410,10 +1412,7 @@ public class Images {
 			sshResponse.setError(e.getMessage());
 		}
 		return Response.ok(sshResponse).build();
-
 	}
-	
-	
 	
 	/**
 	 * This method initiates docker pull task for given image_id provided that
@@ -1428,7 +1427,11 @@ public class Images {
 	 * 
 	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * 
-	 * Output: {"details":"Docker Image successfully queued for download","status":"Success"}
+	 * Output: 
+		{
+			"details": "Docker Image successfully queued for download",
+			"status": "Success"
+		}
 	 * 
 	 * In case of error:
 	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
@@ -1470,19 +1473,25 @@ public class Images {
 	}
 	
 	/**
-	 * This method sets up docker image uploaded manually for given image_id for furhter operation provided that
-	 * deployment_type of image must be 'Docker' and repo tag should be given
-	 * before.
-	 * This is mandatory step before performing any further operation on docker image.
+	 * This method sets up docker image uploaded manually for given image_id for
+	 * further operation provided that deployment_type of image must be 'Docker'
+	 * and repo tag should be given before. This is mandatory step before
+	 * performing any further operation on docker image.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/docker-setup/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * 
 	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * 
-	 * Output: {"details":"Docker Image succesfully uploaded","status":"Success"}
+	 * Output: 
+		{
+			"details": "Docker Image successfully uploaded",
+			"status": "Success"
+		}
 	 * 
 	 * In case of error:
 	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
@@ -1491,7 +1500,7 @@ public class Images {
 	 *   "error": "Cannot Perform Docker Setup Operation in this Image"
 	 * }
 	 * 
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param Pathparam
 	 *            : image_id
@@ -1539,45 +1548,44 @@ public class Images {
 	 * 
 	 * Input: NA
 	 * 
-	 * Output: [
-	{
-	"id": "EC69B190-0058-46F7-8AC1-DD5100C745DD",
-	"policy_uri": "http://10.35.35.35:8080/v1/AUTH_a4bde8b572054869848712dc9bd262ea/VJ_1/f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
-	"date": 1460697888698,
-	"status": "Complete",
-	"trust_policy": {
-	  "created_by_user_id": "admin",
-	  "created_date": "2016-04-15 05:24:44",
-	  "edited_by_user_id": "admin",
-	  "edited_date": "2016-04-15 05:24:44",
-	  "id": "F44C455D-8DD9-4AC2-B998-B1CF53872834",
-	  "trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19</ns3:ImageId><ns3:ImageHash>bc52e3a4e4cf119d8fabc528eca6783d0ddc21b623a4f0f6bdf836fea1175a83</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"><ns3:File Path=\"/boot/grub/menu.lst\">bd4b7aa84740262bca78bd8e737693cdf5f90773f7aa2ece36572abb73fa2182</ns3:File><ns3:File Path=\"/boot/vmlinuz-3.2.0-80-virtual\">c9542e8517a25e2370916ca0dc118b4c0502add62f073536b336da7d3e09d298</ns3:File><ns3:File Path=\"/boot/config-3.2.0-80-virtual\">31bd9004a72d95e5c0ed6144fb9d6ea1784b86ea966c346448c08d655113b550</ns3:File><ns3:File Path=\"/boot/initrd.img-3.2.0-80-virtual\">4aa2ed8eee9cfb23f4f9d588d08a8b0da778254a1f64614b86a8976012e73607</ns3:File><ns3:File Path=\"/boot/grub/stage1\">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</ns3:File><ns3:File Path=\"/boot/grub/e2fs_stage1_5\">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</ns3:File><ns3:File Path=\"/boot/grub/stage2\">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</ns3:File></ns3:Whitelist><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>AEh2nGTVgr9Eawf3g8H/rz2YLvo=</DigestValue></Reference></SignedInfo><SignatureValue>QMxDQxjohuu+CVlHq57upUYpcYtZ2iGv1g/zsBLe36wH5NzBF1S6DPmS4FpaWiEhWheQdr10ZtBZ\ntk+j4ObA2YzMe7y/zZQ5XqYcgpyB5w43VFxfa1op39TZea29p+F5HG3pDVRqgC8NC3jHcK4g3bSx\nDzagmo1IoP4gzu3r2Zbu8ZNEtP76GtwT7gKMJ+Qq/rIDiUYi3U66HNEPUtpVjDzyq98qi2XxH5lN\nceY+D/BJtCr/EbVCzJN0KriEr86uCtuJysWBy173GV6NnALVYp/XapIOq2uuCDL17bv4T4UbvmoS\nF4JfYaT9WiLdFsSX2Q1/qYQ+aVWWk9l69aj5wg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEZxg6xTANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwMzI4MTI0NjM2WhcNMjYwMzI2MTI0NjM2WjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCVGWggOHOQrjZRkxpgeikQDErUSKtI0kzFzdL5mlHO3rzidzJEAkbfPUvw\niCyVoFHn0oHfu7A62wqMcv90sEj4PZR5CrHzDpMwfRA/uEVeCrkl386JG2yXKbOYPsK6DvIXMZBD\nYMFWiRdsdRimpSfc68v8hAEPsDsqrnHld3xJvWhpc0wL3vL6HDfgcyTaMdpwPzif8nL1c00028vU\nK0yeOzPKc+5myYlj9SIelfaYocPBZDbK+VHhe3aEGn+sviI6/JvaskdP+WChKxpX82/dA//lK1TM\nAv81y1DWdSkRVlHHtTWU1pF/IGf8ylFUFh/ByWcjs71SZX9SpOL7XSHrAgMBAAGjITAfMB0GA1Ud\nDgQWBBRCrgwy6dluh/075+1V0pR+jZhMcjANBgkqhkiG9w0BAQsFAAOCAQEAd3st8f1b7+xFiNrz\nDP+CcBiC9mxrivPpLO57U4uhKrQnA0vCL+rL4uL4XfLCMLU2PRL+2YlXlrih+qZUvZCykduhN4RP\n1htv/9hHT6LxeGo9AFE5t7Ef8mNjp3tVsn0q8zOXzHYpILVtFsze2m2Fmyfv2NYMvsxn4IvQMIRA\n1BdJWRxgKvP8pR3VzuWXkuAd8WYz6tL9b3H/vzF/NKDJ+7JHdZ1glYt2BCMwVSsEjsP8aSIQkR9O\nSPjIzUC9cKv8KvU7SI7vjYuM4EpTUvAvtAFyMognyfIjHRkCxEww/lEKl/lhxdjP4cbY3G55txd+\niXHkF6o6nShG0/qn5UZ6ww==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
-	  "img_attributes": {
-	    "created_by_user_id": "admin",
-	    "created_date": "2016-04-15 05:17:10",
-	    "edited_by_user_id": "admin",
-	    "edited_date": "2016-04-15 05:18:26",
-	    "id": "9176FDF8-D3A2-4272-9E12-878B1B09427E",
-	    "image_name": "cirros-0.3.4-x86_64-raw.img",
-	    "image_format": "qcow2",
-	    "image_deployments": "VM",
-	    "image_size": 41126400,
-	    "sent": 41126400,
-	    "deleted": false,
-	    "upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
-	    "image_upload_status": "Complete",
-	    "image_Location": "/mnt/images/"
-	  },
-	  "display_name": "cirros-0.3.4-x86_64-raw.img",
-	  "archive": false
-	},
-	"store_id": "BE03BD95-6407-46E6-A48B-7E1D0866A96E",
-	"store_name": "swift_35",
-	"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
-	"store_artifact_id": "f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
-	"deleted": true
-	}
-	]
+	 * Output: 
+		[{
+			"id": "EC69B190-0058-46F7-8AC1-DD5100C745DD",
+			"policy_uri": "http://10.35.35.35:8080/v1/AUTH_a4bde8b572054869848712dc9bd262ea/VJ_1/f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
+			"date": 1460697888698,
+			"status": "Complete",
+			"trust_policy": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-04-15 05:24:44",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-04-15 05:24:44",
+				"id": "F44C455D-8DD9-4AC2-B998-B1CF53872834",
+				"trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19</ns3:ImageId><ns3:ImageHash>bc52e3a4e4cf119d8fabc528eca6783d0ddc21b623a4f0f6bdf836fea1175a83</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"><ns3:File Path=\"/boot/grub/menu.lst\">bd4b7aa84740262bca78bd8e737693cdf5f90773f7aa2ece36572abb73fa2182</ns3:File><ns3:File Path=\"/boot/vmlinuz-3.2.0-80-virtual\">c9542e8517a25e2370916ca0dc118b4c0502add62f073536b336da7d3e09d298</ns3:File><ns3:File Path=\"/boot/config-3.2.0-80-virtual\">31bd9004a72d95e5c0ed6144fb9d6ea1784b86ea966c346448c08d655113b550</ns3:File><ns3:File Path=\"/boot/initrd.img-3.2.0-80-virtual\">4aa2ed8eee9cfb23f4f9d588d08a8b0da778254a1f64614b86a8976012e73607</ns3:File><ns3:File Path=\"/boot/grub/stage1\">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</ns3:File><ns3:File Path=\"/boot/grub/e2fs_stage1_5\">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</ns3:File><ns3:File Path=\"/boot/grub/stage2\">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</ns3:File></ns3:Whitelist><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>AEh2nGTVgr9Eawf3g8H/rz2YLvo=</DigestValue></Reference></SignedInfo><SignatureValue>QMxDQxjohuu+CVlHq57upUYpcYtZ2iGv1g/zsBLe36wH5NzBF1S6DPmS4FpaWiEhWheQdr10ZtBZ\ntk+j4ObA2YzMe7y/zZQ5XqYcgpyB5w43VFxfa1op39TZea29p+F5HG3pDVRqgC8NC3jHcK4g3bSx\nDzagmo1IoP4gzu3r2Zbu8ZNEtP76GtwT7gKMJ+Qq/rIDiUYi3U66HNEPUtpVjDzyq98qi2XxH5lN\nceY+D/BJtCr/EbVCzJN0KriEr86uCtuJysWBy173GV6NnALVYp/XapIOq2uuCDL17bv4T4UbvmoS\nF4JfYaT9WiLdFsSX2Q1/qYQ+aVWWk9l69aj5wg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEZxg6xTANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwMzI4MTI0NjM2WhcNMjYwMzI2MTI0NjM2WjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCVGWggOHOQrjZRkxpgeikQDErUSKtI0kzFzdL5mlHO3rzidzJEAkbfPUvw\niCyVoFHn0oHfu7A62wqMcv90sEj4PZR5CrHzDpMwfRA/uEVeCrkl386JG2yXKbOYPsK6DvIXMZBD\nYMFWiRdsdRimpSfc68v8hAEPsDsqrnHld3xJvWhpc0wL3vL6HDfgcyTaMdpwPzif8nL1c00028vU\nK0yeOzPKc+5myYlj9SIelfaYocPBZDbK+VHhe3aEGn+sviI6/JvaskdP+WChKxpX82/dA//lK1TM\nAv81y1DWdSkRVlHHtTWU1pF/IGf8ylFUFh/ByWcjs71SZX9SpOL7XSHrAgMBAAGjITAfMB0GA1Ud\nDgQWBBRCrgwy6dluh/075+1V0pR+jZhMcjANBgkqhkiG9w0BAQsFAAOCAQEAd3st8f1b7+xFiNrz\nDP+CcBiC9mxrivPpLO57U4uhKrQnA0vCL+rL4uL4XfLCMLU2PRL+2YlXlrih+qZUvZCykduhN4RP\n1htv/9hHT6LxeGo9AFE5t7Ef8mNjp3tVsn0q8zOXzHYpILVtFsze2m2Fmyfv2NYMvsxn4IvQMIRA\n1BdJWRxgKvP8pR3VzuWXkuAd8WYz6tL9b3H/vzF/NKDJ+7JHdZ1glYt2BCMwVSsEjsP8aSIQkR9O\nSPjIzUC9cKv8KvU7SI7vjYuM4EpTUvAvtAFyMognyfIjHRkCxEww/lEKl/lhxdjP4cbY3G55txd+\niXHkF6o6nShG0/qn5UZ6ww==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
+				"img_attributes": {
+					"created_by_user_id": "admin",
+					"created_date": "2016-04-15 05:17:10",
+					"edited_by_user_id": "admin",
+					"edited_date": "2016-04-15 05:18:26",
+					"id": "9176FDF8-D3A2-4272-9E12-878B1B09427E",
+					"image_name": "cirros-0.3.4-x86_64-raw.img",
+					"image_format": "qcow2",
+					"image_deployments": "VM",
+					"image_size": 41126400,
+					"sent": 41126400,
+					"deleted": false,
+					"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
+					"image_upload_status": "Complete",
+					"image_Location": "/mnt/images/"
+				},
+				"display_name": "cirros-0.3.4-x86_64-raw.img",
+				"archive": false
+			},
+			"store_id": "BE03BD95-6407-46E6-A48B-7E1D0866A96E",
+			"store_name": "swift_35",
+			"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
+			"store_artifact_id": "f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
+			"deleted": true
+		}]
 	 * 
 	 * In case of error:
 	 * Input: NA
@@ -1611,6 +1619,7 @@ public class Images {
 	/**
 	 * This method returns list of deployment types which allow image encryption
 	 * 
+	 * @param NA
 	 * @return list of deployment types which allow image encryption
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
@@ -1631,35 +1640,38 @@ public class Images {
 	
 	
 	/**
-	 * This method returns list of stalled images.
+	 * This method returns list of stalled images. Stalled images are those
+	 * images for which upload is pending for long time.
 	 * 
+	 * @param NA
 	 * @return list of stalled images
 	 * @mtwMethodType GET
+	 * @mtwContentTypeReturned JSON
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images-stalled
 	 * Input: NA
 	 * Output:
-	 * [
-	{
-	"created_by_user_id": "admin",
-	"created_date": "2016-04-14 18:49:11",
-	"edited_by_user_id": "admin",
-	"edited_date": "2016-04-14 18:49:11",
-	"id": "AC4750E4-4018-449D-B471-9517122FE29B",
-	"image_name": "123.img",
-	"image_format": "qcow2",
-	"image_deployments": "VM",
-	"image_size": 13631488,
-	"sent": 0,
-	"deleted": false,
-	"image_uploads_count": 0,
-	"policy_uploads_count": 0,
-	"image_upload_status": "In Progress",
-	"image_Location": "/mnt/images/"
-	}
-	]
+		[
+			{
+			"created_by_user_id": "admin",
+			"created_date": "2016-04-14 18:49:11",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-04-14 18:49:11",
+			"id": "AC4750E4-4018-449D-B471-9517122FE29B",
+			"image_name": "123.img",
+			"image_format": "qcow2",
+			"image_deployments": "VM",
+			"image_size": 13631488,
+			"sent": 0,
+			"deleted": false,
+			"image_uploads_count": 0,
+			"policy_uploads_count": 0,
+			"image_upload_status": "In Progress",
+			"image_Location": "/mnt/images/"
+			}
+		]
 	 *                    </pre>
 	 */
 	@Path("images-stalled")
@@ -1683,8 +1695,11 @@ public class Images {
 	 * valid deployment type. If deployment type is not provided returns hash
 	 * algorithm used by all supported deployment type.
 	 * 
-	 * @return
+	 * @param deploymentType
+	 *            as PathParam
+	 * @return Response
 	 * @mtwMethodType GET
+	 * @mtwContentTypeReturned JSON
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>

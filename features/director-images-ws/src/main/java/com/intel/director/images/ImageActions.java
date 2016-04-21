@@ -299,18 +299,24 @@ public class ImageActions {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * 	  https://{IP/HOST_NAME}/v1/image-actions/history/64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF
 	 * 	  Input: PathParam : imageId = 64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF
 	 * 	  Output:
-	 * 	{"image_action_history_list":[
-	 * 		{"store_names":"Glance-36","execution_status":"Complete","id":"30869EF3-9809-48F6-AC36-21994318313F","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 22 12:30:46"},
-	 * 		{"store_names":"Glance-36","execution_status":"Complete","id":"689AF185-2232-4E61-A1ED-2435FF7DF337","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 18 15:34:36"}]
+	 * 	{
+	 * 		"image_action_history_list":[
+	 * 			{"store_names":"Glance-36","execution_status":"Complete","id":"30869EF3-9809-48F6-AC36-21994318313F","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 22 12:30:46"},
+	 * 			{"store_names":"Glance-36","execution_status":"Complete","id":"689AF185-2232-4E61-A1ED-2435FF7DF337","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 18 15:34:36"}
+	 * 		]
 	 * 	}
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param imageId
-	 * @return Response containing list of image-action-history for given imageId
+	 *            imageId as PathParam
+	 * @return Response containing list of image-action-history for given
+	 *         imageId
 	 */
 	@Path("image-actions/history/{imageId: [0-9a-zA-Z_-]+}")
 	@Produces(MediaType.APPLICATION_JSON)
