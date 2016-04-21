@@ -527,7 +527,7 @@ public class ImageServiceImpl implements ImageService {
 		Set<String> patchDirAddSet = new HashSet<String>();
 		Collection<File> treeFiles = new ArrayList<>();
 
-		String mountPath = DirectorUtil.getMountPath(searchFilesInImageRequest.id);
+		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
 
 		log.info("Browsing files for on image mounted at : " + mountPath);
 
@@ -771,15 +771,7 @@ public class ImageServiceImpl implements ImageService {
 			}
 			String trustPolicyDraftxml = trustPolicyDraft
 					.getTrust_policy_draft();
-			JAXBContext jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-					.createUnmarshaller();
-
-			StringReader reader = new StringReader(trustPolicyDraftxml);
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-					.unmarshal(reader);
-
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(trustPolicyDraftxml);
 			metadata.setImage_name(trustPolicyDraft.getImgAttributes()
 					.getImage_name());
 			metadata.setDisplay_name(trustPolicyDraft.getDisplay_name());
@@ -835,14 +827,7 @@ public class ImageServiceImpl implements ImageService {
 				metadata.setTrustPolicy(policyXml);
 			}
 
-			JAXBContext jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-					.createUnmarshaller();
-
-			StringReader reader = new StringReader(policyXml);
-			policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-					.unmarshal(reader);
+			policy = TdaasUtil.getPolicy(policyXml);
 
 			// /metadata.setIsEncrypted(isEncrypted);
 			metadata.setLaunch_control_policy(policy.getLaunchControlPolicy()
@@ -900,7 +885,7 @@ public class ImageServiceImpl implements ImageService {
 		TrustPolicy existingPolicy;
 		String policyXml = null;
 
-		boolean policyFound;
+		boolean policyFound = true;
 		try {
 			existingDraft = imagePersistenceManager
 					.fetchPolicyDraftById(draftOrTrustPolicyId);
@@ -1212,16 +1197,9 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
-			JAXBContext jaxbContext;
 
 			try {
-				jaxbContext = JAXBContext
-						.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-				Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-				StringReader reader = new StringReader(
-						trustPolicyDraft.getTrust_policy_draft());
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-						.unmarshal(reader);
+				com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil.getPolicy(trustPolicyDraft.getTrust_policy_draft());
 				if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
 					for (Measurement measurement : trustPolicyDraftObj
 							.getWhitelist().getMeasurements()) {
@@ -1279,15 +1257,7 @@ public class ImageServiceImpl implements ImageService {
 		try {
 			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
 					.fetchPolicyDraftForImage(imageID);
-			JAXBContext jaxbContext;
-
-			jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			StringReader reader = new StringReader(
-					trustPolicyDraft.getTrust_policy_draft());
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-					.unmarshal(reader);
+			com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil.getPolicy(trustPolicyDraft.getTrust_policy_draft());
 			if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
 				return trustPolicyDraftObj.getWhitelist().getMeasurements();
 			}

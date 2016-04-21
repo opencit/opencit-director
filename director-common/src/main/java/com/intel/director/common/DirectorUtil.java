@@ -49,6 +49,7 @@ import com.intel.mtwilson.configuration.ConfigurationFactory;
 import com.intel.mtwilson.configuration.ConfigurationProvider;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
+import com.intel.director.util.TdaasUtil;
 
 public class DirectorUtil {
 
@@ -344,31 +345,14 @@ public class DirectorUtil {
 	public static String fetchIdforUpload(TrustPolicy trustPolicy){	
 		String policyXml = trustPolicy.getTrust_policy();
 		log.debug("Inside Run Upload Policy task policyXml::" + policyXml);
-		StringReader reader = new StringReader(policyXml);
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
-		JAXBContext jaxbContext;
 		try {
-			jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-		} catch (JAXBException e) {
-			log.error("Unable to instantiate the jaxbcontext", e);
-			return null;
-			
-		}
-		Unmarshaller unmarshaller;
-		try {
-			unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
-		} catch (JAXBException e) {
-			log.error("Unable to instantiate the unmarshaller", e);
-			return null;
-		}
-		try {
-			policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-					.unmarshal(reader);
+			policy = TdaasUtil.getPolicy(policyXml);
 		} catch (JAXBException e) {
 			log.error("Unable to unmarshall the policy", e);
 			return null;	
-		}
+		}		
+
 		return policy.getImage().getImageId();
 	}
 
@@ -413,19 +397,15 @@ public class DirectorUtil {
 		}
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;
 		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-					.createUnmarshaller();
-
-			StringReader reader = new StringReader(policy.getTrust_policy());
-			trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+			trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
 			///trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
 		} catch (JAXBException e1) {
 			log.error("Directorutil fetchDekUrl failed",e1);
+			return "";
 		}
-		
+	
 		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
-		
+	
 	}
 	
 	public static Result executeCommand(String command, String... args)
