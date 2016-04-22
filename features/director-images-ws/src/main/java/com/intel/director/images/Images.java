@@ -159,22 +159,19 @@ public class Images {
 					.entity(uploadImageToTrustDirector).build();
 		}
 		
-		if (Constants.DEPLOYMENT_TYPE_DOCKER
-				.equals(uploadRequest.image_deployments)
-				&& uploadRequest.image_size == 0) {
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(uploadRequest.image_deployments) && uploadRequest.image_size == 0) {
 			boolean doesRepoTagExistInDockerHub;
 			try {
-				doesRepoTagExistInDockerHub = DockerUtil
-						.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
-								uploadRequest.getTag());
+				doesRepoTagExistInDockerHub = DockerUtil.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
+						uploadRequest.getTag());
 			} catch (ClientProtocolException e) {
 				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
-				
+
 			} catch (IOException e) {
 				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
 			}
-			
-			if(!doesRepoTagExistInDockerHub){
+
+			if (!doesRepoTagExistInDockerHub) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with repo tag not available in docker hub";
@@ -183,11 +180,11 @@ public class Images {
 		}
 		
 		imageService = new ImageServiceImpl();	
-		String imageName=uploadRequest.image_name;
-		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && StringUtils.isBlank(imageName)) {
+		String imageName = uploadRequest.image_name;
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+				&& StringUtils.isBlank(imageName)) {
 			String repositoryInName = uploadRequest.repository;
-			imageName = repositoryInName.replace("/", "-") + ":"
-					+ uploadRequest.tag;
+			imageName = repositoryInName.replace("/", "-") + ":" + uploadRequest.tag;
 		}
 		try {
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && dockerActionService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
@@ -1086,11 +1083,13 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned File
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policyAndManifest
 	 * Input: Image UUID
 	 * Output: Content of tarball as stream
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
@@ -1100,43 +1099,34 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/policyAndManifest")
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadPolicyAndManifestForImageId(
-			@PathParam("imageId") final String imageId) {
+	public Response downloadPolicyAndManifestForImageId(@PathParam("imageId") final String imageId) {
 
 		File tarBall;
-		GenericResponse genericResponse= new GenericResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		GenericResponse genericResponse = new GenericResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		
 
-		ImageInfo imageInfo=null;
+		ImageInfo imageInfo = null;
 		try {
 			imageInfo = imageService.fetchImageById(imageId);
 		} catch (DirectorException e1) {
 			log.error("Unable to fetch image", e1);
 		}
-		if(imageInfo == null){
-			genericResponse.error = "No image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + imageId + " exists.";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		
 
-		
 		String trust_policy_id = imageInfo.getTrust_policy_id();
 		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
 
-		if(trustPolicyByTrustId == null){
-			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+		if (trustPolicyByTrustId == null) {
+			genericResponse.error = "No trust policy exists for image with id : " + imageId + " exists.";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		
-		
-		
+
 		try {
 			tarBall = imageService.createTarballOfPolicyAndManifest(imageId);
 		} catch (DirectorException e) {
@@ -1151,8 +1141,7 @@ public class Images {
 			tarInputStream = new FileInputStream(tarBall) {
 				@Override
 				public void close() throws IOException {
-					log.info("Deleting temporary files "
-							+ Constants.TARBALL_PATH + imageId);
+					log.info("Deleting temporary files " + Constants.TARBALL_PATH + imageId);
 					super.close();
 					FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 					final File dir = new File(Constants.TARBALL_PATH + imageId);
@@ -1165,8 +1154,7 @@ public class Images {
 		}
 		ResponseBuilder response = Response.ok(tarInputStream);
 
-		response.header("Content-Disposition", "attachment; filename="
-				+ tarBall.getName());
+		response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
 
 		Response downloadResponse = response.build();
 		return downloadResponse;
@@ -1175,17 +1163,19 @@ public class Images {
 	/**
 	 * 
 	 * Method lets the user download the image from the grids page. The user can
-	 * visit the grid any time and download image. T
+	 * visit the grid any time and download image.
 	 * 
 	 * In case the image is not found for the image id, HTTP 404 is returned
 	 * 
 	 * @mtwContentTypeReturned File
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/image
 	 * Input: Image UUID
 	 * Output: Content of image as stream
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
@@ -1195,34 +1185,28 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/image")
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadImage(
-			@PathParam("imageId") final String imageId) {
+	public Response downloadImage(@PathParam("imageId") final String imageId) throws DirectorException {
 
-		File tarBall = null;
-		GenericResponse genericResponse= new GenericResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		GenericResponse genericResponse = new GenericResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		
 
-		ImageInfo imageInfo = null;
+		ImageInfo imageInfo;
 		try {
 			imageInfo = imageService.fetchImageById(imageId);
 		} catch (DirectorException e1) {
 			log.error("Unable to fetch image", e1);
+			throw new DirectorException("Unable to fetch image", e1);
 		}
 		if (imageInfo == null) {
-			genericResponse.error = "No image with id : " + imageId
-					+ " exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(genericResponse).build();
+			genericResponse.error = "No image with id : " + imageId + " exists.";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
-		
 
-		tarBall = new File(imageInfo.getLocation() + File.separator + imageInfo.getImage_name());
-	
+		File tarBall = new File(imageInfo.getLocation() + File.separator + imageInfo.getImage_name());
+
 		FileInputStream tarInputStream = null;
 		try {
 			tarInputStream = new FileInputStream(tarBall) {
@@ -1237,11 +1221,14 @@ public class Images {
 		}
 		ResponseBuilder response = Response.ok(tarInputStream);
 
-		response.header("Content-Disposition", "attachment; filename="
-				+ tarBall.getName());
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo.getImage_deployments())
+				&& !tarBall.getName().endsWith(".tar")) {
+			response.header("Content-Disposition", "attachment; filename=" + tarBall.getName() + ".tar");
+		} else {
+			response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
+		}
 
-		Response downloadResponse = response.build();
-		return downloadResponse;
+		return response.build();
 	}
 	
 	/**
