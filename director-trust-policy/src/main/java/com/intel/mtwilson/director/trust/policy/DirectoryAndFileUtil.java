@@ -106,7 +106,6 @@ public class DirectoryAndFileUtil {
 		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir;
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
-		String command = null;
 		StringBuilder stringBuilder = new StringBuilder("find " + directoryAbsolutePath);
 
 		if (dirMeasurement.isRecursive() == null) {
@@ -140,7 +139,7 @@ public class DirectoryAndFileUtil {
 		if (exclude != null && StringUtils.isNotEmpty(exclude)) {
 			stringBuilder.append(" | grep -vE '" + exclude + "'");
 		}
-		command = stringBuilder.toString();
+		String command = stringBuilder.toString();
 		log.debug("Command to filter files {}", command);
 		return command;
 	}
@@ -226,14 +225,16 @@ public class DirectoryAndFileUtil {
 				filePath = sb.toString();
 			}
 			filePath = new java.io.File(filePath).getCanonicalPath();
+			StringBuffer stringBuffer = new StringBuffer();
+			
 			if (!filePath.startsWith(DirectorUtil.getMountPath(imageId))) {
-				log.info("Appending mount path for filepath = " + filePath);
-				filePath = DirectorUtil.getMountPath(imageId) + File.separator
-						+ "mount" + filePath;
+				log.debug("Appending mount path for filepath = " + filePath);
+				filePath = stringBuffer.append(DirectorUtil.getMountPath(imageId)).append(File.separator)
+						.append("mount").append(filePath).toString();
 			} else {
-				log.info("NOT Appending mount path for filepath = " + filePath);
+				log.debug("NOT Appending mount path for filepath = " + filePath);
 			}
-			log.info("Symbolic link value for '" + path.toString() + "' is: '"
+			log.debug("Symbolic link value for '" + path.toString() + "' is: '"
 					+ filePath);
 			path = Paths.get(filePath);
 		}

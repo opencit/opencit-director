@@ -18,7 +18,7 @@ import com.intel.director.api.ui.ImageStoreUploadOrderBy;
 import com.intel.director.api.ui.OrderByEnum;
 import com.intel.director.api.ui.PolicyUploadFilter;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
@@ -52,7 +52,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 
 		imgUpFilter.setUploadVariableMD5(uploadVar);
 
-		List<ImageStoreUploadTransferObject> imageUploads = null;
+		List<ImageStoreUploadTransferObject> imageUploads;
 		try {
 			imageUploads = persistenceManager.fetchImageUploads(imgUpFilter, imgOrder);
 		} catch (DbException e) {
@@ -70,7 +70,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 		imgOrder.setOrderBy(OrderByEnum.DESC);
 		ImageStoreUploadFilter imgUpFilter = new ImageStoreUploadFilter();
 		imgUpFilter.setImage_id(imageId);
-		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		List<ImageStoreUploadTransferObject> fetchImageUploads;
 		try {
 			fetchImageUploads = persistenceManager.fetchImageUploads(
 					imgUpFilter, imgOrder);
@@ -93,7 +93,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 
 		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
 		imageStoreFilter.setConnector(Constants.CONNECTOR_GLANCE);
-		List<ImageStoreTransferObject> fetchImageStores = null;
+		List<ImageStoreTransferObject> fetchImageStores;
 		try {
 			fetchImageStores = persistenceManager
 					.fetchImageStores(imageStoreFilter);
@@ -112,7 +112,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 			if (imageStoreTransferObject.isDeleted()) {
 				continue;
 			}
-			StoreManager imageStoreManager = null;
+			StoreManager imageStoreManager;
 			try {
 				imageStoreManager = StoreManagerFactory
 						.getStoreManager(imageStoreTransferObject.getId());
@@ -120,7 +120,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 				log.error("Error in getting imageStoreManager ", e);
 				continue;
 			}
-			List<ImageStoreUploadResponse> fetchAllImages = null;
+			List<ImageStoreUploadResponse> fetchAllImages;
 			try {
 				fetchAllImages = imageStoreManager.fetchAllImages();
 			} catch (StoreException e) {
@@ -145,7 +145,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 		}
 
 		// Fetch the image id from mw_image_uploads
-		List<ImageStoreUploadTransferObject> fetchImageUploads = null;
+		List<ImageStoreUploadTransferObject> fetchImageUploads;
 		try {
 			ImageStoreUploadFilter uploadFilter = new ImageStoreUploadFilter();
 			uploadFilter.setEnableDeletedCheck(true);
@@ -170,7 +170,7 @@ public class ArtifactUploadServiceImpl implements ArtifactUploadService {
 		// Find list of image ids deleted from image store
 		imageStoreUploadArtifactsIdListToBeDeleted.removeAll(idFromImageStores);
 
-		List<PolicyUploadTransferObject> policyUploadTransferObjects = null;
+		List<PolicyUploadTransferObject> policyUploadTransferObjects;
 		try {
 			PolicyUploadFilter uploadFilter = new PolicyUploadFilter();
 			uploadFilter.setEnableDeletedCheck(true);

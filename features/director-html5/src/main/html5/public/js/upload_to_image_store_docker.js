@@ -202,7 +202,7 @@ function createPolicyDraftFromPolicy() {
         url: "/v1/rpc/create-draft-from-policy",
         success: function(data, status, xhr) {
 
-            if (data.status == "Error") {
+            if (data.error) {
                 $('#error_docker_body_3').text("Internal Error Occured");
                 $("#error_docker_3").modal({
                     backdrop: "static"

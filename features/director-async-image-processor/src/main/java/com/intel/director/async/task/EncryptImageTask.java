@@ -13,7 +13,7 @@ import javax.xml.stream.XMLStreamException;
 
 import com.intel.director.common.Constants;
 import com.intel.director.common.EncryptImage;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;

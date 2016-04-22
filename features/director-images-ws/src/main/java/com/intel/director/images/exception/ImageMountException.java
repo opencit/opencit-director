@@ -5,6 +5,8 @@
  */
 package com.intel.director.images.exception;
 
+import com.intel.director.common.exception.DirectorException;
+
 /**
  *
  * @author GS-0681

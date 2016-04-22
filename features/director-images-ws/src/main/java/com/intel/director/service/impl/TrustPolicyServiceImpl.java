@@ -28,7 +28,7 @@ import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.TrustPolicyService;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
@@ -87,7 +87,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	@SuppressWarnings("deprecation")
 	@Override
 	public String signTrustPolicy(String policyXml) throws DirectorException {
-		String signedPolicyXml = null;
+		String signedPolicyXml;
 		Extensions.register(TlsPolicyCreator.class,
 				com.intel.mtwilson.tls.policy.creator.impl.CertificateDigestTlsPolicyCreator.class);
 		log.info("Register TlsPolicyCreator");
@@ -95,7 +95,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		Properties mtwConfig = DirectorUtil.getPropertiesFile(Constants.MTWILSON_PROP_FILE);// My.configuration().getClientProperties();
 		log.info("Get MTW prop file");
 
-		TrustPolicySignature client = null;
+		TrustPolicySignature client;
 		try {
 			client = new TrustPolicySignature(mtwConfig);
 			log.info("MTW client init");
@@ -189,7 +189,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		String trustPolicyFile = localPathForPolicyAndManifest + File.separator + trustPolicyName;
 
 		String manifestFile = localPathForPolicyAndManifest + File.separator + "manifest.xml";
-		String manifest = null;
+		String manifest;
 		try {
 			String unformattedManifest = TdaasUtil.getManifestForPolicy(policyXml);
 			manifest = DirectorUtil.prettifyXml(unformattedManifest);
@@ -213,7 +213,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		fileUtilityOperation.writeToFile(manifestFile, manifest);
 
 		// Push the policy and manifest to the remote host
-		SshSettingInfo existingSsh = null;
+		SshSettingInfo existingSsh;
 		try {
 			existingSsh = persistService.fetchSshByImageId(imageInfo.id);
 		} catch (DbException e) {
@@ -268,7 +268,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		String filePath = imageInfo.getLocation() + imageInfo.getImage_name();
 		File imgFile = new File(filePath);
 		log.info("Calculating MD5 of file : {}", filePath);
-		String computeHash = null;
+		String computeHash;
 		try {
 			computeHash = DirectorUtil.computeHash(MessageDigest.getInstance("MD5"), imgFile);
 		} catch (NoSuchAlgorithmException | IOException e) {

@@ -16,12 +16,10 @@ public abstract class MountServiceImpl implements MountService {
 		mountPath = getMountPath();
 	}
 	
-	private String getMountPath(){
-		String mountPath = null;
+	private String getMountPath() {
 		if (imageInfo.getImage_format() == null) {
 			mountPath = TdaasUtil.getMountPath(imageInfo.id);
-		} else if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo
-				.getImage_deployments())) {
+		} else if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.getImage_deployments())) {
 			mountPath = TdaasUtil.getMountPath(imageInfo.id);
 		} else {
 			mountPath = DirectorUtil.getMountPath(imageInfo.id);

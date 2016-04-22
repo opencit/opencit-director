@@ -13,7 +13,7 @@ import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.DockerUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.util.TdaasUtil;
 
 /**
@@ -62,10 +62,9 @@ public class CreateTarTask extends ImageActionAsyncTask {
 		boolean runFlag = false;
 
 		try {
-			String imageLocation = null;
 			log.info("Inside runCreateTartask for ::"
 					+ imageActionObject.getImage_id());
-			imageLocation = imageInfo.getLocation();
+			String imageLocation = imageInfo.getLocation();
 			// Fetch the policy and write to a location. Move to common
 			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo
 					.getImage_deployments())) {
@@ -87,9 +86,6 @@ public class CreateTarTask extends ImageActionAsyncTask {
 
 				log.info("Inside runCreateTartask for ::"
 						+ imageActionObject.getImage_id());
-
-
-				imageLocation = imageInfo.getLocation();
 
 				String imageName = imageInfo.getImage_name();
 				if (trustPolicy == null) {

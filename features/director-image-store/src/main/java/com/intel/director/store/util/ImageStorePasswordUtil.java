@@ -26,16 +26,14 @@ public class ImageStorePasswordUtil {
 	}
 
 	public String encryptPasswordForImageStore(String password) {
-		String encryptedPassword = null;
-		encryptedPassword = Base64.encodeBase64String(cipher.encrypt(password
+		String encryptedPassword = Base64.encodeBase64String(cipher.encrypt(password
 				.getBytes()));
 		return encryptedPassword;
 
 	}
 
 	public String decryptPasswordForImageStore(String encryptedPassword) {
-		String decryptedPassword = null;
-		decryptedPassword = new String(cipher.decrypt(Base64
+		String decryptedPassword = new String(cipher.decrypt(Base64
 				.decodeBase64(encryptedPassword)));
 		return decryptedPassword;
 	}

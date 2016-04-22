@@ -114,10 +114,9 @@ public class SSHManager {
 	
 	private String getSessionTimeout() {
 		log.info("inside getting session timeout");
-		String timeout = "30";
 
 		Properties prop = DirectorUtil.getPropertiesFile("director.properties");
-		timeout = prop.getProperty("login.token.expires.minutes", "30");
+		String timeout = prop.getProperty("login.token.expires.minutes", "30");
 		log.info("session timeout in happy path = " + timeout);
 
 		log.info("session timeout in default path = " + timeout);

@@ -44,7 +44,7 @@ public class DockerUtil {
 	}
 	
 	public static int executeDockerCommands(String... args) {
-		int exitcode = 0;
+		int exitcode;
 		if (args.length == 0) {
 			log.error("docker command needs at least one argument");
 			return 1;
@@ -56,14 +56,11 @@ public class DockerUtil {
 			exitcode = DirectorUtil.executeCommandInExecUtil(Constants.DOCKER_EXECUTABLES, args);
 		} catch (IOException e) {
 			log.error("Error in executeDockerCommands docker " + args[0], e);
-			if (exitcode == 0) {
-				exitcode = 1;
-			}
+			exitcode = 1;
 		}
 		return exitcode;
 
-	}
-	
+	}	
 	
 	
 	

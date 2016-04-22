@@ -12,7 +12,7 @@ import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
 
@@ -56,12 +56,10 @@ public class UploadTarTask extends GenericUploadTask {
 	}
 
 	public boolean runUploadTarTask() {
-		boolean runFlag = false;
-		log.info("Inside runUploadTarTask for ::"
-				+ imageActionObject.getImage_id());
+		boolean runFlag;
+		log.info("Inside runUploadTarTask for ::" + imageActionObject.getImage_id());
 		String tarName = trustPolicy.getDisplay_name().replace("/", "-") + ".tar";
-		if (Constants.DEPLOYMENT_TYPE_DOCKER
-				.equalsIgnoreCase(imageInfo.image_deployments)) {
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo.image_deployments)) {
 			ArtifactUploadService artifactUploadService = new ArtifactUploadServiceImpl();
 			ImageStoreUploadTransferObject imageUploadByImageId = artifactUploadService
 					.fetchImageUploadByImageId(imageInfo.getId());
@@ -70,7 +68,7 @@ public class UploadTarTask extends GenericUploadTask {
 				UUID uuid = new UUID();
 				customProperties.put(Constants.GLANCE_ID, uuid.toString());
 			}
-		} else {	
+		} else {
 			String glanceId = DirectorUtil.fetchIdforUpload(trustPolicy);
 			log.info("Inside Run Upload Tar task glanceId::" + glanceId);
 			customProperties.put(Constants.GLANCE_ID, glanceId);
@@ -78,17 +76,12 @@ public class UploadTarTask extends GenericUploadTask {
 		customProperties.put(Constants.NAME, trustPolicy.getDisplay_name());
 		log.info("TAR name {}", tarName);
 		String imageLocation = imageInfo.getLocation();
-		String tarLocation = imageLocation + imageActionObject.getImage_id()
-				+ File.separator;
+		String tarLocation = imageLocation + imageActionObject.getImage_id() + File.separator;
 
-	
-		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION,
-				"glance_image_tar");
+		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "glance_image_tar");
 
-	
-		log.info("runUploadTarTask tarname::" + tarName + " ,tarLocation ::"
-				+ tarLocation);
-		//File content = new File(tarLocation + tarName);
+		log.info("runUploadTarTask tarname::" + tarName + " ,tarLocation ::" + tarLocation);
+		// File content = new File(tarLocation + tarName);
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, tarLocation + tarName);
 		log.info("Before transferring to generic upload");
 		runFlag = super.run();
