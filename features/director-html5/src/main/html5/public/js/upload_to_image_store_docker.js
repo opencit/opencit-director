@@ -35,7 +35,7 @@ function displayImageStorePage() {
 
         $.ajax({
             type: "GET",
-            url: "/v1/deployment-artifacts?depolymentType=" + current_depolyment_type,
+            url: "/v1/deployment-artifacts?deploymentType=" + current_depolyment_type,
             dataType: "json",
             success: function(data) {
                 var artifacts_strings = "<option value='0'>Select</option>";

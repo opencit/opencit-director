@@ -124,10 +124,18 @@ public class CreateTrustPolicyMetaDataRequest {
 	 */
 
 	public String validate(String type) {
-		String NAME_REGEX = "[a-zA-Z:0-9/,;. @_-]+";
+		String NAME_REGEX = "[a-zA-Z:0-9,;. @_-]+";
 		List<String> errors = new ArrayList<>();
 		if ("draft".equals(type)) {
-			if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {
+			if(Constants.DEPLOYMENT_TYPE_DOCKER.equals(deployment_type)){
+				int tagStart = display_name.lastIndexOf(":") + 1;
+				String repo = display_name.substring(0, tagStart - 1);
+				String tag = display_name.substring(tagStart);
+				if (!(ValidationUtil.isValidWithRegex(repo, Constants.DOCKER_REPO_NAME_REGEX)
+						&& ValidationUtil.isValidWithRegex(tag, Constants.DOCKER_TAG_NAME_REGEX))) {
+					errors.add("Display name is empty or improper format");
+				}
+			} else if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {
 				errors.add("Display name is empty or improper format");
 			}
 			if (StringUtils.isBlank(getLaunch_control_policy())) {

@@ -152,11 +152,9 @@ public class Images {
 		String errors = uploadRequest.validate();
 		if (StringUtils.isNotBlank(errors)) {
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
-			uploadImageToTrustDirector.details = uploadRequest.validate();
 			uploadImageToTrustDirector.status = Constants.ERROR;
 			uploadImageToTrustDirector.details = errors;
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(uploadImageToTrustDirector).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(uploadImageToTrustDirector).build();
 		}
 		
 		if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(uploadRequest.image_deployments) && uploadRequest.image_size == 0) {
