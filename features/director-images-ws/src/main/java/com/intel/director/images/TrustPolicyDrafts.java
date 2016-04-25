@@ -391,37 +391,40 @@ public class TrustPolicyDrafts {
 	public Response createTrustPolicyDraft(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) {
 
 		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
+
+		ImageInfo fetchImageById;
+		try {
+
+			fetchImageById = imageService.fetchImageById(createTrustPolicyMetaDataRequest.image_id);
+			if (fetchImageById == null) {
+				createTrustPolicyMetadataResponse.setError("Invalid image id provided");
+				createTrustPolicyMetadataResponse.setId(createTrustPolicyMetaDataRequest.image_id);
+				return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
+			}
+
+		} catch (DirectorException e1) {
+			log.error("Invalid image id", e1);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		}
+		createTrustPolicyMetaDataRequest.deployment_type = fetchImageById.getImage_deployments();
+
 		String error = createTrustPolicyMetaDataRequest.validate("draft");
 		if (!StringUtils.isBlank(error)) {
 			createTrustPolicyMetadataResponse.setError(error);
 			return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
 		}
 
-		try {
-			ImageInfo fetchImageById = imageService.fetchImageById(createTrustPolicyMetaDataRequest.image_id);
-			if (fetchImageById == null) {
-				createTrustPolicyMetadataResponse.setError("Invalid image id provided");
-				createTrustPolicyMetadataResponse.setId(createTrustPolicyMetaDataRequest.image_id);
+		if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+			String display_name = createTrustPolicyMetaDataRequest.display_name;
+			if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
+				createTrustPolicyMetadataResponse.setError("Invalid Repo Name");
 				return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
-
 			}
-
-			if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
-				String display_name = createTrustPolicyMetaDataRequest.display_name;
-				if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
-					createTrustPolicyMetadataResponse.setError("Invalid Repo Name");
-					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
-							.build();
-				}
-				String[] split = display_name.split(fetchImageById.getRepository() + ":");
-				if (split.length == 0 || StringUtils.isBlank(split[1])) {
-					createTrustPolicyMetadataResponse.setError("Tag cannot be empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
-							.build();
-				}
+			String[] split = display_name.split(fetchImageById.getRepository() + ":");
+			if (split.length == 0 || StringUtils.isBlank(split[1])) {
+				createTrustPolicyMetadataResponse.setError("Tag cannot be empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
 			}
-		} catch (DirectorException e1) {
-			log.error("Invalid image id", e1);
 		}
 
 		try {
