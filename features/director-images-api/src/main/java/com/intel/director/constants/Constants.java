@@ -199,5 +199,7 @@ public class Constants {
 	public static final String DOCKER_HUB_PASSWORD = "Password";
 	public static final String DOCKER_HUB_EMAIL = "Email";
 	
+	public static final String DOCKER_REPO_NAME_REGEX = "[a-zA-Z0-9/:_-]+";
+	public static final String DOCKER_TAG_NAME_REGEX = "[a-zA-Z0-9_-]+";
 
 }
