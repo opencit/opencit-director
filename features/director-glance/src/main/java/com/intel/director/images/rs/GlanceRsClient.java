@@ -413,6 +413,10 @@ public class GlanceRsClient {
 
 		try {
 			URL url = new URL(authEndpoint);
+			String path = url.getPath();
+			if(StringUtils.isNotBlank(path)){
+				throw new GlanceException("Please provide the AUTH endpoint in format http(s)://<HOST>:<PORT>");
+			}
 			log.debug("Glance auth url is " + url.toString());
 		} catch (MalformedURLException e3) {
 			throw new GlanceException("Invalid auth url", e3);
@@ -521,6 +525,11 @@ public class GlanceRsClient {
 			} else {
 				url = new URL("http://" + glanceIP);
 			}
+			String path = url.getPath();
+			if(StringUtils.isNotBlank(path)){
+				throw new GlanceException("Please provide the API endpoint in format http(s)://<HOST>:<PORT>");
+			}
+
 		} catch (MalformedURLException e) {
 			log.error("Unable to create valid URL", e);
 			throw new GlanceException("Unable to create valid URL", e);
