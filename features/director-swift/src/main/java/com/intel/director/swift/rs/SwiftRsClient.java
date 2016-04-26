@@ -52,6 +52,8 @@ import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 
  * @author Aakash
@@ -73,6 +75,10 @@ public class SwiftRsClient {
 		URL url;
 		try {
 			url = new URL(swiftApiEndpoint);
+			String path = url.getPath();
+			if(StringUtils.isNotBlank(path)){
+				throw new SwiftException("Please provide the API endpoint in format http(s)://<HOST>:<PORT>");
+			}			
 		} catch (MalformedURLException e) {
 			log.error("Initialize SwiftRsClient failed");
 			throw new SwiftException("Initialize SwiftRsClient failed", e);
@@ -532,6 +538,11 @@ public class SwiftRsClient {
 			} catch (Exception me) {
 				protocolByUser = "";
 			}
+			String path = urlSwift.getPath();
+			if(StringUtils.isNotBlank(path)){
+				throw new SwiftException("Please provide the AUTH endpoint in format http(s)://<HOST>:<PORT>");
+			}
+			
 			portByUser = urlSwift.getPort();
 		} catch (MalformedURLException e3) {
 			throw new SwiftException("Error getting swift host", e3);
