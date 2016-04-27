@@ -115,6 +115,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			}
 			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
 				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+				detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
 			}
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore :: " + imageStoreId);
