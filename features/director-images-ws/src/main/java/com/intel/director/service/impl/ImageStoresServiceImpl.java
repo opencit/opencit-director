@@ -31,6 +31,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageStoresServiceImpl.class);
 	
+	private static final String PLACE_HOLDER_BUNDLE = "ImageStoreKeysPlaceHolder";
 	private IPersistService imagePersistenceManager;
 
 	public ImageStoresServiceImpl() {
@@ -84,6 +85,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(savedImageStore != null){
 				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
 					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+					detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
 				}
 			}
 		} catch (DbException e) {

@@ -203,7 +203,7 @@ function createImageStore() {
 					+ "<div class=\"col-md-8\"><input type=\"password\" class=\"form-control\" id=\""
 					+ image_store_details[i].id
 					+ "\" placeholder=\"Enter "
-					+ image_store_details[i].key
+					+ image_store_details[i].place_holder_value
 					+ "\"></div><br />";
 				} else if (image_store_details[i].key.toLowerCase().indexOf(
 				"visibility") != -1){
@@ -226,7 +226,7 @@ function createImageStore() {
 					+ "<div class=\"col-md-8\"><input type=\"text\" class=\"form-control\" id=\""
 					+ image_store_details[i].id
 					+ "\" placeholder=\"Enter "
-					+ image_store_details[i].key
+					+ image_store_details[i].place_holder_value
 					+ "\"></div><br />";
 				}
 				str = str + "</div>";
@@ -553,7 +553,7 @@ function populateImageStoreDetails(image_store_details) {
 		} else {
 
 			if (image_store_details[i].key.toLowerCase().indexOf("password") != -1) {
-				valueHolder = image_store_details[i].key;
+				valueHolder = image_store_details[i].place_holder_value;
 				str = str
 				+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 				+ image_store_details[i].id
@@ -575,7 +575,7 @@ function populateImageStoreDetails(image_store_details) {
 				+ image_store_details[i].id
 				+ "\"><option value=\"public\">Public</option><option value=\"private\">Private</option></div><br />";
 				} else {
-				valueHolder = image_store_details[i].key;
+				valueHolder = image_store_details[i].place_holder_value;
 				str = str
 				+ "<label align=\"right\" class=\"control-label col-md-6\" for="
 				+ image_store_details[i].id

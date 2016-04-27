@@ -9,6 +9,7 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 	public String key;
 	public String value;
 	private String keyDisplayValue;
+	private String placeHolderValue;
 	@JsonIgnore
 	public int seqNo;
 
@@ -52,6 +53,16 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 
 	public void setKeyDisplayValue(String keyDisplayValue) {
 		this.keyDisplayValue = keyDisplayValue;
+	}
+
+	
+	
+	public String getPlaceHolderValue() {
+		return placeHolderValue;
+	}
+
+	public void setPlaceHolderValue(String placeHolderValue) {
+		this.placeHolderValue = placeHolderValue;
 	}
 
 	@Override

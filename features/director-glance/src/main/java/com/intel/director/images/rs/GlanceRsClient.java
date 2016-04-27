@@ -414,7 +414,7 @@ public class GlanceRsClient {
 		String authEndpoint = glanceKeystonePublicEndpoint + "/v2.0/tokens";
 
 		try {
-			URL url = new URL(authEndpoint);
+			URL url = new URL(glanceKeystonePublicEndpoint);
 			String path = url.getPath();
 			if(StringUtils.isNotBlank(path)){
 				throw new GlanceException("Please provide the AUTH endpoint in format http(s)://<HOST>:<PORT>");
