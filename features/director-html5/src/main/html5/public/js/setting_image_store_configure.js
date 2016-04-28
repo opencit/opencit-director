@@ -1,5 +1,9 @@
 var validateIS = true;
 var current_image_store = {};
+$(document).ready(function() {
+	$('[data-toggle="tooltip"]').tooltip();
+});
+
 function imageStoreSettingPage() {
 	$("#image_store_grid").html("");
 	$
@@ -204,7 +208,7 @@ function createImageStore() {
 					+ image_store_details[i].id
 					+ "\" placeholder=\"Enter "
 					+ image_store_details[i].place_holder_value
-					+ "\"></div><br />";
+					+ "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 				} else if (image_store_details[i].key.toLowerCase().indexOf(
 				"visibility") != -1){
 					str = str
@@ -216,7 +220,7 @@ function createImageStore() {
 					+ "<div class=\"col-md-8\"><select class=\"form-control\" id=\""
 					+ image_store_details[i].id
 					+ "\"><option value=\"public\">Public</option><option value=\"private\">Private</option></div><br />";
-					} else {
+				} else {
 					str = str
 					+ "<label class=\"control-label col-md-4\" for=\""
 					+ image_store_details[i].id
@@ -227,7 +231,7 @@ function createImageStore() {
 					+ image_store_details[i].id
 					+ "\" placeholder=\"Enter "
 					+ image_store_details[i].place_holder_value
-					+ "\"></div><br />";
+					+ "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 				}
 				str = str + "</div>";
 			}
@@ -525,7 +529,7 @@ function populateImageStoreDetails(image_store_details) {
 				+ image_store_details[i].key_display_value
 				+ ": </label>"
 				+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id=\""
-				+ image_store_details[i].id + "\"></div><br />";
+				+ image_store_details[i].id + "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 				$("#" + image_store_details[i].id).val(valueHolder);
 			} else if (image_store_details[i].key.toLowerCase().indexOf(
 			"visibility") != -1){
@@ -547,7 +551,7 @@ function populateImageStoreDetails(image_store_details) {
 				+ image_store_details[i].key_display_value
 				+ ": </label>"
 				+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id=\""
-				+ image_store_details[i].id + "\"></div><br />";
+				+ image_store_details[i].id + "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 				$("#" + image_store_details[i].id).val(valueHolder);
 			}
 		} else {
@@ -562,7 +566,7 @@ function populateImageStoreDetails(image_store_details) {
 				+ ": </label>"
 				+ "<div class=\"col-md-6\"><input type=\"password\" class=\"form-control\" id="
 				+ image_store_details[i].id + " placeholder=\""
-				+ valueHolder + "\"></div><br />";
+				+ valueHolder + "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 			} else if (image_store_details[i].key.toLowerCase().indexOf(
 			"visibility") != -1){
 				str = str
@@ -584,7 +588,7 @@ function populateImageStoreDetails(image_store_details) {
 				+ ": </label>"
 				+ "<div class=\"col-md-6\"><input type=\"text\" class=\"form-control\" id="
 				+ image_store_details[i].id + " placeholder=\""
-				+ valueHolder + "\"></div><br />";
+				+ valueHolder + "\" data-toggle=\"tooltip\" title=\"" + image_store_details[i].place_holder_value + "\"></div><br />";
 			}
 
 		}
