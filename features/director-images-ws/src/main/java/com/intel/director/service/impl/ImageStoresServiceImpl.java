@@ -243,7 +243,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 					.getStoreManager(imageStoreId);
 		} catch (StoreException e) {
 			log.error("Error in Initializing ImageStore @ validateImageStore", e);
-			throw new DirectorException("Auth endpoint validation failed");
+			throw new DirectorException(e.getMessage());
 		}
 		try {
 			GenericResponse validate = manager.validate();
