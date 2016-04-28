@@ -85,6 +85,7 @@ import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.manifest.xml.MeasurementType;
+import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
