@@ -74,10 +74,10 @@ public class SwiftRsClient {
 		client = ClientBuilder.newBuilder().build();
 		URL url;
 		try {
-			url = new URL(swiftApiEndpoint);
+			url = new URL(swiftAuthEndpoint);
 			String path = url.getPath();
 			if(StringUtils.isNotBlank(path)){
-				throw new SwiftException("Please provide the API endpoint in format http(s)://<HOST>:<PORT>");
+				throw new SwiftException("Please provide the Auth endpoint in format http(s)://<HOST>:<PORT>");
 			}			
 		} catch (MalformedURLException e) {
 			log.error("Initialize SwiftRsClient failed");
