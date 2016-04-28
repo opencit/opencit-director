@@ -46,8 +46,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.common.ValidationUtil;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.constants.Constants;
-
 
 import org.apache.commons.lang.StringUtils;
 /**
@@ -63,11 +64,12 @@ public class GlanceRsClient {
 	public String authToken;
 
 	public GlanceRsClient(WebTarget webTarget, Client client,
+			String glanceApiEndpoint,
 			String glanceKeystonePublicEndpoint, String tenanatName,
 			String username, String password) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
-
+		validateUrl(glanceApiEndpoint, "API");
 		createAuthToken(glanceKeystonePublicEndpoint, tenanatName, username,
 				password);
 	}
@@ -413,16 +415,8 @@ public class GlanceRsClient {
 		boolean responseHasError = false;
 		String authEndpoint = glanceKeystonePublicEndpoint + "/v2.0/tokens";
 
-		try {
-			URL url = new URL(glanceKeystonePublicEndpoint);
-			String path = url.getPath();
-			if(StringUtils.isNotBlank(path)){
-				throw new GlanceException("Please provide the AUTH endpoint in format http(s)://<HOST>:<PORT>");
-			}
-			log.debug("Glance auth url is " + url.toString());
-		} catch (MalformedURLException e3) {
-			throw new GlanceException("Invalid auth url", e3);
-		}
+		validateUrl(glanceKeystonePublicEndpoint, "AUTH");
+		
 		HttpPost postRequest = new HttpPost(authEndpoint);
 
 		AuthTokenBody authTokenBody = new AuthTokenBody();
@@ -588,7 +582,14 @@ public class GlanceRsClient {
 	}
 	
 	
-
+	private void validateUrl(String urlStr, String type) throws GlanceException{
+		try {
+			ValidationUtil.validateUrl(urlStr, type);
+		} catch (DirectorException e) {
+			throw new GlanceException(e.getMessage());
+		}
+	}
+	
 	private void printTimeDiff(String method, long start, long end) {
 		log.debug(method + " took " + (end - start) + " ms");
 	}
