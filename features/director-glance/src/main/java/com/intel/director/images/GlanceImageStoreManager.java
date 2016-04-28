@@ -111,7 +111,7 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			glanceRsClient = GlanceRsClientBuilder.build(configuration);
 		} catch (GlanceException e) {
 			log.error("Error in creating GlanceRsclient", e);
-			throw new StoreException("Error in creating GlanceRsclient", e);
+			throw new StoreException(e.getMessage(), e);
 		}
 
 	}

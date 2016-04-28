@@ -48,6 +48,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.director.common.ValidationUtil;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
@@ -682,29 +684,11 @@ public class SwiftRsClient {
 	}
 	
 	private void validateUrl(String urlStr, String type) throws SwiftException{
-		URL url;
 		try {
-			url = new URL(urlStr);
-		} catch (MalformedURLException e) {
-			throw new SwiftException("Invalid "+ type+" url");
+			ValidationUtil.validateUrl(urlStr, type);
+		} catch (DirectorException e) {
+			throw new SwiftException(e.getMessage());
 		}
-		String hostByUser = url.getHost();
-		if(StringUtils.isBlank(hostByUser)){
-			throw new SwiftException("Error validating "+type+" endpoint. No host specified. ");
-		}
-		if(StringUtils.isBlank(url.getProtocol())){
-			throw new SwiftException("Error validating "+type+" endpoint. No protocol specified. ");
-		}
-			
-
-		if(url.getPort() == -1){
-			throw new SwiftException("Error validating "+type+" endpoint. No port specified.");
-		}			
-
-		String path = url.getPath();
-		if(StringUtils.isNotBlank(path)){
-			throw new SwiftException("Please provide the "+type+" endpoint in format http(s)://HOST:PORT");
-		}	
 	}
 }
 
