@@ -1,73 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.intel.mtwilson.director</groupId>
-	<artifactId>director-dockerhub</artifactId>
-
-	<description>Director request and response data structures</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-dockerhub</artifactId>
+    
+    <description>Director request and response data structures</description>
+    
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>
         <artifactId>mtwilson-core-feature-zip</artifactId>
         <version>3.1-SNAPSHOT</version>
         <relativePath />
     </parent>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<inherited>true</inherited>
-			</plugin>
-
-		</plugins>
-
-	</build>
-
-	<dependencies>
-		<!-- Director -->
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <!-- Director -->
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-trust-policy</artifactId>
             <version>${project.version}</version>
-			<artifactId>director-trust-policy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-common</artifactId>
             <version>${project.version}</version>
-			<artifactId>director-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-persistence</artifactId>
             <version>${project.version}</version>
-			<artifactId>director-persistence</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.director</groupId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-image-store</artifactId>
             <version>${project.version}</version>
-			<artifactId>director-image-store</artifactId>
-		</dependency>
-		<!-- MTW -->
-
-		<dependency>
-			<artifactId>mtwilson-util-xml</artifactId>
-			<groupId>com.intel.mtwilson.util</groupId>
-            <version>${project.version}</version>
-		</dependency>
-
-		<!-- Others -->
-
-
-	</dependencies>
+        </dependency>
+        
+        <!-- MTW -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-xml</artifactId>
+        </dependency>
+    </dependencies>
+    
 </project>
