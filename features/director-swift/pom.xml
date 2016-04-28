@@ -4,7 +4,7 @@
     <groupId>com.intel.mtwilson.director</groupId>
     <artifactId>director-swift</artifactId>
     
-    <description>Director request and response data structures</description>
+	<description>Director swift integration</description>
     
     <parent>
         <groupId>com.intel.mtwilson.maven</groupId>

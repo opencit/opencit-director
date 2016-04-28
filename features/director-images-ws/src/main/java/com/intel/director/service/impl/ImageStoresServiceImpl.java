@@ -16,7 +16,7 @@ import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageStoresService;
 import com.intel.director.store.StoreManager;
 import com.intel.director.store.StoreManagerFactory;
@@ -31,6 +31,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageStoresServiceImpl.class);
 	
+	private static final String PLACE_HOLDER_BUNDLE = "ImageStoreKeysPlaceHolder";
 	private IPersistService imagePersistenceManager;
 
 	public ImageStoresServiceImpl() {
@@ -55,7 +56,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	
 	@Override
 	public ImageStoreTransferObject createImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-		ImageStoreTransferObject savedImageStore = null;
+		ImageStoreTransferObject savedImageStore;
 		Collection<ImageStoreDetailsTransferObject> image_store_details_final = new ArrayList<ImageStoreDetailsTransferObject>();
 
 		ConnectorKey[] propertiesForConnector = propertiesForConnector(imageStoreTransferObject.getConnector());
@@ -84,6 +85,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(savedImageStore != null){
 				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
 					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+					detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
 				}
 			}
 		} catch (DbException e) {
@@ -97,7 +99,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	public ImageStoreTransferObject getImageStoreById(String imageStoreId)
 			throws DirectorException {
 
-		ImageStoreTransferObject fetchImageStorebyId = null;
+		ImageStoreTransferObject fetchImageStorebyId;
 		try {
 			fetchImageStorebyId = imagePersistenceManager
 					.fetchImageStorebyId(imageStoreId);
@@ -113,6 +115,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			}
 			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
 				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+				detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
 			}
 		} catch (DbException e) {
 			log.error("Error in fetching ImageStore :: " + imageStoreId);
@@ -139,7 +142,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	
 	@Override
 	public GenericDeleteResponse deleteImageStore(String imageStoreId) throws DirectorException {
-		ImageStoreTransferObject fetchImageStorebyId = null;
+		ImageStoreTransferObject fetchImageStorebyId;
 		try {
 			fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
 					
@@ -234,13 +237,13 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 
 	@Override
 	public void validateImageStore(String imageStoreId) throws DirectorException {
-		StoreManager manager = null;
+		StoreManager manager;
 		try {
 			manager = StoreManagerFactory
 					.getStoreManager(imageStoreId);
 		} catch (StoreException e) {
 			log.error("Error in Initializing ImageStore @ validateImageStore", e);
-			throw new DirectorException("Auth endpoint validation failed");
+			throw new DirectorException(e.getMessage());
 		}
 		try {
 			GenericResponse validate = manager.validate();

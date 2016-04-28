@@ -14,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,7 +30,7 @@ import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageService;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;
@@ -249,7 +250,9 @@ public class TrustPolicies {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType DELETE
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
 	 * Input: UUID of the policy to be deleted
 	 * Output: In case of successful deletion:
@@ -257,7 +260,7 @@ public class TrustPolicies {
 	 * 
 	 * In case of error:
 	 * {"deleted":false; "error":"Error in deleting trust policy: <UUID>"}
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param trustPolicyId
 	 * @return GenericResponse
@@ -292,7 +295,52 @@ public class TrustPolicies {
 					+ trustPolicyId);
 		}
 		return Response.ok(response).build();
-
+	}
+	
+	/**
+	 * 
+	 * This method looks into the MW_TRUST_POLICY table and gets the policy
+	 * string and sends it as an xml content to the user.
+	 * 
+	 * In case the policy is not found for the trust policy id, HTTP 404 is
+	 * returned
+	 * 
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 *  https://{IP/HOST_NAME}/v1/trust-policies/08EB37D7-2678-495D-B485-59233EB51996/download
+	 * Input: Trust policy id as path param
+	 * Output: Content sent as stream
+	 * 
+	 *                    </pre>
+	 * @param trustPolicyId
+	 *            the trust policy for which the policy is downloaded
+	 * @return XML content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("trust-policies/{trustPolicyId: [0-9a-zA-Z_-]+}/download")
+	@GET
+	@Produces(MediaType.APPLICATION_XML)
+	public Response downloadPolicyForTrustPolicyId(
+			@PathParam("trustPolicyId") String trustPolicyId) {
+		GenericResponse genericResponse= new GenericResponse();
+		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
+			genericResponse.error = "Trust Policy id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
+		}
+		
+		TrustPolicy trustPolicy = imageService.getTrustPolicyByTrustId(trustPolicyId);
+		
+		if(trustPolicy == null){
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+		ResponseBuilder response = Response.ok(trustPolicy.getTrust_policy());
+		response.header("Content-Disposition", "attachment; filename=policy_"
+				+ trustPolicy.getImgAttributes().getImage_name() + ".xml");
+		return response.build();
 	}
 
 }

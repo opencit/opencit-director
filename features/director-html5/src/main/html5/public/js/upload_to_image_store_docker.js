@@ -35,7 +35,7 @@ function displayImageStorePage() {
 
         $.ajax({
             type: "GET",
-            url: "/v1/deployment-artifacts?depolymentType=" + current_depolyment_type,
+            url: "/v1/deployment-artifacts?deploymentType=" + current_depolyment_type,
             dataType: "json",
             success: function(data) {
                 var artifacts_strings = "<option value='0'>Select</option>";
@@ -202,7 +202,7 @@ function createPolicyDraftFromPolicy() {
         url: "/v1/rpc/create-draft-from-policy",
         success: function(data, status, xhr) {
 
-            if (data.status == "Error") {
+            if (data.error) {
                 $('#error_docker_body_3').text("Internal Error Occured");
                 $("#error_docker_3").modal({
                     backdrop: "static"

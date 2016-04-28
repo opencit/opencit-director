@@ -229,6 +229,7 @@ public class PolicyUploadDao {
 
             Root<MwPolicyUpload> mwPolicyUpload = cq.from(MwPolicyUpload.class);
             Join<MwPolicyUpload, MwTrustPolicy> mwPolicy = mwPolicyUpload.join("trustPolicy");
+            log.debug("mwPolicy content {}" + mwPolicy);
             cq.select(em.getCriteriaBuilder().count(mwPolicyUpload));
 
             Map<PolicyUploadFields, String> policyUploadAttributestoDataMapper = mapper.getPolicyUploadtAttributestoDataMapper();

@@ -11,7 +11,7 @@ import com.intel.director.async.task.UploadImageTask;
 import com.intel.director.async.task.UploadPolicyTask;
 import com.intel.director.async.task.UploadTarTask;
 import com.intel.director.common.Constants;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 
 public class ImageActionTaskFactory {
 

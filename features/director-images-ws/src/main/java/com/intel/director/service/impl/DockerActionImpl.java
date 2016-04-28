@@ -7,7 +7,7 @@ import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DockerUtil;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.DockerActionService;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
@@ -26,7 +26,7 @@ public class DockerActionImpl implements DockerActionService {
 	public void dockerSave(String image_id) throws DirectorException {
 		ImageInfo image = fetchImage(image_id);
 		TrustPolicy trustPolicy;
-		String displayName = null;
+		String displayName;
 
 		if (image.getTrust_policy_id() == null) {
 			displayName = image.getRepository().replace("/", "-") + ":" + image.getTag();
@@ -34,15 +34,20 @@ public class DockerActionImpl implements DockerActionService {
 
 			try {
 				trustPolicy = imagePersistenceManager.fetchPolicyById(image.getTrust_policy_id());
-				displayName = trustPolicy.getDisplay_name();
+				
 			} catch (DbException e1) {
-				log.error("Error in fetching policy  ", e1);
-				throw new DirectorException("No image found with id: " + image.getTrust_policy_id(), e1);
+				log.error("Error in fetching policy", e1);
+				throw new DirectorException("Error in fetching policy " + image.getTrust_policy_id(), e1);
 			}
+			
+			if (trustPolicy == null) {
+				log.error("No trust policy found with id: " + image.getTrust_policy_id());
+				throw new DirectorException("No trust policy found with id: " + image.getTrust_policy_id());
+			}
+			displayName = trustPolicy.getDisplay_name();
 		}
 		try {
-			int success = DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/",
-					displayName);
+			int success = DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/", displayName);
 			if (success != 0) {
 				throw new DirectorException("Docker save failed for imageid ::" + image_id);
 
@@ -117,7 +122,7 @@ public class DockerActionImpl implements DockerActionService {
 		statusToBeCheckedList.add(Constants.COMPLETE);
 		try {
 			List<ImageInfo> imagesList = imagePersistenceManager.fetchImages(null);
-			boolean imageCheck = true;
+			boolean imageCheck;
 			for (ImageInfo image : imagesList) {
 				imageCheck = true;
 				if (!currentImageId.equals("NO_IMAGE")) {

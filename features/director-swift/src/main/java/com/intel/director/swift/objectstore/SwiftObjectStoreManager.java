@@ -173,7 +173,7 @@ public class SwiftObjectStoreManager extends StoreManagerImpl implements
 		try {
 			swiftRsClient = SwiftRsClientBuilder.build(configuration);
 		} catch (SwiftException e) {
-			throw new StoreException("Error in creating SwiftRsClient",e);
+			throw new StoreException(e.getMessage(),e);
 		}
 		log.info("RS client for swift ready for use");
 	}

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.PolicyUploadTransferObject;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 
 public interface ArtifactUploadService {
 

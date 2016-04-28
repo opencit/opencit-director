@@ -22,7 +22,7 @@ function edit_policy_initialize() {
             url: "/v1/rpc/create-draft-from-policy",
             success: function(data, status, xhr) {
 
-                if (data.status == "Error") {
+                if (data.error) {
                     ///	show_error_in_trust_policy_tab("Internal error");
                     return false;
                 } else {

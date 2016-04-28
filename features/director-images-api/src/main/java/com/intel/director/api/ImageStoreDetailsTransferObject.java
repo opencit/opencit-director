@@ -1,5 +1,7 @@
 package com.intel.director.api;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDetailsTransferObject> {
@@ -9,6 +11,7 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 	public String key;
 	public String value;
 	private String keyDisplayValue;
+	private String placeHolderValue;
 	@JsonIgnore
 	public int seqNo;
 
@@ -29,11 +32,11 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 	}
 
 	public String getValue() {
-		return value;
+		return StringUtils.trim(value);
 	}
 
 	public void setValue(String value) {
-		this.value = value;
+		this.value = StringUtils.trim(value);
 	}
 
 	public String getImage_store_id() {
@@ -52,6 +55,16 @@ public class ImageStoreDetailsTransferObject implements Comparable<ImageStoreDet
 
 	public void setKeyDisplayValue(String keyDisplayValue) {
 		this.keyDisplayValue = keyDisplayValue;
+	}
+
+	
+	
+	public String getPlaceHolderValue() {
+		return placeHolderValue;
+	}
+
+	public void setPlaceHolderValue(String placeHolderValue) {
+		this.placeHolderValue = placeHolderValue;
 	}
 
 	@Override

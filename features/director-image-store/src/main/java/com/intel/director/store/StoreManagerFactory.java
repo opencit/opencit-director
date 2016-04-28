@@ -29,23 +29,22 @@ public class StoreManagerFactory {
 	public static StoreManager getStoreManager(String storeId)
 			throws StoreException {
 		IPersistService persistService = new DbServiceImpl();
-		StoreManager storeManager = null;
-		ImageStoreTransferObject imageStoreDTO = null;
+		
+		ImageStoreTransferObject imageStoreDTO;
 		try {
 			imageStoreDTO = persistService.fetchImageStorebyId(storeId);
 		} catch (DbException e) {
 			log.error("No store exists for id {}", storeId);
-			persistService = null;
 			return null;
 		}
 		String connectorName = imageStoreDTO.getConnector();
 		ConnectorProperties connector = ConnectorProperties
 				.getConnectorByName(connectorName);
 		if (connector == null) {
-			persistService = null;
 			return null;
 		}
 
+		StoreManager storeManager;
 		try {
 			storeManager = (StoreManager) Class.forName(connector.getDriver())
 					.newInstance();
@@ -53,8 +52,6 @@ public class StoreManagerFactory {
 				| ClassNotFoundException e) {
 			log.error("Error instatiating connector for {}",
 					connector.getDriver());
-			persistService = null;
-
 			throw new StoreException("Error instatiating connector for "
 					+ connector.getDriver(), e);
 		}
@@ -70,22 +67,16 @@ public class StoreManagerFactory {
 		Map<String, String> map = new HashMap<>();
 
 		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
-			map.put(imageStoreDetailsTransferObject.getKey(),
-					imageStoreDetailsTransferObject.getValue());
+			map.put(imageStoreDetailsTransferObject.getKey(), imageStoreDetailsTransferObject.getValue());
 			if (imageStoreDetailsTransferObject.equals(passwordConfiguration)) {
-				log.debug("Encrypted password is : {}",
-						imageStoreDetailsTransferObject.getValue());
-				map.put(imageStoreDetailsTransferObject.getKey(),
-						imageStorePasswordUtil
-								.decryptPasswordForImageStore(imageStoreDetailsTransferObject
-										.getValue()));
-				log.debug("Decrypted password is : {}",
-						map.get(imageStoreDetailsTransferObject.getKey()));
+				log.debug("Encrypted password is : {}", imageStoreDetailsTransferObject.getValue());
+				map.put(imageStoreDetailsTransferObject.getKey(), imageStorePasswordUtil
+						.decryptPasswordForImageStore(imageStoreDetailsTransferObject.getValue()));
+				log.debug("Decrypted password is : {}", map.get(imageStoreDetailsTransferObject.getKey()));
 			}
 		}
 
 		storeManager.build(map);
-		persistService = null;
 		return storeManager;
 	}
 

@@ -15,7 +15,7 @@ import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /**
@@ -54,8 +54,7 @@ public class UploadPolicyTask extends GenericUploadTask {
 	 * Actual implementation of policy upload task
 	 */
 	public boolean runUploadPolicyTask() {
-		boolean runFlag = false;
-		File file = null;
+		boolean runFlag;
 
 		if (trustPolicy == null) {
 			return false;
@@ -68,7 +67,7 @@ public class UploadPolicyTask extends GenericUploadTask {
 		String containerName = null;
 		// ImageStoreSettings
 		// imageStoreSettings=persistService.fetchImageStoreSettingsById(storeId);
-		ImageStoreTransferObject imgStoreTransferObject = null;
+		ImageStoreTransferObject imgStoreTransferObject;
 		try {
 			imgStoreTransferObject = persistService.fetchImageStorebyId(storeId);
 		} catch (DbException e) {
@@ -105,7 +104,7 @@ public class UploadPolicyTask extends GenericUploadTask {
 			fileUtilityOperation.deleteFileOrDirectory(policyDir);
 			return false;
 		}
-		file = new File(policyPath);
+		File file = new File(policyPath);
 
 		customProperties.put(Constants.SWIFT_CONTAINER_NAME, containerName);
 		customProperties.put(Constants.SWIFT_OBJECT_NAME, glanceId);

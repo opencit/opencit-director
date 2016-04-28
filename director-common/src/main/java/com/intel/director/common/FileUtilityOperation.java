@@ -58,14 +58,16 @@ public class FileUtilityOperation {
 	public void deleteFileOrDirectory(File file) {
 		if (file == null) {
 			return;
-		}
-		if (file.isDirectory()) {
+		} else if (file.isDirectory()) {
 			// directory is empty, then delete it
 			if (file.list() == null || file.list().length == 0) {
 				file.delete();
 			} else {
 				// list all the directory contents
 				String files[] = file.list();
+				if(files == null || files.length == 0){
+					return;
+				}
 				for (String temp : files) {
 					File fileDelete = new File(file, temp);
 					deleteFileOrDirectory(fileDelete);

@@ -46,8 +46,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.common.ValidationUtil;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.constants.Constants;
 
+import org.apache.commons.lang.StringUtils;
 /**
  * 
  * @author Aakash
@@ -61,11 +64,12 @@ public class GlanceRsClient {
 	public String authToken;
 
 	public GlanceRsClient(WebTarget webTarget, Client client,
+			String glanceApiEndpoint,
 			String glanceKeystonePublicEndpoint, String tenanatName,
 			String username, String password) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
-
+		validateUrl(glanceApiEndpoint, "API");
 		createAuthToken(glanceKeystonePublicEndpoint, tenanatName, username,
 				password);
 	}
@@ -75,10 +79,9 @@ public class GlanceRsClient {
 		long start = new Date().getTime();
 		// BufferedReader br = null;
 		InputStream ist = null;
-		HttpClient httpClient = null;
+		HttpClient httpClient = HttpClientBuilder.create().build();
 		String glanceId = null;
-
-		httpClient = HttpClientBuilder.create().build();
+		
 		if (customProperties.get(Constants.GLANCE_ID) != null) {
 			glanceId = (String) customProperties.get(Constants.GLANCE_ID);
 		}
@@ -93,7 +96,7 @@ public class GlanceRsClient {
 				(String) customProperties
 						.get(com.intel.director.common.Constants.UPLOAD_TO_IMAGE_STORE_FILE));
 
-		HttpResponse response = null;
+		HttpResponse response;
 		try {
 			ist = new FileInputStream(file);
 
@@ -138,15 +141,11 @@ public class GlanceRsClient {
 		log.debug("# Inside fetchDetails::" + customProperties);
 		String glanceId = (String) customProperties.get(Constants.GLANCE_ID);
 		ImageStoreUploadResponse imageImageStoreUploadResponse = new ImageStoreUploadResponse();
-		// / System.out.println("Fetach details glanceId::" + glanceId);
 		InputStream inputStream = null;
 		BufferedReader br = null;
-		Response response = null;
+		Response response = webTarget.path(GLANCE_API_VERSION + "/" + glanceId).request()
+				.header(Constants.AUTH_TOKEN, authToken).get();
 
-		response = webTarget.path(GLANCE_API_VERSION + "/" + glanceId)
-				.request().header(Constants.AUTH_TOKEN, authToken).get();
-
-		// /System.out.println("Inside fetch details reponse::" + response);
 		log.info("###### fetch details status::" + response.getStatus());
 		if (response.getStatus() < 200 && response.getStatus() > 204) {
 			log.error("fetchDetails failed," + response.getStatus());
@@ -208,35 +207,27 @@ public class GlanceRsClient {
 
 	public String uploadImageMetaData(Map<String, Object> imageProperties)
 			throws GlanceException {
-		log.info("Inside glance upload image metadata glanceid:: "
-				+ imageProperties.get(Constants.GLANCE_ID));
-		log.info("No mtw TP location");
+		log.info("Inside glance upload image metadata glanceid:: " + imageProperties.get(Constants.GLANCE_ID));
 		HttpClient httpClient = HttpClientBuilder.create().build();
-		String id = null;
+		String id;
 		BufferedReader br = null;
 
-		String glanceId = null;
+		String glanceId;
 		if (imageProperties.get(Constants.GLANCE_ID) != null) {
 			glanceId = (String) imageProperties.get(Constants.GLANCE_ID);
 			log.info(("Inside upload image metadata glanceId: " + glanceId));
 		} else {
 			glanceId = (new UUID()).toString();
-			log.info("Inside upload image metadata no glanceId set in properties so creating new: "
-					+ glanceId);
+			log.info("Inside upload image metadata no glanceId set in properties so creating new: " + glanceId);
 		}
-		HttpPost postRequest = new HttpPost(webTarget.getUri()
-				+ GLANCE_API_VERSION);
+		HttpPost postRequest = new HttpPost(webTarget.getUri() + GLANCE_API_VERSION);
 
 		GlanceImageUploadBody glanceImageUploadBody = new GlanceImageUploadBody();
-		glanceImageUploadBody.container_format = (String) imageProperties
-				.get(Constants.CONTAINER_FORMAT);
-		glanceImageUploadBody.disk_format = (String) imageProperties
-				.get(Constants.DISK_FORMAT);
-		glanceImageUploadBody.name = (String) imageProperties
-				.get(Constants.NAME);
+		glanceImageUploadBody.container_format = (String) imageProperties.get(Constants.CONTAINER_FORMAT);
+		glanceImageUploadBody.disk_format = (String) imageProperties.get(Constants.DISK_FORMAT);
+		glanceImageUploadBody.name = (String) imageProperties.get(Constants.NAME);
 		glanceImageUploadBody.id = glanceId;
-		glanceImageUploadBody.visibility = (String) imageProperties
-				.get(Constants.GLANCE_VISIBILITY);
+		glanceImageUploadBody.visibility = (String) imageProperties.get(Constants.GLANCE_VISIBILITY);
 		if (imageProperties.get(Constants.MTWILSON_TRUST_POLICY_LOCATION) != null) {
 			glanceImageUploadBody.mtwilson_trustpolicy_location = (String) imageProperties
 					.get(Constants.MTWILSON_TRUST_POLICY_LOCATION);
@@ -251,13 +242,12 @@ public class GlanceRsClient {
 			e3.printStackTrace();
 		}
 		log.info("Metadata body {} and authtoken {}", uploadBody, authToken);
-		HttpEntity entity = null;
+		HttpEntity entity;
 		try {
-			entity = new ByteArrayEntity(uploadBody.toString()
-					.getBytes("UTF-8"));
+			entity = new ByteArrayEntity(uploadBody.toString().getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
-			log.error("uploadimgeMetadata failed",e2);
-			throw new GlanceException("uploadimgeMetadata failed",e2);
+			log.error("uploadimgeMetadata failed", e2);
+			throw new GlanceException("uploadimgeMetadata failed", e2);
 		}
 
 		postRequest.setEntity(entity);
@@ -265,27 +255,24 @@ public class GlanceRsClient {
 
 		postRequest.setHeader("X-Auth-Token", authToken);
 
-		HttpResponse httpResponse = null;
+		HttpResponse httpResponse;
 
 		try {
 			httpResponse = httpClient.execute(postRequest);
 		} catch (Exception e1) {
-			log.error("uploadimgeMetadata failed",e1);
-			throw new GlanceException("uploadimgeMetadata failed",e1);
+			log.error("uploadimgeMetadata failed", e1);
+			throw new GlanceException("uploadimgeMetadata failed", e1);
 		}
-		log.info("###### uploadmetadata Status::"
-				+ httpResponse.getStatusLine().getStatusCode()
-				+ " for glanceid::" + glanceId);
+		log.info("###### uploadmetadata Status::" + httpResponse.getStatusLine().getStatusCode() + " for glanceid::"
+				+ glanceId);
 		if (httpResponse.getStatusLine().getStatusCode() != 200
 				&& httpResponse.getStatusLine().getStatusCode() != 201) {
-			log.error("uploadimgeMetadata failed,"
-					+ httpResponse.getStatusLine());
-			throw new GlanceException(com.intel.director.common.Constants.ARTIFACT_ID+":"+glanceId);					
+			log.error("uploadimgeMetadata failed," + httpResponse.getStatusLine());
+			throw new GlanceException(com.intel.director.common.Constants.ARTIFACT_ID + ":" + glanceId);
 		}
 
 		try {
-			br = new BufferedReader(new InputStreamReader(
-					(httpResponse.getEntity().getContent())));
+			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
 
 			String output;
 			StringBuffer sb = new StringBuffer();
@@ -299,8 +286,8 @@ public class GlanceRsClient {
 
 			id = obj.getString("id");
 		} catch (IOException e) {
-			log.error("uploadimgeMetadata failed",e);
-			throw new GlanceException("uploadimgeMetadata failed",e);
+			log.error("uploadimgeMetadata failed", e);
+			throw new GlanceException("uploadimgeMetadata failed", e);
 		} finally {
 			if (br != null) {
 				try {
@@ -323,9 +310,7 @@ public class GlanceRsClient {
 
 		String glanceId = null;
 
-		ImageStoreUploadResponse storeUploadResponse = null;
-
-		storeUploadResponse = fetchDetails(imageProperties);
+		ImageStoreUploadResponse storeUploadResponse = fetchDetails(imageProperties);
 
 		if (imageProperties.get(Constants.GLANCE_ID) != null) {
 			glanceId = (String) imageProperties.get(Constants.GLANCE_ID);
@@ -352,7 +337,7 @@ public class GlanceRsClient {
 				1);
 		updatesList.add(glanceUpateMetadataBody);
 		ObjectMapper objectMapper = new ObjectMapper();
-		String body = null;
+		String body;
 		try {
 			body = objectMapper.writeValueAsString(updatesList);
 		} catch (JsonProcessingException e1) {
@@ -362,13 +347,12 @@ public class GlanceRsClient {
 
 		log.info("Glance updateMetadata operation:: {}", body);
 
-		HttpEntity entity = null;
+		HttpEntity entity;
 		try {
 			entity = new ByteArrayEntity(body.toString().getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
 			log.error("updateMetadata failed", e2);
 			throw new GlanceException("updateMetadata failed", e2);
-
 		}
 		log.debug("Glance updateMetadata body:: " + body);
 		patchRequest.setEntity(entity);
@@ -426,61 +410,55 @@ public class GlanceRsClient {
 			String tenantName, String userName, String password)
 			throws GlanceException {
 		long start = new Date().getTime();
-		// TODO not used after being assigned
-		HttpClient httpClient = null;
+		HttpClient httpClient = HttpClientBuilder.create().build();
 		BufferedReader br = null;
 		boolean responseHasError = false;
 		String authEndpoint = glanceKeystonePublicEndpoint + "/v2.0/tokens";
 
-			try {
-				URL url = new URL(authEndpoint);
-			} catch (MalformedURLException e3) {
-				throw new GlanceException("Invalid auth url", e3);
-			}
-			httpClient = HttpClientBuilder.create().build();
-			HttpPost postRequest = new HttpPost(authEndpoint);
+		validateUrl(glanceKeystonePublicEndpoint, "AUTH");
+		
+		HttpPost postRequest = new HttpPost(authEndpoint);
 
-			AuthTokenBody authTokenBody = new AuthTokenBody();
-			authTokenBody.auth = new Auth();
-			authTokenBody.auth.tenantName = tenantName;
-			authTokenBody.auth.passwordCredentials = new PasswordCredentials();
-			authTokenBody.auth.passwordCredentials.username = userName;
-			authTokenBody.auth.passwordCredentials.password = password;
+		AuthTokenBody authTokenBody = new AuthTokenBody();
+		authTokenBody.auth = new Auth();
+		authTokenBody.auth.tenantName = tenantName;
+		authTokenBody.auth.passwordCredentials = new PasswordCredentials();
+		authTokenBody.auth.passwordCredentials.username = userName;
+		authTokenBody.auth.passwordCredentials.password = password;
 
-			ObjectMapper mapper = new ObjectMapper();
-			String body = null;
-			try {
-				body = mapper.writeValueAsString(authTokenBody);
-			} catch (JsonProcessingException e2) {
-				log.error("Error while creating auth token", e2);
-				throw new GlanceException("Error while creating auth token", e2);
-			}
-			// log.info("Auth token body {}", body);
-			HttpEntity entity =null;
-			try {
-				entity = new ByteArrayEntity(body.getBytes("UTF-8"));
-			} catch (UnsupportedEncodingException e2) {
-				log.error("Error while creating auth token", e2);
-				throw new GlanceException("Error while creating auth token", e2);
-			}
+		ObjectMapper mapper = new ObjectMapper();
+		String body;
+		try {
+			body = mapper.writeValueAsString(authTokenBody);
+		} catch (JsonProcessingException e2) {
+			log.error("Error while creating auth token", e2);
+			throw new GlanceException("Error while creating auth token", e2);
+		}
+		// log.info("Auth token body {}", body);
+		HttpEntity entity;
+		try {
+			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e2) {
+			log.error("Error while creating auth token", e2);
+			throw new GlanceException("Error while creating auth token", e2);
+		}
 
-			postRequest.setEntity(entity);
-			postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-			postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-			HttpResponse response = null;
-			try {
-				response = httpClient.execute(postRequest);
-			} catch (ClientProtocolException e1) {
-				log.error("Error while creating auth token", e1);
-				throw new GlanceException("Error while creating auth token", e1);
-			} catch (Exception e1) {
-				log.error("Error while creating auth token", e1);
-				throw new GlanceException("Error while creating auth token", e1);
-			}
-			
-			try{
-			br = new BufferedReader(new InputStreamReader(
-					(response.getEntity().getContent())));
+		postRequest.setEntity(entity);
+		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+		HttpResponse response;
+		try {
+			response = httpClient.execute(postRequest);
+		} catch (ClientProtocolException e1) {
+			log.error("Error while creating auth token", e1);
+			throw new GlanceException("Error while creating auth token", e1);
+		} catch (Exception e1) {
+			log.error("Error while creating auth token", e1);
+			throw new GlanceException("Error while creating auth token", e1);
+		}
+
+		try {
+			br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
 
 			String output;
 			StringBuffer sb = new StringBuffer();
@@ -493,8 +471,7 @@ public class GlanceRsClient {
 			if (obj.has("access")) {
 				JSONObject jsonObjectAccess = obj.getJSONObject("access");
 				if (jsonObjectAccess.has("token")) {
-					JSONObject property = jsonObjectAccess
-							.getJSONObject("token");
+					JSONObject property = jsonObjectAccess.getJSONObject("token");
 					authToken = property.getString("id");
 				} else {
 					responseHasError = true;
@@ -504,7 +481,6 @@ public class GlanceRsClient {
 			}
 			// httpClient.getConnectionManager().shutdown();
 
-		
 		} catch (Exception e) {
 			log.error("Error while creating auth token", e);
 			throw new GlanceException("Error while creating auth token", e);
@@ -522,8 +498,7 @@ public class GlanceRsClient {
 		long end = new Date().getTime();
 		printTimeDiff("createAuthToken", start, end);
 		if (responseHasError) {
-			throw new GlanceException("Unable to communicate with Glance at "
-					+ authEndpoint);
+			throw new GlanceException("Unable to communicate with Glance at " + authEndpoint);
 		}
 	}
 
@@ -539,13 +514,18 @@ public class GlanceRsClient {
 		String glanceIP = (String) (configuration
 				.get(Constants.GLANCE_API_ENDPOINT) == null ? ""
 				: configuration.get(Constants.GLANCE_API_ENDPOINT));
-		URL url = null;
+		URL url;
 		try {
 			if (glanceIP.contains("http")) {
 				url = new URL(glanceIP);
 			} else {
 				url = new URL("http://" + glanceIP);
 			}
+			String path = url.getPath();
+			if(StringUtils.isNotBlank(path)){
+				throw new GlanceException("Please provide the API endpoint in format http(s)://<HOST>:<PORT>");
+			}
+
 		} catch (MalformedURLException e) {
 			log.error("Unable to create valid URL", e);
 			throw new GlanceException("Unable to create valid URL", e);
@@ -553,7 +533,7 @@ public class GlanceRsClient {
 
 		Client client = ClientBuilder.newBuilder().build();
 		WebTarget target = client.target(url.toExternalForm());
-		Response response = null;
+		Response response;
 		try {
 			response = target.path("/v1/images/detail").request().header(Constants.AUTH_TOKEN, authToken).get();
 		} catch (ProcessingException pe) {
@@ -602,7 +582,14 @@ public class GlanceRsClient {
 	}
 	
 	
-
+	private void validateUrl(String urlStr, String type) throws GlanceException{
+		try {
+			ValidationUtil.validateUrl(urlStr, type);
+		} catch (DirectorException e) {
+			throw new GlanceException(e.getMessage());
+		}
+	}
+	
 	private void printTimeDiff(String method, long start, long end) {
 		log.debug(method + " took " + (end - start) + " ms");
 	}

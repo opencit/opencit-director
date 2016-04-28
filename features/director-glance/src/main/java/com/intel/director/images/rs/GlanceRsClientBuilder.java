@@ -37,7 +37,7 @@ public class GlanceRsClientBuilder {
             
             Client client = ClientBuilder.newBuilder().build();
             WebTarget target = client.target(url.toExternalForm());
-            return new GlanceRsClient(target, client, glanceKeystonePublicEndpoint,tenantName,userName,password);
+            return new GlanceRsClient(target, client, glanceApiEndpoint, glanceKeystonePublicEndpoint,tenantName,userName,password);
         } catch (MalformedURLException ex) {
             throw new GlanceException("Cannot construct glance rest client with given credentials", ex);
         }

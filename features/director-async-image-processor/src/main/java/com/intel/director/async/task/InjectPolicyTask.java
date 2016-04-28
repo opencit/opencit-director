@@ -13,7 +13,7 @@ import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
 import com.intel.director.common.FileUtilityOperation;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
 import com.intel.mtwilson.director.db.exception.DbException;

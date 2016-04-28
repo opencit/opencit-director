@@ -48,9 +48,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.director.common.ValidationUtil;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
@@ -70,14 +74,14 @@ public class SwiftRsClient {
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
-		URL url = null;
+		validateUrl(swiftAuthEndpoint, "AUTH");
+		validateUrl(swiftApiEndpoint, "API");
+		
 		try {
-			url = new URL(swiftApiEndpoint);
+			webTarget = client.target(new URL(swiftApiEndpoint).toExternalForm());
 		} catch (MalformedURLException e) {
-			log.error("Initialize SwiftRsClient failed");
-			throw new SwiftException("Initialize SwiftRsClient failed", e);
+			throw new SwiftException("Unable to initialize swift client");
 		}
-		webTarget = client.target(url.toExternalForm());
 	
 		createAuthTokenFromKeystone(swiftApiEndpoint,swiftAuthEndpoint, tenantName, accountUsername,
 					accountUserPassword,swiftKeystoneService);
@@ -93,7 +97,7 @@ public class SwiftRsClient {
 
 		getRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
-		int status = -1;
+		int status;
 		HttpResponse response;
 		try {
 			response = httpClient.execute(getRequest);
@@ -143,7 +147,7 @@ public class SwiftRsClient {
 	public List<SwiftObject> getObjectsList(String containerName) throws SwiftException {
 		List<SwiftObject> objectsList = new ArrayList<SwiftObject>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "?format=json");
 		} catch (MalformedURLException e) {
@@ -151,7 +155,7 @@ public class SwiftRsClient {
 			throw new SwiftException("Error forming url", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response = null;
+		Response response;
 		try{
 		 response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -226,14 +230,14 @@ public class SwiftRsClient {
 			String objectName, String writeToFilePath) throws SwiftException {
 		Map<String, String> objectMetadata = new HashMap<String, String>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
 			throw new SwiftException("getObject malformed url", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
 		response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -253,7 +257,7 @@ public class SwiftRsClient {
 				// write the inputStream to a FileOutputStream
 				outputStream = new FileOutputStream(new File(writeToFilePath));
 
-				int read = 0;
+				int read;
 				byte[] bytes = new byte[1024];
 
 				while ((read = inputStream.read(bytes)) != -1) {
@@ -311,14 +315,14 @@ public class SwiftRsClient {
 			String objectName) throws SwiftException {
 		Map<String, String> objectMetadata = new HashMap<String, String>();
 		long start = new Date().getTime();
-		URL url = null;
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
 			throw new SwiftException("getObjectMetadata Failed ", e);
 		}
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
 		 response = target.request()
 				.header(Constants.AUTH_TOKEN, authToken).get();
@@ -344,10 +348,8 @@ public class SwiftRsClient {
 		return objectMetadata;
 	}
 
-	public int deleteObject(String containerName, String objectName)
-			throws SwiftException {
-
-		URL url = null;
+	public int deleteObject(String containerName, String objectName) throws SwiftException {
+		URL url;
 		try {
 			url = new URL(storageUrl + "/" + containerName + "/" + objectName);
 		} catch (MalformedURLException e) {
@@ -360,10 +362,9 @@ public class SwiftRsClient {
 
 		long start = new Date().getTime();
 		WebTarget target = client.target(url.toExternalForm());
-		Response response=null;
+		Response response;
 		try {
-		response = target.request()
-				.header(Constants.AUTH_TOKEN, authToken).delete();
+			response = target.request().header(Constants.AUTH_TOKEN, authToken).delete();
 		} catch (Exception e) {
 			throw new SwiftException("deleteObject Failed ", e);
 		}
@@ -388,7 +389,7 @@ public class SwiftRsClient {
 		putRequest.setHeader(Constants.AUTH_TOKEN, authToken);
 
 		putRequest.setEntity(null);
-		int status = -1;
+		int status;
 		HttpResponse response;
 		try {
 			response = httpClient.execute(putRequest);
@@ -426,8 +427,9 @@ public class SwiftRsClient {
 
 		
 		HttpResponse response;
+		InputStream ist = null;
 		try {
-			InputStream ist = new FileInputStream(file);
+			ist = new FileInputStream(file);
 
 			HttpEntity inputHttp = new InputStreamEntity(ist);
 
@@ -450,11 +452,19 @@ public class SwiftRsClient {
 		} catch (Exception e) {
 			log.error("createOrReplaceObject I/O Failed ", e);
 			throw new SwiftException("createOrReplaceObject I/O Failed ", e);
+		} finally {
+			try {
+				ist.close();
+			} catch (IOException e) {
+				log.error("Error while closing file stream", e);
+			}
 		}
-		if((response.getStatusLine().getStatusCode()<200) && (response.getStatusLine().getStatusCode()>204) ){
-			log.error("Swift createOrReplaceObject failed,"+response.getStatusLine());
-			throw new SwiftException("Swift createOrReplaceObject failed,"+response.getStatusLine());
+		
+		if ((response.getStatusLine().getStatusCode() < 200) && (response.getStatusLine().getStatusCode() > 204)) {
+			log.error("Swift createOrReplaceObject failed," + response.getStatusLine());
+			throw new SwiftException("Swift createOrReplaceObject failed," + response.getStatusLine());
 		}
+		
 		long end = new Date().getTime();
 		printTimeDiff("createOrReplaceObject swift", start, end);
 		return storageUrl + "/" + containerName + "/"
@@ -505,66 +515,17 @@ public class SwiftRsClient {
 		+ objectName;
 	}
 
-/*	private void createAuthToken(String swiftAuthEndpoint,String accountName, String accountUsername,
-			String accountUserPassword) throws SwiftException {
-		
-		long start = new Date().getTime();
-		Response response=null;
-		WebTarget authWebTarget;
-		Client authWebClient;
-		authWebClient = ClientBuilder.newBuilder().build();
-		URL authUrl = null;
-		try {
-			authUrl = new URL(swiftAuthEndpoint);
-		} catch (MalformedURLException e) {
-			log.error("Initialize SwiftRsClient failed");
-			throw new SwiftException("Initialize SwiftRsClient failed", e);
-		}
-		authWebTarget = authWebClient.target(authUrl.toExternalForm());
-		try {
-			response = webTarget
-					.path("/auth/v1.0")
-					.request()
-					.header(Constants.SWIFT_STORAGE_USER,
-							accountName + ":" + accountUsername)
-					.header(Constants.SWIFT_STORAGE_PASSWORD,
-							accountUserPassword).get();
-			response = authWebTarget
-					.request()
-					.header(Constants.SWIFT_STORAGE_USER,
-							accountName + ":" + accountUsername)
-					.header(Constants.SWIFT_STORAGE_PASSWORD,
-							accountUserPassword).get();
-			
-		}catch (Exception e) {
-			throw new SwiftException("createAuthToken Failed ", e);
-		}
-		
-		if((response.getStatus()<200) && (response.getStatus()>204)){
-			log.error("Swift createAuthToken failed,"+response.getStatus());
-			throw new SwiftException("Swift createAuthToken failed,"+response.getStatus());
-		}
-		
-		authToken = response.getHeaderString(Constants.AUTH_TOKEN);
-		storageUrl = response.getHeaderString(Constants.SWIFT_STORAGE_URL);
-
-		System.out.println("Inside authToken::" + authToken);
-		long end = new Date().getTime();
-		printTimeDiff("createAuthToken swift", start, end);
-	}
-	*/
 	private void createAuthTokenFromKeystone(String swiftApiEndpoint,String swiftAuthEndpoint,
 			String tenantName, String userName, String password,String swiftKeystoneServiceName)
 			throws SwiftException {
 		long start = new Date().getTime();
-		String hostByUser=null;
-		String hostFromKeyStone = null;
-		String protocolByUser = null;
-		String protocolFromKeyStone = null;
-		HttpClient httpClient = null;
+		String hostByUser;
+		String hostFromKeyStone;
+		String protocolByUser;
+		String protocolFromKeyStone;
 		BufferedReader br = null;
-		int portByUser = -1;
-		int portFormKeyStone = -1;
+		int portByUser;
+		int portFormKeyStone;
 		boolean responseHasError = true;
 		// String authEndpoint = swiftAuthEndpoint + "/v2.0/tokens";
 		try {
@@ -576,10 +537,14 @@ public class SwiftRsClient {
 				protocolByUser = "";
 			}
 			portByUser = urlSwift.getPort();
+			if(portByUser == -1){
+				throw new SwiftException("Error validating AUTH endpoint");
+			}			
+
 		} catch (MalformedURLException e3) {
 			throw new SwiftException("Error getting swift host", e3);
 		}
-		httpClient = HttpClientBuilder.create().build();
+		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(swiftAuthEndpoint+"/v2.0/tokens");
 
 		AuthTokenBody authTokenBody = new AuthTokenBody();
@@ -590,15 +555,15 @@ public class SwiftRsClient {
 		authTokenBody.auth.passwordCredentials.password = password;
 
 		ObjectMapper mapper = new ObjectMapper();
-		String body = null;
+		String body;
 		try {
 			body = mapper.writeValueAsString(authTokenBody);
 		} catch (JsonProcessingException e2) {
 			log.error("Error while creating auth token", e2);
 			throw new SwiftException("Error while creating auth token", e2);
 		}
-		// log.info("Auth token body {}", body);
-		HttpEntity entity = null;
+
+		HttpEntity entity;
 		try {
 			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
@@ -609,7 +574,7 @@ public class SwiftRsClient {
 		postRequest.setEntity(entity);
 		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-		HttpResponse response = null;
+		HttpResponse response;
 		try {
 			response = httpClient.execute(postRequest);
 		} catch (Exception e1) {
@@ -716,6 +681,14 @@ public class SwiftRsClient {
 
 	private void printTimeDiff(String method, long start, long end) {
 		log.info(method + " took " + (end - start) + " ms");
+	}
+	
+	private void validateUrl(String urlStr, String type) throws SwiftException{
+		try {
+			ValidationUtil.validateUrl(urlStr, type);
+		} catch (DirectorException e) {
+			throw new SwiftException(e.getMessage());
+		}
 	}
 }
 

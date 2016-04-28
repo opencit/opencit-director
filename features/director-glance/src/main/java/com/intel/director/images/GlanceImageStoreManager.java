@@ -65,7 +65,7 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			log.error("Error  upload to Glance", e);
 			if(StringUtils.isNotBlank(glanceid)){
 				//delete
-				throw new StoreException(Constants.ARTIFACT_ID+":"+glanceid, e);
+				throw new StoreException(Constants.ARTIFACT_ID + ":" + glanceid, e);
 			} else if(e.getMessage().startsWith(Constants.ARTIFACT_ID)){
 				throw new StoreException(e.getMessage(), e);
 			}
@@ -111,7 +111,7 @@ public class GlanceImageStoreManager extends StoreManagerImpl {
 			glanceRsClient = GlanceRsClientBuilder.build(configuration);
 		} catch (GlanceException e) {
 			log.error("Error in creating GlanceRsclient", e);
-			throw new StoreException("Error in creating GlanceRsclient", e);
+			throw new StoreException(e.getMessage(), e);
 		}
 
 	}
