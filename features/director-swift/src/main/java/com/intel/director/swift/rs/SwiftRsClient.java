@@ -52,6 +52,8 @@ import com.intel.director.swift.api.SwiftContainer;
 import com.intel.director.swift.api.SwiftObject;
 import com.intel.director.swift.constants.Constants;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 
  * @author Aakash
@@ -70,14 +72,14 @@ public class SwiftRsClient {
 			throws SwiftException {
 
 		client = ClientBuilder.newBuilder().build();
-		URL url;
+		validateUrl(swiftAuthEndpoint, "AUTH");
+		validateUrl(swiftApiEndpoint, "API");
+		
 		try {
-			url = new URL(swiftApiEndpoint);
+			webTarget = client.target(new URL(swiftApiEndpoint).toExternalForm());
 		} catch (MalformedURLException e) {
-			log.error("Initialize SwiftRsClient failed");
-			throw new SwiftException("Initialize SwiftRsClient failed", e);
+			throw new SwiftException("Unable to initialize swift client");
 		}
-		webTarget = client.target(url.toExternalForm());
 	
 		createAuthTokenFromKeystone(swiftApiEndpoint,swiftAuthEndpoint, tenantName, accountUsername,
 					accountUserPassword,swiftKeystoneService);
@@ -533,6 +535,10 @@ public class SwiftRsClient {
 				protocolByUser = "";
 			}
 			portByUser = urlSwift.getPort();
+			if(portByUser == -1){
+				throw new SwiftException("Error validating AUTH endpoint");
+			}			
+
 		} catch (MalformedURLException e3) {
 			throw new SwiftException("Error getting swift host", e3);
 		}
@@ -673,6 +679,32 @@ public class SwiftRsClient {
 
 	private void printTimeDiff(String method, long start, long end) {
 		log.info(method + " took " + (end - start) + " ms");
+	}
+	
+	private void validateUrl(String urlStr, String type) throws SwiftException{
+		URL url;
+		try {
+			url = new URL(urlStr);
+		} catch (MalformedURLException e) {
+			throw new SwiftException("Invalid "+ type+" url");
+		}
+		String hostByUser = url.getHost();
+		if(StringUtils.isBlank(hostByUser)){
+			throw new SwiftException("Error validating "+type+" endpoint. No host specified. ");
+		}
+		if(StringUtils.isBlank(url.getProtocol())){
+			throw new SwiftException("Error validating "+type+" endpoint. No protocol specified. ");
+		}
+			
+
+		if(url.getPort() == -1){
+			throw new SwiftException("Error validating "+type+" endpoint. No port specified.");
+		}			
+
+		String path = url.getPath();
+		if(StringUtils.isNotBlank(path)){
+			throw new SwiftException("Please provide the "+type+" endpoint in format http(s)://HOST:PORT");
+		}	
 	}
 }
 
