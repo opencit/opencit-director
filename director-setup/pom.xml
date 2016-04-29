@@ -50,6 +50,11 @@
             <artifactId>director-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-images-ws</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- external -->
         <dependency>
