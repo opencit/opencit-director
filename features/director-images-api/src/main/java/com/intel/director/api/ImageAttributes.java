@@ -139,12 +139,12 @@ public class ImageAttributes extends AuditFields {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
-	public Long getImageSize() {
+	
+	public Long getImage_size() {
 		return image_size;
 	}
 
-	public void setImageSize(long sizeInBytes) {
+	public void setImage_size(Long sizeInBytes) {
 		this.image_size = sizeInBytes;
 	}
 

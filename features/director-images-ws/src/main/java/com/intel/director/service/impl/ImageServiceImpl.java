@@ -358,7 +358,7 @@ public class ImageServiceImpl implements ImageService {
 		imageAttributes.setDeleted(false);
 		long sizeInBytes = fileSize;
 		imageAttributes.setSent(0L);
-		imageAttributes.setImageSize(sizeInBytes);
+		imageAttributes.setImage_size(sizeInBytes);
 		imageAttributes.location = Constants.defaultUploadPath;
 		imageAttributes.image_format = image_format;
 		Calendar currentDate = Calendar.getInstance();
@@ -484,8 +484,8 @@ public class ImageServiceImpl implements ImageService {
 		imageInfo.setSent(imageInfo.getSent() + bytesread);
 		imageInfo.setEdited_date(edited_date);
 		log.debug("Sent in bytes New: " + imageInfo.getSent());
-		log.debug("image size: " + imageInfo.getImageSize());
-		if (imageInfo.getSent().intValue() == imageInfo.getImageSize()
+		log.debug("image size: " + imageInfo.getImage_size());
+		if (imageInfo.getSent().intValue() == imageInfo.getImage_size()
 				.intValue()) {
 			imageInfo.setStatus(Constants.COMPLETE);
 			imageInfo.setDeleted(false);

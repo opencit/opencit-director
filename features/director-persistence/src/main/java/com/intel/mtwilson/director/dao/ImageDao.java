@@ -191,7 +191,7 @@ public class ImageDao extends BaseDao{
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setImage_uploads_count(((Long) imageObj[17]).intValue());
-					imgInfo.setImageSize(((Long) imageObj[18]));
+					imgInfo.setImage_size(((Long) imageObj[18]));
 					imgInfo.setRepository((String) imageObj[19]);
 					imgInfo.setTag((String) imageObj[20]);
 					imgInfo.setPolicy_uploads_count(((Long) imageObj[21]).intValue());
@@ -233,7 +233,7 @@ public class ImageDao extends BaseDao{
 			imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 			imgInfo.setCreated_date(mwImage.getCreatedDate());
 			imgInfo.setEdited_date(mwImage.getEditedDate());
-			imgInfo.setImageSize(mwImage.getContentLength());
+			imgInfo.setImage_size(mwImage.getContentLength());
 			imgInfo.setStatus(mwImage.getStatus());
 			imgInfo.setSent(mwImage.getSent());
 			imgInfo.setUploadVariableMD5(mwImage.getUploadVariablesMd5());
