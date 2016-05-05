@@ -14,8 +14,6 @@
 # 10. add director to startup services
 # 11. look for DIRECTOR_PASSWORD environment variable; if not present print help message and exit:
 #     Trust Director requires a master password
-#     to generate a password run "export DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD"
-#     you must store this password in a safe place
 #     losing the master password will result in data loss
 # 12. director setup
 # 13. director start
@@ -34,7 +32,12 @@ export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
 # load application environment variables if already defined
 
-
+EXTENSIONS_CACHE_FILE=$DIRECTOR_HOME/configuration/extensions.cache
+echo "EXTENSIONS_CACHE_FILE:: $EXTENSIONS_CACHE_FILE"
+if [ -f $EXTENSIONS_CACHE_FILE ] ; then
+echo "removing existing extension cache file"
+    rm -rf $EXTENSIONS_CACHE_FILE
+fi
 
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)

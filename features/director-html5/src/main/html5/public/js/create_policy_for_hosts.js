@@ -63,8 +63,10 @@ function addhostandnext() {
         show_error_in_bmlivemodal("Password is mandatory");
         return;
     }
-
+    
+    if(current_image_id && (current_image_id!="")){
     self.data.image_id = current_image_id;
+    }
 
     self.data.name = $("#host_ip").val();
 

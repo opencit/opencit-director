@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -17,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
@@ -85,11 +82,11 @@ import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest.xml.FileMeasurementType;
 import com.intel.mtwilson.manifest.xml.Manifest;
 import com.intel.mtwilson.manifest.xml.MeasurementType;
-import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -236,6 +233,9 @@ public class ImageServiceImpl implements ImageService {
 		image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
 			imagePersistenceManager.updateImage(image);
+			unmountImageResponse = TdaasUtil
+					.mapImageAttributesToUnMountImageResponse(image);
+
 		} catch (DbException e) {
 			log.error("Error updating image " + imageId, e);
 			throw new DirectorException("Error updating image:" + imageId);
@@ -405,7 +405,8 @@ public class ImageServiceImpl implements ImageService {
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			String image_id, InputStream fileInputStream)
 			throws DirectorException {
-
+		double oneMB = 1024 * 1024 ;
+		double flushSize = oneMB * 10; //10MB
 		ImageInfo imageInfo;
 		try {
 			imageInfo = imagePersistenceManager.fetchImageById(image_id);
@@ -446,12 +447,12 @@ public class ImageServiceImpl implements ImageService {
 
 			out = new FileOutputStream(new File(imageInfo.getLocation()
 					+ imageInfo.getImage_name()), true);
-			int bufferForFlush = 0;
+			double bufferForFlush = 0;
 			while ((read = fileInputStream.read(bytes)) != -1) {
 				bytesread += read;
 				bufferForFlush += read;
 				out.write(bytes, 0, read);
-				if (bufferForFlush >= 1024 * 1024 * 10) { // flush after 10MB
+				if (bufferForFlush >= flushSize) { // flush after 10MB
 					bufferForFlush = 0;
 					out.flush();
 				}
@@ -510,6 +511,7 @@ public class ImageServiceImpl implements ImageService {
 	public SearchFilesInImageResponse searchFilesInImage(
 			SearchFilesInImageRequest searchFilesInImageRequest)
 			throws DirectorException {
+		searchFilesInImageRequest.setDir(EscapeUtil.doubleQuoteEscapeShellArgument(searchFilesInImageRequest.getDir()));
 		log.info("Browsing files for dir: "
 				+ searchFilesInImageRequest.getDir());
 		if(searchFilesInImageRequest.init){
@@ -2656,7 +2658,9 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
-
+		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
+		sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
+		sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
 		log.info("Inside addHost, going to addSshKey ");

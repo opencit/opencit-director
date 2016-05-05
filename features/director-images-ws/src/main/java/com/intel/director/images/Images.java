@@ -105,7 +105,9 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/images
 	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":13631488 }
 	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
@@ -113,6 +115,33 @@ public class Images {
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
 	 * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
 	 * 
+	 * 
+	 * In case of Docker:
+	 * Input:    {
+	    "image_deployments": "Docker",
+	    "image_format" : "tar",
+	    "repository" : "busybox",
+	    "tag":"latest",
+	    "image_size" : 1322496
+	 }
+	 Ouput: 
+		{
+	  "created_by_user_id": "admin",
+	  "created_date": "2016-05-04 08:36:18",
+	  "edited_by_user_id": "admin",
+	  "edited_date": "2016-05-04 08:36:18",
+	  "id": "AAD4CCF9-B6B5-4523-887D-575E9DB0E349",
+	  "image_name": "busybo1x:latest",
+	  "image_format": "tar",
+	  "image_deployments": "Docker",
+	  "image_size": 1322496,
+	  "sent": 0,
+	  "deleted": false,
+	  "repository": "busybox",
+	  "tag": "latest",
+	  "image_upload_status": "success",
+	  "image_Location": "/mnt/images/"
+	}
 	 * In Case of error such as image name already exists on the server :
 	 * {
 	 * 	"status" : "Error",
@@ -128,15 +157,15 @@ public class Images {
 	 * 2) Invalid format and deployment type
 	 * {
 	 *   "deleted": false,
-	 *   "details": "Invalid deployment type for image,Inavlid deployment format for image",
+	 *   "details": "Invalid deployment type for image,Invalid deployment format for image",
 	 *   "image_upload_status": "Error"
 	 * }
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param TrustDirectorImageUploadRequest
 	 *            object which includes metadata information
-	 * @return Response object contains newly created
-	 *         image metadata along with image_id
+	 * @return Response object contains newly created image metadata along with
+	 *         image_id
 	 * @throws DirectorException
 	 */
 	@Path("images")
@@ -240,6 +269,27 @@ public class Images {
 	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Porgress","image_size":407552,
 	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
 	 * 
+	 * In case of Docker: 
+	 * 
+	 * 
+	 * {
+	  "created_by_user_id": "admin",
+	  "created_date": "2016-05-04 08:38:44",
+	  "edited_by_user_id": "admin",
+	  "edited_date": "2016-05-04 08:39:39",
+	  "id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+	  "image_name": "busybox:latest",
+	  "image_format": "tar",
+	  "image_deployments": "Docker",
+	  "image_size": 1322496,
+	  "sent": 1322496,
+	  "deleted": false,
+	  "repository": "busybox",
+	  "tag": "latest",
+	  "image_upload_status": "Complete",
+	  "image_Location": "/mnt/images/"
+	}
+	 * In case of docker, after the call to upload image content another call needs to be done:  https://HOST:PORT/v1/rpc/docker-setup/UUID_OF_IMAGE
 	 * </pre>
 	 * @param imageId
 	 *            - id received as response of https://{IP/HOST_NAME}/v1/images/
@@ -302,46 +352,134 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/images
 	 * Input: deploymentType=VM (Example : https://{IP/HOST_NAME}/v1/images?deploymentType=VM)
 	 * 
-	 * Output: {
-	 * "images": [
-	 * {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-21",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-21",
-	 *       "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *       "image_name": "CIR1.img",
-	 *       "image_format": "qcow2",
-	 *       "image_deployments": "VM",
-	 *       "image_size": 13312,
-	 *       "sent": 13312,
-	 *       "deleted": false,
-	 *       "trust_policy_id": "0e41169f-d2f3-4566-96c7-183d699417fb",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "CIR1.img",
-	 *       "image_upload_status": "Complete",
-	 *       "image_Location": "/mnt/images/"
-	 *     },
-	 *     {
-	 *       "created_date": "2015-12-17",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-17",
-	 *       "id": "D7952C76-8F37-474A-B054-168ACC2C0802",
-	 *       "image_name": "10.35.35.182",
-	 *       "image_deployments": "BareMetal",
-	 *       "deleted": false,
-	 *       "trust_policy_id": "f421e8cf-8d29-40b9-b05f-6b52d549dc81",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "S1",
-	 *       "image_upload_status": "Complete"
-	 *     }
-	 * }]}
-	 * 
-	 * </pre>
+	 * Output:
+	
+			{
+			"images": [
+			{
+			  "created_by_user_id": "admin",
+			  "created_date": "2016-05-03 20:40:17",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-03 20:40:17",
+			  "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+			  "image_name": "debian:testing",
+			  "image_format": "tar",
+			  "image_deployments": "Docker",
+			  "image_size": 0,
+			  "sent": 0,
+			  "deleted": false,
+			  "repository": "debian",
+			  "tag": "testing",
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "-",
+			  "action_entry_created": false,
+			  "image_upload_status": "In Progress",
+			  "image_Location": "/mnt/images/"
+			},
+			{
+			  "created_by_user_id": "admin",
+			  "created_date": "2016-05-02 05:45:44",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-01 22:26:17",
+			  "id": "1AFBA2F5-C02E-420E-9842-C455BB35B334",
+			  "image_name": "cirros.img",
+			  "image_format": "qcow2",
+			  "image_deployments": "VM",
+			  "image_size": 13287936,
+			  "sent": 13287936,
+			  "deleted": false,
+			  "upload_variable_md5": "110db09830b79d60c9faf056d7bdb2f5",
+			  "trust_policy_id": "ACE7EA06-34EE-412B-8505-83FD58AD79AD",
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "cirros.img",
+			  "action_entry_created": true,
+			  "image_upload_status": "Complete",
+			  "image_Location": "/mnt/images/"
+			},
+			{
+			  "created_by_user_id": "admin",
+			  "created_date": "2016-05-02 05:48:28",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-03 01:15:25",
+			  "id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+			  "image_name": "c2",
+			  "image_format": "qcow2",
+			  "image_deployments": "VM",
+			  "image_size": 13287936,
+			  "sent": 13287936,
+			  "deleted": false,
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "-",
+			  "action_entry_created": false,
+			  "image_upload_status": "Complete",
+			  "image_Location": "/mnt/images/"
+			},
+			{
+			  "created_date": "2016-05-03 19:30:10",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-03 19:36:44",
+			  "id": "EC45AC23-0A64-41E7-8083-A339E29F4A56",
+			  "image_name": "10.35.35.131",
+			  "image_deployments": "BareMetal",
+			  "image_size": 0,
+			  "deleted": false,
+			  "trust_policy_draft_id": "9268e9cc-cfc2-43ce-9847-133e96ff0c54",
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "P1",
+			  "action_entry_created": false,
+			  "image_upload_status": "Complete"
+			},
+			{
+			  "created_date": "2016-05-03 19:37:02",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-03 20:37:54",
+			  "id": "EB7E45CD-F84C-419E-9841-A685E8E28050",
+			  "image_name": "10.35.35.131",
+			  "image_deployments": "BareMetal",
+			  "image_size": 0,
+			  "deleted": false,
+			  "trust_policy_draft_id": "f08b2b01-7fe7-4ea1-ba8c-4883b366253a",
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "P2",
+			  "action_entry_created": false,
+			  "image_upload_status": "Complete"
+			},
+			{
+			  "created_by_user_id": "admin",
+			  "created_date": "2016-05-03 20:38:44",
+			  "edited_by_user_id": "admin",
+			  "edited_date": "2016-05-03 20:39:39",
+			  "id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+			  "image_name": "busybox:latest",
+			  "image_format": "tar",
+			  "image_deployments": "Docker",
+			  "image_size": 1322496,
+			  "sent": 1322496,
+			  "deleted": false,
+			  "repository": "busybox",
+			  "tag": "latest",
+			  "image_uploads_count": 0,
+			  "policy_uploads_count": 0,
+			  "policy_name": "-",
+			  "action_entry_created": false,
+			  "image_upload_status": "Complete",
+			  "image_Location": "/mnt/images/"
+			}
+			]
+			}	 
+	*
+	 *                    </pre>
 	 * 
 	 * @param deployment_type
 	 *            - VM/BareMetal
@@ -383,25 +521,57 @@ public class Images {
 	 * Input: imageId : 465A8B27-7CC8-4A3C-BBBC-26161E3853CD
 	 * Output:
 	 * {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-21",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-21",
-	 *       "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *       "image_name": "CIR1.img",
-	 *       "image_format": "qcow2",
-	 *       "image_deployments": "VM",
-	 *       "image_size": 13312,
-	 *       "sent": 13312,
-	 *       "deleted": false,
-	 *       "trust_policy_id": "0e41169f-d2f3-4566-96c7-183d699417fb",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "CIR1.img",
-	 *       "ip_address":"10.35.35.182",
-	 *       "username":"root"
-	 *       "image_upload_status": "Complete",
-	 *       "image_Location": "/mnt/images/"
-	 *     }
+  "created_by_user_id": "admin",
+  "created_date": "2016-05-02 05:45:44",
+  "edited_by_user_id": "admin",
+  "edited_date": "2016-05-02 10:26:17",
+  "id": "1AFBA2F5-C02E-420E-9842-C455BB35B334",
+  "image_name": "cirros.img",
+  "image_format": "qcow2",
+  "image_deployments": "VM",
+  "image_size": 13287936,
+  "sent": 13287936,
+  "deleted": false,
+  "upload_variable_md5": "110db09830b79d60c9faf056d7bdb2f5",
+  "trust_policy_id": "ACE7EA06-34EE-412B-8505-83FD58AD79AD",
+  "image_upload_status": "Complete",
+  "image_Location": "/mnt/images/"
+}
+
+	Docker image response: 
+	{
+  "created_by_user_id": "admin",
+  "created_date": "2016-05-04 08:40:17",
+  "edited_by_user_id": "admin",
+  "edited_date": "2016-05-04 08:40:17",
+  "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+  "image_name": "debian:testing",
+  "image_format": "tar",
+  "image_deployments": "Docker",
+  "image_size": 0,
+  "sent": 0,
+  "deleted": false,
+  "repository": "debian",
+  "tag": "testing",
+  "image_upload_status": "In Progress",
+  "image_Location": "/mnt/images/"
+}
+
+Bare metal response; 
+{
+  "created_date": "2016-05-04 07:30:10",
+  "edited_by_user_id": "admin",
+  "edited_date": "2016-05-04 07:36:44",
+  "id": "EC45AC23-0A64-41E7-8083-A339E29F4A56",
+  "image_name": "10.35.35.131",
+  "image_deployments": "BareMetal",
+  "image_size": 0,
+  "deleted": false,
+  "trust_policy_draft_id": "9268e9cc-cfc2-43ce-9847-133e96ff0c54",
+  "ip_address": "10.35.35.131",
+  "username": "root",
+  "image_upload_status": "Complete"
+}
 	 * 
 	 * 
 	 * 
@@ -458,26 +628,52 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/mount-image
 	 * Input: {"id" : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
+	 * 
+	 * Docker image mount respose:
 	 * {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": 1450636200000,
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": 1450685484685,
-	 *   "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *   "image_name": "CIR1.img",
-	 *   "image_format": "qcow2",
-	 *   "image_deployments": "VM",
-	 *   "image_size": 13312,
-	 *   "sent": 13312,
-	 *   "mounted_by_user_id": "admin",
-	 *   "deleted": false,
-	 *   "image_upload_status": "Complete",
-	 *   "image_Location": "/mnt/images/"
-	 * }
+	"created_by_user_id": "admin",
+	"created_date": "2016-05-04 08:38:44",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-05-04 08:45:31",
+	"id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+	"image_name": "busybox:latest",
+	"image_format": "tar",
+	"image_deployments": "Docker",
+	"image_size": 1322496,
+	"sent": 1322496,
+	"mounted_by_user_id": "admin",
+	"deleted": false,
+	"repository": "busybox",
+	"tag": "latest",
+	"image_upload_status": "Complete",
+	"image_Location": "/mnt/images/"
+	}
+	
+	VM mount response
+	{
+	"created_by_user_id": "admin",
+	"created_date": "2016-05-02 05:48:28",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-05-04 08:47:17",
+	"id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+	"image_name": "c2",
+	"image_format": "qcow2",
+	"image_deployments": "VM",
+	"image_size": 13287936,
+	"sent": 13287936,
+	"mounted_by_user_id": "admin",
+	"deleted": false,
+	"image_upload_status": "Complete",
+	"image_Location": "/mnt/images/"
+	}
+	 * 
+	 * 
 	 * 
 	 * 
 	 * If the user tries to mount an image which, for some reason, has been removed from the uploaded location, the response will look like :
@@ -488,7 +684,7 @@ public class Images {
 	 * 
 	 * Mount image with incorrect image id:
 	 * {"id":"465A8B27-7CC8-4A3C-BBBC-26161Es3853CD","deleted":false,"error":"Error fetching image:465A8B27-7CC8-4A3C-BBBC-26161Es3853CD"}
-	 * </pre>
+	 *                    </pre>
 	 * 
 	 * @param httpServletRequest
 	 * @param httpServletResponse
@@ -552,24 +748,59 @@ public class Images {
 	 * https://{IP/HOST_NAME}/v1/rpc/unmount-image
 	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
+	 * In case of VM:
 	 * {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": 1450636200000,
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": 1450685543811,
-	 *   "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *   "image_name": "CIR1.img",
-	 *   "image_format": "qcow2",
-	 *   "image_deployments": "VM",
-	 *   "image_size": 13312,
-	 *   "sent": 13312,
-	 *   "deleted": false,
-	 *   "image_upload_status": "success",
-	 *   "image_Location": "/mnt/images/"
-	 * }
+		  "created_by_user_id": "admin",
+		  "created_date": "2016-05-02 05:48:28",
+		  "edited_by_user_id": "admin",
+		  "edited_date": "2016-05-04 08:50:32",
+		  "id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+		  "image_name": "c2",
+		  "image_format": "qcow2",
+		  "image_deployments": "VM",
+		  "image_size": 13287936,
+		  "sent": 13287936,
+		  "deleted": false,
+		  "image_upload_status": "Complete",
+		  "image_Location": "/mnt/images/"
+		}
+		
+		Docker: 
+		{
+		  "created_by_user_id": "admin",
+		  "created_date": "2016-05-04 08:40:17",
+		  "edited_by_user_id": "admin",
+		  "edited_date": "2016-05-04 08:51:34",
+		  "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+		  "image_name": "debian:testing",
+		  "image_format": "tar",
+		  "image_deployments": "Docker",
+		  "image_size": 0,
+		  "sent": 0,
+		  "deleted": false,
+		  "repository": "debian",
+		  "tag": "testing",
+		  "image_upload_status": "Complete",
+		  "image_Location": "/mnt/images/"
+		}
 	 * 
 	 * In case of error:
-	 * { â€œerrorâ€: â€œerror message â€ }
+	 * {
+		  "id": "dwqdwqdqd799B",
+		  "deleted": false,
+		  "error": "Image Id is empty or is not in uuid format"
+		}
+		OR in case of invalid image
+		{
+		  "id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+		  "deleted": false,
+		  "error": "Invalid image id provided"
+		}
+		OR if empty body is posted
+		{
+		  "deleted": false,
+		  "error": "Image Id is empty or is not in uuid format"
+		}
 	 * 
 	 * </pre>
 	 * 
@@ -762,18 +993,23 @@ public class Images {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-deployments
 	 * Input: None
-	 * Output: {
-	 *   "image_deployments": [
-	 *     {
-	 *       "name": "VM",
-	 *       "display_name": "Virtualized Server"
-	 *     },
-	 *     {
-	 *       "name": "BareMetal",
-	 *       "display_name": "Non-Virtualized Server"
-	 *     }
-	 *   ]
-	 * }
+	 * Output: 
+	 * {
+		  "image_deployments": [
+		    {
+		      "name": "VM",
+		      "display_name": "Virtualized Server"
+		    },
+		    {
+		      "name": "BareMetal",
+		      "display_name": "Non-Virtualized Server"
+		    },
+		    {
+		      "name": "Docker",
+		      "display_name": "Docker"
+		    }
+		  ]
+		}
 	 * </pre>
 	 * 
 	 * @return list of deployment types
@@ -795,8 +1031,31 @@ public class Images {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-formats
 	 * Input: None
-	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"},{"name": "vhd","display_name": "vhd"}
-	 * ,{"name": "vmdk","display_name": "vmdk"},{"name": "raw","display_name": "raw"},{"name": "vdi","display_name": "vdi"}]}
+	 * Output: 
+	 * {
+		  "image_formats": [
+		    {
+		      "name": "qcow2",
+		      "display_name": "qcow2"
+		    },
+		    {
+		      "name": "vhd",
+		      "display_name": "vhd"
+		    },
+		    {
+		      "name": "vmdk",
+		      "display_name": "vmdk"
+		    },
+		    {
+		      "name": "raw",
+		      "display_name": "raw"
+		    },
+		    {
+		      "name": "vdi",
+		      "display_name": "vdi"
+		    }
+		  ]
+		}
 	 * </pre>
 	 * @return list of image formats
 	 */
@@ -823,31 +1082,51 @@ public class Images {
 	 * deploymentType can be VM , BareMetal or Docker
 	 * Output:
 	 * {
-	 *   "image_launch_policies": [
-	 *     {
-	 *       "name": "MeasureOnly",
-	 *       "display_name": "Hash Only",
-	 *       "image_deployments": [
-	 *         "VM",
-	 *         "BareMetal"
-	 *       ]
-	 *     },
-	 *     {
-	 *       "name": "MeasureAndEnforce",
-	 *       "display_name": "Hash and enforce",
-	 *       "image_deployments": [
-	 *         "VM"
-	 *       ]
-	 *     },
-	 *     {
-	 *       "name": "encrypted",
-	 *       "display_name": "Encryption",
-	 *       "image_deployments": [
-	 *         "VM"
-	 *       ]
-	 *     }
-	 *   ]
-	 * }
+		  "image_launch_policies": [
+		    {
+		      "name": "MeasureOnly",
+		      "display_name": "Hash Only",
+		      "image_deployments": [
+		        "VM",
+		        "BareMetal",
+		        "Docker"
+		      ]
+		    },
+		    {
+		      "name": "MeasureAndEnforce",
+		      "display_name": "Hash and enforce",
+		      "image_deployments": [
+		        "VM",
+		        "Docker"
+		      ]
+		    }
+		  ]
+		}
+		
+		If VM is given as a deploymentType query parameter, response is :
+		{
+		  "image_launch_policies": [
+		    {
+		      "name": "MeasureOnly",
+		      "display_name": "Hash Only",
+		      "image_deployments": [
+		        "VM",
+		        "BareMetal",
+		        "Docker"
+		      ]
+		    },
+		    {
+		      "name": "MeasureAndEnforce",
+		      "display_name": "Hash and enforce",
+		      "image_deployments": [
+		        "VM",
+		        "Docker"
+		      ]
+		    }
+		  ]
+		}
+		
+		valid deplopymentType values are Docker, VM and BareMetal
 	 * </pre>
 	 */
 	@Path("image-launch-policies")
@@ -864,16 +1143,7 @@ public class Images {
 		return Response.ok(lookupService.getImageLaunchPolicies(deploymentType)).build();
 	}
 
-	/**
-	 * Utility methods
-	 * 
-	 * @param httpServletRequest
-	 * @return
-	 */
-	protected String getLoginUsername() {
-		return ShiroUtil.subjectUsername();
-
-	}
+	
 
 	/**
 	 * 
@@ -1290,18 +1560,15 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/images/host
-	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"10.35.35.131","username":"root","password":"intelmh","name":"10.35.35.131"}
 	 * 
-	 * Output: {"deleted":false,"ip_address":"10.35.35.182","username":"root","image_name":"10.35.35.182","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"}
+	 * Output: {"ip_address":"10.35.35.131","username":"root","image_name":"10.35.35.131","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * In case of error:
-	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"","username":"root","password":"intelmh","name":"10.35.35.131"}
 	 * Lets say the user does not provide the IP:
 	 * 
-	 * {
-	 *   "error": "No Ip address provided",
-	 *   "deleted": false
-	 * }
+	 * { "error": "No host provided or host is in incorrect format }
 	 * 
 	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
@@ -1349,25 +1616,16 @@ public class Images {
 	 * 
 	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images/host
-	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"10.35.35.131","username":"root","password":"intelmh","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * Output: 
-	 * {
-	 *   "deleted": false,
-	 *   "ip_address": "10.35.35.182",
-	 *   "username": "root",
-	 *   "image_name": "10.35.35.182",
-	 *   "image_id": "FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"
-	 * }
+	 * {"ip_address":"10.35.35.131","username":"root","image_name":"10.35.35.131","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * In case of error:
-	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"","username":"root","password":"intelmh","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * Lets say the user does not provide the correct details to connect to the remote host :
 	 * 
-	 * {
-	 *   "error": "Unable to connect to remote host",
-	 *   "deleted": false
-	 * }
+	 * { "error": "No host provided or host is in incorrect format }
 	 * 
 	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
@@ -1428,7 +1686,7 @@ public class Images {
 	 * </pre>
 	 * 
 	 * @param Pathparam
-	 *            : image_id
+	 *            : image_id	
 	 * @return Response containing details of docker-pull
 	 */
 	@Path("rpc/docker-pull/{image_id: [0-9a-zA-Z_-]+}")
