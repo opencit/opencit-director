@@ -785,7 +785,22 @@ Bare metal response;
 		}
 	 * 
 	 * In case of error:
-	 * { â€œerrorâ€: â€œerror message â€ }
+	 * {
+		  "id": "dwqdwqdqd799B",
+		  "deleted": false,
+		  "error": "Image Id is empty or is not in uuid format"
+		}
+		OR in case of invalid image
+		{
+		  "id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+		  "deleted": false,
+		  "error": "Invalid image id provided"
+		}
+		OR if empty body is posted
+		{
+		  "deleted": false,
+		  "error": "Image Id is empty or is not in uuid format"
+		}
 	 * 
 	 * </pre>
 	 * 

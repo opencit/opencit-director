@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -17,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
@@ -409,7 +406,7 @@ public class ImageServiceImpl implements ImageService {
 			String image_id, InputStream fileInputStream)
 			throws DirectorException {
 		double oneMB = 1024 * 1024 ;
-		double flushSize = oneMB * 100; //10MB
+		double flushSize = oneMB * 10; //10MB
 		ImageInfo imageInfo;
 		try {
 			imageInfo = imagePersistenceManager.fetchImageById(image_id);
