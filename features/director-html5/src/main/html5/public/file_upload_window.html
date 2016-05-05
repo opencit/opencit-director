@@ -267,7 +267,8 @@ input[readonly] {
 					}
 					if (isDockerManualUpload || image_deployments == "VM") {
 					///	$('#upload').prop('disabled', false);
-						BYTES_PER_CHUNK = 1048576 * 10; //10MB
+						var oneMb = 1024 * 1024;
+						BYTES_PER_CHUNK = oneMb * 10; //10MB
 						start = 0;
 						end = BYTES_PER_CHUNK;
 						upload_chunks(image_id, start, end);

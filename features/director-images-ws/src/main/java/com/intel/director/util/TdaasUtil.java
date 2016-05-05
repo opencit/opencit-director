@@ -484,7 +484,7 @@ public class TdaasUtil {
 		}
 		img.setImage_deployments("BareMetal");
 		img.setImage_format(null);
-		img.setImage_size(0L);
+		img.setImageSize(0L);
 		img.setLocation(null);
 		img.setImage_name(ip);
 		img.setSent(null);

@@ -385,7 +385,7 @@ function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
 					'Accept' : 'application/json'
 				},
 				success : function(data, status, xhr) {
-					if (data.is_valid) {
+					if (data.valid) {
 						$("#image_store_details_error").html("<font color=\"green\">Valid configuration</font>");
 					} else {
 						$("#image_store_details_error").html(data.error);
@@ -647,8 +647,8 @@ function validateImageStore(imageStoreId) {
 		success : function(data, status, xhr) {
 			console.log(xhr.status);
 			if (xhr.status == 200) {
-				console.log(data.is_valid);
-				if (data.is_valid) {
+				console.log(data.valid);
+				if (data.valid) {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-ok");
 				} else {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-remove");

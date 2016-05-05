@@ -15,6 +15,7 @@ import com.intel.director.api.ImageStoreDetailsTransferObject;
 import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.common.Constants;
+import com.intel.director.common.DirectorPropertiesCache;
 import com.intel.director.service.ImageStoresService;
 import com.intel.director.service.impl.ImageStoresServiceImpl;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
@@ -29,58 +30,66 @@ public class SetupGlanceImageStore extends AbstractSetupTask {
 	private String tenant;
 	private String user;
 	private String password;
-	private Map<String, String> map = new HashMap<String, String>();
+	private Map<String, String> envMap = new HashMap<String, String>();
+	private static final String defaultStoreName = "GLANCE_STORE_FROM_3_0";
+	private ImageStoresService imageStoresService = new ImageStoresServiceImpl();
 
 	@Override
 	protected void configure() throws Exception {
-		String userHome = System.getProperty("user.home");
-		if(StringUtils.isBlank(userHome)){
-			userHome = "/root/director.env";
-			log.info("Default User home = {}", userHome);
-		}else{
-			log.info("User home = {}", userHome);
-		}
+		glanceUrl = DirectorPropertiesCache.getValue(Constants.GLANCE_API_ENDPOINT);
+		authUrl = DirectorPropertiesCache.getValue(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT);
+		user = DirectorPropertiesCache.getValue(Constants.GLANCE_IMAGE_STORE_USERNAME);
+		password = DirectorPropertiesCache.getValue(Constants.GLANCE_IMAGE_STORE_PASSWORD);
+		tenant = DirectorPropertiesCache.getValue(Constants.GLANCE_TENANT_NAME);
 		
-		File envFile = new File(userHome);
+		String userHome = System.getProperty("user.home");
+		if (StringUtils.isBlank(userHome)) {
+			userHome = "/root";
+			log.info("Default User home = {}", userHome);
+		} else {
+			log.info("User home is found from Sys.getProp {}", userHome);
+		}
+
+		String envPath = userHome + File.separator + "director.env";
+		log.info("Env path = {}", envPath);
+		File envFile = new File(envPath);
 		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(envFile);
 		Configuration loadedConfiguration = provider.load();
-		log.info("reading director.env");
+		log.info("reading director.env, Properties count {}", loadedConfiguration.keys().size());
 		for (String key : loadedConfiguration.keys()) {
 			String value = loadedConfiguration.get(key);
-			map.put(key, value);
-			log.info("Added key: {} & value {} ", key, value);
+			envMap.put(key, value);
 		}
 	}
 
 	@Override
 	protected void validate() throws Exception {
-		if (!(StringUtils.isNotBlank(map.get("GLANCE_API_ENDPOINT"))
-				&& StringUtils.isNotBlank(map.get("GLANCE_KEYSTONE_PUBLIC_ENDPOINT"))
-				&& StringUtils.isNotBlank(map.get("GLANCE_IMAGE_STORE_USERNAME"))
-				&& StringUtils.isNotBlank(map.get("GLANCE_IMAGE_STORE_PASSWORD"))
-				&& StringUtils.isNotBlank(map.get("TENANT_NAME")))) {
+		if (!(StringUtils.isNotBlank(envMap.get("GLANCE_API_ENDPOINT"))
+				&& StringUtils.isNotBlank(envMap.get("GLANCE_KEYSTONE_PUBLIC_ENDPOINT"))
+				&& StringUtils.isNotBlank(envMap.get("GLANCE_IMAGE_STORE_USERNAME"))
+				&& StringUtils.isNotBlank(envMap.get("GLANCE_IMAGE_STORE_PASSWORD"))
+				&& StringUtils.isNotBlank(envMap.get("TENANT_NAME")))) {
 			log.info("Some props for glance are not set");
-			validation("Some of the Glance properties are not set. Not importing");
+			configuration("Some of the Glance properties are not set. Not importing");
+			return;
 		}
-		glanceUrl = map.get("GLANCE_API_ENDPOINT");
-		authUrl = map.get("GLANCE_KEYSTONE_PUBLIC_ENDPOINT");
-		user = map.get("GLANCE_IMAGE_STORE_USERNAME");
-		password = map.get("GLANCE_IMAGE_STORE_PASSWORD");
-		tenant = map.get("TENANT_NAME");
+		glanceUrl = envMap.get("GLANCE_API_ENDPOINT");
+		authUrl = envMap.get("GLANCE_KEYSTONE_PUBLIC_ENDPOINT");
+		user = envMap.get("GLANCE_IMAGE_STORE_USERNAME");
+		password = envMap.get("GLANCE_IMAGE_STORE_PASSWORD");
+		tenant = envMap.get("TENANT_NAME");
 		log.info("Set api={}, auth={}, user={}, paswd={}, tenant={}", glanceUrl, authUrl, user, password, tenant);
+		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
+		imageStoreFilter.setName(defaultStoreName);
+		List<ImageStoreTransferObject> imageStores = imageStoresService.getImageStores(imageStoreFilter);
+		if (imageStores.size() == 0) {
+			validation("Default image store not yet set. Would be creating it now ");
+		}
+		log.info("End of validate");
 	}
 
 	@Override
 	protected void execute() throws Exception {
-		String defaultStoreName = "GLANCE_STORE_FROM_3_0";
-		ImageStoresService imageStoresService = new ImageStoresServiceImpl();
-		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
-		imageStoreFilter.setName(defaultStoreName);
-		List<ImageStoreTransferObject> imageStores = imageStoresService.getImageStores(imageStoreFilter);
-		if (imageStores.size() > 0) {
-			log.info("Default image store {} already set. Not creating it again. ", defaultStoreName);
-			return;
-		}
 		log.info("Default store {} not present. Creating new", defaultStoreName);
 		ImageStoreTransferObject imageStoreTransferObject = new ImageStoreTransferObject();
 		imageStoreTransferObject.setName(defaultStoreName);

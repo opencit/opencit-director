@@ -364,7 +364,7 @@ public class Mapper {
 	public MwImage toData(ImageAttributes imgAttributes) {
 		MwImage mwImage = new MwImage();
 		mwImage.setImageDeploymentType(imgAttributes.getImage_deployments());
-		mwImage.setContentLength(imgAttributes.getImage_size());
+		mwImage.setContentLength(imgAttributes.getImageSize());
 		mwImage.setImageFormat(imgAttributes.getImage_format());
 		mwImage.setLocation(imgAttributes.getLocation());
 		mwImage.setMountedByUserId(imgAttributes.getMounted_by_user_id());
@@ -409,7 +409,7 @@ public class Mapper {
 		imgInfo.setCreated_date(mwImage.getCreatedDate());
 		imgInfo.setEdited_date(mwImage.getEditedDate());
 		if (mwImage.getContentLength() != null) {
-			imgInfo.setImage_size(mwImage.getContentLength());
+			imgInfo.setImageSize(mwImage.getContentLength());
 		}
 		imgInfo.setStatus(mwImage.getStatus());
 		if (mwImage.getSent() != null) {

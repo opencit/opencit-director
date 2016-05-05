@@ -16,7 +16,7 @@ import org.eclipse.persistence.annotations.UuidGenerator;
 @Entity
 @Cacheable(false)
 @Table(name = "MW_IMAGE_STORE")
-public class MwImageStore {
+public class MwImageStore implements BaseDomainInterface {
 
 	@Id
 	@UuidGenerator(name = "UUID")

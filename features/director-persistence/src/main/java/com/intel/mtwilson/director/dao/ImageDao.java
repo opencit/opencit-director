@@ -25,72 +25,22 @@ import com.intel.director.api.ui.SearchImageByUploadCriteria;
 import com.intel.mtwilson.director.data.MwImage;
 import com.intel.mtwilson.director.data.MwTrustPolicy;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.mapper.Mapper;
 
-public class ImageDao {
-
-	Mapper mapper = new Mapper();
+public class ImageDao extends BaseDao{
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageDao.class);
 	
 	public ImageDao(EntityManagerFactory emf) {
-		this.emf = emf;
+		super(emf);
 	}
 
-	private EntityManagerFactory emf = null;
 
-	public EntityManager getEntityManager() {
-		EntityManager em = emf.createEntityManager();
-		em.clear();
-		return em;
-	}
-
-	public MwImage createImage(MwImage img) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			em.getTransaction().begin();
-			em.persist(img);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("createImage failed",e);
-			throw new DbException("ImageDao,createImage method", e);
-		}
-
-		finally {
-			em.close();
-		}
-		return img;
-	}
-
-	public void updateImage(MwImage img) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			em.getTransaction().begin();
-			em.merge(img);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("updateImage failed",e);
-			throw new DbException("ImageDao,updateImage failed", e);
-		} finally {
-			em.close();
-		}
+	public MwImage findMwImageById(String id) throws DbException {
+		return (MwImage) get(MwImage.class, id);
 	}
 
 	public void destroyImage(MwImage img) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-
-			em.getTransaction().begin();
-			MwImage mwImage = em.getReference(MwImage.class, img.getId());
-			em.remove(mwImage);
-
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("destroyImage failed",e);
-			throw new DbException("ImageDao,destroyImage failed", e);
-		} finally {
-			em.close();
-		}
+		delete(MwImage.class, img);
 	}
 
 	public List<ImageInfo> findMwImageEntities(ImageInfoFilter imgFilter,
@@ -241,7 +191,7 @@ public class ImageDao {
 					imgInfo.setTrust_policy_draft_id((String) imageObj[15]);
 					imgInfo.setTrust_policy_draft_name((String) imageObj[16]);
 					imgInfo.setImage_uploads_count(((Long) imageObj[17]).intValue());
-					imgInfo.setImage_size(((Long) imageObj[18]));
+					imgInfo.setImageSize(((Long) imageObj[18]));
 					imgInfo.setRepository((String) imageObj[19]);
 					imgInfo.setTag((String) imageObj[20]);
 					imgInfo.setPolicy_uploads_count(((Long) imageObj[21]).intValue());
@@ -262,22 +212,6 @@ public class ImageDao {
 		}
 	}
 	
-	public MwImage findMwImageById(String id) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			MwImage mwImage = em.find(MwImage.class, id);
-			return mwImage;
-		} catch (Exception e) {
-			log.error("findMwImage() failed",e);
-			throw new DbException("ImageDao,findMwImage() failed", e);
-		}
-
-		finally {
-			em.close();
-		}
-	}
-
-
 	public ImageInfo findMwImage(String id) throws DbException {
 		EntityManager em = getEntityManager();
 		try {
@@ -299,7 +233,7 @@ public class ImageDao {
 			imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 			imgInfo.setCreated_date(mwImage.getCreatedDate());
 			imgInfo.setEdited_date(mwImage.getEditedDate());
-			imgInfo.setImage_size(mwImage.getContentLength());
+			imgInfo.setImageSize(mwImage.getContentLength());
 			imgInfo.setStatus(mwImage.getStatus());
 			imgInfo.setSent(mwImage.getSent());
 			imgInfo.setUploadVariableMD5(mwImage.getUploadVariablesMd5());
@@ -327,23 +261,6 @@ public class ImageDao {
 				imgInfo.setTag(mwImage.getTag());
 			}
 			return imgInfo;
-		} catch (Exception e) {
-			log.error("findMwImage() failed",e);
-			throw new DbException("ImageDao,findMwImage() failed", e);
-		}
-
-		finally {
-			em.close();
-		}
-
-	}
-
-	public MwImage getMwImage(String id) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			MwImage mwImage = em.find(MwImage.class, id);
-
-			return mwImage;
 		} catch (Exception e) {
 			log.error("findMwImage() failed",e);
 			throw new DbException("ImageDao,findMwImage() failed", e);
@@ -453,6 +370,21 @@ public class ImageDao {
 		finally {
 			em.close();
 		}
+	}
+
+
+	public MwImage createImage(MwImage mwImage) throws DbException {
+		return (MwImage) create(mwImage);
+	}
+
+
+	public MwImage getMwImage(String id) throws DbException {
+		return (MwImage) get(MwImage.class, id);
+	}
+
+
+	public void updateImage(MwImage mwImage) throws DbException {
+		update(mwImage);
 	}
 
 }
