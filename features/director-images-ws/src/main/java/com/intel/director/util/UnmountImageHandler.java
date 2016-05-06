@@ -122,23 +122,15 @@ public class UnmountImageHandler {
 
 		for (String imageId : mountedImageIds) {
 			try {
-				TrustPolicyDraft trustPolicyDraft = persistService
-						.fetchPolicyDraftForImage(imageId);
-				if(trustPolicyDraft == null){
+				ImageInfo imageInfo = persistService.fetchImageById(imageId);
+				
+				if(imageInfo == null){
 					imagesToBeUnmounted.add(imageId);
 					continue;
 				}
-				Calendar trustPolicyDraftEditDate = trustPolicyDraft
-						.getEdited_date();
-				trustPolicyDraftEditDate.set(Calendar.SECOND, 59);
-				trustPolicyDraftEditDate.set(Calendar.HOUR, 23);
-				trustPolicyDraftEditDate.set(Calendar.MINUTE, 59);
 				Calendar currentDate = Calendar.getInstance();
-				currentDate.set(Calendar.SECOND, 59);
-				currentDate.set(Calendar.HOUR, 23);
-				currentDate.set(Calendar.MINUTE, 59);
-				long diffMinutes = (currentDate.getTime().getTime() - trustPolicyDraftEditDate
-						.getTime().getTime()) / (60 * 1000) % 60;
+
+				long diffMinutes = (currentDate.getTime().getTime() - imageInfo.getEdited_date().getTime().getTime()) / (60 * 1000) % 60;
 				
 				log.debug("DIFF : "+diffMinutes +" Timeout = "+new Long(timeout).longValue());
 				if (diffMinutes > new Long(timeout).longValue()) {
