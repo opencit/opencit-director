@@ -2660,7 +2660,7 @@ public class ImageServiceImpl implements ImageService {
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
 		sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
-		sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
+		///sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
 		log.info("Inside addHost, going to addSshKey ");
@@ -2692,7 +2692,8 @@ public class ImageServiceImpl implements ImageService {
 	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 		// SshSettingInfo updateSsh=new SshSettingInfo();
-
+		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
+		///sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
