@@ -347,7 +347,8 @@ public class ImageStores {
 
 	/**
 	 * 
-	 * This method updates the image store record.
+	 * This method updates the image store record. This call replaces the existing record of the image store with the data provided by the user. It updates the name, artifacts and the 
+	 * connection details for the connector. 
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType PUT
@@ -382,7 +383,7 @@ public class ImageStores {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateImageStores(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-		ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
+	///	ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
 		boolean validateConnectorArtifacts = imageStoreService.validateConnectorArtifacts(
 				imageStoreTransferObject.getArtifact_types(), imageStoreTransferObject.getConnector());
 		GenericResponse genericResponse= new GenericResponse();
@@ -516,7 +517,7 @@ public class ImageStores {
 	public Response getArtifactsForDeployment(@QueryParam("deploymentType") String deploymentType) {
 		GenericResponse genericResponse = new GenericResponse();
 		if (StringUtils.isBlank(deploymentType)) {
-			genericResponse.error = "Please provide depolyment type";
+			genericResponse.error = "Please provide deployment type";
 			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 		}
 		if (!CommonValidations.validateImageDeployments(deploymentType)) {
@@ -669,7 +670,7 @@ public class ImageStores {
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
-	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/<IMAGE_STORE_UUID>/validate
+	 * https://{IP/HOST_NAME}/v1/rpc/image-stores/[IMAGE_STORE_UUID]/validate
 	 * Input: the UUID of the image store would be sent as part of the request
 	 * Output:
 	 * 		{"valid":true}

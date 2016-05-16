@@ -35,6 +35,9 @@ public class ExecuteActionsTask implements Runnable {
 			ImageActionTask taskToBeExecuted = getNextActionToBeExecuted(imageActions);
 			if (taskToBeExecuted == null) {
 				markImageActionWithError("Unable to find task");
+				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
+				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+				return;
 			}
 			String task_name = taskToBeExecuted.getTask_name();
 			log.info("Task being executed: " + task_name);
@@ -43,6 +46,12 @@ public class ExecuteActionsTask implements Runnable {
 			try {
 				task = ImageActionTaskFactory.getImageActionTask(
 						task_name);
+				if(task == null){
+					markImageActionWithError(task);
+					ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
+					ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+					return;
+				}
 				task.setImageActionObject(imageActionObj);
 				task.setTaskAction(taskToBeExecuted);
 				//Set the image id and the policy id in the customProperties map
@@ -50,9 +59,7 @@ public class ExecuteActionsTask implements Runnable {
 			} catch (DirectorException e) {
 				log.error("unable to get a task for {}",task_name);
 			}
-			if(task == null){
-				markImageActionWithError(task);
-			}
+			
 			log.info("Task instance from factory : " + task.getTaskName());
 			if(!task.run()){
 				markImageActionWithError(task);
@@ -74,22 +81,28 @@ public class ExecuteActionsTask implements Runnable {
 
 	private void markImageActionWithError(ImageActionAsyncTask failedTask) {
 		imageActionObj.setStatus(Constants.ERROR);
-		imageActionObj.setDetails("Failed to execute task: "+failedTask.getTaskName());
+		imageActionObj.setDetails("Failed to execute task: "
+				+ failedTask.getTaskName());
 		imageActionObj.setCurrent_task_status(Constants.ERROR);
-		failedTask.taskAction.setMessage("Failed to complete the task");
+
 		List<ImageActionTask> actions = imageActionObj.getActions();
-		for (ImageActionTask imageActionTask : actions) {
-			if(imageActionTask.getTask_name().equals(failedTask.getTaskName())){
-				imageActionTask.setStatus(Constants.ERROR);
-				break;
-			}			
+		if (failedTask != null) {
+			failedTask.taskAction.setMessage("Failed to complete the task");
+			for (ImageActionTask imageActionTask : actions) {
+				if (imageActionTask.getTask_name().equals(
+						failedTask.getTaskName())) {
+					imageActionTask.setStatus(Constants.ERROR);
+					break;
+				}
+			}
 		}
 		try {
 			persistService.updateImageAction(imageActionObj);
 		} catch (DbException e) {
-			log.error("Erorr in ExecuteActionTask",e);
+			log.error("Erorr in ExecuteActionTask", e);
 		}
-		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
+		ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj
+				.getId());
 	}
 
 

@@ -416,7 +416,9 @@ public class DirectorUtil {
 			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
 			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
 					.createUnmarshaller();
-
+			if(policy.getTrust_policy()==null){
+				return "";
+			}
 			StringReader reader = new StringReader(policy.getTrust_policy());
 			trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
 			///trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
@@ -424,6 +426,9 @@ public class DirectorUtil {
 			log.error("Directorutil fetchDekUrl failed",e1);
 		}
 		
+		if(trustPolicy==null){
+			return "";
+		}
 		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
 		
 	}

@@ -56,63 +56,103 @@ public class TrustPolicyDrafts {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts
 	 * Input: NA
 	 * 
 	 * Output:
 	 * {
-	 *   "trust_policy_drafts": [
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-29",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "ac3044b0-e842-4fc1-a4b6-8b41a8be9b66",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>4439C209-6CD8-40DA-801B-E91DA0D3E639</ImageId><ImageHash>427b8344669ccd10697225768b2bbc9d9cad0517440f358112f8b6e8118c7ba4</ImageHash></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/menu.lst\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirros-pme",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-17",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-29",
-	 *         "id": "4439C209-6CD8-40DA-801B-E91DA0D3E639",
-	 *         "image_name": "cirros-gauri",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 12976,
-	 *         "sent": 12976,
-	 *         "deleted": false,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     },
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-17",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "5b287b2d-c8c2-4550-9d8e-6154b4e41b1f",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>BD14A8F7-4423-413E-B12E-13E9EBC37925</ImageId><ImageHash>6a749cfc57df53bd36b6ce1cb67c54632be4bc904d084ddd8dbeb79a30f44ccc</ImageHash>    </Image>    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/stage2\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirrus.img",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-16",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-16",
-	 *         "id": "BD14A8F7-4423-413E-B12E-13E9EBC37925",
-	 *         "image_name": "cirrus.img",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 13312,
-	 *         "sent": 13312,
-	 *         "deleted": true,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     }
-	 *   ]
-	 * }
+		"trust_policy_drafts": [{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "b9d7fb1b-82f9-4ca4-a39b-605cc44dfda9",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "aa1-v1",
+			"image_attributes": {
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-08 18:30:00",
+				"id": "B462AA9C-84BD-4E72-9E52-38E18C09A720",
+				"image_name": "10.35.35.131",
+				"image_deployments": "BareMetal",
+				"deleted": false,
+				"image_upload_status": "Complete"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-13 12:42:38",
+			"id": "dc22495d-380a-434c-8f30-051d77eac631",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "v1-v1",
+			"image_attributes": {
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-13 12:42:45",
+				"id": "92986CA0-20F3-46C6-B226-E9744FEC8734",
+				"image_name": "10.35.35.182",
+				"image_deployments": "BareMetal",
+				"deleted": false,
+				"image_upload_status": "Complete"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "48419d0b-9c5e-46dc-bc70-9b5b410ce01e",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "222",
+			"image_attributes": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-13 13:19:31",
+				"id": "F6B0C7D1-A12C-4A0F-84C2-9F0EBA888334",
+				"image_name": "111",
+				"image_format": "qcow2",
+				"image_deployments": "VM",
+				"image_size": 13631488,
+				"sent": 13631488,
+				"deleted": false,
+				"image_upload_status": "Complete",
+				"image_Location": "/mnt/images/"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "f4370aab-21ad-4097-904d-95c74159899f",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>",
+			"display_name": "333-v4",
+			"image_attributes": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-08 18:30:00",
+				"id": "0F61E33B-3BFF-4E49-9B5E-B6931135CC8F",
+				"image_name": "333",
+				"image_format": "qcow2",
+				"image_deployments": "VM",
+				"image_size": 13631488,
+				"sent": 13631488,
+				"deleted": true,
+				"image_upload_status": "Complete",
+				"image_Location": "/mnt/images/"
+			}
+		}]
+		}
+	 * 
+	 * 
 	 * </pre>
 	 * 
 	 * @return List of trust policy drafts
@@ -300,8 +340,7 @@ public class TrustPolicyDrafts {
 			policyDraft = imageService
 					.editTrustPolicyDraft(trustPolicyDraftEditRequest);
 			policyDraft.setImgAttributes(null);
-			log.debug("Updated policy draft trustPolicyXML : "
-					+ trustPolicyDraftXML);
+			log.debug("Updated policy draft trustPolicyXML : ");
 		} catch (Exception e) {
 			// /response.setStatus(Constants.ERROR);
 			policyDraft.setError(e.getMessage());

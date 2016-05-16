@@ -101,10 +101,12 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
     }
     
     private boolean testConnection() {
+    	Statement s1=null;
+    	Connection c1=null;
     	 try {
     	log.debug("Inside  testConnection ");
-    	Connection c1 = DirectorDbConnect.getConnection();
-    	Statement s1 = c1.createStatement();
+    	c1 = DirectorDbConnect.getConnection();
+    	s1 = c1.createStatement();
     	s1.executeQuery("SELECT 1"); 
             return true;
         }
@@ -112,6 +114,23 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
             log.error("Director : cannot connect to database", e);
             validation("Director : Cannot connect to database");
             return false;
+        }finally{
+        	if(s1!=null){
+        	try {
+				s1.close();
+			} catch (SQLException e) {
+				log.error("ApplyDatabasePatches , testConnection : cannot close create statement", e);
+			}
+        	}
+        	try {
+        		if(c1!=null && !c1.isClosed()){
+    				
+					c1.close();
+				
+				}
+			} catch (SQLException e) {
+				log.error("ApplyDatabasePatches , testConnection  : cannot close connection", e);
+			}
         }
         
     }
@@ -192,7 +211,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
         
     	HashSet<Long> changesToApply = fetchChangesToApply();
        
-        if( changesToApply.isEmpty() ) {
+        if( changesToApply!=null && changesToApply.isEmpty() ) {
             log.info("No database updates available");
         }
         else {

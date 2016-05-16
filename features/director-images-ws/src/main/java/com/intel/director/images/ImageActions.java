@@ -97,6 +97,26 @@ public class ImageActions {
 	 *   "current_task_status": "Incomplete",
 	 *   "current_task_name": "Recreate Policy"
 	 * }
+	 * 
+	 * 
+	 * Docker image action:
+	 * {
+		  "id": "C9EF6E99-33A6-43E0-AD8A-A2897FAF4661",
+		  "image_id": "BF36833E-15BB-4D65-8FAB-3B8E04684CAA",
+		  "action_count": 1,
+		  "action_completed": 0,
+		  "action_size": 0,
+		  "action_size_max": 0,
+		  "actions": [
+		    {
+		      "status": "Incomplete",
+		      "task_name": "Upload Image",
+		      "store_id": "12A48CDF-604E-4026-9441-9A1EF950DA22"
+		    }
+		  ],
+		  "current_task_status": "Incomplete",
+		  "current_task_name": "Upload Image"
+		}
 	 * </pre>
 	 * 
 	 * If such action do not exist it will give 404 not found
