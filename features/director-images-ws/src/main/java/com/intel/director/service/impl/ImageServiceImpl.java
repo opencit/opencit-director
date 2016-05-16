@@ -2808,7 +2808,16 @@ public class ImageServiceImpl implements ImageService {
 		}
 		if (image == null) {
 			log.error("dockerSetup, no image found for imageId::" + imageId);
-			return;
+			throw new DirectorException(
+					"dockerSetup, no image found for imageId::" + imageId);
+		}
+		
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())) {
+			log.error("Image must be of docker type ::"
+					+ imageId);
+			throw new DirectorException(
+					"Image must be of docker deployment type");
 		}
 
 		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image

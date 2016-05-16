@@ -243,6 +243,9 @@ public class GlanceRsClient {
 		}
 		log.info("Metadata body {} and authtoken {}", uploadBody, authToken);
 		HttpEntity entity;
+		if(uploadBody==null){
+			new GlanceException("uploadimgeMetadata failed");
+		}
 		try {
 			entity = new ByteArrayEntity(uploadBody.toString().getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
@@ -349,7 +352,7 @@ public class GlanceRsClient {
 
 		HttpEntity entity;
 		try {
-			entity = new ByteArrayEntity(body.toString().getBytes("UTF-8"));
+			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
 			log.error("updateMetadata failed", e2);
 			throw new GlanceException("updateMetadata failed", e2);

@@ -88,10 +88,13 @@ public class RecreatePolicyTask extends GenericUploadTask {
 		}
 
 		for (ImageStoreUploadTransferObject imageTransfer : imageUploads) {
-			if (imageTransfer.getStoreArtifactId().equals(trustPolicyObj.getImage().getImageId())) {
-				log.info("Found an image in glance");
-				regenPolicy = true;
-				break;
+			if (imageTransfer.getStoreArtifactId() != null) {
+				if (imageTransfer.getStoreArtifactId().equals(
+						trustPolicyObj.getImage().getImageId())) {
+					log.info("Found an image in glance");
+					regenPolicy = true;
+					break;
+				}
 			}
 		}
 

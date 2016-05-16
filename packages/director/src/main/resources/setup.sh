@@ -242,11 +242,11 @@ load_director_defaults
 #prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
 
 # required TD properties
-prompt_with_default DIRECTOR_VM_WHITELIST_HASH_TYPE "vm.whitelist.hash.type:" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_VM_WHITELIST_HASH_TYPE "vm.whitelist.hash.type:" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
 update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
-prompt_with_default DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE "bm.whitelist.hash.type:" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE "bm.whitelist.hash.type:" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
 update_property_in_file "bm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
-prompt_with_default DIRECTOR_DOCKER_WHITELIST_HASH_TYPE "docker.whitelist.hash.type:" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_DOCKER_WHITELIST_HASH_TYPE "docker.whitelist.hash.type:" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
 update_property_in_file "docker.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
 
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"

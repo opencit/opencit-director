@@ -122,26 +122,29 @@ public class ImageStoreTransferObject extends GenericResponse {
 	}
 	
 
-	public  ImageStoreDetailsTransferObject fetchPasswordConfiguration() {
+	public ImageStoreDetailsTransferObject fetchPasswordConfiguration() {
 		ImageStoreDetailsTransferObject detailsTransferObject = null;
 
 		Collection<ImageStoreDetailsTransferObject> imageStoreDetails = getImage_store_details();
 		ConnectorProperties connectorByName = ConnectorProperties
 				.getConnectorByName(getConnector());
 		String passwordElement = null;
-		if (connectorByName.equals(ConnectorProperties.DOCKER)) {
-			passwordElement = Constants.DOCKER_HUB_PASSWORD;
-		} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
-			passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
-		} else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
-			passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
-		}
-
-		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {
-			if (imageStoreDetailsTransferObject.getKey()
-					.equals(passwordElement)) {
-				detailsTransferObject = imageStoreDetailsTransferObject;
-				break;
+		if(connectorByName!=null){
+			if (connectorByName.equals(ConnectorProperties.DOCKER)) {
+				passwordElement = Constants.DOCKER_HUB_PASSWORD;
+			} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
+				passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
+			} else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
+				passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
+			}
+	   }
+		if (imageStoreDetails != null) {
+			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {
+				if (imageStoreDetailsTransferObject.getKey().equals(
+						passwordElement)) {
+					detailsTransferObject = imageStoreDetailsTransferObject;
+					break;
+				}
 			}
 		}
 		return detailsTransferObject;
