@@ -25,6 +25,7 @@ public class SetupGlanceImageStore extends AbstractSetupTask {
 	private String user;
 	private String password;
 	private static final String defaultStoreName = "GLANCE_STORE_FROM_3_0";
+	private static boolean validationRequired = true;
 	private ImageStoresService imageStoresService = new ImageStoresServiceImpl();
 
 	@Override
@@ -34,27 +35,34 @@ public class SetupGlanceImageStore extends AbstractSetupTask {
 		user = DirectorPropertiesCache.getValue(Constants.GLANCE_IMAGE_STORE_USERNAME);
 		password = DirectorPropertiesCache.getValue(Constants.GLANCE_IMAGE_STORE_PASSWORD);
 		tenant = DirectorPropertiesCache.getValue(Constants.GLANCE_TENANT_NAME);
-	 
-		if (isAnyGlancePropertyNotSet()) {
-			log.debug("Some props for glance are not set");
-			configuration("Some of the Glance properties are not set. Not importing");
-			return;
-		}
+
 	}
 
 	@Override
 	protected void validate() throws Exception {
-		log.debug("Set api={}, auth={}, user={}, paswd={}, tenant={}", glanceUrl, authUrl, user, password, tenant);
-		ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
-		imageStoreFilter.setName(defaultStoreName);
-		List<ImageStoreTransferObject> imageStores = imageStoresService.getImageStores(imageStoreFilter);
-		if (imageStores.size() == 0) {
-			validation("Default image store not yet set. Would be creating it now ");
+		if (validationRequired && isAnyGlancePropertyNotSet() ) {
+			validationRequired = false;
+			log.warn("Glance properties are not set. Not importing");
+			validation("Glance properties are not set. Not importing");
+		} else if(validationRequired){
+			log.debug("Set api={}, auth={}, user={}, paswd={}, tenant={}", glanceUrl, authUrl, user, password, tenant);
+			ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
+			imageStoreFilter.setName(defaultStoreName);
+			List<ImageStoreTransferObject> imageStores = imageStoresService.getImageStores(imageStoreFilter);
+
+			if (imageStores.size() == 0) {
+				validation("Default image store not yet set. Would be creating it now ");
+			}
 		}
+
 	}
 
 	@Override
 	protected void execute() throws Exception {
+		if (isAnyGlancePropertyNotSet()) {
+			return;
+		}
+
 		log.debug("Default store {} not present. Creating new", defaultStoreName);
 		ImageStoreTransferObject imageStoreTransferObject = new ImageStoreTransferObject();
 		imageStoreTransferObject.setName(defaultStoreName);
