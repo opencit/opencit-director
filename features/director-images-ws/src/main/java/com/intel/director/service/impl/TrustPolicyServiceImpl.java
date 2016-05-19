@@ -440,7 +440,9 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 
 		for (Measurement measurement : policyObj.getWhitelist()
 				.getMeasurements()) {
-			measurement.setPath(measurement.getPath().substring(1));
+			String path = measurement.getPath().substring(1);
+			path = path.replaceAll("/", "\\");
+			measurement.setPath(path);
 		}
 
 		try {
