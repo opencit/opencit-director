@@ -1915,7 +1915,7 @@ public class DbServiceImpl implements IPersistService {
 
 	public void updateSsh(SshSettingInfo ssh) throws DbException {
 		MwImage mwImage = imgDao.getMwImage(ssh.getImage().getId());
-		mwImage.setName(ssh.getIpAddress());
+		mwImage.setName(ssh.getName());
 		
 		MwHost mwSsh = mapper.toDataUpdate(ssh);
 		mwSsh.setImageId(mwImage);
