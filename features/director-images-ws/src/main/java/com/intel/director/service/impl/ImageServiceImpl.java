@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -17,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
@@ -89,6 +86,7 @@ import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
+import com.intel.mtwilson.util.exec.EscapeUtil;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -235,6 +233,9 @@ public class ImageServiceImpl implements ImageService {
 		image.setEdited_by_user_id(ShiroUtil.subjectUsername());
 		try {
 			imagePersistenceManager.updateImage(image);
+			unmountImageResponse = TdaasUtil
+					.mapImageAttributesToUnMountImageResponse(image);
+
 		} catch (DbException e) {
 			log.error("Error updating image " + imageId, e);
 			throw new DirectorException("Error updating image:" + imageId);
@@ -404,7 +405,8 @@ public class ImageServiceImpl implements ImageService {
 	public TrustDirectorImageUploadResponse uploadImageToTrustDirector(
 			String image_id, InputStream fileInputStream)
 			throws DirectorException {
-
+		double oneMB = 1024 * 1024 ;
+		double flushSize = oneMB * 10; //10MB
 		ImageInfo imageInfo;
 		try {
 			imageInfo = imagePersistenceManager.fetchImageById(image_id);
@@ -445,12 +447,12 @@ public class ImageServiceImpl implements ImageService {
 
 			out = new FileOutputStream(new File(imageInfo.getLocation()
 					+ imageInfo.getImage_name()), true);
-			int bufferForFlush = 0;
+			double bufferForFlush = 0;
 			while ((read = fileInputStream.read(bytes)) != -1) {
 				bytesread += read;
 				bufferForFlush += read;
 				out.write(bytes, 0, read);
-				if (bufferForFlush >= 1024 * 1024 * 10) { // flush after 10MB
+				if (bufferForFlush >= flushSize) { // flush after 10MB
 					bufferForFlush = 0;
 					out.flush();
 				}
@@ -509,6 +511,7 @@ public class ImageServiceImpl implements ImageService {
 	public SearchFilesInImageResponse searchFilesInImage(
 			SearchFilesInImageRequest searchFilesInImageRequest)
 			throws DirectorException {
+		searchFilesInImageRequest.setDir(EscapeUtil.doubleQuoteEscapeShellArgument(searchFilesInImageRequest.getDir()));
 		log.info("Browsing files for dir: "
 				+ searchFilesInImageRequest.getDir());
 		if(searchFilesInImageRequest.init){
@@ -1000,7 +1003,7 @@ public class ImageServiceImpl implements ImageService {
 			ImageAttributes img = imagePersistenceManager
 					.fetchImageById(imageid);
 			if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
-					.getImage_deployments()) && StringUtils.isBlank(img.getPartition())) {
+					.getImage_deployments())) {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
 
@@ -2037,13 +2040,8 @@ public class ImageServiceImpl implements ImageService {
 			// importPolicyTemplateResponse.setStatus("Success");
 			return importPolicyTemplateResponse;
 		}
-		String idendifier = "V";
 		// Check if mounted live BM has /opt/vrtm
-		if (image.getPartition() == null) {
-			idendifier = TdaasUtil.checkInstalledComponents(imageId);
-		} else {
-			idendifier = "W";
-		}
+		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
 
 		String content = null;
 		Manifest manifest;
@@ -2660,38 +2658,20 @@ public class ImageServiceImpl implements ImageService {
 			throws DirectorException {
 
 		TdaasUtil tdaasUtil = new TdaasUtil();
-		
-		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-					sshSettingRequest.getUsername(),
-					sshSettingRequest.getPassword());
-			log.debug("Inside addHost,After execution of addSshKey ");
-		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			try {
-				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
-						sshSettingRequest.getUsername(),
-						sshSettingRequest.getPassword(),
-						sshSettingRequest.getIpAddress());
-				String drives = StringUtils.join(driveFromWindowsHost, ",");
-				sshSettingRequest.setPartition(drives);
-			} catch (IOException e) {
-				log.error("Error Fetching Partition Info");
-				throw new DirectorException("Error Fetching Partition Info", e);
-			}
-		}
-		
-
+		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
+		sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
+		///sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
-		
-		
+		log.info("Inside addHost, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
 		log.debug("Going to save sshSetting info in database");
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
 			log.info("AddHost can't take image_id as parameter");
-			;
 			throw new DirectorException(
 					"AddHost can't take image_id as parameter");
 		} else {
@@ -2711,44 +2691,30 @@ public class ImageServiceImpl implements ImageService {
 	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 		// SshSettingInfo updateSsh=new SshSettingInfo();
-
+		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
+		///sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
-		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-					sshSettingRequest.getUsername(),
-					sshSettingRequest.getPassword());
-			log.debug("Inside addHost,After execution of addSshKey ");
-		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
-			log.info("Inside addHost, going to addSshKey ");
-			try {
-				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
-						sshSettingRequest.getUsername(),
-						sshSettingRequest.getPassword(),
-						sshSettingRequest.getIpAddress());
-				String drives = StringUtils.join(driveFromWindowsHost, ",");
-				sshSettingRequest.setPartition(drives);
-			} catch (IOException e) {
-				log.error("Error Fetching Partition Info");
-				throw new DirectorException("Error Fetching Partition Info", e);
-			}
-		}
+		log.info("Inside updateSshData, going to addSshKey ");
+		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),
+				sshSettingRequest.getPassword());
+		log.debug("Inside addHost,After execution of addSshKey ");
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
-
-			SshSettingInfo sshSettingInfo = tdaasUtil
-					.fromSshSettingRequest(sshSettingRequest);
 			SshSettingInfo existingSsh = imagePersistenceManager
 					.fetchSshByImageId(sshSettingRequest.getImage_id());
-			if (existingSsh.getId() != null
-					&& StringUtils.isNotBlank(existingSsh.getId())) {
-				sshSettingInfo.setId(existingSsh.getId());
-				ImageAttributes image = existingSsh.getImage();
-				sshSettingInfo.setImage(image);
-			}
+
+			SshSettingInfo sshSettingInfo = tdaasUtil
+					.fromSshSettingRequest(sshSettingRequest, existingSsh);
+//			if (existingSsh.getId() != null
+//					&& StringUtils.isNotBlank(existingSsh.getId())) {
+//				sshSettingInfo.setId(existingSsh.getId());
+//				ImageAttributes image = existingSsh.getImage();
+//				sshSettingInfo.setImage(image);
+//			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
 			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
 		} catch (DbException e) {
@@ -2841,7 +2807,16 @@ public class ImageServiceImpl implements ImageService {
 		}
 		if (image == null) {
 			log.error("dockerSetup, no image found for imageId::" + imageId);
-			return;
+			throw new DirectorException(
+					"dockerSetup, no image found for imageId::" + imageId);
+		}
+		
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
+				.getImage_deployments())) {
+			log.error("Image must be of docker type ::"
+					+ imageId);
+			throw new DirectorException(
+					"Image must be of docker deployment type");
 		}
 
 		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(image
@@ -2941,18 +2916,5 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 		return hashTypeObjects;
-	}
-
-	@Override
-	public List<String> getDrivesForWindows(String username, String password,
-			String ipAddress) throws DirectorException {
-		try {
-			List<String> driveFromWindowsHost = DirectorUtil
-					.getDriveFromWindowsHost(username, password, ipAddress);
-			return driveFromWindowsHost;
-		} catch (IOException e) {
-			log.error("Unable to Get Drives", e);
-			throw new DirectorException("Unable to Get Drives", e);
-		}
 	}
 }

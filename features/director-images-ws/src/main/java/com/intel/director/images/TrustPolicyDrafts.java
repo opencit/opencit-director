@@ -56,63 +56,103 @@ public class TrustPolicyDrafts {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts
 	 * Input: NA
 	 * 
 	 * Output:
 	 * {
-	 *   "trust_policy_drafts": [
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-29",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "ac3044b0-e842-4fc1-a4b6-8b41a8be9b66",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>4439C209-6CD8-40DA-801B-E91DA0D3E639</ImageId><ImageHash>427b8344669ccd10697225768b2bbc9d9cad0517440f358112f8b6e8118c7ba4</ImageHash></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/menu.lst\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirros-pme",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-17",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-29",
-	 *         "id": "4439C209-6CD8-40DA-801B-E91DA0D3E639",
-	 *         "image_name": "cirros-gauri",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 12976,
-	 *         "sent": 12976,
-	 *         "deleted": false,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     },
-	 *     {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-17",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-29",
-	 *       "id": "5b287b2d-c8c2-4550-9d8e-6154b4e41b1f",
-	 *       "trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>BD14A8F7-4423-413E-B12E-13E9EBC37925</ImageId><ImageHash>6a749cfc57df53bd36b6ce1cb67c54632be4bc904d084ddd8dbeb79a30f44ccc</ImageHash>    </Image>    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/boot/grub/stage2\"></File></Whitelist></TrustPolicy>",
-	 *       "display_name": "cirrus.img",
-	 *       "image_attributes": {
-	 *         "created_by_user_id": "admin",
-	 *         "created_date": "2015-12-16",
-	 *         "edited_by_user_id": "admin",
-	 *         "edited_date": "2015-12-16",
-	 *         "id": "BD14A8F7-4423-413E-B12E-13E9EBC37925",
-	 *         "image_name": "cirrus.img",
-	 *         "image_format": "qcow2",
-	 *         "image_deployments": "VM",
-	 *         "image_size": 13312,
-	 *         "sent": 13312,
-	 *         "deleted": true,
-	 *         "image_upload_status": "Complete",
-	 *         "image_Location": "/mnt/images/"
-	 *       }
-	 *     }
-	 *   ]
-	 * }
+		"trust_policy_drafts": [{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "b9d7fb1b-82f9-4ca4-a39b-605cc44dfda9",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "aa1-v1",
+			"image_attributes": {
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-08 18:30:00",
+				"id": "B462AA9C-84BD-4E72-9E52-38E18C09A720",
+				"image_name": "10.35.35.131",
+				"image_deployments": "BareMetal",
+				"deleted": false,
+				"image_upload_status": "Complete"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-13 12:42:38",
+			"id": "dc22495d-380a-434c-8f30-051d77eac631",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "v1-v1",
+			"image_attributes": {
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-13 12:42:45",
+				"id": "92986CA0-20F3-46C6-B226-E9744FEC8734",
+				"image_name": "10.35.35.182",
+				"image_deployments": "BareMetal",
+				"deleted": false,
+				"image_upload_status": "Complete"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "48419d0b-9c5e-46dc-bc70-9b5b410ce01e",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>\n",
+			"display_name": "222",
+			"image_attributes": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-13 13:19:31",
+				"id": "F6B0C7D1-A12C-4A0F-84C2-9F0EBA888334",
+				"image_name": "111",
+				"image_format": "qcow2",
+				"image_deployments": "VM",
+				"image_size": 13631488,
+				"sent": 13631488,
+				"deleted": false,
+				"image_upload_status": "Complete",
+				"image_Location": "/mnt/images/"
+			}
+		},
+		{
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-08 18:30:00",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-08 18:30:00",
+			"id": "f4370aab-21ad-4097-904d-95c74159899f",
+			"trust_policy_draft": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"></TrustPolicy>",
+			"display_name": "333-v4",
+			"image_attributes": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-05-08 18:30:00",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-08 18:30:00",
+				"id": "0F61E33B-3BFF-4E49-9B5E-B6931135CC8F",
+				"image_name": "333",
+				"image_format": "qcow2",
+				"image_deployments": "VM",
+				"image_size": 13631488,
+				"sent": 13631488,
+				"deleted": true,
+				"image_upload_status": "Complete",
+				"image_Location": "/mnt/images/"
+			}
+		}]
+		}
+	 * 
+	 * 
 	 * </pre>
 	 * 
 	 * @return List of trust policy drafts
@@ -174,7 +214,7 @@ public class TrustPolicyDrafts {
 		if (fetchTrustpolicydraftById == null) {
 			GenericResponse genericResponse = new GenericResponse();
 			genericResponse.error = "Trust policy draft with id "+ trustPolicyDraftId+" does not exist";
-			return Response.status(Response.Status.BAD_REQUEST)
+			return Response.status(Response.Status.NOT_FOUND)
 					.entity(genericResponse).build();
 		}
 
@@ -269,7 +309,7 @@ public class TrustPolicyDrafts {
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) {
 		trustPolicyDraftEditRequest.trust_policy_draft_id = trustPolicyDraftId;
 		TrustPolicyDraftResponse policyDraft = new TrustPolicyDraftResponse();
-		String trustPolicyDraftXML = null;
+		/////String trustPolicyDraftXML = null;
 		
 		String error = trustPolicyDraftEditRequest.validate();
 
@@ -300,8 +340,7 @@ public class TrustPolicyDrafts {
 			policyDraft = imageService
 					.editTrustPolicyDraft(trustPolicyDraftEditRequest);
 			policyDraft.setImgAttributes(null);
-			log.debug("Updated policy draft trustPolicyXML : "
-					+ trustPolicyDraftXML);
+			log.debug("Updated policy draft trustPolicyXML : ");
 		} catch (Exception e) {
 			// /response.setStatus(Constants.ERROR);
 			policyDraft.setError(e.getMessage());
@@ -325,13 +364,15 @@ public class TrustPolicyDrafts {
 	 *  
 	 * Input
 	 * {"trust_policy_draft_id":"<UUID of trust policy draft>", "image_id" : "<UUID of the image>"}
+	 * 
+	 * {"trust_policy_draft_id":"a173302e-39f1-4083-8f6e-a7f0b9d45b20","image_id":"9C64F16D-782C-4F24-8880-9A9F1EE6794D"}
 	 * In case of a success, the response would be :
-	 * {"id":"14767a34-b5a4-4f84-be7a-7604670fe8b5"}
+	 * {"id":"1526B5F9-1414-4DA2-91A9-4858C51352ED"}
 	 * id returned in case of success response is id of trust policy created 
 	 * by this call by signing draft and generating hashes 
 	 * 
 	 * In case of error where signing with MTW fails: 
-	 * {"error":"Unable to sign the policy with MTW"}.
+	 * {"error":"Unable to sign the policy with attestation service"}
 	 * </pre>
 	 * 
 	 * 
@@ -375,11 +416,15 @@ public class TrustPolicyDrafts {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policy-drafts
-	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996","image_name":"cirrus_1811.img","display_name":"cirrus_1811.img","launch_control_policy":"MeasureOnly","encrypted":false}
+	 * Input: {"image_id":"9C64F16D-782C-4F24-8880-9A9F1EE6794D","image_name":"c2","display_name":"c2","launch_control_policy":"MeasureOnly","encrypted":false}
 	 * 
-	 * Output: {"id":"50022e9c-577a-4bbd-9445-197a3e1a349f","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n <Director>\n <CustomerId>testId</CustomerId>\n </Director>\n <Image>\n <ImageId>08EB37D7-2678-495D-B485-59233EB51996</ImageId>\n <ImageHash>6413fccb72e36d2cd4b20efb5b5fe1be916ab60f0fe1d7e2aab1a2170be1ff40</ImageHash>\n </Image>\n <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n <Whitelist DigestAlg=\"sha256\">\n <File Path=\"/boot/grub/stage1\"></File>\n <File Path=\"/boot/grub/menu.lst\"></File>\n <File Path=\"/initrd.img\"></File>\n <File Path=\"/boot/vmlinuz-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/config-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/initrd.img-3.2.0-37-virtual\"></File>\n <File Path=\"/boot/grub/e2fs_stage1_5\"></File>\n <File Path=\"/boot/grub/stage2\"></File>\n </Whitelist>\n</TrustPolicy>\n"}
+	 * Output: {"encrypted":false,"id":"a173302e-39f1-4083-8f6e-a7f0b9d45b20","trust_policy":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n    <Director>\n        <CustomerId>admin</CustomerId>\n    </Director>\n    <Image>\n        <ImageId>9C64F16D-782C-4F24-8880-9A9F1EE6794D</ImageId>\n    </Image>\n    <LaunchControlPolicy>MeasureOnly</LaunchControlPolicy>\n    <Whitelist DigestAlg=\"sha256\"/>\n</TrustPolicy>\n","status":"success"}
 	 * </pre>
 	 * 
+	 * In case of wrong input it will show 400 Bad request
+	 * with output:-
+	 * 
+	 * {"error": "Invalid image id provided"}
 	 * 
 	 * @param createTrustPolicyMetaDataRequest
 	 * @return CreateTrustPolicyMetaDataResponse
@@ -391,45 +436,48 @@ public class TrustPolicyDrafts {
 	public Response createTrustPolicyDraft(CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest) {
 
 		CreateTrustPolicyMetaDataResponse createTrustPolicyMetadataResponse = new CreateTrustPolicyMetaDataResponse();
-		String error = createTrustPolicyMetaDataRequest.validate("draft");
-		if (!StringUtils.isBlank(error)) {
-			createTrustPolicyMetadataResponse.setError(error);
-			return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
-		}
-
+		GenericResponse genericResponse= new GenericResponse();
+		ImageInfo fetchImageById;
 		try {
-			ImageInfo fetchImageById = imageService.fetchImageById(createTrustPolicyMetaDataRequest.image_id);
+
+			fetchImageById = imageService.fetchImageById(createTrustPolicyMetaDataRequest.image_id);
 			if (fetchImageById == null) {
-				createTrustPolicyMetadataResponse.setError("Invalid image id provided");
-				createTrustPolicyMetadataResponse.setId(createTrustPolicyMetaDataRequest.image_id);
-				return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse).build();
-
+				genericResponse.setError("Invalid image id provided");
+				///createTrustPolicyMetadataResponse.setId(createTrustPolicyMetaDataRequest.image_id);
+				return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 			}
 
-			if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
-				String display_name = createTrustPolicyMetaDataRequest.display_name;
-				if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
-					createTrustPolicyMetadataResponse.setError("Invalid Repo Name");
-					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
-							.build();
-				}
-				String[] split = display_name.split(fetchImageById.getRepository() + ":");
-				if (split.length == 0 || StringUtils.isBlank(split[1])) {
-					createTrustPolicyMetadataResponse.setError("Tag cannot be empty");
-					return Response.status(Response.Status.BAD_REQUEST).entity(createTrustPolicyMetadataResponse)
-							.build();
-				}
-			}
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		}
+		createTrustPolicyMetaDataRequest.deployment_type = fetchImageById.getImage_deployments();
+
+		String error = createTrustPolicyMetaDataRequest.validate("draft");
+		if (!StringUtils.isBlank(error)) {
+			genericResponse.setError(error);
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+		}
+
+		if (fetchImageById.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+			String display_name = createTrustPolicyMetaDataRequest.display_name;
+			if (!createTrustPolicyMetaDataRequest.display_name.startsWith(fetchImageById.getRepository() + ":")) {
+				genericResponse.setError("Invalid Repo Name");
+				return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			}
+			String[] split = display_name.split(fetchImageById.getRepository() + ":");
+			if (split.length == 0 || StringUtils.isBlank(split[1])) {
+				genericResponse.setError("Tag cannot be empty");
+				return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			}
 		}
 
 		try {
 			createTrustPolicyMetadataResponse = imageService.saveTrustPolicyMetaData(createTrustPolicyMetaDataRequest);
 		} catch (DirectorException e) {
 			log.error("createTrustPolicyMetaData failed", e);
-			createTrustPolicyMetadataResponse.setError(e.getMessage());
-			return Response.ok(createTrustPolicyMetadataResponse).build();
+			genericResponse.setError(e.getMessage());
+			return Response.ok(genericResponse).build();
 		}
 
 		return Response.ok(createTrustPolicyMetadataResponse).build();
@@ -447,13 +495,18 @@ public class TrustPolicyDrafts {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
 	 * 
-	 *                    <pre>
+	 * <pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/create-draft-from-policy
-	 * Input: {"image_id":"08EB37D7-2678-495D-B485-59233EB51996"}
+	 * Input: {"image_id":"3BCDCF57-0065-4859-93FB-12F99C89B99C"}
 	 * 
-	 * Output: {"id":"<UUID of Policy draft>", "trust_policy_draft":"<XML representation of policy>", "display_name":"<name provided by user for the policy>", "image_attributes":"{"id":"<UUID of image>", "image_format":"qcow2", ..... }"}
+	 * Output: {"created_by_user_id":"admin","created_date":"2016-05-04 09:18:10","edited_by_user_id":"admin","edited_date":"2016-05-04 09:18:58",
+	 * "id":"6ab4bc2d-c7cd-4e5e-9b68-e5b237f0fe1e","trust_policy_draft":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>
+	 * <TrustPolicy ....>...</TrustPolicy>","display_name":"t2-PME-TAR-v2","image_attributes":{"created_by_user_id":"admin","created_date":"2016-05-03 10:05:19",
+	 * "edited_by_user_id":"admin","edited_date":"2016-05-04 09:18:10","id":"3BCDCF57-0065-4859-93FB-12F99C89B99C","image_name":"t2",
+	 * "image_format":"qcow2","image_deployments":"VM","sent":13287936,"deleted":false,"upload_variable_md5":"9ad8c4f85a8f0cb8ecd65352fc204a73",
+	 * "image_upload_status":"Complete","image_Location":"/mnt/images/"}}
 	 * 
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param imageId
 	 *            id of the image for which policy draft is being created
@@ -464,7 +517,7 @@ public class TrustPolicyDrafts {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createPolicyDraftFromPolicy(GenericRequest req) {
-		TrustPolicyDraftResponse trustPolicyDraft = new TrustPolicyDraftResponse();
+		TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
 		if (!ValidationUtil.isValidWithRegex(req.getImage_id(), RegexPatterns.UUID)) {
 			trustPolicyDraft.error = "Image id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST).entity(trustPolicyDraft).build();
@@ -511,8 +564,8 @@ public class TrustPolicyDrafts {
 	 * Output: In case of successful deletion:
 	 * {"deleted":true}
 	 * 
-	 * In case of error:
-	 * {"deleted":false; "error":"Error in deleting policy draft"}
+	 * In case of wrong input it shows 400 Bad request:
+	 * Output: { "error": "Trust Policy Draft Id does not exist", "deleted": false}
 	 * </pre>
 	 * @param trustPolicyDraftId
 	 * @return GenericResponse
@@ -531,7 +584,7 @@ public class TrustPolicyDrafts {
 		
 		TrustPolicyDraft fetchTrustpolicydraftById = imageService.fetchTrustpolicydraftById(trustPolicyDraftId);
 		if(fetchTrustpolicydraftById == null){
-			genericResponse.error = "Trust Policy Draft Id does not exist for id "+trustPolicyDraftId;
+			genericResponse.error = "Trust Policy Draft Id does not exist";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 
@@ -564,6 +617,8 @@ public class TrustPolicyDrafts {
 	 * Input: Trust policy draft id as path param
 	 * Output: Content sent as stream
 	 * 
+	 * In case of improper input it will show 400 bad request with 
+	 * <error>Trust Policy id is empty or not in uuid format</error>
 	 *                    </pre>
 	 * 
 	 *                    *
@@ -579,7 +634,7 @@ public class TrustPolicyDrafts {
 			@PathParam("trustPolicyDraftId") String trustPolicyDraftId) {
 		GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyDraftId,RegexPatterns.UUID)){
-			genericResponse.error = "Trust Policy id is empty or not in uuid format";
+			genericResponse.error = "Trust Policy Draft id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}

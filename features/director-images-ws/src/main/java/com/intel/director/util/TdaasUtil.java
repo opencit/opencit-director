@@ -463,15 +463,31 @@ public class TdaasUtil {
 		sshSettingInfo
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
-		
 		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
-				sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),sshSettingRequest.getPartition()));
+				sshSettingRequest.getName(),
+				sshSettingRequest.getUsername()));
+		return sshSettingInfo;
+
+	}
+	
+	public SshSettingInfo fromSshSettingRequest(
+			SshSettingRequest sshSettingRequest, SshSettingInfo existingSshSettingInfo) {
+		SshSettingInfo sshSettingInfo = new SshSettingInfo();
+		sshSettingInfo.setId(StringUtils.isNotBlank(sshSettingRequest.getId())?sshSettingRequest.getId():existingSshSettingInfo.getId());
+		sshSettingInfo.setIpAddress(StringUtils.isNotBlank(sshSettingRequest.getIpAddress()) ? sshSettingRequest.getIpAddress() : existingSshSettingInfo.getIpAddress());
+		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
+		sshSettingInfo.setName(StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName());		
+		sshSettingInfo
+				.setPassword(fromPassword(sshSettingRequest.getPassword()));		
+		sshSettingInfo.setUsername(StringUtils.isNotBlank(sshSettingRequest.getUsername()) ? sshSettingRequest.getUsername() : existingSshSettingInfo.getUsername());
+		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
+				StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName(),
+				sshSettingRequest.getUsername()));
 		return sshSettingInfo;
 
 	}
 
-	public ImageAttributes toImage(String id, String ip, String username, String partition) {
+	public ImageAttributes toImage(String id, String ip, String username) {
 		/*
 		 * Calendar c = Calendar.getInstance(); c.setTime(new Date());
 		 * c.add(Calendar.DATE, -3); Date currentDate = new Date();
@@ -490,7 +506,6 @@ public class TdaasUtil {
 		img.setImage_name(ip);
 		img.setSent(null);
 		img.setStatus(Constants.COMPLETE);
-		img.setPartition(partition);
 		return img;
 	}
 
@@ -745,7 +760,6 @@ public class TdaasUtil {
 		sshResponse.setImage_name(info.getImage().getImage_name());
 		sshResponse.setIp_address(info.getIpAddress());
 		sshResponse.setUsername(info.getUsername());
-		sshResponse.setPartition(info.getImage().getPartition());
 		return sshResponse;
 	}
 
