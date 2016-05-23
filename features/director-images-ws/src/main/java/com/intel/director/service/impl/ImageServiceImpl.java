@@ -2672,7 +2672,6 @@ public class ImageServiceImpl implements ImageService {
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
 			log.info("AddHost can't take image_id as parameter");
-			;
 			throw new DirectorException(
 					"AddHost can't take image_id as parameter");
 		} else {
@@ -2705,17 +2704,17 @@ public class ImageServiceImpl implements ImageService {
 		log.debug("Inside addHost,After execution of addSshKey ");
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
-
-			SshSettingInfo sshSettingInfo = tdaasUtil
-					.fromSshSettingRequest(sshSettingRequest);
 			SshSettingInfo existingSsh = imagePersistenceManager
 					.fetchSshByImageId(sshSettingRequest.getImage_id());
-			if (existingSsh.getId() != null
-					&& StringUtils.isNotBlank(existingSsh.getId())) {
-				sshSettingInfo.setId(existingSsh.getId());
-				ImageAttributes image = existingSsh.getImage();
-				sshSettingInfo.setImage(image);
-			}
+
+			SshSettingInfo sshSettingInfo = tdaasUtil
+					.fromSshSettingRequest(sshSettingRequest, existingSsh);
+//			if (existingSsh.getId() != null
+//					&& StringUtils.isNotBlank(existingSsh.getId())) {
+//				sshSettingInfo.setId(existingSsh.getId());
+//				ImageAttributes image = existingSsh.getImage();
+//				sshSettingInfo.setImage(image);
+//			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
 			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
 		} catch (DbException e) {

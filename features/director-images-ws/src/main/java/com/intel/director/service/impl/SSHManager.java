@@ -199,7 +199,9 @@ public class SSHManager {
 			channel.disconnect();
 			log.info("Channel disconnected.");
 			try {
+				if(fstream!=null){
 				fstream.close();
+				}
 			} catch (IOException e) {
 				log.error("Unable to close file stream");
 			}

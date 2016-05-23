@@ -309,7 +309,7 @@ public class TrustPolicyDrafts {
 			TrustPolicyDraftEditRequest trustPolicyDraftEditRequest) {
 		trustPolicyDraftEditRequest.trust_policy_draft_id = trustPolicyDraftId;
 		TrustPolicyDraftResponse policyDraft = new TrustPolicyDraftResponse();
-		String trustPolicyDraftXML = null;
+		/////String trustPolicyDraftXML = null;
 		
 		String error = trustPolicyDraftEditRequest.validate();
 
