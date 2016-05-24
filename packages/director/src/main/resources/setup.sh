@@ -539,6 +539,7 @@ fi
 
 
 director setup apply-database-patches
+director setup setup-glance-image-store
 ## Installing Docker
 ## already installed needs to be checked not implemented in code
 version_gt() { 
