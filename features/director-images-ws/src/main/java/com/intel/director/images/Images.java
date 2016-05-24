@@ -201,6 +201,22 @@ public class Images {
 		if (Constants.DEPLOYMENT_TYPE_DOCKER
 				.equals(uploadRequest.image_deployments)
 				&& uploadRequest.image_size == 0) {
+			boolean dockerHubConnection=false;
+			try {
+				dockerHubConnection = DockerUtil
+						.checkDockerHubConnection();
+			} catch (IOException e) {
+				throw new DirectorException(
+						"Error in doesRepoTagExistInDockerHub", e);
+			}
+			if (!dockerHubConnection) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Unable to connect to docker hub";
+				return Response.ok(uploadImageToTrustDirector)
+						.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			}
+			
 			boolean doesRepoTagExistInDockerHub;
 			try {
 				doesRepoTagExistInDockerHub = DockerUtil

@@ -64,7 +64,18 @@ public class DockerUtil {
 	
 	
 	
+	public static boolean checkDockerHubConnection()
+			throws ClientProtocolException, IOException {
+		int result=-1;
+		result = executeDockerCommands("search", "busybox");  /// return 0 when able to connect hub and search even though serch result is empty
+		if (result == 0) {
+			return true;
+		}
+		return false;
+	}
+	
 	public static boolean doesRepoTagExistInDockerHub(String repo, String tag) throws ClientProtocolException, IOException{
+		
 		
 		String command ="curl -i -X GET https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag;
 		log.info("doesRepoTagExistInDockerHub, running command::"+command);
