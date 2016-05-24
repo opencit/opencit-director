@@ -286,7 +286,7 @@ input[readonly] {
 							.authorizationToken(null);
 					window.opener.location.reload();
 					window.close();
-				}else if (xhrmdt.status === 400) {
+				}else if ((xhrmdt.status === 400) || (xhrmdt.status === 500)) {
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
 					if (myArr.details) {
