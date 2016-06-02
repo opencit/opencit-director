@@ -103,7 +103,7 @@ public class DirectoryAndFileUtil {
 		if(!pathOfDir.endsWith(File.separator)){
 			pathOfDir += File.separator;
 		}
-		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir;
+		String directoryAbsolutePath = "'"+DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir+"'";
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
 		StringBuilder stringBuilder = new StringBuilder("find " + directoryAbsolutePath);
