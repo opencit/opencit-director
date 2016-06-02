@@ -506,6 +506,7 @@ public class TdaasUtil {
 		img.setImage_name(ip);
 		img.setSent(null);
 		img.setStatus(Constants.COMPLETE);
+		img.setPartition(partition);
 		return img;
 	}
 
@@ -623,7 +624,7 @@ public class TdaasUtil {
 		}
 
 		log.debug("Index :: " + index);
-
+fromSshSettingRequest
 		if (index != 0) {
 			return split[index];
 		} else {

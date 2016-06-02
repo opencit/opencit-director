@@ -2670,7 +2670,7 @@ public class ImageServiceImpl implements ImageService {
 			log.info("Inside addHost, going to addSshKey ");
 			try {
 				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
-						sshSettingRequest.getUsername(),	
+						sshSettingRequest.getUsername(),
 						sshSettingRequest.getPassword(),
 						sshSettingRequest.getIpAddress());
 				String drives = StringUtils.join(driveFromWindowsHost, ",");
@@ -2690,7 +2690,6 @@ public class ImageServiceImpl implements ImageService {
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
 			log.info("AddHost can't take image_id as parameter");
-			;
 			throw new DirectorException(
 					"AddHost can't take image_id as parameter");
 		} else {
