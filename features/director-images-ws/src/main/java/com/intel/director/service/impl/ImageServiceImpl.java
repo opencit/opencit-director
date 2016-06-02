@@ -2041,8 +2041,13 @@ public class ImageServiceImpl implements ImageService {
 			return importPolicyTemplateResponse;
 		}
 		// Check if mounted live BM has /opt/vrtm
-		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
-
+		String idendifier = "V";
+		// Check if mounted live BM has /opt/vrtm
+		if (image.getPartition() == null) {
+			idendifier = TdaasUtil.checkInstalledComponents(imageId);
+		} else {
+			idendifier = "W";
+		}
 		String content = null;
 		Manifest manifest;
 
@@ -2690,6 +2695,7 @@ public class ImageServiceImpl implements ImageService {
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
 			log.info("AddHost can't take image_id as parameter");
+			;
 			throw new DirectorException(
 					"AddHost can't take image_id as parameter");
 		} else {
