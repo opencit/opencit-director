@@ -469,25 +469,30 @@ public class TdaasUtil {
 		return sshSettingInfo;
 
 	}
-	
+
 	public SshSettingInfo fromSshSettingRequest(
-			SshSettingRequest sshSettingRequest, SshSettingInfo existingSshSettingInfo) {
+			SshSettingRequest sshSettingRequest) {
 		SshSettingInfo sshSettingInfo = new SshSettingInfo();
-		sshSettingInfo.setId(StringUtils.isNotBlank(sshSettingRequest.getId())?sshSettingRequest.getId():existingSshSettingInfo.getId());
-		sshSettingInfo.setIpAddress(StringUtils.isNotBlank(sshSettingRequest.getIpAddress()) ? sshSettingRequest.getIpAddress() : existingSshSettingInfo.getIpAddress());
+		sshSettingInfo.setId(sshSettingRequest.getId());
+		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
 		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
-		sshSettingInfo.setName(StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName());		
+		if (!StringUtils.isBlank(sshSettingRequest.getName())) {
+			sshSettingInfo.setName(sshSettingRequest.getName());
+		} else {
+			sshSettingInfo.setName(sshSettingRequest.getIpAddress());
+		}
 		sshSettingInfo
-				.setPassword(fromPassword(sshSettingRequest.getPassword()));		
-		sshSettingInfo.setUsername(StringUtils.isNotBlank(sshSettingRequest.getUsername()) ? sshSettingRequest.getUsername() : existingSshSettingInfo.getUsername());
+				.setPassword(fromPassword(sshSettingRequest.getPassword()));
+		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
+		
 		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
-				StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName(),
-				sshSettingRequest.getUsername()));
+				sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getUsername(),sshSettingRequest.getPartition()));
 		return sshSettingInfo;
 
 	}
 
-	public ImageAttributes toImage(String id, String ip, String username) {
+	public ImageAttributes toImage(String id, String ip, String username, String partition) {
 		/*
 		 * Calendar c = Calendar.getInstance(); c.setTime(new Date());
 		 * c.add(Calendar.DATE, -3); Date currentDate = new Date();
@@ -755,14 +760,17 @@ public class TdaasUtil {
 		return result;
 	}
 
+
 	public static SshSettingResponse convertSshInfoToResponse(SshSettingInfo info) {
 		SshSettingResponse sshResponse = new SshSettingResponse();
 		sshResponse.setImage_id(info.getImage().getId());
 		sshResponse.setImage_name(info.getImage().getImage_name());
 		sshResponse.setIp_address(info.getIpAddress());
 		sshResponse.setUsername(info.getUsername());
+		sshResponse.setPartition(info.getImage().getPartition());
 		return sshResponse;
 	}
+
 
 	public SearchFilesInImageRequest mapUriParamsToSearchFilesInImageRequest(
 			UriInfo uriInfo) {
