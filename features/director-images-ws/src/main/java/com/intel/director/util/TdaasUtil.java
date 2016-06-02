@@ -449,26 +449,6 @@ public class TdaasUtil {
 		return policyToHostResponse;
 	}
 
-	public SshSettingInfo fromSshSettingRequest(
-			SshSettingRequest sshSettingRequest) {
-		SshSettingInfo sshSettingInfo = new SshSettingInfo();
-		sshSettingInfo.setId(sshSettingRequest.getId());
-		sshSettingInfo.setIpAddress(sshSettingRequest.getIpAddress());
-		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
-		if (!StringUtils.isBlank(sshSettingRequest.getName())) {
-			sshSettingInfo.setName(sshSettingRequest.getName());
-		} else {
-			sshSettingInfo.setName(sshSettingRequest.getIpAddress());
-		}
-		sshSettingInfo
-				.setPassword(fromPassword(sshSettingRequest.getPassword()));
-		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
-		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
-				sshSettingRequest.getName(),
-				sshSettingRequest.getUsername()));
-		return sshSettingInfo;
-
-	}
 
 	public SshSettingInfo fromSshSettingRequest(
 			SshSettingRequest sshSettingRequest) {
