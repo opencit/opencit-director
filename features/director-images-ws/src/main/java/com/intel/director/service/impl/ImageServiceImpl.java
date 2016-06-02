@@ -1003,10 +1003,10 @@ public class ImageServiceImpl implements ImageService {
 			ImageAttributes img = imagePersistenceManager
 					.fetchImageById(imageid);
 			if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
-					.getImage_deployments())) {
+					.getImage_deployments()) && StringUtils.isBlank(img.getPartition())) {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
-
+			
 			Calendar currentDate = Calendar.getInstance();
 
 			TrustPolicyDraft existingDraft = imagePersistenceManager
