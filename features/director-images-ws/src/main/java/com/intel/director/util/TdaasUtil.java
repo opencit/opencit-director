@@ -624,7 +624,7 @@ public class TdaasUtil {
 		}
 
 		log.debug("Index :: " + index);
-fromSshSettingRequest
+
 		if (index != 0) {
 			return split[index];
 		} else {
