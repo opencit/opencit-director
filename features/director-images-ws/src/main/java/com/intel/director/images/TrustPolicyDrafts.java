@@ -33,7 +33,9 @@ import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
 import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ImageService;
+import com.intel.director.service.TrustPolicyService;
 import com.intel.director.service.impl.ImageServiceImpl;
+import com.intel.director.service.impl.TrustPolicyServiceImpl;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
 /**
@@ -647,5 +649,82 @@ public class TrustPolicyDrafts {
 		response.header("Content-Disposition", "attachment; filename=policy_"
 				+ trustPolicyDraft.getImgAttributes().getImage_name() + ".xml");
 		return response.build();
+	}
+	
+	
+	/**
+	 * 
+	 * This method looks into the MW_TRUST_POLICY_DRAFTS table and gets the policy draft
+	 * string and sends it as an xml content to the user.
+	 * 
+	 * In case the policy draft is not found for the trust policy draft id, HTTP 404 is returned
+	 * 
+	 * @mtwContentTypeReturned XML
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 *  https://{IP/HOST_NAME}/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996/download
+	 * Input: Trust policy draft id as path param
+	 * Output: Content sent as stream
+	 * 
+	 * In case of improper input it will show 400 bad request with 
+	 * <error>Trust Policy id is empty or not in uuid format</error>
+	 *                    </pre>
+	 * 
+	 *                    *
+	 * @param trustPolicyDraftId
+	 *            the trust policy draft for which the draft is downloaded
+	 * @return XML content of the policy
+	 * @throws DirectorException
+	 */
+	@Path("rpc/fetch-versioned-display-name")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getVersionedDisplayNameForDockerImage(GenericRequest req) {
+		GenericResponse genericResponse = new GenericResponse();
+
+		if (!ValidationUtil.isValidWithRegex(req.getImage_id(), RegexPatterns.UUID)) {
+			genericResponse.error = "Image id is empty or not in uuid format";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+		}
+
+		ImageInfo imageInfo = null;
+
+		try {
+			imageInfo = imageService.fetchImageById(req.getImage_id());
+		} catch (DirectorException e1) {
+			log.error("Unable to fetch image", e1);
+		}
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + req.getImage_id() + " exists.";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+		}
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.getImage_deployments())) {
+			genericResponse.error = "Only supported for Docker images";
+			return Response.status(Response.Status.NO_CONTENT).entity(genericResponse).build();
+		}
+		String trust_policy_draft_id = imageInfo.getTrust_policy_draft_id();
+
+		TrustPolicyDraft trustPolicyDraft = imageService.fetchTrustpolicydraftById(trust_policy_draft_id);
+		if (trustPolicyDraft != null) {
+			genericResponse.error = "Only supported for new policy drafts";
+			return Response.status(Response.Status.NO_CONTENT).entity(genericResponse).build();
+		}
+		String versionedDisplayNameForDockerImage;
+		TrustPolicyService trustPolicyService;
+		try {
+			trustPolicyService = new TrustPolicyServiceImpl(req.getImage_id());
+			versionedDisplayNameForDockerImage = trustPolicyService
+					.getVersionedDisplayNameForDockerImage(req.getImage_id());
+		} catch (DirectorException e) {
+			log.error("Unable to get versioned name for policy", e);
+			genericResponse.error = "Unable to get versioned name for docker image policy ";
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+
+		}
+		genericResponse.setDetails(versionedDisplayNameForDockerImage);
+
+		return Response.ok(genericResponse).build();
 	}
 }

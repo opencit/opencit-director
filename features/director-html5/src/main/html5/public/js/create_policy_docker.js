@@ -5,6 +5,7 @@ $(document).ready(function() {
 	$("#display_name_repo").val(current_repository);
     fetchImageLaunchPolicies();
 	fetchImaheHashAlgo("Docker","hashtype_docker");
+	fetchDockerVersionedDisplayName();
 });
 
 function CreateDockerImageMetaData(data) {
@@ -130,3 +131,22 @@ function addRadios(arr) {
     }
     $('#launch_control_policy').html(temp);
 };
+
+function fetchDockerVersionedDisplayName(){
+    var fetchDisplayname = {"image_id": current_image_id};
+
+    $.ajax({
+        type: "POST",
+        url: "/v1/rpc/fetch-versioned-display-name",
+        contentType: "application/json",
+        headers: {
+            'Accept': 'application/json'
+        },
+        data: JSON.stringify(fetchDisplayname),
+        success: function(data, status, xhr) {
+            var display_name = data.details.substring(data.details.lastIndexOf(":") + 1);
+            $("#display_name").val(display_name);
+        }
+    });
+
+}

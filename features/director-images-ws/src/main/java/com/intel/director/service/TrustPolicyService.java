@@ -83,4 +83,6 @@ public interface TrustPolicyService {
 	public List<TrustPolicyDraft> getTrustPolicyDrafts(
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;
+	
+	public String getVersionedDisplayNameForDockerImage(String imageId) throws DirectorException;
 }
