@@ -434,22 +434,25 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 		try {
 			policyObj = TdaasUtil.getPolicy(policyXml);
 		} catch (JAXBException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("Error", e1);
 		}
 
 		for (Measurement measurement : policyObj.getWhitelist()
 				.getMeasurements()) {
-			String path = measurement.getPath().substring(1);
-			path = path.replaceAll("/", "\\");
+				
+			String path = measurement.getPath();
+			log.info("Path is {}", path);
+			path = path.substring(1);
+			log.info("Sub Path is {}", path);			
+			path = path.replaceAll("/", "\\\\");
+			log.info("replaced Path is {}", path);
 			measurement.setPath(path);
 		}
 
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policyObj);
 		} catch (JAXBException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("Error", e1);
 		}
 		return policyXml;
 	}
