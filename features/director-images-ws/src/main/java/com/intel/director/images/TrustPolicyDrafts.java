@@ -704,13 +704,6 @@ public class TrustPolicyDrafts {
 			genericResponse.error = "Only supported for Docker images";
 			return Response.status(Response.Status.NO_CONTENT).entity(genericResponse).build();
 		}
-		String trust_policy_draft_id = imageInfo.getTrust_policy_draft_id();
-
-		TrustPolicyDraft trustPolicyDraft = imageService.fetchTrustpolicydraftById(trust_policy_draft_id);
-		if (trustPolicyDraft != null) {
-			genericResponse.error = "Only supported for new policy drafts";
-			return Response.status(Response.Status.NO_CONTENT).entity(genericResponse).build();
-		}
 		String versionedDisplayNameForDockerImage;
 		TrustPolicyService trustPolicyService;
 		try {
