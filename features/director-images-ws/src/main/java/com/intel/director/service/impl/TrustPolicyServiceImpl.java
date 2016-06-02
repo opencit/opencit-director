@@ -37,7 +37,7 @@ import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
-import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
+import com.intel.mtwilson.services.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
