@@ -519,7 +519,7 @@ public class TrustPolicyDrafts {
 	public Response createPolicyDraftFromPolicy(GenericRequest req) {
 		TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
 		if (!ValidationUtil.isValidWithRegex(req.getImage_id(), RegexPatterns.UUID)) {
-			trustPolicyDraft.error = "Image id is empty or not in uuid format";
+			trustPolicyDraft.setError("Image id is empty or not in uuid format");
 			return Response.status(Response.Status.BAD_REQUEST).entity(trustPolicyDraft).build();
 		}
 
@@ -530,7 +530,7 @@ public class TrustPolicyDrafts {
 			log.error("Unable to fetch image", e1);
 		}
 		if (imageInfo == null) {
-			trustPolicyDraft.error = "No image with id : " + req.getImage_id() + " exists.";
+			trustPolicyDraft.setError("No image with id : " + req.getImage_id() + " exists.");
 			return Response.status(Response.Status.BAD_REQUEST).entity(trustPolicyDraft).build();
 		}
 
@@ -538,7 +538,7 @@ public class TrustPolicyDrafts {
 		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
 
 		if (trustPolicyByTrustId == null) {
-			trustPolicyDraft.error = "No trust policy exists for image with id : " + req.getImage_id() + " exists.";
+			trustPolicyDraft.setError("No trust policy exists for image with id : " + req.getImage_id() + " exists.");
 			return Response.status(Response.Status.BAD_REQUEST).entity(trustPolicyDraft).build();
 		}
 

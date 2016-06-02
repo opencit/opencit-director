@@ -2917,4 +2917,16 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return hashTypeObjects;
 	}
-}
+	@Override
+	public List<String> getDrivesForWindows(String username, String password,
+			String ipAddress) throws DirectorException {
+		try {
+			List<String> driveFromWindowsHost = DirectorUtil
+					.getDriveFromWindowsHost(username, password, ipAddress);
+			return driveFromWindowsHost;
+		} catch (IOException e) {
+			log.error("Unable to Get Drives", e);
+			throw new DirectorException("Unable to Get Drives", e);
+		}
+	}
+	}
