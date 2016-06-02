@@ -2657,21 +2657,40 @@ public class ImageServiceImpl implements ImageService {
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 
+
 		TdaasUtil tdaasUtil = new TdaasUtil();
-		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
-		sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
-		///sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
+		
+		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			try {
+				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
+						sshSettingRequest.getUsername(),	
+						sshSettingRequest.getPassword(),
+						sshSettingRequest.getIpAddress());
+				String drives = StringUtils.join(driveFromWindowsHost, ",");
+				sshSettingRequest.setPartition(drives);
+			} catch (IOException e) {
+				log.error("Error Fetching Partition Info");
+				throw new DirectorException("Error Fetching Partition Info", e);
+			}
+		}
+		
+
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
-		log.info("Inside addHost, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		
+		
 		log.debug("Going to save sshSetting info in database");
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
 			log.info("AddHost can't take image_id as parameter");
+			;
 			throw new DirectorException(
 					"AddHost can't take image_id as parameter");
 		} else {
@@ -2685,36 +2704,48 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 		return TdaasUtil.convertSshInfoToResponse(info);
-
 	}
 
 	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
-		// SshSettingInfo updateSsh=new SshSettingInfo();
-		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
-		///sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
+
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
-		log.info("Inside updateSshData, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			try {
+				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
+						sshSettingRequest.getUsername(),
+						sshSettingRequest.getPassword(),
+						sshSettingRequest.getIpAddress());
+				String drives = StringUtils.join(driveFromWindowsHost, ",");
+				sshSettingRequest.setPartition(drives);
+			} catch (IOException e) {
+				log.error("Error Fetching Partition Info");
+				throw new DirectorException("Error Fetching Partition Info", e);
+			}
+		}
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
-			SshSettingInfo existingSsh = imagePersistenceManager
-					.fetchSshByImageId(sshSettingRequest.getImage_id());
 
 			SshSettingInfo sshSettingInfo = tdaasUtil
-					.fromSshSettingRequest(sshSettingRequest, existingSsh);
-//			if (existingSsh.getId() != null
-//					&& StringUtils.isNotBlank(existingSsh.getId())) {
-//				sshSettingInfo.setId(existingSsh.getId());
-//				ImageAttributes image = existingSsh.getImage();
-//				sshSettingInfo.setImage(image);
-//			}
+					.fromSshSettingRequest(sshSettingRequest);
+			SshSettingInfo existingSsh = imagePersistenceManager
+					.fetchSshByImageId(sshSettingRequest.getImage_id());
+			if (existingSsh.getId() != null
+					&& StringUtils.isNotBlank(existingSsh.getId())) {
+				sshSettingInfo.setId(existingSsh.getId());
+				ImageAttributes image = existingSsh.getImage();
+				sshSettingInfo.setImage(image);
+			}
 			imagePersistenceManager.updateSsh(sshSettingInfo);
 			return TdaasUtil.convertSshInfoToResponse(sshSettingInfo);
 		} catch (DbException e) {
