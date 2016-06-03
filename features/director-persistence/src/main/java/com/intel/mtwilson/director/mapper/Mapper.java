@@ -974,13 +974,18 @@ public class Mapper {
 		return policytemplate;
 	}
 
-	public MwImageStore toData(ImageStoreTransferObject imageStoreTO) {
+	public MwImageStore toData(MwImageStore existingImageStore, ImageStoreTransferObject imageStoreTO) {
 		if (imageStoreTO == null) {
 			return null;
 		}
-		MwImageStore mwImageStore = new MwImageStore();
-		if (imageStoreTO.getId() != null) {
-			mwImageStore.setId(imageStoreTO.getId());
+		MwImageStore mwImageStore = null;
+		if(existingImageStore != null){
+			mwImageStore = existingImageStore; 
+		}else{
+			mwImageStore = new MwImageStore();
+			if (imageStoreTO.getId() != null) {
+				mwImageStore.setId(imageStoreTO.getId());
+			}
 		}
 		String[] artifact_types = imageStoreTO.getArtifact_types();
 		Arrays.sort(artifact_types);
@@ -997,15 +1002,26 @@ public class Mapper {
 		mwImageStore.setName(imageStoreTO.getName());
 		mwImageStore.setDeleted(imageStoreTO.isDeleted());
 
-		Collection<MwImageStoreDetails> mwImageStoreDetailsCollection = new ArrayList<MwImageStoreDetails>();
+		Collection<MwImageStoreDetails> mwImageStoreDetailsCollection = new ArrayList<MwImageStoreDetails>();;
+		Collection<MwImageStoreDetails> existingMwImageStoreDetailsCollection = mwImageStore.getMwImageStoreDetailsCollection();
+
 
 		if (imageStoreTO.getImage_store_details() != null
 				&& imageStoreTO.getImage_store_details().size() != 0) {
 			Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTO
 					.getImage_store_details();
 			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+				MwImageStoreDetails existingMwImageStoreDetails = null;
+				if(existingMwImageStoreDetailsCollection != null){
+					for (MwImageStoreDetails mwImageStoreDetails : existingMwImageStoreDetailsCollection) {
+						if(mwImageStoreDetails.getKey().equals(imageStoreDetailsTransferObject.getKey())){
+							existingMwImageStoreDetails = mwImageStoreDetails;
+							break;
+						}
+					}
+				}
 				MwImageStoreDetails data = toData(
-						imageStoreDetailsTransferObject, mwImageStore);
+						imageStoreDetailsTransferObject, existingMwImageStoreDetails, mwImageStore);
 				mwImageStoreDetailsCollection.add(data);
 			}
 		}
@@ -1015,17 +1031,26 @@ public class Mapper {
 	}
 
 	private MwImageStoreDetails toData(
-			ImageStoreDetailsTransferObject imageStoreDetailsTO,
+			ImageStoreDetailsTransferObject imageStoreDetailsTO, MwImageStoreDetails existingMwImageStoreDetails,
 			MwImageStore mwImageStore) {
 		if (imageStoreDetailsTO == null) {
 			return null;
 		}
-		MwImageStoreDetails mwImageStoreDetails = new MwImageStoreDetails();
-		if (imageStoreDetailsTO.getId() != null) {
-			mwImageStoreDetails.setId(imageStoreDetailsTO.getId());
+		MwImageStoreDetails mwImageStoreDetails;
+		if(existingMwImageStoreDetails == null){
+			mwImageStoreDetails = new MwImageStoreDetails();
+
+			if (imageStoreDetailsTO.getId() != null) {
+				mwImageStoreDetails.setId(imageStoreDetailsTO.getId());
+			}
+		}else{
+			mwImageStoreDetails = existingMwImageStoreDetails;
 		}
+		
 		mwImageStoreDetails.setKey(imageStoreDetailsTO.getKey());
-		mwImageStoreDetails.setValue(imageStoreDetailsTO.getValue());
+		if(StringUtils.isNotBlank(imageStoreDetailsTO.getValue())){
+			mwImageStoreDetails.setValue(imageStoreDetailsTO.getValue());
+		}
 		mwImageStoreDetails.setImage_store(mwImageStore);
 		return mwImageStoreDetails;
 	}

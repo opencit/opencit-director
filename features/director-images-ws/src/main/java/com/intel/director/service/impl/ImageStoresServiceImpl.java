@@ -128,6 +128,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(fetchImageStorebyId == null){
 				return null;
 			}
+			/*
 			ImageStoreDetailsTransferObject passwordConfiguration = fetchImageStorebyId.fetchPasswordConfiguration();
 			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 
@@ -135,6 +136,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 				String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());			
 				passwordConfiguration.setValue(passwordForImageStore);
 			}
+			*/
 			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
 				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
 				detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));

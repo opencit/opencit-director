@@ -600,7 +600,9 @@ function populateImageStoreDetails(image_store_details) {
 		var valueHolder = "";
 		if (image_store_details[i].value) {
 			valueHolder = image_store_details[i].value;
-			$("#" + image_store_details[i].id).val(valueHolder);
+			if (image_store_details[i].key.toLowerCase().indexOf("password") == -1) {
+				$("#" + image_store_details[i].id).val(valueHolder);
+			}
 		}
 	}
 }
