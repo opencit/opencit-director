@@ -84,33 +84,150 @@ public class ImageStores {
 	 * 
 	 * Output:
 	 * {
-	 *   "deleted": false,
-	 *   "image_stores": [
-	 *     {
-	 *       "deleted": false,
-	 *       "id": "9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8",
-	 *       "name": "Glance1",
-	 *       "artifact_types": [
-	 *         "Docker"
-	 *       ],
-	 *       "connector": "Glance",
-	 *       "image_store_details": [
-	 *         {
-	 *           "id": "932FE2CE-AF28-4817-A484-D8EBB30512AB",
-	 *           "image_store_id": "9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8",
-	 *           "key": "gkey1",
-	 *           "value": "asd1"
-	 *         },
-	 *         {
-	 *           "id": "ADE6E1E1-9BAF-48C5-9A3E-938A6D28FB94",
-	 *           "image_store_id": "9EC519A5-F57C-4A07-ABEA-D7C5C58B5CD8",
-	 *           "key": "gkey2",
-	 *           "value": "asd1212"
-	 *         }
-	 *       ]
-	 *     }
-	 *   ]
-	 * }
+  "image_stores": [
+    {
+      "id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "name": "Docker-Glance",
+      "artifact_types": [
+        "Docker"
+      ],
+      "connector": "Glance",
+      "deleted": false,
+      "image_store_details": [
+        {
+          "id": "E26BD4ED-DB26-444B-B11D-AB7AC04DEB1D",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.api.endpoint",
+          "value": "http://10.35.35.35:9292"
+        },
+        {
+          "id": "501376A7-EF36-4C88-A67D-B5768F9C786C",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.keystone.public.endpoint",
+          "value": "http://10.35.35.35:5000"
+        },
+        {
+          "id": "DF0FA0EA-B587-4931-B004-ACAEF5E25462",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.tenant.name",
+          "value": "admin"
+        },
+        {
+          "id": "14354D92-2AEA-495E-9FB1-7C59A91C4612",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.image.store.username",
+          "value": "admin"
+        },
+        {
+          "id": "1949DE82-98EC-433A-A192-14E35BA8CD77",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.image.store.password",
+          "value": "QGGE8BwUZnmJXhRiPWg5LhRRhoTZPIDPjedYkwWDdrqnfvQ0RLy5uvFUqQW3YS6h"
+        },
+        {
+          "id": "0A6DF663-D56C-4C11-AE2A-C9C97BBC1975",
+          "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+          "key": "glance.visibility",
+          "value": "public"
+        }
+      ]
+    },
+    {
+      "id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+      "name": "G1",
+      "artifact_types": [
+        "Image"
+      ],
+      "connector": "Glance",
+      "deleted": false,
+      "image_store_details": [
+        {
+          "id": "0D380944-1D93-49CF-9758-6E5365E31CEB",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.api.endpoint",
+          "value": "http://10.35.35.35:9292"
+        },
+        {
+          "id": "7F82F620-5CA0-4984-B65A-518D67F0BE64",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.keystone.public.endpoint",
+          "value": "http://10.35.35.35:5000"
+        },
+        {
+          "id": "A8394FE3-EF80-4255-9506-F8AF6509B40B",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.tenant.name",
+          "value": "admin"
+        },
+        {
+          "id": "DE86419D-36B0-480B-8788-F8570DF3CD96",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.image.store.username",
+          "value": "admin"
+        },
+        {
+          "id": "DE8F7E91-1B8D-4D5D-91CF-6FA36B1D409E",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.image.store.password",
+          "value": "n7ou60GtnvKBHy8RpLx+mhPgpE7J3r8DvCAbEQshhseNYF45NRtNXIDBY5CtA9Ey"
+        },
+        {
+          "id": "505601ED-6EAE-4CAB-896B-83BABD6D1460",
+          "image_store_id": "447CDE52-B103-4B4A-8037-138DA4845AE2",
+          "key": "glance.visibility",
+          "value": "public"
+        }
+      ]
+    },
+    {
+      "id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+      "name": "G2",
+      "artifact_types": [
+        "Image"
+      ],
+      "connector": "Glance",
+      "deleted": false,
+      "image_store_details": [
+        {
+          "id": "7E18B46E-6693-48A9-83F2-D71D67A6B4FF",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.api.endpoint",
+          "value": "http://10.35.35.35:9292"
+        },
+        {
+          "id": "4C8BABC6-97B1-4617-ABD4-D6C4A0A9E225",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.keystone.public.endpoint",
+          "value": "http://10.35.35.35:5000"
+        },
+        {
+          "id": "41D46D6B-1501-4E52-8155-A1F5FEDC325C",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.tenant.name",
+          "value": "admin"
+        },
+        {
+          "id": "F3BFD350-9C2D-4768-A9AF-1C191E09AF8C",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.image.store.username",
+          "value": "admin"
+        },
+        {
+          "id": "877AE891-E0F7-48DF-8F31-5856F5E882D5",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.image.store.password",
+          "value": "LXDJyZG6tU+bYuJJOsrjOalCloTuNR/yvNlpGRG8awksXiXPqs+nuIiD6lrZS5w5"
+        },
+        {
+          "id": "F12589D2-9C68-4115-89D8-00BADDDE113F",
+          "image_store_id": "E6DBF11B-9134-4CF3-8110-76DB57EDE4C8",
+          "key": "glance.visibility",
+          "value": "public"
+        }
+      ]
+    }
+  ]
+}
 	 *                    </pre>
 	 */
 	@Path("image-stores")
@@ -166,42 +283,64 @@ public class ImageStores {
 	 * Output:
 	 * 
 	 * {
-		"id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-		"name": "ExtStore_1",
-		"artifact_types": [
-			"Image",
-			"Tarball"
-		],
-		"connector": "Glance",
-		"deleted": false,
-		"image_store_details": [
-			{
-	  			"id": "FFF71D82-29E2-46FA-9789-ED67880B2266",
-			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-			  	"key": "glance.image.store.username"
-			},
-			{
-				"id": "331BD472-5F66-4EFB-811C-461A0CEF6517",
-				"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-				"key": "glance.api.endpoint"
-			},
-			{
-				"id": "F76EC7A8-703C-4645-8FE0-2666C377D033",
-			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-			  	"key": "glance.tenant.name"
-			},
-			{
-			  	"id": "AA24C0E1-9F33-442C-B872-49364D933F35",
-			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-			  	"key": "glance.keystone.public.endpoint"
-			},
-			{
-			  	"id": "02073D14-648F-41C8-97CF-E3BD831D4F03",
-			  	"image_store_id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
-			  	"key": "glance.image.store.password"
-			}
-		]
-	}
+  "id": "3DA92563-A2A6-4D52-9337-3201D11105E1",
+  "name": "Docker-Glance",
+  "artifact_types": [
+    "Docker"
+  ],
+  "connector": "Glance",
+  "deleted": false,
+  "image_store_details": [
+    {
+      "id": "E26BD4ED-DB26-444B-B11D-AB7AC04DEB1D",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.api.endpoint",
+      "value": "http://10.35.35.35:9292",
+      "key_display_value": "API Endpoint",
+      "place_holder_value": "http://<HOST>:<PORT>"
+    },
+    {
+      "id": "501376A7-EF36-4C88-A67D-B5768F9C786C",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.keystone.public.endpoint",
+      "value": "http://10.35.35.35:5000",
+      "key_display_value": "Authorization Endpoint",
+      "place_holder_value": "http://<HOST>:<PORT>"
+    },
+    {
+      "id": "DF0FA0EA-B587-4931-B004-ACAEF5E25462",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.tenant.name",
+      "value": "admin",
+      "key_display_value": "Tenant Name",
+      "place_holder_value": "Tenant Name"
+    },
+    {
+      "id": "14354D92-2AEA-495E-9FB1-7C59A91C4612",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.image.store.username",
+      "value": "admin",
+      "key_display_value": "UserName",
+      "place_holder_value": "UserName"
+    },
+    {
+      "id": "1949DE82-98EC-433A-A192-14E35BA8CD77",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.image.store.password",
+      "value": "QGGE8BwUZnmJXhRiPWg5LhRRhoTZPIDPjedYkwWDdrqnfvQ0RLy5uvFUqQW3YS6h",
+      "key_display_value": "Password",
+      "place_holder_value": "Password"
+    },
+    {
+      "id": "0A6DF663-D56C-4C11-AE2A-C9C97BBC1975",
+      "image_store_id": "E8C35D44-24DF-463F-A173-03C66D493A75",
+      "key": "glance.visibility",
+      "value": "public",
+      "key_display_value": "Visibility",
+      "place_holder_value": "Visibility"
+    }
+  ]
+}
 	
 	If an invalid ID for image store is give, a HTTP 404 is returned
 	 *                    </pre>
@@ -383,7 +522,8 @@ public class ImageStores {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateImageStores(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-	///	ImageStoreTransferObject updateImageStore = new ImageStoreTransferObject();
+
+		//Begin validation
 		boolean validateConnectorArtifacts = imageStoreService.validateConnectorArtifacts(
 				imageStoreTransferObject.getArtifact_types(), imageStoreTransferObject.getConnector());
 		GenericResponse genericResponse= new GenericResponse();
@@ -403,10 +543,14 @@ public class ImageStores {
 		}
 
 		List<String> errorList = new ArrayList<String>();
-
+		
 		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject
 				.getImage_store_details();
+		
 		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+			if(imageStoreTransferObject.fetchPasswordConfiguration().equals(imageStoreDetailsTransferObject)){
+				continue;
+			}
 			if (StringUtils.isBlank(imageStoreDetailsTransferObject.getValue())) {
 				errorList.add(I18Util.format(imageStoreDetailsTransferObject.getKey()));
 			}
@@ -417,11 +561,12 @@ public class ImageStores {
 			return Response.status(Status.BAD_REQUEST).entity(genericResponse).build();
 		}
 
-		// Encrypt password fields
+		//End  validation
+		
+		// Encrypt password fields if its provided by the user		
 		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.fetchPasswordConfiguration();
-		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
-
-		if (StringUtils.isNotBlank(passwordConfiguration.getValue())) {
+		if(passwordConfiguration != null && StringUtils.isNotBlank(passwordConfiguration.getValue())){
+			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);	
 			String encryptedPassword = imageStorePasswordUtil
 					.encryptPasswordForImageStore(passwordConfiguration.getValue());
 			passwordConfiguration.setValue(encryptedPassword);
@@ -710,18 +855,22 @@ public class ImageStores {
 		imageStoreTransferObject.setIsValid(true);
 
 		try {
+			imageStoreService.updateImageStore(imageStoreTransferObject);
+		} catch (DirectorException e) {
+			throw new DirectorException("Error Updating image store");
+		}
+		
+		try {
 			imageStoreService.validateImageStore(imageStoreId);
 		} catch (DirectorException e) {
 			validationResponse.setError(e.getMessage());
 			validationResponse.setValid(false);
 			return Response.ok(validationResponse).build();
 		}
+		
 
-		try {
-			persistService.updateImageStore(imageStoreTransferObject);
-		} catch (DbException e) {
-			throw new DirectorException("Error Updating image store");
-		}
+
+
 		validationResponse.setValid(true);
 		return Response.ok(validationResponse).build();
 

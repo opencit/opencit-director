@@ -654,28 +654,22 @@ public class TrustPolicyDrafts {
 	
 	/**
 	 * 
-	 * This method looks into the MW_TRUST_POLICY_DRAFTS table and gets the policy draft
-	 * string and sends it as an xml content to the user.
+	 * This method is called to check the name of the trust policy name. If the
+	 * docker image has been uploaded to the store before the policy is
+	 * uploaded, the versioned name is returned.
 	 * 
-	 * In case the policy draft is not found for the trust policy draft id, HTTP 404 is returned
 	 * 
-	 * @mtwContentTypeReturned XML
-	 * @mtwMethodType GET
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
 	 * @mtwSampleRestCall
 	 * 
 	 *                    <pre>
-	 *  https://{IP/HOST_NAME}/v1/trust-policy-drafts/08EB37D7-2678-495D-B485-59233EB51996/download
-	 * Input: Trust policy draft id as path param
-	 * Output: Content sent as stream
+	 *                    https://{IP/HOST_NAME}/v1/rpc/fetch-versioned-display-
+	 *                    name Input:
+	 *                    {"image_id":"CC60C7E3-7442-4D1E-BDA7-5A5A59186EB8"}
+	 *                    Output: { "details": "busybox:latest-v1" }
 	 * 
-	 * In case of improper input it will show 400 bad request with 
-	 * <error>Trust Policy id is empty or not in uuid format</error>
-	 *                    </pre>
-	 * 
-	 *                    *
-	 * @param trustPolicyDraftId
-	 *            the trust policy draft for which the draft is downloaded
-	 * @return XML content of the policy
+	 * @return "details" returns the result of the call
 	 * @throws DirectorException
 	 */
 	@Path("rpc/fetch-versioned-display-name")
