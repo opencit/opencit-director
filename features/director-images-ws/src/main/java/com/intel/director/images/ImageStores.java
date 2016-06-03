@@ -855,18 +855,22 @@ public class ImageStores {
 		imageStoreTransferObject.setIsValid(true);
 
 		try {
+			imageStoreService.updateImageStore(imageStoreTransferObject);
+		} catch (DirectorException e) {
+			throw new DirectorException("Error Updating image store");
+		}
+		
+		try {
 			imageStoreService.validateImageStore(imageStoreId);
 		} catch (DirectorException e) {
 			validationResponse.setError(e.getMessage());
 			validationResponse.setValid(false);
 			return Response.ok(validationResponse).build();
 		}
+		
 
-		try {
-			persistService.updateImageStore(imageStoreTransferObject);
-		} catch (DbException e) {
-			throw new DirectorException("Error Updating image store");
-		}
+
+
 		validationResponse.setValid(true);
 		return Response.ok(validationResponse).build();
 

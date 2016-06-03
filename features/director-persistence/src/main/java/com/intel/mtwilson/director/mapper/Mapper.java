@@ -1048,9 +1048,7 @@ public class Mapper {
 		}
 		
 		mwImageStoreDetails.setKey(imageStoreDetailsTO.getKey());
-		if(StringUtils.isNotBlank(imageStoreDetailsTO.getValue())){
-			mwImageStoreDetails.setValue(imageStoreDetailsTO.getValue());
-		}
+		mwImageStoreDetails.setValue(imageStoreDetailsTO.getValue());
 		mwImageStoreDetails.setImage_store(mwImageStore);
 		return mwImageStoreDetails;
 	}
