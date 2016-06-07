@@ -49,7 +49,10 @@
         <appender-ref ref="ConsoleWarn"/>
         <appender-ref ref="ConsoleInfo"/>
     </root>
-    <logger name="com.intel.mtwilson.util.exec.ExecUtil" level="INFO"/>
+    
+    <logger name="org.dozer" level="ERROR"/>
+    
+    <logger name="com.intel.mtwilson.util.exec.ExecUtil" level="DEBUG"/>
 
     <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
     <!-- INFO:  Enabling session validation scheduler...  -->

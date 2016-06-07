@@ -244,7 +244,7 @@ public class ImageActionDao {
 	            }
 			
 			Query q = em.createQuery(criteriaQuery);
-			log.info("Query :: " + q.toString());
+			//log.info("Query :: " + q.toString());
 
 			List<Object[]> result = q.getResultList();
 			List<MwImageAction> mwImageActionList = new ArrayList<MwImageAction>();
