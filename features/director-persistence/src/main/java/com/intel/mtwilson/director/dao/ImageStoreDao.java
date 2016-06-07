@@ -109,7 +109,6 @@ public class ImageStoreDao extends BaseDao{
 					.toArray(new Predicate[] {})));
 			
 			Query q = em.createQuery(criteriaQuery);
-			log.info("Query :: " + q.toString());
 
 			List<Object[]> result = q.getResultList();
 			List<MwImageStore> mwImageStoreList = new ArrayList<MwImageStore>();
