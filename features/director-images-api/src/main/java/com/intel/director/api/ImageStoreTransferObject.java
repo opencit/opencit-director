@@ -134,9 +134,9 @@ public class ImageStoreTransferObject extends GenericResponse {
 				passwordElement = Constants.DOCKER_HUB_PASSWORD;
 			} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
 				passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
-			} else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
+			} /*else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
 				passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
-			}
+			}*/
 	   }
 		if (imageStoreDetails != null) {
 			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {

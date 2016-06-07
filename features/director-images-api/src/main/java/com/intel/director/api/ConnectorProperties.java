@@ -19,7 +19,7 @@ public enum ConnectorProperties {
 					put(Constants.ARTIFACT_DOCKER, "Docker");
 				}
 			}), 
-	SWIFT("SWIFT", "com.intel.director.swift.objectstore.SwiftObjectStoreManager",
+	/*SWIFT("SWIFT", "com.intel.director.swift.objectstore.SwiftObjectStoreManager",
 			new ConnectorKey[] {
 					new ConnectorKey(1, Constants.SWIFT_API_ENDPOINT),
 					new ConnectorKey(2, Constants.SWIFT_AUTH_ENDPOINT),
@@ -32,7 +32,7 @@ public enum ConnectorProperties {
 				{
 					put(Constants.ARTIFACT_POLICY, "Policy");
 				}
-			}), 
+			}), */
 	GLANCE("GLANCE", "com.intel.director.images.GlanceImageStoreManager",
 			new ConnectorKey[] {
 					new ConnectorKey(1, Constants.GLANCE_API_ENDPOINT),

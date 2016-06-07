@@ -223,10 +223,10 @@ public  class ImageActionImpl implements ImageActionService {
 				artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
 				imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(artifactStoreList.get(0).getArtifact_name(),artifactStoreIdMap,isEncrypted));	
 				
-			}else if(Constants.ARTIFACT_IMAGE.equals(artifactStoreList.get(0).getArtifact_name()) && (imageInfo.getTrust_policy_id()!=null)){
+			}/*else if(Constants.ARTIFACT_IMAGE.equals(artifactStoreList.get(0).getArtifact_name()) && (imageInfo.getTrust_policy_id()!=null)){
 				artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
 				imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(Constants.ARTIFACT_IMAGE_WHEN_POLICY_EXISTS,artifactStoreIdMap,isEncrypted));
-			}else{
+			}*/else{
 			artifactStoreIdMap.put(artifactStoreKeyMap.get(artifactStoreList.get(0).getArtifact_name()), artifactStoreList.get(0).getImage_store_id());
 			imageActionTaskList.addAll(fetchActionService.getActionsByDeploymentArtifact(artifactStoreList.get(0).getArtifact_name(),artifactStoreIdMap,isEncrypted));
 			}
