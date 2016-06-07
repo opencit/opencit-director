@@ -291,7 +291,7 @@ public class DirectorUtil {
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
 			String value = (String) map.get(key);
-			if (value.equals("null")) {
+			if (value.equals("null") || StringUtils.isBlank(value) || StringUtils.isEmpty(value)) {
 				value = loadedConfiguration.get(key.replace("_", "."));
 			}
 			loadedConfiguration.set(key.replace('_', '.'), value);

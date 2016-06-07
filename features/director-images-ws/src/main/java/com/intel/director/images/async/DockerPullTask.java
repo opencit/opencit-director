@@ -56,7 +56,7 @@ public class DockerPullTask implements Runnable {
 		String repository = image.getRepository();
 		String tag = image.getTag();
 
-		log.info("Inside DockerPullTask, repository::" + repository + " tag::" + tag);
+		log.info("Inside DockerPullTask, imageName: {}, repository::" + repository + " tag::" + tag, image.getImage_name());
 
 		try {
 			image.setStatus(Constants.IN_PROGRESS);

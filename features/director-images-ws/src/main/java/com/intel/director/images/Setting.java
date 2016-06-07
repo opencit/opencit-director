@@ -9,6 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.intel.director.api.MountWilsonSetting;
 import com.intel.director.api.SettingsKMSObject;
 import com.intel.director.common.Constants;
@@ -44,6 +46,10 @@ public class Setting {
 		log.debug("Setting -> updateMtWilsonProperties");
 		if (!request.mtwilson_api_url.contains("https://")) {
 			request.mtwilson_api_url = "https://" + request.mtwilson_api_url;
+		}
+		String validate = request.validate();
+		if(StringUtils.isNotBlank(validate)){
+			return "Error: "+validate.replaceAll("_", " ");
 		}
 		DirectorUtil.editProperties(Constants.MTWILSON_PROP_FILE,
 				request.toString());
