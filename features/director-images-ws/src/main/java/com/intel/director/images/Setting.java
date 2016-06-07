@@ -32,7 +32,7 @@ public class Setting {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRecentMtWilson() throws IOException {
 		log.debug("Setting -> getRecentMtWilson");
-		return DirectorUtil.getProperties(Constants.MTWILSON_PROP_FILE);
+		return DirectorUtil.getPropertiesWithoutPassword(Constants.MTWILSON_PROP_FILE);
 	}
 
 	@POST
@@ -45,9 +45,9 @@ public class Setting {
 		if (!request.mtwilson_api_url.contains("https://")) {
 			request.mtwilson_api_url = "https://" + request.mtwilson_api_url;
 		}
-		return DirectorUtil.editProperties(Constants.MTWILSON_PROP_FILE,
+		DirectorUtil.editProperties(Constants.MTWILSON_PROP_FILE,
 				request.toString());
-
+		return DirectorUtil.getPropertiesWithoutPassword(Constants.MTWILSON_PROP_FILE);
 	}
 
 	@GET
@@ -55,7 +55,7 @@ public class Setting {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getKMSProperties() throws IOException {
 		log.debug("Setting -> getKMSProperties");
-		return DirectorUtil.getProperties(Constants.KMS_PROP_FILE);
+		return DirectorUtil.getPropertiesWithoutPassword(Constants.KMS_PROP_FILE);
 	}
 
 	@POST
@@ -68,9 +68,9 @@ public class Setting {
 		if (!request.kms_endpoint_url.contains("https://")) {
 			request.kms_endpoint_url = "https://" + request.kms_endpoint_url;
 		}
-		return DirectorUtil.editProperties(Constants.KMS_PROP_FILE,
+		DirectorUtil.editProperties(Constants.KMS_PROP_FILE,
 				request.toString());
-
+		return DirectorUtil.getPropertiesWithoutPassword(Constants.KMS_PROP_FILE);
 	}
 
 }
