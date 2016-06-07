@@ -27,7 +27,6 @@ function saveMtWilsonSetting() {
 		url : '/v1/setting/mtwilson/updateproperties',
 		data : JSON.stringify(self.data),
 		contentType : "application/json",
-		dataType : "json",
 		success : function (data) {
 			if (data.indexOf("Error: ") >= 0){
 				alert(data);
