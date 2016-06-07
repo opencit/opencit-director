@@ -18,12 +18,12 @@ function saveMtWilsonSetting() {
 		success : function (data) {
 			$('#mtwilsonapiurl').val(data.mtwilson_api_url);
 			$('#mtwilsonapiusername').val(data.mtwilson_api_username);
-			$('#mtwilsonapipassword').val(data.mtwilson_api_password);
+			$('#mtwilsonapipassword').val(self.data.mtwilson_api_password );
 			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha1);
 			$('#mtwilsonserverip').val(data.mtwilson_server);
 			$('#mtwilsonserverport').val(data.mtwilson_server_port);
 			$('#mtwilsonusername').val(data.mtwilson_username);
-			$('#mtwilsonpassword').val(data.mtwilson_password);
+			$('#mtwilsonpassword').val(self.data.mtwilson_password);
 			alert("Updated Successfully");
 		}
 	});
