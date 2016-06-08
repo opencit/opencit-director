@@ -74,30 +74,9 @@ public class ImageActions {
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * 	  https://{IP/HOST_NAME}/v1/image-actions/<action_id>
-	 * 	  Input: PathParam : action_id = 86AD4900-4F82-4E3B-BAD4-3C6E825AB7C7
+	 * 	  Input: PathParam : action_id = 808B57E5-1A02-4731-813C-60123F739A85
 	 * 	  Output: 
-	 * 	  {
-	 *   "id": "86AD4900-4F82-4E3B-BAD4-3C6E825AB7C7",
-	 *   "image_id": "1AFBA2F5-C02E-420E-9842-C455BB35B334",
-	 *   "action_count": 2,
-	 *   "action_completed": 0,
-	 *   "action_size": 0,
-	 *   "action_size_max": 0,
-	 *   "actions": [
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Recreate Policy"
-	 *     },
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Upload Image For Policy",
-	 *       "store_id": "62B42B78-85B4-4F46-A1FA-AA1DA4F51A54"
-	 *     }
-	 *   ],
-	 *   "current_task_status": "Incomplete",
-	 *   "current_task_name": "Recreate Policy"
-	 * }
-	 * 
+	 * 	  {"id":"808B57E5-1A02-4731-813C-60123F739A85","image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67","action_count":3,"action_completed":3,"action_size":0,"action_size_max":0,"actions":[{"status":"Complete","task_name":"Recreate Policy","message":"recreate task completed"},{"status":"Complete","task_name":"Create Tar","message":"Create Tar completed"},{"status":"Complete","task_name":"Upload Tar","message":"Upload Tar complete","store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"current_task_status":"Complete","current_task_name":"Upload Tar","datetime":1465284021967}
 	 * 
 	 * Docker image action:
 	 * {
@@ -161,43 +140,11 @@ public class ImageActions {
 	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * 
 	 * Input:
-	 * 
-	 *  {"artifact_store_list":[{"artifact_name":"Image","image_store_id":"91D8B6B1-1DF8-4883-8F62-C229A0DC187A"},{"artifact_name":"Policy","image_store_id":"C0D80287-892A-484F-A44D-DBFAF793FB69"}],"image_id":"3BCDCF57-0065-4859-93FB-12F99C89B99C"}
+	 * {"artifact_store_list":[{"artifact_name":"Tarball","image_store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67"}
+	 *  
 	 * Output:
+	 * {"id":"808B57E5-1A02-4731-813C-60123F739A85","image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67","action_count":3,"action_completed":0,"action_size":0,"action_size_max":0,"actions":[{"status":"Incomplete","task_name":"Recreate Policy"},{"status":"Incomplete","task_name":"Create Tar"},{"status":"Incomplete","task_name":"Upload Tar","store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"current_task_status":"Incomplete","current_task_name":"Recreate Policy","created_date_time":1465283994090,"deleted":false}
 	 * 
-	 * {
-	 *   "id": "D6F3E465-24D9-4511-BBBF-C3AE28F18B5E",
-	 *   "image_id": "3BCDCF57-0065-4859-93FB-12F99C89B99C",
-	 *   "action_count": 4,
-	 *   "action_completed": 0,
-	 *   "action_size": 0,
-	 *   "action_size_max": 0,
-	 *   "actions": [
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Recreate Policy"
-	 *     },
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Upload Image For Policy",
-	 *       "store_id": "91D8B6B1-1DF8-4883-8F62-C229A0DC187A"
-	 *     },
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Upload Policy",
-	 *       "store_id": "C0D80287-892A-484F-A44D-DBFAF793FB69"
-	 *     },
-	 *     {
-	 *       "status": "Incomplete",
-	 *       "task_name": "Update Metadata",
-	 *       "store_id": "91D8B6B1-1DF8-4883-8F62-C229A0DC187A"
-	 *     }
-	 *   ],
-	 *   "current_task_status": "Incomplete",
-	 *   "current_task_name": "Recreate Policy",
-	 *   "created_date_time": 1462370693856,
-	 *   "deleted": false
-	 * }
 	 * 
 	 * In case of error:
 	 * {

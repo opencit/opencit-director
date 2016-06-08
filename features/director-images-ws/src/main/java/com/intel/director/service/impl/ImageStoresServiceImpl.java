@@ -48,9 +48,9 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		case Constants.CONNECTOR_GLANCE:
 			returnString = ConnectorProperties.GLANCE.getProperties();
 			break;
-		case Constants.CONNECTOR_SWIFT:
+	/*	case Constants.CONNECTOR_SWIFT:
 			returnString = ConnectorProperties.SWIFT.getProperties();
-			break;
+			break;*/
 		}	
 		return returnString;
 	}
@@ -243,7 +243,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			}
 			return isValidated;
 			
-		case Constants.CONNECTOR_SWIFT:
+	/*	case Constants.CONNECTOR_SWIFT:
 
 			for (String artifact : artifact_types) {
 				Map<String, String> supported_artifacts = ConnectorProperties.SWIFT
@@ -252,7 +252,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 					isValidated = false;
 				}
 			}
-			return isValidated;
+			return isValidated;*/
 
 			default:
 				return false;

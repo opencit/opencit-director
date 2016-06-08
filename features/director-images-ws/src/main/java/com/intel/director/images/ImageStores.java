@@ -643,10 +643,8 @@ public class ImageStores {
 	 * Input: Required: Name of deploymentType: VM or Docker
 	 * 
 		{
-			"Policy": "Policy",
 			"Image": "Image",
-			"Tarball": "Image With Policy",
-			"ImageWithPolicy": "Image with Policy Separated"
+			"Tarball": "Image With Policy"			
 		}
 	 * 
 	 * In case no deployment type is provided, gives error:
@@ -694,7 +692,7 @@ public class ImageStores {
 	 *                    <pre>
 	 * 	https://{IP/HOST_NAME}/v1/image-store-connectors
 	
-	 * Input: Name of connector Docker,Glance,Swift else it would give 404 not found
+	 * Input: Name of connector Docker,Glance else it would give 404 not found
 	 * Output:
 	 * https://{IP/HOST_NAME}/v1/Docker
 		{
@@ -741,34 +739,7 @@ public class ImageStores {
 				"Tarball": "Tarball"
 			}
 		}
-	 * https://{IP/HOST_NAME}/v1/Swift
-		{
-			"name": "GLANCE",
-			"driver": "com.intel.director.images.GlanceImageStoreManager",
-			"properties": [{
-				"key": "glance.api.endpoint"
-			},
-			{
-				"key": "glance.keystone.public.endpoint"
-			},
-			{
-				"key": "glance.tenant.name"
-			},
-			{
-				"key": "glance.image.store.username"
-			},
-			{
-				"key": "glance.image.store.password"
-			},
-			{
-				"key": "glance.visibility"
-			}],
-			"supported_artifacts": {
-				"Image": "Image",
-				"Docker": "Docker",
-				"Tarball": "Tarball"
-			}
-		}
+	 
 	 * 
 	 *                    </pre>
 	 */

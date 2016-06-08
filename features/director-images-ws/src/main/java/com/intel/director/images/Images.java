@@ -1877,7 +1877,7 @@ public class Images {
 	 * 
 	 * @param
 	 * @return Response containing list of details of policies removed
-	 */
+	 *//*
 	@Path("rpc/remove-orphan-policies")
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -1893,7 +1893,7 @@ public class Images {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
 					.entity(genericResponse).build();
 		}
-	}
+	}*/
 
 	/**
 	 * This method returns list of deployment types which allow image encryption

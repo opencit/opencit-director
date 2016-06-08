@@ -5,8 +5,6 @@
  */
 package com.intel.director.async.task;
 
-import javax.xml.bind.JAXBException;
-
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreTransferObject;
 import com.intel.director.api.ImageStoreUploadTransferObject;
@@ -15,7 +13,6 @@ import com.intel.director.common.DockerUtil;
 import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.ArtifactUploadService;
 import com.intel.director.service.impl.ArtifactUploadServiceImpl;
-import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
 
 /**
@@ -121,6 +118,7 @@ public class UploadImageTask extends GenericUploadTask {
 		String uploadImageName = fetchUploadImageName();
 		customProperties.put(Constants.NAME, uploadImageName);
 		String imageFilePath = imageLocation + imageInfo.getImage_name();
+		/*
 		if (trustPolicy != null) {
 			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
 			try {
@@ -136,7 +134,7 @@ public class UploadImageTask extends GenericUploadTask {
 			}
 
 		}
-
+		*/
 		customProperties.put(Constants.UPLOAD_TO_IMAGE_STORE_FILE, imageFilePath);
 	}
 
