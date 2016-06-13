@@ -17,6 +17,7 @@ import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.ImageAttributes;
+import com.intel.director.api.ImageStoreUploadTransferObject;
 import com.intel.director.api.SshSettingInfo;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.TrustPolicyDraft;
@@ -24,6 +25,7 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
 import com.intel.director.api.ui.ImageInfo;
+import com.intel.director.api.ui.ImageStoreUploadFilter;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DirectorUtil;
@@ -35,7 +37,6 @@ import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
-import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
 import com.intel.mtwilson.trustpolicy.xml.Measurement;
@@ -376,6 +377,40 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			throws DirectorException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getVersionedDisplayNameForDockerImage(String imageId) throws DirectorException {
+		// Find if this image is a docker image and has been uploaded earlier.
+		// If so, append v1 to the tag
+		String versionedName = null;
+		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.getImage_deployments())) {
+			return null;
+		}
+		ImageInfo imageById;
+		try {
+			imageById = persistService.fetchImageById(imageId);
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch image by id " + imageId);
+		}
+		if(imageById == null){
+			throw new DirectorException("Unable to fetch image by id " + imageId);
+		}
+		ImageStoreUploadFilter imgUploadFilter = new ImageStoreUploadFilter();
+
+		imgUploadFilter.setImage_id(imageId);
+		List<ImageStoreUploadTransferObject> imageUploads;
+		try {
+			imageUploads = persistService.fetchImageUploads(imgUploadFilter, null);
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch image uploads by image id " + imageId);
+		}
+		versionedName = imageById.getRepository() + ":" + imageById.getTag();
+		if (imageUploads != null && imageUploads.size() > 0) {
+			versionedName = TdaasUtil.getVersionedName(versionedName);
+			log.info("image was uploaded earlier. So appending version to the policy {}", versionedName);			
+		}
+		return versionedName;
 	}
 
 }

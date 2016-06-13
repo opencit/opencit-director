@@ -24,11 +24,15 @@ public class DockerHubManager extends StoreManagerImpl {
 
 	@Override
 	public String upload() throws StoreException {
+		if(objectProperties
+				.get(ImageInfo.class.getName())==null ){
+			throw new StoreException("Error in upload");
+		}
 		ImageInfo imageinfo = (ImageInfo) objectProperties
 				.get(ImageInfo.class.getName());
 		
 		String dockerTagToUse = (String) objectProperties.get(Constants.DOCKER_TAG_TO_USE);
-		
+		if(imageinfo!=null){
 		log.info("Executing /opt/director/bin/dockerhubUpload.sh" + SPACE
 				+ (String) objectProperties.get(Constants.DOCKER_HUB_USERNAME)
 				+ SPACE
@@ -37,6 +41,7 @@ public class DockerHubManager extends StoreManagerImpl {
 				+ (String) objectProperties.get(Constants.DOCKER_HUB_EMAIL)
 				+ SPACE + imageinfo.getRepository() + SPACE
 				+ imageinfo.getTag());
+		}
 
 		try {
 			DirectorUtil.executeCommandInExecUtil(

@@ -385,7 +385,7 @@ function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
 					'Accept' : 'application/json'
 				},
 				success : function(data, status, xhr) {
-					if (data.is_valid) {
+					if (data.valid) {
 						$("#image_store_details_error").html("<font color=\"green\">Valid configuration</font>");
 					} else {
 						$("#image_store_details_error").html(data.error);
@@ -600,7 +600,11 @@ function populateImageStoreDetails(image_store_details) {
 		var valueHolder = "";
 		if (image_store_details[i].value) {
 			valueHolder = image_store_details[i].value;
-			$("#" + image_store_details[i].id).val(valueHolder);
+			if (image_store_details[i].key.toLowerCase().indexOf("password") != -1) {
+				$("#" + image_store_details[i].id).attr("placeholder", image_store_details[i].place_holder_value);
+			}else{
+				$("#" + image_store_details[i].id).val(valueHolder);
+			}
 		}
 	}
 }
@@ -647,8 +651,8 @@ function validateImageStore(imageStoreId) {
 		success : function(data, status, xhr) {
 			console.log(xhr.status);
 			if (xhr.status == 200) {
-				console.log(data.is_valid);
-				if (data.is_valid) {
+				console.log(data.valid);
+				if (data.valid) {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-ok");
 				} else {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-remove");

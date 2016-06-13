@@ -1915,7 +1915,7 @@ public class DbServiceImpl implements IPersistService {
 
 	public void updateSsh(SshSettingInfo ssh) throws DbException {
 		MwImage mwImage = imgDao.getMwImage(ssh.getImage().getId());
-		mwImage.setName(ssh.getIpAddress());
+		mwImage.setName(ssh.getName());
 		
 		MwHost mwSsh = mapper.toDataUpdate(ssh);
 		mwSsh.setImageId(mwImage);
@@ -2062,7 +2062,7 @@ public class DbServiceImpl implements IPersistService {
 	@Override
 	public ImageStoreTransferObject saveImageStore(
 			ImageStoreTransferObject imageStoreTO) throws DbException {
-		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		MwImageStore mwImageStore = mapper.toData(null, imageStoreTO);
 		MwImageStore createdImageStore = imageStoreDao
 				.createImageStore(mwImageStore);
 		return mapper.toTransferObject(createdImageStore);
@@ -2088,14 +2088,19 @@ public class DbServiceImpl implements IPersistService {
 	@Override
 	public void updateImageStore(ImageStoreTransferObject imageStoreTO)
 			throws DbException {
-		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		MwImageStore existingStore = imageStoreDao.getImageStoreByID(imageStoreTO.id);
+		MwImageStore mwImageStore = mapper.toData(existingStore, imageStoreTO);
 		imageStoreDao.updateImageStore(mwImageStore);
 	}
 	
 	@Override
 	public void destroyImageStore(ImageStoreTransferObject imageStoreTO)
 			throws DbException {
-		MwImageStore mwImageStore = mapper.toData(imageStoreTO);
+		if(imageStoreTO == null || StringUtils.isBlank(imageStoreTO.getId())){
+			throw new DbException("Unable to delete image store since no image store passed has no ID");
+		}
+		MwImageStore mwImageStore = new MwImageStore();
+		mwImageStore.setId(imageStoreTO.getId());
 		imageStoreDao.deleteImageStore(mwImageStore);
 	}
 

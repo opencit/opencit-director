@@ -33,9 +33,9 @@ public enum ArtifactsForDeploymentType {
 		artifacts = new HashMap<String, String>();
 		if (Constants.DEPLOYMENT_TYPE_VM.equals(name)) {
 			artifacts.put(Constants.ARTIFACT_IMAGE, "Image");
-			artifacts.put(Constants.ARTIFACT_POLICY, "Policy");
+			///artifacts.put(Constants.ARTIFACT_POLICY, "Policy");
 			artifacts.put(Constants.ARTIFACT_TAR, "Image With Policy" );
-			artifacts.put(Constants.ARTIFACT_IMAGE_WITH_POLICY, "Image with Policy Separated");
+			////artifacts.put(Constants.ARTIFACT_IMAGE_WITH_POLICY, "Image with Policy Separated");
 		} else if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(name)) {
 			artifacts.put(Constants.ARTIFACT_DOCKER_IMAGE, "Docker Image");
 			artifacts.put(Constants.ARTIFACT_DOCKER_WITH_POLICY, "Docker Image With Policy");

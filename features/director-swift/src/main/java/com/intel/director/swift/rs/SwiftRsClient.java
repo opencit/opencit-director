@@ -186,10 +186,8 @@ public class SwiftRsClient {
 					"Unable to read json ,swift getObjectList method", e);
 		}finally{
 			
-				try {
-					if(br!=null){
-					br.close();
-					}
+				try {					
+					br.close();					
 					if(inputStream!=null){
 						inputStream.close();
 					}
@@ -454,7 +452,9 @@ public class SwiftRsClient {
 			throw new SwiftException("createOrReplaceObject I/O Failed ", e);
 		} finally {
 			try {
+				if(ist!=null){
 				ist.close();
+				}
 			} catch (IOException e) {
 				log.error("Error while closing file stream", e);
 			}

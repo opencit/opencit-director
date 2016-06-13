@@ -9,21 +9,30 @@ function saveMtWilsonSetting() {
 	self.data.mtwilson_server_port = $('#mtwilsonserverport').val();
 	self.data.mtwilson_username = $('#mtwilsonusername').val();
 	self.data.mtwilson_password = $('#mtwilsonpassword').val();
+	
+	
+	self.data.mtwilson_password = $.trim(self.data.mtwilson_password);
+	self.data.mtwilson_api_password = $.trim(self.data.mtwilson_api_password);
+	
+	if(self.data.mtwilson_api_password == '') {
+		alert('Please provide valid api password');
+		return false;
+	}
+	if (self.data.mtwilson_password == '' ){
+		alert('Please provide valid password');
+		return false;
+	} 
 	$.ajax({
 		type : 'POST',
 		url : '/v1/setting/mtwilson/updateproperties',
 		data : JSON.stringify(self.data),
 		contentType : "application/json",
-		dataType : "json",
 		success : function (data) {
-			$('#mtwilsonapiurl').val(data.mtwilson_api_url);
-			$('#mtwilsonapiusername').val(data.mtwilson_api_username);
-			$('#mtwilsonapipassword').val(data.mtwilson_api_password);
-			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha1);
-			$('#mtwilsonserverip').val(data.mtwilson_server);
-			$('#mtwilsonserverport').val(data.mtwilson_server_port);
-			$('#mtwilsonusername').val(data.mtwilson_username);
-			$('#mtwilsonpassword').val(data.mtwilson_password);
+			if (data.indexOf("Error: ") >= 0){
+				alert(data);
+				return false;
+			}
+
 			alert("Updated Successfully");
 		}
 	});

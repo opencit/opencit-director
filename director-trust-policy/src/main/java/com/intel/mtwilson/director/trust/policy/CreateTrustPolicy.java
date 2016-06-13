@@ -106,7 +106,7 @@ public class CreateTrustPolicy {
 			String keyFromKMS = kmsUtil.getKeyFromKMS(keyIdFromUrl);
 			if(StringUtils.isNotBlank(keyFromKMS)){
 				log.info("Existing key is still valid. Not creating a new one.");
-				throw new DirectorException("Error validating/getting key from KMS");
+				return;
 			}
 		}
 

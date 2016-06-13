@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Entity
 @Cacheable(false)
 @Table(name = "MW_IMAGE")
-public class MwImage extends MwAuditable {
+public class MwImage extends MwAuditable implements BaseDomainInterface {
 
 	@Column(name = "NAME")
 	private String name;

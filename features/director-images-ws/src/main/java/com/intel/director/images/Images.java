@@ -34,7 +34,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.ClientProtocolException;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
@@ -105,14 +105,54 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images
 	 * Input: {"image_name":"test.img","image_deployments":"VM","image_format": "qcow2", "image_size":13631488 }
-	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
-	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","image_name":"test.img",
-	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Progress","image_size":407552,
-	 * 			"sent":0,"deleted":false,"location":"/mnt/images/"}
+	 * Output: {
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-16 07:19:39",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-16 07:19:39",
+	 *   "id": "D848C017-36BC-43BB-BC69-698A517878A0",
+	 *   "image_name": "test.img",
+	 *   "image_format": "qcow2",
+	 *   "image_deployments": "VM",
+	 *   "image_size": 13631488,
+	 *   "sent": 0,
+	 *   "deleted": false,
+	 *   "image_upload_status": "success",
+	 *   "image_Location": "/mnt/images/"
+	 * }
 	 * 
+	 * 
+	 * In case of Docker:
+	 * Input:    {
+	 * 	    "image_deployments": "Docker",
+	 * 	    "image_format" : "tar",
+	 * 	    "repository" : "debian",
+	 * 	    "tag":"latest",
+	 * 	    "image_size" : 1322496
+	 * 	 }
+	 * 	 Ouput: 
+	 * 		{
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-16 07:20:40",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-16 07:20:40",
+	 *   "id": "D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8",
+	 *   "image_name": "debian:latest",
+	 *   "image_format": "tar",
+	 *   "image_deployments": "Docker",
+	 *   "image_size": 1322496,
+	 *   "sent": 0,
+	 *   "deleted": false,
+	 *   "repository": "debian",
+	 *   "tag": "latest",
+	 *   "image_upload_status": "success",
+	 *   "image_Location": "/mnt/images/"
+	 * }
 	 * In Case of error such as image name already exists on the server :
 	 * {
 	 * 	"status" : "Error",
@@ -128,15 +168,15 @@ public class Images {
 	 * 2) Invalid format and deployment type
 	 * {
 	 *   "deleted": false,
-	 *   "details": "Invalid deployment type for image,Inavlid deployment format for image",
+	 *   "details": "Invalid deployment type for image,Invalid deployment format for image",
 	 *   "image_upload_status": "Error"
 	 * }
 	 * </pre>
 	 * 
 	 * @param TrustDirectorImageUploadRequest
 	 *            object which includes metadata information
-	 * @return Response object contains newly created
-	 *         image metadata along with image_id
+	 * @return Response object contains newly created image metadata along with
+	 *         image_id
 	 * @throws DirectorException
 	 */
 	@Path("images")
@@ -146,66 +186,90 @@ public class Images {
 	public Response createUploadImageMetadata(
 			TrustDirectorImageUploadRequest uploadRequest)
 			throws DirectorException {
-		
+
 		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
-		
+
 		String errors = uploadRequest.validate();
 		if (StringUtils.isNotBlank(errors)) {
 			uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 			uploadImageToTrustDirector.status = Constants.ERROR;
 			uploadImageToTrustDirector.details = errors;
-			return Response.status(Response.Status.BAD_REQUEST).entity(uploadImageToTrustDirector).build();
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(uploadImageToTrustDirector).build();
 		}
-		
-		if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(uploadRequest.image_deployments) && uploadRequest.image_size == 0) {
+
+		if (Constants.DEPLOYMENT_TYPE_DOCKER
+				.equals(uploadRequest.image_deployments)
+				&& uploadRequest.image_size == 0) {
+			boolean dockerHubConnection=false;
+			try {
+				dockerHubConnection = DockerUtil
+						.checkDockerHubConnection();
+			} catch (IOException e) {
+				throw new DirectorException(
+						"Error in doesRepoTagExistInDockerHub", e);
+			}
+			if (!dockerHubConnection) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Unable to connect to docker hub";
+				return Response.ok(uploadImageToTrustDirector)
+						.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			}
+			
 			boolean doesRepoTagExistInDockerHub;
 			try {
-				doesRepoTagExistInDockerHub = DockerUtil.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
-						uploadRequest.getTag());
-			} catch (ClientProtocolException e) {
-				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
-
+				doesRepoTagExistInDockerHub = DockerUtil
+						.doesRepoTagExistInDockerHub(
+								uploadRequest.getRepository(),
+								uploadRequest.getTag());
 			} catch (IOException e) {
-				throw new DirectorException("Error in doesRepoTagExistInDockerHub", e);
+				throw new DirectorException(
+						"Error in doesRepoTagExistInDockerHub", e);
 			}
 
 			if (!doesRepoTagExistInDockerHub) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with repo tag not available in docker hub";
-				return Response.ok(uploadImageToTrustDirector).status(Response.Status.NOT_FOUND).build();
+				return Response.ok(uploadImageToTrustDirector)
+						.status(Response.Status.NOT_FOUND).build();
 			}
 		}
-		
-		imageService = new ImageServiceImpl();	
+
+		imageService = new ImageServiceImpl();
 		String imageName = uploadRequest.image_name;
-		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+		if (Constants.DEPLOYMENT_TYPE_DOCKER
+				.equalsIgnoreCase(uploadRequest.image_deployments)
 				&& StringUtils.isBlank(imageName)) {
 			String repositoryInName = uploadRequest.repository;
-			imageName = repositoryInName.replace("/", "-") + ":" + uploadRequest.tag;
+			imageName = repositoryInName.replace("/", "-") + ":"
+					+ uploadRequest.tag;
 		}
 		try {
-			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments) && dockerActionService.doesRepoTagExist(uploadRequest.repository,uploadRequest.tag)) {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER
+					.equalsIgnoreCase(uploadRequest.image_deployments)
+					&& dockerActionService.doesRepoTagExist(
+							uploadRequest.repository, uploadRequest.tag)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Repo And Tag already exists..!!";
 				return Response.ok(uploadImageToTrustDirector).build();
 			}
-			
+
 			if (imageService.doesImageNameExist(imageName)) {
 				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
 				uploadImageToTrustDirector.status = Constants.ERROR;
 				uploadImageToTrustDirector.details = "Image with Same Name already exists. <br>Please Enter Image Name ";
 				return Response.ok().entity(uploadImageToTrustDirector).build();
 			}
-			
-		
-			
+
 			uploadImageToTrustDirector = imageService
 					.createUploadImageMetadataImpl(
 							uploadRequest.image_deployments,
 							uploadRequest.image_format, imageName,
-							uploadRequest.image_size, uploadRequest.repository, uploadRequest.tag);
+							uploadRequest.image_size, uploadRequest.repository,
+							uploadRequest.tag);
 			uploadImageToTrustDirector.status = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: "
 					+ uploadImageToTrustDirector.getLocation());
@@ -227,19 +291,62 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/rpc/images/content/3DED763F-99BA-4F99-B53B-5A6F6736E1E9
+	 * https://{IP/HOST_NAME}/v1/rpc/images/content/C4C9E453-A864-4B14-8B72-9F9DF9406198
 	 * Input: chunk for image upload
-	 * Output: {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
-	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
-	 * 			"image_format":"qcow2","image_deployments":"VM","status":"Complete","image_size":407552,
-	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+	 * Output: {
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-16 08:53:08",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-16 08:56:15",
+	 *   "id": "C4C9E453-A864-4B14-8B72-9F9DF9406198",
+	 *   "image_name": "test11.img",
+	 *   "image_format": "qcow2",
+	 *   "image_deployments": "VM",
+	 *   "image_size": 13631488,
+	 *   "sent": 13631488,
+	 *   "deleted": false,
+	 *   "image_upload_status": "Complete",
+	 *   "image_Location": "/mnt/images/"
+	 * }
 	 * 
 	 * While the image upload is in progress:
-	 * {"created_by_user_id":"admin","created_date":1446801301639,"edited_by_user_id":"admin",
-	 * 			"edited_date":1446801301639,"id":"B79EDFE9-4690-42B7-B4F0-71C53E36368C","name":"test.img",
-	 * 			"image_format":"qcow2","image_deployments":"VM","status":"In Porgress","image_size":407552,
-	 * 			"sent":407552,"deleted":false,"location":"/mnt/images/"}
+	 * {
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-16 08:53:08",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-16 08:53:50",
+	 *   "id": "C4C9E453-A864-4B14-8B72-9F9DF9406198",
+	 *   "image_name": "test11.img",
+	 *   "image_format": "qcow2",
+	 *   "image_deployments": "VM",
+	 *   "image_size": 13631488,
+	 *   "sent": 0,
+	 *   "deleted": false,
+	 *   "image_upload_status": "In Progress",
+	 *   "image_Location": "/mnt/images/"
+	 * }
 	 * 
+	 * In case of Docker: 
+	 * 
+	 * 
+	 * {
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-16 07:20:40",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-16 08:50:53",
+	 *   "id": "D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8",
+	 *   "image_name": "debian:latest",
+	 *   "image_format": "tar",
+	 *   "image_deployments": "Docker",
+	 *   "image_size": 1322496,
+	 *   "sent": 0,
+	 *   "deleted": false,
+	 *   "repository": "debian",
+	 *   "tag": "latest",
+	 *   "image_upload_status": "In Progress",
+	 *   "image_Location": "/mnt/images/"
+	 * }
+	 * In case of docker, after the call to upload image content another call needs to be done:  https://HOST:PORT/v1/rpc/docker-setup/UUID_OF_IMAGE
 	 * </pre>
 	 * @param imageId
 	 *            - id received as response of https://{IP/HOST_NAME}/v1/images/
@@ -259,8 +366,9 @@ public class Images {
 			throws DirectorException {
 		log.info("Uploading image to TDaaS");
 		imageService = new ImageServiceImpl();
-		TrustDirectorImageUploadResponse uploadImageToTrustDirector =new TrustDirectorImageUploadResponse();;
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+		;
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			uploadImageToTrustDirector.details = "Imaged id is empty or not in uuid format";
 			uploadImageToTrustDirector.status = Constants.ERROR;
 			return Response.status(Response.Status.BAD_REQUEST)
@@ -302,44 +410,132 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images
 	 * Input: deploymentType=VM (Example : https://{IP/HOST_NAME}/v1/images?deploymentType=VM)
 	 * 
-	 * Output: {
-	 * "images": [
-	 * {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-21",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-21",
-	 *       "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *       "image_name": "CIR1.img",
-	 *       "image_format": "qcow2",
-	 *       "image_deployments": "VM",
-	 *       "image_size": 13312,
-	 *       "sent": 13312,
-	 *       "deleted": false,
-	 *       "trust_policy_id": "0e41169f-d2f3-4566-96c7-183d699417fb",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "CIR1.img",
-	 *       "image_upload_status": "Complete",
-	 *       "image_Location": "/mnt/images/"
-	 *     },
-	 *     {
-	 *       "created_date": "2015-12-17",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-17",
-	 *       "id": "D7952C76-8F37-474A-B054-168ACC2C0802",
-	 *       "image_name": "10.35.35.182",
-	 *       "image_deployments": "BareMetal",
-	 *       "deleted": false,
-	 *       "trust_policy_id": "f421e8cf-8d29-40b9-b05f-6b52d549dc81",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "S1",
-	 *       "image_upload_status": "Complete"
-	 *     }
-	 * }]}
+	 * Output:
+	 * 	
+	 * 			{
+	 * 			"images": [
+	 * 			{
+	 * 			  "created_by_user_id": "admin",
+	 * 			  "created_date": "2016-05-03 20:40:17",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-03 20:40:17",
+	 * 			  "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+	 * 			  "image_name": "debian:testing",
+	 * 			  "image_format": "tar",
+	 * 			  "image_deployments": "Docker",
+	 * 			  "image_size": 0,
+	 * 			  "sent": 0,
+	 * 			  "deleted": false,
+	 * 			  "repository": "debian",
+	 * 			  "tag": "testing",
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "-",
+	 * 			  "action_entry_created": false,
+	 * 			  "image_upload_status": "In Progress",
+	 * 			  "image_Location": "/mnt/images/"
+	 * 			},
+	 * 			{
+	 * 			  "created_by_user_id": "admin",
+	 * 			  "created_date": "2016-05-02 05:45:44",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-01 22:26:17",
+	 * 			  "id": "1AFBA2F5-C02E-420E-9842-C455BB35B334",
+	 * 			  "image_name": "cirros.img",
+	 * 			  "image_format": "qcow2",
+	 * 			  "image_deployments": "VM",
+	 * 			  "image_size": 13287936,
+	 * 			  "sent": 13287936,
+	 * 			  "deleted": false,
+	 * 			  "upload_variable_md5": "110db09830b79d60c9faf056d7bdb2f5",
+	 * 			  "trust_policy_id": "ACE7EA06-34EE-412B-8505-83FD58AD79AD",
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "cirros.img",
+	 * 			  "action_entry_created": true,
+	 * 			  "image_upload_status": "Complete",
+	 * 			  "image_Location": "/mnt/images/"
+	 * 			},
+	 * 			{
+	 * 			  "created_by_user_id": "admin",
+	 * 			  "created_date": "2016-05-02 05:48:28",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-03 01:15:25",
+	 * 			  "id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+	 * 			  "image_name": "c2",
+	 * 			  "image_format": "qcow2",
+	 * 			  "image_deployments": "VM",
+	 * 			  "image_size": 13287936,
+	 * 			  "sent": 13287936,
+	 * 			  "deleted": false,
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "-",
+	 * 			  "action_entry_created": false,
+	 * 			  "image_upload_status": "Complete",
+	 * 			  "image_Location": "/mnt/images/"
+	 * 			},
+	 * 			{
+	 * 			  "created_date": "2016-05-03 19:30:10",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-03 19:36:44",
+	 * 			  "id": "EC45AC23-0A64-41E7-8083-A339E29F4A56",
+	 * 			  "image_name": "10.35.35.131",
+	 * 			  "image_deployments": "BareMetal",
+	 * 			  "image_size": 0,
+	 * 			  "deleted": false,
+	 * 			  "trust_policy_draft_id": "9268e9cc-cfc2-43ce-9847-133e96ff0c54",
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "P1",
+	 * 			  "action_entry_created": false,
+	 * 			  "image_upload_status": "Complete"
+	 * 			},
+	 * 			{
+	 * 			  "created_date": "2016-05-03 19:37:02",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-03 20:37:54",
+	 * 			  "id": "EB7E45CD-F84C-419E-9841-A685E8E28050",
+	 * 			  "image_name": "10.35.35.131",
+	 * 			  "image_deployments": "BareMetal",
+	 * 			  "image_size": 0,
+	 * 			  "deleted": false,
+	 * 			  "trust_policy_draft_id": "f08b2b01-7fe7-4ea1-ba8c-4883b366253a",
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "P2",
+	 * 			  "action_entry_created": false,
+	 * 			  "image_upload_status": "Complete"
+	 * 			},
+	 * 			{
+	 * 			  "created_by_user_id": "admin",
+	 * 			  "created_date": "2016-05-03 20:38:44",
+	 * 			  "edited_by_user_id": "admin",
+	 * 			  "edited_date": "2016-05-03 20:39:39",
+	 * 			  "id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+	 * 			  "image_name": "busybox:latest",
+	 * 			  "image_format": "tar",
+	 * 			  "image_deployments": "Docker",
+	 * 			  "image_size": 1322496,
+	 * 			  "sent": 1322496,
+	 * 			  "deleted": false,
+	 * 			  "repository": "busybox",
+	 * 			  "tag": "latest",
+	 * 			  "image_uploads_count": 0,
+	 * 			  "policy_uploads_count": 0,
+	 * 			  "policy_name": "-",
+	 * 			  "action_entry_created": false,
+	 * 			  "image_upload_status": "Complete",
+	 * 			  "image_Location": "/mnt/images/"
+	 * 			}
+	 * 			]
+	 * 			}
 	 * 
 	 * </pre>
 	 * 
@@ -356,15 +552,14 @@ public class Images {
 			throws DirectorException {
 		SearchImagesRequest searchImagesRequest = new SearchImagesRequest();
 		SearchImagesResponse searchImagesResponse = new SearchImagesResponse();
-		if(!CommonValidations.validateImageDeployments(deployment_type)){
+		if (!CommonValidations.validateImageDeployments(deployment_type)) {
 			searchImagesResponse.error = "Incorrect deployment_type. Valid types are BareMetal or VM";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(searchImagesResponse).build();
 		}
-		
+
 		searchImagesRequest.deploymentType = deployment_type;
-		 searchImagesResponse = imageService
-				.searchImages(searchImagesRequest);
+		searchImagesResponse = imageService.searchImages(searchImagesRequest);
 		return Response.ok(searchImagesResponse).build();
 
 	}
@@ -383,25 +578,57 @@ public class Images {
 	 * Input: imageId : 465A8B27-7CC8-4A3C-BBBC-26161E3853CD
 	 * Output:
 	 * {
-	 *       "created_by_user_id": "admin",
-	 *       "created_date": "2015-12-21",
-	 *       "edited_by_user_id": "admin",
-	 *       "edited_date": "2015-12-21",
-	 *       "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *       "image_name": "CIR1.img",
-	 *       "image_format": "qcow2",
-	 *       "image_deployments": "VM",
-	 *       "image_size": 13312,
-	 *       "sent": 13312,
-	 *       "deleted": false,
-	 *       "trust_policy_id": "0e41169f-d2f3-4566-96c7-183d699417fb",
-	 *       "uploads_count": 0,
-	 *       "policy_name": "CIR1.img",
-	 *       "ip_address":"10.35.35.182",
-	 *       "username":"root"
-	 *       "image_upload_status": "Complete",
-	 *       "image_Location": "/mnt/images/"
-	 *     }
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-02 05:45:44",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-02 10:26:17",
+	 *   "id": "1AFBA2F5-C02E-420E-9842-C455BB35B334",
+	 *   "image_name": "cirros.img",
+	 *   "image_format": "qcow2",
+	 *   "image_deployments": "VM",
+	 *   "image_size": 13287936,
+	 *   "sent": 13287936,
+	 *   "deleted": false,
+	 *   "upload_variable_md5": "110db09830b79d60c9faf056d7bdb2f5",
+	 *   "trust_policy_id": "ACE7EA06-34EE-412B-8505-83FD58AD79AD",
+	 *   "image_upload_status": "Complete",
+	 *   "image_Location": "/mnt/images/"
+	 * }
+	 * 
+	 * 	Docker image response: 
+	 * 	{
+	 *   "created_by_user_id": "admin",
+	 *   "created_date": "2016-05-04 08:40:17",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-04 08:40:17",
+	 *   "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+	 *   "image_name": "debian:testing",
+	 *   "image_format": "tar",
+	 *   "image_deployments": "Docker",
+	 *   "image_size": 0,
+	 *   "sent": 0,
+	 *   "deleted": false,
+	 *   "repository": "debian",
+	 *   "tag": "testing",
+	 *   "image_upload_status": "In Progress",
+	 *   "image_Location": "/mnt/images/"
+	 * }
+	 * 
+	 * Bare metal response; 
+	 * {
+	 *   "created_date": "2016-05-04 07:30:10",
+	 *   "edited_by_user_id": "admin",
+	 *   "edited_date": "2016-05-04 07:36:44",
+	 *   "id": "EC45AC23-0A64-41E7-8083-A339E29F4A56",
+	 *   "image_name": "10.35.35.131",
+	 *   "image_deployments": "BareMetal",
+	 *   "image_size": 0,
+	 *   "deleted": false,
+	 *   "trust_policy_draft_id": "9268e9cc-cfc2-43ce-9847-133e96ff0c54",
+	 *   "ip_address": "10.35.35.131",
+	 *   "username": "root",
+	 *   "image_upload_status": "Complete"
+	 * }
 	 * 
 	 * 
 	 * 
@@ -420,13 +647,12 @@ public class Images {
 			throws DirectorException {
 		ImageInfoResponse imageInfoResponse = new ImageInfoResponse();
 
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			imageInfoResponse.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(imageInfoResponse).build();
 		}
-		imageInfoResponse = imageService
-				.getImageDetails(imageId);
+		imageInfoResponse = imageService.getImageDetails(imageId);
 		if (imageInfoResponse == null) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
@@ -458,26 +684,52 @@ public class Images {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/rpc/mount-image
 	 * Input: {"id" : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
 	 * Output: 
+	 * 
+	 * Docker image mount respose:
 	 * {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": 1450636200000,
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": 1450685484685,
-	 *   "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *   "image_name": "CIR1.img",
-	 *   "image_format": "qcow2",
-	 *   "image_deployments": "VM",
-	 *   "image_size": 13312,
-	 *   "sent": 13312,
-	 *   "mounted_by_user_id": "admin",
-	 *   "deleted": false,
-	 *   "image_upload_status": "Complete",
-	 *   "image_Location": "/mnt/images/"
-	 * }
+	 * 	"created_by_user_id": "admin",
+	 * 	"created_date": "2016-05-04 08:38:44",
+	 * 	"edited_by_user_id": "admin",
+	 * 	"edited_date": "2016-05-04 08:45:31",
+	 * 	"id": "960ECC0E-8DDF-4FDB-B788-A2855F9E799B",
+	 * 	"image_name": "busybox:latest",
+	 * 	"image_format": "tar",
+	 * 	"image_deployments": "Docker",
+	 * 	"image_size": 1322496,
+	 * 	"sent": 1322496,
+	 * 	"mounted_by_user_id": "admin",
+	 * 	"deleted": false,
+	 * 	"repository": "busybox",
+	 * 	"tag": "latest",
+	 * 	"image_upload_status": "Complete",
+	 * 	"image_Location": "/mnt/images/"
+	 * 	}
+	 * 	
+	 * 	VM mount response
+	 * 	{
+	 * 	"created_by_user_id": "admin",
+	 * 	"created_date": "2016-05-02 05:48:28",
+	 * 	"edited_by_user_id": "admin",
+	 * 	"edited_date": "2016-05-04 08:47:17",
+	 * 	"id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+	 * 	"image_name": "c2",
+	 * 	"image_format": "qcow2",
+	 * 	"image_deployments": "VM",
+	 * 	"image_size": 13287936,
+	 * 	"sent": 13287936,
+	 * 	"mounted_by_user_id": "admin",
+	 * 	"deleted": false,
+	 * 	"image_upload_status": "Complete",
+	 * 	"image_Location": "/mnt/images/"
+	 * 	}
+	 * 
+	 * 
 	 * 
 	 * 
 	 * If the user tries to mount an image which, for some reason, has been removed from the uploaded location, the response will look like :
@@ -502,7 +754,7 @@ public class Images {
 			@Context HttpServletRequest httpServletRequest,
 			@Context HttpServletResponse httpServletResponse) {
 		MountImageResponse mountImageResponse = new MountImageResponse();
-		String error=mountImage.validate();
+		String error = mountImage.validate();
 		if (StringUtils.isNotBlank(error)) {
 			mountImageResponse.setError(error);
 			mountImageResponse.setId(mountImage.id);
@@ -510,8 +762,9 @@ public class Images {
 					.entity(mountImageResponse).build();
 		}
 		try {
-			ImageInfo fetchImageById = imageService.fetchImageById(mountImage.id);
-			if(fetchImageById == null){
+			ImageInfo fetchImageById = imageService
+					.fetchImageById(mountImage.id);
+			if (fetchImageById == null) {
 				mountImageResponse.setError("Invalid image id provided");
 				mountImageResponse.setId(mountImage.id);
 				return Response.status(Response.Status.BAD_REQUEST)
@@ -549,27 +802,52 @@ public class Images {
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/rpc/unmount-image
-	 * Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
-	 * Output: 
-	 * {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": 1450636200000,
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": 1450685543811,
-	 *   "id": "465A8B27-7CC8-4A3C-BBBC-26161E3853CD",
-	 *   "image_name": "CIR1.img",
-	 *   "image_format": "qcow2",
-	 *   "image_deployments": "VM",
-	 *   "image_size": 13312,
-	 *   "sent": 13312,
-	 *   "deleted": false,
-	 *   "image_upload_status": "success",
-	 *   "image_Location": "/mnt/images/"
-	 * }
+	 *  https://{IP/HOST_NAME}/v1/rpc/unmount-image
+	 *  Input: {id : "465A8B27-7CC8-4A3C-BBBC-26161E3853CD"} 
+	 *  Output: 
+	 *  In case of VM:
+	 *  {
+	 * 		  "created_by_user_id": "admin",
+	 * 		  "created_date": "2016-05-02 05:48:28",
+	 * 		  "edited_by_user_id": "admin",
+	 * 		  "edited_date": "2016-05-04 08:50:32",
+	 * 		  "id": "9C64F16D-782C-4F24-8880-9A9F1EE6794D",
+	 * 		  "image_name": "c2",
+	 * 		  "image_format": "qcow2",
+	 * 		  "image_deployments": "VM",
+	 * 		  "image_size": 13287936,
+	 * 		  "sent": 13287936,
+	 * 		  "deleted": false,
+	 * 		  "upload_variable_md5":"39b61f1d3234565bfa6fc585ee8177f2",
+	 * 		  "image_upload_status": "Complete",
+	 * 		  "image_Location": "/mnt/images/"
+	 * 		}
+	 * 		
+	 * 		Docker: 
+	 * 		{
+	 * 		  "created_by_user_id": "admin",
+	 * 		  "created_date": "2016-05-04 08:40:17",
+	 * 		  "edited_by_user_id": "admin",
+	 * 		  "edited_date": "2016-05-04 08:51:34",
+	 * 		  "id": "D67DE0A7-9FED-48B1-894E-4E345AD3475F",
+	 * 		  "image_name": "debian:testing",
+	 * 		  "image_format": "tar",
+	 * 		  "image_deployments": "Docker",
+	 * 		  "image_size": 0,
+	 * 		  "sent": 0,
+	 * 		  "deleted": false,
+	 * 		   "upload_variable_md5":"48b6171d3234565bfa6fc585ee8177f2",
+	 * 		  "repository": "debian",
+	 * 		  "tag": "testing",
+	 * 		  "image_upload_status": "Complete",
+	 * 		  "image_Location": "/mnt/images/"
+	 * 		}
+	 *  
+	 *  In case of error:
+	 * {"id":"2C0EFEF6-A3C4-4FC6-9CEC-A679FF1F74","deleted":false,"error":"Image Id is empty or is not in uuid format"}
+	 * 		OR in case of invalid image
+	 * 		{"id":"2C0EFEF6-A3C4-4FC6-9CEC-A679FF1F743a","deleted":false,"error":"Invalid image id provided"}
 	 * 
-	 * In case of error:
-	 * { â€œerrorâ€: â€œerror message â€ }
 	 * 
 	 * </pre>
 	 * 
@@ -589,7 +867,7 @@ public class Images {
 			@Context HttpServletResponse httpServletResponse) {
 		String user = ShiroUtil.subjectUsername();
 		UnmountImageResponse unmountImageResponse = new UnmountImageResponse();
-		String error=unmountimage.validate();
+		String error = unmountimage.validate();
 		if (StringUtils.isNotBlank(error)) {
 			unmountImageResponse.setError(error);
 			unmountImageResponse.setId(unmountimage.id);
@@ -597,8 +875,9 @@ public class Images {
 					.entity(unmountImageResponse).build();
 		}
 		try {
-			ImageInfo fetchImageById = imageService.fetchImageById(unmountimage.id);
-			if(fetchImageById == null){
+			ImageInfo fetchImageById = imageService
+					.fetchImageById(unmountimage.id);
+			if (fetchImageById == null) {
 				unmountImageResponse.setError("Invalid image id provided");
 				unmountImageResponse.setId(unmountimage.id);
 				return Response.status(Response.Status.BAD_REQUEST)
@@ -609,7 +888,6 @@ public class Images {
 			log.error("Invalid image id", e1);
 		}
 
-	
 		try {
 			unmountImageResponse = imageService.unMountImage(unmountimage.id,
 					user);
@@ -694,22 +972,22 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/search")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response searchFilesInImage(
-			@PathParam("imageId") String imageId, @Context UriInfo uriInfo) {
+	public Response searchFilesInImage(@PathParam("imageId") String imageId,
+			@Context UriInfo uriInfo) {
 		imageService = new ImageServiceImpl();
 		SearchFilesInImageRequest searchFilesInImageRequest = new TdaasUtil()
 				.mapUriParamsToSearchFilesInImageRequest(uriInfo);
 		searchFilesInImageRequest.id = imageId;
 		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			filesInImageResponse.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(filesInImageResponse).build();
 		}
-		
+
 		try {
 			ImageInfo fetchImageById = imageService.fetchImageById(imageId);
-			if(fetchImageById == null){
+			if (fetchImageById == null) {
 				filesInImageResponse.error = "Invalid image id provided";
 				return Response.status(Response.Status.BAD_REQUEST)
 						.entity(filesInImageResponse).build();
@@ -718,15 +996,15 @@ public class Images {
 		} catch (DirectorException e1) {
 			log.error("Invalid image id", e1);
 		}
-		
+
 		String mountPath = TdaasUtil.getMountPath(imageId);
 		File f = new File(mountPath);
-		if(!f.exists()){
+		if (!f.exists()) {
 			filesInImageResponse.error = "Image not mounted";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(filesInImageResponse).build();
 		}
-		
+
 		try {
 			filesInImageResponse = imageService
 					.searchFilesInImage(searchFilesInImageRequest);
@@ -753,8 +1031,8 @@ public class Images {
 	}
 
 	/**
-	 * Retrieves list of deployment types - VM and BareMetal are the types
-	 * returned as JSON
+	 * Retrieves list of deployment types - VM,BareMetal and Docker are the
+	 * types returned as JSON
 	 * 
 	 * 
 	 * @mtwContentTypeReturned JSON
@@ -762,18 +1040,23 @@ public class Images {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-deployments
 	 * Input: None
-	 * Output: {
-	 *   "image_deployments": [
-	 *     {
-	 *       "name": "VM",
-	 *       "display_name": "Virtualized Server"
-	 *     },
-	 *     {
-	 *       "name": "BareMetal",
-	 *       "display_name": "Non-Virtualized Server"
-	 *     }
-	 *   ]
-	 * }
+	 * Output: 
+	 * {
+	 * 		  "image_deployments": [
+	 * 		    {
+	 * 		      "name": "VM",
+	 * 		      "display_name": "Virtualized Server"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "BareMetal",
+	 * 		      "display_name": "Non-Virtualized Server"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "Docker",
+	 * 		      "display_name": "Docker"
+	 * 		    }
+	 * 		  ]
+	 * 		}
 	 * </pre>
 	 * 
 	 * @return list of deployment types
@@ -795,8 +1078,31 @@ public class Images {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-formats
 	 * Input: None
-	 * Output: {"image_formats": [{"name": "qcow2","display_name": "qcow2"},{"name": "vhd","display_name": "vhd"}
-	 * ,{"name": "vmdk","display_name": "vmdk"},{"name": "raw","display_name": "raw"},{"name": "vdi","display_name": "vdi"}]}
+	 * Output: 
+	 * {
+	 * 		  "image_formats": [
+	 * 		    {
+	 * 		      "name": "qcow2",
+	 * 		      "display_name": "qcow2"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "vhd",
+	 * 		      "display_name": "vhd"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "vmdk",
+	 * 		      "display_name": "vmdk"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "raw",
+	 * 		      "display_name": "raw"
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "vdi",
+	 * 		      "display_name": "vdi"
+	 * 		    }
+	 * 		  ]
+	 * 		}
 	 * </pre>
 	 * @return list of image formats
 	 */
@@ -823,31 +1129,51 @@ public class Images {
 	 * deploymentType can be VM , BareMetal or Docker
 	 * Output:
 	 * {
-	 *   "image_launch_policies": [
-	 *     {
-	 *       "name": "MeasureOnly",
-	 *       "display_name": "Hash Only",
-	 *       "image_deployments": [
-	 *         "VM",
-	 *         "BareMetal"
-	 *       ]
-	 *     },
-	 *     {
-	 *       "name": "MeasureAndEnforce",
-	 *       "display_name": "Hash and enforce",
-	 *       "image_deployments": [
-	 *         "VM"
-	 *       ]
-	 *     },
-	 *     {
-	 *       "name": "encrypted",
-	 *       "display_name": "Encryption",
-	 *       "image_deployments": [
-	 *         "VM"
-	 *       ]
-	 *     }
-	 *   ]
-	 * }
+	 * 		  "image_launch_policies": [
+	 * 		    {
+	 * 		      "name": "MeasureOnly",
+	 * 		      "display_name": "Hash Only",
+	 * 		      "image_deployments": [
+	 * 		        "VM",
+	 * 		        "BareMetal",
+	 * 		        "Docker"
+	 * 		      ]
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "MeasureAndEnforce",
+	 * 		      "display_name": "Hash and enforce",
+	 * 		      "image_deployments": [
+	 * 		        "VM",
+	 * 		        "Docker"
+	 * 		      ]
+	 * 		    }
+	 * 		  ]
+	 * 		}
+	 * 		
+	 * 		If VM is given as a deploymentType query parameter, response is :
+	 * 		{
+	 * 		  "image_launch_policies": [
+	 * 		    {
+	 * 		      "name": "MeasureOnly",
+	 * 		      "display_name": "Hash Only",
+	 * 		      "image_deployments": [
+	 * 		        "VM",
+	 * 		        "BareMetal",
+	 * 		        "Docker"
+	 * 		      ]
+	 * 		    },
+	 * 		    {
+	 * 		      "name": "MeasureAndEnforce",
+	 * 		      "display_name": "Hash and enforce",
+	 * 		      "image_deployments": [
+	 * 		        "VM",
+	 * 		        "Docker"
+	 * 		      ]
+	 * 		    }
+	 * 		  ]
+	 * 		}
+	 * 		
+	 * 		valid deplopymentType values are Docker, VM and BareMetal
 	 * </pre>
 	 */
 	@Path("image-launch-policies")
@@ -855,24 +1181,15 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getImageLaunchPoliciesList(
 			@QueryParam("deploymentType") String deploymentType) {
-		ListImageLaunchPolicyResponse imgLaunchPolicy= new ListImageLaunchPolicyResponse();
-		if(!CommonValidations.validateImageDeployments(deploymentType)){
+		ListImageLaunchPolicyResponse imgLaunchPolicy = new ListImageLaunchPolicyResponse();
+		if (!CommonValidations.validateImageDeployments(deploymentType)) {
 			imgLaunchPolicy.error = "Incorrect deployment_type";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(imgLaunchPolicy).build();
 		}
-		return Response.ok(lookupService.getImageLaunchPolicies(deploymentType)).build();
-	}
-
-	/**
-	 * Utility methods
-	 * 
-	 * @param httpServletRequest
-	 * @return
-	 */
-	protected String getLoginUsername() {
-		return ShiroUtil.subjectUsername();
-
+		return Response
+				.ok(lookupService.getImageLaunchPolicies(deploymentType))
+				.build();
 	}
 
 	/**
@@ -884,28 +1201,17 @@ public class Images {
 	 * 
 	 * In case the policy is not found for the image id, HTTP 404 is returned
 	 * 
-	 * @mtwContentTypeReturned XML
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 *  https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policy
-	 * Input: Image id as path param
-	 * Output: Content sent as stream
+	 * https://{IP/HOST_NAME}/v1/images/
+	 * 08EB37D7-2678-495D-B485-59233EB51996/downloads/policy
 	 * 
 	 * </pre>
+	 * 
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * Input: Image id as path param
-	 * Output: Content sent as stream
+	 * Output: xml
 	 * 
-	 * </pre>
-	 * @mtwContentTypeReturned XML
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall
-	 * <pre>
-	 * Input: Image id as path param
-	 *	Output: Content sent as stream
-     *
 	 * </pre>
 	 * @param imageId
 	 *            the image for which the policy is downloaded
@@ -918,38 +1224,36 @@ public class Images {
 	public Response downloadPolicyForImageId(
 			@PathParam("imageId") String imageId) {
 		TrustPolicy policy = null;
-		GenericResponse genericResponse= new GenericResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		GenericResponse genericResponse = new GenericResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}
-		
 
-		ImageInfo imageInfo=null;
+		ImageInfo imageInfo = null;
 		try {
 			imageInfo = imageService.fetchImageById(imageId);
 		} catch (DirectorException e1) {
 			log.error("Unable to fetch image", e1);
 		}
-		if(imageInfo == null){
-			genericResponse.error = "No image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
 					.entity(genericResponse).build();
 		}
-		
 
-		
 		String trust_policy_id = imageInfo.getTrust_policy_id();
-		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+		TrustPolicy trustPolicyByTrustId = imageService
+				.getTrustPolicyByTrustId(trust_policy_id);
 
-		if(trustPolicyByTrustId == null){
-			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
+		if (trustPolicyByTrustId == null) {
+			genericResponse.error = "No trust policy exists for image with id : "
+					+ imageId + " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
 					.entity(genericResponse).build();
 		}
-		
-		
 
 		try {
 			policy = imageService.getTrustPolicyByImageId(imageId);
@@ -978,28 +1282,16 @@ public class Images {
 	 * 
 	 * In case the policy is not found for the image id, HTTP 404 is returned
 	 * 
-	 * @mtwContentTypeReturned XML
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 *  https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/manifest
-	 * Input: Image id as path param
-	 * Output: Content sent as stream
+	 * https://{IP/HOST_NAME}/v1/images/
+	 * 08EB37D7-2678-495D-B485-59233EB51996/downloads/manifest Input: Image id
+	 * as path param Output: XML content sent as stream
 	 * 
-	 * </pre>
 	 * @mtwContentTypeReturned XML
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * Input: Image id as path param
-	 * Output: Content sent as stream
+	 * Output: xml
 	 * 
-	 * </pre>
-	 * @mtwContentTypeReturned XML
-	 * @mtwMethodType GET
-	 * @mtwSampleRestCall
-	 * <pre>
-	 * Input: Image id as path param
-	 *	Output: Content sent as stream
-     *
 	 * </pre>
 	 * @param imageId
 	 *            the image for which the policy is downloaded
@@ -1012,38 +1304,36 @@ public class Images {
 	public Response downloadManifestForImageId(
 			@PathParam("imageId") String imageId) {
 		TrustPolicy policy = null;
-		GenericResponse genericResponse= new GenericResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		GenericResponse genericResponse = new GenericResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(genericResponse).build();
 		}
-		
 
-		ImageInfo imageInfo=null;
+		ImageInfo imageInfo = null;
 		try {
 			imageInfo = imageService.fetchImageById(imageId);
 		} catch (DirectorException e1) {
 			log.error("Unable to fetch image", e1);
 		}
-		if(imageInfo == null){
-			genericResponse.error = "No image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
+		if (imageInfo == null) {
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
 					.entity(genericResponse).build();
 		}
-		
 
-		
 		String trust_policy_id = imageInfo.getTrust_policy_id();
-		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+		TrustPolicy trustPolicyByTrustId = imageService
+				.getTrustPolicyByTrustId(trust_policy_id);
 
-		if(trustPolicyByTrustId == null){
-			genericResponse.error = "No trust policy exists for image with id : "+imageId+" exists.";
-			return Response.status(Response.Status.BAD_REQUEST)
+		if (trustPolicyByTrustId == null) {
+			genericResponse.error = "No trust policy exists for image with id : "
+					+ imageId + " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
 					.entity(genericResponse).build();
 		}
-		
-		
 
 		try {
 			policy = imageService.getTrustPolicyByImageId(imageId);
@@ -1058,17 +1348,18 @@ public class Images {
 		}
 		String manifestForPolicy;
 		try {
-			manifestForPolicy = TdaasUtil.getManifestForPolicy(policy.getTrust_policy());
+			manifestForPolicy = TdaasUtil.getManifestForPolicy(policy
+					.getTrust_policy());
 		} catch (JAXBException e) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-		
+
 		ResponseBuilder response = Response.ok(manifestForPolicy);
 		response.header("Content-Disposition", "attachment; filename=manifest_"
 				+ policy.getImgAttributes().getImage_name() + ".xml");
 		return response.build();
 	}
-	
+
 	/**
 	 * 
 	 * Method lets the user download the policy and manifest as a tarball from
@@ -1087,7 +1378,7 @@ public class Images {
 	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/policyAndManifest
 	 * Input: Image UUID
 	 * Output: Content of tarball as stream
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
@@ -1097,13 +1388,15 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/policyAndManifest")
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadPolicyAndManifestForImageId(@PathParam("imageId") final String imageId) {
+	public Response downloadPolicyAndManifestForImageId(
+			@PathParam("imageId") final String imageId) {
 
 		File tarBall;
 		GenericResponse genericResponse = new GenericResponse();
 		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
 		}
 
 		ImageInfo imageInfo = null;
@@ -1113,16 +1406,21 @@ public class Images {
 			log.error("Unable to fetch image", e1);
 		}
 		if (imageInfo == null) {
-			genericResponse.error = "No image with id : " + imageId + " exists.";
-			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
+					.entity(genericResponse).build();
 		}
 
 		String trust_policy_id = imageInfo.getTrust_policy_id();
-		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trust_policy_id);
+		TrustPolicy trustPolicyByTrustId = imageService
+				.getTrustPolicyByTrustId(trust_policy_id);
 
 		if (trustPolicyByTrustId == null) {
-			genericResponse.error = "No trust policy exists for image with id : " + imageId + " exists.";
-			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			genericResponse.error = "No trust policy exists for image with id : "
+					+ imageId + " exists.";
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
 		}
 
 		try {
@@ -1139,7 +1437,8 @@ public class Images {
 			tarInputStream = new FileInputStream(tarBall) {
 				@Override
 				public void close() throws IOException {
-					log.info("Deleting temporary files " + Constants.TARBALL_PATH + imageId);
+					log.info("Deleting temporary files "
+							+ Constants.TARBALL_PATH + imageId);
 					super.close();
 					FileUtilityOperation fileUtilityOperation = new FileUtilityOperation();
 					final File dir = new File(Constants.TARBALL_PATH + imageId);
@@ -1152,7 +1451,8 @@ public class Images {
 		}
 		ResponseBuilder response = Response.ok(tarInputStream);
 
-		response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
+		response.header("Content-Disposition", "attachment; filename="
+				+ tarBall.getName());
 
 		Response downloadResponse = response.build();
 		return downloadResponse;
@@ -1173,7 +1473,7 @@ public class Images {
 	 * https://{IP/HOST_NAME}/v1/images/08EB37D7-2678-495D-B485-59233EB51996/downloads/image
 	 * Input: Image UUID
 	 * Output: Content of image as stream
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param imageId
 	 *            the image for which the policy and manifest is downloaded
@@ -1183,12 +1483,14 @@ public class Images {
 	@Path("images/{imageId: [0-9a-zA-Z_-]+}/downloads/image")
 	@GET
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadImage(@PathParam("imageId") final String imageId) throws DirectorException {
+	public Response downloadImage(@PathParam("imageId") final String imageId)
+			throws DirectorException {
 
 		GenericResponse genericResponse = new GenericResponse();
 		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			genericResponse.error = "Imaged id is empty or not in uuid format";
-			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(genericResponse).build();
 		}
 
 		ImageInfo imageInfo;
@@ -1199,11 +1501,14 @@ public class Images {
 			throw new DirectorException("Unable to fetch image", e1);
 		}
 		if (imageInfo == null) {
-			genericResponse.error = "No image with id : " + imageId + " exists.";
-			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+			genericResponse.error = "No image with id : " + imageId
+					+ " exists.";
+			return Response.status(Response.Status.NOT_FOUND)
+					.entity(genericResponse).build();
 		}
 
-		File tarBall = new File(imageInfo.getLocation() + File.separator + imageInfo.getImage_name());
+		File tarBall = new File(imageInfo.getLocation() + File.separator
+				+ imageInfo.getImage_name());
 
 		FileInputStream tarInputStream = null;
 		try {
@@ -1219,16 +1524,18 @@ public class Images {
 		}
 		ResponseBuilder response = Response.ok(tarInputStream);
 
-		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo.getImage_deployments())
-				&& !tarBall.getName().endsWith(".tar")) {
-			response.header("Content-Disposition", "attachment; filename=" + tarBall.getName() + ".tar");
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(imageInfo
+				.getImage_deployments()) && !tarBall.getName().endsWith(".tar")) {
+			response.header("Content-Disposition", "attachment; filename="
+					+ tarBall.getName() + ".tar");
 		} else {
-			response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
+			response.header("Content-Disposition", "attachment; filename="
+					+ tarBall.getName());
 		}
 
 		return response.build();
 	}
-	
+
 	/**
 	 * 
 	 * Mark image as deleted. We turn the deleted flag=true in the MW_IMAGE
@@ -1257,8 +1564,8 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteImage(@PathParam("imageId") String imageId) {
 		GenericDeleteResponse response = new GenericDeleteResponse();
-	///	GenericResponse genericResponse= new GenericResponse();
-		if(!ValidationUtil.isValidWithRegex(imageId,RegexPatterns.UUID)){
+		// / GenericResponse genericResponse= new GenericResponse();
+		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(response).build();
@@ -1290,18 +1597,15 @@ public class Images {
 	 * @mtwMethodType POST
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/images/host
-	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"10.35.35.131","username":"root","password":"intelmh","name":"10.35.35.131"}
 	 * 
-	 * Output: {"deleted":false,"ip_address":"10.35.35.182","username":"root","image_name":"10.35.35.182","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"}
+	 * Output: {"ip_address":"10.35.35.131","username":"root","image_name":"10.35.35.131","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * In case of error:
-	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"","username":"root","password":"intelmh","name":"10.35.35.131"}
 	 * Lets say the user does not provide the IP:
 	 * 
-	 * {
-	 *   "error": "No Ip address provided",
-	 *   "deleted": false
-	 * }
+	 * { "error": "No host provided or host is in incorrect format }
 	 * 
 	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
@@ -1325,8 +1629,7 @@ public class Images {
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(sshResponse).build();
 		}
-		
-		
+
 		try {
 			sshResponse = imageService.addHost(sshSettingRequest);
 		} catch (DirectorException e) {
@@ -1335,7 +1638,7 @@ public class Images {
 		}
 		return Response.ok(sshResponse).build();
 	}
-	
+
 	/**
 	 * This method updates the host related details provided by the user. The
 	 * connection details are used to verify whether connection can be
@@ -1349,29 +1652,20 @@ public class Images {
 	 * 
 	 *                    <pre>
 	 * https://{IP/HOST_NAME}/v1/images/host
-	 * Input: {"policy_name":"Host_1","ip_address":"10.35.35.182","username":"admin","password":"password","image_id":"FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"10.35.35.131","username":"root","password":"intelmh","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * Output: 
-	 * {
-	 *   "deleted": false,
-	 *   "ip_address": "10.35.35.182",
-	 *   "username": "root",
-	 *   "image_name": "10.35.35.182",
-	 *   "image_id": "FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9"
-	 * }
+	 * {"ip_address":"10.35.35.131","username":"root","image_name":"10.35.35.131","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * 
 	 * In case of error:
-	 * Input: {"policy_name":"Host_1","ip_address":"","username":"admin","password":"password","image_id":"","name":"10.35.35.182"}
+	 * Input: {"policy_name":"P2","ip_address":"","username":"root","password":"intelmh","image_id":"EB7E45CD-F84C-419E-9841-A685E8E28050"}
 	 * Lets say the user does not provide the correct details to connect to the remote host :
 	 * 
-	 * {
-	 *   "error": "Unable to connect to remote host",
-	 *   "deleted": false
-	 * }
+	 * { "error": "No host provided or host is in incorrect format }
 	 * 
 	 * In case of any back end error, the error would contain the error occurred at the backed.
 	 * 
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param sshSettingRequest
 	 *            JSON representation of the connection details
@@ -1398,7 +1692,7 @@ public class Images {
 		}
 		return Response.ok(sshResponse).build();
 	}
-	
+
 	/**
 	 * This method initiates docker pull task for given image_id provided that
 	 * deployment_type of image must be 'Docker' and repo tag should be given
@@ -1413,10 +1707,10 @@ public class Images {
 	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * 
 	 * Output: 
-		{
-			"details": "Docker Image successfully queued for download",
-			"status": "Success"
-		}
+	 * 		{
+	 * 			"details": "Docker Image successfully queued for download",
+	 * 			"status": "Success"
+	 * 		}
 	 * 
 	 * In case of error:
 	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
@@ -1436,7 +1730,7 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public Response dockerPull(@PathParam("image_id") String image_id) {
-		log.info("Performing Director Docker Pull for imageId::"+image_id);
+		log.info("Performing Director Docker Pull for imageId::" + image_id);
 		GenericResponse response = new GenericDeleteResponse();
 		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
@@ -1453,10 +1747,11 @@ public class Images {
 					.entity(monitorStatus).build();
 		}
 		monitorStatus.setStatus(Constants.SUCCESS);
-		monitorStatus.setDetails("Docker Image succesfully queued for download");
+		monitorStatus
+				.setDetails("Docker Image succesfully queued for download");
 		return Response.ok(monitorStatus).build();
 	}
-	
+
 	/**
 	 * This method sets up docker image uploaded manually for given image_id for
 	 * further operation provided that deployment_type of image must be 'Docker'
@@ -1473,19 +1768,19 @@ public class Images {
 	 * Input: Pathparam: 3DED763F-99BA-4F99-B53B-5A6F6736E1E9
 	 * 
 	 * Output: 
-		{
-			"details": "Docker Image successfully uploaded",
-			"status": "Success"
-		}
+	 * 		{
+	 * 			"details": "Docker Image successfully uploaded",
+	 * 			"status": "Success"
+	 * 		}
 	 * 
 	 * In case of error:
 	 * Input: Pathparam: FAA5AA92-5872-44CD-BBF4-AD3EFB61D7C9
 	 * Lets say the user provide the image id which does not have image_deployment as 'Docker':
 	 * {
-	 *   "error": "Cannot Perform Docker Setup Operation in this Image"
-	 * }
+	 *   		"error": "Image must be of docker deployment type"
+	 * 		}
 	 * 
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param Pathparam
 	 *            : image_id
@@ -1496,7 +1791,7 @@ public class Images {
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public Response dockerSetup(@PathParam("image_id") String image_id) {
-		log.info("Performing Director Docker setup for imageid::"+image_id);
+		log.info("Performing Director Docker setup for imageid::" + image_id);
 		GenericResponse response = new GenericDeleteResponse();
 		if (!ValidationUtil.isValidWithRegex(image_id, RegexPatterns.UUID)) {
 			response.error = "Imaged id is empty or not in uuid format";
@@ -1517,8 +1812,7 @@ public class Images {
 		monitorStatus.setDetails("Docker Image succesfully uploaded");
 		return Response.ok(monitorStatus).build();
 	}
-	
-	
+
 	/**
 	 * This method removes policies from configured external storages whose
 	 * associated image is deleted from one or more configured external
@@ -1534,72 +1828,72 @@ public class Images {
 	 * Input: NA
 	 * 
 	 * Output: 
-		[{
-			"id": "EC69B190-0058-46F7-8AC1-DD5100C745DD",
-			"policy_uri": "http://10.35.35.35:8080/v1/AUTH_a4bde8b572054869848712dc9bd262ea/VJ_1/f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
-			"date": 1460697888698,
-			"status": "Complete",
-			"trust_policy": {
-				"created_by_user_id": "admin",
-				"created_date": "2016-04-15 05:24:44",
-				"edited_by_user_id": "admin",
-				"edited_date": "2016-04-15 05:24:44",
-				"id": "F44C455D-8DD9-4AC2-B998-B1CF53872834",
-				"trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19</ns3:ImageId><ns3:ImageHash>bc52e3a4e4cf119d8fabc528eca6783d0ddc21b623a4f0f6bdf836fea1175a83</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"><ns3:File Path=\"/boot/grub/menu.lst\">bd4b7aa84740262bca78bd8e737693cdf5f90773f7aa2ece36572abb73fa2182</ns3:File><ns3:File Path=\"/boot/vmlinuz-3.2.0-80-virtual\">c9542e8517a25e2370916ca0dc118b4c0502add62f073536b336da7d3e09d298</ns3:File><ns3:File Path=\"/boot/config-3.2.0-80-virtual\">31bd9004a72d95e5c0ed6144fb9d6ea1784b86ea966c346448c08d655113b550</ns3:File><ns3:File Path=\"/boot/initrd.img-3.2.0-80-virtual\">4aa2ed8eee9cfb23f4f9d588d08a8b0da778254a1f64614b86a8976012e73607</ns3:File><ns3:File Path=\"/boot/grub/stage1\">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</ns3:File><ns3:File Path=\"/boot/grub/e2fs_stage1_5\">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</ns3:File><ns3:File Path=\"/boot/grub/stage2\">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</ns3:File></ns3:Whitelist><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>AEh2nGTVgr9Eawf3g8H/rz2YLvo=</DigestValue></Reference></SignedInfo><SignatureValue>QMxDQxjohuu+CVlHq57upUYpcYtZ2iGv1g/zsBLe36wH5NzBF1S6DPmS4FpaWiEhWheQdr10ZtBZ\ntk+j4ObA2YzMe7y/zZQ5XqYcgpyB5w43VFxfa1op39TZea29p+F5HG3pDVRqgC8NC3jHcK4g3bSx\nDzagmo1IoP4gzu3r2Zbu8ZNEtP76GtwT7gKMJ+Qq/rIDiUYi3U66HNEPUtpVjDzyq98qi2XxH5lN\nceY+D/BJtCr/EbVCzJN0KriEr86uCtuJysWBy173GV6NnALVYp/XapIOq2uuCDL17bv4T4UbvmoS\nF4JfYaT9WiLdFsSX2Q1/qYQ+aVWWk9l69aj5wg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEZxg6xTANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwMzI4MTI0NjM2WhcNMjYwMzI2MTI0NjM2WjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCVGWggOHOQrjZRkxpgeikQDErUSKtI0kzFzdL5mlHO3rzidzJEAkbfPUvw\niCyVoFHn0oHfu7A62wqMcv90sEj4PZR5CrHzDpMwfRA/uEVeCrkl386JG2yXKbOYPsK6DvIXMZBD\nYMFWiRdsdRimpSfc68v8hAEPsDsqrnHld3xJvWhpc0wL3vL6HDfgcyTaMdpwPzif8nL1c00028vU\nK0yeOzPKc+5myYlj9SIelfaYocPBZDbK+VHhe3aEGn+sviI6/JvaskdP+WChKxpX82/dA//lK1TM\nAv81y1DWdSkRVlHHtTWU1pF/IGf8ylFUFh/ByWcjs71SZX9SpOL7XSHrAgMBAAGjITAfMB0GA1Ud\nDgQWBBRCrgwy6dluh/075+1V0pR+jZhMcjANBgkqhkiG9w0BAQsFAAOCAQEAd3st8f1b7+xFiNrz\nDP+CcBiC9mxrivPpLO57U4uhKrQnA0vCL+rL4uL4XfLCMLU2PRL+2YlXlrih+qZUvZCykduhN4RP\n1htv/9hHT6LxeGo9AFE5t7Ef8mNjp3tVsn0q8zOXzHYpILVtFsze2m2Fmyfv2NYMvsxn4IvQMIRA\n1BdJWRxgKvP8pR3VzuWXkuAd8WYz6tL9b3H/vzF/NKDJ+7JHdZ1glYt2BCMwVSsEjsP8aSIQkR9O\nSPjIzUC9cKv8KvU7SI7vjYuM4EpTUvAvtAFyMognyfIjHRkCxEww/lEKl/lhxdjP4cbY3G55txd+\niXHkF6o6nShG0/qn5UZ6ww==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
-				"img_attributes": {
-					"created_by_user_id": "admin",
-					"created_date": "2016-04-15 05:17:10",
-					"edited_by_user_id": "admin",
-					"edited_date": "2016-04-15 05:18:26",
-					"id": "9176FDF8-D3A2-4272-9E12-878B1B09427E",
-					"image_name": "cirros-0.3.4-x86_64-raw.img",
-					"image_format": "qcow2",
-					"image_deployments": "VM",
-					"image_size": 41126400,
-					"sent": 41126400,
-					"deleted": false,
-					"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
-					"image_upload_status": "Complete",
-					"image_Location": "/mnt/images/"
-				},
-				"display_name": "cirros-0.3.4-x86_64-raw.img",
-				"archive": false
-			},
-			"store_id": "BE03BD95-6407-46E6-A48B-7E1D0866A96E",
-			"store_name": "swift_35",
-			"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
-			"store_artifact_id": "f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
-			"deleted": true
-		}]
+	 * 		[{
+	 * 			"id": "EC69B190-0058-46F7-8AC1-DD5100C745DD",
+	 * 			"policy_uri": "http://10.35.35.35:8080/v1/AUTH_a4bde8b572054869848712dc9bd262ea/VJ_1/f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
+	 * 			"date": 1460697888698,
+	 * 			"status": "Complete",
+	 * 			"trust_policy": {
+	 * 				"created_by_user_id": "admin",
+	 * 				"created_date": "2016-04-15 05:24:44",
+	 * 				"edited_by_user_id": "admin",
+	 * 				"edited_date": "2016-04-15 05:24:44",
+	 * 				"id": "F44C455D-8DD9-4AC2-B998-B1CF53872834",
+	 * 				"trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19</ns3:ImageId><ns3:ImageHash>bc52e3a4e4cf119d8fabc528eca6783d0ddc21b623a4f0f6bdf836fea1175a83</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"><ns3:File Path=\"/boot/grub/menu.lst\">bd4b7aa84740262bca78bd8e737693cdf5f90773f7aa2ece36572abb73fa2182</ns3:File><ns3:File Path=\"/boot/vmlinuz-3.2.0-80-virtual\">c9542e8517a25e2370916ca0dc118b4c0502add62f073536b336da7d3e09d298</ns3:File><ns3:File Path=\"/boot/config-3.2.0-80-virtual\">31bd9004a72d95e5c0ed6144fb9d6ea1784b86ea966c346448c08d655113b550</ns3:File><ns3:File Path=\"/boot/initrd.img-3.2.0-80-virtual\">4aa2ed8eee9cfb23f4f9d588d08a8b0da778254a1f64614b86a8976012e73607</ns3:File><ns3:File Path=\"/boot/grub/stage1\">77c1024a494c2170d0236dabdb795131d8a0f1809792735b3dd7f563ef5d951e</ns3:File><ns3:File Path=\"/boot/grub/e2fs_stage1_5\">1d317c1e94328cdbe00dc05d50b02f0cb9ec673159145b7f4448cec28a33dc14</ns3:File><ns3:File Path=\"/boot/grub/stage2\">5aa718ea1ecc59140eef959fc343f8810e485a44acc35805a0f6e9a7ffb10973</ns3:File></ns3:Whitelist><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>AEh2nGTVgr9Eawf3g8H/rz2YLvo=</DigestValue></Reference></SignedInfo><SignatureValue>QMxDQxjohuu+CVlHq57upUYpcYtZ2iGv1g/zsBLe36wH5NzBF1S6DPmS4FpaWiEhWheQdr10ZtBZ\ntk+j4ObA2YzMe7y/zZQ5XqYcgpyB5w43VFxfa1op39TZea29p+F5HG3pDVRqgC8NC3jHcK4g3bSx\nDzagmo1IoP4gzu3r2Zbu8ZNEtP76GtwT7gKMJ+Qq/rIDiUYi3U66HNEPUtpVjDzyq98qi2XxH5lN\nceY+D/BJtCr/EbVCzJN0KriEr86uCtuJysWBy173GV6NnALVYp/XapIOq2uuCDL17bv4T4UbvmoS\nF4JfYaT9WiLdFsSX2Q1/qYQ+aVWWk9l69aj5wg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEZxg6xTANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwMzI4MTI0NjM2WhcNMjYwMzI2MTI0NjM2WjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCVGWggOHOQrjZRkxpgeikQDErUSKtI0kzFzdL5mlHO3rzidzJEAkbfPUvw\niCyVoFHn0oHfu7A62wqMcv90sEj4PZR5CrHzDpMwfRA/uEVeCrkl386JG2yXKbOYPsK6DvIXMZBD\nYMFWiRdsdRimpSfc68v8hAEPsDsqrnHld3xJvWhpc0wL3vL6HDfgcyTaMdpwPzif8nL1c00028vU\nK0yeOzPKc+5myYlj9SIelfaYocPBZDbK+VHhe3aEGn+sviI6/JvaskdP+WChKxpX82/dA//lK1TM\nAv81y1DWdSkRVlHHtTWU1pF/IGf8ylFUFh/ByWcjs71SZX9SpOL7XSHrAgMBAAGjITAfMB0GA1Ud\nDgQWBBRCrgwy6dluh/075+1V0pR+jZhMcjANBgkqhkiG9w0BAQsFAAOCAQEAd3st8f1b7+xFiNrz\nDP+CcBiC9mxrivPpLO57U4uhKrQnA0vCL+rL4uL4XfLCMLU2PRL+2YlXlrih+qZUvZCykduhN4RP\n1htv/9hHT6LxeGo9AFE5t7Ef8mNjp3tVsn0q8zOXzHYpILVtFsze2m2Fmyfv2NYMvsxn4IvQMIRA\n1BdJWRxgKvP8pR3VzuWXkuAd8WYz6tL9b3H/vzF/NKDJ+7JHdZ1glYt2BCMwVSsEjsP8aSIQkR9O\nSPjIzUC9cKv8KvU7SI7vjYuM4EpTUvAvtAFyMognyfIjHRkCxEww/lEKl/lhxdjP4cbY3G55txd+\niXHkF6o6nShG0/qn5UZ6ww==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
+	 * 				"img_attributes": {
+	 * 					"created_by_user_id": "admin",
+	 * 					"created_date": "2016-04-15 05:17:10",
+	 * 					"edited_by_user_id": "admin",
+	 * 					"edited_date": "2016-04-15 05:18:26",
+	 * 					"id": "9176FDF8-D3A2-4272-9E12-878B1B09427E",
+	 * 					"image_name": "cirros-0.3.4-x86_64-raw.img",
+	 * 					"image_format": "qcow2",
+	 * 					"image_deployments": "VM",
+	 * 					"image_size": 41126400,
+	 * 					"sent": 41126400,
+	 * 					"deleted": false,
+	 * 					"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
+	 * 					"image_upload_status": "Complete",
+	 * 					"image_Location": "/mnt/images/"
+	 * 				},
+	 * 				"display_name": "cirros-0.3.4-x86_64-raw.img",
+	 * 				"archive": false
+	 * 			},
+	 * 			"store_id": "BE03BD95-6407-46E6-A48B-7E1D0866A96E",
+	 * 			"store_name": "swift_35",
+	 * 			"upload_variable_md5": "23dcdcde197e05a1fdeeb5ac93282b67",
+	 * 			"store_artifact_id": "f3d9b14e-8841-4b9e-8e13-a8c6f34ebc19",
+	 * 			"deleted": true
+	 * 		}]
 	 * 
 	 * In case of error:
-	 * Input: NA
 	 * 
 	 * Output:
 	 * {
-	 *   "error": "No image stores configured"
-	 * }
+	 *   		"error": "No policy uploads"
+	 * 		}
 	 * 
-	 *                    </pre>
+	 * </pre>
 	 * 
 	 * @param
 	 * @return Response containing list of details of policies removed
-	 */
+	 *//*
 	@Path("rpc/remove-orphan-policies")
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
 	public Response removeOrphanPolicies() throws DirectorException {
 		log.info("Removing Orphan Policies");
 		try {
-			List<PolicyUploadTransferObject> removedOrphanPolicies = artifactUploadService.removeOrphanPolicies();
+			List<PolicyUploadTransferObject> removedOrphanPolicies = artifactUploadService
+					.removeOrphanPolicies();
 			return Response.ok(removedOrphanPolicies).build();
 		} catch (DirectorException e) {
 			GenericResponse genericResponse = new GenericResponse();
 			genericResponse.setError(e.getMessage());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity(genericResponse).build();
 		}
-	}
-	
+	}*/
 
 	/**
 	 * This method returns list of deployment types which allow image encryption
@@ -1622,8 +1916,7 @@ public class Images {
 		imgEncryptSupported.add(Constants.DEPLOYMENT_TYPE_VM);
 		return Response.ok(imgEncryptSupported).build();
 	}
-	
-	
+
 	/**
 	 * This method returns list of stalled images. Stalled images are those
 	 * images for which upload is pending for long time.
@@ -1638,26 +1931,26 @@ public class Images {
 	 * https://{IP/HOST_NAME}/v1/images-stalled
 	 * Input: NA
 	 * Output:
-		[
-			{
-			"created_by_user_id": "admin",
-			"created_date": "2016-04-14 18:49:11",
-			"edited_by_user_id": "admin",
-			"edited_date": "2016-04-14 18:49:11",
-			"id": "AC4750E4-4018-449D-B471-9517122FE29B",
-			"image_name": "123.img",
-			"image_format": "qcow2",
-			"image_deployments": "VM",
-			"image_size": 13631488,
-			"sent": 0,
-			"deleted": false,
-			"image_uploads_count": 0,
-			"policy_uploads_count": 0,
-			"image_upload_status": "In Progress",
-			"image_Location": "/mnt/images/"
-			}
-		]
-	 *                    </pre>
+	 * 		[
+	 * 			{
+	 * 			"created_by_user_id": "admin",
+	 * 			"created_date": "2016-04-14 18:49:11",
+	 * 			"edited_by_user_id": "admin",
+	 * 			"edited_date": "2016-04-14 18:49:11",
+	 * 			"id": "AC4750E4-4018-449D-B471-9517122FE29B",
+	 * 			"image_name": "123.img",
+	 * 			"image_format": "qcow2",
+	 * 			"image_deployments": "VM",
+	 * 			"image_size": 13631488,
+	 * 			"sent": 0,
+	 * 			"deleted": false,
+	 * 			"image_uploads_count": 0,
+	 * 			"policy_uploads_count": 0,
+	 * 			"image_upload_status": "In Progress",
+	 * 			"image_Location": "/mnt/images/"
+	 * 			}
+	 * 		]
+	 * </pre>
 	 */
 	@Path("images-stalled")
 	@GET
@@ -1674,7 +1967,7 @@ public class Images {
 		}
 		return Response.ok(stalledImages).build();
 	}
-	
+
 	/**
 	 * This method returns hash algorithm used for hash calculation according to
 	 * valid deployment type. If deployment type is not provided returns hash
@@ -1696,7 +1989,7 @@ public class Images {
 	 * 		"deployment_type": "VM",
 	 * 		"hash_type": "sha256"
 	 * }
-	 *
+	 * 
 	 * Input: If deployment type is not provided 
 	 * 
 	 * Output:
@@ -1705,26 +1998,29 @@ public class Images {
 	 * 	{"deployment_type":"VM","hash_type":"sha256"},
 	 * 	{"deployment_type":"Docker","hash_type":"sha256"}
 	 * ]
-	 *	
-	 *	Input: If invalid deployment is provided,
-	 *
-	 *	Output:
-	 *	{"error": "Invalid Deployment Type"}
-	 *                    </pre>
+	 * 
+	 * Input: If invalid deployment is provided,
+	 * 
+	 * Output:
+	 * {"error": "Invalid Deployment Type"}
+	 * </pre>
 	 */
 	@Path("image-hash-type")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getImageHashType(@QueryParam("deploymentType") String deploymentType) {
+	public Response getImageHashType(
+			@QueryParam("deploymentType") String deploymentType) {
 		GenericResponse response = new GenericResponse();
 		List<String> deplomentTypeList = new ArrayList<String>();
 		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_VM);
 		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_DOCKER);
 		deplomentTypeList.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
 
-		if (deploymentType != null && !deplomentTypeList.contains(deploymentType)) {
+		if (deploymentType != null
+				&& !deplomentTypeList.contains(deploymentType)) {
 			response.setError("Invalid Deployment Type");
-			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
 		}
 
 		List<HashTypeObject> imageHashType;
@@ -1732,7 +2028,8 @@ public class Images {
 			imageHashType = imageService.getImageHashType(deploymentType);
 		} catch (DirectorException e) {
 			response.setError(e.getMessage());
-			return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+			return Response.status(Response.Status.BAD_REQUEST)
+					.entity(response).build();
 		}
 		if (imageHashType.size() == 1) {
 			return Response.ok(imageHashType.get(0)).build();

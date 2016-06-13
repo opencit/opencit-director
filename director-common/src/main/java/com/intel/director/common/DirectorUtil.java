@@ -14,8 +14,10 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -52,6 +54,12 @@ import com.intel.mtwilson.util.exec.Result;
 
 public class DirectorUtil {
 
+	private static final List<String> passwordFields = new ArrayList<String>();
+	static{
+		passwordFields.add("mtwilson.password");
+		passwordFields.add("mtwilson.api.password");
+		passwordFields.add("kms.login.basic.password");
+	}
 	private static final Logger log = LoggerFactory
 			.getLogger(DirectorUtil.class);
 
@@ -235,12 +243,32 @@ public class DirectorUtil {
 		JSONObject json = new JSONObject(map);
 		return json.toString();
 	}
+	
+	public static String getPropertiesWithoutPassword(String path) throws IOException {
+		File customFile = new File(Constants.configurationPath + path);
+		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(customFile);
+		Configuration loadedConfiguration = provider.load();
+		Map<String, String> map = new HashMap<String, String>();
+		for (String key : loadedConfiguration.keys()) {
+			String value = loadedConfiguration.get(key);
+			if (passwordFields.contains(key)) {
+				continue;
+			}
+			map.put(key.replace(".", "_"), value);
+		}
+		JSONObject json = new JSONObject(map);
+		return json.toString();
+	}
+	
 
 	public static String editProperties(String path, String data)
 			throws JsonMappingException, JsonParseException {
-		Map<String, Object> map = new Gson().fromJson(data,
-				new TypeToken<HashMap<String, Object>>() {
-				}.getType());
+		Map<String, Object> map = new HashMap<>();
+		JSONObject jsonObject = new JSONObject(data);
+		String[] names = JSONObject.getNames(jsonObject);
+		for (String key : names) {
+			map.put(key, jsonObject.get(key));
+		}
 		try {
 			File file = new File(Constants.configurationPath + path);
 			if (!file.exists()) {
@@ -263,11 +291,13 @@ public class DirectorUtil {
 		while (itr.hasNext()) {
 			String key = (String) itr.next();
 			String value = (String) map.get(key);
+			if (value.equals("null") || StringUtils.isBlank(value) || StringUtils.isEmpty(value)) {
+				value = loadedConfiguration.get(key.replace("_", "."));
+			}
 			loadedConfiguration.set(key.replace('_', '.'), value);
 		}
 		provider.save(loadedConfiguration);
 	}
-
 	
 	public static String computeUploadVar(String uuid, String dekUrl){
 		if(uuid == null){
@@ -416,7 +446,9 @@ public class DirectorUtil {
 			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
 			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
 					.createUnmarshaller();
-
+			if(policy.getTrust_policy()==null){
+				return "";
+			}
 			StringReader reader = new StringReader(policy.getTrust_policy());
 			trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
 			///trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
@@ -424,6 +456,9 @@ public class DirectorUtil {
 			log.error("Directorutil fetchDekUrl failed",e1);
 		}
 		
+		if(trustPolicy==null){
+			return "";
+		}
 		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
 		
 	}
