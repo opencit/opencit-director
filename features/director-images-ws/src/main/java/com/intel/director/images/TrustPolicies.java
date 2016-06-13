@@ -55,41 +55,80 @@ public class TrustPolicies {
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
-	 * @mtwSampleRestCall <pre>
-	 * https://{IP/HOST_NAME}/v1/trust-policy/08EB37D7-2678-495D-B485-59233EB51996
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
+	 * https://{IP/HOST_NAME}/v1/trust-policy/31DE80A1-875C-4274-BFB2-D26F596A4346
 	 * 
 	 * Input: pass the UUID of the image as path param
-	 * Output: {
-	 *   "created_by_user_id": "admin",
-	 *   "created_date": "2015-12-29",
-	 *   "edited_by_user_id": "admin",
-	 *   "edited_date": "2015-12-29",
-	 *   "id": "01e9fe36-5584-45d9-a644-60962976e54c",
-	 *   "trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><TrustPolicy xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns=\"mtwilson:trustdirector:policy:1.1\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><Director><CustomerId>testId</CustomerId></Director><Image><ImageId>3645ACBB-1529-421D-A6DD-824BCD0002DE</ImageId><ImageHash>90bdb581df9f6869d2b4761d8b9f5708bd1b5a98715abc6e9afafca6866951ef</ImageHash></Image><LaunchControlPolicy>MeasureAndEnforce</LaunchControlPolicy><Whitelist DigestAlg=\"sha256\"><File Path=\"/sbin/blkid\">1a33e58fd757e195a7919ca40d1e1eda19e9e2439d06b6efbe2006ae5e6ef865</File></Whitelist></TrustPolicy>",
-	 *   "img_attributes": {
-	 *     "created_by_user_id": "admin",
-	 *     "created_date": "2015-12-07",
-	 *     "edited_by_user_id": "admin",
-	 *     "edited_date": "2015-12-29",
-	 *     "id": "3645ACBB-1529-421D-A6DD-824BCD0002DE",
-	 *     "image_name": "cirros-0.3.1-x86_64-disk_1.img",
-	 *     "image_format": "qcow2",
-	 *     "image_deployments": "VM",
-	 *     "image_size": 13312,
-	 *     "sent": 13312,
-	 *     "deleted": false,
-	 *     "image_upload_status": "Complete",
-	 *     "image_Location": "/mnt/images/"
-	 *   },
-	 *   "display_name": "11_test_test1",
-	 *   "encrypted": false,
-	 *   "image_launch_policy": "MeasureAndEnforce"
-	 * }
+	 * Output: 
+	 * VM Policy
+	 *  {
+			"created_by_user_id": "admin",
+			"created_date": "2016-05-16 05:41:46",
+			"edited_by_user_id": "admin",
+			"edited_date": "2016-05-16 05:41:46",
+			"id": "519EABEE-884A-4F1F-B858-22AE35EC39EC",
+			"trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>C97E3F36-D8AC-4491-8D08-23F418E13CB7</ns3:ImageId><ns3:ImageHash>0000000000000000000000000000000000000000000000000000000000000000</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"/><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>Futuojo3RIy8S++qDBbOJUaM/uA=</DigestValue></Reference></SignedInfo><SignatureValue>GB4GeJ1ddZUH6mN/0VDgHs2YW4x5s3WKro1LZMqUJ6s5RG91jdLMsFVU9GGLW5Voq8RjyyHFywAE\nemlPMdTQ+vrgGjGqtjOrKsNaehS8f6l3k/u1LPGu4Wd8QWFuPOPKp6dpUXQaNX9UIEnZrapZs8hD\nzst/glGeMI3Fdl5TLoexjzSa2zZ9VE3DC+wBf++VdSPQn6Vz90lNFsCXJq+JVi9AznpvT9EFgsuc\ng+uSzDLxxLLifsOCoK6zSR8SFyzVuBOGfGUR1eVfotHCuLjq6lLTniZPSRB61taMF8xA9pHDTKZQ\n5ayWXjNig1B88YZ1Z9M5PjqPmuf/sBA0s5FXHg==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEWr8S1zANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwNDI5MTE1MDQxWhcNMjYwNDI3MTE1MDQxWjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCnAGkEJoldD50ENz8lCUMqdSARg2LQOkVTEwUar5/srjMRNbtV8L7MdmW5\nsQYOQhUby6/5bu9x0T1oWJ0tQKJliYYeiJaO2FxzAwsW8aLlfDFdVx3sZOQoIXm7hwCKXc38jHTn\nV5CfNS8eadF+C1XUqjYY1iBN2jkM3pts+gF9RWnF8CX03pa7W6hCXDij1HuqxLDD9kzwADpcPXM6\nz4oDhW64uRUAg3Pc50TjYopbo6B+v5/wdoJt8kXQ5RsgiCbL88U+Fz2Wi5brYR00zTvx5reY1tya\nV03ELeWpfxuQ0cLl//Hknlif1Dvk++C6hqgRtjfckv5jw825C3VyXA9VAgMBAAGjITAfMB0GA1Ud\nDgQWBBS5KKZzika6mcYmOdaJwZzjNgSkvzANBgkqhkiG9w0BAQsFAAOCAQEAI4sZLOU8g6NM9kYn\nnuqTvoFHgW3dEJ0Rv/zW/AigyrTCw8niY++P/GUoS0HoHoqsvrInmP73HjMqj3/4jJdSpwjri4DL\niPm6lG3O2vDsVqmje0x4VqBA5LGJJsExHcf+ElLciiNezVNprWeNXZ916vYkCHCbArMuL/GXnYMw\nUTCix4AJCqsrtYPpQDPaaNrcciugHBFFS4sWgMNluJYrLYutXw1Loe9j5XjkIh/JAWwcO6mgjQds\n6Ok8pe6hPsVrOQlLsPi0uaBbeWt5yTw++iVO5I8hlCpUs8kqctBcxeljhEbzMryx3pt9rp8PaBG0\ncf5Va9rMRJdNR5fUNYMrHQ==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
+			"img_attributes": {
+				"created_by_user_id": "admin",
+				"created_date": "2016-05-16 05:41:35",
+				"edited_by_user_id": "admin",
+				"edited_date": "2016-05-16 05:41:47",
+				"id": "C97E3F36-D8AC-4491-8D08-23F418E13CB7",
+				"image_name": "cirros_cc1.img",
+				"image_format": "qcow2",
+				"image_deployments": "VM",
+				"image_size": 13631488,
+				"sent": 13631488,
+				"deleted": false,
+				"upload_variable_md5": "441ad50d1b27e62c017853fc1f56132d",
+				"image_upload_status": "Complete",
+				"image_Location": "/mnt/images/"
+			},
+			"display_name": "cirros_cc1.img",
+			"archive": false,
+			"encrypted": false,
+			"image_launch_policy": "MeasureOnly"
+		} 
 	 * 
+	 * 
+	 * Docker policy
+	 * {
+  "created_by_user_id": "admin",
+  "created_date": "2016-05-16 06:22:31",
+  "edited_by_user_id": "admin",
+  "edited_date": "2016-05-16 06:22:31",
+  "id": "8E41EA5D-8BE6-4557-8AC4-52F0C5F61819",
+  "trust_policy": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns3:TrustPolicy xmlns:ns3=\"mtwilson:trustdirector:policy:1.1\" xmlns:ns2=\"http://www.w3.org/2000/09/xmldsig#\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><ns3:Director><ns3:CustomerId>admin</ns3:CustomerId></ns3:Director><ns3:Image><ns3:ImageId>BF36833E-15BB-4D65-8FAB-3B8E04684CAA</ns3:ImageId><ns3:ImageHash>cad440e0080e96dab43b95696629e5c55d8c0cde27e566b5d097e21ca44d8d77</ns3:ImageHash></ns3:Image><ns3:LaunchControlPolicy>MeasureOnly</ns3:LaunchControlPolicy><ns3:Whitelist DigestAlg=\"sha256\"><ns3:File Path=\"/bin/acpid\">aa490cd8b89b6fa4c1030d2d6e30b03cd15e69abec9504ad9d07491ba51e9fba</ns3:File></ns3:Whitelist><Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><SignedInfo><CanonicalizationMethod Algorithm=\"http://www.w3.org/TR/2001/REC-xml-c14n-20010315\"/><SignatureMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#rsa-sha1\"/><Reference URI=\"\"><Transforms><Transform Algorithm=\"http://www.w3.org/2000/09/xmldsig#enveloped-signature\"/></Transforms><DigestMethod Algorithm=\"http://www.w3.org/2000/09/xmldsig#sha1\"/><DigestValue>VBNoQJgNbBtirefBsd/bpnt4OqM=</DigestValue></Reference></SignedInfo><SignatureValue>PrrIG+4d46Q/mrD4ouRERYaeACxfprNpap1PaNZ4iisqctLXTi/E2dUVteZ5WEF1/vXnH6WzVrS9\nEBP07OYlg51JpcNc/r0IqVfJf9qjrCuFfr0S8RFqTIkr2j541bP4EHDEeebCSbg+wpgqqxrwuw3h\nB8BMR9YhL9/P+YTtz2Pl++By1jKTpxxy7nXVqU1fSYoCuJcW6XjYCd0oRP7GZyWtZ8q89HHEoyNQ\nnWL3CzIwEwQR6GdrTG8lJmQj5oG6Brt43ggzNX2lhPyGXBeD0IEa9LuYSNACgBdgOV6ZiDCK/fX0\n/ZbTE03xFvojeIjyfkMxiX51fNO6KuFrqkcDpA==</SignatureValue><KeyInfo><X509Data><X509SubjectName>CN=mtwilson,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US</X509SubjectName><X509Certificate>MIIDYzCCAkugAwIBAgIEWr8S1zANBgkqhkiG9w0BAQsFADBiMQswCQYDVQQGEwJVUzELMAkGA1UE\nCBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwxEjAQBgNVBAsTCU10IFdpbHNv\nbjERMA8GA1UEAxMIbXR3aWxzb24wHhcNMTYwNDI5MTE1MDQxWhcNMjYwNDI3MTE1MDQxWjBiMQsw\nCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExDzANBgNVBAcTBkZvbHNvbTEOMAwGA1UEChMFSW50ZWwx\nEjAQBgNVBAsTCU10IFdpbHNvbjERMA8GA1UEAxMIbXR3aWxzb24wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCnAGkEJoldD50ENz8lCUMqdSARg2LQOkVTEwUar5/srjMRNbtV8L7MdmW5\nsQYOQhUby6/5bu9x0T1oWJ0tQKJliYYeiJaO2FxzAwsW8aLlfDFdVx3sZOQoIXm7hwCKXc38jHTn\nV5CfNS8eadF+C1XUqjYY1iBN2jkM3pts+gF9RWnF8CX03pa7W6hCXDij1HuqxLDD9kzwADpcPXM6\nz4oDhW64uRUAg3Pc50TjYopbo6B+v5/wdoJt8kXQ5RsgiCbL88U+Fz2Wi5brYR00zTvx5reY1tya\nV03ELeWpfxuQ0cLl//Hknlif1Dvk++C6hqgRtjfckv5jw825C3VyXA9VAgMBAAGjITAfMB0GA1Ud\nDgQWBBS5KKZzika6mcYmOdaJwZzjNgSkvzANBgkqhkiG9w0BAQsFAAOCAQEAI4sZLOU8g6NM9kYn\nnuqTvoFHgW3dEJ0Rv/zW/AigyrTCw8niY++P/GUoS0HoHoqsvrInmP73HjMqj3/4jJdSpwjri4DL\niPm6lG3O2vDsVqmje0x4VqBA5LGJJsExHcf+ElLciiNezVNprWeNXZ916vYkCHCbArMuL/GXnYMw\nUTCix4AJCqsrtYPpQDPaaNrcciugHBFFS4sWgMNluJYrLYutXw1Loe9j5XjkIh/JAWwcO6mgjQds\n6Ok8pe6hPsVrOQlLsPi0uaBbeWt5yTw++iVO5I8hlCpUs8kqctBcxeljhEbzMryx3pt9rp8PaBG0\ncf5Va9rMRJdNR5fUNYMrHQ==</X509Certificate></X509Data></KeyInfo></Signature></ns3:TrustPolicy>",
+  "img_attributes": {
+    "created_by_user_id": "admin",
+    "created_date": "2016-05-16 06:22:15",
+    "edited_by_user_id": "admin",
+    "edited_date": "2016-05-16 06:22:35",
+    "id": "BF36833E-15BB-4D65-8FAB-3B8E04684CAA",
+    "image_name": "bl.tar",
+    "image_format": "tar",
+    "image_deployments": "Docker",
+    "image_size": 1322496,
+    "sent": 1322496,
+    "deleted": false,
+    "repository": "busybox",
+    "tag": "latest",
+    "upload_variable_md5": "e3317460e2ce7a35438dbb1c4904cb69",
+    "image_upload_status": "Complete",
+    "image_Location": "/mnt/images/"
+  },
+  "display_name": "busybox:latest",
+  "archive": false,
+  "encrypted": false,
+  "image_launch_policy": "MeasureOnly"
+}
 	 * 
 	 * In case of error:
 	 * HTTP 404: Not Found
-	 * </pre>
+	 *                    </pre>
+	 * 
 	 * @param trustPolicyId
 	 * @return trustPolicy
 	 */
@@ -100,9 +139,10 @@ public class TrustPolicies {
 			@PathParam("trustPolicyId") String trustPolicyId) {
 		TrustPolicyResponse trustpolicyresponse = new TrustPolicyResponse();
 		if(!ValidationUtil.isValidWithRegex(trustPolicyId,RegexPatterns.UUID)){
-			trustpolicyresponse.error = "Trust Policy Id is empty or not in uuid format";
+			GenericResponse genericResponse=new GenericResponse();
+			genericResponse.error = "Trust Policy Id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(trustpolicyresponse).build();
+					.entity(genericResponse).build();
 		}
 
 		try {
@@ -113,7 +153,7 @@ public class TrustPolicies {
 			}
 		} catch (DirectorException e) {
 			log.error("Error in getTrustPoliciesData ", e);
-			trustpolicyresponse = new TrustPolicyResponse();
+			//trustpolicyresponse = new TrustPolicyResponse();
 			trustpolicyresponse.setId(null);
 			return Response.status(Status.NOT_FOUND).build();
 		}
@@ -125,21 +165,35 @@ public class TrustPolicies {
 	 * 
 	 * On the step 3/3 of the wizard for VM, when the user clicks on the "Upload
 	 * now" button, we accept the last moment changes in the name of the policy
-	 * and update it. 
+	 * and update it.
 	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType POST
-	 * @mtwSampleRestCall <pre>
+	 * @mtwSampleRestCall
+	 * 
+	 * 					<pre>
 	 * https://{IP/HOST_NAME}/v1/trust-policies/d80ce469-39fd-4940-bb67-c0573551ce4c2
 	 * Input: UUID of trust policy in path {"display_name":"policy_renamed"}
 	 * Output: 
 	 * In case of success : 
-	 * {"status":"success","deleted":false}
+	 * {"status":"success"}
 	 * 
-	 * In case of error such as policy name already exists:
-	 * { "error" : "Policy Name Already Exists","deleted":false }
+	 * In case of policy ID in incorrect format or empty:
+	 * {
+		  "error": "Trust policy ID is not in a UUID format"
+		}
 	 * 
-	 * </pre>
+	 * In case of ID that does not exist
+	 * {
+		  "error": "Trust Policy does not exist for the given id"
+		}
+		
+		In case the display name is not provided:
+		{
+		  "error": "Display name is empty or improper format. Name can contain only numbers, alphabets, no spaces and following characters ,;.@_-"
+		}
+	 *                    </pre>
+	 * 
 	 * @param updateTrustPolicyRequest
 	 * @return GenericResponse
 	 */
@@ -161,7 +215,7 @@ public class TrustPolicies {
 
 		TrustPolicy trustPolicyByTrustId = imageService.getTrustPolicyByTrustId(trustPolicyId);
 		if(trustPolicyByTrustId == null){
-			monitorStatus.error = "Trust Policy does not exist for id: "+trustPolicyId;
+			monitorStatus.error = "Trust Policy does not exist for the given id";
 			return Response.status(Response.Status.BAD_REQUEST)
 					.entity(monitorStatus).build();
 		}
@@ -195,8 +249,17 @@ public class TrustPolicies {
 	 * Output: In case of success :: {"trust_policy":"<policy xml>"}
 	 *  
 	 * In case of error::
-	 * {"error":"No image found during import of policy"}
+	 * 1) When invalid image id is provided
+	 * {
+		  "error": "No image with id : 7A871544-87E0-42A1-B545-CDC6477DC2F9 exists."
+		}
 	 *  
+	 *  2) When image id provided is not in correct format: 
+	 *  {
+		  "error": "Image id is empty or not in uuid format"
+		}
+		
+		3) 
 	 *  details attribute in output describes the error. If the image id provided does not exist, an error 
 	 *  "No image found during import of policy" would be returned in the details.
 	 * 
@@ -312,9 +375,9 @@ public class TrustPolicies {
 	 *                    <pre>
 	 *  https://{IP/HOST_NAME}/v1/trust-policies/08EB37D7-2678-495D-B485-59233EB51996/download
 	 * Input: Trust policy id as path param
-	 * Output: Content sent as stream
+	 * Output: Content sent as xml document 
 	 * 
-	 *                    </pre>
+	 *                    </pre>              
 	 * @param trustPolicyId
 	 *            the trust policy for which the policy is downloaded
 	 * @return XML content of the policy

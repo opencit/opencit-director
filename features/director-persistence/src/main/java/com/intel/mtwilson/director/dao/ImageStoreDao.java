@@ -17,88 +17,37 @@ import com.intel.director.api.ImageStoreFilter;
 import com.intel.director.api.ui.ImageStoreFields;
 import com.intel.mtwilson.director.data.MwImageStore;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.director.mapper.Mapper;
 
-public class ImageStoreDao {
+public class ImageStoreDao extends BaseDao{
 
-	Mapper mapper = new Mapper();
 
 	public ImageStoreDao(EntityManagerFactory emf) {
-		this.emf = emf;
+		super(emf);
 	}
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
 			.getLogger(ImageStoreDao.class);
 
-	private EntityManagerFactory emf = null;
-
-	public EntityManager getEntityManager() {
-		EntityManager em = emf.createEntityManager();
-		em.clear();
-		return em;
-	}
 
 	public MwImageStore createImageStore(MwImageStore mw_image_store)
 			throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			em.getTransaction().begin();
-			em.persist(mw_image_store);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("createImageStore failed", e);
-			throw new DbException("ImageStoreDao,createImageStore method", e);
-		}
-
-		finally {
-			em.close();
-		}
+		create(mw_image_store);
 		return mw_image_store;
 	}
 
 	public MwImageStore getImageStoreByID(String id) throws DbException {
-		MwImageStore mw_image_store;
-		EntityManager em = getEntityManager();
-		try {
-			mw_image_store = em.find(MwImageStore.class, id);
-		} catch (Exception e) {
-			log.error("getImageStoreByID failed", e);
-			throw new DbException("ImageStoreDao,getImageStoreByID method", e);
-		} finally {
-			em.close();
-		}
+		MwImageStore mw_image_store = (MwImageStore) get(MwImageStore.class, id);		
 		return mw_image_store;
 	}
 
 	public void updateImageStore(MwImageStore mw_image_store)
 			throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-			em.getTransaction().begin();
-			em.merge(mw_image_store);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("updateImageStore failed", e);
-			throw new DbException("ImageStoreDao,updateImageStore failed", e);
-		} finally {
-			em.close();
-		}
+		update(mw_image_store);
 	}
 
 	public void deleteImageStore(MwImageStore mw_image_store)
 			throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-
-			em.getTransaction().begin();
-			em.remove(mw_image_store);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("deleteImageStore failed", e);
-			throw new DbException("ImageStoreDao, deleteImageStore failed", e);
-		} finally {
-			em.close();
-		}
+		delete(MwImageStore.class, mw_image_store);
 	}
 
 	public List<MwImageStore> findMwImageStore(ImageStoreFilter imageStoreFilter)
@@ -160,7 +109,6 @@ public class ImageStoreDao {
 					.toArray(new Predicate[] {})));
 			
 			Query q = em.createQuery(criteriaQuery);
-			log.info("Query :: " + q.toString());
 
 			List<Object[]> result = q.getResultList();
 			List<MwImageStore> mwImageStoreList = new ArrayList<MwImageStore>();
@@ -180,19 +128,7 @@ public class ImageStoreDao {
 	}
 
 	public void deleteImageStoreByID(String id) throws DbException {
-		EntityManager em = getEntityManager();
-		try {
-
-			em.getTransaction().begin();
-			MwImageStore mwImageStore = em.getReference(MwImageStore.class, id);
-			em.remove(mwImageStore);
-			em.getTransaction().commit();
-		} catch (Exception e) {
-			log.error("deleteImageStoreByID failed", e);
-			throw new DbException("ImageStoreDao, deleteImageStoreByID failed",
-					e);
-		} finally {
-			em.close();
-		}
+		MwImageStore imageStoreByID = getImageStoreByID(id);
+		deleteImageStore(imageStoreByID);
 	}
 }

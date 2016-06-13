@@ -62,8 +62,6 @@ function edit_policy_initialize() {
 
     }
 
-
-
 }
 
 
@@ -176,6 +174,8 @@ function EditDockerImageViewModel(data) {
 function showImageLaunchPoliciesDocker(policydata) {
     current_display_name = policydata.display_name.substring(policydata.display_name.lastIndexOf(":") + 1);
     $("#display_name").val(current_display_name);
+	fetchDockerVersionedDisplayName();
+
     $.ajax({
         type: "GET",
         url: "/v1/image-launch-policies?deploymentType=Docker",
@@ -209,4 +209,22 @@ function addRadios(arr) {
     }
 
     $('#launch_control_policy').html(temp);
+};
+
+function fetchDockerVersionedDisplayName(){
+    var fetchDisplayname = {"image_id": current_image_id};
+
+    $.ajax({
+        type: "POST",
+        url: "/v1/rpc/fetch-versioned-display-name",
+        contentType: "application/json",
+        headers: {
+            'Accept': 'application/json'
+        },
+        data: JSON.stringify(fetchDisplayname),
+        success: function(data, status, xhr) {
+            var display_name = data.details.substring(data.details.lastIndexOf(":") + 1);
+            $("#display_name").val(display_name);
+        }
+    })
 };

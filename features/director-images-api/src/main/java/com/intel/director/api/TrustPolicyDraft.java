@@ -16,7 +16,7 @@ public class TrustPolicyDraft extends AuditFields {
 
     protected String display_name;
     
-    protected String error;
+    public String error;
     
     public String getError() {
 		return error;

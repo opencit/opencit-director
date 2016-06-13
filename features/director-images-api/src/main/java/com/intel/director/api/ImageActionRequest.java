@@ -38,7 +38,7 @@ public class ImageActionRequest {
 			errors.add("Image Id is empty or not in uuid format");
 		}
 	
-		if (artifact_store_list.size() == 2) {
+	/*	if (artifact_store_list.size() == 2) {
 			if (!(artifact_store_list.get(0).getArtifact_name()
 					.equals(Constants.ARTIFACT_IMAGE)
 					&& artifact_store_list.get(1).getArtifact_name()
@@ -47,22 +47,23 @@ public class ImageActionRequest {
 				errors.add("Invalid list of artifacts selected for upload. Image should be followed by Policy");
 			}
 		} else if (artifact_store_list.size() > 2) {
-			errors.add("Artifacts can t be gretaer than 2 ");
-		} else if (artifact_store_list.size() == 1) {
+			errors.add("Artifacts can' t be greater than 2 ");
+		} else*/ if (artifact_store_list.size() == 1) {
 			if (!ValidationUtil.isValidWithRegex(artifact_store_list.get(0)
 					.getArtifact_name(), Constants.ARTIFACT_IMAGE + "|"
 					+ Constants.ARTIFACT_DOCKER_IMAGE + "|"
-					+ Constants.ARTIFACT_POLICY + "|" + Constants.ARTIFACT_TAR
+					 + Constants.ARTIFACT_TAR
 					+ "|" + Constants.ARTIFACT_DOCKER_WITH_POLICY)) {
 				errors.add("Invalid artifact provided. It should be "
 						+ Constants.ARTIFACT_IMAGE + "|"
 						+ Constants.ARTIFACT_DOCKER_IMAGE + "|"
-						+ Constants.ARTIFACT_POLICY + "|"
 						+ Constants.ARTIFACT_TAR + "|"
 						+ Constants.ARTIFACT_DOCKER_WITH_POLICY);
 
 			}
 
+		}else{
+			errors.add("Only single artifact supported in this release");
 		}
 		
 		for(ArtifactStoreDetails artifactStoreDetails: artifact_store_list){

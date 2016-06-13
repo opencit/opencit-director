@@ -29,7 +29,8 @@ public class DockerActionImpl implements DockerActionService {
 		String displayName;
 
 		if (image.getTrust_policy_id() == null) {
-			displayName = image.getRepository().replace("/", "-") + ":" + image.getTag();
+			displayName = image.getImage_name() != null ? image.getImage_name()
+					: image.getRepository().replace("/", "-") + ":" + image.getTag();
 		} else {
 
 			try {

@@ -3,6 +3,7 @@ package com.intel.director.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,9 +48,9 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		case Constants.CONNECTOR_GLANCE:
 			returnString = ConnectorProperties.GLANCE.getProperties();
 			break;
-		case Constants.CONNECTOR_SWIFT:
+	/*	case Constants.CONNECTOR_SWIFT:
 			returnString = ConnectorProperties.SWIFT.getProperties();
-			break;
+			break;*/
 		}	
 		return returnString;
 	}
@@ -61,13 +62,19 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 
 		ConnectorKey[] propertiesForConnector = propertiesForConnector(imageStoreTransferObject.getConnector());
 		List<ConnectorKey> listOfPropertiesForConnector = new ArrayList<ConnectorKey>(Arrays.asList(propertiesForConnector));
+		Map<String, ConnectorKey> keyToConnectorPropertyMap = new HashMap<>(listOfPropertiesForConnector.size());
+		for (ConnectorKey connectorKey : listOfPropertiesForConnector) {
+			keyToConnectorPropertyMap.put(connectorKey.getKey(), connectorKey);
+		}
+		boolean updateWithEncryptedPassword = false;
 		if(imageStoreTransferObject.getImage_store_details() != null && imageStoreTransferObject.getImage_store_details().size() != 0) {
 			Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject.getImage_store_details();
 			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
 				String key = imageStoreDetailsTransferObject.getKey();
-				if(listOfPropertiesForConnector.contains(key)){
-					listOfPropertiesForConnector.remove(key);
+				if(keyToConnectorPropertyMap.containsKey(key)){
+					listOfPropertiesForConnector.remove(keyToConnectorPropertyMap.get(key));
 				}
+				updateWithEncryptedPassword = true;
 				image_store_details_final.add(imageStoreDetailsTransferObject);
 			}
 		}
@@ -82,6 +89,21 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		
 		try {
 			savedImageStore = imagePersistenceManager.saveImageStore(imageStoreTransferObject);
+			//If the user has provided the whole Image Store configuration with the details,
+			//We want to encrypt the password and save it for which we need the id of the password field
+			//So once we save the store, we need to update it 
+			if(updateWithEncryptedPassword){
+				ImageStoreDetailsTransferObject passwordConfiguration = savedImageStore.fetchPasswordConfiguration();
+				ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
+
+				if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
+					String passwordForImageStore = imageStorePasswordUtil.encryptPasswordForImageStore(passwordConfiguration.getValue());			
+					passwordConfiguration.setValue(passwordForImageStore);
+				}
+				
+				imagePersistenceManager.updateImageStore(savedImageStore);
+
+			}
 			if(savedImageStore != null){
 				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
 					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
@@ -106,6 +128,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			if(fetchImageStorebyId == null){
 				return null;
 			}
+			/*
 			ImageStoreDetailsTransferObject passwordConfiguration = fetchImageStorebyId.fetchPasswordConfiguration();
 			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 
@@ -113,6 +136,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 				String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());			
 				passwordConfiguration.setValue(passwordForImageStore);
 			}
+			*/
 			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
 				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
 				detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
@@ -219,7 +243,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 			}
 			return isValidated;
 			
-		case Constants.CONNECTOR_SWIFT:
+	/*	case Constants.CONNECTOR_SWIFT:
 
 			for (String artifact : artifact_types) {
 				Map<String, String> supported_artifacts = ConnectorProperties.SWIFT
@@ -228,7 +252,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 					isValidated = false;
 				}
 			}
-			return isValidated;
+			return isValidated;*/
 
 			default:
 				return false;

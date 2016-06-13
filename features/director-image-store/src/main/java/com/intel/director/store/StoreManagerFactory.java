@@ -60,7 +60,8 @@ public class StoreManagerFactory {
 		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreDTO.fetchPasswordConfiguration();
 		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
 		if(StringUtils.isBlank(passwordConfiguration.getValue())){
-			throw new StoreException("No password set for store "+ storeId);
+			log.error("No password set for store "+ storeId);
+			throw new StoreException("No password set for store");
 		}
 		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreDTO
 				.getImage_store_details();

@@ -95,13 +95,20 @@ public class UpdateMetadataTask extends GenericUploadTask {
 			fetchImageUploads = persistService.fetchImageUploads(imgUpFilter, imageStoreUploadOrderBy);
 			if ((fetchImageUploads != null && fetchImageUploads.size() > 0)) {
 				imageStoreTranserObject = fetchImageUploads.get(fetchImageUploads.size() - 1);
-				log.info("Last uploaded image to store : {},  glance id : {}", imageStoreTranserObject.getStoreId(),
-						imageStoreTranserObject.getStoreArtifactId());
+				if(imageStoreTranserObject!=null){
+					log.info("Last uploaded image to store : {},  glance id : {}", imageStoreTranserObject.getStoreId(),
+							imageStoreTranserObject.getStoreArtifactId());
+				}
+			
 				log.info("Glance id from policy {}", glanceId);
 			} 
 		} catch (DbException e) {
 			log.error("Error fetching image uploads {}", e);
 			updateImageActionState(Constants.ERROR, "Error in update metadata task");
+			return false;
+		}
+		if(imageStoreTranserObject==null){
+			updateImageActionState(Constants.ERROR, "Error in Updating metadata in imagestore");
 			return false;
 		}
 		

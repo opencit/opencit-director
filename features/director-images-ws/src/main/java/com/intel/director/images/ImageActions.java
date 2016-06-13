@@ -21,10 +21,12 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.api.GenericDeleteResponse;
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.api.ImageActionRequest;
 import com.intel.director.api.ImageActionResponse;
+import com.intel.director.api.ImageInfoResponse;
 import com.intel.director.api.ListImageActionResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.exception.DirectorException;
@@ -65,62 +67,38 @@ public class ImageActions {
 	 * task holds the name of the task in the "action" array that is currently
 	 * being processed.
 	 * 
+	 * Status of the action tasks can be Incomplete,Complete or Error 
+	 * depending on result of execution
+	 * 
 	 * @mtwContentTypeReturned JSON
 	 * @mtwMethodType GET
 	 * @mtwSampleRestCall <pre>
 	 * 	  https://{IP/HOST_NAME}/v1/image-actions/<action_id>
-	 * 	  Input: PathParam : action_id = CF0A8FA3-F73E-41E9-8421-112FB22BB057
-	 * 	  Output: {
-	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	  "action_count": 2,
-	 * 	  "action_completed": 2,
-	 * 	  "action_size": 66570,
-	 * 	  "action_size_max": 66570,
-	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 * 	   "status": "Complete", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * 	  "current_task_status": "Complete",
-	 * 	  "current_task_name": "Upload Tar" }
-	 * 	  
-	 * 	   {
-	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	  "action_count": 2,
-	 * 	  "action_completed": 1,
-	 * 	  "action_size": 66570,
-	 * 	  "action_size_max": 66570,
-	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 * 	   "status": "In Progress", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * 	  "current_task_status": "Complete",
-	 * 	  "current_task_name": "Create Tar" }
-	 * 	  
-	 * 	  
-	 * 	  In case of error creating tar : 
-	 * 	  {
-	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	  "action_count": 2,
-	 * 	  "action_completed": 0,
-	 * 	  "action_size": 66570,
-	 * 	  "action_size_max": 66570,
-	 * 	  "action": [ { "status": "Error","task_name": "Create Tar","error":"Error Creating tar"},
-	 * 	  "status": "Incomplete", "storename": "Glance", "task_name": "Upload Tar" }],
-	 * 	  "current_task_status": "Error : Error Creating tar ",
-	 * 	  "current_task_name": "Create Tar" }
-	 * 	  
-	 * 	  In case of error uploading tar : 
-	 * 	  {
-	 * 	  "id": "CF0A8FA3-F73E-41E9-8421-112FB22BB057",
-	 * 	  "image_id": "08EB37D7-2678-495D-B485-59233EB51996",
-	 * 	  "action_count": 2,
-	 * 	  "action_completed": 1,
-	 * 	  "action_size": 66570,
-	 * 	  "action_size_max": 66570,
-	 * 	  "action": [ { "status": "Complete","task_name": "Create Tar"},
-	 * 	  "status": "Error", "storename": "Glance", "task_name": "Upload Tar","error":"Error Uploading tar"}],
-	 * 	  "current_task_status": "Error : Error Uploading tar ",
-	 * 	  "current_task_name": "Upload Tar" }
+	 * 	  Input: PathParam : action_id = 808B57E5-1A02-4731-813C-60123F739A85
+	 * 	  Output: 
+	 * 	  {"id":"808B57E5-1A02-4731-813C-60123F739A85","image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67","action_count":3,"action_completed":3,"action_size":0,"action_size_max":0,"actions":[{"status":"Complete","task_name":"Recreate Policy","message":"recreate task completed"},{"status":"Complete","task_name":"Create Tar","message":"Create Tar completed"},{"status":"Complete","task_name":"Upload Tar","message":"Upload Tar complete","store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"current_task_status":"Complete","current_task_name":"Upload Tar","datetime":1465284021967}
+	 * 
+	 * Docker image action:
+	 * {
+		  "id": "C9EF6E99-33A6-43E0-AD8A-A2897FAF4661",
+		  "image_id": "BF36833E-15BB-4D65-8FAB-3B8E04684CAA",
+		  "action_count": 1,
+		  "action_completed": 0,
+		  "action_size": 0,
+		  "action_size_max": 0,
+		  "actions": [
+		    {
+		      "status": "Incomplete",
+		      "task_name": "Upload Image",
+		      "store_id": "12A48CDF-604E-4026-9441-9A1EF950DA22"
+		    }
+		  ],
+		  "current_task_status": "Incomplete",
+		  "current_task_name": "Upload Image"
+		}
 	 * </pre>
+	 * 
+	 * If such action do not exist it will give 404 not found
 	 * 
 	 * @param actionId
 	 * @return ImageActionResponse
@@ -143,7 +121,6 @@ public class ImageActions {
 					
 			}else{
 				return  Response.status(404)
-					.entity("No image action found for id: " + actionId)
 					.build();
 			}
 			
@@ -162,22 +139,16 @@ public class ImageActions {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * 
-	 * Input: {"artifact_store_list":[{"artifact_name":"Tarball","image_store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB"}],
-	 * "image_id":"64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF"}
-	 * 
+	 * Input:
+	 * {"artifact_store_list":[{"artifact_name":"Tarball","image_store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67"}
+	 *  
 	 * Output:
-	 * {"id":"30869EF3-9809-48F6-AC36-21994318313F",
-	 * "image_id":"64E8AFCC-182F-42C9-8A7B-42AD3C93EDCF",
-	 * "action_count":3,
-	 * "action_completed":0,
-	 * "action_size":0,
-	 * "action_size_max":0,
-	 * "actions":[{"status":"Incomplete","task_name":"Recreate Policy"},{"status":"Incomplete","task_name":"Create Tar"},
-	 * 			{"status":"Incomplete","task_name":"Upload Tar","store_id":"78D1FF99-7412-4AA6-8351-8FD6902412CB"}],
-	 * "current_task_status":"Incomplete",
-	 * "current_task_name":"Recreate Policy",
-	 * "created_date_time":1458630019513,
-	 * "deleted":false
+	 * {"id":"808B57E5-1A02-4731-813C-60123F739A85","image_id":"42ECB200-CACB-4D58-AE2D-51FB0413FA67","action_count":3,"action_completed":0,"action_size":0,"action_size_max":0,"actions":[{"status":"Incomplete","task_name":"Recreate Policy"},{"status":"Incomplete","task_name":"Create Tar"},{"status":"Incomplete","task_name":"Upload Tar","store_id":"5506B552-0E88-4C23-8E71-06FD26AF9162"}],"current_task_status":"Incomplete","current_task_name":"Recreate Policy","created_date_time":1465283994090,"deleted":false}
+	 * 
+	 * 
+	 * In case of error:
+	 * {
+	 *   "error": "Image does not exist for id: 1AFBA2F5-C02E-420E-9842-C455BB35B332"
 	 * }
 	 * 
 	 * </pre>
@@ -193,12 +164,13 @@ public class ImageActions {
 	public Response createImageAction(
 			ImageActionRequest imageActionRequest) {
 		ImageActionResponse imageActionResponse = new ImageActionResponse();
+		GenericResponse genericResponse= new GenericResponse();
 		ImageActionObject imageActionObject;
 		String error=imageActionRequest.validate();
 		if(!StringUtils.isBlank(error)){
-			imageActionResponse.error=error;
+			genericResponse.error=error;
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(imageActionResponse).build();
+					.entity(genericResponse).build();
 		}
 		
 		ImageInfo fetchImageById = null;;
@@ -210,10 +182,10 @@ public class ImageActions {
 		}
 
 		if (fetchImageById == null) {
-			imageActionResponse.error = "Image does not exist for id: "
+			genericResponse.error = "Image does not exist for id: "
 					+ imageActionRequest.image_id;
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(imageActionResponse).build();
+					.entity(genericResponse).build();
 		}
 		
 		try {
@@ -251,7 +223,7 @@ public class ImageActions {
 	 * @mtwSampleRestCall <pre>
 	 * https://{IP/HOST_NAME}/v1/image-actions
 	 * Input: PathParam =  actionId : CF0A8FA3-F73E-41E9-8421-112FB22BB057
-	 * Output: {"deleted":true,"action_count":0,"action_completed":0,"action_size":0,"action_size_max":0}
+	 * Output: {"deleted":true}
 	 * 
 	 * </pre>
 	 * 
@@ -262,13 +234,15 @@ public class ImageActions {
 	@DELETE
 	public Response deleteImageAction(
 			@PathParam("actionId") String actionId) {
-		ImageActionResponse imageActionResponse = new ImageActionResponse();
-		imageActionResponse.setDeleted(true);
+		GenericDeleteResponse imageDeleteResponse = new GenericDeleteResponse();
+		GenericResponse genericResponse= new GenericResponse();
+		ImageActionObject imageActionObject;
+		imageDeleteResponse.setDeleted(true);
 	///	GenericResponse genericResponse= new GenericResponse();
 		if(!ValidationUtil.isValidWithRegex(actionId,RegexPatterns.UUID)){
-			imageActionResponse.error = "Action Id is empty or not in uuid format";
+			genericResponse.error = "Action Id is empty or not in uuid format";
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(imageActionResponse).build();
+					.entity(genericResponse).build();
 		}
 		ImageActionObject fetchImageAction = null;
 		try {
@@ -278,19 +252,19 @@ public class ImageActions {
 		}
 
 		if(fetchImageAction == null){			
-			imageActionResponse.error = "Image action does not exist for id "+actionId;
-			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(imageActionResponse).build();
+			genericResponse.error = "Image action does not exist for id "+actionId;
+			return Response.status(Response.Status.NOT_FOUND)
+					.entity(genericResponse).build();
 		}
 		try {
 			actionService.deleteImageAction(actionId);
 		} catch (Exception e) {
 			log.error("Error in deleteImageAction", e);
-			imageActionResponse.setError("Error in deleteImageAction");
-			imageActionResponse.setDeleted(false);
-			return Response.ok(imageActionResponse).build();
+			imageDeleteResponse.setError("Error in deleteImageAction");
+			imageDeleteResponse.setDeleted(false);
+			return Response.ok(imageDeleteResponse).build();
 		}
-		return Response.ok(imageActionResponse).build();
+		return Response.ok(imageDeleteResponse).build();
 	}
 	
 	
@@ -311,7 +285,10 @@ public class ImageActions {
 	 * 			{"store_names":"Glance-36","execution_status":"Complete","id":"689AF185-2232-4E61-A1ED-2435FF7DF337","artifact_name":"Image With Policy As Tarball","datetime":"2016 Mar 18 15:34:36"}
 	 * 		]
 	 * 	}
-	 *                    </pre>
+	 * </pre>
+	 * 
+	 *                    It will give 404 id image do not exist with the given
+	 *                    id: { "error": "Image with the id do not exist" }
 	 * 
 	 * @param imageId
 	 *            imageId as PathParam
@@ -323,12 +300,27 @@ public class ImageActions {
 	@GET
 	public Response getImageActionHistory(@PathParam("imageId") String imageId) {
 		ListImageActionResponse imageActionResponseList = new ListImageActionResponse();
+		GenericResponse genericResponse= new GenericResponse();
 		if (!ValidationUtil.isValidWithRegex(imageId, RegexPatterns.UUID)) {
-			imageActionResponseList.error = "ImageId is empty or not in uuid format";
+			genericResponse.error = "ImageId is empty or not in uuid format";
+			
 			return Response.status(Response.Status.BAD_REQUEST)
-					.entity(imageActionResponseList).build();
+					.entity(genericResponse).build();
 		}
-
+	
+		ImageInfoResponse imageInfoResponse=null;
+		try {
+			imageInfoResponse = imageService
+					.getImageDetails(imageId);
+		} catch (DirectorException e1) {
+			log.error("getImageDetails failed",e1);
+			return Response.status(500).build();	
+		}
+		if (imageInfoResponse == null) {
+			genericResponse.error = "Image with the id do not exist";
+			return Response.status(Response.Status.NOT_FOUND)
+					.entity(genericResponse).build();
+		}
 		try {
 			imageActionResponseList.setImageActionResponseList(actionService
 					.getImageActionHistory(imageId));
@@ -337,6 +329,7 @@ public class ImageActions {
 			log.error("getImageActionHistory failed",e);
 			return Response.status(500).build();
 		}
+		
 		return Response.ok(imageActionResponseList).build();
 
 	}

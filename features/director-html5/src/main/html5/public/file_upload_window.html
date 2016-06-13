@@ -267,7 +267,8 @@ input[readonly] {
 					}
 					if (isDockerManualUpload || image_deployments == "VM") {
 					///	$('#upload').prop('disabled', false);
-						BYTES_PER_CHUNK = 1048576 * 10; //10MB
+						var oneMb = 1024 * 1024;
+						BYTES_PER_CHUNK = oneMb * 10; //10MB
 						start = 0;
 						end = BYTES_PER_CHUNK;
 						upload_chunks(image_id, start, end);
@@ -285,7 +286,7 @@ input[readonly] {
 							.authorizationToken(null);
 					window.opener.location.reload();
 					window.close();
-				}else if (xhrmdt.status === 400) {
+				}else if ((xhrmdt.status === 400) || (xhrmdt.status === 500)) {
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
 					if (myArr.details) {

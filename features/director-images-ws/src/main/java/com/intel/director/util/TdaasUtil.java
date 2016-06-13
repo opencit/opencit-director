@@ -464,7 +464,24 @@ public class TdaasUtil {
 				.setPassword(fromPassword(sshSettingRequest.getPassword()));
 		sshSettingInfo.setUsername(sshSettingRequest.getUsername());
 		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
-				sshSettingRequest.getIpAddress(),
+				sshSettingRequest.getName(),
+				sshSettingRequest.getUsername()));
+		return sshSettingInfo;
+
+	}
+	
+	public SshSettingInfo fromSshSettingRequest(
+			SshSettingRequest sshSettingRequest, SshSettingInfo existingSshSettingInfo) {
+		SshSettingInfo sshSettingInfo = new SshSettingInfo();
+		sshSettingInfo.setId(StringUtils.isNotBlank(sshSettingRequest.getId())?sshSettingRequest.getId():existingSshSettingInfo.getId());
+		sshSettingInfo.setIpAddress(StringUtils.isNotBlank(sshSettingRequest.getIpAddress()) ? sshSettingRequest.getIpAddress() : existingSshSettingInfo.getIpAddress());
+		sshSettingInfo.setSshKeyId(fromKey(sshSettingRequest.getKey()));
+		sshSettingInfo.setName(StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName());		
+		sshSettingInfo
+				.setPassword(fromPassword(sshSettingRequest.getPassword()));		
+		sshSettingInfo.setUsername(StringUtils.isNotBlank(sshSettingRequest.getUsername()) ? sshSettingRequest.getUsername() : existingSshSettingInfo.getUsername());
+		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
+				StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName(),
 				sshSettingRequest.getUsername()));
 		return sshSettingInfo;
 

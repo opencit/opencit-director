@@ -14,8 +14,6 @@
 # 10. add director to startup services
 # 11. look for DIRECTOR_PASSWORD environment variable; if not present print help message and exit:
 #     Trust Director requires a master password
-#     to generate a password run "export DIRECTOR_PASSWORD=$(director generate-password) && echo DIRECTOR_PASSWORD=$DIRECTOR_PASSWORD"
-#     you must store this password in a safe place
 #     losing the master password will result in data loss
 # 12. director setup
 # 13. director start
@@ -34,7 +32,12 @@ export DIRECTOR_ENV=$DIRECTOR_HOME/env
 
 # load application environment variables if already defined
 
-
+EXTENSIONS_CACHE_FILE=$DIRECTOR_HOME/configuration/extensions.cache
+echo "EXTENSIONS_CACHE_FILE:: $EXTENSIONS_CACHE_FILE"
+if [ -f $EXTENSIONS_CACHE_FILE ] ; then
+echo "removing existing extension cache file"
+    rm -rf $EXTENSIONS_CACHE_FILE
+fi
 
 if [ -d $DIRECTOR_ENV ]; then
   DIRECTOR_ENV_FILES=$(ls -1 $DIRECTOR_ENV/*)
@@ -239,11 +242,11 @@ load_director_defaults
 #prompt_with_default KMS_SERVER "Key Management Server:" "$KMS_SERVER"
 
 # required TD properties
-prompt_with_default DIRECTOR_VM_WHITELIST_HASH_TYPE "vm.whitelist.hash.type:" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_VM_WHITELIST_HASH_TYPE "vm.whitelist.hash.type:" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
 update_property_in_file "vm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_VM_WHITELIST_HASH_TYPE"
-prompt_with_default DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE "bm.whitelist.hash.type:" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE "bm.whitelist.hash.type:" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
 update_property_in_file "bm.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_BAREMETAL_WHITELIST_HASH_TYPE"
-prompt_with_default DIRECTOR_DOCKER_WHITELIST_HASH_TYPE "docker.whitelist.hash.type:" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
+#prompt_with_default DIRECTOR_DOCKER_WHITELIST_HASH_TYPE "docker.whitelist.hash.type:" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
 update_property_in_file "docker.whitelist.hash.type" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DOCKER_WHITELIST_HASH_TYPE"
 
 update_property_in_file "tenant.name" "$DIRECTOR_PROPERTIES_FILE" "$TENANT_NAME"
@@ -536,6 +539,7 @@ fi
 
 
 director setup apply-database-patches
+director setup setup-glance-image-store
 ## Installing Docker
 ## already installed needs to be checked not implemented in code
 version_gt() { 
