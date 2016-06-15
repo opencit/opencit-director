@@ -4,11 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,25 +79,26 @@ public class DockerUtil {
 		
 		boolean repoTagExists = false;	
 		log.info("Checking with REST endpoint for repo: {} and tag: {}", repo, tag);
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		String url = "https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag;
-		log.info("Searching at url: {}", url);
-		HttpGet get = new HttpGet(url);
-		HttpResponse execute = httpClient.execute(get);
-		int statusCode = execute.getStatusLine().getStatusCode();
-		log.info("Status code of GET : {}", statusCode);
-		if(statusCode == 200){
-			log.info("{}:{} found with REST endoint", repo, tag);
-			repoTagExists = true;
+
+		String command ="curl -i -X GET https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag;
+		log.info("doesRepoTagExistInDockerHub, running command::"+command);
+		Result result=DirectorUtil.executeCommand("curl","-i","-X","GET","https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag);
+		String resultOutput=result.getStdout();
+		log.info("result:"+result+" console output::"+resultOutput);
+		if(StringUtils.isNotBlank(resultOutput)){
+			if(resultOutput.contains("200 OK")){
+				repoTagExists = true;
+			}
 		}
+		
 		if(repoTagExists){
 			return repoTagExists;
 		}
 		
 		log.info("Checking using docker search command");
 		//In cases lie ngnix we use second option to search 
-		String command = "docker search " + repo + ":" + tag;
-		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
+		command = "docker search " + repo + ":" + tag;
+		result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
 		log.info("doesRepoTagExistInDockerHub : Command executed for checking existence of repo and tab in hub : {}", command);
 		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
