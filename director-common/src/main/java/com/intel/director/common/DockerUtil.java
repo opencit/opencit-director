@@ -76,8 +76,29 @@ public class DockerUtil {
 
 	public static boolean doesRepoTagExistInDockerHub(String repo, String tag)
 			throws ClientProtocolException, IOException {
-		String command = "docker search " + repo + ":" + tag;
-		Result result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
+		
+		boolean repoTagExists = false;	
+		log.info("Checking with REST endpoint for repo: {} and tag: {}", repo, tag);
+
+		String command ="curl -i -X GET https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag;
+		log.info("doesRepoTagExistInDockerHub, running command::"+command);
+		Result result=DirectorUtil.executeCommand("curl","-i","-X","GET","https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag);
+		String resultOutput=result.getStdout();
+		log.info("result:"+result+" console output::"+resultOutput);
+		if(StringUtils.isNotBlank(resultOutput)){
+			if(resultOutput.contains("200 OK")){
+				repoTagExists = true;
+			}
+		}
+		
+		if(repoTagExists){
+			return repoTagExists;
+		}
+		
+		log.info("Checking using docker search command");
+		//In cases lie ngnix we use second option to search 
+		command = "docker search " + repo + ":" + tag;
+		result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
 		log.info("doesRepoTagExistInDockerHub : Command executed for checking existence of repo and tab in hub : {}", command);
 		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
 			log.error(result.getStderr());
@@ -88,7 +109,6 @@ public class DockerUtil {
 		log.info("searchResult = {}", searchResult);
 		String nl = System.getProperty("line.separator");
 		String[] split = searchResult.split(nl);
-		boolean repoTagExists = false;
 		for (String string : split) {
 			if (StringUtils.isNotBlank(string) && string.contains("NAME") && string.contains("DESCRIPTION") && string.contains("STARS") ) {
 				log.info("Found the header: {}", string);
