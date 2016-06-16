@@ -9,6 +9,7 @@ import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.common.exception.DirectorException;
 
@@ -84,5 +85,5 @@ public interface TrustPolicyService {
 			TrustPolicyDraftFilter trustPolicyDraftFilter)
 			throws DirectorException;
 	
-	public String getVersionedDisplayNameForDockerImage(String imageId) throws DirectorException;
+	public String getVersionedDisplayNameForDockerImage(ImageInfo imageInfo) throws DirectorException;
 }

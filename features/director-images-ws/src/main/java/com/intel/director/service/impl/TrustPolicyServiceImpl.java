@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,6 +34,7 @@ import com.intel.director.common.FileUtilityOperation;
 import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.TrustPolicyService;
 import com.intel.director.util.TdaasUtil;
+import com.intel.director.util.TrustPolicyComparator;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
@@ -380,37 +382,45 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	}
 
 	@Override
-	public String getVersionedDisplayNameForDockerImage(String imageId) throws DirectorException {
+	public String getVersionedDisplayNameForDockerImage(ImageInfo imageInfo) throws DirectorException {
 		// Find if this image is a docker image and has been uploaded earlier.
 		// If so, append v1 to the tag
-		String versionedName = null;
-		if (!Constants.DEPLOYMENT_TYPE_DOCKER.equals(imageInfo.getImage_deployments())) {
-			return null;
-		}
-		ImageInfo imageById;
-		try {
-			imageById = persistService.fetchImageById(imageId);
-		} catch (DbException e) {
-			throw new DirectorException("Unable to fetch image by id " + imageId);
-		}
-		if(imageById == null){
-			throw new DirectorException("Unable to fetch image by id " + imageId);
-		}
 		ImageStoreUploadFilter imgUploadFilter = new ImageStoreUploadFilter();
 
-		imgUploadFilter.setImage_id(imageId);
+		imgUploadFilter.setImage_id(imageInfo.id);
 		List<ImageStoreUploadTransferObject> imageUploads;
 		try {
 			imageUploads = persistService.fetchImageUploads(imgUploadFilter, null);
 		} catch (DbException e) {
-			throw new DirectorException("Unable to fetch image uploads by image id " + imageId);
+			throw new DirectorException("Unable to fetch image uploads by image id " + imageInfo.id);
 		}
-		versionedName = imageById.getRepository() + ":" + imageById.getTag();
-		if (imageUploads != null && imageUploads.size() > 0) {
+		String versionedName = imageInfo.getRepository() + ":" + imageInfo.getTag();
+		// Get the active trust policy
+		TrustPolicy fetchActivePolicyForImage = null;
+		try {
+			fetchActivePolicyForImage = persistService.fetchActivePolicyForImage(imageInfo.id);
+			if (fetchActivePolicyForImage == null) {
+				List<TrustPolicy> fetchArchivedPoliciesForImage = persistService
+						.fetchArchivedPoliciesForImage(imageInfo.id);
+				Collections.sort(fetchArchivedPoliciesForImage, new TrustPolicyComparator());
+				fetchActivePolicyForImage = fetchArchivedPoliciesForImage.get(fetchArchivedPoliciesForImage.size()-1);
+			}
+		} catch (DbException e) {
+			throw new DirectorException("Unable to fetch active policy by image id " + imageInfo.id);
+		}
+		if (fetchActivePolicyForImage != null) {
+			versionedName = fetchActivePolicyForImage.getDisplay_name();
 			versionedName = TdaasUtil.getVersionedName(versionedName);
-			log.info("image was uploaded earlier. So appending version to the policy {}", versionedName);			
+		} else {
+			if (imageUploads != null && imageUploads.size() > 0) {
+				versionedName = TdaasUtil.getVersionedName(versionedName);
+				log.info("image was uploaded earlier. So appending version to the policy {}", versionedName);
+			}
 		}
 		return versionedName;
 	}
 
+	
 }
+
+
