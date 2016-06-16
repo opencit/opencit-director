@@ -703,7 +703,7 @@ public class TrustPolicyDrafts {
 		try {
 			trustPolicyService = new TrustPolicyServiceImpl(req.getImage_id());
 			versionedDisplayNameForDockerImage = trustPolicyService
-					.getVersionedDisplayNameForDockerImage(req.getImage_id());
+					.getVersionedDisplayNameForDockerImage(imageInfo);
 		} catch (DirectorException e) {
 			log.error("Unable to get versioned name for policy", e);
 			genericResponse.error = "Unable to get versioned name for docker image policy ";
