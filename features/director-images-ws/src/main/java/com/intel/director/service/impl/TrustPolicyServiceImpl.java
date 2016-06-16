@@ -402,8 +402,11 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			if (fetchActivePolicyForImage == null) {
 				List<TrustPolicy> fetchArchivedPoliciesForImage = persistService
 						.fetchArchivedPoliciesForImage(imageInfo.id);
-				Collections.sort(fetchArchivedPoliciesForImage, new TrustPolicyComparator());
-				fetchActivePolicyForImage = fetchArchivedPoliciesForImage.get(fetchArchivedPoliciesForImage.size()-1);
+				if (fetchArchivedPoliciesForImage != null && fetchArchivedPoliciesForImage.size() > 0) {
+					Collections.sort(fetchArchivedPoliciesForImage, new TrustPolicyComparator());
+					fetchActivePolicyForImage = fetchArchivedPoliciesForImage
+							.get(fetchArchivedPoliciesForImage.size() - 1);
+				}
 			}
 		} catch (DbException e) {
 			throw new DirectorException("Unable to fetch active policy by image id " + imageInfo.id);
