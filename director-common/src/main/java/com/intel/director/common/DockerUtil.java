@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.intel.director.constants.Constants;
+import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
 
 public class DockerUtil {
@@ -42,7 +43,7 @@ public class DockerUtil {
 		return executeDockerCommands("load", "--input=" + source_image);
 
 	}
-	
+
 	public static int executeDockerCommands(String... args) {
 		int exitcode;
 		if (args.length == 0) {
@@ -60,23 +61,25 @@ public class DockerUtil {
 		}
 		return exitcode;
 
-	}	
-	
-	
-	
-	public static boolean checkDockerHubConnection()
-			throws ClientProtocolException, IOException {
-		int result=-1;
-		result = executeDockerCommands("search", "busybox");  /// return 0 when able to connect hub and search even though serch result is empty
+	}
+
+	public static boolean checkDockerHubConnection() throws ClientProtocolException, IOException {
+		int result = -1;
+		/// return 0 when able to connect hub and search even though serch
+		/// result is empty
+		result = executeDockerCommands("search", "busybox");
 		if (result == 0) {
 			return true;
 		}
 		return false;
 	}
-	
-	public static boolean doesRepoTagExistInDockerHub(String repo, String tag) throws ClientProtocolException, IOException{
+
+	public static boolean doesRepoTagExistInDockerHub(String repo, String tag)
+			throws ClientProtocolException, IOException {
 		
-		
+		boolean repoTagExists = false;	
+		log.info("Checking with REST endpoint for repo: {} and tag: {}", repo, tag);
+
 		String command ="curl -i -X GET https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag;
 		log.info("doesRepoTagExistInDockerHub, running command::"+command);
 		Result result=DirectorUtil.executeCommand("curl","-i","-X","GET","https://registry.hub.docker.com/v1/repositories/"+repo+"/tags/"+tag);
@@ -84,11 +87,39 @@ public class DockerUtil {
 		log.info("result:"+result+" console output::"+resultOutput);
 		if(StringUtils.isNotBlank(resultOutput)){
 			if(resultOutput.contains("200 OK")){
-				return true;
+				repoTagExists = true;
 			}
 		}
 		
-		return false;	
+		if(repoTagExists){
+			return repoTagExists;
+		}
 		
+		log.info("Checking using docker search command");
+		//In cases lie ngnix we use second option to search 
+		command = "docker search " + repo + ":" + tag;
+		result = ExecUtil.executeQuoted("/bin/sh", "-c", command);
+		log.info("doesRepoTagExistInDockerHub : Command executed for checking existence of repo and tab in hub : {}", command);
+		if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
+			log.error(result.getStderr());
+			return false;
+		}
+		
+		String searchResult = result.getStdout();
+		log.info("searchResult = {}", searchResult);
+		String nl = System.getProperty("line.separator");
+		String[] split = searchResult.split(nl);
+		for (String string : split) {
+			if (StringUtils.isNotBlank(string) && string.contains("NAME") && string.contains("DESCRIPTION") && string.contains("STARS") ) {
+				log.info("Found the header: {}", string);
+				continue;
+			}
+			log.info("Found the content: {}", string);
+			repoTagExists = true;
+			break;
+		}
+
+		return repoTagExists;
+
 	}
 }
