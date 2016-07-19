@@ -15,40 +15,39 @@ public class ImageStoreTransferObject extends GenericResponse {
 
 	public String id;
 	public String name;
-	
-	public String[] artifact_types;
-	
-	
-	public String connector;
-	
-	public boolean deleted;
-	
-	public String deploymentFormat;
-	
-	public Boolean isValid = null;
-	
-	public Collection<ImageStoreDetailsTransferObject> image_store_details;
-	
 
-    
+	public String[] artifact_types;
+
+	public String connector;
+
+	public boolean deleted;
+
+	public String deploymentFormat;
+
+	public Boolean isValid = null;
+
+	public Collection<ImageStoreDetailsTransferObject> image_store_details;
+
 	public Collection<ImageStoreDetailsTransferObject> getImage_store_details() {
-		if(this.image_store_details == null){
+		if (this.image_store_details == null) {
 			return null;
 		}
 		List<ImageStoreDetailsTransferObject> listImageStoreDetailsTransferObject = new ArrayList<ImageStoreDetailsTransferObject>(
 				image_store_details);
-		
+
 		ConnectorProperties connectorByName = ConnectorProperties.getConnectorByName(connector);
-		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : listImageStoreDetailsTransferObject) {
-			imageStoreDetailsTransferObject.seqNo = connectorByName.fetchSeqNoOfProperty(imageStoreDetailsTransferObject.key);
+		if (connectorByName != null) {
+			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : listImageStoreDetailsTransferObject) {
+				imageStoreDetailsTransferObject.seqNo = connectorByName
+						.fetchSeqNoOfProperty(imageStoreDetailsTransferObject.key);
+			}
 		}
-		
+
 		Collections.sort(listImageStoreDetailsTransferObject);
 		return listImageStoreDetailsTransferObject;
 	}
 
-	public void setImage_store_details(
-			Collection<ImageStoreDetailsTransferObject> image_store_details) {
+	public void setImage_store_details(Collection<ImageStoreDetailsTransferObject> image_store_details) {
 		this.image_store_details = image_store_details;
 	}
 
@@ -59,8 +58,6 @@ public class ImageStoreTransferObject extends GenericResponse {
 	public void setArtifact_types(String[] artifact_types) {
 		this.artifact_types = artifact_types;
 	}
-
-	
 
 	public String getDeploymentFormat() {
 		return deploymentFormat;
@@ -102,8 +99,6 @@ public class ImageStoreTransferObject extends GenericResponse {
 		this.deleted = deleted;
 	}
 
-	
-
 	public Boolean getIsValid() {
 		return isValid;
 	}
@@ -114,34 +109,30 @@ public class ImageStoreTransferObject extends GenericResponse {
 
 	@Override
 	public String toString() {
-		return "ImageStoreTransferObject [id=" + id + ", name=" + name
-				+ ", artifact_types=" + Arrays.toString(artifact_types)
-				+ ", connector=" + connector + ", deleted=" + deleted
-				+ ", deploymentFormat=" + deploymentFormat
-				+ ", image_store_details=" + image_store_details + "]";
+		return "ImageStoreTransferObject [id=" + id + ", name=" + name + ", artifact_types="
+				+ Arrays.toString(artifact_types) + ", connector=" + connector + ", deleted=" + deleted
+				+ ", deploymentFormat=" + deploymentFormat + ", image_store_details=" + image_store_details + "]";
 	}
-	
 
 	public ImageStoreDetailsTransferObject fetchPasswordConfiguration() {
 		ImageStoreDetailsTransferObject detailsTransferObject = null;
 
 		Collection<ImageStoreDetailsTransferObject> imageStoreDetails = getImage_store_details();
-		ConnectorProperties connectorByName = ConnectorProperties
-				.getConnectorByName(getConnector());
+		ConnectorProperties connectorByName = ConnectorProperties.getConnectorByName(getConnector());
 		String passwordElement = null;
-		if(connectorByName!=null){
+		if (connectorByName != null) {
 			if (connectorByName.equals(ConnectorProperties.DOCKER)) {
 				passwordElement = Constants.DOCKER_HUB_PASSWORD;
 			} else if (connectorByName.equals(ConnectorProperties.GLANCE)) {
 				passwordElement = Constants.GLANCE_IMAGE_STORE_PASSWORD;
-			} /*else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
-				passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD;
-			}*/
-	   }
+			} /*
+				 * else if (connectorByName.equals(ConnectorProperties.SWIFT)) {
+				 * passwordElement = Constants.SWIFT_ACCOUNT_USER_PASSWORD; }
+				 */
+		}
 		if (imageStoreDetails != null) {
 			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : imageStoreDetails) {
-				if (imageStoreDetailsTransferObject.getKey().equals(
-						passwordElement)) {
+				if (imageStoreDetailsTransferObject.getKey().equals(passwordElement)) {
 					detailsTransferObject = imageStoreDetailsTransferObject;
 					break;
 				}
@@ -150,6 +141,5 @@ public class ImageStoreTransferObject extends GenericResponse {
 		return detailsTransferObject;
 
 	}
-
 
 }

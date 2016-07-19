@@ -238,13 +238,14 @@ public class GlanceRsClient {
 		try {
 			uploadBody = mapper.writeValueAsString(glanceImageUploadBody);
 		} catch (JsonProcessingException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
+			String msg = "Error converting json upload data to string";
+			log.error(msg, e3);
+			throw new GlanceException(msg, e3);
 		}
 		log.info("Metadata body {} and authtoken {}", uploadBody, authToken);
 		HttpEntity entity;
 		if(uploadBody==null){
-			new GlanceException("uploadimgeMetadata failed");
+			throw new GlanceException("uploadimgeMetadata failed");
 		}
 		try {
 			entity = new ByteArrayEntity(uploadBody.toString().getBytes("UTF-8"));

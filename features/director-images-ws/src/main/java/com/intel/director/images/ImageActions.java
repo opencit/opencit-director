@@ -192,6 +192,10 @@ public class ImageActions {
 			
 			actionService = ActionServiceBuilder.build(imageActionRequest
 					.getImage_id());
+			if(actionService == null){
+				throw new DirectorException("Unable to instantiate a actionService for image id : "+imageActionRequest
+						.getImage_id());
+			}
 			imageActionObject = actionService
 					.createImageAction(imageActionRequest);
 		} catch (DirectorException e) {

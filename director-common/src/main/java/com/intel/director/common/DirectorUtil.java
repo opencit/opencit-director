@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.security.MessageDigest;
@@ -43,8 +44,6 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.TrustPolicy;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
@@ -55,27 +54,24 @@ import com.intel.mtwilson.util.exec.Result;
 public class DirectorUtil {
 
 	private static final List<String> passwordFields = new ArrayList<String>();
-	static{
+	static {
 		passwordFields.add("mtwilson.password");
 		passwordFields.add("mtwilson.api.password");
 		passwordFields.add("kms.login.basic.password");
 	}
-	private static final Logger log = LoggerFactory
-			.getLogger(DirectorUtil.class);
+	private static final Logger log = LoggerFactory.getLogger(DirectorUtil.class);
 
-	public static String createTar(String imageDir, String imageName,
-			String trustPolicyName, String tarLocation, String tarName)
-			throws IOException {
+	public static String createTar(String imageDir, String imageName, String trustPolicyName, String tarLocation,
+			String tarName) throws IOException {
 
-		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir
-				+ " " + imageName + " " + trustPolicyName;
+		String command = "tar -cf " + tarLocation + tarName + " -C " + imageDir + " " + imageName + " "
+				+ trustPolicyName;
 		// / String tarName = imageName + "-" + new
 		// SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".tar";
 		// / log.debug(genrateTP.executeShellCommand("tar -cf " + imageTPDir +
 		// imagePathDelimiter + tarName + " -C " + imageTPDir + " " + imageName
 		// + " " + trustpolicyName));
-		System.out.println("Inside create Tar...................command::"
-				+ command);
+		System.out.println("Inside create Tar...................command::" + command);
 		log.debug(executeShellCommand("cd " + imageDir));
 		log.debug(executeShellCommand("pwd "));
 		log.debug(executeShellCommand(command));
@@ -83,14 +79,11 @@ public class DirectorUtil {
 		return tarLocation + tarName;
 	}
 
-	public static void createCopy(String absoluteImagePath,
-			String absoluteModifiedImagePath) throws IOException {
+	public static void createCopy(String absoluteImagePath, String absoluteModifiedImagePath) throws IOException {
 
-		String command = "cp " + absoluteImagePath + " "
-				+ absoluteModifiedImagePath;
+		String command = "cp " + absoluteImagePath + " " + absoluteModifiedImagePath;
 
-		System.out.println("Inside createCopy..................command::"
-				+ command);
+		System.out.println("Inside createCopy..................command::" + command);
 		log.debug("Inside createCopy..................command::" + command);
 
 		log.debug(executeShellCommand(command));
@@ -114,6 +107,7 @@ public class DirectorUtil {
 		}
 		return null;
 	}
+
 	public static String getSymbolicLink(String filePath) {
 		return filePath;
 
@@ -123,14 +117,13 @@ public class DirectorUtil {
 		log.debug("Command to execute is:" + command);
 		String[] cmd = { "/bin/sh", "-c", command };
 		Process p = null;
-		BufferedReader reader = null ;
+		BufferedReader reader = null;
 		// / int exitCode=1;
 		String excludeList = null;
 		try {
 			p = Runtime.getRuntime().exec(cmd);
 			p.waitFor();
-			reader = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			StringBuffer result = new StringBuffer();
 			String line = "";
 			while ((line = reader.readLine()) != null) {
@@ -143,23 +136,24 @@ public class DirectorUtil {
 			}
 			// log.debug("Result of execute command: "+result);
 
-		} catch (InterruptedException | IOException  ex) {
+		} catch (InterruptedException | IOException ex) {
 			log.error(null, ex);
-		} finally{
-			if(reader != null)
-			{
+		} finally {
+			if (reader != null) {
 				try {
 					reader.close();
 				} catch (IOException e) {
-					log.error("error in closing reader in executeShellCommand()",e);
+					log.error("error in closing reader in executeShellCommand()", e);
 				}
 			}
-			if(p != null && p.getInputStream() != null)
-			{
-				try {
-					p.getInputStream().close();
-				} catch (IOException e) {
-					log.error("error in closing p.getInputStream() in executeShellCommand()",e);
+			if (p != null) {
+				InputStream inputStream = p.getInputStream();
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						log.error("error in closing p.getInputStream() in executeShellCommand()", e);
+					}
 				}
 			}
 		}
@@ -175,13 +169,11 @@ public class DirectorUtil {
 		try {
 			p = Runtime.getRuntime().exec(command);
 			exitCode = p.waitFor();
-			reader = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				output.append(line).append("\n");
 			}
-			
 
 		} catch (InterruptedException | IOException ex) {
 			log.error(null, ex);
@@ -193,11 +185,14 @@ public class DirectorUtil {
 					log.error("error in closing reader in executeShellCommand()", e);
 				}
 			}
-			if (p != null && p.getInputStream() != null) {
-				try {
-					p.getInputStream().close();
-				} catch (IOException e) {
-					log.error("error in closing p.getInputStream() in executeShellCommand()", e);
+			if (p != null) {
+				InputStream inputStream = p.getInputStream();
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						log.error("error in closing p.getInputStream() in executeShellCommand()", e);
+					}
 				}
 			}
 		}
@@ -207,8 +202,7 @@ public class DirectorUtil {
 
 	}
 
-	public static int executeCommandInExecUtil(String command, String... args)
-			throws IOException {
+	public static int executeCommandInExecUtil(String command, String... args) throws IOException {
 		Result result = ExecUtil.execute(command, args);
 		return result.getExitCode();
 	}
@@ -221,7 +215,7 @@ public class DirectorUtil {
 			provider = ConfigurationFactory.createConfigurationProvider(customFile);
 			Configuration loadedConfiguration = provider.load();
 			Set<String> keys = loadedConfiguration.keys();
-			for(String key : keys){
+			for (String key : keys) {
 				prop.put(key, loadedConfiguration.get(key));
 			}
 		} catch (IOException e) {
@@ -243,7 +237,7 @@ public class DirectorUtil {
 		JSONObject json = new JSONObject(map);
 		return json.toString();
 	}
-	
+
 	public static String getPropertiesWithoutPassword(String path) throws IOException {
 		File customFile = new File(Constants.configurationPath + path);
 		ConfigurationProvider provider = ConfigurationFactory.createConfigurationProvider(customFile);
@@ -259,10 +253,8 @@ public class DirectorUtil {
 		JSONObject json = new JSONObject(map);
 		return json.toString();
 	}
-	
 
-	public static String editProperties(String path, String data)
-			throws JsonMappingException, JsonParseException {
+	public static String editProperties(String path, String data) throws JsonMappingException, JsonParseException {
 		Map<String, Object> map = new HashMap<>();
 		JSONObject jsonObject = new JSONObject(data);
 		String[] names = JSONObject.getNames(jsonObject);
@@ -298,14 +290,14 @@ public class DirectorUtil {
 		}
 		provider.save(loadedConfiguration);
 	}
-	
-	public static String computeUploadVar(String uuid, String dekUrl){
-		if(uuid == null){
+
+	public static String computeUploadVar(String uuid, String dekUrl) {
+		if (uuid == null) {
 			return null;
 		}
 		String uploadvar;
 		StringBuilder builder = new StringBuilder(uuid);
-		if(StringUtils.isNotBlank(dekUrl)){
+		if (StringUtils.isNotBlank(dekUrl)) {
 			builder.append(dekUrl);
 		}
 		try {
@@ -317,12 +309,11 @@ public class DirectorUtil {
 		return uploadvar;
 	}
 
-	public static String computeHash(MessageDigest md, File file)
-			throws IOException {
+	public static String computeHash(MessageDigest md, File file) throws IOException {
 		if (!file.exists()) {
 			return null;
 		}
-	
+
 		md.reset();
 		byte[] bytes = new byte[2048];
 		int numBytes;
@@ -334,7 +325,7 @@ public class DirectorUtil {
 			log.error("error :: input file doesn't exists", e);
 			throw new IOException("input file doesn't exists", e);
 		}
-	
+
 		try {
 			while ((numBytes = is.read(bytes)) != -1) {
 				md.update(bytes, 0, numBytes);
@@ -342,7 +333,7 @@ public class DirectorUtil {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log.error("error in reading from file", e);
-	
+
 			throw new IOException("error in reading from file", e);
 		} finally {
 			try {
@@ -355,35 +346,33 @@ public class DirectorUtil {
 		}
 		byte[] digest = md.digest();
 		String result = new String(Hex.encodeHex(digest));
-	
-		return result;
-	
-	}
-	
 
-	public static String computeHash(MessageDigest md, String str){
-		if(str == null){
+		return result;
+
+	}
+
+	public static String computeHash(MessageDigest md, String str) {
+		if (str == null) {
 			return null;
 		}
 		md.update(str.getBytes());
 		byte[] digest = md.digest();
-		String result = new String(Hex.encodeHex(digest));	
-		return result;	
+		String result = new String(Hex.encodeHex(digest));
+		return result;
 	}
 
-	public static String fetchIdforUpload(TrustPolicy trustPolicy){	
+	public static String fetchIdforUpload(TrustPolicy trustPolicy) {
 		String policyXml = trustPolicy.getTrust_policy();
 		log.debug("Inside Run Upload Policy task policyXml::" + policyXml);
 		StringReader reader = new StringReader(policyXml);
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
 		JAXBContext jaxbContext;
 		try {
-			jaxbContext = JAXBContext
-					.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+			jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
 		} catch (JAXBException e) {
 			log.error("Unable to instantiate the jaxbcontext", e);
 			return null;
-			
+
 		}
 		Unmarshaller unmarshaller;
 		try {
@@ -393,11 +382,10 @@ public class DirectorUtil {
 			return null;
 		}
 		try {
-			policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller
-					.unmarshal(reader);
+			policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
 		} catch (JAXBException e) {
 			log.error("Unable to unmarshall the policy", e);
-			return null;	
+			return null;
 		}
 		return policy.getImage().getImageId();
 	}
@@ -430,49 +418,47 @@ public class DirectorUtil {
 
 		String formatted = writer.writeToString(document);
 		if (keepDeclaration) {
-			formatted = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"+System.getProperty("line.separator")+formatted;	
-		}		
+			formatted = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+					+ System.getProperty("line.separator") + formatted;
+		}
 
 		return formatted;
 	}
 
-	
-	public static String fetchDekUrl(TrustPolicy policy){
+	public static String fetchDekUrl(TrustPolicy policy) {
 		if (policy == null) {
 			return "";
 		}
 		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
-			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-					.createUnmarshaller();
-			if(policy.getTrust_policy()==null){
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
+			if (policy.getTrust_policy() == null) {
 				return "";
 			}
 			StringReader reader = new StringReader(policy.getTrust_policy());
 			trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
-			///trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
+			/// trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
 		} catch (JAXBException e1) {
-			log.error("Directorutil fetchDekUrl failed",e1);
+			log.error("Directorutil fetchDekUrl failed", e1);
 		}
-		
-		if(trustPolicy==null){
+
+		if (trustPolicy == null) {
 			return "";
 		}
-		return trustPolicy.getEncryption()!=null ? trustPolicy.getEncryption().getKey().getValue() : "";
-		
+		return trustPolicy.getEncryption() != null ? trustPolicy.getEncryption().getKey().getValue() : "";
+
 	}
-	
-	public static Result executeCommand(String command, String... args)
-			throws ExecuteException, IOException {
+
+	public static Result executeCommand(String command, String... args) throws ExecuteException, IOException {
 		Result result = ExecUtil.executeQuoted(command, args);
-		
-		/*if (result.getStderr() != null
-				&& StringUtils.isNotEmpty(result.getStderr())) {
-			log.error(result.getStderr());
-		}*/
+
+		/*
+		 * if (result.getStderr() != null &&
+		 * StringUtils.isNotEmpty(result.getStderr())) {
+		 * log.error(result.getStderr()); }
+		 */
 		return result;
 	}
-	
 
 }

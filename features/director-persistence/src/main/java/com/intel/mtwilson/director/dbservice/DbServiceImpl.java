@@ -1859,15 +1859,15 @@ public class DbServiceImpl implements IPersistService {
 		List<ImageActionObject> imageActionObject = new ArrayList<ImageActionObject>();
 		List<MwImageAction> mwImageAction = imageActionDao.showAllAction();
 
+		if(mwImageAction == null){
+			return imageActionObject;
+		}
 		for (int index = 0; index < mwImageAction.size(); index++) {
-
-			ImageActionObject actionObject = mapper
-					.toTransferObject(mwImageAction.get(index));
+			ImageActionObject actionObject = mapper.toTransferObject(mwImageAction.get(index));
 			imageActionObject.add(actionObject);
 		}
 		return imageActionObject;
-	}
-	
+	}	
 	
 	public List<ImageActionObject> fetchImageActions(ImageActionFilter imageActionFilter, ImageActionOrderBy imageActionOrderBy)
 			throws DbException{
@@ -1987,10 +1987,10 @@ public class DbServiceImpl implements IPersistService {
 	}
 
 	@Override
-	public PolicyTemplateInfo savePolicyTemplate(
-			PolicyTemplateInfo policyTemplate) throws DbException {
-		return mapper.toTransferObject(policyTemplateDao
-				.createPolicyTemplate(mapper.toData(policyTemplate)));
+	public PolicyTemplateInfo savePolicyTemplate(PolicyTemplateInfo policyTemplate) throws DbException {
+		MwPolicyTemplate data = mapper.toData(policyTemplate);
+		MwPolicyTemplate mwPolicyTemplate = policyTemplateDao.createPolicyTemplate(data);
+		return mapper.toTransferObject(mwPolicyTemplate);
 	}
 
 	@Override

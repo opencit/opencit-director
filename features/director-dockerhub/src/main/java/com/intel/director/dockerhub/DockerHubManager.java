@@ -40,23 +40,23 @@ public class DockerHubManager extends StoreManagerImpl {
 				+ SPACE
 				+ (String) objectProperties.get(Constants.DOCKER_HUB_EMAIL)
 				+ SPACE + imageinfo.getRepository() + SPACE
-				+ imageinfo.getTag());
+				+ dockerTagToUse);
+		}else{
+			log.error("No ImagInfo exists for docker image upload");
+			throw new StoreException("No ImagInfo exists for docker image upload");
 		}
 
 		try {
-			DirectorUtil.executeCommandInExecUtil(
-					"/opt/director/bin/dockerhubUpload.sh",
-					(String) objectProperties
-							.get(Constants.DOCKER_HUB_USERNAME),
-					(String) objectProperties
-							.get(Constants.DOCKER_HUB_PASSWORD),
-					(String) objectProperties.get(Constants.DOCKER_HUB_EMAIL),
+			String user = (String)objectProperties.get(Constants.DOCKER_HUB_USERNAME);
+			String password = (String) objectProperties.get(Constants.DOCKER_HUB_PASSWORD);
+			String email = (String) objectProperties.get(Constants.DOCKER_HUB_EMAIL);
+			DirectorUtil.executeCommandInExecUtil("/opt/director/bin/dockerhubUpload.sh", user, password, email,
 					imageinfo.repository, dockerTagToUse);
 		} catch (IOException e) {
-			e.printStackTrace();
-			throw new StoreException();
+			log.error("Error in uploading to DockerHub");
+			throw new StoreException("Error in uploading to DockerHub",e);
 		}
-		log.info("Pushed...!!!");
+		log.debug("Pushed...!!!");
 		return null;
 	}
 

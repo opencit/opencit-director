@@ -358,13 +358,14 @@ public class TdaasUtil {
 							e);
 				}
 			}
-			if (p != null && p.getInputStream() != null) {
-				try {
-					p.getInputStream().close();
-				} catch (IOException e) {
-					log.error(
-							"error in closing p.getInputStream() in executeShellCommand()",
-							e);
+			if (p != null) {
+				InputStream inputStream = p.getInputStream();
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						log.error("error in closing p.getInputStream() in executeShellCommand()", e);
+					}
 				}
 			}
 		}

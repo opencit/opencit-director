@@ -100,41 +100,36 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
         initDatabase();
     }
     
-    private boolean testConnection() {
-    	Statement s1=null;
-    	Connection c1=null;
-    	 try {
-    	log.debug("Inside  testConnection ");
-    	c1 = DirectorDbConnect.getConnection();
-    	s1 = c1.createStatement();
-    	s1.executeQuery("SELECT 1"); 
-            return true;
-        }
-        catch(Exception e) {
-            log.error("Director : cannot connect to database", e);
-            validation("Director : Cannot connect to database");
-            return false;
-        }finally{
-        	if(s1!=null){
-        	try {
-				s1.close();
-			} catch (SQLException e) {
-				log.error("ApplyDatabasePatches , testConnection : cannot close create statement", e);
+	private boolean testConnection() {
+		Statement s1 = null;
+		Connection c1 = null;
+		try {
+			log.debug("Inside  testConnection ");
+			c1 = DirectorDbConnect.getConnection();
+			s1 = c1.createStatement();
+			s1.executeQuery("SELECT 1");
+			return true;
+		} catch (Exception e) {
+			log.error("Director : cannot connect to database", e);
+			validation("Director : Cannot connect to database");
+			return false;
+		} finally {
+			if (s1 != null) {
+				try {
+					s1.close();
+				} catch (SQLException e) {
+					log.error("ApplyDatabasePatches , testConnection : cannot close create statement", e);
+				}
 			}
-        	}
-        	try {
-        		if(c1!=null && !c1.isClosed()){
-    				
+			try {
+				if (c1 != null && !c1.isClosed()) {
 					c1.close();
-				
 				}
 			} catch (SQLException e) {
 				log.error("ApplyDatabasePatches , testConnection  : cannot close connection", e);
 			}
-        }
-        
-    }
- 
+		}
+	} 
   
 
     public static class ChangelogEntry {

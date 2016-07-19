@@ -2249,7 +2249,11 @@ public class ImageServiceImpl implements ImageService {
 								+ trust_policy_draft_id, e);
 			}
 		}
-		deleteImageShhSettings(policyDraft.getImgAttributes().id);
+		ImageAttributes imgAttributes = policyDraft.getImgAttributes();
+		if(imgAttributes != null){
+			String id = imgAttributes.getId();
+			deleteImageShhSettings(id);
+		}
 	}
 
 	private void deleteImageShhSettings(String imageId)

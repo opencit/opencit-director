@@ -59,21 +59,23 @@ public class FileUtilityOperation {
 		if (file == null) {
 			return;
 		} else if (file.isDirectory()) {
+			String[] fileList = file.list();
+
 			// directory is empty, then delete it
-			if (file.list() == null || file.list().length == 0) {
+			if (fileList == null || fileList.length == 0) {
 				file.delete();
 			} else {
 				// list all the directory contents
-				String files[] = file.list();
-				if(files == null || files.length == 0){
+				if(fileList == null || fileList.length == 0){
 					return;
 				}
-				for (String temp : files) {
+				for (String temp : fileList) {
 					File fileDelete = new File(file, temp);
 					deleteFileOrDirectory(fileDelete);
 				}
 				// check the directory again, if empty then delete it
-				if (file.list() == null || file.list().length == 0) {
+				
+				if (fileList == null || fileList.length == 0) {
 					file.delete();
 					log.info("Directory is deleted : " + file.getAbsolutePath());
 				}
@@ -205,11 +207,23 @@ public class FileUtilityOperation {
 	}
 	
 	public int createTar(String tarFilePath, List<String> filePaths) {
-		FileOutputStream dest;
+		FileOutputStream dest = null;
+		boolean proceed = true;
 		try {
 			dest = new FileOutputStream(tarFilePath);
 		} catch (FileNotFoundException e) {
 			log.error("Error creating tar file", e);
+			proceed = false;
+		}finally{
+			if(dest != null){
+				try {
+					dest.close();
+				} catch (IOException e) {
+					log.error("Error closing tar file stream", e);
+				}
+			}
+		}
+		if(!proceed){
 			return 1;
 		}
 
