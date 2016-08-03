@@ -20,7 +20,6 @@ public class Constants {
 	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
 	public static final String mountPath = "/mnt/director/";
 	public static final String uploadPath = "director.upload.path";
-	public static final String defaultUploadPath = "/mnt/images/";
 	public static final String vmImagesPath = "/opt/kms/images/vm/";
 	public static final String configurationPath = "/opt/director/configuration/";
 	public static final String DOCKER_EXECUTABLES = "docker";
@@ -108,6 +107,7 @@ public class Constants {
 	public static final String GLANCE_VISIBILITY = "glance.visibility";
 	public static final String GLANCE_IMAGE_STORE_PASSWORD = "glance.image.store.password";
 	public static final String GLANCE_TENANT_NAME = "glance.tenant.name";
+	public static final String GLANCE_DOMAIN_NAME = "glance.domain.name";
 	public static final String GLANCE_API_ENDPOINT = "glance.api.endpoint";
 	public static final String GLANCE_KEYSTONE_PUBLIC_ENDPOINT = "glance.keystone.public.endpoint";
 	public static final String DIRECTOR_ID = "director.id";
@@ -192,6 +192,8 @@ public class Constants {
 	public static final String CONNECTOR_GLANCE = "Glance";
 	public static final String CONNECTOR_SWIFT = "Swift";
 	public static final String CONNECTOR_DOCKERHUB = "Docker";
+	public static final String OPENSTACK_VERSION = "openstack.version";
+	public static final String KEYSTONE_VERSION = "keystone.version";
 	
 	public static final String UPLOAD_TO_IMAGE_STORE_FILE = "UPLOAD_TO_IMAGE_STORE_FILE";
 	
@@ -201,5 +203,10 @@ public class Constants {
 	
 	public static final String DOCKER_REPO_NAME_REGEX = "[a-zA-Z0-9/:_-]+";
 	public static final String DOCKER_TAG_NAME_REGEX = "[a-zA-Z0-9_.-]+";
-
+	public static final String VERSION_V2 = "v2.0";
+	public static final String VERSION_V3 = "v3";
+	public static final String OPENSTACK_VERSION_KILO = "Kilo";
+	public static final String OPENSTACK_VERSION_LIBERTY = "Liberty";
+	public static final String OPENSTACK_VERSION_MITAKA = "Mitaka";
+	
 }

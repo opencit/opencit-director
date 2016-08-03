@@ -32,10 +32,10 @@ import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
  * 
  * @author GS-0681
  */
-public class UpdateMetadataTask extends GenericUploadTask {
-	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UpdateMetadataTask.class);
+public class UpdateMetadata extends GenericUpload {
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UpdateMetadata.class);
 
-	public UpdateMetadataTask() throws DirectorException {
+	public UpdateMetadata() throws DirectorException {
 		super();
 	}
 

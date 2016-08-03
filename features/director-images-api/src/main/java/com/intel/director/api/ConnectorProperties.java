@@ -18,7 +18,7 @@ public enum ConnectorProperties {
 				{
 					put(Constants.ARTIFACT_DOCKER, "Docker");
 				}
-			}), 
+			},	new ConnectorCompositeItem[]{}), 
 	/*SWIFT("SWIFT", "com.intel.director.swift.objectstore.SwiftObjectStoreManager",
 			new ConnectorKey[] {
 					new ConnectorKey(1, Constants.SWIFT_API_ENDPOINT),
@@ -41,14 +41,23 @@ public enum ConnectorProperties {
 					new ConnectorKey(3, Constants.GLANCE_TENANT_NAME),
 					new ConnectorKey(4, Constants.GLANCE_IMAGE_STORE_USERNAME),
 					new ConnectorKey(5, Constants.GLANCE_IMAGE_STORE_PASSWORD),
-					new ConnectorKey(6, Constants.GLANCE_VISIBILITY) },
+					new ConnectorKey(7, Constants.GLANCE_DOMAIN_NAME),
+					new ConnectorKey(10, Constants.GLANCE_VISIBILITY)
+					},
+					
 			new HashMap<String, String>() {
 				{
 					put(Constants.ARTIFACT_IMAGE, "Image");
 					put(Constants.ARTIFACT_TAR, "Tarball");
 					put(Constants.ARTIFACT_DOCKER, "Docker");
 				}
-			}
+			},
+			new ConnectorCompositeItem[]{
+					new ConnectorCompositeItem(
+					Constants.KEYSTONE_VERSION,
+					new ConnectorItem[]{ new ConnectorItem(3,Constants.VERSION_V3,Constants.OPENSTACK_VERSION_MITAKA), new ConnectorItem(2,Constants.VERSION_V2, Constants.OPENSTACK_VERSION_LIBERTY) })
+					}
+			
 
 	);
 
@@ -62,6 +71,8 @@ public enum ConnectorProperties {
 	private ConnectorKey[] properties;
 
 	private Map<String, String> supportedArtifacts;
+	
+	private ConnectorCompositeItem[] connectorCompositeItem;
 
 	ConnectorProperties(String name, String driver, ConnectorKey[] properties,
 			Map<String, String> supportedArtifacts) {
@@ -69,6 +80,15 @@ public enum ConnectorProperties {
 		this.driver = driver;
 		this.properties = properties;
 		this.supportedArtifacts = supportedArtifacts;
+	}
+	
+	ConnectorProperties(String name, String driver, ConnectorKey[] properties,
+			Map<String, String> supportedArtifacts,ConnectorCompositeItem[] connectorCompositeItem) {
+		this.name = name;
+		this.driver = driver;
+		this.properties = properties;
+		this.supportedArtifacts = supportedArtifacts;
+		this.connectorCompositeItem = connectorCompositeItem;
 	}
 
 	public ConnectorKey[] getProperties() {
@@ -103,6 +123,7 @@ public enum ConnectorProperties {
 
 	public static ConnectorProperties getConnectorByName(String name) {
 		ConnectorProperties connector = null;
+	
 		for (ConnectorProperties connectorProperties : ConnectorProperties
 				.values()) {
 			if (connectorProperties.getName().equalsIgnoreCase(name)) {
@@ -112,4 +133,15 @@ public enum ConnectorProperties {
 		}
 		return connector;
 	}
+
+	public ConnectorCompositeItem[] getConnectorCompositeItem() {
+		return connectorCompositeItem;
+	}
+
+	public void setConnectorCompositeItem(
+			ConnectorCompositeItem[] connectorCompositeItem) {
+		this.connectorCompositeItem = connectorCompositeItem;
+	}
+	
+	
 }

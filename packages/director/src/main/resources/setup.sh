@@ -63,10 +63,16 @@ else
 fi
 
 
-if [ -d /mnt/images ]; then
-  echo "Upload directory exists"
+if [ -d /mnt/images/vm ]; then
+  echo "Upload directory for VM exists"
 else
-	mkdir /mnt/images	
+	mkdir -p /mnt/images/vm	
+fi
+
+if [ -d /mnt/images/docker ]; then
+  echo "Upload directory for docker exists"
+else
+	mkdir /mnt/images/docker	
 fi
 
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required
@@ -266,10 +272,10 @@ update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIR
 prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
 
-DIRECTOR_DB_USERNAME=${DIRECTOR_DB_USERNAME:-"admin"}
+prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
 
-DIRECTOR_DB_PASSWORD=${DIRECTOR_DB_PASSWORD:-$(generate_password 16)}
+prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
 update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
 
 prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"

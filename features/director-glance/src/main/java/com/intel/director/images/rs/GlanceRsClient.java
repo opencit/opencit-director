@@ -27,9 +27,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -46,11 +46,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.director.api.ImageStoreUploadResponse;
+import com.intel.director.common.Constants;
 import com.intel.director.common.ValidationUtil;
 import com.intel.director.common.exception.DirectorException;
-import com.intel.director.constants.Constants;
-
-import org.apache.commons.lang.StringUtils;
+import com.intel.director.images.identity.IdentityService;
+import com.intel.director.images.identity.IdentityServiceFactory;
 /**
  * 
  * @author Aakash
@@ -65,13 +65,13 @@ public class GlanceRsClient {
 
 	public GlanceRsClient(WebTarget webTarget, Client client,
 			String glanceApiEndpoint,
-			String glanceKeystonePublicEndpoint, String tenanatName,
-			String username, String password) throws GlanceException {
+			String glanceKeystonePublicEndpoint, String tenanatOrProjectName,
+			String username, String password,String domainName ,String version) throws GlanceException {
 		this.webTarget = webTarget;
 		this.client = client;
 		validateUrl(glanceApiEndpoint, "API");
-		createAuthToken(glanceKeystonePublicEndpoint, tenanatName, username,
-				password);
+		createAuthToken(glanceKeystonePublicEndpoint, tenanatOrProjectName, username,
+				password,domainName, version);
 	}
 
 	public void uploadImage(Map<String, Object> customProperties)
@@ -238,13 +238,14 @@ public class GlanceRsClient {
 		try {
 			uploadBody = mapper.writeValueAsString(glanceImageUploadBody);
 		} catch (JsonProcessingException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
+			String msg = "Error converting json upload data to string";
+			log.error(msg, e3);
+			throw new GlanceException(msg, e3);
 		}
 		log.info("Metadata body {} and authtoken {}", uploadBody, authToken);
 		HttpEntity entity;
 		if(uploadBody==null){
-			new GlanceException("uploadimgeMetadata failed");
+			throw new GlanceException("uploadimgeMetadata failed");
 		}
 		try {
 			entity = new ByteArrayEntity(uploadBody.toString().getBytes("UTF-8"));
@@ -410,99 +411,34 @@ public class GlanceRsClient {
 	}
 
 	private void createAuthToken(String glanceKeystonePublicEndpoint,
-			String tenantName, String userName, String password)
-			throws GlanceException {
-		long start = new Date().getTime();
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		BufferedReader br = null;
-		boolean responseHasError = false;
-		String authEndpoint = glanceKeystonePublicEndpoint + "/v2.0/tokens";
-
-		validateUrl(glanceKeystonePublicEndpoint, "AUTH");
+			String tenantOrProjectName, String userName, String password, String domainName,String version)
+ throws GlanceException {
+		IdentityService identityService = null;
 		
-		HttpPost postRequest = new HttpPost(authEndpoint);
 
-		AuthTokenBody authTokenBody = new AuthTokenBody();
-		authTokenBody.auth = new Auth();
-		authTokenBody.auth.tenantName = tenantName;
-		authTokenBody.auth.passwordCredentials = new PasswordCredentials();
-		authTokenBody.auth.passwordCredentials.username = userName;
-		authTokenBody.auth.passwordCredentials.password = password;
+		// We first try getting token by v2.0 identity Service and if it fails
+		// we use v3 identity service
+		identityService = IdentityServiceFactory
+				.getIdentityService(Constants.VERSION_V2);
 
-		ObjectMapper mapper = new ObjectMapper();
-		String body;
-		try {
-			body = mapper.writeValueAsString(authTokenBody);
-		} catch (JsonProcessingException e2) {
-			log.error("Error while creating auth token", e2);
-			throw new GlanceException("Error while creating auth token", e2);
+		if (Constants.VERSION_V2.equalsIgnoreCase(version)) {
+			
+				authToken = identityService.createAuthToken(
+						glanceKeystonePublicEndpoint, tenantOrProjectName,
+						userName, password, domainName);
+
+			
+		} else if (Constants.VERSION_V3.equalsIgnoreCase(version)) {
+			
+			identityService = IdentityServiceFactory
+					.getIdentityService(Constants.VERSION_V3);
+			authToken = identityService.createAuthToken(
+					glanceKeystonePublicEndpoint, tenantOrProjectName, userName,
+					password, domainName);
+			
 		}
-		// log.info("Auth token body {}", body);
-		HttpEntity entity;
-		try {
-			entity = new ByteArrayEntity(body.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e2) {
-			log.error("Error while creating auth token", e2);
-			throw new GlanceException("Error while creating auth token", e2);
-		}
+		
 
-		postRequest.setEntity(entity);
-		postRequest.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-		postRequest.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-		HttpResponse response;
-		try {
-			response = httpClient.execute(postRequest);
-		} catch (ClientProtocolException e1) {
-			log.error("Error while creating auth token", e1);
-			throw new GlanceException("Error while creating auth token", e1);
-		} catch (Exception e1) {
-			log.error("Error while creating auth token", e1);
-			throw new GlanceException("Error while creating auth token", e1);
-		}
-
-		try {
-			br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
-
-			String output;
-			StringBuffer sb = new StringBuffer();
-
-			while ((output = br.readLine()) != null) {
-				sb.append(output);
-			}
-			// /log.info("createAuthToken response::" + sb.toString());
-			JSONObject obj = new JSONObject(sb.toString());
-			if (obj.has("access")) {
-				JSONObject jsonObjectAccess = obj.getJSONObject("access");
-				if (jsonObjectAccess.has("token")) {
-					JSONObject property = jsonObjectAccess.getJSONObject("token");
-					authToken = property.getString("id");
-				} else {
-					responseHasError = true;
-				}
-			} else {
-				responseHasError = true;
-			}
-			// httpClient.getConnectionManager().shutdown();
-
-		} catch (Exception e) {
-			log.error("Error while creating auth token", e);
-			throw new GlanceException("Error while creating auth token", e);
-		} finally {
-
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					log.error("Error closing reader", e);
-				}
-			}
-
-		}
-		long end = new Date().getTime();
-		printTimeDiff("createAuthToken", start, end);
-		if (responseHasError) {
-			throw new GlanceException("Unable to communicate with Glance at " + authEndpoint);
-		}
 	}
 
 	public void getImageMetaData() {

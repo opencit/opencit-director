@@ -45,7 +45,7 @@ public class SetupGlanceImageStore extends AbstractSetupTask {
 			log.warn("Glance properties are not set. Not importing");
 			validation("Glance properties are not set. Not importing");
 		} else if(validationRequired){
-			log.debug("Set api={}, auth={}, user={}, paswd={}, tenant={}", glanceUrl, authUrl, user, password, tenant);
+			log.debug("Set api={}, auth={}, user={}, paswd={}, tenant={}", glanceUrl, authUrl, user, password.replaceAll("(?s).", "*"), tenant);
 			ImageStoreFilter imageStoreFilter = new ImageStoreFilter();
 			imageStoreFilter.setName(defaultStoreName);
 			List<ImageStoreTransferObject> imageStores = imageStoresService.getImageStores(imageStoreFilter);

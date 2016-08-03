@@ -131,7 +131,7 @@ public interface ImageService {
 	boolean doesPolicyNameExist(String display_name, String image_id)
 			throws DirectorException;
 
-	boolean doesImageNameExist(String fileName) throws DirectorException;
+	boolean doesImageNameExist(String fileName,String deplymentType) throws DirectorException;
 
 	void deleteTrustPolicyDraft(String trust_policy_draft_id)
 			throws DirectorException;
@@ -176,10 +176,10 @@ public interface ImageService {
 			
 	public TrustPolicyDraft fetchTrustpolicydraftById(String trustPolicyDraftId);
 	
-	public void dockerPull(String imageId)
+	public void pullDockerImageFromRepository(String imageId)
 			throws DirectorException;
 	
-	public void dockerSetup(String imageId)
+	public void processUploadedDockerImage(String imageId)
 			throws DirectorException;
 
 	public List<ImageInfo> getStalledImages() throws DirectorException;

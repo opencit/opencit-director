@@ -1,4 +1,4 @@
-endpoint = "/v1";
+
 var imageFormats = new Array();
 var image_policies = new Array();
 

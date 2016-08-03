@@ -255,7 +255,7 @@ input[readonly] {
 
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
-					if (myArr.image_upload_status== "Error") {
+					if (myArr.status== "Error") {
 						$('#file_upload_window_modal_body').html(myArr.details);
 						$("#file_upload_window_modal").modal({
 							backdrop : "static"
@@ -460,7 +460,7 @@ input[readonly] {
 		$
 		.ajax({
 			type : "POST",
-			url : "/v1/rpc/docker-setup/" + image_id,
+			url : "/v1/rpc/docker-process-uploaded-image/" + image_id,
 			dataType : "json",
 			headers : {
 				"Authorization" : "Token " + authorizationToken

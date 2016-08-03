@@ -1,15 +1,15 @@
 package com.intel.director.async;
 
-import com.intel.director.async.task.CreateTarTask;
-import com.intel.director.async.task.EncryptImageTask;
-import com.intel.director.async.task.ImageActionAsyncTask;
-import com.intel.director.async.task.InjectPolicyTask;
-import com.intel.director.async.task.RecreatePolicyTask;
-import com.intel.director.async.task.UpdateMetadataTask;
-import com.intel.director.async.task.UploadImageForPolicyTask;
-import com.intel.director.async.task.UploadImageTask;
-import com.intel.director.async.task.UploadPolicyTask;
-import com.intel.director.async.task.UploadTarTask;
+import com.intel.director.async.task.CreateTar;
+import com.intel.director.async.task.EncryptImage;
+import com.intel.director.async.task.ImageActionAsync;
+import com.intel.director.async.task.InjectPolicy;
+import com.intel.director.async.task.RecreatePolicy;
+import com.intel.director.async.task.UpdateMetadata;
+import com.intel.director.async.task.UploadImageForPolicy;
+import com.intel.director.async.task.UploadImage;
+import com.intel.director.async.task.UploadPolicy;
+import com.intel.director.async.task.UploadTar;
 import com.intel.director.common.Constants;
 import com.intel.director.common.exception.DirectorException;
 
@@ -23,35 +23,35 @@ public class ImageActionTaskFactory {
 	 * @return
 	 * @throws DirectorException 
 	 */
-	public static ImageActionAsyncTask getImageActionTask(String taskName) throws DirectorException {
-		ImageActionAsyncTask actionTask = null;
+	public static ImageActionAsync getImageActionTask(String taskName) throws DirectorException {
+		ImageActionAsync actionTask = null;
 		switch (taskName) {
 		case Constants.TASK_NAME_CREATE_TAR:
-			actionTask = new CreateTarTask();
+			actionTask = new CreateTar();
 			break;
 		case Constants.TASK_NAME_ENCRYPT_IMAGE:
-			actionTask = new EncryptImageTask();
+			actionTask = new EncryptImage();
 			break;
 		case Constants.TASK_NAME_UPLOAD_IMAGE:
-			actionTask = new UploadImageTask();
+			actionTask = new UploadImage();
 			break;
 		case Constants.TASK_NAME_UPLOAD_POLICY:
-			actionTask = new UploadPolicyTask();
+			actionTask = new UploadPolicy();
 			break;
 		case Constants.TASK_NAME_INJECT_POLICY:
-			actionTask = new InjectPolicyTask();
+			actionTask = new InjectPolicy();
 			break;
 		case Constants.TASK_NAME_RECREATE_POLICY:
-			actionTask = new RecreatePolicyTask();
+			actionTask = new RecreatePolicy();
 			break;
 		case Constants.TASK_NAME_UPDATE_METADATA:
-			actionTask = new UpdateMetadataTask();
+			actionTask = new UpdateMetadata();
 			break;
 		case Constants.TASK_NAME_UPLOAD_TAR:
-			actionTask = new UploadTarTask();
+			actionTask = new UploadTar();
 			break;
 		case Constants.TASK_NAME_UPLOAD_IMAGE_FOR_POLICY:
-			actionTask = new UploadImageForPolicyTask();
+			actionTask = new UploadImageForPolicy();
 		
 		}
 

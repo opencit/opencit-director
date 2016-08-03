@@ -25,4 +25,6 @@ public interface ImageStoresService {
 	public boolean validateConnectorArtifacts(String[] artifact_types, String connector);
 
 	public void validateImageStore(String imageStoreId) throws DirectorException;
+	
+	public void validateImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException;
 }

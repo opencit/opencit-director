@@ -27,17 +27,17 @@ import com.intel.mtwilson.director.db.exception.DbException;
  * @author Siddharth
  * 
  */
-public abstract class GenericUploadTask extends ImageActionAsyncTask {
+public abstract class GenericUpload extends ImageActionAsync {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(GenericUploadTask.class);
+			.getLogger(GenericUpload.class);
 	public String storeId = null;
 ///	private ImageActionService imageActionService = new ImageActionImpl();
 
-	public GenericUploadTask() throws DirectorException {
+	public GenericUpload() throws DirectorException {
 		super();
 	}
 
-	public GenericUploadTask(String imageStoreId) throws DirectorException {
+	public GenericUpload(String imageStoreId) throws DirectorException {
 		super();
 		this.storeId = imageStoreId;
 	}

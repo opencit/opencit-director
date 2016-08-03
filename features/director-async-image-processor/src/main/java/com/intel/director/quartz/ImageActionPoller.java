@@ -16,7 +16,7 @@ import java.util.Set;
 
 import com.intel.director.api.ImageActionObject;
 import com.intel.director.async.ImageActionExecutor;
-import com.intel.director.async.task.ExecuteActionsTask;
+import com.intel.director.async.task.ExecuteActions;
 import com.intel.director.common.Constants;
 import com.intel.director.service.ImageActionService;
 import com.intel.director.service.impl.ImageActionImpl;
@@ -110,7 +110,7 @@ public class ImageActionPoller {
 			if (imageActionObj.getCurrent_task_status() != null
 					&& imageActionObj.getCurrent_task_status().equals(
 							Constants.INCOMPLETE)) {
-				ExecuteActionsTask task = new ExecuteActionsTask(imageActionObj);
+				ExecuteActions task = new ExecuteActions(imageActionObj);
 				ImageActionExecutor.submitTask(task);
 				log.info("Submitted task for ExecuteActions for id: "
 						+ imageActionObj.getId());

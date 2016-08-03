@@ -15,7 +15,7 @@ function mount_remote_file_system(){
 
         exit 1
     else
-        echo "Remote file systtem was mounted successfully"
+        echo "Remote file system was mounted successfully"
         exit 0
     fi
 }
@@ -54,7 +54,7 @@ if [ ! -z $ipAddress ] || [ ! -z $userName ] || [ ! -z $password ] || [! -z $mou
 then
     echo " IP address is: $ipAddress"
     echo "Username is: $userName"
-    echo "Password is: $password"
+	#echo "Password is: $password"
     #Check mount Status
     unmount_remote_file_system
     echo "Unmount was done for remote directory"

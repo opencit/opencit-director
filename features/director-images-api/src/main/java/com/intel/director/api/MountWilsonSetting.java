@@ -101,7 +101,9 @@ public class MountWilsonSetting {
 					errors.add(f.getName() + " is invalid");
 				}
 			} catch (IllegalArgumentException e) {
+				errors.add("Invalid field");
 			} catch (IllegalAccessException e) {
+				errors.add("Invalid field");
 			}
 		}
 		return StringUtils.join(errors, ",");
