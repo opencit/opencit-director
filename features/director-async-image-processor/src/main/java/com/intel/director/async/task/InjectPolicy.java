@@ -117,7 +117,7 @@ public class InjectPolicy extends ImageActionAsync {
 
 	String display_name = trustPolicy.getDisplay_name();
 	int tagStart = display_name.lastIndexOf(":") + 1;
-	String repo = display_name.substring(0, tagStart - 1);
+	String repo = display_name.substring(0, tagStart - 1); 
 	String tag = display_name.substring(tagStart);
 	if (StringUtils.isBlank(tag) || StringUtils.isBlank(repo) || StringUtils.isBlank(imageinfo.repository)
 		|| StringUtils.isBlank(imageinfo.tag)) {
@@ -127,9 +127,10 @@ public class InjectPolicy extends ImageActionAsync {
 	log.info("Injecting Policy @ /trust and creating new image with :: " + repo + ":" + tag);
 	// Create container
 	log.info("Creating container");
-	String command = "docker run -id " + imageinfo.repository + ":" + imageinfo.tag;
+	String command = "docker run -id " + imageinfo.repository + ":" + imageinfo.tag + Constants.SOURCE_TAG;
+	log.info("Command to run the container: {}", command);
 	String containerId = executeCommand(command);
-	if(containerId.endsWith("\n")){
+	if (containerId.endsWith("\n")) {
 	    containerId = containerId.replaceAll("\n", "");
 	}
 	log.info("Created container: {}", containerId);
@@ -155,9 +156,9 @@ public class InjectPolicy extends ImageActionAsync {
 	log.info("After copying the policy");
 
 	log.info("Before committing the changes");
-	command = "docker commit " + containerId + " \"" + repo + ":" + tag+"\"";
+	command = "docker commit " + containerId + " \"" + repo + ":" + tag + "\"";
 	String imageId = executeCommand(command);
-	log.info("After committing the changes, image id = {}",imageId);
+	log.info("After committing the changes, image id = {}", imageId);
 
 	if (StringUtils.isBlank(imageId)) {
 	    log.error("Error In committing the policy");
@@ -205,10 +206,10 @@ public class InjectPolicy extends ImageActionAsync {
 	} catch (IOException e) {
 	    throw new DirectorException("Error In executing command", e);
 	}
-	
+
 	int exitCode = result.getExitCode();
 	if (exitCode != 0) {
-	    throw new DirectorException("Error executing command: "+command);
+	    throw new DirectorException("Error executing command: " + command);
 	}
     }
 

@@ -70,6 +70,7 @@ public class FileUtilityOperation {
 		    deleteFileOrDirectory(fileDelete);
 		}
 		// check the directory again, if empty then delete it
+		fileList = file.list();
 
 		if (fileList == null || fileList.length == 0) {
 		    file.delete();
