@@ -693,7 +693,7 @@ public class Mapper {
 	}
 
 	public String fromCharacterArray(Character[] chars) {
-		if (ArrayUtils.isEmpty(chars)) {
+		if (chars == null || ArrayUtils.isEmpty(chars)) {
 			return null;
 		}
 		StringBuilder sb = new StringBuilder(chars.length);
@@ -978,7 +978,7 @@ public class Mapper {
 		if (imageStoreTO == null) {
 			return null;
 		}
-		MwImageStore mwImageStore = null;
+		MwImageStore mwImageStore;
 		if(existingImageStore != null){
 			mwImageStore = existingImageStore; 
 		}else{

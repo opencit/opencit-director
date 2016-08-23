@@ -1989,8 +1989,12 @@ public class DbServiceImpl implements IPersistService {
 	@Override
 	public PolicyTemplateInfo savePolicyTemplate(PolicyTemplateInfo policyTemplate) throws DbException {
 		MwPolicyTemplate data = mapper.toData(policyTemplate);
-		MwPolicyTemplate mwPolicyTemplate = policyTemplateDao.createPolicyTemplate(data);
-		return mapper.toTransferObject(mwPolicyTemplate);
+                if (data != null) {
+                    MwPolicyTemplate mwPolicyTemplate = policyTemplateDao.createPolicyTemplate(data);
+                    if (mwPolicyTemplate != null)
+                        return mapper.toTransferObject(mwPolicyTemplate);
+                }
+                return null;
 	}
 
 	@Override
