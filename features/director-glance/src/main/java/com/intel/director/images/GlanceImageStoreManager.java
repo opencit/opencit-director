@@ -9,11 +9,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.intel.director.api.GenericResponse;
 import com.intel.director.api.StoreResponse;
-import com.intel.director.common.Constants;
 import com.intel.director.images.rs.GlanceException;
 import com.intel.director.images.rs.GlanceRsClient;
 import com.intel.director.images.rs.GlanceRsClientBuilder;
