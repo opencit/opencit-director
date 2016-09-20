@@ -1,7 +1,11 @@
 package com.intel.director.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.director.constants.Constants;
 
 
 public class SshSettingRequest extends AuditFields {
@@ -12,6 +16,8 @@ public class SshSettingRequest extends AuditFields {
 	String id;
 	String key;
 	String image_id;
+	String partition;
+	String host_type;
 	///String policy_name;
 
 	/*public String getPolicy_name() {
@@ -83,6 +89,25 @@ public class SshSettingRequest extends AuditFields {
 	}
 
 	
+	
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
+	
+	
+
+	public String getHost_type() {
+		return host_type;
+	}
+
+	public void setHost_type(String host_type) {
+		this.host_type = host_type;
+	}
+
 	public SshSettingResponse validate(String operation) {
 		String NAME_REGEX = "[a-zA-Z0-9,;.@ _-]+";
 		String FQDN_RFC_ALL="^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)*[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?$";
@@ -96,7 +121,16 @@ public class SshSettingRequest extends AuditFields {
 		} else if (!ValidationUtil.isValidWithRegex(getPassword(),RegexPatterns.PASSWORD)) {
 			sshResponse.setError("No password provided or password is in incorrect format");
 		}
-
+		
+		List<String> supported_host_types = new ArrayList<String>();
+		supported_host_types.add(Constants.HOST_TYPE_LINUX);
+		supported_host_types.add(Constants.HOST_TYPE_WINDOWS);
+		
+		if (getHost_type() == null || !supported_host_types.contains(getHost_type())) {
+			sshResponse
+					.setError("No Host Type is provided or Host Type is in incorrect format");
+		}
+		
 		if ("update".equals(operation)) {
 			if (!ValidationUtil.isValidWithRegex(getImage_id(),RegexPatterns.UUID)) {
 				sshResponse.setError("No image id provided or image id is not in uuid format");

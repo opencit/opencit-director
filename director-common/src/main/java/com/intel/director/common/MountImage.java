@@ -71,7 +71,7 @@ public class MountImage {
 				+ mountPath);
 		try {
 			exitcode = DirectorUtil.executeCommandInExecUtil(
-					Constants.mountRemoteFileSystemScript, mountPath);			
+					Constants.mountRemoteFileSystemScript, mountPath);
 		} catch (IOException e) {
 			exitcode = 1;
 			log.error("Error in unmounting remote host" + e);
@@ -114,19 +114,34 @@ public class MountImage {
 		return exitcode;
 	}	
 	
-	public static int mountWindowsRemoteSystem(String ipAddress,
-			String userName, String password, String mountpath, String partition) {
+	public static int mountWindowsRemoteSystem(String ipAddress, String userName, String password, String mountpath,
+			String partition, String fileMode, String DirMode) {
 		int exitcode;
-		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE
-				+ ipAddress + SPACE + partition + SPACE + mountpath + SPACE
-				+ userName + SPACE + password;
+		String command = Constants.mountWindowsRemoteFileSystemScript + SPACE + ipAddress + SPACE + partition + SPACE
+				+ mountpath + SPACE + userName + SPACE + fileMode + SPACE + DirMode;
 
-		log.info("Mounting To Windows Remote Host Using :: " + command);
+		String domain = "";
 
+		if (userName.contains("@")) {
+			String[] splitUserName = userName.split("@");
+			userName = splitUserName[0];
+			domain = splitUserName[1];
+		}
+
+		if (partition.contains(":")) {
+			partition = partition.replace(":", "");
+		}
+
+		log.info("MOunting To Windows Remote Host Using :: " + command);
 		try {
-			exitcode = DirectorUtil.executeCommandInExecUtil(
-					Constants.mountWindowsRemoteFileSystemScript, ipAddress,
-					partition, mountpath, userName, password);
+			DirectorUtil.callExec("mkdir -p " + mountpath);
+		} catch (IOException e) {
+			String msg = "Error creating mount directory " + mountpath;
+			log.error(msg);
+		}
+		try {
+			exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountWindowsRemoteFileSystemScript, ipAddress,
+					partition, mountpath, userName, password, fileMode, DirMode, domain);
 		} catch (Exception e) {
 			exitcode = 1;
 			log.error("Error in mounting remote host" + e);

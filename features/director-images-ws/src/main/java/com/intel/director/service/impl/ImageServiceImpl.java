@@ -1003,10 +1003,10 @@ public class ImageServiceImpl implements ImageService {
 			ImageAttributes img = imagePersistenceManager
 					.fetchImageById(imageid);
 			if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
-					.getImage_deployments())) {
+					.getImage_deployments()) && StringUtils.isBlank(img.getPartition())) {
 				TdaasUtil.checkInstalledComponents(imageid);
 			}
-
+			
 			Calendar currentDate = Calendar.getInstance();
 
 			TrustPolicyDraft existingDraft = imagePersistenceManager
@@ -2041,8 +2041,13 @@ public class ImageServiceImpl implements ImageService {
 			return importPolicyTemplateResponse;
 		}
 		// Check if mounted live BM has /opt/vrtm
-		String idendifier = TdaasUtil.checkInstalledComponents(imageId);
-
+		String idendifier = "V";
+		// Check if mounted live BM has /opt/vrtm
+		if (image.getPartition() == null) {
+			idendifier = TdaasUtil.checkInstalledComponents(imageId);
+		} else {
+			idendifier = "W";
+		}
 		String content = null;
 		Manifest manifest;
 
@@ -2657,17 +2662,37 @@ public class ImageServiceImpl implements ImageService {
 	public SshSettingResponse addHost(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
 
+
 		TdaasUtil tdaasUtil = new TdaasUtil();
 		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
 		sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
-		///sshSettingRequest.setPassword(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getPassword()));
+		
+		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			try {
+				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
+						sshSettingRequest.getUsername(),
+						sshSettingRequest.getPassword(),
+						sshSettingRequest.getIpAddress());
+				String drives = StringUtils.join(driveFromWindowsHost, ",");
+				sshSettingRequest.setPartition(drives);
+			} catch (IOException e) {
+				log.error("Error Fetching Partition Info");
+				throw new DirectorException("Error Fetching Partition Info", e);
+			}
+		}
+		
+
 		SshSettingInfo sshSettingInfo = tdaasUtil
 				.fromSshSettingRequest(sshSettingRequest);
-		log.info("Inside addHost, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		
+		
 		log.debug("Going to save sshSetting info in database");
 		SshSettingInfo info;
 		if (StringUtils.isNotBlank(sshSettingRequest.getImage_id())) {
@@ -2685,23 +2710,36 @@ public class ImageServiceImpl implements ImageService {
 			}
 		}
 		return TdaasUtil.convertSshInfoToResponse(info);
-
 	}
 
 	public SshSettingResponse updateSshData(SshSettingRequest sshSettingRequest)
 			throws DirectorException {
-		// SshSettingInfo updateSsh=new SshSettingInfo();
 		sshSettingRequest.setIpAddress(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getIpAddress()));
 		///sshSettingRequest.setName(EscapeUtil.doubleQuoteEscapeShellArgument(sshSettingRequest.getName()));
 		TdaasUtil tdaasUtil = new TdaasUtil();
 
 		// sshPersistenceManager.destroySshById(sshSettingRequest.getId());
 
-		log.info("Inside updateSshData, going to addSshKey ");
-		TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
-				sshSettingRequest.getUsername(),
-				sshSettingRequest.getPassword());
-		log.debug("Inside addHost,After execution of addSshKey ");
+		if (Constants.HOST_TYPE_LINUX.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			TdaasUtil.addSshKey(sshSettingRequest.getIpAddress(),
+					sshSettingRequest.getUsername(),
+					sshSettingRequest.getPassword());
+			log.debug("Inside addHost,After execution of addSshKey ");
+		} else if(Constants.HOST_TYPE_WINDOWS.equalsIgnoreCase(sshSettingRequest.getHost_type())) {
+			log.info("Inside addHost, going to addSshKey ");
+			try {
+				List<String> driveFromWindowsHost = DirectorUtil.getDriveFromWindowsHost(
+						sshSettingRequest.getUsername(),
+						sshSettingRequest.getPassword(),
+						sshSettingRequest.getIpAddress());
+				String drives = StringUtils.join(driveFromWindowsHost, ",");
+				sshSettingRequest.setPartition(drives);
+			} catch (IOException e) {
+				log.error("Error Fetching Partition Info");
+				throw new DirectorException("Error Fetching Partition Info", e);
+			}
+		}
 		log.info("Inside updateSshData,After execution of addSshKey ");
 		try {
 			SshSettingInfo existingSsh = imagePersistenceManager
@@ -2917,4 +2955,16 @@ public class ImageServiceImpl implements ImageService {
 		}
 		return hashTypeObjects;
 	}
-}
+	@Override
+	public List<String> getDrivesForWindows(String username, String password,
+			String ipAddress) throws DirectorException {
+		try {
+			List<String> driveFromWindowsHost = DirectorUtil
+					.getDriveFromWindowsHost(username, password, ipAddress);
+			return driveFromWindowsHost;
+		} catch (IOException e) {
+			log.error("Unable to Get Drives", e);
+			throw new DirectorException("Unable to Get Drives", e);
+		}
+	}
+	}

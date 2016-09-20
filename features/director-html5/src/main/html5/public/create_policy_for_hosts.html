@@ -1,66 +1,79 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		
-		
-		<title>Create Policy</title>
-		
-	</head>
-	<body>
-		<div>
-			<form class="form-horizontal" role="form">
-				<div>
-					
-					
-					<div class="row">
-						<div class="col-md-2"></div>
-						<div class="col-md-8" style="margin-top: 10px;">
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h1>Create Trust Policy</h1>
-								</div>
-								<div class="panel-body">
-									
-									<div class="form-group">
-										<label class="control-label col-md-4" for="display_name_host">Policy Name:</label>
-										<div class="col-md-4">
-											<input type="text" class="form-control" id="display_name_host"
-											placeholder="Enter Policy Name" required>
-										</div>
-										
-									</div>
-									
-																		
-									<div class="form-group">
-										<label class="control-label col-md-4" for="host_ip">Host IP/Name
+
+<head>
+
+
+    <title>Create Policy</title>
+
+</head>
+
+<body>
+    <div>
+        <form class="form-horizontal" role="form">
+            <div>
+
+
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8" style="margin-top: 10px;">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h1>Create Trust Policy</h1>
+                            </div>
+                            <div class="panel-body">
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="display_name_host">Policy Name:</label>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="display_name_host" placeholder="Enter Policy Name" required>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="host_ip">Host IP/Name
 										:</label>
-										<div class="col-md-4">
-											<input type="text" class="form-control" id="host_ip"
-											placeholder="Enter Host" required>
-										</div>
-									</div>
-									
-									<div class="form-group">
-										<label class="control-label col-md-4" for="username_for_host">Username
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="host_ip" placeholder="Enter Host" required>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-4" for="host_type">Host Type
 										:</label>
-										<div class="col-md-4">
-											<input type="text" class="form-control"
+                                    <div class="col-md-4">
+                                        <div class="radio">
+                                            <label><input type="radio" name="host_type" value="windows" checked>Windows</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label><input type="radio" name="host_type" value="linux">Linux</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+								<div class="form-group">
+									<label class="control-label col-md-4" for="username_for_host">Username
+										:</label>
+									<div class="col-md-4">
+										<input type="text" class="form-control"
 											id="username_for_host" placeholder="Enter Username" required>
-										</div>
 									</div>
-									
-									<div class="form-group">
-										<label class="control-label col-md-4" for="password_for_host">Password
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-md-4" for="password_for_host">Password
 										:</label>
-										<div class="col-md-4">
-											<input type="password" class="form-control"
+									<div class="col-md-4">
+										<input type="password" class="form-control"
 											id="password_for_host" placeholder="Enter Password" required>
-										</div>
 									</div>
-									
-									
-									
-									<div class="form-group">
+								</div>
+
+
+								<div class="form-group">
 										<label class="control-label col-md-4" for="hashtype_bm">Hash
 										Type :</label>
 										<div class="col-md-4">
@@ -90,26 +103,25 @@
 													<h4 class="modal-title">
 														<div id="error_modal_body_bm_live_1">Error In adding ssh key to remote host</div>
 													</h4>
-												</div>
-												
-												<div class="modal-footer">
-													<button type="button" class="btn btn-default"
-													data-dismiss="modal">Okay</button>
-												</div>
-											</div>
-											
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</form>
-		</div>
-		
-		<script
-		src="/v1/html5/public/director-html5/js/create_policy_for_hosts.js"></script>
-		
-	</body>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="/v1/html5/public/director-html5/js/create_policy_for_hosts.js"></script>
+
+</body>
+
 </html>

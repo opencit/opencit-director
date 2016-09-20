@@ -106,7 +106,7 @@ public class DirectoryAndFileUtil {
 		String directoryAbsolutePath = DirectorUtil.getMountPath(imageId)+File.separator+"mount"+pathOfDir;
 		String include = dirMeasurement.getInclude();
 		String exclude = dirMeasurement.getExclude();
-		StringBuilder stringBuilder = new StringBuilder("find " + directoryAbsolutePath);
+		StringBuilder stringBuilder = new StringBuilder("find '" + directoryAbsolutePath + "'");
 
 		if (dirMeasurement.isRecursive() == null) {
 			dirMeasurement.setRecursive(false);
@@ -131,7 +131,7 @@ public class DirectoryAndFileUtil {
 		stringBuilder.append(" | cut -c " + startIndex + "-");
 		
 		//Sort
-		//stringBuilder.append(" | sort ");
+		stringBuilder.append(" | sort ");
 		
 		if (include != null && StringUtils.isNotEmpty(include)) {
 			stringBuilder.append(" | grep -E '" + include + "'");

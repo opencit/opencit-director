@@ -19,16 +19,41 @@ public class ImageAttributes extends AuditFields {
 	public String id;
 	public String image_name;
 
-	public String image_format;
-	public String image_deployments;
-	@JsonProperty("image_upload_status")
-	public String status;
-	public Long image_size;
-	public Long sent;
-	public String mounted_by_user_id;
-	public boolean deleted;
-	@JsonProperty("image_Location")
-	public String location;
+  
+    public String image_format;
+    public String image_deployments;
+    @JsonProperty("image_upload_status")
+    public String status;
+    public Long image_size;
+    public Long sent;
+    public String mounted_by_user_id;
+    public boolean deleted;
+    @JsonProperty("image_Location")
+    public String location;
+    
+    public String repository;
+    public String tag;
+    public String uploadVariableMD5;
+    public String tmpLocation;
+    
+	public String partition;
+	
+	
+	
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
+
+	
+    
+    
+    public ImageAttributes() {
+        super();
+    }
 
 	public String repository;
 	public String tag;
