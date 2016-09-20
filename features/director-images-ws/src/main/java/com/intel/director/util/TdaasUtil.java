@@ -484,8 +484,9 @@ public class TdaasUtil {
 		sshSettingInfo.setUsername(StringUtils.isNotBlank(sshSettingRequest.getUsername()) ? sshSettingRequest.getUsername() : existingSshSettingInfo.getUsername());
 		sshSettingInfo.setImage(toImage(sshSettingRequest.getImage_id(),
 				StringUtils.isNotBlank(sshSettingRequest.getName()) ? sshSettingRequest.getName() : existingSshSettingInfo.getName(),
-				sshSettingRequest.getUsername()));
+				sshSettingRequest.getUsername(), sshSettingRequest.getPartition()));
 		return sshSettingInfo;
+	}
 
 	public ImageAttributes toImage(String id, String ip, String username, String partition) {
 		/*

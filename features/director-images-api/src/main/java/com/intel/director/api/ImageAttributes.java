@@ -40,25 +40,8 @@ public class ImageAttributes extends AuditFields {
 	
 	
 	
-	public String getPartition() {
-		return partition;
-	}
 
-	public void setPartition(String partition) {
-		this.partition = partition;
-	}
 
-	
-    
-    
-    public ImageAttributes() {
-        super();
-    }
-
-	public String repository;
-	public String tag;
-	public String uploadVariableMD5;
-	public String tmpLocation;
 
 	public ImageAttributes() {
 		super();
@@ -221,4 +204,12 @@ public class ImageAttributes extends AuditFields {
 		this.tag = tag == null ? null : tag.trim();
 	}
 
+
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
 }
