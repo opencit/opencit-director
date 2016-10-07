@@ -216,7 +216,7 @@ function addRadios(arr) {
     $('#launch_control_policy').html(temp);
     $.ajax({
         type: 'GET',
-        url: '/v1/setting/kms/getproperties',
+        url: '/v1/setting/kms',
         contentType: "application/json",
         success: function(data) {
 

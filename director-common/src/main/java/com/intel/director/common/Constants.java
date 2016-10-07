@@ -172,6 +172,10 @@ public class Constants {
 	public static final String INCLUDE_LIST_BM_LIVE="bmlive.include";
 	public static final String MTWILSON_PROP_FILE = "mtwilson.properties";
 	public static final String KMS_PROP_FILE = "kms.properties";
+	public static final String KMS_PROP_URL = "kms.endpoint.url";	
+	public static final String KMS_PROP_USER = "kms.login.basic.username";
+	public static final String KMS_PROP_SHA1 = "kms.tls.policy.certificate.sha1";
+
 	public static final String MTWILSON_TRUST_POLICY_LOCATION="mtwilson_trustpolicy_location";
 
 	
@@ -233,4 +237,12 @@ public class Constants {
 	public static final String SIZE="size";
 	public static final String KEYSTONE_VERSION = "keystone.version";
 
+	public static final String MTWILSON_PROP_SERVER_IP = "mtwilson.server";
+	public static final String MTWILSON_PROP_SERVER_API_IP = "mtwilson.api.url";
+	public static final String MTWILSON_PROP_SERVER_API_USER = "mtwilson.api.username";
+	public static final String MTWILSON_PROP_SERVER_API_PASSWORD = "mtwilson.api.password";
+	public static final String MTWILSON_PROP_SERVER_SHA1 = "mtwilson.api.tls.policy.certificate.sha1";
+	public static final String MTWILSON_PROP_SERVER_PORT = "mtwilson.server.port";
+	public static final String MTWILSON_PROP_SERVER_PASSWORD = "mtwilson.server.password";
+	public static final String MTWILSON_PROP_SERVER_USERNAME = "mtwilson.server.username";
 }
