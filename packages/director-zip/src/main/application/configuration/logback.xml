@@ -52,7 +52,6 @@
     
     <logger name="org.dozer" level="ERROR"/>
     
-    <logger name="com.intel.mtwilson.util.exec.ExecUtil" level="ERROR"/>
 
     <logger name="org.apache.shiro.session.mgt" level="ERROR"/>
     <!-- INFO:  Enabling session validation scheduler...  -->
@@ -67,5 +66,7 @@
     <logger name="com.intel.dcsg.cpg" level="INFO"/>
     <logger name="com.intel.dcsg.cpg.console" level="INFO"/>
     <logger name="com.intel.dcsg.cpg.configuration" level="INFO"/>
+    <logger name="com.intel.mtwilson.util.exec.ExecUtil" level="INFO"/>
+
     -->
 </configuration>

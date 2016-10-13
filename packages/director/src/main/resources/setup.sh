@@ -63,10 +63,16 @@ else
 fi
 
 
-if [ -d /mnt/images ]; then
-  echo "Upload directory exists"
+if [ -d /mnt/images/vm ]; then
+  echo "Upload directory for VM exists"
 else
-	mkdir /mnt/images	
+	mkdir -p /mnt/images/vm	
+fi
+
+if [ -d /mnt/images/docker ]; then
+  echo "Upload directory for docker exists"
+else
+	mkdir /mnt/images/docker	
 fi
 
 # functions script (mtwilson-linux-util-3.0-SNAPSHOT.sh) is required

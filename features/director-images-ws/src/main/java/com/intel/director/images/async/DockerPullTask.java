@@ -65,12 +65,16 @@ public class DockerPullTask implements Runnable {
 			} catch (DbException e) {
 				log.error("Unable to update image ,set downloading status in DockerPullTask", e);
 			}
+			/// Pull docker image drom remote hub
 			dockerActionService.dockerPull(repository, tag);
-
+			// Save the image in /mnt/images
 			dockerActionService.dockerSave(imageId);
 
 			String newTag = tag + Constants.SOURCE_TAG;
+			///In order to identify orginal image later on , we tag it by appending _source. For example 
+			//busybox:latest tagged to--> busybox:latest_source
 			dockerActionService.dockerTag(imageId, repository, newTag);
+			// We remove older one i.e busybox:latest
 			dockerActionService.dockerRMI(imageId);
 			image.setStatus(Constants.COMPLETE);
 		} catch (DirectorException e1) {

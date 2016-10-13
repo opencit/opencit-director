@@ -3,6 +3,7 @@ package com.intel.director.api.ui;
 import java.util.List;
 import java.util.Map;
 
+import com.intel.director.api.ConnectorCompositeItem;
 import com.intel.director.api.ConnectorKey;
 
 public class ImageStoreConnector {
@@ -10,6 +11,8 @@ public class ImageStoreConnector {
 	private String driver;
 	private List<ConnectorKey> properties;
 	private Map<String, String> supported_artifacts;
+	private List<ConnectorCompositeItem> connectorCompositeItem;
+	
 	public String getName() {
 		return name;
 	}
@@ -33,6 +36,13 @@ public class ImageStoreConnector {
 	}
 	public void setSupported_artifacts(Map<String, String> supported_artifacts) {
 		this.supported_artifacts = supported_artifacts;
+	}
+	public List<ConnectorCompositeItem> getConnectorCompositeItem() {
+		return connectorCompositeItem;
+	}
+	public void setConnectorCompositeItem(
+			List<ConnectorCompositeItem> connectorCompositeItem) {
+		this.connectorCompositeItem = connectorCompositeItem;
 	}
 	
 

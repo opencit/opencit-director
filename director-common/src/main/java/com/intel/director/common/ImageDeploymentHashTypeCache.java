@@ -7,23 +7,24 @@ import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
 
 public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 
-	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(ImageDeploymentHashTypeCache.class);
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageDeploymentHashTypeCache.class);
 	private static Map<String, String> deploymentTypeHashTypeMap = new HashMap<String, String>();
 
 	public static void init() {
 		getAllValues();
-		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_VM) != null) {
-			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_VM,
-					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_VM).value());
+		DigestAlgorithm digestAlgorithmForDeploymentType = getDigestAlgorithmForDeploymentType(
+				Constants.DEPLOYMENT_TYPE_VM);
+		if (digestAlgorithmForDeploymentType != null) {
+			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_VM, digestAlgorithmForDeploymentType.value());
 		}
-		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL) != null) {
+		digestAlgorithmForDeploymentType = getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL);
+		if (digestAlgorithmForDeploymentType != null) {
 			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_BAREMETAL,
-					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_BAREMETAL).value());
+					digestAlgorithmForDeploymentType.value());
 		}
-		if (getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER) != null) {
-			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_DOCKER,
-					getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER).value());
+		digestAlgorithmForDeploymentType = getDigestAlgorithmForDeploymentType(Constants.DEPLOYMENT_TYPE_DOCKER);
+		if (digestAlgorithmForDeploymentType != null) {
+			deploymentTypeHashTypeMap.put(Constants.DEPLOYMENT_TYPE_DOCKER, digestAlgorithmForDeploymentType.value());
 		}
 	}
 
@@ -58,13 +59,13 @@ public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 
 	private static DigestAlgorithm getHashType(String ht, DigestAlgorithm defaultDigestAlg) {
 		String property = properties.getProperty(ht);
-		if(property == null){
+		if (property == null) {
 			return defaultDigestAlg;
 		}
 		DigestAlgorithm algorithm = null;
-		try{
+		try {
 			algorithm = DigestAlgorithm.fromValue(property.toLowerCase());
-		}catch(IllegalArgumentException iae){
+		} catch (IllegalArgumentException iae) {
 			log.error("Invalid input {}", property);
 		}
 		if (algorithm == null) {

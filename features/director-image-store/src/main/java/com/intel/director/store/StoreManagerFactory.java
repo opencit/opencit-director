@@ -73,12 +73,66 @@ public class StoreManagerFactory {
 				log.debug("Encrypted password is : {}", imageStoreDetailsTransferObject.getValue());
 				map.put(imageStoreDetailsTransferObject.getKey(), imageStorePasswordUtil
 						.decryptPasswordForImageStore(imageStoreDetailsTransferObject.getValue()));
-				log.debug("Decrypted password is : {}", map.get(imageStoreDetailsTransferObject.getKey()));
+				log.debug("Password decrypted");
 			}
 		}
 
 		storeManager.build(map);
 		return storeManager;
 	}
+	
+	
+	
+	/**
+	 * Returns null if no store exists for the ID
+	 * 
+	 * @param storeId
+	 * @return
+	 * @throws StoreException
+	 */
+	public static StoreManager getStoreManager(ImageStoreTransferObject imageStoreDTO)
+			throws StoreException {
+		String connectorName = imageStoreDTO.getConnector();
+		ConnectorProperties connector = ConnectorProperties
+				.getConnectorByName(connectorName);
+		if (connector == null) {
+			return null;
+		}
+
+		StoreManager storeManager;
+		try {
+			storeManager = (StoreManager) Class.forName(connector.getDriver())
+					.newInstance();
+		} catch (InstantiationException | IllegalAccessException
+				| ClassNotFoundException e) {
+			log.error("Error instatiating connector for {}",
+					connector.getDriver());
+			throw new StoreException("Error instatiating connector for "
+					+ connector.getDriver(), e);
+		}
+
+
+	/*	ImageStoreDetailsTransferObject passwordConfiguration = imageStoreDTO.fetchPasswordConfiguration();
+		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
+		if(StringUtils.isBlank(passwordConfiguration.getValue())){
+			log.error("No password set for store "+ storeId);
+			throw new StoreException("No password set for store");
+		}*/
+		Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreDTO
+				.getImage_store_details();
+		Map<String, String> map = new HashMap<>();
+
+		for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+			map.put(imageStoreDetailsTransferObject.getKey(), imageStoreDetailsTransferObject.getValue());
+		}
+		log.debug("getStoreManager, imageStoreDTO::"+imageStoreDTO);
+		storeManager.build(map);
+		return storeManager;
+	}
+	
+	
+
+
+
 
 }

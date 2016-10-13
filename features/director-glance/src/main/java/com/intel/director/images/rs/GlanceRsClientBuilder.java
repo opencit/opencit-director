@@ -31,15 +31,17 @@ public class GlanceRsClientBuilder {
             String userName = configuration.get(Constants.GLANCE_IMAGE_STORE_USERNAME);
             String password = configuration.get(Constants.GLANCE_IMAGE_STORE_PASSWORD);
             String tenantName = configuration.get(Constants.GLANCE_TENANT_NAME);
+            String domainName = configuration.get(Constants.GLANCE_DOMAIN_NAME);
+            String version = configuration.get(Constants.KEYSTONE_VERSION);
             
          
             URL url = new URL(glanceApiEndpoint); // example: "http://localhost:8080/";
             
             Client client = ClientBuilder.newBuilder().build();
             WebTarget target = client.target(url.toExternalForm());
-            return new GlanceRsClient(target, client, glanceApiEndpoint, glanceKeystonePublicEndpoint,tenantName,userName,password);
+            return new GlanceRsClient(target, client, glanceApiEndpoint, glanceKeystonePublicEndpoint,tenantName,userName,password,domainName,version);
         } catch (MalformedURLException ex) {
-            throw new GlanceException("Cannot construct glance rest client with given credentials", ex);
+            throw new GlanceException("Invalid endpoints", ex);
         }
     }
 

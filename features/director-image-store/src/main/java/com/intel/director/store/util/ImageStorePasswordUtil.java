@@ -16,7 +16,6 @@ public class ImageStorePasswordUtil {
 
 	public ImageStorePasswordUtil(String id) {
 		randomPassword = id;
-		log.info("Using directorPassword : {}", randomPassword);
 		protection = PasswordProtectionBuilder.factory().aes(128)
 				.digestAlgorithm("SHA-256").keyAlgorithm("PBKDF2WithHmacSHA1")
 				.iterations(1000).saltBytes(16).mode("CBC")

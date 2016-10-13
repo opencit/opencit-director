@@ -48,7 +48,7 @@ public class DockerActionImpl implements DockerActionService {
 			displayName = trustPolicy.getDisplay_name();
 		}
 		try {
-			int success = DockerUtil.dockerSave(image.repository, image.tag, "/mnt/images/", displayName);
+			int success = DockerUtil.dockerSave(image.repository, image.tag, Constants.DEFAULT_DOCKER_UPLOAD_PATH, displayName);
 			if (success != 0) {
 				throw new DirectorException("Docker save failed for imageid ::" + image_id);
 

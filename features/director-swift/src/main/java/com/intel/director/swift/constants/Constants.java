@@ -15,7 +15,6 @@ public class Constants {
 	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
 	public static final String mountPath = "/mnt/director/";
 	public static final String uploadPath = "director.upload.path";
-	public static final String defaultUploadPath = "/mnt/images/";
 	public static final String vmImagesPath = "/opt/kms/images/vm/";
 	public static final String configurationPath = "/opt/director/configuration/";
 

@@ -437,6 +437,7 @@ public  class ImageActionImpl implements ImageActionService {
 
 		if (image == null) {
 			log.error("Image with id " + imageActionObject.getImage_id() + "does not exist");
+			return null;
 		}
 
 		boolean isDockerImage=false;
@@ -472,6 +473,14 @@ public  class ImageActionImpl implements ImageActionService {
 				artifactName = Constants.ARTIFACT_POLICY;
 				//displayMessage=imageActionTask.getMessage();
 				
+			}
+			if (imageActionTask.getTask_name().equals(
+					Constants.TASK_NAME_INJECT_POLICY)) {
+				if(isDockerImage){
+					artifactName = Constants.ARTIFACT_DOCKER_IMAGE_WITH_POLICY_DISPLAY_NAME;
+					break;
+				}
+
 			}
 			if (imageActionTask.getTask_name().equals(
 					Constants.TASK_NAME_UPLOAD_IMAGE)) {

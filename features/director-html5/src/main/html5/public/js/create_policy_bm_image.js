@@ -1,8 +1,7 @@
 var image_policies = new Array();
-endpoint = "/v1";
 $.ajax({
 	type : "GET",
-	url : endpoint + "image-formats",
+	url :  "/v1/image-formats",
 	contentType : "application/json",
 	headers : {
 		'Accept' : 'application/json'
@@ -37,7 +36,6 @@ function CreateBMImageMetaData(data) {
 
 function CreateBMImageViewModel() {
 	var self = this;
-	endpoint = "/v1";
 	$("input[name=isEncryptedBM]").val(false);
 	$("#display_name_bm").val(current_display_name);
 	$('input[name=launch_control_policy]:checked').val("MeasureOnly");
@@ -52,7 +50,7 @@ function CreateBMImageViewModel() {
 		current_display_name = $('#display_name_bm').val();
 		$.ajax({
 			type : "POST",
-			url : endpoint + "trustpoliciesmetadata",
+			url : "/v1/trustpoliciesmetadata",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
@@ -97,10 +95,9 @@ function CreateBMImageViewModel() {
 };
 
 function fetchBMImageLaunchPolicies() {
-	endpoint = "/v1";
 	$.ajax({
 		type : "GET",
-		url : endpoint + current_image_id + "/trustpolicymetadata",
+		url : "/v1/" + current_image_id + "/trustpolicymetadata",
 		dataType : "json",
 		success : function(data, status, xhr) {
 			$("#display_name_bm").val(data.display_name);

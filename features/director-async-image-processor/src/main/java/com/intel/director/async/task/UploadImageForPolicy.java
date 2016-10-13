@@ -19,12 +19,12 @@ import com.intel.director.service.impl.ArtifactUploadServiceImpl;
  * @author Aakash
  */
 
-public class UploadImageForPolicyTask extends UploadImageTask {
+public class UploadImageForPolicy extends UploadImage {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(UploadImageForPolicyTask.class);
+			.getLogger(UploadImageForPolicy.class);
 
-	public UploadImageForPolicyTask() throws DirectorException {
+	public UploadImageForPolicy() throws DirectorException {
 		super();
 	}
 
@@ -45,6 +45,8 @@ public class UploadImageForPolicyTask extends UploadImageTask {
 				.fetchImageUploadByImageId(imageInfo.getId());
 		String glanceId = imageInfo.getId();
 		customProperties.put(Constants.GLANCE_ID, imageInfo.getId());
+		/// This is the tag in image metatdata to be uploaded to glance showing details about trust policy location. Astrsutpolicy exits but we are not
+		// uploading to glance hence we set the tag to NA
 		customProperties.put(Constants.MTWILSON_TRUST_POLICY_LOCATION, "NA");
 		if (imageUploadByImageId != null) {
 			String uuid = DirectorUtil.fetchIdforUpload(trustPolicy);

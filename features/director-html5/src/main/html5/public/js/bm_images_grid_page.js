@@ -22,7 +22,6 @@ function ImageData() {
 
 function refreshBMOnlineGrid() {
     var self = this;
-    endpoint = "/v1";
     $("#bmGridOnline").html("");
     $.ajax({
         type: "GET",
@@ -129,11 +128,10 @@ function refreshBMOnlineGrid() {
 }
 
 function refresh_bm_images_Grid() {
-    endpoint = "/v1";
     $("#bmGridImages").html("");
     $.ajax({
         type: "GET",
-        url: endpoint + "imagesList/BareMetal",
+        url: "/v1/imagesList/BareMetal",
         accept: "application/json",
         headers: {
             'Accept': 'application/json'

@@ -1,32 +1,32 @@
 package com.intel.director.api;
 
 public class SshPassword {
-	String id;
-	String key;
+    String id;
+    String key;
 
-	public SshPassword(String id, String key) {
-		super();
-		this.id = id;
-		this.key = key;
-	}
+    public SshPassword(String id, String key) {
+	super();
+	this.id = id;
+	this.key = key;
+    }
 
-	public SshPassword() {
-	}
+    public SshPassword() {
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+	return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+	this.id = id;
+    }
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+	return key;
+    }
 
-	public void setKey(String key) {
-		this.key = key;
-	}
+    public void setKey(String key) {
+	this.key = key;
+    }
 
 }

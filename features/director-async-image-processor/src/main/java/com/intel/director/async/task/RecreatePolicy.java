@@ -26,10 +26,10 @@ import com.intel.mtwilson.director.db.exception.DbException;
  * 
  * @author GS-0681
  */
-public class RecreatePolicyTask extends GenericUploadTask {
-	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RecreatePolicyTask.class);
+public class RecreatePolicy extends GenericUpload {
+	public static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RecreatePolicy.class);
 
-	public RecreatePolicyTask() throws DirectorException {
+	public RecreatePolicy() throws DirectorException {
 		super();
 	}
 

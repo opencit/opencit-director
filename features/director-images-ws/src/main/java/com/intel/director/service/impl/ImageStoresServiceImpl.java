@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.intel.director.api.ConnectorCompositeItem;
 import com.intel.director.api.ConnectorKey;
 import com.intel.director.api.ConnectorProperties;
 import com.intel.director.api.GenericDeleteResponse;
@@ -29,255 +30,358 @@ import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
 
 public class ImageStoresServiceImpl implements ImageStoresService {
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory
-			.getLogger(ImageStoresServiceImpl.class);
-	
-	private static final String PLACE_HOLDER_BUNDLE = "ImageStoreKeysPlaceHolder";
-	private IPersistService imagePersistenceManager;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImageStoresServiceImpl.class);
 
-	public ImageStoresServiceImpl() {
-		imagePersistenceManager = new DbServiceImpl();
+    private static final String PLACE_HOLDER_BUNDLE = "ImageStoreKeysPlaceHolder";
+    private IPersistService imagePersistenceManager;
+
+    public ImageStoresServiceImpl() {
+	imagePersistenceManager = new DbServiceImpl();
+    }
+
+    private ConnectorKey[] propertiesForConnector(String connector) {
+	ConnectorKey returnString[] = null;
+	switch (connector) {
+	case Constants.CONNECTOR_DOCKERHUB:
+	    returnString = ConnectorProperties.DOCKER.getProperties();
+	    break;
+	case Constants.CONNECTOR_GLANCE:
+	    returnString = ConnectorProperties.GLANCE.getProperties();
+	    break;
+	/*
+	 * case Constants.CONNECTOR_SWIFT: returnString =
+	 * ConnectorProperties.SWIFT.getProperties(); break;
+	 */
+	}
+	return returnString;
+    }
+    
+    
+    private ConnectorCompositeItem[] compositeItemsForConnector(String connector) {
+    	ConnectorCompositeItem returnString[] = null;
+    	switch (connector) {
+    	case Constants.CONNECTOR_DOCKERHUB:
+    	    returnString = ConnectorProperties.DOCKER.getConnectorCompositeItem();
+    	    break;
+    	case Constants.CONNECTOR_GLANCE:
+    	    returnString = ConnectorProperties.GLANCE.getConnectorCompositeItem();
+    	    break;
+    	/*
+    	 * case Constants.CONNECTOR_SWIFT: returnString =
+    	 * ConnectorProperties.SWIFT.getProperties(); break;
+    	 */
+    	}
+    	return returnString;
+        }
+
+    @Override
+    public ImageStoreTransferObject createImageStore(ImageStoreTransferObject imageStoreTransferObject)
+	    throws DirectorException {
+	ImageStoreTransferObject savedImageStore;
+	Collection<ImageStoreDetailsTransferObject> image_store_details_final = new ArrayList<ImageStoreDetailsTransferObject>();
+
+	ConnectorKey[] propertiesForConnector = propertiesForConnector(imageStoreTransferObject.getConnector());
+	ConnectorCompositeItem[] compositeItems=compositeItemsForConnector(imageStoreTransferObject.getConnector());
+	List<ConnectorKey> listOfPropertiesForConnector = new ArrayList<ConnectorKey>(
+		Arrays.asList(propertiesForConnector));
+	///List<ConnectorKey> compositeItemList = new ArrayList<ConnectorKey>();
+	Map<String, ConnectorKey> keyToConnectorPropertyMap = new HashMap<>(listOfPropertiesForConnector.size());
+	for (ConnectorKey connectorKey : listOfPropertiesForConnector) {
+	    keyToConnectorPropertyMap.put(connectorKey.getKey(), connectorKey);
+	}
+	for(ConnectorCompositeItem item : compositeItems){
+		listOfPropertiesForConnector.add(new ConnectorKey(8,item.getKey()));
+	}
+	boolean updateWithEncryptedPassword = false;
+	if (imageStoreTransferObject.getImage_store_details() != null
+		&& imageStoreTransferObject.getImage_store_details().size() != 0) {
+	    Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject
+		    .getImage_store_details();
+	    for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
+		String key = imageStoreDetailsTransferObject.getKey();
+		if (keyToConnectorPropertyMap.containsKey(key)) {
+		    listOfPropertiesForConnector.remove(keyToConnectorPropertyMap.get(key));
+		}
+		updateWithEncryptedPassword = true;
+		image_store_details_final.add(imageStoreDetailsTransferObject);
+	    }
+	}
+	for (ConnectorKey props : listOfPropertiesForConnector) {
+	    ImageStoreDetailsTransferObject storeDetailsTransferObject = new ImageStoreDetailsTransferObject();
+	    storeDetailsTransferObject.setKey(props.getKey());
+	    storeDetailsTransferObject.setValue(null);
+	    image_store_details_final.add(storeDetailsTransferObject);
 	}
 	
-	private ConnectorKey[] propertiesForConnector(String connector) {
-		ConnectorKey returnString[] = null ;
-		switch (connector) {
-		case Constants.CONNECTOR_DOCKERHUB:
-			returnString = ConnectorProperties.DOCKER.getProperties();
-			break;
-		case Constants.CONNECTOR_GLANCE:
-			returnString = ConnectorProperties.GLANCE.getProperties();
-			break;
-	/*	case Constants.CONNECTOR_SWIFT:
-			returnString = ConnectorProperties.SWIFT.getProperties();
-			break;*/
-		}	
-		return returnString;
-	}
 	
-	@Override
-	public ImageStoreTransferObject createImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-		ImageStoreTransferObject savedImageStore;
-		Collection<ImageStoreDetailsTransferObject> image_store_details_final = new ArrayList<ImageStoreDetailsTransferObject>();
 
-		ConnectorKey[] propertiesForConnector = propertiesForConnector(imageStoreTransferObject.getConnector());
-		List<ConnectorKey> listOfPropertiesForConnector = new ArrayList<ConnectorKey>(Arrays.asList(propertiesForConnector));
-		Map<String, ConnectorKey> keyToConnectorPropertyMap = new HashMap<>(listOfPropertiesForConnector.size());
-		for (ConnectorKey connectorKey : listOfPropertiesForConnector) {
-			keyToConnectorPropertyMap.put(connectorKey.getKey(), connectorKey);
-		}
-		boolean updateWithEncryptedPassword = false;
-		if(imageStoreTransferObject.getImage_store_details() != null && imageStoreTransferObject.getImage_store_details().size() != 0) {
-			Collection<ImageStoreDetailsTransferObject> image_store_details = imageStoreTransferObject.getImage_store_details();
-			for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
-				String key = imageStoreDetailsTransferObject.getKey();
-				if(keyToConnectorPropertyMap.containsKey(key)){
-					listOfPropertiesForConnector.remove(keyToConnectorPropertyMap.get(key));
-				}
-				updateWithEncryptedPassword = true;
-				image_store_details_final.add(imageStoreDetailsTransferObject);
-			}
-		}
-		for (ConnectorKey props : listOfPropertiesForConnector) {
-			ImageStoreDetailsTransferObject storeDetailsTransferObject = new ImageStoreDetailsTransferObject();
-			storeDetailsTransferObject.setKey(props.getKey());
-			storeDetailsTransferObject.setValue(null);
-			image_store_details_final.add(storeDetailsTransferObject);
-		}
-		
-		imageStoreTransferObject.setImage_store_details(image_store_details_final);
-		
-		try {
-			savedImageStore = imagePersistenceManager.saveImageStore(imageStoreTransferObject);
-			//If the user has provided the whole Image Store configuration with the details,
-			//We want to encrypt the password and save it for which we need the id of the password field
-			//So once we save the store, we need to update it 
-			if(updateWithEncryptedPassword){
-				ImageStoreDetailsTransferObject passwordConfiguration = savedImageStore.fetchPasswordConfiguration();
-				ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
+	imageStoreTransferObject.setImage_store_details(image_store_details_final);
 
-				if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
-					String passwordForImageStore = imageStorePasswordUtil.encryptPasswordForImageStore(passwordConfiguration.getValue());			
-					passwordConfiguration.setValue(passwordForImageStore);
-				}
+	try {
+	    savedImageStore = imagePersistenceManager.saveImageStore(imageStoreTransferObject);
+	   
+	    // If the user has provided the whole Image Store configuration with
+	    // the details,
+	    // We want to encrypt the password and save it for which we need the
+	    // id of the password field
+	    // So once we save the store, we need to update it
+	    if (updateWithEncryptedPassword) {
+		ImageStoreDetailsTransferObject passwordConfiguration = savedImageStore.fetchPasswordConfiguration();
+		ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
+
+		if (StringUtils.isNotBlank(passwordConfiguration.getValue())) {
+		    String passwordForImageStore = imageStorePasswordUtil
+			    .encryptPasswordForImageStore(passwordConfiguration.getValue());
+		    passwordConfiguration.setValue(passwordForImageStore);
+		}
+
+		imagePersistenceManager.updateImageStore(savedImageStore);
+
+	    }
+		Collection<ImageStoreDetailsTransferObject> detailsObjectCorrectList= new ArrayList<ImageStoreDetailsTransferObject>();
+	    if (savedImageStore != null) {
+	    	///log.debug("createImageStore ,Before removal compositeItems::"+compositeItems);
+	    
+	    	for (ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details) {
+	    		boolean add=true;
+	    		for(ConnectorCompositeItem item : compositeItems){
+	    			if(item.getKey().equals(detailsTransferObject.getKey())){
+	    				item.setValue(detailsTransferObject.getValue());
+	    				item.setPlaceholder(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
+	    				item.setId(detailsTransferObject.getId());
+	    				///savedImageStore.image_store_details.remove(detailsTransferObject);	
+	    				add=false;
+	    			}
+	    		}
+	    		if(add){
+	    			detailsObjectCorrectList.add(detailsTransferObject);
+	    		}
 				
-				imagePersistenceManager.updateImageStore(savedImageStore);
-
-			}
-			if(savedImageStore != null){
-				for(ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details){
-					detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
-					detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
-				}
-			}
-		} catch (DbException e) {
-			log.error("Error in creating ImageStore",e);
-			throw new DirectorException("Error in creating ImageStore",e);
-		}	
-		return savedImageStore;
-	}
-
-	@Override
-	public ImageStoreTransferObject getImageStoreById(String imageStoreId)
-			throws DirectorException {
-
-		ImageStoreTransferObject fetchImageStorebyId;
-		try {
-			fetchImageStorebyId = imagePersistenceManager
-					.fetchImageStorebyId(imageStoreId);
-			if(fetchImageStorebyId == null){
-				return null;
-			}
-			/*
-			ImageStoreDetailsTransferObject passwordConfiguration = fetchImageStorebyId.fetchPasswordConfiguration();
-			ImageStorePasswordUtil imageStorePasswordUtil = new ImageStorePasswordUtil(passwordConfiguration.id);
-
-			if(StringUtils.isNotBlank(passwordConfiguration.getValue())){
-				String passwordForImageStore = imageStorePasswordUtil.decryptPasswordForImageStore(passwordConfiguration.getValue());			
-				passwordConfiguration.setValue(passwordForImageStore);
-			}
-			*/
-			for(ImageStoreDetailsTransferObject detailsTransferObject : fetchImageStorebyId.image_store_details){
-				detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
-				detailsTransferObject.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
-			}
-		} catch (DbException e) {
-			log.error("Error in fetching ImageStore :: " + imageStoreId);
-			throw new DirectorException("Error in fetching ImageStore :: "
-					+ imageStoreId, e);
-		}
-		return fetchImageStorebyId;
-	}
-	
-	@Override
-	public List<ImageStoreTransferObject> getImageStores(
-			ImageStoreFilter imageStoreFilter) throws DirectorException {
-
-		List<ImageStoreTransferObject> fetchedImageStore;
-		try {
-			fetchedImageStore = imagePersistenceManager
-					.fetchImageStores(imageStoreFilter);
-		} catch (DbException e) {
-			log.error("Error in fetching ImageStores", e);
-			throw new DirectorException("Error in fetching ImageStores", e);
-		}
-		return fetchedImageStore;
-	}
-	
-	@Override
-	public GenericDeleteResponse deleteImageStore(String imageStoreId) throws DirectorException {
-		ImageStoreTransferObject fetchImageStorebyId;
-		try {
-			fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
-					
-		} catch (DbException e) {
-			log.error("Error in fetching ImageStore @ deleteImageStore", e);
-			throw new DirectorException("Error in fetching ImageStore @ deleteImageStore", e);
-		}
-		if(fetchImageStorebyId == null){
-			return null;
-		}
-		fetchImageStorebyId.setDeleted(true);
-		try {
-			imagePersistenceManager.updateImageStore(fetchImageStorebyId);
-		} catch (DbException e) {
-			log.error("Error in updating ImageStore @ deleteImageStore", e);
-			throw new DirectorException("Error in updating ImageStore @ deleteImageStore", e);
-		}
-		return new GenericDeleteResponse();
-	}
-	
-	@Override
-	public ImageStoreTransferObject updateImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
-		try {
 			
-			imagePersistenceManager.updateImageStore(imageStoreTransferObject);
-		} catch (DbException e) {
-			log.error("Error in Updating ImageStore @ updateImageStore", e);
-			throw new DirectorException("Error in Updating ImageStore @ updateImageStore", e);
-		}
-		return imageStoreTransferObject;
-	}
-	
-	@Override
-	public boolean doesImageStoreNameExist(String name,String imageStoreId) throws DirectorException{
-		List<ImageStoreTransferObject> fetchImageStores;
-		try {
-			fetchImageStores = imagePersistenceManager.fetchImageStores(null);
-		} catch (DbException e) {
-			log.error("Error in Fetching ImageStore @ doesImageStoreNameExist", e);
-			throw new DirectorException("Error in Fetching ImageStore @ doesImageStoreNameExist", e);
-		}
-		for (ImageStoreTransferObject imageStoreTO : fetchImageStores) {
-			if(!imageStoreTO.deleted && imageStoreTO.name.equalsIgnoreCase(name) && !imageStoreTO.id.equalsIgnoreCase(imageStoreId)) {
-				return true;
 			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean validateConnectorArtifacts(String[] artifact_types,
-			String connector) {
-		boolean isValidated = true;
-		switch (connector) {
-		case Constants.CONNECTOR_DOCKERHUB:
-
-			for (String artifact : artifact_types) {
-				Map<String, String> supported_artifacts = ConnectorProperties.DOCKER
-						.getSupported_artifacts();
-				if (!supported_artifacts.containsKey(artifact)) {
-					isValidated = false;
-				}
-			}
-			return isValidated;
-
-		case Constants.CONNECTOR_GLANCE:
-
-			for (String artifact : artifact_types) {
-				Map<String, String> supported_artifacts = ConnectorProperties.GLANCE
-						.getSupported_artifacts();
-				if (!supported_artifacts.containsKey(artifact)) {
-					isValidated = false;
-				}
-			}
-			return isValidated;
+	    	
+	      
+	    savedImageStore.image_store_details=detailsObjectCorrectList;
+	    	log.debug(" createImageStore, After removal compositeItems::"+compositeItems);
+		for (ImageStoreDetailsTransferObject detailsTransferObject : savedImageStore.image_store_details) {
 			
-	/*	case Constants.CONNECTOR_SWIFT:
-
-			for (String artifact : artifact_types) {
-				Map<String, String> supported_artifacts = ConnectorProperties.SWIFT
-						.getSupported_artifacts();
-				if (!supported_artifacts.containsKey(artifact)) {
-					isValidated = false;
-				}
-			}
-			return isValidated;*/
-
-			default:
-				return false;
+		    detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+		    detailsTransferObject
+			    .setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
 		}
+		
+		savedImageStore.setConnectorCompositeItemsList(Arrays.asList(compositeItems));
+		
+	    }
+	} catch (DbException e) {
+	    log.error("Error in creating ImageStore", e);
+	    throw new DirectorException("Error in creating ImageStore", e);
 	}
+	return savedImageStore;
+    }
 
-	@Override
-	public void validateImageStore(String imageStoreId) throws DirectorException {
-		StoreManager manager;
-		try {
-			manager = StoreManagerFactory
-					.getStoreManager(imageStoreId);
-		} catch (StoreException e) {
-			log.error("Error in Initializing ImageStore @ validateImageStore", e);
-			throw new DirectorException(e.getMessage());
-		}
-		try {
-			GenericResponse validate = manager.validate();
-			if(validate.getError() != null){
-				throw new DirectorException(validate.getError());
-			}
-		} catch (StoreException e) {
-			log.error(e.getMessage());
-			throw new DirectorException(e.getMessage());
-		}
+    @Override
+    public ImageStoreTransferObject getImageStoreById(String imageStoreId) throws DirectorException {
+
+	ImageStoreTransferObject fetchImageStorebyId;
+	try {
+	    fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
+	    if (fetchImageStorebyId == null) {
+		return null;
+	    }
+
+	  
+	} catch (DbException e) {
+	    log.error("Error in fetching ImageStore :: " + imageStoreId);
+	    throw new DirectorException("Error in fetching ImageStore :: " + imageStoreId, e);
 	}
+	  return populateCompositeItemInStore(fetchImageStorebyId);
+    }
+
+    public ImageStoreTransferObject populateCompositeItemInStore(ImageStoreTransferObject imageStore){
+    	Collection<ImageStoreDetailsTransferObject> detailsObjectCorrectList= new ArrayList<ImageStoreDetailsTransferObject>();
+	    ConnectorCompositeItem[] compositeItems=compositeItemsForConnector(imageStore.getConnector());
+	    
+		for (ImageStoreDetailsTransferObject detailsTransferObject : imageStore.image_store_details) {
+    		boolean add=true;
+    		for(ConnectorCompositeItem item : compositeItems){
+    			if(item.getKey().equals(detailsTransferObject.getKey())){
+    				item.setValue(detailsTransferObject.getValue());
+    				item.setPlaceholder(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
+    				item.setId(detailsTransferObject.getId());
+    				///savedImageStore.image_store_details.remove(detailsTransferObject);	
+    				add=false;
+    			}
+    		}
+    		if(add){
+    			detailsObjectCorrectList.add(detailsTransferObject);
+    		}
+			
+		
+		}
+		imageStore.setImage_store_details(detailsObjectCorrectList);
+		imageStore.setConnectorCompositeItemsList(Arrays.asList(compositeItems));
+	    for (ImageStoreDetailsTransferObject detailsTransferObject : imageStore.image_store_details) {
+		detailsTransferObject.setKeyDisplayValue(I18Util.format(detailsTransferObject.getKey()));
+		detailsTransferObject
+			.setPlaceHolderValue(I18Util.format(detailsTransferObject.getKey(), PLACE_HOLDER_BUNDLE));
+	    }
 	
+	return imageStore;
+    }
+    
+    
+    @Override
+    public List<ImageStoreTransferObject> getImageStores(ImageStoreFilter imageStoreFilter) throws DirectorException {
+    	List<ImageStoreTransferObject> imageStoreConvertedList = new ArrayList<ImageStoreTransferObject>(); 	
+	List<ImageStoreTransferObject> fetchedImageStoreList;
+	try {
+	    fetchedImageStoreList = imagePersistenceManager.fetchImageStores(imageStoreFilter);
+	    
+	} catch (DbException e) {
+	    log.error("Error in fetching ImageStores", e);
+	    throw new DirectorException("Error in fetching ImageStores", e);
+	}
+	for(ImageStoreTransferObject storeTransferObject : fetchedImageStoreList){
+		
+		ImageStoreTransferObject obj=populateCompositeItemInStore(storeTransferObject);	
+		imageStoreConvertedList.add(obj);
+	}
+	return imageStoreConvertedList;
+    }
+
+    @Override
+    public GenericDeleteResponse deleteImageStore(String imageStoreId) throws DirectorException {
+	ImageStoreTransferObject fetchImageStorebyId;
+	try {
+	    fetchImageStorebyId = imagePersistenceManager.fetchImageStorebyId(imageStoreId);
+
+	} catch (DbException e) {
+	    log.error("Error in fetching ImageStore @ deleteImageStore", e);
+	    throw new DirectorException("Error in fetching ImageStore @ deleteImageStore", e);
+	}
+	if (fetchImageStorebyId == null) {
+	    return null;
+	}
+	fetchImageStorebyId.setDeleted(true);
+	try {
+	    imagePersistenceManager.updateImageStore(fetchImageStorebyId);
+	} catch (DbException e) {
+	    log.error("Error in updating ImageStore @ deleteImageStore", e);
+	    throw new DirectorException("Error in updating ImageStore @ deleteImageStore", e);
+	}
+	return new GenericDeleteResponse();
+    }
+
+    @Override
+    public ImageStoreTransferObject updateImageStore(ImageStoreTransferObject imageStoreTransferObject)
+	    throws DirectorException {
+	try {
+
+	    imagePersistenceManager.updateImageStore(imageStoreTransferObject);
+	} catch (DbException e) {
+	    log.error("Error in Updating ImageStore @ updateImageStore", e);
+	    throw new DirectorException("Error in Updating ImageStore @ updateImageStore", e);
+	}
+	return imageStoreTransferObject;
+    }
+
+    @Override
+    public boolean doesImageStoreNameExist(String name, String imageStoreId) throws DirectorException {
+	List<ImageStoreTransferObject> fetchImageStores;
+	try {
+	    fetchImageStores = imagePersistenceManager.fetchImageStores(null);
+	} catch (DbException e) {
+	    log.error("Error in Fetching ImageStore @ doesImageStoreNameExist", e);
+	    throw new DirectorException("Error in Fetching ImageStore @ doesImageStoreNameExist", e);
+	}
+	for (ImageStoreTransferObject imageStoreTO : fetchImageStores) {
+	    if (!imageStoreTO.deleted && imageStoreTO.name.equalsIgnoreCase(name)
+		    && !imageStoreTO.id.equalsIgnoreCase(imageStoreId)) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    @Override
+    public boolean validateConnectorArtifacts(String[] artifact_types, String connector) {
+	boolean isValidated = true;
+	switch (connector) {
+	case Constants.CONNECTOR_DOCKERHUB:
+
+	    for (String artifact : artifact_types) {
+		Map<String, String> supported_artifacts = ConnectorProperties.DOCKER.getSupported_artifacts();
+		if (!supported_artifacts.containsKey(artifact)) {
+		    isValidated = false;
+		}
+	    }
+	    return isValidated;
+
+	case Constants.CONNECTOR_GLANCE:
+
+	    for (String artifact : artifact_types) {
+		Map<String, String> supported_artifacts = ConnectorProperties.GLANCE.getSupported_artifacts();
+		if (!supported_artifacts.containsKey(artifact)) {
+		    isValidated = false;
+		}
+	    }
+	    return isValidated;
+
+	/*
+	 * case Constants.CONNECTOR_SWIFT:
+	 * 
+	 * for (String artifact : artifact_types) { Map<String, String>
+	 * supported_artifacts = ConnectorProperties.SWIFT
+	 * .getSupported_artifacts(); if
+	 * (!supported_artifacts.containsKey(artifact)) { isValidated = false; }
+	 * } return isValidated;
+	 */
+
+	default:
+	    return false;
+	}
+    }
+
+    @Override
+    public void validateImageStore(ImageStoreTransferObject imageStoreTransferObject) throws DirectorException {
+	StoreManager manager;
+	try {
+	    manager = StoreManagerFactory.getStoreManager(imageStoreTransferObject);
+	} catch (StoreException e) {
+	    log.error("Error in Initializing ImageStore @ validateImageStore", e);
+	    throw new DirectorException(e.getMessage());
+	}
+	try {
+	    GenericResponse validate = manager.validate();
+	    if (validate.getError() != null) {
+		throw new DirectorException(validate.getError());
+	    }
+	} catch (StoreException e) {
+	    log.error(e.getMessage());
+	    throw new DirectorException(e.getMessage());
+	}
+    }
+    
+    
+    @Override
+    public void validateImageStore(String imageStoreId) throws DirectorException {
+	StoreManager manager;
+	try {
+	    manager = StoreManagerFactory.getStoreManager(imageStoreId);
+	} catch (StoreException e) {
+	    log.error("Error in Initializing ImageStore @ validateImageStore", e);
+	    throw new DirectorException(e.getMessage());
+	}
+	try {
+	    GenericResponse validate = manager.validate();
+	    if (validate.getError() != null) {
+		throw new DirectorException(validate.getError());
+	    }
+	} catch (StoreException e) {
+	    log.error(e.getMessage());
+	    throw new DirectorException(e.getMessage());
+	}
+    }
+
 }

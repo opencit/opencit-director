@@ -1,13 +1,13 @@
-package com.intel.director.images;
+package com.intel.director.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.intel.director.common.Constants;
+import com.intel.director.constants.Constants;
 
 public enum ArtifactsForDeploymentType {
 
-	DOCKER(Constants.DEPLOYMENT_TYPE_DOCKER), VM(Constants.DEPLOYMENT_TYPE_VM);
+	DOCKER("Docker"), VM("VM");
 
 	private String name;
 
