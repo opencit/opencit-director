@@ -5,10 +5,15 @@
  */
 package com.intel.director.common;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.exec.ExecuteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 
 public class MountImage {
 
@@ -46,8 +51,8 @@ public class MountImage {
 
     public static int mountRemoteSystem(String ipAddress, String userName, String password, String mountpath) {
 	int exitcode;
-	String command = Constants.mountRemoteFileSystemScript + SPACE + ipAddress + SPACE + userName + SPACE + password.replaceAll("(?s).", "*")
-		+ SPACE + mountpath;
+	String command = Constants.mountRemoteFileSystemScript + SPACE + ipAddress + SPACE + userName + SPACE
+		+ password.replaceAll("(?s).", "*") + SPACE + mountpath;
 	log.debug("Executing command " + command);
 	try {
 	    exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountRemoteFileSystemScript, ipAddress, userName,
@@ -72,36 +77,67 @@ public class MountImage {
 	return exitcode;
     }
 
-    public static int mountDocker(String mountpath, String repository, String tag) {
-	int exitcode = 1;
-	String command = Constants.mountDockerScript + SPACE + "mount" + SPACE + mountpath + SPACE + repository + SPACE
-		+ tag;
-	log.info("\n" + "Mounting the docker image : " + mountpath + "with command: " + command);
+    /*
+     * public static int mountDocker(String mountpath, String repository, String
+     * tag) { int exitcode = 1; String command = Constants.mountDockerScript +
+     * SPACE + "mount" + SPACE + mountpath + SPACE + repository + SPACE + tag;
+     * log.info("\n" + "Mounting the docker image : " + mountpath +
+     * "with command: " + command); try { exitcode =
+     * DirectorUtil.executeCommandInExecUtil(Constants.mountDockerScript,
+     * "mount", mountpath, repository, tag); } catch (IOException e) { if
+     * (exitcode == 0) { exitcode = 1; } log.error(
+     * "Error in mounting docker image" + e); } return exitcode; }
+     */
+
+    public static int mountDocker(String mountpath, String imageId) {
+	String imageIdParameter = "--image-id=" + imageId;
+	String mountPathParameter = "--mount-path=" + mountpath;
+	String command = Constants.mountDockerScript + SPACE + mountPathParameter + SPACE + imageIdParameter;
+	log.debug("\n" + "Mounting the docker image : " + mountpath + "with command: " + command);
+	int exitCode = 1;
+	Result execute;
 	try {
-	    exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountDockerScript, "mount", mountpath,
-		    repository, tag);
+	    execute = ExecUtil.execute(Constants.mountDockerScript, mountPathParameter, imageIdParameter);
+	    exitCode = execute.getExitCode();
+	} catch (ExecuteException e) {
+	    exitCode = 1;
+	    log.error("Error in mounting docker image" + e);
 	} catch (IOException e) {
-	    if (exitcode == 0) {
-		exitcode = 1;
-	    }
+	    exitCode = 1;
 	    log.error("Error in mounting docker image" + e);
 	}
-	return exitcode;
+	return exitCode;
     }
 
     public static int unmountDocker(String mountpath, String repository, String tag) {
+	/*
+	 * int exitcode; String command = Constants.mountDockerScript + SPACE +
+	 * "unmount" + SPACE + mountpath + SPACE + repository + SPACE + tag;
+	 * log.info("\n" + "Unmounting the docker image : " + mountpath +
+	 * "with command: " + command); try { exitcode =
+	 * DirectorUtil.executeCommandInExecUtil(Constants.mountDockerScript,
+	 * "unmount", mountpath, repository, tag); } catch (IOException e) {
+	 * exitcode = 1; log.error("Error in mounting docker image" + e); }
+	 * return exitcode;
+	 */
+	String unmountPathParameter = "--unmount-path=" + mountpath;
+
+	String command = Constants.mountDockerScript + SPACE + unmountPathParameter;
+	log.debug(":\n" + "Unmounting the docker image : " + mountpath + "with command: " + command);
 	int exitcode;
-	String command = Constants.mountDockerScript + SPACE + "unmount" + SPACE + mountpath + SPACE + repository
-		+ SPACE + tag;
-	log.info("\n" + "Unmounting the docker image : " + mountpath + "with command: " + command);
 	try {
-	    exitcode = DirectorUtil.executeCommandInExecUtil(Constants.mountDockerScript, "unmount", mountpath,
-		    repository, tag);
+	    Result execute = ExecUtil.execute(Constants.mountDockerScript, unmountPathParameter);
+	    exitcode = execute.getExitCode();
 	} catch (IOException e) {
 	    exitcode = 1;
-	    log.error("Error in mounting docker image" + e);
+	    log.error("Error in unmounting docker image" + e);
+	}
+	File mountDirectory = new File(mountpath);
+	if (mountDirectory.exists()) {
+	    mountDirectory.delete();
 	}
 	return exitcode;
+
     }
 
     public static int mountWindowsRemoteSystem(String ipAddress, String userName, String password, String mountpath,
