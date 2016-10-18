@@ -176,6 +176,13 @@ public class ImageActions {
 	    return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
 	}
 
+
+	ImageInfo fetchImageById = null;
+	try {
+	    fetchImageById = imageService.fetchImageById(imageActionRequest.image_id);
+	} catch (DirectorException e1) {
+	    log.error("unable to fetch image", e1);
+	}
 		if (fetchImageById == null) {
 			genericResponse.error = "Image does not exist for id: "
 					+ imageActionRequest.image_id;
@@ -212,39 +219,6 @@ public class ImageActions {
 		imageActionResponse.setCreatedDateTime(Calendar.getInstance());
 		return Response.ok(imageActionResponse).build();
 	}
-
-	if (fetchImageById == null) {
-	    genericResponse.error = "Image does not exist for id: " + imageActionRequest.image_id;
-	    genericResponse.errorCode = ErrorCode.RECORD_NOT_FOUND;
-	    return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
-	}
-
-	try {
-
-	    actionService = ActionServiceBuilder.build(imageActionRequest.getImage_id());
-	    if (actionService == null) {
-		genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
-		genericResponse.error = "Unable to instantiate a actionService for image id : "
-			+ imageActionRequest.getImage_id();
-		return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
-	    }
-	    imageActionObject = actionService.createImageAction(imageActionRequest);
-	} catch (DirectorException e) {
-	    log.error("Error in createImageAction", e);
-	    imageActionResponse.setError(e.getMessage());
-	    imageActionResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
-	    return Response.ok(imageActionResponse).build();
-	}
-	imageActionResponse.setId(imageActionObject.getId());
-	imageActionResponse.setImage_id(imageActionObject.getImage_id());
-	imageActionResponse.setAction_completed(imageActionObject.getAction_completed());
-	imageActionResponse.setAction_count(imageActionObject.getAction_count());
-	imageActionResponse.setActions(imageActionObject.getActions());
-	imageActionResponse.setCurrent_task_name(imageActionObject.getCurrent_task_name());
-	imageActionResponse.setCurrent_task_status(imageActionObject.getCurrent_task_status());
-	imageActionResponse.setCreatedDateTime(Calendar.getInstance());
-	return Response.ok(imageActionResponse).build();
-    }
 
     /**
      * This method will delete existing image-action. Data required by this
