@@ -50,40 +50,27 @@ public class FileUtilityOperation {
 	return true;
     }
 
-	// Delete the directory with its contents
-	public void deleteFileOrDirectory(File file) {
-		if (file == null) {
-			return;
-		} else if (file.isDirectory()) {
-			String[] fileList = file.list();
+    // Delete the directory with its contents
+    public void deleteFileOrDirectory(File file) {
+	if (file == null) {
+	    return;
+	} else if (file.isDirectory()) {
+	    String[] fileList = file.list();
 
-			// directory is empty, then delete it
-			if (fileList == null || fileList.length == 0) {
-				file.delete();
-			} else {
-				// list all the directory contents
-				if(fileList == null || fileList.length == 0){
-					return;
-				}
-				for (String temp : fileList) {
-					File fileDelete = new File(file, temp);
-					deleteFileOrDirectory(fileDelete);
-				}
-				// check the directory again, if empty then delete it
-				
-				if (fileList == null || fileList.length == 0) {
-					file.delete();
-					log.info("Directory is deleted : " + file.getAbsolutePath());
-				}
-			}
-		} else {
-			file.delete();
+	    // directory is empty, then delete it
+	    if (fileList == null || fileList.length == 0) {
+		file.delete();
+	    } else {
+		// list all the directory contents
+		if (fileList == null || fileList.length == 0) {
+		    return;
 		}
 		for (String temp : fileList) {
 		    File fileDelete = new File(file, temp);
 		    deleteFileOrDirectory(fileDelete);
 		}
 		// check the directory again, if empty then delete it
+		fileList = file.list();
 
 		if (fileList == null || fileList.length == 0) {
 		    file.delete();
@@ -232,27 +219,6 @@ public class FileUtilityOperation {
 	for (String filePath : filePaths) {
 	    filesToTar[i++] = new File(filePath);
 	}
-	
-	public int createTar(String tarFilePath, List<String> filePaths) {
-		FileOutputStream dest = null;
-		boolean proceed = true;
-		try {
-			dest = new FileOutputStream(tarFilePath);
-		} catch (FileNotFoundException e) {
-			log.error("Error creating tar file", e);
-			proceed = false;
-		}finally{
-			if(dest != null){
-				try {
-					dest.close();
-				} catch (IOException e) {
-					log.error("Error closing tar file stream", e);
-				}
-			}
-		}
-		if(!proceed){
-			return 1;
-		}
 
 	for (File f : filesToTar) {
 	    try {
