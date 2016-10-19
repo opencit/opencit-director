@@ -590,8 +590,7 @@ else
 fi
 
 echo "Installing docker....!!!!!"
-apt-get -y install docker-engine=1.9.1-0~$CODENAME --force-yes
-## Docker 
+apt-get -y --force-yes install docker-engine
 
 # delete the temporary setup environment variables file
 rm -f $DIRECTOR_ENV/director-setup
