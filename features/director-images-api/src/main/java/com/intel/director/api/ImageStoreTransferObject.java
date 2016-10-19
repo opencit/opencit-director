@@ -30,7 +30,6 @@ public class ImageStoreTransferObject extends GenericResponse {
 	public Boolean isValid = null;
 
 	public Collection<ImageStoreDetailsTransferObject> image_store_details;
-	
 	public Collection<ConnectorCompositeItem> connectorCompositeItemsList;
 
 	public Collection<ImageStoreDetailsTransferObject> getImage_store_details() {
