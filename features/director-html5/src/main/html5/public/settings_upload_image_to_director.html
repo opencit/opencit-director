@@ -13,7 +13,7 @@
 
             $("#image_format").hide();
             $("#gotoUploadWindow").click(function() {
-                var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
+                var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window_resumable.html", "_blank", "width=500,height=400,resizable=no");
                 image_type_upload = $("#image_type").val();
                 if ($("#image_type").val() == 'VM') {
                 	image_format_upload = 'qcow2';
