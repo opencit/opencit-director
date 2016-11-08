@@ -32,6 +32,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
+import javax.ws.rs.BeanParam;
+import com.intel.director.api.upload.Chunk;
+import com.intel.director.service.impl.UploadService;
+import org.apache.commons.io.IOUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
