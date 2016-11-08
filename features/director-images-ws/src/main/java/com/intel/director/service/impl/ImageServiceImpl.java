@@ -2606,4 +2606,21 @@ public class ImageServiceImpl implements ImageService {
 	}
 	return hashTypeObjects;
     }
+
+
+	/**
+	 * Update ImageInformation
+	 * @param imageInfo updated image information
+	 * @throws DirectorException
+	 */
+	public void updateImageMetadata(ImageInfo imageInfo)
+			throws DirectorException {
+		try {
+			imagePersistenceManager.updateImage(imageInfo);
+		} catch (DbException e) {
+			log.error("Error while updating metadata for uploaded image : " + e);
+			throw new DirectorException("Cannot update image meta data", e);
+		}
+	}
+
 }

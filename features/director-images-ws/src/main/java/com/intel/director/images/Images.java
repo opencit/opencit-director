@@ -2047,4 +2047,59 @@ public class Images {
 
 	return Response.ok(imageHashType).build();
     }
+
+
+/**
+	 * API to check if chunk of a file/image is available at server or not.
+	 * @param imageId Unique Image ID of file
+	 * @param chunk Chunk parameters
+	 * @return HTTP status 200 - OK  if chunk is found on server else HTTP status 404 - Not Found
+	 */
+	@Path("images/upload/content/{imageId: [0-9a-zA-Z_-]+}")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response check(@PathParam("imageId") String imageId, @BeanParam Chunk chunk) {
+		try {
+			UploadService uploadService = new UploadService(Constants.defaultUploadPath);
+			if(uploadService.isChunkUploaded(chunk)) {
+				return Response.ok("Uploaded").build();
+			}
+			return Response.status(Status.NOT_FOUND).build();
+		}catch (Exception e){
+			log.error("Error while uploading image to Trust Director", e);
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.details = e.getMessage();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+		}
+	}
+
+	/**
+	 * API to upload File chunk (Binary data) to server
+	 * @param request {@link HttpServletRequest}
+	 * @param imageId
+	 * @param chunk
+	 * @return
+	 */
+	@Path("rpc/images/upload/content/{imageId: [0-9a-zA-Z_-]+}")
+	@POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response upload(@Context HttpServletRequest request, @PathParam("imageId") String imageId, @BeanParam Chunk chunk){
+		try {
+			UploadService uploadService = new UploadService(Constants.defaultUploadPath);
+			byte[] chunkData = IOUtils.toByteArray(request.getInputStream(), request.getContentLength());
+			return Response.ok(uploadService.uploadChunk(imageId, chunk, chunkData)).build();
+		}catch (Exception e){
+			log.error("Error while uploading image to Trust Director", e);
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.details = e.getMessage();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+		}
+	}
+
+
 }

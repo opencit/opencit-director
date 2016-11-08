@@ -186,5 +186,8 @@ public interface ImageService {
 
 	public List<HashTypeObject> getImageHashType(String deploymentType) throws DirectorException;
 	
+	public	void updateImageMetadata(ImageInfo imageInfo) throws DirectorException;
+
+	
 }
 
