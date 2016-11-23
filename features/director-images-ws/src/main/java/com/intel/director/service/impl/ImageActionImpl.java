@@ -132,7 +132,7 @@ public  class ImageActionImpl implements ImageActionService {
 		}
 		
 		TrustPolicy trustPolicy = null;
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = null;
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = null;
 		if (imageInfo.getTrust_policy_id() != null) {
 
 			try {
@@ -372,7 +372,7 @@ public  class ImageActionImpl implements ImageActionService {
 		}
 
 		// Now check for the upload var
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy;
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicy;
 		try {
 			trustPolicy = TdaasUtil.getPolicy(fetchPolicyById.getTrust_policy());
 		} catch (JAXBException e1) {

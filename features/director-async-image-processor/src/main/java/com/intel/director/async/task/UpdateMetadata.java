@@ -25,7 +25,7 @@ import com.intel.director.store.StoreManagerFactory;
 import com.intel.director.store.exception.StoreException;
 import com.intel.director.util.TdaasUtil;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy2.xml.TrustPolicy;
 
 /**
  * Task to upload the policy to image store

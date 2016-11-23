@@ -41,7 +41,7 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.CreateTrustPolicy;
 import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.tls.policy.factory.TlsPolicyCreator;
-import com.intel.mtwilson.trustpolicy.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.Measurement;
 import com.intel.mtwilson.vm.attestation.client.jaxrs2.TrustPolicySignature;
 import com.jcraft.jsch.JSchException;
 
@@ -251,7 +251,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	}
 
 	@Override
-	public void addEncryption(com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) throws DirectorException {
+	public void addEncryption(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) throws DirectorException {
 		if (policy == null) {
 			return;
 		}
@@ -283,7 +283,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	}
 
 	@Override
-	public void calculateHashes(com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) throws DirectorException {
+	public void calculateHashes(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) throws DirectorException {
 		if (trustPolicy != null) {
 			policy.setSignature(null);
 			List<Measurement> measurements = policy.getWhitelist().getMeasurements();

@@ -1,29 +1,5 @@
 package com.intel.director.service.impl;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang.StringUtils;
-import org.dozer.DozerBeanMapper;
-import org.dozer.Mapper;
-import org.springframework.stereotype.Component;
-
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
 import com.intel.director.api.CreateTrustPolicyMetaDataResponse;
 import com.intel.director.api.HashTypeObject;
@@ -51,12 +27,14 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.UpgradeTrustPolicyResponse;
 import com.intel.director.api.ui.ImageActionFields;
 import com.intel.director.api.ui.ImageActionFilter;
 import com.intel.director.api.ui.ImageActionOrderBy;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.ImageInfoFilter;
 import com.intel.director.api.ui.OrderByEnum;
+import com.intel.director.api.ui.TreeElement;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
 import com.intel.director.common.Constants;
@@ -79,15 +57,51 @@ import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.director.dbservice.DbServiceImpl;
 import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
-import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
-import com.intel.mtwilson.manifest.xml.FileMeasurementType;
-import com.intel.mtwilson.manifest.xml.Manifest;
-import com.intel.mtwilson.manifest.xml.MeasurementType;
+import com.intel.mtwilson.manifest2.xml.DirectoryMeasurementType;
+import com.intel.mtwilson.manifest2.xml.FileMeasurementType;
+import com.intel.mtwilson.manifest2.xml.Manifest;
+import com.intel.mtwilson.manifest2.xml.MeasurementType;
 import com.intel.mtwilson.shiro.ShiroUtil;
-import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.Measurement;
 import com.intel.mtwilson.util.exec.EscapeUtil;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.lang.StringUtils;
+import org.dozer.DozerBeanMapper;
+import org.dozer.Mapper;
+import org.springframework.stereotype.Component;
+import org.xml.sax.SAXException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -476,177 +490,485 @@ public class ImageServiceImpl implements ImageService {
 	return TdaasUtil.mapImageAttributesToTrustDirectorImageUploadResponse(imageInfo);
     }
 
-    @Override
-    public SearchFilesInImageResponse searchFilesInImage(SearchFilesInImageRequest searchFilesInImageRequest)
-	    throws DirectorException {
-	searchFilesInImageRequest.setDir(EscapeUtil.doubleQuoteEscapeShellArgument(searchFilesInImageRequest.getDir()));
-	log.info("Browsing files for dir: " + searchFilesInImageRequest.getDir());
-	if (searchFilesInImageRequest.init) {
-	    try {
-		TrustPolicyDraft fetchPolicyDraftForImage = imagePersistenceManager
-			.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
-		fetchPolicyDraftForImage.setEdited_date(Calendar.getInstance());
-		imagePersistenceManager.updatePolicyDraft(fetchPolicyDraftForImage);
-	    } catch (DbException e) {
-		log.error("Error updating policy draft for image {}", searchFilesInImageRequest.id, e);
-	    }
-	}
-	List<String> trustPolicyElementsList = new ArrayList<String>();
-	Set<String> fileNames = new HashSet<String>();
-	Set<String> patchFileAddSet = new HashSet<String>();
-	Set<String> patchFileRemoveSet = new HashSet<String>();
-	Set<String> patchDirAddSet = new HashSet<String>();
-	Collection<File> treeFiles = new ArrayList<>();
-
-	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
-
-	log.info("Browsing files for on image mounted at : " + mountPath);
-
-	SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
-	Collection<File> listFilesAndDirs = getFirstLevelFiles(searchFilesInImageRequest);
-	log.info("Get first level files");
-
-	List<Measurement> measurements = getMeasurements(searchFilesInImageRequest.id);
-	log.info("Get existing measurements");
-	// this map contains the directory paths as key. the value - boolean
-	// indicates whether all
-	// the sub files of these directory need to be fetched.
-	// false - only first level files
-	Map<String, Boolean> directoryListContainingPolicyFiles = new HashMap<>();
-	Set<TreeNodeDetail> directoryListContainingRegex = new HashSet<TreeNodeDetail>();
-	init(trustPolicyElementsList, directoryListContainingPolicyFiles, directoryListContainingRegex,
-		searchFilesInImageRequest);
-	log.info("after init");
-
-	// Fetch the files
-	if (searchFilesInImageRequest.recursive) {
-	    treeFiles = getFilesAndDirectories(searchFilesInImageRequest.getDir(), null, searchFilesInImageRequest.id);
-	    log.info("calc treefiles in recursive");
-	} else {
-	    if (listFilesAndDirs != null) {
-		treeFiles = listFilesAndDirs;
-		log.info("calc treefiles w/o recursive");
-	    }
-	}
-
-	// In case of edit mode we want to show the exploded view
-	// so that the selected file is visible in the initial screen.
-	// For that we use the directoryListContainingPolicyFiles to find the
-	// directories
-	// that contain that file/s
-
-	// populate filenames with the leaf nodes of the root folder
-
-	createListOfFileNamesForTree(searchFilesInImageRequest, treeFiles, fileNames,
-		directoryListContainingPolicyFiles.keySet());
-	log.info("create list of file name for tree");
-
-	// Now add the exploded file view in case of edit
-	Set<String> dirsForEdit = new HashSet<String>();
-
-	for (String dirPath : directoryListContainingPolicyFiles.keySet()) {
-	    log.info("calc treefiles for dir : " + dirPath);
-
-	    if (directoryListContainingPolicyFiles.get(dirPath)) {
-		List<File> filesAndDirectories = getFilesAndDirectoriesForEdit(dirPath, dirsForEdit,
-			searchFilesInImageRequest.id);
-		createListOfFileNamesForTree(searchFilesInImageRequest, filesAndDirectories, fileNames,
-			directoryListContainingPolicyFiles.keySet());
-		log.info("calc treefiles in recursive edit mode");
-	    } else {
-
-		Collection<File> firstLevelFiles = getFirstLevelFiles(dirPath, searchFilesInImageRequest.id);
-		if (firstLevelFiles != null) {
-		    createListOfFileNamesForTree(searchFilesInImageRequest, firstLevelFiles, fileNames);
+    
+    
+    public UpgradeTrustPolicyResponse upgradePolicyForImage(String imageId)
+			throws DirectorException {
+		UpgradeTrustPolicyResponse resp = new UpgradeTrustPolicyResponse();
+		String policyDraftXml = null;
+		log.debug("Inside upgradePolicyForImage imageId:" + imageId);
+		String user = ShiroUtil.subjectUsername();
+		String mountPath = TdaasUtil.getMountPath(imageId);
+		TrustPolicy existingTrustPolicy = null;
+		TrustPolicyDraft trustPolicyDraft = null;
+		try {
+			trustPolicyDraft = imagePersistenceManager
+					.fetchPolicyDraftForImage(imageId);
+		} catch (DbException e1) {
+			throw new DirectorException("Unable to fetch policy draft", e1);
 		}
-		log.info("calc treefiles in recursive edit mode else");
-	    }
-	}
+		String draftContent = null;
+		String draftId = null;
+		if (trustPolicyDraft == null) {
+			ImageInfo imageInfo;
+			try {
+				imageInfo = imagePersistenceManager.fetchImageById(imageId);
+			} catch (DbException e) {
+				log.error("Cannot fetch imageid imageId::" + imageId, e);
+				throw new DirectorException("Cannot fetch image by id", e);
+			}
+			if (imageInfo == null) {
+				throw new DirectorException("Image does not exist");
+			}
 
-	String parent = searchFilesInImageRequest.getDir();
-	TreeNode root = new TreeNode(parent, parent);
-	log.info("Create root node");
-	Tree tree = new Tree(root, searchFilesInImageRequest.recursive, searchFilesInImageRequest.files_for_policy);
-	log.info("Create tree");
-	root.parent = tree;
-	tree.mountPath = mountPath;
-	tree.directoryListContainingRegex = directoryListContainingRegex;
+			try {
+				existingTrustPolicy = imagePersistenceManager
+						.fetchPolicyById(imageInfo.getTrust_policy_id());
+			} catch (DbException e) {
+				log.error("Cannot get policy by id existingTrustPolicyId::"
+						+ imageInfo.getTrust_policy_id(), e);
+				throw new DirectorException("Cannot get policy by id", e);
+			}
+			draftContent = existingTrustPolicy.getTrust_policy();
 
-	// In case of regex, find the list of files and add it here and then set
-	// it in
-	if (searchFilesInImageRequest.reset_regex) {
-	    // populate list of measurements to be deleted
-	    createlistOfFilesForRegexReset(searchFilesInImageRequest, patchFileRemoveSet);
-	} else if (searchFilesInImageRequest.include != null || searchFilesInImageRequest.exclude != null) {
-	    Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
-	    trustPolicyElementsList = new ArrayList<String>();
-	    for (File file : regexFiles) {
-		if (file.isFile()) {
-		    patchFileAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+		} else {
+			draftId = trustPolicyDraft.getId();
+			draftContent = trustPolicyDraft.getTrust_policy_draft();
 		}
 
-		if (!trustPolicyElementsList.contains(file.getAbsolutePath().replace(mountPath, ""))) {
-		    trustPolicyElementsList.add(file.getAbsolutePath().replace(mountPath, ""));
+		String policyVersion = null;
+		try {
+			policyVersion = TdaasUtil.getPolicyVersion(draftContent);
+		} catch (ParserConfigurationException | SAXException | IOException e1) {
+			throw new DirectorException("Unable to get policy version", e1);
 		}
-	    }
-
-	    patchDirAddSet.add(searchFilesInImageRequest.getDir());
-	    TreeNodeDetail detail = new TreeNodeDetail();
-	    detail.regexPath = searchFilesInImageRequest.getDir();
-	    detail.regexExclude = searchFilesInImageRequest.exclude;
-	    detail.regexInclude = searchFilesInImageRequest.include;
-	    detail.isRegexRecursive = searchFilesInImageRequest.include_recursive;
-
-	    root.rootDirWithRegex = detail;
-	}
-
-	// Select all on directory
-	if (searchFilesInImageRequest.recursive) {
-	    filesInImageResponse.patchXml = new ArrayList<>();
-	    String parentDir = searchFilesInImageRequest.getDir();
-	    if (searchFilesInImageRequest.files_for_policy) {
-		// This means that the user has checked the parent directory
-		// checkbox
-		for (String fileName : fileNames) {
-		    String path = mountPath + parentDir + fileName;
-		    if (new File(path).isFile()) {
-			patchFileAddSet.add(parentDir + fileName);
-		    }
-		    trustPolicyElementsList.add(parentDir + fileName);
+		log.info("#####  policyVersion" + policyVersion);
+		if (StringUtils.isNotBlank(policyVersion)) {
+			if (!(Constants.TRUST_POLICY_VERSION_2.equals(policyVersion) || Constants.TRUST_POLICY_VERSION_1.equals(policyVersion))) {
+				throw new DirectorException(
+						"Unidentified policy version , policyVersion:"
+								+ policyVersion);
+			}
 		}
-	    } else {
-		for (String fileName : fileNames) {
-		    if (new File(mountPath + parentDir + fileName).isFile()) {
-			patchFileRemoveSet.add(parentDir + fileName);
-		    }
+
+		if (Constants.TRUST_POLICY_VERSION_1.equals(policyVersion)) {
+
+			try {
+
+				mountImage(imageId, user);
+				com.intel.mtwilson.trustpolicy1.xml.TrustPolicy trustPolicy1DraftObj = null;
+				try {
+					trustPolicy1DraftObj = TdaasUtil.getPolicy1(draftContent);
+				} catch (JAXBException e) {
+					throw new DirectorException(
+							"Unable to get unmarshal policy draft", e);
+				}
+				// /com.intel.mtwilson.trustpolicy2.xml.TrustPolicy
+				// trustPolicy2DraftObj= new
+				// com.intel.mtwilson.trustpolicy2.xml.TrustPolicy();
+				log.debug("Before mapper");
+				Mapper mapper = new DozerBeanMapper();
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicy2DraftObj = mapper
+						.map(trustPolicy1DraftObj,
+								com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class);
+				if(trustPolicy2DraftObj.getWhitelist()!=null){
+				log.debug(" trustPolicy2DraftObj before clearing measurments: "
+						+ trustPolicy2DraftObj.getWhitelist().getMeasurements()
+								.toString());
+				trustPolicy2DraftObj.getWhitelist().getMeasurements().clear();
+
+				if (trustPolicy1DraftObj.getWhitelist().getMeasurements()
+						.size() > 0) {
+					for (com.intel.mtwilson.trustpolicy1.xml.Measurement policy1Measurement : trustPolicy1DraftObj
+							.getWhitelist().getMeasurements()) {
+
+						if (policy1Measurement instanceof com.intel.mtwilson.trustpolicy1.xml.FileMeasurement) {
+							log.debug("file upgradation element: "
+									+ policy1Measurement.getPath());
+							String elementPath = mountPath
+									+ policy1Measurement.getPath();
+							Path path = Paths.get(elementPath);
+							if (Files.isSymbolicLink(path)) {
+								log.info("Element is Symlink path: {}", path);
+								com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement symlinkMeasurement = new com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement();
+								symlinkMeasurement.setPath(policy1Measurement
+										.getPath());
+								trustPolicy2DraftObj.getWhitelist()
+										.getMeasurements()
+										.add(symlinkMeasurement);
+							} else {
+								com.intel.mtwilson.trustpolicy2.xml.FileMeasurement fileMeasurement = new com.intel.mtwilson.trustpolicy2.xml.FileMeasurement();
+								fileMeasurement.setPath(policy1Measurement
+										.getPath());
+								trustPolicy2DraftObj.getWhitelist()
+										.getMeasurements().add(fileMeasurement);
+							}
+
+						}
+
+						if (policy1Measurement instanceof com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement) {
+							log.info("Dir upgradation element: "
+									+ policy1Measurement.getPath());
+
+							Collection<File> regexDirectories = new HashSet<>();
+							com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement oldPolicyDirMesurment = (com.intel.mtwilson.trustpolicy1.xml.DirectoryMeasurement) policy1Measurement;
+							// / Upgrading Dir as per 1.2
+							log.debug(" oldPolicyDirMesurment.isRecursive().booleanValue():"
+									+ oldPolicyDirMesurment.isRecursive()
+											.booleanValue());
+							if ((oldPolicyDirMesurment.isRecursive()
+									.booleanValue())) {
+
+								log.info("Is  Recursive");
+								regexDirectories = getAllSubDirectories(
+										mountPath, policy1Measurement.getPath());
+							}
+							regexDirectories.add(new File(mountPath
+									+ policy1Measurement.getPath()));
+							log.info("######### All Regex directories: "
+									+ regexDirectories);
+							for (File file : regexDirectories) {
+
+								if (file.isDirectory()) {
+
+									log.debug("######### file.getAbsolutePath() "
+											+ file.getAbsolutePath());
+									String newPolicyDirPath = file
+											.getAbsolutePath().replace(
+													mountPath, "");
+
+									com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement dirMeasurement = new com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement();
+									dirMeasurement
+											.setExclude(oldPolicyDirMesurment
+													.getExclude());
+									dirMeasurement
+											.setInclude(oldPolicyDirMesurment
+													.getInclude());
+									dirMeasurement.setFilterType("regex");
+									dirMeasurement.setPath(newPolicyDirPath);
+									trustPolicy2DraftObj.getWhitelist()
+											.getMeasurements()
+											.add(dirMeasurement);
+
+								}
+
+							}
+
+						}
+					}
+
+				}
+				}
+
+				try {
+					policyDraftXml = TdaasUtil
+							.getPolicyXml(trustPolicy2DraftObj);
+				} catch (JAXBException e) {
+					throw new DirectorException(
+							"Unable to get nmarshal policy draft", e);
+				}
+
+				try {
+
+					if (trustPolicyDraft == null) {
+						TrustPolicyDraft createTrustPolicyDraft = new TrustPolicyDraft();
+						createTrustPolicyDraft.setCreated_date(Calendar
+								.getInstance());
+						createTrustPolicyDraft.setEdited_date(Calendar
+								.getInstance());
+						createTrustPolicyDraft.setEdited_by_user_id(user);
+						createTrustPolicyDraft.setCreated_by_user_id(user);
+
+						createTrustPolicyDraft.setName(existingTrustPolicy
+								.getName());
+						createTrustPolicyDraft
+								.setImgAttributes(existingTrustPolicy
+										.getImgAttributes());
+						createTrustPolicyDraft
+								.setTrust_policy_draft(policyDraftXml);
+						createTrustPolicyDraft.setDisplay_name(TdaasUtil
+								.getVersionedName(existingTrustPolicy
+										.getDisplay_name()));
+						createTrustPolicyDraft
+								.setTrust_policy_draft(policyDraftXml);
+						TrustPolicyDraft savePolicyDraft = imagePersistenceManager
+								.savePolicyDraft(createTrustPolicyDraft);
+						draftId = savePolicyDraft.getId();
+					} else {
+						trustPolicyDraft
+								.setCreated_date(Calendar.getInstance());
+						trustPolicyDraft.setEdited_date(Calendar.getInstance());
+						trustPolicyDraft.setEdited_by_user_id(user);
+						trustPolicyDraft.setCreated_by_user_id(user);
+						trustPolicyDraft.setTrust_policy_draft(policyDraftXml);
+						imagePersistenceManager
+								.updatePolicyDraft(trustPolicyDraft);
+
+					}
+					log.info("trustPolicy2DraftObj final: " + policyDraftXml);
+
+				} catch (DbException e) {
+					throw new DirectorException(
+							"Unable to update policy draft", e);
+				}
+				resp.status = "success";
+				resp.message = "Policy Draft Succesfully upgraded to 1.2";
+				resp.policyDraft = policyDraftXml;
+				resp.draftId = draftId;
+
+			} finally {
+				unMountImage(imageId, user);
+			}
+
+		} else {
+			resp.status = "success";
+			resp.message = "Policy Draft already of version 1.2, no action done";
+			resp.policyDraft = draftContent;
+			resp.draftId = draftId;
+			log.info(" Policy is of 1.2 version");
 		}
-	    }
+
+		return resp;
 	}
+    
+    
+	@Override
+	public SearchFilesInImageResponse searchFilesInImage(
+			SearchFilesInImageRequest searchFilesInImageRequest)
+			throws DirectorException {
+		searchFilesInImageRequest.setDir(EscapeUtil
+				.doubleQuoteEscapeShellArgument(searchFilesInImageRequest.getDir()));
+		log.info("Browsing files for dir: {}", searchFilesInImageRequest.getDir());
+		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+		log.info("Browsing files for on image mounted at : {}", mountPath);
 
-	tree.setTrustPolicyElementsList(trustPolicyElementsList);
-	log.info("set seleceted files for tree");
-	tree.setDirPathsForEdit(dirsForEdit);
-	log.info("set dirs for edit");
-	for (String data : fileNames) {
-	    tree.addElement(data);
+		SearchFilesInImageResponse filesInImageResponse = new SearchFilesInImageResponse();
+		Collection<File> listFilesAndDirs = getFirstLevelFiles(searchFilesInImageRequest);
+		List<Measurement> measurements = getMeasurements(searchFilesInImageRequest.id);
+		Map<String, Boolean> directoryListContainingPolicyFiles = new HashMap<>();
+		Set<TreeNodeDetail> directoryListContainingRegex = new HashSet<>();
+		List<String> trustPolicyElementsList = new ArrayList<>();
+		Set<String> fileNames = new HashSet<>();
+		Set<String> patchFileAddSet = new HashSet<>();
+		Set<String> patchFileRemoveSet = new HashSet<>();
+		Set<String> patchDirAddSet = new HashSet<>();
+		Set<String> patchDirRemoveSet = new HashSet<>();
+		Set<String> patchSymLinkAddSet = new HashSet<>();
+		Set<String> patchSymLinkRemoveSet = new HashSet<>();
+		Collection<File> treeFiles = new ArrayList<>();
+		/* Init will read trust policy draft file to get whitelist directories
+		 and files needs to be checked/regex purpose. Useful in scenarios like edit
+		 mode*/
+		if (searchFilesInImageRequest.init) {
+			try {
+				TrustPolicyDraft fetchPolicyDraftForImage = imagePersistenceManager
+						.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+				fetchPolicyDraftForImage.setEdited_date(Calendar.getInstance());
+				imagePersistenceManager
+						.updatePolicyDraft(fetchPolicyDraftForImage);
+				/*
+				 * init will populate :- directoryListContainingPolicyFiles: all
+				 * directories for a policy file item till root. Only for
+				 * FileMeasurment . Used in edit mode.
+				 * directoryListContainingRegex:- all directory in
+				 * DirectoryMeasurement
+				 */
+				init(trustPolicyElementsList,
+						directoryListContainingPolicyFiles,
+						directoryListContainingRegex, searchFilesInImageRequest);
+			} catch (DbException e) {
+				log.error("Error updating policy draft for image {}",
+						searchFilesInImageRequest.id, e);
+			}
+		}
+
+		log.info("after init");
+
+		// Fetch the files
+		if (searchFilesInImageRequest.recursive) {
+			treeFiles = getFilesAndDirectories(
+					searchFilesInImageRequest.getDir(), null,
+					searchFilesInImageRequest.id);
+		} else {
+			if (listFilesAndDirs != null) {
+				treeFiles = listFilesAndDirs;
+			}
+		}
+
+		/*
+		 * populate filenames with the leaf nodes of the root folder treefiles
+		 * has fetched files from tree structure to be opened without
+		 * considering edit scenario files(with or without recursion depending
+		 * on recursion flag) Add files which are present in treefile but not in
+		 * directoryListContainingPolicyFiles to fileNames
+		 */
+		createListOfFileNamesForTree(searchFilesInImageRequest, treeFiles,
+				fileNames, directoryListContainingPolicyFiles.keySet());
+		log.info("create list of file name for tree");
+
+		// Now add the exploded file view in case of edit to filenames
+		Set<String> dirsForEdit = new HashSet<String>();
+
+		for (String dirPath : directoryListContainingPolicyFiles.keySet()) {
+			log.debug("calc tree  files for dir : {}", dirPath);
+
+			if (directoryListContainingPolicyFiles.get(dirPath)) {
+				/*
+				 * filenames is a set not list. filesAndDirectories currently
+				 * being fetched has has all files and directories of basic tree
+				 * structure(without edit) and those to be opened in edit mode.
+				 * TODO:- Refactor getFilesAndDirectoriesForEdit which is using
+				 * common file list with createListOfFileNamesForTree function
+				 * to return. It should only return filesorDirectories in edit
+				 * mode . As it being used in nextline to get filenames which is
+				 * a set so there is no duplication in filenames which we will
+				 * be using later to build patch and create
+				 * trustpolicyelelementlist
+				 */
+				List<File> filesAndDirectories = getFilesAndDirectoriesForEdit(
+						dirPath, dirsForEdit, searchFilesInImageRequest.id);
+				createListOfFileNamesForTree(searchFilesInImageRequest,
+						filesAndDirectories, fileNames,
+						directoryListContainingPolicyFiles.keySet());
+				log.info("calc tree files in recursive edit mode");
+			}
+		}
+
+		/* Regex/wildcard file search */
+		if(!StringUtils.isEmpty(searchFilesInImageRequest.include) ||
+				!StringUtils.isEmpty(searchFilesInImageRequest.exclude)) {
+			/* If Request is to reset regex/wildcard recursively */
+			if (searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
+				Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				for (File rFile : regexFiles) {
+					if (Files.isSymbolicLink(rFile.toPath())) {
+						patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					if (rFile.isFile()) {
+						patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+						patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
+				}
+				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
+			}
+
+			/* If Request is to apply regex/wildcard recursively */
+			if (searchFilesInImageRequest.recursive && !searchFilesInImageRequest.reset_regex) {
+				Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				for (File rFile : regexFiles) {
+					if (Files.isSymbolicLink(rFile.toPath())) {
+						patchSymLinkAddSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					if (rFile.isFile()) {
+						patchFileAddSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+						patchDirAddSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (!trustPolicyElementsList.contains(rFile.getAbsolutePath().replace(mountPath, ""))) {
+						trustPolicyElementsList.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+				}
+				patchDirAddSet.add(searchFilesInImageRequest.getDir());
+			}
+
+			/* If Request is to reset regex/wildcard for single directory */
+			if (!searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
+				Collection<File> files = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				for (File file : files) {
+					patchFileRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+				}
+			}
+
+			/* If Request is to apply regex/wildcard for single directory */
+			if (!searchFilesInImageRequest.recursive && !searchFilesInImageRequest.reset_regex) {
+				Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				for (File file : regexFiles) {
+					if (Files.isSymbolicLink(file.toPath())) {
+						patchSymLinkAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (file.isFile()) {
+						patchFileAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
+						patchDirAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (!trustPolicyElementsList.contains(file.getAbsolutePath().replace(mountPath, ""))) {
+						trustPolicyElementsList.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+				}
+				patchDirAddSet.add(searchFilesInImageRequest.getDir());
+			}
+		}
+
+		/* Selected Directory request. Select all files under directory */
+		if (searchFilesInImageRequest.recursive) {
+			filesInImageResponse.patchXml = new ArrayList<>();
+			String parentDir = searchFilesInImageRequest.getDir();
+
+			/*
+			 * files_for_policy(true):- when checkbox is checked on directory
+			 * Recursive is true in two cases:- 1. Select All or deselect all 2.
+			 * Regex applied
+			 */
+			if (searchFilesInImageRequest.files_for_policy) {
+				// This means that the user has checked the parent directory
+				// checkbox
+				for (String fileName : fileNames) {
+					String path = mountPath + parentDir + fileName;
+					File file = new File(path);
+					if (file.isFile()) {
+						patchFileAddSet.add(parentDir + fileName);
+					}
+					if (file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
+						patchDirAddSet.add(parentDir + fileName);
+					}
+					if(Files.isSymbolicLink(file.toPath())){
+						patchSymLinkAddSet.add(parentDir + fileName);
+					}
+					if (!trustPolicyElementsList.contains(parentDir + fileName)) {
+						trustPolicyElementsList.add(parentDir + fileName);
+					}
+				}
+			} else {
+				/*
+				 * Filenames = files of basic structure + edit mode
+				 * files(including directories) opened last time. It does not
+				 * contain files on which new regex is applied
+				 */
+				for (String fileName : fileNames) {
+					Path file = Paths.get(mountPath, parentDir, fileName);
+					if (file.toFile().isFile()) {
+						patchFileRemoveSet.add(parentDir + fileName);
+					}
+					if (Files.isSymbolicLink(file)) {
+						patchSymLinkRemoveSet.add(parentDir + fileName);
+					}
+				}
+			}
+		}
+		Tree tree = new Tree(searchFilesInImageRequest, mountPath,
+				directoryListContainingRegex, trustPolicyElementsList,
+				dirsForEdit, fileNames);
+		TreeElement treeCreated = tree.createTree();
+		buildPatch(patchDirAddSet, patchDirRemoveSet, patchFileAddSet, patchFileRemoveSet,
+				patchSymLinkAddSet, patchSymLinkRemoveSet,
+				measurements, searchFilesInImageRequest, filesInImageResponse);
+
+		filesInImageResponse.setGeneratedTree(treeCreated);
+		return filesInImageResponse;
 	}
-
-	tree.printTree();
-	log.info("print tree");
-
-	// Create patch to be sent in case of directory selection or regex
-	buildPatch(patchDirAddSet, patchFileAddSet, patchFileRemoveSet, measurements, searchFilesInImageRequest,
-		filesInImageResponse);
-	log.info("build patch");
-	filesInImageResponse.files = tree.treeElementsHtml;
-	log.info("return");
-	return filesInImageResponse;
-
-    }
 
     /**
      * 
-     * @param imageStoreUploadRequest
+     * @param imageId
      * @return
      * @throws DirectorException
      * @throws ImageStoreException
@@ -727,25 +1049,52 @@ public class ImageServiceImpl implements ImageService {
 		return null;
 	    }
 	    String trustPolicyDraftxml = trustPolicyDraft.getTrust_policy_draft();
-	    com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(trustPolicyDraftxml);
-	    metadata.setImage_name(trustPolicyDraft.getImgAttributes().getImage_name());
-	    metadata.setDisplay_name(trustPolicyDraft.getDisplay_name());
-	    if (policy.getEncryption() != null) {
-		metadata.setEncrypted(true);
-	    }
-	    // /metadata.setIsEncrypted(isEncrypted);
-	    metadata.setLaunch_control_policy(policy.getLaunchControlPolicy().value());
+	    
+			String policyVersion = null;
+
+			policyVersion = TdaasUtil.getPolicyVersion(trustPolicyDraftxml);
+
+			JAXBContext jaxbContext = null;
+			if (Constants.TRUST_POLICY_VERSION_1.equals(policyVersion)) {
+
+				com.intel.mtwilson.trustpolicy1.xml.TrustPolicy policy = TdaasUtil
+						.getPolicy1(trustPolicyDraftxml);
+				metadata.setImage_name(trustPolicyDraft.getImgAttributes()
+						.getImage_name());
+				metadata.setDisplay_name(trustPolicyDraft.getDisplay_name());
+				if (policy.getEncryption() != null) {
+					metadata.setEncrypted(true);
+				}
+				// /metadata.setIsEncrypted(isEncrypted);
+				metadata.setLaunch_control_policy(policy
+						.getLaunchControlPolicy().value());
+			} else {
+
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil
+						.getPolicy(trustPolicyDraftxml);
+				metadata.setImage_name(trustPolicyDraft.getImgAttributes()
+						.getImage_name());
+				metadata.setDisplay_name(trustPolicyDraft.getDisplay_name());
+				if (policy.getEncryption() != null) {
+					metadata.setEncrypted(true);
+				}
+				// /metadata.setIsEncrypted(isEncrypted);
+				metadata.setLaunch_control_policy(policy
+						.getLaunchControlPolicy().value());
+			}
+	     
 	    metadata.setTrustPolicy(trustPolicyDraftxml);
 	    // /metadata.setSelected_image_format(selected_image_format);
 	} catch (DbException e) {
 	    String errorMsg = "Unable to get policy metadata draftid::" + draftid;
 	    log.error(errorMsg, e);
 	    throw new DirectorException(errorMsg, e);
-	} catch (JAXBException e) {
+	} catch (ParserConfigurationException | SAXException | IOException|JAXBException e) {
 	    String errorMsg = "Unable to get policy metadata draftid::" + draftid;
 	    log.error(errorMsg, e);
 	    throw new DirectorException(errorMsg, e);
 	}
+	
 	return metadata;
     }
 
@@ -754,7 +1103,7 @@ public class ImageServiceImpl implements ImageService {
 	CreateTrustPolicyMetaDataResponse metadata = new CreateTrustPolicyMetaDataResponse();
 	try {
 
-	    com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
+	    com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy;
 	    String policyXml;
 	    TrustPolicyDraft trustPolicyDraft = imagePersistenceManager.fetchPolicyDraftForImage(image_id);
 	    if (trustPolicyDraft == null) {
@@ -874,7 +1223,7 @@ public class ImageServiceImpl implements ImageService {
 
 	TrustPolicyService trustPolicyService = new TrustPolicyServiceImpl(image.id);
 
-	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
+	com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy;
 	// Get TrustPolicy from policyXml
 	try {
 	    policy = TdaasUtil.getPolicy(policyXml);
@@ -981,7 +1330,7 @@ public class ImageServiceImpl implements ImageService {
 		    String policyXml = existingPolicy.getTrust_policy();
 		    trustPolicyDraft.setDisplay_name(createTrustPolicyMetaDataRequest.getDisplay_name());
 
-		    com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
+		    com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
 		    policy.setSignature(null);
 		    List<Measurement> measurements = policy.getWhitelist().getMeasurements();
 		    for (Measurement measurement : measurements) {
@@ -1046,20 +1395,18 @@ public class ImageServiceImpl implements ImageService {
     }
 
     /**
-     * *************************************************************************
-     * *************
-     */
-    /**
      * Setters and getters
      * 
-     * @param imagePersistenceManager
-     * @param imageStoreManager
+     * @param searchFilesInImageRequest
+     * @param treeFiles
+		 * @param fileNames
      * @return
      */
 
     private void createListOfFileNamesForTree(SearchFilesInImageRequest searchFilesInImageRequest,
 	    Collection<File> treeFiles, Set<String> fileNames) {
 	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+   
 	for (File file : treeFiles) {
 	    String _file = file.getAbsolutePath().replace("\\", "/").replace(mountPath, "");
 	    _file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
@@ -1070,11 +1417,17 @@ public class ImageServiceImpl implements ImageService {
     private void createListOfFileNamesForTree(SearchFilesInImageRequest searchFilesInImageRequest,
 	    Collection<File> treeFiles, Set<String> fileNames, Set<String> directoryListContainingPolicyFiles) {
 	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+    List<String> directoryList= new ArrayList<String>();
+	directoryList.addAll(directoryListContainingPolicyFiles);
+	Collections.sort(directoryList);
 	for (File file : treeFiles) {
 	    String _file = file.getAbsolutePath().replace(mountPath, "");
 	    _file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
-	    if (!directoryListContainingPolicyFiles.contains(mountPath + File.separator + _file)) {
-		fileNames.add(_file);
+	    ////if (!directoryListContainingPolicyFiles.contains(mountPath + File.separator + _file)) {
+		int index=Collections.binarySearch(directoryList, mountPath
+					+ File.separator + _file);
+        if(index<0){
+		   fileNames.add(_file);
 	    }
 	}
     }
@@ -1092,7 +1445,7 @@ public class ImageServiceImpl implements ImageService {
 		    .fetchPolicyDraftForImage(searchFilesInImageRequest.id);
 
 	    try {
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
 			.getPolicy(trustPolicyDraft.getTrust_policy_draft());
 		if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
 		    for (Measurement measurement : trustPolicyDraftObj.getWhitelist().getMeasurements()) {
@@ -1106,17 +1459,16 @@ public class ImageServiceImpl implements ImageService {
 					mountPath + measurement.getPath(),
 					mountPath + searchFilesInImageRequest.getDir(),
 					directoryListContainingPolicyFiles, true);
+				
 			    }
 			    if (measurement instanceof DirectoryMeasurement) {
 				TreeNodeDetail detail = new TreeNodeDetail();
 				detail.regexPath = measurement.getPath();
 				detail.regexExclude = ((DirectoryMeasurement) measurement).getExclude();
 				detail.regexInclude = ((DirectoryMeasurement) measurement).getInclude();
-				if (((DirectoryMeasurement) measurement).isRecursive() == null) {
-				    log.info("--- Recursive flag not found for :" + measurement.getPath());
-				}
-				detail.isRegexRecursive = ((DirectoryMeasurement) measurement).isRecursive() != null
-					? ((DirectoryMeasurement) measurement).isRecursive() : false;
+				detail.filterType =  ((DirectoryMeasurement) measurement).getFilterType();
+
+				detail.isRegexRecursive = searchFilesInImageRequest.recursive;
 				directoryListContainingRegex.add(detail);
 			    }
 
@@ -1136,7 +1488,7 @@ public class ImageServiceImpl implements ImageService {
     private List<Measurement> getMeasurements(String imageID) {
 	try {
 	    TrustPolicyDraft trustPolicyDraft = imagePersistenceManager.fetchPolicyDraftForImage(imageID);
-	    com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
+	    com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
 		    .getPolicy(trustPolicyDraft.getTrust_policy_draft());
 	    if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
 		return trustPolicyDraftObj.getWhitelist().getMeasurements();
@@ -1147,102 +1499,126 @@ public class ImageServiceImpl implements ImageService {
 	return null;
     }
 
-    private void buildPatch(Set<String> patchDirAddSet, Set<String> patchFileAddSet, Set<String> patchFileRemoveSet,
-	    List<Measurement> measurements, SearchFilesInImageRequest searchFilesInImageRequest,
-	    SearchFilesInImageResponse filesInImageResponse) {
-	// Build the PATCH
-	// Add Dir patch
-	if (filesInImageResponse.patchXml == null) {
-	    filesInImageResponse.patchXml = new ArrayList<>();
-	}
-	boolean includeDir = false;
-	if (StringUtils.isNotBlank(searchFilesInImageRequest.include)
-		|| StringUtils.isNotBlank(searchFilesInImageRequest.exclude)) {
-	    includeDir = true;
-	}
-	// Remove patch
-	if (measurements != null) {
-	    for (Measurement measurement : measurements) {
-		if (measurement instanceof DirectoryMeasurement) {
-		    continue;
+	private void buildPatch(Set<String> patchDirAddSet, Set<String> patchDirRemoveSet,
+			Set<String> patchFileAddSet, Set<String> patchFileRemoveSet,
+			Set<String> patchSymLinkAddSet, Set<String> patchSymLinkRemoveSet,
+			List<Measurement> measurements, SearchFilesInImageRequest searchFilesInImageRequest,
+			SearchFilesInImageResponse filesInImageResponse) {
+		// Build the PATCH
+		// Add Dir patch
+		if (filesInImageResponse.patchXml == null) {
+			filesInImageResponse.patchXml = new ArrayList<>();
 		}
-
-		if (patchFileRemoveSet.contains(measurement.getPath())) {
-		    filesInImageResponse.patchXml
-			    .add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
-				    + measurement.getPath() + "\"]'></remove>");
+		boolean includeDir = false;
+		if (StringUtils.isNotBlank(searchFilesInImageRequest.include)
+				|| StringUtils.isNotBlank(searchFilesInImageRequest.exclude)) {
+			includeDir = true;
 		}
-	    }
-	}
-	if (searchFilesInImageRequest.reset_regex) {
-	    filesInImageResponse.patchXml
-		    .add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-			    + searchFilesInImageRequest.getDir() + "\"]'></remove>");
-	}
-
-	if (includeDir) {
-	    String dirPath = null;
-	    for (String patchFile : patchDirAddSet) {
-		boolean found = false;
+		// Remove patch
 		if (measurements != null) {
-		    for (Measurement measurement : measurements) {
-			if (measurement instanceof DirectoryMeasurement) {
-			    if (measurement.getPath().equals(patchFile)) {
-				found = true;
-				dirPath = measurement.getPath();
-				break;
-			    }
+			for (Measurement measurement : measurements) {
+				if (measurement instanceof DirectoryMeasurement) {
+					/* 5224 - Create remove dir patch */
+					if (patchDirRemoveSet.contains(measurement.getPath())) {
+						filesInImageResponse.patchXml
+								.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+										+ measurement.getPath() + "\"]'></remove>");
+					}
+					continue;
+				}
+
+				if (patchFileRemoveSet.contains(measurement.getPath())) {
+					filesInImageResponse.patchXml
+							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
+									+ measurement.getPath() + "\"]'></remove>");
+				}
+
+				if (patchSymLinkRemoveSet.contains(measurement.getPath())) {
+					filesInImageResponse.patchXml
+							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Symlink\"][@Path=\""
+									+ measurement.getPath() + "\"]'></remove>");
+				}
 			}
-		    }
+		}
+		if (searchFilesInImageRequest.reset_regex) {
+			filesInImageResponse.patchXml
+					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+							+ searchFilesInImageRequest.getDir() + "\"]'></remove>");
 		}
 
-		String recursiveAttr = " Recursive=\"false\"";
-		if (searchFilesInImageRequest.include_recursive) {
-		    recursiveAttr = " Recursive=\"true\"";
-		}
-		if (found) {
-		    filesInImageResponse.patchXml
-			    .add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-				    + dirPath + "\"]'></remove>");
-		}
-		filesInImageResponse.patchXml
-			.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\"" + patchFile + "\" Include=\""
-				+ (searchFilesInImageRequest.include == null ? "" : searchFilesInImageRequest.include)
-				+ "\" Exclude=\""
-				+ (searchFilesInImageRequest.exclude == null ? "" : searchFilesInImageRequest.exclude)
-				+ "\"" + recursiveAttr + "/></add>");
-
-	    }
-	}
-
-	for (String patchFile : patchFileAddSet) {
-	    boolean found = false;
-	    if (measurements != null) {
-		for (Measurement measurement : measurements) {
-		    if (measurement instanceof FileMeasurement) {
-			if (measurement.getPath().equals(patchFile)) {
-			    found = true;
-			    break;
-			}
-		    }
-		}
-	    }
-
-	    if (!found || includeDir) {
-		String dirPath = "";
-		String pos = "";
 		if (includeDir) {
-		    dirPath = "/*[local-name()=\"Dir\"][@Path=\"" + searchFilesInImageRequest.getDir() + "\"]";
-		    pos = "pos=\"after\"";
-		} else {
-		    pos = "pos=\"prepend\"";
+			String dirPath = null;
+			for (String patchFile : patchDirAddSet) {
+				boolean found = false;
+				if (measurements != null) {
+					for (Measurement measurement : measurements) {
+						if (measurement instanceof DirectoryMeasurement) {
+							if (measurement.getPath().equals(patchFile)) {
+								found = true;
+								dirPath = measurement.getPath();
+								break;
+							}
+						}
+					}
+				}
+
+				/* 5224 - Add Filter type and remove recursive attribute */
+				String filterTypeAttribute = "FilterType=\"" + searchFilesInImageRequest.filter_type + "\"";
+				if (found) {
+					filesInImageResponse.patchXml
+							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+									+ dirPath + "\"]'></remove>");
+				}
+				filesInImageResponse.patchXml
+						.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
+								+ patchFile
+								+ "\" Include=\""
+								+ (searchFilesInImageRequest.include == null ? ""
+								: searchFilesInImageRequest.include)
+								+ "\" Exclude=\""
+								+ (searchFilesInImageRequest.exclude == null ? ""
+								: searchFilesInImageRequest.exclude)
+								+ "\" "
+								+ filterTypeAttribute
+								+ "/></add>");
+			}
 		}
 
-		filesInImageResponse.patchXml.add("<add " + pos + " sel='//*[local-name()=\"Whitelist\"]" + dirPath
-			+ "'><File Path=\"" + patchFile + "\"/></add>");
-	    }
+		for (String patchFile : patchFileAddSet) {
+			boolean found = false;
+			if (measurements != null) {
+				for (Measurement measurement : measurements) {
+					if (measurement instanceof FileMeasurement) {
+						if (measurement.getPath().equals(patchFile)) {
+							found = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (!found || includeDir) {
+				String dirPath = "";
+				String pos = "";
+				if (includeDir) {
+					dirPath =
+							"/*[local-name()=\"Dir\"][@Path=\"" + searchFilesInImageRequest.getDir() + "\"]";
+					pos = "pos=\"after\"";
+				} else {
+					pos = "pos=\"prepend\"";
+				}
+
+				filesInImageResponse.patchXml.add(
+						"<add " + pos + " sel='//*[local-name()=\"Whitelist\"]" + dirPath
+								+ "'><File Path=\"" + patchFile + "\"/></add>");
+			}
+		}
+
+		for (String patchFile : patchSymLinkAddSet) {
+				filesInImageResponse.patchXml.add(
+						"<add sel='//*[local-name()=\"Whitelist\"]'><Symlink Path=\"" + patchFile + "\"/></add>");
+		}
 	}
-    }
 
     public void updateTrustPolicy(UpdateTrustPolicyRequest updateTrustPolicyRequest, String policyId)
 	    throws DirectorException {
@@ -1592,7 +1968,7 @@ public class ImageServiceImpl implements ImageService {
 	TrustPolicyDraft trustPolicyDraft = new TrustPolicyDraft();
 	String policyXml = existingTrustPolicy.getTrust_policy();
 
-	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
+	com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil.getPolicy(policyXml);
 	policy.setSignature(null);
 	List<Measurement> measurements = policy.getWhitelist().getMeasurements();
 	for (Measurement measurement : measurements) {
@@ -1626,9 +2002,9 @@ public class ImageServiceImpl implements ImageService {
 	DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil(imageId);
 	DirectoryMeasurement dirMeasurement = new DirectoryMeasurement();
 	dirMeasurement.setPath(dir);
-	dirMeasurement.setRecursive(false);
 	try {
-	    String filesAndDirectories = directoryAndFileUtil.getFilesAndDirectories(imageId, dirMeasurement);
+	    String filesAndDirectories = directoryAndFileUtil.getFilesAndDirectories(imageId,
+					dirMeasurement, true);
 	    files = getFilesFromFileString(dir, filesAndDirectories);
 	} catch (IOException e) {
 	    // TODO Handle Error
@@ -1678,40 +2054,106 @@ public class ImageServiceImpl implements ImageService {
 	return files;
     }
 
-    private Collection<File> getFilesAndDirectoriesWithFilter(SearchFilesInImageRequest searchFilesInImageRequest) {
-	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+	private Collection<File> getFilesAndDirectoriesWithFilter(
+			SearchFilesInImageRequest searchFilesInImageRequest) {
+		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
 
-	Collection<File> files = new HashSet<>();
-	DirectoryAndFileUtil directoryAndFileUtil = new DirectoryAndFileUtil(searchFilesInImageRequest.id);
-	DirectoryMeasurement dirMeasurement = new DirectoryMeasurement();
-	dirMeasurement.setPath(searchFilesInImageRequest.getDir());
-	dirMeasurement.setRecursive(searchFilesInImageRequest.include_recursive);
-	dirMeasurement.setInclude(searchFilesInImageRequest.include);
-	dirMeasurement.setExclude(searchFilesInImageRequest.exclude);
-	try {
-	    String filesAndDirectories = directoryAndFileUtil.getFilesAndDirectories(searchFilesInImageRequest.id,
-		    dirMeasurement);
-	    files = getFilesFromFileString(mountPath + searchFilesInImageRequest.getDir() + File.separator,
-		    filesAndDirectories);
-	} catch (IOException e) {
-	    // TODO Handle Error
-	    log.error("Error in getting files for browser ", e);
-	}
-	return files;
-    }
+		Collection<File> files = new HashSet<>();
+		DirectoryAndFileUtil directoryAndFileUtil =
+				new DirectoryAndFileUtil(searchFilesInImageRequest.id);
+		DirectoryMeasurement dirMeasurement = new DirectoryMeasurement();
+		dirMeasurement.setPath(searchFilesInImageRequest.getDir());
+		dirMeasurement.setFilterType(searchFilesInImageRequest.filter_type);
+		dirMeasurement.setInclude(searchFilesInImageRequest.include);
+		dirMeasurement.setExclude(searchFilesInImageRequest.exclude);
+		try {
+			String filesAndDirectories =
+					directoryAndFileUtil.getFilesAndDirectories(searchFilesInImageRequest.id,
+							dirMeasurement, true);
+			files =
+					getFilesFromFileString(mountPath + searchFilesInImageRequest.getDir() + File.separator,
+							filesAndDirectories);
 
-    private Collection<File> getFilesFromFileString(String baseDir, String fileStr) {
-	String nl = System.getProperty("line.separator");
-	Set<File> files = new HashSet<File>();
-	String[] split = fileStr.split(nl);
-	for (String string : split) {
-	    if (!string.isEmpty() && !string.equals(baseDir)) {
-		File file = new File(baseDir + string);		
-		files.add(file);
-	    }
+			/* Go deep in sub directories and try to find the matching files*/
+			/* Only if recursive flag is set */
+			if(searchFilesInImageRequest.recursive){
+				Collection<File> directoryTree =
+						getAllSubDirectories(mountPath, searchFilesInImageRequest.getDir());
+				for(File dir : directoryTree) {
+					files.add(dir);
+					DirectoryMeasurement subDirMeasurement = new DirectoryMeasurement();
+					subDirMeasurement.setPath(dir.getAbsolutePath());
+					subDirMeasurement.setFilterType(searchFilesInImageRequest.filter_type);
+					subDirMeasurement.setInclude(searchFilesInImageRequest.include);
+					subDirMeasurement.setExclude(searchFilesInImageRequest.exclude);
+					String subFilesAndDirectories =
+							directoryAndFileUtil.getFilesAndDirectories(searchFilesInImageRequest.id,
+									subDirMeasurement, false);
+					Collection<File> subFiles =
+							getFilesFromFileString(dir.getAbsolutePath() + File.separator,
+									subFilesAndDirectories);
+					files.addAll(subFiles);
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Handle Error
+			log.error("Error in getting files for browser ", e);
+		}
+		return files;
 	}
-	return files;
-    }
+
+	private Collection<File> getFilesFromFileString(String baseDir, String fileStr) {
+		String nl = System.getProperty("line.separator");
+		Set<File> files = new HashSet<File>();
+		String[] split = fileStr.split(nl);
+		for (String string : split) {
+			if (!string.isEmpty() && !string.equals(baseDir)) {
+				File file = new File(baseDir + string);
+				files.add(file);
+			}
+		}
+		return files;
+	}
+
+	/**
+	 * Get All sub directories for given mount path and base directory
+	 * @param mountPath
+	 * @param baseDir
+	 * @return
+	 */
+	private Collection<File> getAllSubDirectories(String mountPath, String baseDir){
+		File baseFile = new File(mountPath + baseDir);
+		Collection<File> empty = new HashSet<>();
+		if(baseFile.exists() && baseFile.isDirectory()){
+			return getSubDirectories(baseFile);
+		}
+		return empty;
+	}
+
+	/**
+	 * Get Subdirectories recursively and return in collection
+	 * @param baseDirectory Base Directory
+	 * @return
+	 */
+	private Collection<File> getSubDirectories(File baseDirectory) {
+		File[] listFiles = baseDirectory.listFiles(new FileFilter() {
+			public boolean accept(File f) {
+				return f.isDirectory() && !Files.isSymbolicLink(f.toPath());
+			}
+		});
+		if(null != listFiles) {
+			List<File> subDirectories = Arrays.asList(listFiles);
+			subDirectories = new ArrayList<>(subDirectories);
+			List<File> deepSubDirectories = new ArrayList<>();
+			for (File dir : subDirectories) {
+				deepSubDirectories.addAll(getSubDirectories(dir));
+			}
+			subDirectories.addAll(deepSubDirectories);
+			return subDirectories;
+		}
+		return new ArrayList<>(0);
+	}
 
     @Override
     public String getDisplayNameForImage(String image_id) throws DirectorException {
@@ -1812,7 +2254,7 @@ public class ImageServiceImpl implements ImageService {
 	    throw new DirectorException("Error fetching trust policy in import policy: " + imageId, ex);
 	}
 
-	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
+	com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy;
 	try {
 	    policy = TdaasUtil.getPolicy(policyDraftForImage.getTrust_policy_draft());
 	} catch (JAXBException e) {
@@ -1867,7 +2309,7 @@ public class ImageServiceImpl implements ImageService {
 		measurement.setPath(measurementType.getPath());
 		measurement.setExclude(((DirectoryMeasurementType) measurementType).getExclude());
 		measurement.setInclude(((DirectoryMeasurementType) measurementType).getInclude());
-		measurement.setRecursive(((DirectoryMeasurementType) measurementType).isRecursive());
+		measurement.setFilterType(((DirectoryMeasurementType) measurementType).getFilterType());
 		measurements.add(measurement);
 	    } else if (measurementType instanceof FileMeasurementType) {
 		FileMeasurement measurement = new FileMeasurement();
@@ -1921,7 +2363,7 @@ public class ImageServiceImpl implements ImageService {
 
 	boolean start = false;
 	try {
-	    com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+	    com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil
 		    .getPolicy(trustPolicyDraft.getTrust_policy_draft());
 	    List<Measurement> measurements = policy.getWhitelist().getMeasurements();
 	    for (Measurement measurement : measurements) {
@@ -2255,8 +2697,10 @@ public class ImageServiceImpl implements ImageService {
 	}
 
 	try {
-	    return TdaasUtil.convertTrustPolicyToTrustPolicyResponse(trustPolicy);
-	} catch (JAXBException e) {
+	  
+		return TdaasUtil.convertTrustPolicyToTrustPolicyResponse(trustPolicy);
+		
+	} catch (ParserConfigurationException | SAXException | IOException|JAXBException e) {
 	    log.error("Unable to convert Trust Policy to TrustPolicyResponse", e);
 	    throw new DirectorException("Unable to convert Trust Policy to TrustPolicyResponse", e);
 	}

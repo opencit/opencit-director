@@ -789,7 +789,8 @@ public class ImageStores {
 		.getImage_store_details();
 
 	for (ImageStoreDetailsTransferObject imageStoreDetailsTransferObject : image_store_details) {
-	    if (imageStoreTransferObject.fetchPasswordConfiguration().equals(imageStoreDetailsTransferObject)) {
+		ImageStoreDetailsTransferObject passwordConfiguration = imageStoreTransferObject.fetchPasswordConfiguration();
+	    if (passwordConfiguration != null && passwordConfiguration.equals(imageStoreDetailsTransferObject)) {
 		continue;
 	    }
 	    if (StringUtils.isBlank(imageStoreDetailsTransferObject.getValue())) {

@@ -24,6 +24,7 @@ import com.intel.director.api.TrustPolicyDraftEditRequest;
 import com.intel.director.api.TrustPolicyResponse;
 import com.intel.director.api.UnmountImageResponse;
 import com.intel.director.api.UpdateTrustPolicyRequest;
+import com.intel.director.api.UpgradeTrustPolicyResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.api.ui.TrustPolicyDraftFilter;
 import com.intel.director.api.ui.TrustPolicyDraftResponse;
@@ -84,6 +85,7 @@ public interface ImageService {
 
 	public String createTrustPolicy(String trust_policy_draft_id)
 			throws DirectorException;
+	 public UpgradeTrustPolicyResponse upgradePolicyForImage(String imageId) throws DirectorException;
 
 	public TrustPolicy getTrustPolicyByTrustId(String trustId);
 

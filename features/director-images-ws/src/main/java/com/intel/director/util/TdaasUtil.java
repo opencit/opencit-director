@@ -32,10 +32,18 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import net.schmizz.sshj.SSHClient;
 
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import com.github.dnault.xmlpatch.Patcher;
 import com.intel.dcsg.cpg.crypto.Md5Digest;
@@ -69,26 +77,24 @@ import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.SSHManager;
 import com.intel.mtwilson.director.db.exception.DbException;
-import com.intel.mtwilson.manifest.xml.DirectoryMeasurementType;
-import com.intel.mtwilson.manifest.xml.FileMeasurementType;
-import com.intel.mtwilson.manifest.xml.Manifest;
-import com.intel.mtwilson.manifest.xml.MeasurementType;
+import com.intel.mtwilson.manifest2.xml.DirectoryMeasurementType;
+import com.intel.mtwilson.manifest2.xml.FileMeasurementType;
+import com.intel.mtwilson.manifest2.xml.Manifest;
+import com.intel.mtwilson.manifest2.xml.MeasurementType;
 import com.intel.mtwilson.shiro.ShiroUtil;
-import com.intel.mtwilson.trustpolicy.xml.Checksum;
-import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.Director;
-import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.Encryption;
-import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.Image;
-import com.intel.mtwilson.trustpolicy.xml.LaunchControlPolicy;
-import com.intel.mtwilson.trustpolicy.xml.Measurement;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
-import com.intel.mtwilson.trustpolicy.xml.Whitelist;
+import com.intel.mtwilson.trustpolicy2.xml.Checksum;
+import com.intel.mtwilson.trustpolicy2.xml.DecryptionKey;
+import com.intel.mtwilson.trustpolicy2.xml.Director;
+import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.Encryption;
+import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.Image;
+import com.intel.mtwilson.trustpolicy2.xml.LaunchControlPolicy;
+import com.intel.mtwilson.trustpolicy2.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy2.xml.Whitelist;
 import com.intel.mtwilson.util.exec.ExecUtil;
 import com.intel.mtwilson.util.exec.Result;
-
-import net.schmizz.sshj.SSHClient;
 
 /**
  * 
@@ -174,7 +180,7 @@ public class TdaasUtil {
 	public static String generateInitialPolicyDraft(
 			CreateTrustPolicyMetaDataRequest createTrustPolicyMetaDataRequest)
 			throws JAXBException {
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = new com.intel.mtwilson.trustpolicy.xml.TrustPolicy();
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = new com.intel.mtwilson.trustpolicy2.xml.TrustPolicy();
 		Director director = new Director();
 /*		director.setCustomerId(DirectorUtil.getDirectorId() == null ? "TESTDID"
 				: DirectorUtil.getDirectorId());*/
@@ -202,9 +208,9 @@ public class TdaasUtil {
 
 	}
 
-	public static com.intel.mtwilson.trustpolicy.xml.TrustPolicy setEncryption(
+	public static com.intel.mtwilson.trustpolicy2.xml.TrustPolicy setEncryption(
 			CreateTrustPolicyMetaDataRequest req,
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) {
+			com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) {
 		boolean encryptFlag = req.encrypted;
 		boolean isPolicyEncrypted = false;
 		if (policy.getEncryption() != null) {
@@ -248,6 +254,26 @@ public class TdaasUtil {
 		return w.toString();
 
 	}
+	
+	public static String getPolicyXml(com.intel.mtwilson.trustpolicy1.xml.TrustPolicy policy) throws JAXBException{
+		JAXBContext jaxbContext;		
+		jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy1.xml.TrustPolicy.class);		
+		Marshaller m = jaxbContext.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		StringWriter w = new StringWriter();
+		m.marshal(policy, w);
+		return w.toString();
+	}
+	
+	public static String getPolicyXml(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) throws JAXBException{
+		JAXBContext jaxbContext;		
+		jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class);		
+		Marshaller m = jaxbContext.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		StringWriter w = new StringWriter();
+		m.marshal(policy, w);
+		return w.toString();
+	}
 
 	public static TrustPolicy getPolicy(String policyxml) throws JAXBException {
 		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
@@ -257,6 +283,40 @@ public class TdaasUtil {
 		StringReader reader = new StringReader(policyxml);
 		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
 		return policy;
+
+	}
+	
+	public static com.intel.mtwilson.trustpolicy1.xml.TrustPolicy getPolicy1(String policyxml) throws JAXBException {
+		JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy1.xml.TrustPolicy.class);
+		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+				.createUnmarshaller();
+
+		StringReader reader = new StringReader(policyxml);
+		com.intel.mtwilson.trustpolicy1.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy1.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+		return policy;
+
+	}
+	
+	
+	public static String getPolicyVersion(String draftContent) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		ByteArrayInputStream bis = new ByteArrayInputStream(
+				draftContent.getBytes());
+		Document doc = db.parse(bis);
+		Node n = doc.getFirstChild();
+		String namspaceUri = n.getNamespaceURI();
+		log.info("################### namspaceUri:" + namspaceUri);
+		// //mtwilson:trustdirector:policy:1.2
+		String policyVersion = null;
+		if (StringUtils.isNotBlank(namspaceUri)) {
+			String[] namspaceArr = namspaceUri.split(":");
+			if (namspaceArr.length > 0) {
+				policyVersion = namspaceArr[namspaceArr.length - 1];
+			}
+		}
+		return policyVersion;
 
 	}
 
@@ -740,7 +800,8 @@ public class TdaasUtil {
 				directoryMeasurementType.setPath(measurement.getPath());
 				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude()); 
 				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
-				directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
+				//directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
+
 				manifestList.add(directoryMeasurementType);
 				
 			} else if (measurement instanceof FileMeasurement) {
@@ -815,18 +876,54 @@ public class TdaasUtil {
 			searchFilesInImageRequest.id = uriInfo.getQueryParameters()
 					.getFirst(("id"));
 		}
+		if (StringUtils.isNotBlank(uriInfo.getQueryParameters()
+				.getFirst(("filterType")))) {
+			searchFilesInImageRequest.filter_type = uriInfo.getQueryParameters()
+					.getFirst(("filterType"));
+		}
 		return searchFilesInImageRequest;
 	}
 
 	public static TrustPolicyResponse convertTrustPolicyToTrustPolicyResponse(
-			com.intel.director.api.TrustPolicy trustPolicy) throws JAXBException {
+			com.intel.director.api.TrustPolicy trustPolicy) throws JAXBException, ParserConfigurationException, SAXException, IOException {
 		TrustPolicyResponse tpr = new TrustPolicyResponse();
-		JAXBContext jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
-		Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
-				.createUnmarshaller();
+		String policyVersion = null;
+		
+			policyVersion = TdaasUtil.getPolicyVersion(trustPolicy.getTrust_policy());
+			JAXBContext jaxbContext=null;
+		if(Constants.TRUST_POLICY_VERSION_1.equals(policyVersion)){
+			jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy1.xml.TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
 
-		StringReader reader = new StringReader(trustPolicy.getTrust_policy());
-		TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+			StringReader reader = new StringReader(trustPolicy.getTrust_policy());
+			com.intel.mtwilson.trustpolicy1.xml.TrustPolicy policy = (com.intel.mtwilson.trustpolicy1.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+			if(policy.getEncryption() == null )	{
+				tpr.setEncrypted(false);
+			}
+			else{
+				tpr.setEncrypted(true);
+			}
+			tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+			tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+		}else{
+			jaxbContext = JAXBContext.newInstance(TrustPolicy.class);
+			Unmarshaller unmarshaller = (Unmarshaller) jaxbContext
+					.createUnmarshaller();
+
+			StringReader reader = new StringReader(trustPolicy.getTrust_policy());
+			TrustPolicy policy = (TrustPolicy) unmarshaller.unmarshal(reader);
+			if(policy.getEncryption() == null )	{
+				tpr.setEncrypted(false);
+			}
+			else{
+				tpr.setEncrypted(true);
+			}
+			tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+			tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+		}
+	
+	
 		
 		tpr.setCreated_by_user_id(trustPolicy.getCreated_by_user_id());
 		tpr.setCreated_date(trustPolicy.getCreated_date());
@@ -834,14 +931,9 @@ public class TdaasUtil {
 		tpr.setDisplay_name(trustPolicy.getDisplay_name());
 		tpr.setEdited_by_user_id(trustPolicy.getEdited_by_user_id());
 		tpr.setEdited_date(trustPolicy.getEdited_date());
-		if(policy.getEncryption() == null )	{
-			tpr.setEncrypted(false);
-		}
-		else{
-			tpr.setEncrypted(true);
-		}
+	
 		tpr.setId(trustPolicy.getId());
-		tpr.setImage_launch_policy(policy.getLaunchControlPolicy().value());
+	
 		tpr.setImgAttributes(trustPolicy.getImgAttributes());
 		tpr.setName(trustPolicy.getName());
 		tpr.setTrust_policy(trustPolicy.getTrust_policy());

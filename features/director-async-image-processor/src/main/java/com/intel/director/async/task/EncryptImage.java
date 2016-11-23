@@ -75,7 +75,7 @@ public class EncryptImage extends ImageActionAsync {
 			
 			imageLocation += imageInfo.getImage_name();
 			log.debug("EncryptImageTask: Image location is : "+imageLocation);
-			com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
+			com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
 			if (policy.getEncryption() == null) {
 				log.debug("EncryptImageTask: No encryption required,. retun");
 				return;

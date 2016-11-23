@@ -95,7 +95,7 @@ public class CreateTar extends ImageActionAsync {
 				}
 				log.debug("Create Tar has a trust policy");
 
-				com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy = TdaasUtil
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy = TdaasUtil
 						.getPolicy(trustPolicy.getTrust_policy());
 
 				if (policy != null && policy.getEncryption() != null) {

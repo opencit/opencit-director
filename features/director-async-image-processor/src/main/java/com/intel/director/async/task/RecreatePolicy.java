@@ -62,7 +62,7 @@ public class RecreatePolicy extends GenericUpload {
 		// try {
 		log.info("Inside runRecreatePolicyTask for ::" + imageActionObject.getImage_id());
 
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicyObj;
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyObj;
 		try {
 			trustPolicyObj = TdaasUtil.getPolicy(trustPolicy.getTrust_policy());
 		} catch (JAXBException e) {

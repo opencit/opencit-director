@@ -37,9 +37,9 @@ public interface TrustPolicyService {
     
     public void copyTrustPolicyAndManifestToHost(String policyXml) throws DirectorException;
     
-    public void addEncryption(com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) throws DirectorException;
+    public void addEncryption(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) throws DirectorException;
 
-    public void calculateHashes(com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy) throws DirectorException;
+    public void calculateHashes(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy) throws DirectorException;
     
 	public TrustPolicyDraft editTrustPolicyDraft(
 			TrustPolicyDraftEditRequest trustpolicyDraftEditRequest)

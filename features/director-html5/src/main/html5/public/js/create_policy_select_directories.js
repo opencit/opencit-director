@@ -35,9 +35,13 @@ function ApplyRegExViewModel() {
 
     self.applyRegexMetaData = new ApplyRegexMetaData({});
 
-    self.resetRegEx = function(event) {
+    self.resetRegEx = function(data, event) {
         var sel_dir = $("#sel_dir").val();
-        var node = $("input[name='directory_" + sel_dir + "']");
+        var node = $("input[name='checkbox_" + sel_dir + "']");
+        var includeRecursive = $("#create_policy_regex_includeRecursive").is(':checked');
+        var include = $('#create_policy_regex_include').val();
+        var exclude = $('#create_policy_regex_exclude').val();
+        var filterType = $("#create_policy_filter_type").val();
         console.log(node.attr("name"));
         var config = {
             root: '/',
@@ -49,7 +53,12 @@ function ApplyRegExViewModel() {
             loadMessage: "Loading...",
             init: false,
             filesForPolicy: false,
-            reset_regex: true
+            reset_regex: true,
+            recursive: includeRecursive,
+            include_recursive: includeRecursive,
+            include: include,
+            exclude: exclude,
+            filterType: filterType
         };
 
         var len = node.parent().children().length;
@@ -82,18 +91,20 @@ function ApplyRegExViewModel() {
     }
 
     self.applyRegEx = function(loginFormElement) {
+    	var filterType=$("#create_policy_filter_type").val();
+    	console.log("#### filterType:"+filterType);
         var include = loginFormElement.create_policy_regex_include.value;
         var includeRecursive = loginFormElement.create_policy_regex_includeRecursive.checked;
         var exclude = loginFormElement.create_policy_regex_exclude.value;
         console.log(include + "-- " + exclude + " -- " + includeRecursive);
         if ((include == "" || include == null || include == undefined) && (exclude == "" || exclude == null || exclude == undefined)) {
-            $("#regex_error_vm").html("<font color='red'>Provide atleast one filter</font>");
+            $("#regex_error_vm").html("<font color=' red'>Provide atleast one filter</font>");
             return;
         }
         $("#regex_error_vm").html("");
         var sel_dir = loginFormElement.sel_dir.value.trim();
-
-        var node = $("input[name='directory_" + sel_dir + "']");
+        console.log("############### sel_dir:"+sel_dir);
+        var node = $("input[name='checkbox_" + sel_dir + "']");
         console.log(sel_dir);
         var config = {
             root: '/',
@@ -105,10 +116,11 @@ function ApplyRegExViewModel() {
             loadMessage: "Loading...",
             init: false,
             filesForPolicy: false,
-            recursive: true,
+            recursive: includeRecursive,
             include: include,
             include_recursive: includeRecursive,
-            exclude: exclude
+            exclude: exclude,
+            filterType: filterType
         };
         var len = node.parent().children().length;
         var counter = 0;
@@ -136,11 +148,28 @@ function ApplyRegExViewModel() {
         node.attr("rootregexdir", sel_dir);
         node.attr("include", include);
         node.attr("exclude", exclude);
-        node.attr("recursive", "" + includeRecursive + "");
+       /// node.attr("recursive", "" + includeRecursive + "");
         closeRegexPanel();
     }
 
 };
+
+function getSymlinkDisplayValue(path){
+var displayValue="";
+	if(path){
+
+	var pathNodesArr=path.split("\/");
+
+	if(pathNodesArr){
+	 displayValue= pathNodesArr[pathNodesArr.length-1];
+	}
+	}
+///	console.log("displayValue::"+displayValue);
+
+	return 	displayValue;
+}
+
+
 
 function toggleState(node) {
     var id = node.id;
@@ -148,23 +177,42 @@ function toggleState(node) {
     path = id.substring(n + 1);
 
 
-    var checkboxObj = $("input[name='directory_" + path + "']");
-    console.log("input[name='directory_" + path + "']");
+    var checkboxObj = $("input[name='checkbox_" + path + "']");
+    console.log("input[name='checkbox_" + path + "']");
     //Check if the dir has regex
-    if (checkboxObj.attr("rootregexdir") == undefined || checkboxObj.attr("rootregexdir") == 'undefined') {
+    /*if (checkboxObj.attr("rootregexdir") == undefined || checkboxObj.attr("rootregexdir") == 'undefined') {
         console.log("checkboxObj.rootregexdir:" + checkboxObj.attr("rootregexdir"));
         console.log("No regex");
-    } else {
-        path = checkboxObj.attr("rootregexdir");
-        $('#create_policy_regex_includeRecursive').attr('checked', checkboxObj.attr("recursive") == "true");
+    } else {*/
+       
+        ///$('#create_policy_regex_includeRecursive').attr('checked', checkboxObj.attr("recursive") == "true");
+    $("#create_policy_filter_type option[value='"+filter_type+"']").attr("selected", "selected");
+        console.log("filter_type :"+filter_type);
         var includeObj = $("input[id='create_policy_regex_include']");
         var include = checkboxObj.attr("include");
+        if(!include){
+        	if(filter_type){
+        		include="*";
+        	}else{
+        		if(filter_type == "regex"){
+            		include=".*";
+            	}else{
+            		include="*";
+            	}	
+        	}
+        	
+        }
         includeObj.attr("value", include);
 
         var excludeObj = $("input[id='create_policy_regex_exclude']");
         var exclude = checkboxObj.attr("exclude");
+        filter_type="wildcard";
+        var filter_type = checkboxObj.attr("filter_type");
+        ///filter_type="regex";
         excludeObj.attr("value", exclude);
-    }
+        ///$("#create_policy_filter_type option:contains(" + filter_type + ")").attr('selected', 'selected');
+       $("#create_policy_filter_type option[value='"+filter_type+"']").attr("selected", "selected");
+    ///}
     var oldSelDir = "";
     if ($('#regexPanel').hasClass('open')) {
         oldSelDir = $('#sel_dir').val();
@@ -189,6 +237,25 @@ function toggleState(node) {
     }
     document.forms["form-horizontal"].reset();
 }
+
+
+
+$('#create_policy_filter_type').on('change', function() {
+	var newFilter=$("#create_policy_filter_type").val();
+	console.log("newFilter:"+newFilter);
+	 var includeObj = $("input[id='create_policy_regex_include']");
+	 var include="";
+       if(newFilter){
+    	   console.log("newFilter :"+newFilter);
+       	if(newFilter == "regex"){
+       		include=".*";
+       	}else{
+       		include="*";
+       	}
+       }
+       includeObj.attr("value", include);
+	
+	});
 
 function openRegexPanel() {
     $('#regexPanel').addClass('col-md-4');
@@ -244,6 +311,185 @@ function editPatchWithDataFromServer(patch) {
 
 
 }
+
+
+function createTreeContent(tree_element,withParentDirectoryHtml){
+///	alert("tree_element::"+tree_element);
+	var tree_content="";
+	tree_content+= "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+	tree_content+=createTreeElementRecursively(tree_element,withParentDirectoryHtml);
+	///console.log("################### tree content"+tree_content);
+
+	tree_content+="</ul>";
+	//////console.log("####################after tree content"+tree_content);
+	return tree_content;
+}
+
+function createTreeElementRecursively(tree_element,withParentDirectoryHtml) {
+	///console.log("Inside createTreeElementRecursively generated_tree::" + tree_element.value);
+	var tree_content = "";
+	var checked = "";
+	var selected = "";
+	var regexIdentifier = "";
+	var child_tree_elements_array = tree_element.child_elements;
+	var anchor_element = "";
+
+	if (tree_element.is_selected == true) {
+		checked = "checked=\"true\"";
+		selected = "selected";
+	}
+
+	if (tree_element.include || tree_element.exclude) {
+		regexIdentifier = " include=\"" + tree_element.include + "\" exclude=\""
+				+ tree_element.exclude + "\"  filter_type=\""+tree_element.filter_type+"\" ";
+	}
+
+	
+
+	if (tree_element.element_type == 'directory') {
+		///alert("Inside tree_element.is_directory true"+tree_element.value);
+		var expanded_li_class = "";
+		var toggle_icon = "";
+		
+		if(withParentDirectoryHtml==true){
+		anchor_element = "<a href=\"#\" " + " style=\"float:left;\" " + " name=\"" + tree_element.path + "\" " + " id=\"" + tree_element.path + "\" " + "rel=\""
+			+ tree_element.path + "/\">" + tree_element.value + "</a>";
+
+		if (tree_element.is_selected == true) {
+			expanded_li_class = "expanded";
+		}
+
+		if (tree_element.include || tree_element.exclude) {
+			toggle_icon = "<i class='fa fa-lock' style='color : blue; font-size : 1.6em' title='"
+					+ "To unselect files/dirs click on the icon to Reset"
+					+ "'  id='toggle_"
+					+ tree_element.path
+					+ "'   onclick='toggleState(this)'></i>";
+		} else {
+			toggle_icon = "<i class='fa fa-unlock' style='color : blue; font-size : 1.6em' title='"
+					+ "To lock the directory and specific files click on the icon to apply regex"
+					+ "'  id='toggle_"
+					+ tree_element.path
+					+ "'   onclick='toggleState(this)'></i>";
+		}
+
+		tree_content += "<li class=\"" + "directory" + " " + selected + " "
+				+ expanded_li_class + "\">";
+		tree_content += "<input type=\"checkbox\" name=\"checkbox_"
+				+ tree_element.path + "\" id=\"checkbox_" + tree_element.path + "\""
+				+ checked + regexIdentifier + " style=\"float:left;\"/>";
+		tree_content += anchor_element;
+		tree_content += toggle_icon;
+		}
+
+		///console.log("##########Inside child_elements.length::"+child_tree_elements_array.length+" for element::"+tree_element.value);
+
+		if (child_tree_elements_array.length > 0) {
+			///console.log("##########Inside >0 child_elements.length::"+child_tree_elements_array.length+" for element::"+tree_element.value);
+			tree_content += "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
+
+
+			for (var i = 0; i < child_tree_elements_array.length; i++) {
+				///console.log("#################Before calling for i="+i);
+	
+				var childTreeContent = createTreeElementRecursively(child_tree_elements_array[i],true);
+				///console.log("#################result came::  childTreeContent ::"+childTreeContent );
+
+			
+				tree_content += childTreeContent;
+			}
+			tree_content += "</ul>";
+
+		}
+		if(withParentDirectoryHtml==true){
+		tree_content += "</li>";
+		}
+		
+	} else if (tree_element.element_type == 'symlink') {
+
+		var displayValue=getSymlinkDisplayValue(tree_element.path);
+		if(displayValue){
+			anchor_element = "<a href=\"#\" style=\"text-decoration:underline;\" " +" onMouseOver=\"changeToolTip(this);\""  +  " name=\"" + tree_element.path + "\" " + " id=\"" + tree_element.path + "\" " + "rel=\""
+			+ tree_element.value + "\">" + displayValue + "</a>";
+			
+		   tree_content += "<li class=\"" + "symlink" + " " + selected + "\">";
+		   tree_content += "<input type=\"checkbox\" name=\"checkbox_"
+				+ tree_element.path + "\" id=\"checkbox_" + tree_element.path + "\""
+				+ checked + regexIdentifier + " style=\"float:left;\"/>"
+		   tree_content += anchor_element;
+		   tree_content += "</li>";	
+	   }
+		
+	}else{
+		        
+		anchor_element = "<a href=\"#\" " + " name=\"" + tree_element.path + "\" " + " id=\"" + tree_element.path + "\" " + "rel=\""
+			+ tree_element.path + "\">" + tree_element.value + "</a>";
+
+		tree_content += "<li class=\"" + "file" + " " + selected + "\">";
+		tree_content += "<input type=\"checkbox\" name=\"checkbox_"
+				+ tree_element.path + "\" id=\"checkbox_" + tree_element.path + "\""
+				+ checked + regexIdentifier + " style=\"float:left;\"/>"
+		tree_content += anchor_element;
+		tree_content += "</li>";
+
+	}
+	return tree_content;
+	
+
+}
+
+
+function changeToolTip(element){
+	
+	var target=element.rel;
+	///$(element).tooltip({contents:"Hello"}).tooltip('close').tooltip('open');
+	var checkboxEleName="checkbox_"+target;
+	console.log("#################checkboxEleName:"+checkboxEleName);
+	if($('[name="'+checkboxEleName+'"]').length==0){
+		console.log("no such element checkboxEleName:"+checkboxEleName);
+		return;
+	}else{
+		console.log("element exist checkboxEleName:"+checkboxEleName);
+		
+	}
+	
+	
+	var checkboxElement=$('[name="'+checkboxEleName+'"]');
+	var isChecked="false";
+	var checkedValue=checkboxElement.attr("checked");
+	if(checkedValue){
+		isChecked="true";
+	}
+	var isRegex="";
+	if(checkboxElement.attr("include") || checkboxElement.attr("exclude")){
+		isRegex=true;
+	}
+	console.log("#### isChecked:"+isChecked+" isRegex:"+isRegex);
+	//$(element).attr("title","{checked:"/""+isChecked+"/"", regex:"/"+isRegex+"/"}");
+}
+
+function getSymlinkTargetToExpand(path){
+	var displayValue="";
+		if(path){
+
+		var pathNodesArr=path.split("\/");
+
+		if(pathNodesArr){
+		 displayValue= pathNodesArr[0];
+		 if(displayValue==""){
+			 if(pathNodesArr.length>1){
+				 displayValue= pathNodesArr[1];
+					console.log("getSymlinkTargetToExpand target split index 1::"+displayValue);
+				
+			 }
+		 }
+		}
+		}
+		displayValue="/"+displayValue;
+		console.log("getSymlinkTargetToExpand target::"+displayValue);
+	///alert("getSymlinkDisplayValue: target"+displayValue);
+		return 	displayValue;
+	}
 
 
 
@@ -327,6 +573,19 @@ $(document)
                 return;
             console.log("******* before tree 1");
             $("#dirNextButton").prop('disabled', true);
+            
+            /*$.ajax({
+                type: "PATCH",
+                url: '/v1/images/' + current_image_id + '/upgradePolicy',
+                contentType: "application/json",
+                headers: {
+                    'Accept': 'application/json'
+                },
+                success: function(data, status, xhr) {
+                    alert("Hello");
+                }
+            });*/
+            
             $('#jstree2').fileTree({
                 root: '/',
                 dir: '/',
@@ -362,19 +621,27 @@ function editPatch(file, checkedStatus, rootRegexDir) {
     var addPath = "'//*[local-name()=\"Whitelist\"]'";
     var removePath = "'//*[local-name()=\"Whitelist\"]";
     var pos = "prepend";
-
-    if (rootRegexDir != "") {
+    var elementType="File";
+    
+    console.log("### editPatch , filename:"+file); 
+    if($("input[name='checkbox_" + file + "']").parent().hasClass('symlink')){
+    	elementType="Symlink";	
+    	
+    }else if($("input[name='" + file + "']").parent().hasClass('Directory')){
+    	elementType="Directory";
+    }
+    /*if (rootRegexDir != "") {
         if (checkedStatus == true) {
             pos = "after";
         }
         addPath = "'//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\"" + rootRegexDir + "\"]'";
-    }
+    }*/
 
     if (checkedStatus == true) {
 
-        addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath + "><File Path=\"" + file + "\"/></add>";
+        addRemoveXml = "<add pos=\"" + pos + "\" sel=" + addPath + "><"+elementType+" Path=\"" + file + "\"/></add>";
     } else {
-        addRemoveXml = "<remove sel=" + removePath + "/*[local-name()=\"File\"][@Path=\"" + file + "\"]'/>";
+        addRemoveXml = "<remove sel=" + removePath + "/*[local-name()=\""+elementType+"\"][@Path=\"" + file + "\"]'/>";
     }
     whichPatchToUse.push(addRemoveXml);
 }

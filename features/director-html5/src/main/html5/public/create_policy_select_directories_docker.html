@@ -93,6 +93,22 @@
                                                     <div id="folderPathDiv" class="col-md-5" style="padding-left: 0px; padding-right: 0px; padding-top: 10px;">
                                                     </div>
                                                 </div>
+                                                
+                                                
+										
+											<div class="form-group">
+                                                    <label class="control-label col-md-6" id="" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_filter_type">Filter Type:</label>
+                                                    <div class="col-md-5" style="padding-left: 0px; padding-right: 0px;">
+                                                     
+                                                         <select class="form-control" id="create_policy_filter_type">
+															<option value="wildcard">Wildcard</option>
+															<option value="regex">Regex</option>													
+														</select>
+                                                        
+                                                    </div>
+                                                </div>
+										
+                                                
                                                 <div class="form-group">
                                                     <label class="control-label col-md-6" id="" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_include">Include Filter:</label>
                                                     <div class="col-md-5" style="padding-left: 0px; padding-right: 0px;">
@@ -107,8 +123,8 @@
                                                         <input type="text" class="form-control" id="create_policy_regex_exclude" placeholder="Enter RegEx" />
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_includeRecursive">Recursive:</label>
+                                                <div class="form-group" style="padding-top: 20px;margin-top: 10px;margin-left: 4px; margin-right: 4px;border-top:2px solid blue">
+                                                    <label class="control-label col-md-6" style="padding-left: 4px; padding-right: 17px; padding-top: 6px;" for="create_policy_regex_includeRecursive">Apply to Subdirectories:</label>
                                                     <div class="col-md-5">
                                                         <div class="checkbox">
                                                             &nbsp;&nbsp;

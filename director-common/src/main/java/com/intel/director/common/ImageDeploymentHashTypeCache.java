@@ -3,7 +3,7 @@ package com.intel.director.common;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
+import com.intel.mtwilson.trustpolicy2.xml.DigestAlgorithm;
 
 public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 

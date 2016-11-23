@@ -31,6 +31,9 @@ public class Constants {
 
 	public static final String LAUNCH_CONTROL_POLICY_HASH_ONLY = "MeasureOnly";
 	public static final String LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE = "MeasureAndEnforce";
+	public static final String TRUST_POLICY_VERSION_1= "1.1";
+	public static final String TRUST_POLICY_VERSION_2 = "1.2";
+	
 	public static final String SUCCESS="success";
 	public static final String CUSTOMER_ID = "Customer ID";
 	public static final String IMAGE_NAME = "Image Name";
@@ -245,4 +248,9 @@ public class Constants {
 	public static final String MTWILSON_PROP_SERVER_PORT = "mtwilson.server.port";
 	public static final String MTWILSON_PROP_SERVER_PASSWORD = "mtwilson.server.password";
 	public static final String MTWILSON_PROP_SERVER_USERNAME = "mtwilson.server.username";
+	
+	public static final String TREE_ELEMENT_DIRECTORY="directory";
+	public static final String TREE_ELEMENT_FILE="file";
+	public static final String TREE_ELEMENT_SYMLINK="symlink";
+	
 }

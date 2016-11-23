@@ -1,86 +1,89 @@
 package com.intel.director.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.intel.director.api.SearchFilesInImageRequest;
+import com.intel.director.api.ui.TreeElement;
+import com.intel.director.common.exception.DirectorException;
+
 public class Tree {
 
 	TreeNode root;
-	TreeNode commonRoot;
-	public String directoryCollapsed = "collapsed";
-	public String checked = "";
+	public boolean checked = false;
 	public List<String> treeElementsHtml = null;
+
 	public boolean explodedView = false;
 	public Set<String> dirPathsForEdit = null;
-	public String mountPath = null; 
+	public String mountPath = null;
 	public Set<TreeNodeDetail> directoryListContainingRegex = null;
-	
-	
+	public Set<String> fileNames = null;
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Tree.class);
 	public void setDirPathsForEdit(Set<String> dirPathsForEdit) {
 		this.dirPathsForEdit = dirPathsForEdit;
 	}
 
 	public List<String> trustPolicyElementsList = null;
-	public Tree(TreeNode root, boolean recursive, boolean filesForPolicy) {
-		this.root = root;
-		
-		commonRoot = root;
-		
-		if(recursive){
-			directoryCollapsed = "expanded";
+
+	public Tree() {
+		super();
+	}
+
+	public Tree(SearchFilesInImageRequest searchFilesInImageRequest,
+			String mountPath, Set<TreeNodeDetail> directoryListContainingRegex,
+			List<String> trustPolicyElementsList, Set<String> dirPathsForEdit,
+			Set<String> fileNames) {
+
+		this.mountPath = mountPath;
+		this.directoryListContainingRegex = directoryListContainingRegex;
+		this.trustPolicyElementsList = trustPolicyElementsList;
+		this.dirPathsForEdit = dirPathsForEdit;
+		this.fileNames = fileNames;
+		String actionDir = searchFilesInImageRequest.getDir();
+		String pattern = File.separator;
+		String[] list = actionDir.split(pattern);
+		if (list.length > 1) {
+			root = new TreeNode(list[list.length - 1], actionDir, mountPath);
+		} else {
+			root = new TreeNode("/", actionDir, mountPath);
+		}
+		///rootDirWithRegex will be there for create mode if either include or exclude flag are set , null for edit mode
+	
+		if (!searchFilesInImageRequest.reset_regex && (searchFilesInImageRequest.include != null
+				|| searchFilesInImageRequest.exclude != null)) {
+			TreeNodeDetail detail = new TreeNodeDetail();
+			detail.regexPath = actionDir;
+			detail.regexExclude = searchFilesInImageRequest.exclude;
+			detail.regexInclude = searchFilesInImageRequest.include;
+			detail.isRegexRecursive = searchFilesInImageRequest.include_recursive;
+			root.rootDirWithRegex = detail;
+		}
+		root.parent = this;
+
+		if (searchFilesInImageRequest.recursive) {
 			explodedView = true;
-		}	
-		
-		if(filesForPolicy){
-			checked = " checked=\"true\"";
-		}else{
-			checked = "";
+		}
+
+		if (searchFilesInImageRequest.files_for_policy) {
+			checked = true;
 		}
 		treeElementsHtml = new ArrayList<String>();
 	}
-	
-	public void setTrustPolicyElementsList(List<String> trustPolicyElementsList){
-		this.trustPolicyElementsList = trustPolicyElementsList;
-	}
 
-	
-	public void addElement(String elementValue) {
-		String pattern = File.separator;
-		String[] list = elementValue.split(pattern);
+	public TreeElement createTree()  {
+		for (String data : fileNames) {
 
-		// latest element of the list is the filename.extrension
-		root.addElement(root.incrementalPath, list);
-
-	}
-
-	public void printTree() {
-		// I move the tree common root to the current common root because I
-		// don't mind about initial folder
-		// that has only 1 child (and no leaf)
-		List<TreeNode> nodesList = getCommonRoot();
-		TreeNode treeNode = nodesList.get(0) ;
-		treeNode.printNode(false, false);		
-	}
-
-	public List<TreeNode> getCommonRoot() {
-		List<TreeNode> list = new ArrayList<TreeNode>();		
-		if (commonRoot != null) {
-			list.add(commonRoot);
-			return list;
-		} else {
-			TreeNode current = root;
-
-			if (current.leafs.size() <= 0) {
-				list = current.childs;
-			} else{
-				list.add(current);
-			}
-			return list;
+			String pattern = File.separator;
+			String[] list = data.split(pattern);
+			
+			root.createNode(root.incrementalPath, list);
+			
 		}
 
+		return root.generateTree();
 	}
-
 
 }

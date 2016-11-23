@@ -7,61 +7,49 @@ edit_policy_bmlive_initialize();
 
 function edit_policy_bmlive_initialize() {
 
+	
     if (!current_trust_policy_draft_id) {
-        var create_draft_request = {
-            "image_id": current_image_id
-        }
+    	
+    	
+
 
         $.ajax({
-            type: "POST",
+            type: "GET",
+            url: "/v1/images/" + current_image_id,
             contentType: "application/json",
             headers: {
                 'Accept': 'application/json'
             },
-            data: JSON.stringify(create_draft_request),
-
-            url: "/v1/rpc/create-draft-from-policy",
+            dataType: "json",
             success: function(data, status, xhr) {
-
-                if (data.error) {
-                    return false;
-                } else {
-                    current_trust_policy_draft_id = data.id;
-
-                    $.ajax({
-                        type: "GET",
-                        url: "/v1/images/" + current_image_id,
-                        contentType: "application/json",
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        dataType: "json",
-                        success: function(data, status, xhr) {
-                            $("#host_ip_edit").val(data.ip_address);
-                            $("#username_for_host_edit").val(data.username);
-                        }
-                    });
-
-
-                    $.ajax({
-                        type: "GET",
-                        url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
-                        // accept: "application/json",
-                        contentType: "application/json",
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        dataType: "json",
-                        success: function(data, status, xhr) {
-                            $("#display_name_host_edit").val(data.display_name);
-                        }
-                    });
-
-
-                }
-
+                $("#host_ip_edit").val(data.ip_address);
+                $("#username_for_host_edit").val(data.username);
+                
+                var trust_policy_id=data.trust_policy_id
+                $.ajax({
+                    type: "GET",
+                    url: "/v1/trust-policy/" + trust_policy_id,
+                    // accept: "application/json",
+                    contentType: "application/json",
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    dataType: "json",
+                    success: function(data, status, xhr) {
+                        $("#display_name_host_edit").val(data.display_name);
+                    }
+                });
             }
         });
+
+
+       
+
+
+    
+    	
+    	
+    	
     } else {
 
         $.ajax({
@@ -189,67 +177,81 @@ function editandNext() {
                 return;
             }
 
-
-
-            self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
-            self.editBMLiveMetaData.isEncrypted = false;
-            self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
-            var mountimage = {
-                "id": current_image_id
-            }
+            
+            
             $.ajax({
-                type: "POST",
-                url: "/v1/rpc/mount-image",
-
+                type: "PATCH",
                 contentType: "application/json",
-                headers: {
-                    'Accept': 'application/json'
-                },
-                data: JSON.stringify(mountimage),
+
+                url: '/v1/images/' + current_image_id + '/upgradePolicy',
                 success: function(data, status, xhr) {
-
-                    if (data.error) {
-                        $("#editBMLivePolicyNext").prop('disabled', false);
-                        show_error_in_editbmlivemodal(data.error);
-                        return;
+                	
+                    self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
+                    self.editBMLiveMetaData.isEncrypted = false;
+                    self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
+                    var mountimage = {
+                        "id": current_image_id
                     }
-
-
                     $.ajax({
                         type: "POST",
-                        url: "/v1/trust-policy-drafts",
+                        url: "/v1/rpc/mount-image",
+
                         contentType: "application/json",
                         headers: {
                             'Accept': 'application/json'
                         },
-                        data: ko.toJSON(self.editBMLiveMetaData),
+                        data: JSON.stringify(mountimage),
                         success: function(data, status, xhr) {
-                            $("#editBMLivePolicyNext").prop('disabled', false);
 
                             if (data.error) {
+                                $("#editBMLivePolicyNext").prop('disabled', false);
                                 show_error_in_editbmlivemodal(data.error);
-
-                                $.ajax({
-                                    type: "POST",
-                                    url: "/v1/rpc/unmount-image",
-                                    contentType: "application/json",
-                                    headers: {
-                                        'Accept': 'application/json'
-                                    },
-                                    data: JSON.stringify(mountimage),
-                                    success: function(data, status, xhr) {
-                                        console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
-                                    }
-                                });
-
                                 return;
                             }
-                            current_trust_policy_draft_id = data.id;
-                            nextButtonLiveBM();
+
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/v1/trust-policy-drafts",
+                                contentType: "application/json",
+                                headers: {
+                                    'Accept': 'application/json'
+                                },
+                                data: ko.toJSON(self.editBMLiveMetaData),
+                                success: function(data, status, xhr) {
+                                    $("#editBMLivePolicyNext").prop('disabled', false);
+
+                                    if (data.error) {
+                                        show_error_in_editbmlivemodal(data.error);
+
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "/v1/rpc/unmount-image",
+                                            contentType: "application/json",
+                                            headers: {
+                                                'Accept': 'application/json'
+                                            },
+                                            data: JSON.stringify(mountimage),
+                                            success: function(data, status, xhr) {
+                                                console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
+                                            }
+                                        });
+
+                                        return;
+                                    }
+                                    current_trust_policy_draft_id = data.id;
+                                    nextButtonLiveBM();
+                                }
+                            });
                         }
                     });
+                	
+                	
                 }
             });
+            
+
+           
 
         }
 

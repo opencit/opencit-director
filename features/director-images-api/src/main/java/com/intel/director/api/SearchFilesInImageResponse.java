@@ -10,6 +10,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.intel.director.api.ui.TreeElement;
 
 /**
  * 
@@ -28,6 +29,8 @@ public class SearchFilesInImageResponse {
 
 	public List<String> patchXml = null;
 	public String treeContent = null;
+	public TreeElement generatedTree= new TreeElement();
+	
 	public String error;
 	public List<String> getPatchXml() {
 		return patchXml;
@@ -49,6 +52,12 @@ public class SearchFilesInImageResponse {
 	}
 	public void setFiles(List<String> files) {
 		this.files = files;
+	}
+	public TreeElement getGeneratedTree() {
+		return generatedTree;
+	}
+	public void setGeneratedTree(TreeElement generatedTree) {
+		this.generatedTree = generatedTree;
 	}
 	
 	

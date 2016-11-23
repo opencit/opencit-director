@@ -365,10 +365,10 @@ public class DirectorUtil {
 	String policyXml = trustPolicy.getTrust_policy();
 	log.debug("Inside Run Upload Policy task policyXml::" + policyXml);
 	StringReader reader = new StringReader(policyXml);
-	com.intel.mtwilson.trustpolicy.xml.TrustPolicy policy;
+	com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policy;
 	JAXBContext jaxbContext;
 	try {
-	    jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+	    jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class);
 	} catch (JAXBException e) {
 	    log.error("Unable to instantiate the jaxbcontext", e);
 	    return null;
@@ -382,7 +382,7 @@ public class DirectorUtil {
 	    return null;
 	}
 	try {
-	    policy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+	    policy = (com.intel.mtwilson.trustpolicy2.xml.TrustPolicy) unmarshaller.unmarshal(reader);
 	} catch (JAXBException e) {
 	    log.error("Unable to unmarshall the policy", e);
 	    return null;
@@ -429,15 +429,15 @@ public class DirectorUtil {
 	if (policy == null) {
 	    return "";
 	}
-	com.intel.mtwilson.trustpolicy.xml.TrustPolicy trustPolicy = null;
+	com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicy = null;
 	try {
-	    JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy.xml.TrustPolicy.class);
+	    JAXBContext jaxbContext = JAXBContext.newInstance(com.intel.mtwilson.trustpolicy2.xml.TrustPolicy.class);
 	    Unmarshaller unmarshaller = (Unmarshaller) jaxbContext.createUnmarshaller();
 	    if (policy.getTrust_policy() == null) {
 		return "";
 	    }
 	    StringReader reader = new StringReader(policy.getTrust_policy());
-	    trustPolicy = (com.intel.mtwilson.trustpolicy.xml.TrustPolicy) unmarshaller.unmarshal(reader);
+	    trustPolicy = (com.intel.mtwilson.trustpolicy2.xml.TrustPolicy) unmarshaller.unmarshal(reader);
 	    /// trustPolicy = TdaasUtil.getPolicy(policy.getTrust_policy());
 	} catch (JAXBException e1) {
 	    log.error("Directorutil fetchDekUrl failed", e1);

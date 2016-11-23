@@ -63,6 +63,7 @@ import com.intel.director.api.TrustDirectorImageUploadRequest;
 import com.intel.director.api.TrustDirectorImageUploadResponse;
 import com.intel.director.api.TrustPolicy;
 import com.intel.director.api.UnmountImageResponse;
+import com.intel.director.api.UpgradeTrustPolicyResponse;
 import com.intel.director.api.ui.ImageInfo;
 import com.intel.director.common.Constants;
 import com.intel.director.common.DockerUtil;
@@ -79,6 +80,7 @@ import com.intel.director.service.impl.ImageServiceImpl;
 import com.intel.director.service.impl.LookupServiceImpl;
 import com.intel.director.service.impl.SettingImpl;
 import com.intel.director.util.TdaasUtil;
+import com.intel.mtwilson.jaxrs2.server.PATCH;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.shiro.ShiroUtil;
 
@@ -1043,6 +1045,32 @@ public class Images {
 	// return join;
 	return Response.ok(filesInImageResponse).build();
     }
+    
+    
+    
+    @Path("images/{imageId: [0-9a-zA-Z_-]+}/upgradePolicy")
+    @PATCH
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response upgradePolicyForImage(@PathParam("imageId") String imageId) {
+		UpgradeTrustPolicyResponse upgardeResponse = new UpgradeTrustPolicyResponse();
+		try {
+			upgardeResponse = imageService.upgradePolicyForImage(imageId);
+		} catch (DirectorException e) {
+			upgardeResponse.status = "error";
+			upgardeResponse.message = e.getMessage();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(upgardeResponse).build();
+		}
+		return Response.ok(upgardeResponse).build();
+
+	}
+    
+    
+    
+    
+    
+    
+    
 
     /**
      * Retrieves list of deployment types - VM,BareMetal and Docker are the
@@ -2041,6 +2069,7 @@ public class Images {
 	try {
 	    imageHashType = imageService.getImageHashType(deploymentType);
 	} catch (DirectorException e) {
+			log.error("Error",e);
 	    response.setError(e.getMessage());
 	    response.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
 	    return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
@@ -2052,8 +2081,7 @@ public class Images {
 	return Response.ok(imageHashType).build();
     }
 
-
-/**
+	/**
 	 * API to check if chunk of a file/image is available at server or not.
 	 * @param imageId Unique Image ID of file
 	 * @param chunk Chunk parameters
@@ -2104,6 +2132,4 @@ public class Images {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
 		}
 	}
-
-
 }

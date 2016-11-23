@@ -248,7 +248,7 @@ public class GlanceRsClient {
 			throw new GlanceException("uploadimgeMetadata failed");
 		}
 		try {
-			entity = new ByteArrayEntity(uploadBody.getBytes("UTF-8"));
+			entity = new ByteArrayEntity(uploadBody.toString().getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e2) {
 			log.error("uploadimgeMetadata failed", e2);
 			throw new GlanceException("uploadimgeMetadata failed", e2);

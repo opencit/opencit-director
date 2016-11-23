@@ -5,6 +5,7 @@
  */
 package com.intel.mtwilson.director.trust.policy;
 
+import com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement;
 import java.io.IOException;
 import java.util.List;
 
@@ -18,16 +19,16 @@ import com.intel.dcsg.cpg.crypto.digest.Digest;
 import com.intel.director.common.exception.DirectorException;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
-import com.intel.mtwilson.trustpolicy.xml.Checksum;
-import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
-import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.Encryption;
-import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.ImageHash;
-import com.intel.mtwilson.trustpolicy.xml.Measurement;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
-import com.intel.mtwilson.trustpolicy.xml.Whitelist;
+import com.intel.mtwilson.trustpolicy2.xml.Checksum;
+import com.intel.mtwilson.trustpolicy2.xml.DecryptionKey;
+import com.intel.mtwilson.trustpolicy2.xml.DigestAlgorithm;
+import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.Encryption;
+import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.ImageHash;
+import com.intel.mtwilson.trustpolicy2.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy2.xml.Whitelist;
 
 /**
  * 
@@ -79,7 +80,7 @@ public class CreateTrustPolicy {
 	/**
 	 * Adds encryption information such as dek URL and checksum in trust policy
 	 * 
-	 * @param inputPolicy
+	 * @param trustPolicy
 	 * @return
 	 * @throws XMLStreamException
 	 * @throws JAXBException
@@ -175,8 +176,17 @@ public class CreateTrustPolicy {
 					continue;
 				}
 
-			} else {
-				log.error("Unsupported mesurement type");
+			} else if (measurement instanceof SymlinkMeasurement){
+				try {
+					hash = dirFileUtil.getSymlinkHash(imageId,
+							(SymlinkMeasurement) measurement, whitelist
+									.getDigestAlg().value());
+				} catch (IOException e) {
+					throw new DirectorException("No Symlink found for measurement "+ measurement.getPath(), e);
+				}
+			}
+			else {
+				log.error("Unsupported measurement type");
 				return;
 			}
 			measurement.setValue(hash.toHex());
