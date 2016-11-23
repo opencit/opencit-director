@@ -240,8 +240,7 @@ public class ImageServiceImpl implements ImageService {
 
     /**
      * 
-     * @param imageId
-     * @param imageFileInputStream
+     * @param searchImagesRequest
      * @return
      * @throws FileNotFoundException
      * @throws IOException
@@ -427,21 +426,18 @@ public class ImageServiceImpl implements ImageService {
 	/// We append every chunk to file
 	try {
 	    int read;
-	    byte[] bytes = new byte[1024*60];
+	    byte[] bytes = new byte[1024];
 
 	    out = new FileOutputStream(new File(imageInfo.getLocation() + imageInfo.getImage_name()), true);
 	    double bufferForFlush = 0;
-	    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(out,  8 * 1024);
-	    
 	    while ((read = fileInputStream.read(bytes)) != -1) {
-		/*bytesread += read;
+		bytesread += read;
 		bufferForFlush += read;
 		out.write(bytes, 0, read);
 		if (bufferForFlush >= flushSize) { // flush after 10MB
 		    bufferForFlush = 0;
 		    out.flush();
-		}*/
-		bufferedOutputStream.write(bytes, 0, read);
+		}
 	    }
 	} catch (IOException e) {
 	    log.error("Error while writing uploaded image: " + e.getMessage());
@@ -3050,7 +3046,6 @@ public class ImageServiceImpl implements ImageService {
 	}
 	return hashTypeObjects;
     }
-
 
 	/**
 	 * Update ImageInformation
