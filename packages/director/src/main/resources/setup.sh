@@ -272,7 +272,7 @@ update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIR
 prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
 
-DIRECTOR_DB_USERNAME=${DIRECTOR_DB_USERNAME:-"admin"}
+DIRECTOR_DB_USERNAME=${DIRECTOR_DB_USERNAME:-"director"}
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
 
 DIRECTOR_DB_PASSWORD=${DIRECTOR_DB_PASSWORD:-$(generate_password 16)}
