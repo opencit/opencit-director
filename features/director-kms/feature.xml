@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
-<id>director-images-ws</id>
+<id>director-kms</id>
 <version>3.2-SNAPSHOT</version>
-<name>WS</name>
+<name>director-kms</name>
 <provider><name>Intel Corporation</name></provider>
 <description>TDAAS</description>
 <license><copyright>2015 Intel Corporation</copyright><url>http://intel.com</url></license>

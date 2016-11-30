@@ -51,6 +51,17 @@ sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-i
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-images-ws/feature.xml\"" >&2; exit 3; fi
 sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-persistence/feature.xml
 if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-persistence/feature.xml\"" >&2; exit 3; fi
+sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-async-image-processor/feature.xml
+if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-async-image-processor/feature.xml\"" >&2; exit 3; fi
+sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-dockerhub/feature.xml
+if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-dockerhub/feature.xml\"" >&2; exit 3; fi
+sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-image-store/feature.xml
+if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-image-store/feature.xml\"" >&2; exit 3; fi
+sed -i 's/\(<version>\).*\(<\/version>\)/\1'${version}'\2/g' features/director-kms/feature.xml
+if [ $? -ne 0 ]; then echo "Failed to change version in \"features/director-kms/feature.xml\"" >&2; exit 3; fi
+
+
+
 
 (cd packages  && $changeVersionCommand)
 if [ $? -ne 0 ]; then echo "Failed to change maven version on \"packages\" folder" >&2; exit 3; fi
