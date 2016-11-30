@@ -1,57 +1,65 @@
 <!DOCTYPE html>
 <html>
-    <head>
 
-    
-        <title>Create Policy Wizard</title>
-        <meta name="author" content="aakash">
-    </head>
-    <body>
+<head>
+    <title>Create Policy Wizard</title>
+    <meta name="author" content="aakash">
+</head>
 
-     
+<body>
 
-  			<span>
+
+
+    <span>
   			<div class="row col-md-12">
-  			  <div class="col-md-3"></div>
-				            <div id="wizard" class="swMain col-md-6" style="margin-top: 3px;">   
-				     
-  			<ul class="anchor col-md-12" id="createPolicySteps">
-  				<li class="col-md-4" ><a href="#create_policy.html" id="create_policy_step_1" class="selected col-md-12" style="margin-top: 5px;" isdone="1" rel="1">
-                <label class="stepNumber col-md-2">1</label>
-                <span class="stepDesc col-md-10">
-                   Policy Metadata<br>
-                   <small>Enter basic details    for policy generation</small>
-                </span>
-            </a></li>
-  				<li class="col-md-4"><a href="#create_policy_select_directories.html" id="create_policy_step_2"  class="disabled col-md-12" style="margin-top: 5px;" isdone="0" rel="2">
-                <label class="stepNumber col-md-2">2</label>
-                <span class="stepDesc col-md-10">
+				<div class="col-md-3"></div>
+				<div id="wizard" class="swMain col-md-6" style="margin-top: 3px;">   
+					
+					<ul class="anchor col-md-12" id="createPolicySteps">
+						<li class="col-md-4" ><a href="#create_policy.html" id="create_policy_step_1" class="selected col-md-12" style="margin-top: 5px;" isdone="1" rel="1">
+							<label class="stepNumber col-md-2">1</label>
+							<span class="stepDesc col-md-10">
+								Policy Metadata<br>
+								<small>Enter basic details    for policy generation</small>
+							</span>
+    </a>
+    </li>
+    <li class="col-md-4">
+        <a href="#create_policy_select_directories.html" id="create_policy_step_2" class="disabled col-md-12" style="margin-top: 5px;" isdone="0" rel="2">
+            <label class="stepNumber col-md-2">2</label>
+            <span class="stepDesc col-md-10">
                    Select Files<br>
                    <small>Select file/directories  for calculating hash </small>
                 </span>
-            </a></li>
-  				<li class="col-md-4" ><a href="#upload_imagestore.html" id="create_policy_step_3"  class="disabled col-md-12" isdone="0" style="margin-top: 5px;" rel="3">
-                <label class="stepNumber col-md-2">3</label>
-                <span class="stepDesc col-md-10">
+        </a>
+    </li>
+    <li class="col-md-4">
+        <a href="#upload_imagestore.html" id="create_policy_step_3" class="disabled col-md-12" isdone="0" style="margin-top: 5px;" rel="3">
+            <label class="stepNumber col-md-2">3</label>
+            <span class="stepDesc col-md-10">
                    Upload to Store<br>
                    <small>Upload Policy generated  to image store</small>
-                </span>                   
-             </a></li>
-  				
-  			</ul>
-  			
-  			</div>
-  			 <div class="col-md-3"></div>
-  			</div>
-  			</span>
-  		
-        <div id="createPolicyStepsContent">             
-		<div id="create_policy_content_step_1"   style="display: block;" > </div>
-		<div id="create_policy_content_step_2"   style="display: none;" > </div>
-		<div id="create_policy_content_step_3"   style="display: none;" > </div>
-		</div>   
-					
-		 
- <script src="/v1/html5/public/director-html5/js/create_policy_wizard.js"></script>
-    </body>
+                </span>
+        </a>
+    </li>
+
+    </ul>
+
+    </div>
+    <div class="col-md-3"></div>
+    </div>
+    </span>
+
+    <div id="createPolicyStepsContent">
+        <div id="create_policy_content_step_1" style="display: block;"> </div>
+        <div id="create_policy_content_step_2" style="display: none;"> </div>
+        <div id="create_policy_content_step_3" style="display: none;"> </div>
+    </div>
+
+
+
+
+    <script src="/v1/html5/public/director-html5/js/create_policy_wizard.js"></script>
+</body>
+
 </html>

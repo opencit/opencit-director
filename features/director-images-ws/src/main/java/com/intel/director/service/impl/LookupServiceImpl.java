@@ -38,8 +38,12 @@ public class LookupServiceImpl implements LookupService {
     	imageDeployment_bm.setName(Constants.DEPLOYMENT_TYPE_BAREMETAL);
     	imageDeployment_bm.setDisplay_name("Non-Virtualized Server");
     	deploymentsResponse.image_deployments.add(imageDeployment_bm);
-    	
-    	return deploymentsResponse;
+
+    	imageDeployment = new ImageDeploymentsResponse();
+    	imageDeployment.setName(Constants.DEPLOYMENT_TYPE_DOCKER);
+    	imageDeployment.setDisplay_name(Constants.DEPLOYMENT_TYPE_DOCKER);
+    	deploymentsResponse.image_deployments.add(imageDeployment);
+        return deploymentsResponse;
     }
 
     @Override
@@ -81,6 +85,7 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy.display_name = "Hash Only";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_BAREMETAL);
+        imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_DOCKER);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         
         
@@ -90,17 +95,9 @@ public class LookupServiceImpl implements LookupService {
         imagelaunchpolicy.name = Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE;
         imagelaunchpolicy.display_name = "Hash and enforce";
         imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
+        imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_DOCKER);
         imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         
-        
-        imagelaunchpolicy = new ImageLaunchPolicy();
-        imagelaunchpolicy.image_deployments = new ArrayList<String>();
-        imagelaunchpolicy.name = "encrypted";
-        imagelaunchpolicy.display_name = "Encryption";
-        imagelaunchpolicy.image_deployments.add(Constants.DEPLOYMENT_TYPE_VM);
-        
-        
-        imageLaunchPoliciesResponse.image_launch_policies.add(imagelaunchpolicy);
         if(StringUtils.isEmpty(deployment_type)){
         	return imageLaunchPoliciesResponse;
         }

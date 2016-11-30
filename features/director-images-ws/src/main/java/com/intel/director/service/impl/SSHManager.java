@@ -7,6 +7,7 @@ package com.intel.director.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -114,10 +115,9 @@ public class SSHManager {
 	
 	private String getSessionTimeout() {
 		log.info("inside getting session timeout");
-		String timeout = "30";
 
 		Properties prop = DirectorUtil.getPropertiesFile("director.properties");
-		timeout = prop.getProperty("login.token.expires.minutes", "30");
+		String timeout = prop.getProperty("login.token.expires.minutes", "30");
 		log.info("session timeout in happy path = " + timeout);
 
 		log.info("session timeout in default path = " + timeout);
@@ -130,9 +130,9 @@ public class SSHManager {
 			String[] folders = path.split("/");
 			if (folders[0].isEmpty())
 				folders[0] = "/";
-			String fullPath = folders[0];
+			StringBuffer fullPath = new StringBuffer(folders[0]);
 			for (int i = 1; i < folders.length; i++) {
-				Vector ls = channelSftp.ls(fullPath);
+				Vector ls = channelSftp.ls(fullPath.toString());
 				boolean isExist = false;
 				for (Object o : ls) {
 					if (o instanceof LsEntry) {
@@ -146,7 +146,8 @@ public class SSHManager {
 				if (!isExist && !folders[i].isEmpty()) {
 					channelSftp.mkdir(fullPath + folders[i]);
 				}
-				fullPath = fullPath + folders[i] + "/";
+				fullPath.append(folders[i] + "/");
+				///fullPath = fullPath + folders[i] + "/";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -179,14 +180,15 @@ public class SSHManager {
 	}
 
 	private void send(List<String> files, String remoteLocation) {
-
+		FileInputStream fstream = null;
 		try {
 			
 			channelSftp.cd(remoteLocation);
 			for (String fileName : files) {
 				log.info("Sending file "+fileName);
 				File f = new File(fileName);
-				channelSftp.put(new FileInputStream(f), f.getName());
+				fstream=new FileInputStream(f);
+				channelSftp.put(fstream, f.getName());
 				log.info("File transfered successfully to host.");				
 			}
 		} catch (Exception ex) {
@@ -196,6 +198,13 @@ public class SSHManager {
 			log.info("sftp Channel exited.");
 			channel.disconnect();
 			log.info("Channel disconnected.");
+			try {
+				if(fstream!=null){
+				fstream.close();
+				}
+			} catch (IOException e) {
+				log.error("Unable to close file stream");
+			}
 			close();
 			log.info("Host Session disconnected.");
 		}

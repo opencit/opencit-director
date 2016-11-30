@@ -1,5 +1,3 @@
-		var endpoint = "/v1";
-
 		
 		
 		
@@ -55,7 +53,7 @@
 				    	
 				    $.ajax({
 				        type: "POST",
-				        url:  endpoint+"trustpoliciesmetadata",
+				        url:  "/v1/images/trustpoliciesmetadata",
 //				                    accept: "application/json",
 				        contentType: "application/json",
 				        headers: {'Accept': 'application/json'},

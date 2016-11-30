@@ -41,7 +41,7 @@ public class SshSetting{
 		
 	@Override
 	public String toString() {
-		return "{username=" + username + ",password=" + password + ",name=" + name + ",ipAddress=" + ipAddress + "}";
+		return "{username=" + username + ",name=" + name + ",ipAddress=" + ipAddress + "}";
 	}
 	
 }

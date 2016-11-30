@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Docker</title>
+    <meta name="author" content="aakash">
+</head>
+
+<body>
+
+    <script type="text/javascript">
+        var currentFlow;
+        var current_image_id;
+        var current_image_name;
+        var current_trust_policy_id;
+        var current_image_action_id;
+        var current_trust_policy_draft_id;
+        var current_display_name;
+		var current_repository;
+        console.log("inside docker_images_page.js");
+        console.log("docker_images_page script");
+        resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js'], function() {
+            console.log("docker_images_page.html: loaded scripts");
+        });
+    </script>
+
+    <script src="/v1/html5/public/director-html5/js/docker_images_page.js"></script>
+
+    <div id="dockerImagesContent">
+        <div id="docker_images_grid_page" style="display: block;"> </div>
+
+        <div id="create_policy_wizard_docker" style="display: none;"> </div>
+        <div id="edit_policy_wizard_docker" style="display: none;"> </div>
+
+        <div id="upload_to_image_store_redirect_docker" style="display: none;"> </div>
+
+    </div>
+
+</body>
+
+</html>

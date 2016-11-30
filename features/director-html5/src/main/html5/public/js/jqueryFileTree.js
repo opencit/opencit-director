@@ -51,7 +51,7 @@ if(jQuery) (function($){
 			if(o.reset_regex == undefined) o.reset_regex=false;
 			
 			$(this).each( function() {
-				function showTree(c, treeOptions) {
+				function showTree(c, treeOptions,focusElementPath) {
 					console.log("inside show tree");
 
 					$(c).addClass('wait');
@@ -59,11 +59,14 @@ if(jQuery) (function($){
 					$(".jqueryFileTree.start").remove();
 					var formData = "dir="+escape(treeOptions.dir==undefined?'/':treeOptions.dir)+"&recursive="+(treeOptions.recursive==undefined?false:treeOptions.recursive)+"&files_for_policy="+(treeOptions.files_for_policy==undefined?false:treeOptions.files_for_policy)+"&init="+(treeOptions.init==undefined?false:treeOptions.init)+"&include_recursive="+(treeOptions.include_recursive==undefined?false:treeOptions.include_recursive)+"&reset_regex="+(treeOptions.reset_regex==undefined?false:treeOptions.reset_regex);
 					if(treeOptions.include!=undefined && treeOptions.include!=null){
-						formData+="&include="+escape(treeOptions.include);
+						formData+="&include="+encodeURIComponent(treeOptions.include);
 					}
 					if(treeOptions.exclude!=undefined && treeOptions.exclude!=null){
-						formData+="&exclude="+escape(treeOptions.exclude);
+						formData+="&exclude="+encodeURIComponent(treeOptions.exclude);
 					}
+					if(treeOptions.filterType!=undefined && treeOptions.filterType!=null){
+            formData+="&filterType="+escape(treeOptions.filterType);
+          }
 					$.ajax({
 					  type: "GET",
 					  url: o.script,
@@ -71,25 +74,41 @@ if(jQuery) (function($){
 					contentType: "application/json",
 					  success: function(data, status) {
 						  console.log("success");
+						  hideLoading();
 						$(c).find('.start').html('');
 						var response = data;
 						if(!(response.patch_xml == null)){							
 							editPatchWithDataFromServer(response.patch_xml);
 						}
-
-						$(c).removeClass('wait').append(data.tree_content);
+						////alert("yes::"+data.generated_tree);
+						var tree_content_created=createTreeContent(data.generated_tree);
+						console.log("tree_content-created final::"+tree_content_created);
+						$(c).removeClass('wait').append(tree_content_created);
+						
+						
 						$("#dirNextButton").prop('disabled', false);
 						if( o.root == treeOptions.dir ) $(c).find('UL:hidden').show(); else $(c).find('UL:hidden').slideDown({ duration: o.expandSpeed, easing: o.expandEasing });
 							bindTree(c);
+
+							if(focusElementPath){
+								console.log("Going to focus on elleemnt by name:"+focusElementPath);
+
+								var elem= $('[name="'+focusElementPath+'"]');
+							
+								console.log("element:: "+elem);
+							
+								elem.focus();
+							}
 						},
-						 error: function (jqXHR, textStatus, errorThrown)
-					    {
-					 		alert("ERROR");
-					    },
+						error: function (jqXHR, textStatus, errorThrown){
+							hideLoading();
+							alert("ERROR");
+						},
 					});					
 				}
 				
 				var eventHandlerFunction=function() {
+
 					if( $(this).parent().hasClass('directory') ) {
 						if( $(this).parent().hasClass('collapsed') ) {
 							// Expand
@@ -104,13 +123,69 @@ if(jQuery) (function($){
 							treeOptions.files_for_policy = false;
 							treeOptions.init=true;
 
-							showTree( $(this).parent(), treeOptions );
+							showTree( $(this).parent(), treeOptions,"" );
 							$(this).parent().removeClass('collapsed').addClass('expanded');
 						} else {
 							// Collapse
 							$(this).parent().find('UL').slideUp({ duration: o.collapseSpeed, easing: o.collapseEasing });
 							$(this).parent().removeClass('expanded').addClass('collapsed');
 						}
+					}else if($(this).parent().hasClass('symlink')) {
+						console.log("Inside symlink click");
+						var targetPath="";
+						targetPath=$(this).attr('rel');
+
+
+						var targetToExpand="";
+						targetToExpand=getSymlinkTargetToExpand(targetPath);
+						console.log("link targetPath::"+targetPath+" targetToExpand:"+targetToExpand);
+						var checkboxElement="checkbox_"+targetToExpand;
+						console.log("#################myEle:"+checkboxElement);
+						var mainElement=$('[name="'+checkboxElement+'"]').parent();
+					if( $('[name="'+targetPath+'"]').length == 0)
+					{
+					console.log("Ellement do not exist:"+targetPath);
+				
+											var treeOptions = {};
+											treeOptions.dir = targetToExpand;
+											treeOptions.recursive = true;
+											treeOptions.files_for_policy = false;
+				
+											showTree( mainElement, treeOptions,targetPath);
+											console.log("Before focus..................targetPath:"+targetPath);
+											// /$( '[name="'+targetPath+'"]'
+											// ).focus();
+											// //navigateToLink($(this).attr('value'));
+					
+					   }else{
+							console.log("Element exist:"+targetPath);
+							if( mainElement.hasClass('collapsed') ) {
+								// Expand
+								if( !o.multiFolder ) {
+									$(mainElement).parent().parent().find('UL').slideUp({ duration: o.collapseSpeed, easing: o.collapseEasing });
+									$(mainElement).parent().parent().find('LI.directory').removeClass('expanded').addClass('collapsed');
+								}
+								$(mainElement).parent().find('UL').remove(); // cleanup
+							
+								var treeOptions = {};
+								treeOptions.dir = escape($(this).attr('rel').match( /.*\// ));
+								treeOptions.recursive = false;
+								treeOptions.files_for_policy = false;
+								treeOptions.init=true;
+		
+								showTree( mainElement, treeOptions,targetPath );
+								$(this).parent().removeClass('collapsed').addClass('expanded');
+							}else{
+								$('[name="'+targetPath+'"]').focus();
+								//mainElement.focus();	
+							} 
+							
+							
+							
+					}
+						
+					}else{
+ 						
 					} 
 					return false;
 				};
@@ -118,6 +193,7 @@ if(jQuery) (function($){
 			function bindTree(t) {
 				$(t).find('LI A').bind(o.folderEvent, eventHandlerFunction);
 				$(t).find('LI input').bind(o.folderEvent, function() {
+
 							if( $(this).parent().hasClass('directory') ) {
 								if(canPushPatch == false){
 									alert("Please wait for the last operation to complete.");
@@ -129,14 +205,24 @@ if(jQuery) (function($){
 								}
 								$(this).parent().find('UL').remove(); // cleanup
 								var treeOptions = {};
-								treeOptions.dir = escape($(this).attr('id'));
+								var checkboxId=escape($(this).attr('id'));
+								if(checkboxId){
+
+									var idArr=checkboxId.split("_");
+									if(idArr.length>1){
+										
+										treeOptions.dir=idArr[1];
+										console.log("############ directory checkbox click: dir"+treeOptions.dir);
+									}
+								}
+							///	treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
 								treeOptions.files_for_policy = false;
 								// if($(this).attr('checked')){
 								if(this.checked){
 									treeOptions.files_for_policy = true;
 								}
-								showTree( $(this).parent(),  treeOptions);
+								showTree( $(this).parent(),  treeOptions,"");
 								$(this).parent().removeClass('collapsed').addClass('expanded');
 
 							}else{								
@@ -147,7 +233,17 @@ if(jQuery) (function($){
 									rootRegexDir = "";
 								}
 								console.log("*rootRegexDir : "+rootRegexDir);
-								h($(this).attr('id'), this.checked, rootRegexDir);
+								var checkboxId=escape($(this).attr('id'));
+								var elementId="";
+								if(checkboxId){
+
+									var idArr=checkboxId.split("_");
+									if(idArr.length>1){
+										elementId=idArr[1];
+									}
+								}
+								console.log("############ file checkbox click: elementId"+elementId);
+								h(elementId, this.checked, rootRegexDir);
 							}
 							var isChecked = this.checked;// $(this).attr('checked')
 															// ;
@@ -170,7 +266,7 @@ if(jQuery) (function($){
 				// Get the initial file list
 				o.dir = escape(o.dir);
 				console.log("callong show tree");
-				showTree( $(this), o );
+				showTree( $(this), o ,"");
 			});
 		}
 	});

@@ -7,12 +7,12 @@ package com.intel.director.images.rs;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
-import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.images.glance.constants.Constants;
 
 /**
@@ -21,25 +21,27 @@ import com.intel.director.images.glance.constants.Constants;
  */
 public class GlanceRsClientBuilder {
 
-    public static GlanceRsClient build(Configuration configuration) throws GlanceException {
+    public static GlanceRsClient build(Map<String, String> configuration) throws GlanceException {
         try {
             if (configuration == null || configuration.get(Constants.GLANCE_API_ENDPOINT) == null) {
                 throw new GlanceException("No configuration provided ");
             }
-            String glanceApiEndpoint = configuration.get(Constants.GLANCE_API_ENDPOINT, ""); 
-            String glanceKeystonePublicEndpoint = configuration.get(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT, ""); 
+            String glanceApiEndpoint = configuration.get(Constants.GLANCE_API_ENDPOINT); 
+            String glanceKeystonePublicEndpoint = configuration.get(Constants.GLANCE_KEYSTONE_PUBLIC_ENDPOINT); 
             String userName = configuration.get(Constants.GLANCE_IMAGE_STORE_USERNAME);
             String password = configuration.get(Constants.GLANCE_IMAGE_STORE_PASSWORD);
             String tenantName = configuration.get(Constants.GLANCE_TENANT_NAME);
+            String domainName = configuration.get(Constants.GLANCE_DOMAIN_NAME);
+            String version = configuration.get(Constants.KEYSTONE_VERSION);
             
          
             URL url = new URL(glanceApiEndpoint); // example: "http://localhost:8080/";
             
             Client client = ClientBuilder.newBuilder().build();
             WebTarget target = client.target(url.toExternalForm());
-            return new GlanceRsClient(target, client, glanceKeystonePublicEndpoint,tenantName,userName,password);
+            return new GlanceRsClient(target, client, glanceApiEndpoint, glanceKeystonePublicEndpoint,tenantName,userName,password,domainName,version);
         } catch (MalformedURLException ex) {
-            throw new GlanceException("Cannot construct glance rest client", ex);
+            throw new GlanceException("Invalid endpoints", ex);
         }
     }
 

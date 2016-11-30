@@ -21,6 +21,8 @@ resourceLoader.loadJS(['js/jquery.js','/v1/html5/public/director-html5/js/settin
 					<div class="panel-heading">
 						<h1>Key Management Server Settings</h1>
 					</div>
+					<center><font color = "red"><div id="kms_config_error"></div></font></center>
+					<br/>
 					<div class="panel-body">
 						<div class="row">
 							<div class="form-group">
@@ -73,6 +75,7 @@ resourceLoader.loadJS(['js/jquery.js','/v1/html5/public/director-html5/js/settin
 								<div class="col-md-4"></div>
 								<div class="col-md-4">
 									<button class="btn btn-primary" onclick="saveKMSSetting()">Save</button>
+									<button class="btn btn-primary" onclick="validateKMSSetting()">Validate</button>
 								</div>
 								<div class="col-md-4"></div>
 							</div>

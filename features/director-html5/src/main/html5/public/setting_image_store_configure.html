@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<title>Virtualized Server</title>
+		<meta name="author" content="aakash">
+		<script type="text/javascript">
+			resourceLoader.loadJS(['js/jquery.js','/v1/html5/public/director-html5/js/setting_image_store_configure.js'], function() { 
+			});
+		</script>
+	</head>
+	<body>
+		
+		<br /><br />
+		
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h1>External Storage</h1>
+			</div>
+			<div class="panel-body">
+				
+				
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8" align="right">
+						<button type="button" onclick="resetAllFields()" class="btn btn-primary" data-toggle="modal" data-target="#image_store">Add
+						External Storage</button>
+					</div>
+					<div class="col-md-2">
+					</div>
+				</div>
+				<br/>
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8">
+						<div id="image_store_grid"></div>
+					</div>
+					<div class="col-md-2"></div>
+				</div>
+				
+				
+				<!-- CreateImage Store Modal -->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false" id="image_store" role="dialog">
+					<div class="modal-dialog modal-lg">
+						
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" onclick="imageStoreSettingPage()">&times;</button>
+								<center><h4 class="modal-title">External Storage</h4></center>
+							</div>
+							<div class="modal-body">
+								<center><font color = "red"><div id="image_store_error"></div></font></center>
+								<div class="row">
+									<div class="col-md-1"></div>
+									<div class="col-md-8">
+										<div class="form-group">
+											<label class="control-label col-md-4" for="image_store_name">External Storage Name:</label>
+											<div class="col-md-8">          
+												<input type="text" class="form-control" id="image_store_name"  placeholder="Enter External Storage Name">
+											</div>
+										</div> 
+										
+										<br /><br /><br />
+										
+										<div class="form-group">
+											<label class="control-label col-md-4" for="connector">Connector:</label>
+											<div class="col-md-8">          
+												<select class="form-control" id="connector">
+													<option value="0">Select</option>
+													<option value="Docker">Docker</option>
+													<option value="Glance">Glance</option>
+												</select>
+											</div>
+										</div> 
+										
+										<br /><br />
+										
+										<div class="form-group" id = "artifacts_div">
+											<label class="col-md-4">Supported Artifacts:</label>
+											<div class="col-md-8" id = "artifacts"></div>
+										</div> 
+										
+										
+										
+
+									</div>
+									<div class="col-md-3"></div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="imageStoreSettingPage()" >Close</button>
+								<button type="button" class="btn btn-default" onclick = "createImageStore()">Next</button>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+				
+				<!-- Edit Image Store Modal -->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false" id="edit_image_store" role="dialog">
+					<div class="modal-dialog modal-lg">
+						
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button"  onclick="imageStoreSettingPage()" class="close" data-dismiss="modal">&times;</button>
+								<center><h4 class="modal-title">External Storage</h4></center>
+							</div>
+							<div class="modal-body">
+							<center><font color = "red"><div id="edit_image_store_error"></div></font></center>
+
+								<div class="row">
+									<div class="col-md-1"></div>
+									<div class="col-md-8">
+										<div class="form-group">
+											<label class="control-label col-md-4" for="edit_image_store_name">External Storage Name:</label>
+											<div class="col-md-8">          
+												<input type="text" class="form-control" id="edit_image_store_name"  placeholder="Enter External Storage Name">
+											</div>
+										</div> 
+										
+										<br /><br /><br />
+										
+										<div class="form-group">
+											<label class="control-label col-md-4" for="edit_connector">Connector:</label>
+											<div class="col-md-8">          
+												<input type="text" disabled class="form-control" id="edit_connector"></input>
+											</div>
+										</div> 
+										<br /><br />
+										<div class="form-group" id = "edit_artifacts_div">
+											<label class="col-md-4">Supported Artifacts:</label>
+											<div class="col-md-8" id="edit_artifacts">
+											
+												
+											</div>
+										</div> 
+										
+										
+										
+
+									</div>
+									<div class="col-md-3" style="margin-top: 8px;"></div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage()">Close</button>
+								<button type="button" class="btn btn-default" onclick = "editImageStore()">Next</button>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+				
+				<!-- Image Store Details Modal Common for both create and update-->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="image_store_details" role="dialog">
+					<div class="modal-dialog modal-lg">
+						
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" onclick="imageStoreSettingPage()" class="close" data-dismiss="modal">&times;</button>
+								<center><h4 class="modal-title"><div id="image_store_details_title"></div></h4></center>
+							</div>
+							<div class="modal-body">
+								<center><font color = "red"><div id="image_store_details_error"></div></font><center>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label class="control-label col-md-1" for="image_store_properties"></label>
+											<div class="col-md-11" id="image_store_properties">          
+												
+											</div>
+										</div> 						
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col-md-1"><button type="button" onclick="imageStoreSettingPage()" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
+									<div class="col-md-1"><div id = "editBackButton"><button type="button" class="btn btn-default" onclick = "backToEdit()">Back</button></div></div>
+									<div class="col-md-1"><div id = "saveButton"></div></div>
+									<div class="col-md-1"><div id = "saveAnywaysButton"></div></div>
+									
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+				
+				
+				
+				<!--Delete Confirmation Modal -->
+				<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="image_store_delete_confirmation_window" role="dialog">
+					<div class="modal-dialog modal-md">	
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<center><h4 class="modal-title" id = "image_store_delete_confirmation_window_text"></h4></center>
+							</div>
+							<div class="modal-footer">
+								<div class="row">
+									<div class="col-md-4"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-danger" data-dismiss="modal">No</button></div>
+									<div class="col-md-2"></div>
+									<div class="col-md-1"><button type="button" class="btn btn-success" data-dismiss="modal" id = "image_store_confirm_delete" >Yes</button></div>
+									<div class="col-md-4"></div>
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+				
+				
+				
+				
+				
+			</div>
+			
+		</div>
+		
+	</body>
+	
+</html>

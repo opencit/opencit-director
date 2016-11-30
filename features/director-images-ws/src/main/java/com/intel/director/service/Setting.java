@@ -1,14 +1,12 @@
 package com.intel.director.service;
 
-import java.io.IOException;
-import java.util.Map;
+import com.intel.director.api.GenericResponse;
+import com.intel.director.api.MountWilsonSetting;
+import com.intel.director.api.ValidateKMSConfigurationRequest;
 
 public interface Setting {
 
-	
-	
-	public String editProperties(String string, Map<String,String> data) throws IOException;
-	
-	public String getProperties(String path) throws IOException;
-	
+    public GenericResponse validateKMS(ValidateKMSConfigurationRequest request);
+
+    public GenericResponse validateMTW(MountWilsonSetting request);
 }

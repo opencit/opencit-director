@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <title>File Upload</title>
 <style>
@@ -45,7 +46,7 @@ form {
 	min-height: 100%;
 	font-size: 100px;
 	text-align: right;
-	filter: alpha(opacity =                     0);
+	filter: alpha(opacity = 0);
 	opacity: 0;
 	background: red;
 	cursor: inherit;
@@ -57,36 +58,39 @@ input[readonly] {
 	cursor: text !important;
 }
 </style>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/jsgrid.css" />
+<link rel="stylesheet" type="text/css" href="css/theme.css" />
 <script src="js/jquery.js"></script>
 <script src="js/jquery.form.js"></script>
-<script src="js/date.js"></script>
-<link rel="stylesheet" href="css/bootstrap.min.css">
+
 <script src="js/bootstrap.min.js"></script>
+<script src="js/jsgrid.min.js"></script>
 <script type="text/javascript">
 	var authorizationToken = window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken();
 	var authorizationTokenExpires = window.opener.mainViewModel.loginViewModel.userProfile.authorizationTokenExpires();
-
-	var image_deployments=window.opener.image_type_upload;
-	var image_format=window.opener.image_format_upload;
-
+	console.log ("authorizationTokenExpires   :: "+authorizationTokenExpires );
+	var image_deployments = window.opener.image_type_upload;
+	var isDockerManualUpload = true;
+	var image_format = window.opener.image_format_upload;
 
 	var urlToUploadMetadata = "/v1/images";
 	var blob, BYTES_PER_CHUNK, SIZE, NUM_CHUNKS, start, end;
 	var fileName = "";
 	var currentFileName = "";
 	var refreshIntervalId = 0;
-	var defaultSessionExtensionInterval = 20*60*1000; 
-
-
-	function validateName(fileName ){
-		fileName = fileName .split(' '); //we split the string in an array of strings using     whitespace as separator
-        	return (fileName.length == 1); //true when there is only one word, false else.
+	var defaultSessionExtensionInterval = 20 * 60 * 1000;
+	var timeToExpiry = 0;
+	var isSlowUpload = false;
+	function validateName(fileName) {
+		fileName = fileName.split(' '); //we split the string in an array of strings using     whitespace as separator
+		return (fileName.length == 1); //true when there is only one word, false else.
 	}
-	
+
 	function convertServerTimeToClientTime(serverDateIso8601, timediff) { 
        	 var date = new Date(serverDateIso8601);
-	        date.addMilliseconds(timediff);
-	        return date;
+			date += timediff;
+	        return new Date(date);
 	};
 
 
@@ -148,103 +152,226 @@ input[readonly] {
 	
 	function scheduleSessionRefresh(upload_size){
 		var numberOfCallsRequired = (upload_size/1048576)/ 10;
+		NUM_CHUNKS = numberOfCallsRequired ;
 		var timeTakenForCalls = numberOfCallsRequired * 5;
 		
 		console.log("Size of file being uploaded = "+numberOfCallsRequired);
 		console.log("Number of calls required : "+numberOfCallsRequired);
-		console.log("Time taken for calls :"+timeTakenForCalls);		
+		console.log("Time taken for calls :"+timeTakenForCalls);
 		var now = new Date();
 		var tokenExtendTimeout = Math.max(authorizationTokenExpires - now.getTime(), 0);
-		var timeToExpiry = authorizationTokenExpires - now.getTime();
+		timeToExpiry = authorizationTokenExpires - now.getTime();
+		console.log("authorizationTokenExpires :: " + authorizationTokenExpires);
 		if(tokenExtendTimeout <= (1000 * timeTakenForCalls)){
 			extendSession();
 		}
 	}
-	
-	
-	function validateForm() {		
-		$('#upload').prop('disabled', true);
+
+	function validateForm() {
+		///$('#upload').prop('disabled', true);
+		console.log("image_deployments ::" + image_deployments);
+		if(image_deployments == "Docker"){
+			isDockerManualUpload = document.querySelector('input[name="docker_upload_radio"]:checked').value=='uploadManually';
+		} 
+		
+		console.log("isDockerManualUpload ::" + isDockerManualUpload);
 		var x = document.forms["myform"]["myfile"].value;
-		if (x == null || x == "") {
+		if ((image_deployments != 'Docker' && (x == null || x == "")) || ((image_deployments == 'Docker') && isDockerManualUpload && (x == null || x == "") )) {
 			alert("First Choose File Please...");
 			$('#upload').prop('disabled', false);
 			return false;
 		}
-		currentFileName = document.getElementById('myfile').files[0].name;
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload) ) {
+			currentFileName = document.getElementById('myfile').files[0].name;
+		}
+		
+  
+
+
 		if ($('#image_name_input').val() != ""
 				&& $('#image_name_input').val() != null) {
 			fileName = $('#image_name_input').val();
 		} else {
 			fileName = currentFileName;
 		}
-		if(!validateName(fileName )){
+		if (!validateName(fileName)) {
 			$('#upload').prop('disabled', false);
-			$('#file_upload_window_modal_body').html("Provide correct file name");
-						$("#file_upload_window_modal").modal({
-							backdrop : "static"
-						});
-						$('body').removeClass("modal-open");
-						return false;
+			$('#file_upload_window_modal_body').html(
+					"Provide correct file name");
+			$("#file_upload_window_modal").modal({
+				backdrop : "static"
+			});
+			$('body').removeClass("modal-open");
+			return false;
 		}
-		
-		blob = document.getElementById('myfile').files[0];
-		SIZE = blob.size;
-		scheduleSessionRefresh(SIZE);
-	
+		SIZE = -1;
+		if (document.forms["myform"]["myfile"].value && (image_deployments == "VM" || isDockerManualUpload)) {
+			blob = document.getElementById('myfile').files[0];
+			SIZE = blob.size;
+			scheduleSessionRefresh(SIZE);
+		}
+
 		var image_id;
 		var upload_size = Math.floor(SIZE / 1024);
+		
+		if(!isDockerManualUpload){
+			SIZE = 0;
+		}
 
-		var xhrmdt = new XMLHttpRequest();
-		xhrmdt.open('POST', urlToUploadMetadata, true);
-		xhrmdt.setRequestHeader("Content-Type", "application/json");
-		xhrmdt.setRequestHeader("Authorization", "Token " + authorizationToken);
 		upload_data = {
 			'image_deployments' : image_deployments,
 			'image_format' : image_format,
 			'image_name' : fileName,
 			'image_size' : SIZE
 		};
+		if (image_deployments == "Docker") {
+			upload_data.repository = $('#input_repo').val();
+			upload_data.tag = $('#input_tag').val();
+			if (upload_data.tag == "" || upload_data.repository == "") {
+				alert("Please provide repository and tag...");
+				return false;
+			}
+
+		}
+
+		executeImageUpload(upload_data, urlToUploadMetadata, authorizationToken)
+		//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
+	}
+	
+	function executeImageUpload(upload_data, urlToUploadMetadata,
+			authorizationToken) {
+			disableRadioOptions();
+		$('#upload').prop('disabled', true);
+
+		var xhrmdt = new XMLHttpRequest();
+		xhrmdt.open('POST', urlToUploadMetadata, true);
+		xhrmdt.setRequestHeader("Content-Type", "application/json");
+		xhrmdt.setRequestHeader("Authorization", "Token " + authorizationToken);
 		xhrmdt.send(JSON.stringify(upload_data));
 		xhrmdt.onreadystatechange = function(e) {
 
 			if (xhrmdt.readyState === 4) {
-				if (xhrmdt.status === 400 || xhrmdt.status === 200 ) {
+				if (xhrmdt.status === 200) {
 
 					var myArr = JSON.parse(xhrmdt.responseText);
 					image_id = myArr.id;
-					if (myArr.image_upload_status == "Error") {
+					if (myArr.status== "Error") {
 						$('#file_upload_window_modal_body').html(myArr.details);
 						$("#file_upload_window_modal").modal({
 							backdrop : "static"
 						});
 						$('body').removeClass("modal-open");
 						$('#upload').prop('disabled', false);
+						enableRadioOptions();
 						return false;
 					}
-					BYTES_PER_CHUNK = 1048576 * 10; //10MB
-					start = 0;
-					end = BYTES_PER_CHUNK;
-					upload_chunks(image_id, start, end);
+					if (isDockerManualUpload || image_deployments == "VM") {
+					///	$('#upload').prop('disabled', false);
+						var oneMb = 1024 * 1024;
+						BYTES_PER_CHUNK = oneMb * 10; //10MB
+						start = 0;
+						end = BYTES_PER_CHUNK;
+						upload_chunks(image_id, start, end);
+					} else {
+						if (image_deployments == 'Docker') {
+							dockerdownloadImage(image_id);
+						}
+					}
 
-				}else if(xhrmdt.status === 401){
+				} else if (xhrmdt.status === 401) {
 					alert("Session timed out");
-					window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
-       					window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+					window.opener.mainViewModel.loginViewModel.userProfile
+							.authenticated(false);
+					window.opener.mainViewModel.loginViewModel.userProfile
+							.authorizationToken(null);
 					window.opener.location.reload();
 					window.close();
-				} else {
-					console.log("Clearing interval : "+refreshIntervalId );
-					clearInterval(refreshIntervalId );
+				}else if ((xhrmdt.status === 400) || (xhrmdt.status === 500)) {
+					var myArr = JSON.parse(xhrmdt.responseText);
+					image_id = myArr.id;
+					if (myArr.details) {
+						$('#file_upload_window_modal_body').html(myArr.details);
+						$("#file_upload_window_modal").modal({
+							backdrop : "static"
+						});
+
+						$('body').removeClass("modal-open");
+						$('#upload').prop('disabled', false);
+						enableRadioOptions();
+						return false;
+					}
+
+				} else if (xhrmdt.status === 404) {
+					var myArr = JSON.parse(xhrmdt.responseText);
+					image_id = myArr.id;
+					if (myArr.details) {
+						$('#file_upload_window_modal_body').html(myArr.details);
+						$("#file_upload_window_modal").modal({
+							backdrop : "static"
+						});
+
+						$('body').removeClass("modal-open");
+						$('#upload').prop('disabled', false);
+						enableRadioOptions();
+						return false;
+					}
+
+				} else  {
+					console.log("Clearing interval : " + refreshIntervalId);
+					clearInterval(refreshIntervalId);
 					alert("Failed to save image upload metdata.");
 					$('#upload').prop('disabled', false);
+					enableRadioOptions();
+					return false;
 				}
 			}
 		}
-		//NUM_CHUNKS = Math.max(Math.ceil(SIZE / BYTES_PER_CHUNK), 1);
+
+	}
+
+	function dockerdownloadImage(image_id) {
+	
+
+
+		$
+				.ajax({
+					type : "POST",
+					url : "/v1/rpc/docker-pull/" + image_id,
+					dataType : "json",
+					headers : {
+						"Authorization" : "Token " + authorizationToken
+					},
+					success : function(data) {
+					$('#upload').prop('disabled', false);
+						if (data.error) {
+							alert("Error in downloading docker image from hub");
+							$('#upload').prop('disabled', false);
+							return;
+						}
+						$("#message")
+								.html(
+										"<font color='blue'>Image has been queued for download !</font>");
+						document.getElementById("upload").onclick = function() {
+							this.disabled = false;
+						}
+						$('#upload').prop('disabled', false);
+						alert("Image has been successfully queued for download");
+						var goToTPDiv = $("#goToTrustPolicyPageDiv",
+								opener.document);
+						var uploadBtnDiv = $("#gotoUploadWindowDiv",
+								opener.document);
+						goToTPDiv.show();
+						
+						goToTPDiv.css("display", "block");
+						window.close();
+						return;
+					}
+				});
+
 	}
 
 	function upload_chunks(image_id, start, end) {
-
+		
 		if (start < SIZE) {
 			//alert(image_id);		
 			var blobslice = blob.slice(start, end);
@@ -255,10 +382,14 @@ input[readonly] {
 			xhr
 					.setRequestHeader("Authorization", "Token "
 							+ authorizationToken);
+			var start_time = new Date().getTime();
 			xhr.send(blobslice);
 
 			xhr.onreadystatechange = function(e) {
-
+				var responseTime = (new Date().getTime() - start_time);
+				if( ((NUM_CHUNKS * responseTime * 2) > timeToExpiry) && refreshIntervalId == 0){
+					extendSession();
+				}
 				if (xhr.readyState === 4) {
 					if (xhr.status === 200) {
 						var percentComplete;
@@ -284,15 +415,17 @@ input[readonly] {
 
 						upload_chunks(image_id, start, end);
 
-					}else if(xhrmdt.status === 401){
+					} else if (xhr.status === 401) {
 						alert("Session timed out");
-						window.opener.mainViewModel.loginViewModel.userProfile.authenticated(false);
-       						window.opener.mainViewModel.loginViewModel.userProfile.authorizationToken(null); 
+						window.opener.mainViewModel.loginViewModel.userProfile
+								.authenticated(false);
+						window.opener.mainViewModel.loginViewModel.userProfile
+								.authorizationToken(null);
 						window.opener.location.reload();
 						window.close();
 					} else {
-						console.log("Clearing interval : "+refreshIntervalId );
-						clearInterval(refreshIntervalId );
+						console.log("Clearing interval : " + refreshIntervalId);
+						clearInterval(refreshIntervalId);
 						alert("File upload failed..");
 						$('#upload').prop('disabled', false);
 					}
@@ -300,30 +433,79 @@ input[readonly] {
 			}
 
 		} else {
-			console.log("Clearing interval : "+refreshIntervalId );
-			clearInterval(refreshIntervalId );
-			
-			$("#message").html(
-					"<font color='blue'>Your file has been uploaded!</font>");
-
-			document.getElementById("upload").onclick = function() {
-				this.disabled = false;
+			if (image_deployments == 'Docker') {
+				dockerUploadSave();
+			} else {
+				$("#message")
+						.html(
+								"<font color='blue'>Your file has been uploaded!</font>");
+				document.getElementById("upload").onclick = function() {
+					this.disabled = false;
+				}
+				alert("Image upload successfully completed");
+				var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
+				var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
+				//uploadBtnDiv.hide();
+				goToTPDiv.show();
+				$('#upload').prop('disabled', false);
+				$('#upload').prop('disabled', false);
+				goToTPDiv.css("display", "block");
+				window.close();
 			}
-			var goToTPDiv = $("#goToTrustPolicyPageDiv",opener.document);
-			
-			
-			alert("Image upload successfully completed");	
-			$('#upload').prop('disabled', false);
-			goToTPDiv.css("display","block");
-			
-			
-			window.close();
-			
-
 		}
 	}
-</script>
-<script>
+
+	function dockerUploadSave() {
+		$("#message").html("<font color='green'>Setting up docker image</font>");
+		$
+		.ajax({
+			type : "POST",
+			url : "/v1/rpc/docker-process-uploaded-image/" + image_id,
+			dataType : "json",
+			headers : {
+				"Authorization" : "Token " + authorizationToken
+			},
+			success : function(data) {
+			$('#upload').prop('disabled', false);
+				if (data.error) {
+					alert("Error in uploading docker image");
+					$('#upload').prop('disabled', false);
+					return;
+				}
+				$("#message")
+						.html(
+								"<font color='blue'>Docker image uploaded successfully !</font>");
+				document.getElementById("upload").onclick = function() {
+					this.disabled = false;
+				}
+				$('#upload').prop('disabled', false);
+				alert("Docker image uploaded successfully");
+				var goToTPDiv = $("#goToTrustPolicyPageDiv",
+						opener.document);
+				var uploadBtnDiv = $("#gotoUploadWindowDiv",
+						opener.document);
+				goToTPDiv.show();
+				
+				goToTPDiv.css("display", "block");
+				window.close();
+				return;
+			},
+			error : function(data, textStatus, errorThrown) {
+				if (data.responseJSON.error) {
+					$("#progressbar").width(0 + '%');
+					$("#percent").html(0 + '%');
+					$('#file_upload_window_modal_body').html(data.responseJSON.error);
+					$("#file_upload_window_modal").modal({
+						backdrop : "static"
+					});
+					$('body').removeClass("modal-open");
+					$('#upload').prop('disabled', false);
+					return false;
+				}
+			}
+		});
+	}
+
 	$(document).on(
 			'change',
 			'.btn-file :file',
@@ -334,32 +516,230 @@ input[readonly] {
 				input.trigger('fileselect', [ numFiles, label ]);
 			});
 
-	$(document).ready(
-			function() {
-				$('.btn-file :file').on(
-						'fileselect',
-						function(event, numFiles, label) {
-							var input = $(this).parents('.input-group').find(
-									':text'), log = numFiles > 1 ? numFiles
-									+ ' files selected' : label;
+	$(document)
+			.ready(
+					function() {
+						$('[data-toggle="tooltip"]').tooltip();
+						if (image_deployments == "Docker") {
 
-							if (input.length) {
-								input.val(log);
-							} else {
-								if (log)
-									alert(log);
-							}
-						});
-			});
+							$(
+									"input[name=docker_upload_radio][value='uploadManually']")
+									.attr('checked', 'checked');
+							$("#docker_upload_option_div").show();
+								
+							$("#repo_tag").show();
+
+						} else {
+							$("#docker_upload_option_div").hide();
+							$("#repo_tag").hide();
+
+						}
+						$('.btn-file :file')
+								.on(
+										'fileselect',
+										function(event, numFiles, label) {
+											var input = $(this).parents(
+													'.input-group').find(
+													':text'), log = numFiles > 1 ? numFiles
+													+ ' files selected'
+													: label;
+
+											if (input.length) {
+												input.val(log);
+											} else {
+												if (log)
+													alert(log);
+											}
+										});
+					});
+
+	function showHideDockerUploadOptions() {
+
+		var status = document
+				.querySelector('input[name="docker_upload_radio"]:checked').value;
+
+		if (status == 'uploadManually') {
+			$("#upload__browse_image_div").show();
+			$("input[name=docker_upload_radio][value='uploadManually']").attr(
+					'checked', 'checked');
+			$("#progressbox").show();
+			$("#message_body").show();
+			$("#upload").attr('value','Upload');
+
+		} else {
+			$("#progressbox").hide();
+			$("#upload__browse_image_div").hide();
+			$("input[name=docker_upload_radio][value='downloadFromHub']").attr(
+					'checked', 'checked');
+			$("#message_body").hide();
+			$("#upload").attr('value','Download');
+
+		}
+	}
+	
+	
+	function refresh_stalled_images_grid(){
+	
+	
+		console.log("Refreshing stalled Image Grid");
+		$("#stalled-images-grid").html("");
+		
+		$.ajax({
+			type: "GET",
+			url: "/v1/images-stalled",
+			headers : {
+				"Authorization" : "Token " + authorizationToken
+			},
+			dataType: "json",
+			success: function(result) {
+				images = result;
+				var grid = [];
+				for (i = 0; i < images.length; i++) {
+					if (images[i].deleted) {
+						continue;
+					}
+					var gridData = {};
+
+					gridData.image_name = images[i].image_name;
+					gridData.created_date = images[i].created_date;
+					var deleteCallArr = "['deleteImage', 'Are you sure you want to delete the image?' , '" + images[i].id + "']";
+					gridData.image_delete = "<a href=\"#\"><span class=\"glyphicon glyphicon-remove\" title=\"Remove Stalled Image\" id=\"stalled_remove_row_" + i + "\" onclick=\"confirmDeleteOperation("+deleteCallArr +")\"/></a>";
+					grid.push(gridData);
+
+				}
+				
+				$("#stalled-images-grid").jsGrid({
+
+					height: "auto",
+					width: "80%",
+					sorting: true,
+					paging: true,
+					pageSize: 10,
+					pageButtonCount: 15,
+					data: grid,
+					fields: [{
+							title: "Image Name",
+							name: "image_name",
+							type: "text",
+							width: 200,
+							align: "center"
+					},  {
+							title: "Delete",
+							name: "image_delete",
+							type: "text",
+							width: 50,
+							align: "center"
+					},
+						
+						{
+							title: "Policy Created Date",
+							name: "created_date",
+							type: "text",
+							width: 50,
+							align: "center"
+					}],
+					onRefreshed: function(args) {
+						if (grid.length <= 0) {
+							return;
+						}
+						var numOfPagesWithDecimal = grid.length / args.grid.pageSize;
+						var numOfPages = Math.ceil(numOfPagesWithDecimal);
+						if (args.grid.pageIndex > numOfPages) {
+							args.grid.reset();
+						}
+
+					}
+				});
+				$("#stalled-images-grid").jsGrid("sort", { field: "image_name", order: "asc" });
+			}
+		});
+	}
+	
+	function confirmDeleteOperation(deleteCallArr){
+		var funcName = deleteCallArr[0];
+
+		var args = "";
+		if(deleteCallArr.length > 2){
+			for(var i=2;i<deleteCallArr.length;i++){
+				args=args + "'"+deleteCallArr[i]+"',";			
+			}
+			args = args.substring(0, args.length-1);
+		}
+		var func = funcName+"("+args+")";
+		$("#confirm_delete").attr("onclick", func);
+		$("#delete_confirmation_window_text").text(deleteCallArr[1]);
+		$("#delete_confirmation_window").modal('show');
+	}
+	
+	function deleteImage(imageid) {
+		$.ajax({
+			type : "DELETE",
+			url : "/v1/images/" + imageid,
+			dataType : "text",
+			headers : {
+				"Authorization" : "Token " + authorizationToken
+			},
+			success : function(result) {
+				refresh_stalled_images_grid();
+			}
+		});
+	}
+	
+	
+	
+	function enableRadioOptions() {
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
+		if (status == 'uploadManually') {
+			$("input[name=docker_upload_radio][value='downloadFromHub']").attr(
+					'disabled', false);
+		} else {
+			$("input[name=docker_upload_radio][value='uploadManually']").attr(
+					'disabled', false);
+		}
+
+	}
+
+	function disableRadioOptions() {
+
+		//var status = document.querySelector('input[name="docker_upload_radio"]:checked').value;
+		var status = $('input[name="docker_upload_radio"]:checked').val();
+
+		if (status == 'uploadManually') {
+
+			$('input[name="docker_upload_radio"][value="downloadFromHub"]')
+					.attr('disabled', true);
+		} else {
+
+			$('input[name="docker_upload_radio"][value="uploadManually"]')
+					.attr('disabled', true);
+		}
+
+	}
 </script>
 
 </head>
+
 <body>
 
 	<form id="UploadForm" name="myform" method="post"
 		enctype="multipart/form-data">
-		<h4>Please Select File ::</h4>
-		<div class="input-group">
+		
+		<div id="docker_upload_option_div" class="form-group">
+			<div id="docker_upload_option" class="col-md-8">
+				<label class="radio-inline"> <input type="radio"
+					value="uploadManually" id="docker_upload_radio"
+					name="docker_upload_radio" onclick="showHideDockerUploadOptions();" />Manual
+					Upload
+				</label> <label class="radio-inline"> <input type="radio"
+					value="downloadFromHub" id="docker_upload_radio"
+					name="docker_upload_radio" onclick="showHideDockerUploadOptions();" />Pull
+					from Hub
+				</label>
+			</div>
+		</div>
+
+		<div id="upload__browse_image_div" class="input-group">
 			<span class="input-group-btn"> <span
 				class="btn btn-primary btn-file"> Browse&hellip; <input
 					type="file" id="myfile" name="myfile">
@@ -367,7 +747,15 @@ input[readonly] {
 			</span> <input type="text" class="form-control" readonly>
 		</div>
 		<br /> <input type="text" id="image_name_input" class="form-control"
-			placeholder="Enter Image Name with extension (optional)...">
+			placeholder="Enter Image Name with extension(optional) ...">
+		<br />
+		<div id="repo_tag" style="display: none;">
+			<input type="text" id="input_repo" data-toggle="tooltip"
+				title="Repo of Docker Image" class="form-control"
+				placeholder="Enter Repository"> <br /> <input type="text"
+				id="input_tag" data-toggle="tooltip" title="Tag of Docker Image"
+				class="form-control" placeholder="Enter Tag">
+		</div>
 		<br /> <input class="btn btn-primary" id="upload" type="button"
 			onclick="validateForm()" value="Upload">
 		<div id="progressbox">
@@ -376,11 +764,36 @@ input[readonly] {
 		</div>
 		<br />
 		<div id="message"></div>
-		<div>
-			<font color="red">Note : Please Don't Close This Window when
+		<div id="message_body">
+			<font color="red">Note : Please do not close this window when
 				upload is in progress...!!!</font>
 		</div>
+		<br />		<br />		<br />
+		
+		
+		<!-- Modal -->
+		<div class="modal fade" data-backdrop="static" data-keyboard="false"  id="delete_confirmation_window" role="dialog">
+			<div class="modal-dialog modal-md">	
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-header">
+						<center><h4 class="modal-title" id = "delete_confirmation_window_text"></h4></center>
+					</div>
+					<div class="modal-footer">
+						<div class="row">
+							<div class="col-md-4"></div>
+							<div class="col-md-1"><button type="button" class="btn btn-danger" data-dismiss="modal">No</button></div>
+							<div class="col-md-2"></div>
+							<div class="col-md-1"><button type="button" class="btn btn-success" data-dismiss="modal" id = "confirm_delete" >Yes</button></div>
+							<div class="col-md-4"></div>
+						</div>
+					</div>
+				</div>	
+			</div>
+		</div>
 
+		
+		
 		<!-- Modal -->
 		<div class="modal fade" id="file_upload_window_modal" role="dialog">
 			<div class="modal-dialog">
@@ -402,8 +815,17 @@ input[readonly] {
 			</div>
 		</div>
 	</form>
-
+		<!--<button onclick="refresh_stalled_images_grid()">Stalled Images</button><br />-->
+		<div class="row">
+			<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<div id = "stalled-images-grid"></div>
+			</div>
+			<div class="col-md-3"></div>
+		</div>
+		
 
 
 </body>
+
 </html>

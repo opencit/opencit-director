@@ -1,4 +1,3 @@
-endpoint = "/v1";
 var imageFormats = new Array();
 var image_policies = new Array();
 
@@ -37,7 +36,7 @@ function EditBMImageViewModel(data) {
 		current_display_name = $('#display_name_edit_bm').val();
 		$.ajax({
 			type : "POST",
-			url : endpoint + "trustpoliciesmetadata",
+			url : "/v1/" + "trustpoliciesmetadata",
 			contentType : "application/json",
 			headers : {
 				'Accept' : 'application/json'
@@ -84,7 +83,7 @@ function showBMImageLaunchPolicies(policydata) {
 
 	$.ajax({
 		type : "GET",
-		url : endpoint + current_image_id + "/trustpolicymetadata",
+		url : "/v1/" + current_image_id + "/trustpolicymetadata",
 		dataType : "json",
 		success : function(data, status, xhr) {
 

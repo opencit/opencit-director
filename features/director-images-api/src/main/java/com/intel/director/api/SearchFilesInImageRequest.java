@@ -24,7 +24,18 @@ public class SearchFilesInImageRequest {
     public boolean files_for_policy;
     public boolean reset_regex;
     public boolean init;
+    public String filter_type;
+    
     public String id;
+	
+    
+
+	public String getFilter_type() {
+		return filter_type;
+	}
+	public void setFilter_type(String filter_type) {
+		this.filter_type = filter_type;
+	}
 	public String getDir()  {
 		try {
 			return URLDecoder.decode(dir, "UTF-8");
