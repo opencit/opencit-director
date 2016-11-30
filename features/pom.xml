@@ -23,7 +23,6 @@
 		<module>director-dockerhub</module>
 		<module>director-async-image-processor</module>
 		<module>director-kms</module>
-		<module>director-swift</module>
     </modules>
     
 </project>
