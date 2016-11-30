@@ -185,9 +185,6 @@ public class DirectoryAndFileUtil {
     log.debug("Symlink mount path:{}", filePath);
     String symlinkTarget = Files.readSymbolicLink(Paths.get(filePath)).toString();
     log.debug("Symlink target:{}", symlinkTarget);
-    if(!symlinkTarget.startsWith("/")){
-      symlinkTarget = Paths.get(filePath).getParent().toString()  + File.separator + symlinkTarget;
-    }
     String mergedLinkTarget = symlinkMeasurement.getPath() +
         symlinkTarget.replace(DirectorUtil.getMountPath(imageId) + File.separator +  "mount", "");
     log.debug("Merged Symlink Target: {}", mergedLinkTarget);

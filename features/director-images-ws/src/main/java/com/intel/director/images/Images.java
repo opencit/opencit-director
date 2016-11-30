@@ -5,6 +5,9 @@
  */
 package com.intel.director.images;
 
+import com.intel.director.api.upload.Chunk;
+import com.intel.director.service.impl.UploadService;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +19,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -32,11 +36,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
-import javax.ws.rs.BeanParam;
-import com.intel.director.api.upload.Chunk;
-import com.intel.director.service.impl.UploadService;
-import org.apache.commons.io.IOUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -786,7 +787,7 @@ public class Images {
 	try {
 	    mountImageResponse = imageService.mountImage(mountImage.id, user);
 	} catch (DirectorException e) {
-	    log.error("Error while Mounting the Image");
+	    log.error("Error while Mounting the Image",e);
 	    GenericResponse genericResponse = new GenericResponse();
 	    genericResponse.setError(e.getMessage());
 	    genericResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
