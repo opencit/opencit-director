@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature xmlns="urn:mtwilson:feature:1.0">
 <id>director-async-processor</id>
-<version>3.1-SNAPSHOT</version>
+<version>3.2-SNAPSHOT</version>
 <name>director-async-processor</name>
 <provider><name>Intel Corporation</name></provider>
 <description>TDAAS</description>
