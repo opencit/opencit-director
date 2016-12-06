@@ -65,8 +65,8 @@ import com.intel.mtwilson.shiro.ShiroUtil;
 import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
 import com.intel.mtwilson.trustpolicy2.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement;
 import com.intel.mtwilson.util.exec.EscapeUtil;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -74,12 +74,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -91,12 +88,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.dozer.Mapper;
@@ -743,7 +737,8 @@ public class ImageServiceImpl implements ImageService {
 		List<Measurement> measurements = getMeasurements(searchFilesInImageRequest.id);
 		Map<String, Boolean> directoryListContainingPolicyFiles = new HashMap<>();
 		Set<TreeNodeDetail> directoryListContainingRegex = new HashSet<>();
-		List<String> trustPolicyElementsList = new ArrayList<>();
+		Set<String> preSelectedPaths = new HashSet<>();
+		Set<String> trustPolicyElementsList = new HashSet<>();
 		Set<String> fileNames = new HashSet<>();
 		Set<String> patchFileAddSet = new HashSet<>();
 		Set<String> patchFileRemoveSet = new HashSet<>();
@@ -771,7 +766,7 @@ public class ImageServiceImpl implements ImageService {
 				 */
 				init(trustPolicyElementsList,
 						directoryListContainingPolicyFiles,
-						directoryListContainingRegex, searchFilesInImageRequest);
+						directoryListContainingRegex, preSelectedPaths, searchFilesInImageRequest);
 			} catch (DbException e) {
 				log.error("Error updating policy draft for image {}",
 						searchFilesInImageRequest.id, e);
@@ -876,7 +871,18 @@ public class ImageServiceImpl implements ImageService {
 			if (!searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
 				Collection<File> files = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
 				for (File file : files) {
-					patchFileRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					if (Files.isSymbolicLink(file.toPath())) {
+						patchSymLinkRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (file.isFile()) {
+						patchFileRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+
+					if (file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
+						patchDirRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+					}
+					patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 				}
 			}
 
@@ -905,7 +911,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 
 		/* Selected Directory request. Select all files under directory */
-		if (searchFilesInImageRequest.recursive) {
+		if (searchFilesInImageRequest.recursive && searchFilesInImageRequest.init) {
 			filesInImageResponse.patchXml = new ArrayList<>();
 			String parentDir = searchFilesInImageRequest.getDir();
 
@@ -914,23 +920,35 @@ public class ImageServiceImpl implements ImageService {
 			 * Recursive is true in two cases:- 1. Select All or deselect all 2.
 			 * Regex applied
 			 */
-			if (searchFilesInImageRequest.files_for_policy) {
+			if ( searchFilesInImageRequest.files_for_policy) {
 				// This means that the user has checked the parent directory
 				// checkbox
-				for (String fileName : fileNames) {
-					String path = mountPath + parentDir + fileName;
-					File file = new File(path);
+				Collection<File> selectedFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				patchDirAddSet.add(searchFilesInImageRequest.getDir());
+				for (File file : selectedFiles) {
+					if (Files.isSymbolicLink(file.toPath())) {
+						String tmpPath = file.getAbsolutePath().replace(mountPath, "");
+						if(!preSelectedPaths.contains(tmpPath)) {
+							patchSymLinkAddSet.add(tmpPath);
+						}
+					}
+
 					if (file.isFile()) {
-						patchFileAddSet.add(parentDir + fileName);
+						String tmpPath = file.getAbsolutePath().replace(mountPath, "");
+						if(!preSelectedPaths.contains(tmpPath)) {
+							patchFileAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+						}
 					}
+
 					if (file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
-						patchDirAddSet.add(parentDir + fileName);
+						String tmpPath = file.getAbsolutePath().replace(mountPath, "");
+						if(!preSelectedPaths.contains(tmpPath)) {
+							patchDirAddSet.add(file.getAbsolutePath().replace(mountPath, ""));
+						}
 					}
-					if(Files.isSymbolicLink(file.toPath())){
-						patchSymLinkAddSet.add(parentDir + fileName);
-					}
-					if (!trustPolicyElementsList.contains(parentDir + fileName)) {
-						trustPolicyElementsList.add(parentDir + fileName);
+
+					if (!trustPolicyElementsList.contains(file.getAbsolutePath().replace(mountPath, ""))) {
+						trustPolicyElementsList.add(file.getAbsolutePath().replace(mountPath, ""));
 					}
 				}
 			} else {
@@ -939,14 +957,19 @@ public class ImageServiceImpl implements ImageService {
 				 * files(including directories) opened last time. It does not
 				 * contain files on which new regex is applied
 				 */
-				for (String fileName : fileNames) {
-					Path file = Paths.get(mountPath, parentDir, fileName);
-					if (file.toFile().isFile()) {
-						patchFileRemoveSet.add(parentDir + fileName);
+				Collection<File> selectedFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
+				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
+				for (File rFile : selectedFiles) {
+					if (Files.isSymbolicLink(rFile.toPath())) {
+						patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
 					}
-					if (Files.isSymbolicLink(file)) {
-						patchSymLinkRemoveSet.add(parentDir + fileName);
+					if (rFile.isFile()) {
+						patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
 					}
+					if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+						patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					}
+					trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
 				}
 			}
 		}
@@ -1410,76 +1433,78 @@ public class ImageServiceImpl implements ImageService {
 	}
     }
 
-    private void createListOfFileNamesForTree(SearchFilesInImageRequest searchFilesInImageRequest,
-	    Collection<File> treeFiles, Set<String> fileNames, Set<String> directoryListContainingPolicyFiles) {
-	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
-    List<String> directoryList= new ArrayList<String>();
-	directoryList.addAll(directoryListContainingPolicyFiles);
-	Collections.sort(directoryList);
-	for (File file : treeFiles) {
-	    String _file = file.getAbsolutePath().replace(mountPath, "");
-	    _file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
-	    ////if (!directoryListContainingPolicyFiles.contains(mountPath + File.separator + _file)) {
-		int index=Collections.binarySearch(directoryList, mountPath
-					+ File.separator + _file);
-        if(index<0){
-		   fileNames.add(_file);
-	    }
-	}
-    }
-
-    private void init(List<String> trustPolicyElementsList, Map<String, Boolean> directoryListContainingPolicyFiles,
-	    Set<TreeNodeDetail> directoryListContainingRegex, SearchFilesInImageRequest searchFilesInImageRequest) {
-	/*
-	 * if (!searchFilesInImageRequest.init) { trustPolicyElementsList =
-	 * null; return; }
-	 */
-	// Fetch the files from the draft
-	String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
-	try {
-	    TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
-		    .fetchPolicyDraftForImage(searchFilesInImageRequest.id);
-
-	    try {
-		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
-			.getPolicy(trustPolicyDraft.getTrust_policy_draft());
-		if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
-		    for (Measurement measurement : trustPolicyDraftObj.getWhitelist().getMeasurements()) {
-			log.info(measurement.getPath() + " **** " + searchFilesInImageRequest.getDir());
-			if (searchFilesInImageRequest.init
-				&& measurement.getPath().startsWith(searchFilesInImageRequest.getDir())) {
-			    trustPolicyElementsList.add(measurement.getPath());
-
-			    if (measurement instanceof FileMeasurement) {
-				TdaasUtil.getParentDirectory(searchFilesInImageRequest.id,
-					mountPath + measurement.getPath(),
-					mountPath + searchFilesInImageRequest.getDir(),
-					directoryListContainingPolicyFiles, true);
-				
-			    }
-			    if (measurement instanceof DirectoryMeasurement) {
-				TreeNodeDetail detail = new TreeNodeDetail();
-				detail.regexPath = measurement.getPath();
-				detail.regexExclude = ((DirectoryMeasurement) measurement).getExclude();
-				detail.regexInclude = ((DirectoryMeasurement) measurement).getInclude();
-				detail.filterType =  ((DirectoryMeasurement) measurement).getFilterType();
-
-				detail.isRegexRecursive = searchFilesInImageRequest.recursive;
-				directoryListContainingRegex.add(detail);
-			    }
-
-			}
-		    }
+	private void createListOfFileNamesForTree(SearchFilesInImageRequest searchFilesInImageRequest,
+			Collection<File> treeFiles, Set<String> fileNames,
+			Set<String> directoryListContainingPolicyFiles) {
+		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+		List<String> directoryList = new ArrayList<String>();
+		directoryList.addAll(directoryListContainingPolicyFiles);
+		Collections.sort(directoryList);
+		for (File file : treeFiles) {
+			String _file = file.getAbsolutePath().replace(mountPath, "");
+			_file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
+			////if (!directoryListContainingPolicyFiles.contains(mountPath + File.separator + _file)) {
+			//String filePath = Paths.get(searchFilesInImageRequest.dir, _file).toString();
+			//int index = Collections.binarySearch(directoryList, filePath);
+			//if (index < 0) {
+				fileNames.add(_file);
+			//}
 		}
-	    } catch (JAXBException e) {
-		log.error("Error while reading JAXB creating file list from policy draft  ", e);
-	    }
-
-	} catch (DbException ex) {
-	    log.error("Error while fetching current policy draft ", ex);
 	}
 
-    }
+	private void init(Set<String> trustPolicyElementsList,
+			Map<String, Boolean> directoryListContainingPolicyFiles,
+			Set<TreeNodeDetail> directoryListContainingRegex, Set<String> preSelectedPaths,
+			SearchFilesInImageRequest searchFilesInImageRequest) {
+		/*
+		 * if (!searchFilesInImageRequest.init) { trustPolicyElementsList =
+		 * null; return; }
+	 	 */
+		// Fetch the files from the draft
+		String mountPath = TdaasUtil.getMountPath(searchFilesInImageRequest.id);
+		try {
+			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
+					.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+
+			try {
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
+						.getPolicy(trustPolicyDraft.getTrust_policy_draft());
+				if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
+					for (Measurement measurement : trustPolicyDraftObj.getWhitelist().getMeasurements()) {
+						log.info(measurement.getPath() + " **** " + searchFilesInImageRequest.getDir());
+						trustPolicyElementsList.add(measurement.getPath());
+						if (searchFilesInImageRequest.init
+								&& measurement.getPath().startsWith(searchFilesInImageRequest.getDir())) {
+							if (measurement instanceof FileMeasurement) {
+								TdaasUtil.getParentDirectory(searchFilesInImageRequest.id,
+										mountPath + measurement.getPath(),
+										mountPath + searchFilesInImageRequest.getDir(),
+										directoryListContainingPolicyFiles, true);
+								preSelectedPaths.add(measurement.getPath());
+							}
+							if (measurement instanceof SymlinkMeasurement) {
+								preSelectedPaths.add(measurement.getPath());
+							}
+							if (measurement instanceof DirectoryMeasurement) {
+								TreeNodeDetail detail = new TreeNodeDetail();
+								detail.regexPath = measurement.getPath();
+								detail.regexExclude = ((DirectoryMeasurement) measurement).getExclude();
+								detail.regexInclude = ((DirectoryMeasurement) measurement).getInclude();
+								detail.filterType = ((DirectoryMeasurement) measurement).getFilterType();
+								detail.isRegexRecursive = searchFilesInImageRequest.recursive;
+								directoryListContainingRegex.add(detail);
+								preSelectedPaths.add(measurement.getPath());
+							}
+						}
+					}
+				}
+			} catch (JAXBException e) {
+				log.error("Error while reading JAXB creating file list from policy draft  ", e);
+			}
+		} catch (DbException ex) {
+			log.error("Error while fetching current policy draft ", ex);
+		}
+	}
 
     private List<Measurement> getMeasurements(String imageID) {
 	try {
@@ -1505,114 +1530,53 @@ public class ImageServiceImpl implements ImageService {
 		if (filesInImageResponse.patchXml == null) {
 			filesInImageResponse.patchXml = new ArrayList<>();
 		}
-		boolean includeDir = false;
-		if (StringUtils.isNotBlank(searchFilesInImageRequest.include)
-				|| StringUtils.isNotBlank(searchFilesInImageRequest.exclude)) {
-			includeDir = true;
-		}
-		// Remove patch
-		if (measurements != null) {
-			for (Measurement measurement : measurements) {
-				if (measurement instanceof DirectoryMeasurement) {
-					/* 5224 - Create remove dir patch */
-					if (patchDirRemoveSet.contains(measurement.getPath())) {
-						filesInImageResponse.patchXml
-								.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-										+ measurement.getPath() + "\"]'></remove>");
-					}
-					continue;
-				}
-
-				if (patchFileRemoveSet.contains(measurement.getPath())) {
-					filesInImageResponse.patchXml
-							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
-									+ measurement.getPath() + "\"]'></remove>");
-				}
-
-				if (patchSymLinkRemoveSet.contains(measurement.getPath())) {
-					filesInImageResponse.patchXml
-							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Symlink\"][@Path=\""
-									+ measurement.getPath() + "\"]'></remove>");
-				}
-			}
-		}
-		if (searchFilesInImageRequest.reset_regex) {
-			filesInImageResponse.patchXml
-					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-							+ searchFilesInImageRequest.getDir() + "\"]'></remove>");
-		}
-
-		if (includeDir) {
-			String dirPath = null;
-			for (String patchFile : patchDirAddSet) {
-				boolean found = false;
-				if (measurements != null) {
-					for (Measurement measurement : measurements) {
-						if (measurement instanceof DirectoryMeasurement) {
-							if (measurement.getPath().equals(patchFile)) {
-								found = true;
-								dirPath = measurement.getPath();
-								break;
-							}
-						}
-					}
-				}
-
-				/* 5224 - Add Filter type and remove recursive attribute */
-				String filterTypeAttribute = "FilterType=\"" + searchFilesInImageRequest.filter_type + "\"";
-				if (found) {
-					filesInImageResponse.patchXml
-							.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
-									+ dirPath + "\"]'></remove>");
-				}
-				filesInImageResponse.patchXml
-						.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
-								+ patchFile
-								+ "\" Include=\""
-								+ (searchFilesInImageRequest.include == null ? ""
-								: searchFilesInImageRequest.include)
-								+ "\" Exclude=\""
-								+ (searchFilesInImageRequest.exclude == null ? ""
-								: searchFilesInImageRequest.exclude)
-								+ "\" "
-								+ filterTypeAttribute
-								+ "/></add>");
-			}
-		}
 
 		for (String patchFile : patchFileAddSet) {
-			boolean found = false;
-			if (measurements != null) {
-				for (Measurement measurement : measurements) {
-					if (measurement instanceof FileMeasurement) {
-						if (measurement.getPath().equals(patchFile)) {
-							found = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if (!found || includeDir) {
-				String dirPath = "";
-				String pos = "";
-				if (includeDir) {
-					dirPath =
-							"/*[local-name()=\"Dir\"][@Path=\"" + searchFilesInImageRequest.getDir() + "\"]";
-					pos = "pos=\"after\"";
-				} else {
-					pos = "pos=\"prepend\"";
-				}
-
-				filesInImageResponse.patchXml.add(
-						"<add " + pos + " sel='//*[local-name()=\"Whitelist\"]" + dirPath
-								+ "'><File Path=\"" + patchFile + "\"/></add>");
-			}
+			filesInImageResponse.patchXml.add(
+					"<add sel='//*[local-name()=\"Whitelist\"]'><File Path=\"" + patchFile + "\"/></add>");
 		}
 
 		for (String patchFile : patchSymLinkAddSet) {
 				filesInImageResponse.patchXml.add(
 						"<add sel='//*[local-name()=\"Whitelist\"]'><Symlink Path=\"" + patchFile + "\"/></add>");
+		}
+
+		for (String patchFile : patchDirAddSet) {
+			String filterType = searchFilesInImageRequest.filter_type == null
+					? ""
+					: searchFilesInImageRequest.filter_type;
+
+			String filterTypeAttribute = "FilterType=\"" + filterType	+ "\"";
+			filesInImageResponse.patchXml
+					.add("<add sel='//*[local-name()=\"Whitelist\"]'><Dir Path=\""
+							+ patchFile
+							+ "\" Include=\""
+							+ (searchFilesInImageRequest.include == null ? ""
+							: searchFilesInImageRequest.include)
+							+ "\" Exclude=\""
+							+ (searchFilesInImageRequest.exclude == null ? ""
+							: searchFilesInImageRequest.exclude)
+							+ "\" "
+							+ filterTypeAttribute
+							+ "/></add>");
+		}
+
+		for (String patchFile : patchFileRemoveSet) {
+			filesInImageResponse.patchXml
+					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"File\"][@Path=\""
+							+ patchFile + "\"]'></remove>");
+		}
+
+		for (String patchFile : patchSymLinkRemoveSet) {
+			filesInImageResponse.patchXml
+					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Symlink\"][@Path=\""
+							+ patchFile + "\"]'></remove>");
+		}
+
+		for (String patchFile : patchDirRemoveSet) {
+			filesInImageResponse.patchXml
+					.add("<remove sel='//*[local-name()=\"Whitelist\"]/*[local-name()=\"Dir\"][@Path=\""
+							+ patchFile + "\"]'></remove>");
 		}
 	}
 

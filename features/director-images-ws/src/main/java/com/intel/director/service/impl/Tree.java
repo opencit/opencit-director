@@ -26,7 +26,7 @@ public class Tree {
 		this.dirPathsForEdit = dirPathsForEdit;
 	}
 
-	public List<String> trustPolicyElementsList = null;
+	public Set<String> trustPolicyElementsList = null;
 
 	public Tree() {
 		super();
@@ -34,7 +34,7 @@ public class Tree {
 
 	public Tree(SearchFilesInImageRequest searchFilesInImageRequest,
 			String mountPath, Set<TreeNodeDetail> directoryListContainingRegex,
-			List<String> trustPolicyElementsList, Set<String> dirPathsForEdit,
+			Set<String> trustPolicyElementsList, Set<String> dirPathsForEdit,
 			Set<String> fileNames) {
 
 		this.mountPath = mountPath;
