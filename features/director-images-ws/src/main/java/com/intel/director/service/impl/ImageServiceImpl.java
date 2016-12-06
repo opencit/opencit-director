@@ -3026,9 +3026,5 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
-	@Override
-	public TrustPolicyDraft fetchPolicyDraftForImage(String image_id) throws DirectorException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 }
