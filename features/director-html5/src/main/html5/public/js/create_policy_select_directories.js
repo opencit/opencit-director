@@ -176,7 +176,13 @@ function toggleState(node) {
     var n = id.indexOf("_");
     path = id.substring(n + 1);
 
+    if ($(node).hasClass('fa-unlock')) {
+		$("#resetRegexVMBtn").prop("disabled", true);
+	} else {
 
+		$("#resetRegexVMBtn").prop("disabled", false);
+	}
+    
     var checkboxObj = $("input[name='checkbox_" + path + "']");
     console.log("input[name='checkbox_" + path + "']");
     //Check if the dir has regex
@@ -628,6 +634,7 @@ function editPatch(file, checkedStatus, rootRegexDir) {
     	elementType="Symlink";	
     	
     }else if($("input[name='" + file + "']").parent().hasClass('Directory')){
+  
     	elementType="Directory";
     }
     /*if (rootRegexDir != "") {

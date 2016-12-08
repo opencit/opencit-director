@@ -222,6 +222,7 @@ if(jQuery) (function($){
 								if(this.checked){
 									treeOptions.files_for_policy = true;
 								}
+								treeOptions.init = true;
 								showTree( $(this).parent(),  treeOptions,"");
 								$(this).parent().removeClass('collapsed').addClass('expanded');
 

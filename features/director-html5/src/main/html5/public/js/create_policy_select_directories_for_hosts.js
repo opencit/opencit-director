@@ -177,7 +177,12 @@ function toggleState(node) {
     var id = node.id;
     var n = id.indexOf("_");
     path = id.substring(n + 1);
+	if ($(node).hasClass('fa-unlock')) {
+		$("#resetRegexBmLiveBtn").prop("disabled", true);
+	} else {
 
+		$("#resetRegexBmLiveBtn").prop("disabled", false);
+	}
 
     var checkboxObj = $("input[name='checkbox_" + path + "']");
     console.log("input[name='checkbox_" + path + "']");
