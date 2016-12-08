@@ -832,16 +832,18 @@ public class ImageServiceImpl implements ImageService {
 			if (searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
 				Collection<File> regexFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
 				for (File rFile : regexFiles) {
-					if (Files.isSymbolicLink(rFile.toPath())) {
-						patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+					if(trustPolicyElementsList.contains(rFile.getAbsolutePath().replace(mountPath, ""))) {
+						if (Files.isSymbolicLink(rFile.toPath())) {
+							patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
+						if (rFile.isFile()) {
+							patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
+						if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+							patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
+						trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
 					}
-					if (rFile.isFile()) {
-						patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-					}
-					if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
-						patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-					}
-					trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
 				}
 				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 			}
@@ -870,20 +872,22 @@ public class ImageServiceImpl implements ImageService {
 			/* If Request is to reset regex/wildcard for single directory */
 			if (!searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
 				Collection<File> files = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
-				for (File file : files) {
-					if (Files.isSymbolicLink(file.toPath())) {
-						patchSymLinkRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
-					}
+				for (File rFile : files) {
+					if(trustPolicyElementsList.contains(rFile.getAbsolutePath().replace(mountPath, ""))) {
+						if (Files.isSymbolicLink(rFile.toPath())) {
+							patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
 
-					if (file.isFile()) {
-						patchFileRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
-					}
+						if (rFile.isFile()) {
+							patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
 
-					if (file.isDirectory() && !Files.isSymbolicLink(file.toPath())) {
-						patchDirRemoveSet.add(file.getAbsolutePath().replace(mountPath, ""));
+						if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+							patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+						}
 					}
-					patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 				}
+				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 			}
 
 			/* If Request is to apply regex/wildcard for single directory */
@@ -960,16 +964,18 @@ public class ImageServiceImpl implements ImageService {
 				Collection<File> selectedFiles = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
 				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 				for (File rFile : selectedFiles) {
-					if (Files.isSymbolicLink(rFile.toPath())) {
-						patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-					}
-					if (rFile.isFile()) {
-						patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-					}
-					if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
-						patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-					}
-					trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
+				  if(trustPolicyElementsList.contains(rFile.getAbsolutePath().replace(mountPath, ""))) {
+            if (Files.isSymbolicLink(rFile.toPath())) {
+              patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+            }
+            if (rFile.isFile()) {
+              patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+            }
+            if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
+              patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
+            }
+            trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
+          }
 				}
 			}
 		}
@@ -3026,5 +3032,9 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
-	
+	@Override
+	public TrustPolicyDraft fetchPolicyDraftForImage(String image_id) throws DirectorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
