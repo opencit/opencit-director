@@ -695,7 +695,7 @@ public class ImageServiceImpl implements ImageService {
 								.updatePolicyDraft(trustPolicyDraft);
 
 					}
-					log.info("trustPolicy2DraftObj final: " + policyDraftXml);
+					log.debug("trustPolicy2DraftObj final: " + policyDraftXml);
 
 				} catch (DbException e) {
 					throw new DirectorException(
