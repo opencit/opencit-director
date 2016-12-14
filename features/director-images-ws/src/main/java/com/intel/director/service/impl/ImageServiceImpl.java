@@ -1,3 +1,4 @@
+
 package com.intel.director.service.impl;
 
 import com.intel.director.api.CreateTrustPolicyMetaDataRequest;
@@ -695,7 +696,7 @@ public class ImageServiceImpl implements ImageService {
 								.updatePolicyDraft(trustPolicyDraft);
 
 					}
-					log.info("trustPolicy2DraftObj final: " + policyDraftXml);
+					log.debug("trustPolicy2DraftObj final: " + policyDraftXml);
 
 				} catch (DbException e) {
 					throw new DirectorException(
@@ -771,6 +772,8 @@ public class ImageServiceImpl implements ImageService {
 				log.error("Error updating policy draft for image {}",
 						searchFilesInImageRequest.id, e);
 			}
+		} else{
+			populateTrustPolicyElements(trustPolicyElementsList, searchFilesInImageRequest);
 		}
 
 		log.info("after init");
@@ -885,6 +888,8 @@ public class ImageServiceImpl implements ImageService {
 						if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
 							patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
 						}
+
+						trustPolicyElementsList.remove(rFile.getAbsolutePath().replace(mountPath, ""));
 					}
 				}
 				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
@@ -1455,6 +1460,23 @@ public class ImageServiceImpl implements ImageService {
 			//if (index < 0) {
 				fileNames.add(_file);
 			//}
+		}
+	}
+
+	private void populateTrustPolicyElements(Set<String> trustPolicyElementsList,
+			SearchFilesInImageRequest searchFilesInImageRequest) {
+		try {
+			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
+					.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
+						.getPolicy(trustPolicyDraft.getTrust_policy_draft());
+				if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
+					for (Measurement measurement : trustPolicyDraftObj.getWhitelist().getMeasurements()) {
+						trustPolicyElementsList.add(measurement.getPath());
+					}
+				}
+		} catch (JAXBException  | DbException ex) {
+			log.error("Error while fetching current policy draft ", ex);
 		}
 	}
 
