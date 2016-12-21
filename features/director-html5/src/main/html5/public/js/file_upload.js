@@ -221,7 +221,7 @@ function uploadMetadataAndFile(uploadFile, event){
       if (imageType === 'Docker'){
         $('#errorMsg').html(data.responseJSON.details);
       }else {
-        $('#errorMsg').html('file could not be uploaded: '+textStatus);
+        $('#errorMsg').html('file could not be uploaded: '+data.responseJSON.details);
       }
       $('#errorMsg').show();
       $('#upload').prop('disabled', false);
@@ -301,7 +301,7 @@ function uploadRemoteImage(uploadFile, event){
       if (imageType === 'Docker'){
         $('#errorMsg').html(data.responseJSON.details);
       }else {
-        $('#errorMsg').html('file could not be uploaded: '+textStatus);
+        $('#errorMsg').html('file could not be uploaded: '+data.responseJSON.details);
       }
       $('#errorMsg').show();
       $('#upload').prop('disabled', false);
