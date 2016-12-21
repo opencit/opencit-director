@@ -150,7 +150,7 @@ director_complete_setup() {
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   director_run setup $DIRECTOR_SETUP_TASKS
-  if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA1" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
+  if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA256" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
   	director_run setup $DIRECTOR_KMS_SETUP_TASKS
   fi
 
