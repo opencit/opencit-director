@@ -309,7 +309,7 @@ update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSO
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 prompt_with_default MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
-update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
+update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
 #KMS

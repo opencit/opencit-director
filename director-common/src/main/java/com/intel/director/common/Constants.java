@@ -178,6 +178,7 @@ public class Constants {
 	public static final String KMS_PROP_URL = "kms.endpoint.url";	
 	public static final String KMS_PROP_USER = "kms.login.basic.username";
 	public static final String KMS_PROP_SHA1 = "kms.tls.policy.certificate.sha1";
+	public static final String KMS_PROP_SHA256 = "kms.tls.policy.certificate.sha256";
 
 	public static final String MTWILSON_TRUST_POLICY_LOCATION="mtwilson_trustpolicy_location";
 
@@ -209,6 +210,7 @@ public class Constants {
 	public static final String CONNECTOR_GLANCE = "Glance";
 	public static final String CONNECTOR_SWIFT = "Swift";
 	public static final String CONNECTOR_DOCKERHUB = "Docker";
+	public static final String CONNECTOR_DOCKERREGISTRY = "Registry";
 	
 	public static final String UPLOAD_TO_IMAGE_STORE_FILE = "UPLOAD_TO_IMAGE_STORE_FILE";
 	
@@ -245,6 +247,7 @@ public class Constants {
 	public static final String MTWILSON_PROP_SERVER_API_USER = "mtwilson.api.username";
 	public static final String MTWILSON_PROP_SERVER_API_PASSWORD = "mtwilson.api.password";
 	public static final String MTWILSON_PROP_SERVER_SHA1 = "mtwilson.api.tls.policy.certificate.sha1";
+	public static final String MTWILSON_PROP_SERVER_SHA256 = "mtwilson.api.tls.policy.certificate.sha256";
 	public static final String MTWILSON_PROP_SERVER_PORT = "mtwilson.server.port";
 	public static final String MTWILSON_PROP_SERVER_PASSWORD = "mtwilson.server.password";
 	public static final String MTWILSON_PROP_SERVER_USERNAME = "mtwilson.server.username";
