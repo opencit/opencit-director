@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -140,7 +141,7 @@ public class Images {
 	 * 	    "tag":"latest",
 	 * 	    "image_size" : 1322496
 	 * 	 }
-	 * 	 Ouput: 
+	 * 	 Output:
 	 * 		{
 	 *   "created_by_user_id": "admin",
 	 *   "created_date": "2016-05-16 07:20:40",
@@ -190,7 +191,7 @@ public class Images {
 	 * }
 	 * </pre>
 	 * 
-	 * @param TrustDirectorImageUploadRequest
+	 * @param uploadRequest
 	 *            object which includes metadata information
 	 * @return Response object contains newly created image metadata along with
 	 *         image_id
@@ -862,8 +863,6 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param imageId
-     *            Id of the image to be un-mounted
      * @param httpServletRequest
      * @param httpServletResponse
      * @return UnmountImageResponse containing the details of the unmount
@@ -1793,7 +1792,7 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param Pathparam
+     * @param image_id
      *            : image_id
      * @return Response containing details of docker-pull
      */
@@ -1851,7 +1850,7 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param Pathparam
+     * @param image_id
      *            : image_id
      * @return Response containing details of docker-setup
      */
@@ -1965,7 +1964,6 @@ public class Images {
     /**
      * This method returns list of deployment types which allow image encryption
      * 
-     * @param NA
      * @return list of deployment types which allow image encryption
      * @mtwMethodType GET
      * @mtwSampleRestCall
@@ -1990,7 +1988,6 @@ public class Images {
      * This method returns list of stalled images. Stalled images are those
      * images for which upload is pending for long time.
      * 
-     * @param NA
      * @return list of stalled images
      * @mtwMethodType GET
      * @mtwContentTypeReturned JSON
@@ -2155,6 +2152,145 @@ public class Images {
 			genericResponse.status = Constants.ERROR;
 			genericResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+		}
+	}
+
+	/**
+	 * API provides registration of pre-uploaded image with Trust Director for Policy creation.
+	 * This API assumes that Image is available on server. This image can be uploaded through SSH/FTP.
+	 * API accepts absolute path on server.
+	 * At the end of this operation, file is moved to Trust Director's image repository<br/>
+	 *
+	 * Request and Response format example.
+	 *
+	 * <br>
+	 Input
+	 <code><pre>
+	 {
+		 "image_deployments" : "VM",
+		 "image_format" : "raw",
+		 "image_name" : "c3",
+		 "image_size" : 0,
+		 "image_file" : "/tmp/c.img"
+	 }
+	 </pre>
+	 </code>
+
+
+	 Output
+	 <code><pre>
+	 {
+		 "created_by_user_id": "admin",
+		 "created_date": "2016-12-20 12:23:04",
+		 "edited_by_user_id": "admin",
+		 "edited_date": "2016-12-20 12:23:04",
+		 "id": "EDB35ABB-2787-4A09-8937-53161B8A84F6",
+		 "image_name": "c3",
+		 "image_format": "raw",
+		 "image_deployments": "VM",
+		 "image_size": 0,
+		 "sent": 0,
+		 "deleted": false,
+		 "image_upload_status": "success",
+		 "image_Location": "/mnt/images/vm/"
+	 }
+	 </pre>
+	 </code>
+	 * @param uploadRequest
+	 * @return uploadResponse
+	 */
+	@Path("images/upload/remote")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response uploadLocalImage(TrustDirectorImageUploadRequest uploadRequest) {
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
+		String errors = uploadRequest.validate();
+		if (StringUtils.isNotBlank(errors)) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.details = errors;
+			genericResponse.errorCode = ErrorCode.VALIDATION_FAILED;
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+		}
+
+		// If the image is docker image we check that image with same repo and tag should not exist already
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equals(uploadRequest.image_deployments) && uploadRequest.image_size == 0) {
+			boolean doesRepoTagExistInDockerHub = false;
+			try {
+				doesRepoTagExistInDockerHub = DockerUtil.doesRepoTagExistInDockerHub(uploadRequest.getRepository(),
+						uploadRequest.getTag());
+			} catch (DirectorException e) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				genericResponse.details = e.getMessage();
+				if (e instanceof ConnectionFailException) {
+					genericResponse.details = "Unable to connect to docker hub";
+					return Response.ok(genericResponse).status(Response.Status.INTERNAL_SERVER_ERROR).build();
+				}
+				return Response.ok(genericResponse).status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			}
+
+			if (!doesRepoTagExistInDockerHub) {
+				uploadImageToTrustDirector = new TrustDirectorImageUploadResponse();
+				uploadImageToTrustDirector.status = Constants.ERROR;
+				uploadImageToTrustDirector.details = "Image with repo tag not available in docker hub";
+				return Response.ok(uploadImageToTrustDirector).status(Response.Status.NOT_FOUND).build();
+			}
+		}
+
+		imageService = new ImageServiceImpl();
+		String imageName = uploadRequest.image_name;
+		// Imagename in case of docker if not sent in request we take repo:tag
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+				&& StringUtils.isBlank(imageName)) {
+			String repositoryInName = uploadRequest.repository;
+			imageName = repositoryInName.replace("/", "-") + ":" + uploadRequest.tag;
+		}
+		try {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+					&& dockerActionService.doesRepoTagExist(uploadRequest.repository, uploadRequest.tag)) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image with Repo And Tag already exists";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok(genericResponse).build();
+			}
+
+			if (imageService.doesImageNameExist(imageName,uploadRequest.image_deployments)) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image with same name already exists. <br>Please enter different name";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok().entity(genericResponse).build();
+			}
+			File uploadedFile = new File(uploadRequest.image_file.trim());
+			if (!uploadedFile.exists() || !uploadedFile.isFile()) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image location does not exists. Please check that image is available at given location";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok().entity(genericResponse).build();
+			}
+			uploadImageToTrustDirector = imageService.createUploadImageMetadataImpl(uploadRequest.image_deployments,
+					uploadRequest.image_format, imageName, uploadRequest.image_size, uploadRequest.repository,
+					uploadRequest.tag);
+			ImageService imageService = new ImageServiceImpl();
+			ImageInfo imageInfo = imageService.fetchImageById(uploadImageToTrustDirector.id);
+			uploadedFile.renameTo(Paths.get(imageInfo.getLocation(),imageInfo.getImage_name()).toFile());
+			imageInfo.setStatus(Constants.COMPLETE);
+			imageInfo.setDeleted(false);
+			imageService.updateImageMetadata(imageInfo);
+			uploadImageToTrustDirector.status = Constants.SUCCESS;
+			log.info("Successfully uploaded image to location: {}" , uploadImageToTrustDirector.getLocation());
+			return Response.ok().entity(uploadImageToTrustDirector).build();
+		} catch (DirectorException e) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.details = "Error in saving image metadata";
+			genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+			return Response.ok(genericResponse).status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 }
