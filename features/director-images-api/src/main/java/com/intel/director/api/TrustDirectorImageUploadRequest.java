@@ -41,9 +41,13 @@ public class TrustDirectorImageUploadRequest extends ImageAttributes {
 				&& ValidationUtil.isValidWithRegex(image_format, "qcow2|vhd(vpc)|vmdk|raw|vdi|tar")))) {
 			errors.add("Invalid format for image. Valid formats are: qcow2, vhd(vpc), vmdk, raw, vdi");
 		}
-		if (StringUtils.isNotBlank(image_deployments) && Constants.DEPLOYMENT_TYPE_VM.equals(image_deployments)) {
-			if (!(image_size != null && (image_size > 0))) {
-				errors.add("Invalid image size image");
+		/* Skip Image size validation if image_file is provided */
+		if(StringUtils.isEmpty(image_file)) {
+			if (StringUtils.isNotBlank(image_deployments) && Constants.DEPLOYMENT_TYPE_VM.equals(
+					image_deployments)) {
+				if (!(image_size != null && (image_size > 0))) {
+					errors.add("Invalid image size image");
+				}
 			}
 		}
 		if (StringUtils.isNotBlank(image_deployments) && Constants.DEPLOYMENT_TYPE_DOCKER.equals(image_deployments)) {

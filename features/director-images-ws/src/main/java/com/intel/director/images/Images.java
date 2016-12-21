@@ -1049,6 +1049,30 @@ public class Images {
     
     
     
+    
+
+    /**
+	 * API for for upgrading policy from older schema 1.1 to newer schema 1.2. This newer schema supports symlinks and have recursive flag 
+	 * removed from Dir. The api returns draft which can be further used to create policy. 
+	
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType PATCH
+	 * @mtwSampleRestCall
+	 * 
+	 *<pre>
+	 * https://{IP/HOST_NAME}/v1/images/35D7EF4E-D7EA-41D5-9F05-E0AF182D7F3B/upgradePolicy
+	 * 
+	 * Output:
+	 * {"status":"success","message":"Policy Draft Succesfully upgraded to 1.2","policy_draft":"<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns2:TrustPolicy xmlns:ns2=\"mtwilson:trustdirector:policy:1.2\" .........</ns2:TrustPolicy>"}
+	 * 
+	 * In case the policy is already of 1.2 version:
+	 * {"status":"success","message":"Policy Draft already of version 1.2, no action done","policy_draft":"<?xml version=\"1.0\" encoding=\"UTF-8\"?><ns2:TrustPolicy xmlns:ns2=\"mtwilson:trustdirector:policy:1.2\" .........</ns2:TrustPolicy>"}
+	 * </pre>
+	 * 
+	 * @param imageId
+     *            - imageid in url
+	 * @return Response object contains newly upgrade policy draft
+	 */ 
     @Path("images/{imageId: [0-9a-zA-Z_-]+}/upgradePolicy")
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)

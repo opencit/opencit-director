@@ -309,13 +309,8 @@ update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSO
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 prompt_with_default MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
-update_property_in_file "mtwilson.api.tls.policy.certificate.sha1" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
+update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
-
-#KMS
-update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
-update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
-update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 
 
 #############################################
@@ -329,7 +324,7 @@ update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILS
 
 #KMS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
-update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.tls.policy.certificate.sha256" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA256"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 

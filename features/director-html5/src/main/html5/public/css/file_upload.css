@@ -1,7 +1,7 @@
 body {text-align:center;}
 #frame {text-align:left;}
 #errorMsg {display: none; font-color: red;}
-
+#fileUploadBox {padding-top: 15px;}
 .resumable-error {display:none; font-size:14px; font-style:italic;}
 
 /* Uploader: Progress bar */
