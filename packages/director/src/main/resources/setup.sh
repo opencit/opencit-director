@@ -272,10 +272,10 @@ update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIR
 prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
 
-DIRECTOR_DB_USERNAME=${DIRECTOR_DB_USERNAME:-"director"}
+prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
 
-DIRECTOR_DB_PASSWORD=${DIRECTOR_DB_PASSWORD:-$(generate_password 16)}
+prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
 update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
 
 prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
@@ -314,7 +314,7 @@ update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$MTWILSON_
 
 #KMS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
-update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.tls.policy.certificate.sha256" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA256"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 
 
@@ -329,7 +329,7 @@ update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILS
 
 #KMS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
-update_property_in_file "kms.tls.policy.certificate.sha1" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA1"
+update_property_in_file "kms.tls.policy.certificate.sha256" "$KMS_PROPERTIES_FILE" "$KMS_TLS_POLICY_CERTIFICATE_SHA256"
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 

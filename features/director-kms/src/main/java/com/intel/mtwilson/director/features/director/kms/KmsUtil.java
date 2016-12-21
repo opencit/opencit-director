@@ -48,7 +48,7 @@ public class KmsUtil {
 	private static final String DIRECTOR_KEYSTORE = "director.keystore";
 	private static final String DIRECTOR_KEYSTORE_PASSWORD = "director.keystore.password";
 	private static final String KMS_ENDPOINT_URL = "kms.endpoint.url";
-	private static final String KMS_TLS_POLICY_CERTIFICATE_SHA1 = "kms.tls.policy.certificate.sha1";
+	private static final String KMS_TLS_POLICY_CERTIFICATE_SHA256 = "kms.tls.policy.certificate.sha256";
 	private static final String KMS_LOGIN_BASIC_USERNAME = "kms.login.basic.username";
 	private static final String KMS_LOGIN_BASIC_PASSWORD = "kms.login.basic.password";
 	private static final String KMS_PROP_FILE = "kms.properties";
@@ -97,7 +97,7 @@ public class KmsUtil {
 		Password keystorePassword = null;
 		PublicKey directorEnvelopePublicKey;
 		String kmsEndpointUrl;
-		String kmsTlsPolicyCertificateSha1;
+		String kmsTlsPolicyCertificateSha256;
 		String kmsLoginBasicPassword;
 		kmsprops = new Gson().fromJson(getProperties(KMS_PROP_FILE), new TypeToken<HashMap<String, Object>>() {
 		}.getType());
@@ -143,8 +143,8 @@ public class KmsUtil {
 		}
 
 		log.debug("Got the kms endpoint {}", kmsEndpointUrl);
-		kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
-		if (kmsTlsPolicyCertificateSha1 == null || kmsTlsPolicyCertificateSha1.isEmpty()) {
+		kmsTlsPolicyCertificateSha256 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA256.replace('.', '_'));
+		if (kmsTlsPolicyCertificateSha256 == null || kmsTlsPolicyCertificateSha256.isEmpty()) {
 			throw new Exception("KMS TLS policy certificate digest not configured");
 		}
 
@@ -173,7 +173,7 @@ public class KmsUtil {
 		// create KMS Keys API client
 		Properties properties = new Properties();
 		properties.setProperty("endpoint.url", kmsEndpointUrl);
-		properties.setProperty("tls.policy.certificate.sha1", kmsTlsPolicyCertificateSha1);
+		properties.setProperty("tls.policy.certificate.sha256", kmsTlsPolicyCertificateSha256);
 		properties.setProperty("login.basic.username", kmsLoginBasicUsername);
 		properties.setProperty("login.basic.password", kmsLoginBasicPassword);
 		keys = new Keys(properties);

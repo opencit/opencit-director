@@ -6,7 +6,7 @@ public class SettingsKMSObject {
 	public String kms_endpoint_url;
 	public String kms_login_basic_username;
 	public String kms_login_basic_password;
-	public String kms_tls_policy_certificate_sha1;
+	public String kms_tls_policy_certificate_sha256;
 	public String getKms_endpoint_url() {
 		return kms_endpoint_url;
 	}
@@ -26,19 +26,19 @@ public class SettingsKMSObject {
 		this.kms_login_basic_password = kms_login_basic_password;
 	}
 	public String getKms_tls_policy_certificate_sha1() {
-		return kms_tls_policy_certificate_sha1;
+		return kms_tls_policy_certificate_sha256;
 	}
 	public void setKms_tls_policy_certificate_sha1(
-			String kms_tls_policy_certificate_sha1) {
-		this.kms_tls_policy_certificate_sha1 = kms_tls_policy_certificate_sha1;
+			String kms_tls_policy_certificate_sha256) {
+		this.kms_tls_policy_certificate_sha256 = kms_tls_policy_certificate_sha256;
 	}
 	@Override
 	public String toString() {
 		return "{\"kms_endpoint_url\":\"" + kms_endpoint_url
 				+ "\", \"kms_login_basic_username\" : \"" + kms_login_basic_username
 				+ "\",\"kms_login_basic_password\":\"" + kms_login_basic_password
-				+ "\",\"kms_tls_policy_certificate_sha1\":\""
-				+ kms_tls_policy_certificate_sha1 + "\"}";
+				+ "\",\"kms_tls_policy_certificate_sha256\":\""
+				+ kms_tls_policy_certificate_sha256 + "\"}";
 	}
 	
 
