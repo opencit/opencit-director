@@ -25,10 +25,10 @@ public class SettingsKMSObject {
 	public void setKms_login_basic_password(String kms_login_basic_password) {
 		this.kms_login_basic_password = kms_login_basic_password;
 	}
-	public String getKms_tls_policy_certificate_sha1() {
+	public String getKms_tls_policy_certificate_sha256() {
 		return kms_tls_policy_certificate_sha256;
 	}
-	public void setKms_tls_policy_certificate_sha1(
+	public void setKms_tls_policy_certificate_sha256(
 			String kms_tls_policy_certificate_sha256) {
 		this.kms_tls_policy_certificate_sha256 = kms_tls_policy_certificate_sha256;
 	}

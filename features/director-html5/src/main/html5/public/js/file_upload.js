@@ -6,7 +6,7 @@ var imageFormat = window.opener.image_format_upload;
 var imageId = null;
 var chunkSize = 5*1024*1024; // 5MB
 var simultaneousUploads = 4;
-
+var remoteUpload = false;
 var r = null;
 
 /** Prepare Resumable upload service */
@@ -86,34 +86,63 @@ $(document).ready(function() {
   prepareFileUploadBox();
   attachFileSelectListener();
   if(imageType === 'Docker'){
-    $('.dockerInputs').show();
-  } else {
-    $('.dockerInputs').hide();
+    showHideOptions(false,false);
+  }else{
+    showHideOptions(true,true);
   }
 });
 
 /*
-  Show/Hide Docker Options based on upload option selected
+* Based on used selection, toggle inputs in form
 */
-function showHideDockerUploadOptions() {
-  var status = document.querySelector('input[name="dockerUploadOption"]:checked').value;
-  if (status == '0') {
-    $('#fileUploadBox').show();
-    $('input[name=dockerUploadOption][value="0"]').attr('checked', 'checked');
-    $('#upload').attr('value','Upload');
-    dockerManualUpload = true;
-  } else {
-    $('#fileUploadBox').hide();
-    $('input[name=dockerUploadOption][value="1"]').attr('checked', 'checked');
-    $('#upload').attr('value','Download');
-    dockerManualUpload = false;
-  }
-};
+function showHideOptions(manual,local){
+  if(imageType === 'Docker'){
+      $('.dockerInputs').show();
+      if(manual){
+        dockerManualUpload = true;
+        $('#upload').attr('value','Upload');
+        $('#locationOptions').show();
+        if(local){
+          $('.remote').hide();
+          $('.local').show();
+          remoteUpload = false;
+        }else{
+          $('.remote').show();
+          $('.local').hide();
+          remoteUpload = true;
+        }
+      } else {
+        dockerManualUpload = false;
+        remoteUpload = false;
+        $('.remote').hide();
+        $('.local').hide();
+        $('#locationOptions').hide();
+        $('#upload').attr('value','Download');
+      }
+    } else {
+      $('.dockerInputs').hide();
+      $('#locationOptions').show();
+      if(local){
+        $('.remote').hide();
+        $('.local').show();
+        remoteUpload = false;
+      }else{
+        $('.remote').show();
+        $('.local').hide();
+        remoteUpload = true;
+      }
+    }
+}
+
 
 function upload(event){
   $('#errorMsg').hide();
-  var uploadFile = document.getElementById('myfile').files[0];
-  uploadMetadataAndFile(uploadFile, event);
+  if(remoteUpload){
+    uploadRemoteImage(null, event);
+  }else{
+    var uploadFile = document.getElementById('myfile').files[0];
+    uploadMetadataAndFile(uploadFile, event);
+  }
 };
 
 
@@ -164,7 +193,7 @@ function uploadMetadataAndFile(uploadFile, event){
         return;
       }
       imageId = data.id;
-      if(dockerManualUpload || imageType === 'VM'){
+      if((dockerManualUpload && !remoteUpload) || imageType === 'VM'){
         r = new Resumable({
           target: '/v1/rpc/images/upload/content/'+ imageId,
           testTarget: '/v1/images/upload/content/'+ imageId,
@@ -181,8 +210,92 @@ function uploadMetadataAndFile(uploadFile, event){
         prepareResumeUploadService(r);
         r.addFile(uploadFile, event);
       } else if (imageType === 'Docker'){
-        downloadFromDockerHub(imageId);
+        if(remoteUpload){
+          processDockerImage(imageId);
+        }else{
+          downloadFromDockerHub(imageId);
+        }
       }
+    },
+    error: function(data, textStatus, errorThrown){
+      if (imageType === 'Docker'){
+        $('#errorMsg').html(data.responseJSON.details);
+      }else {
+        $('#errorMsg').html('file could not be uploaded: '+textStatus);
+      }
+      $('#errorMsg').show();
+      $('#upload').prop('disabled', false);
+    }
+  });
+};
+
+/**
+  Create Image Metadata and upload file once we receive the UUID
+ */
+function uploadRemoteImage(uploadFile, event){
+  var fName = null;
+  var fileSize = null;
+  var newFileName = null;
+  var fileLocation = null;
+  if(uploadFile === null || uploadFile === undefined){
+    fileLocation = $('#fileLocation').val();
+    if (imageType === 'Docker'){
+      fName = $('#dockerRepo').val() + ':' + $('#dockerTag').val();
+    }else{
+      fName = fileLocation.replace(/^.*[\\\/]/, '');
+    }
+    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    fileSize = 0;
+
+  }else {
+    fileLocation = $('#fileLocation').val();
+    fName = fileLocation.replace(/^.*[\\\/]/, '');
+    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    fileSize = 0;
+  }
+  newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+  var imageMetadataRequest = {
+    'image_deployments' : imageType,
+    'image_format' : imageFormat,
+    'image_name' : newFileName,
+    'image_size' : fileSize,
+    'image_file' : fileLocation
+  };
+
+  if (imageType === 'Docker') {
+    imageMetadataRequest.repository = $('#dockerRepo').val();
+    imageMetadataRequest.tag = $('#dockerTag').val();
+  }
+
+  $('#upload').prop('disabled', true);
+
+  $.ajax({
+    type: 'POST',
+    data : JSON.stringify(imageMetadataRequest),
+    url: '/v1/images/upload/remote',
+    contentType: 'application/json',
+    dataType: 'json',
+    beforeSend: function (request) {
+      request.setRequestHeader('Authorization', tokenString);
+    },
+    success: function(data) {
+      if(data.status === 'Error') {
+        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').show();
+        $('#upload').prop('disabled', false);
+        return;
+      }
+      imageId = data.id;
+      var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
+      var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
+      goToTPDiv.show();
+
+      goToTPDiv.css("display", "block");
+      window.setTimeout(function(){
+        window.close();
+      },3000);
+
+      return;
     },
     error: function(data, textStatus, errorThrown){
       if (imageType === 'Docker'){

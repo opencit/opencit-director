@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -167,8 +168,10 @@ public class KmsUtil {
 		// kmsLoginBasicPassword =
 		// getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD,
 		// kmsLoginBasicPassword);
-		if (kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty()) {
-			throw new Exception("KMS API password not configured");
+		if (kmsLoginBasicPassword == null || StringUtils.isBlank(kmsLoginBasicPassword)) {
+			//throw new Exception("KMS API password not configured");
+			log.info("KMS Password not set");
+			kmsLoginBasicPassword = kmsprops.get(KMS_LOGIN_BASIC_PASSWORD.replace('.', '_'));
 		}
 		// create KMS Keys API client
 		Properties properties = new Properties();
