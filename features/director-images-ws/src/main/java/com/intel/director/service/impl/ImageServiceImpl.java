@@ -1397,6 +1397,23 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
+	private void populateTrustPolicyElements(Set<String> trustPolicyElementsList,
+			SearchFilesInImageRequest searchFilesInImageRequest) {
+		try {
+			TrustPolicyDraft trustPolicyDraft = imagePersistenceManager
+					.fetchPolicyDraftForImage(searchFilesInImageRequest.id);
+				com.intel.mtwilson.trustpolicy2.xml.TrustPolicy trustPolicyDraftObj = TdaasUtil
+						.getPolicy(trustPolicyDraft.getTrust_policy_draft());
+				if (trustPolicyDraftObj.getWhitelist().getMeasurements().size() > 0) {
+					for (Measurement measurement : trustPolicyDraftObj.getWhitelist().getMeasurements()) {
+						trustPolicyElementsList.add(measurement.getPath());
+					}
+				}
+		} catch (JAXBException  | DbException ex) {
+			log.error("Error while fetching current policy draft ", ex);
+		}
+	}
+
 	private void init(Set<String> trustPolicyElementsList,
 			Map<String, Boolean> directoryListContainingPolicyFiles,
 			Set<TreeNodeDetail> directoryListContainingRegex, Set<String> preSelectedPaths,
