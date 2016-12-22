@@ -36,61 +36,84 @@
         </repository>
     </repositories>
     
-    <dependencies>
-        <!-- common-java -->
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-crypto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-extensions</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-configuration</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.util</groupId>
-            <artifactId>mtwilson-util-configuration</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-shiro-util</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-password-vault</artifactId>
-        </dependency>
-        
-        <!-- mtwilson -->
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-manifest-xml</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-trustpolicy-xml</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-vm-attestation-client-jaxrs2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<configuration>
+					<sourcepath>
+						${basedir}/src/main/java/com/intel/director/images
+					</sourcepath>
+					<sourceFileExcludes>
+						<exclude>Dashboard.java</exclude>
+					</sourceFileExcludes>
+					<excludePackageNames>com.intel.director.service.images.exception:com.intel.director.service:com.intel.director.util</excludePackageNames>
+					<noqualifier>all</noqualifier>
+					<tags>
+						<tag>
+							<name>mtwRequiresPermissions</name>
+							<placement>aoptcmf</placement>
+							<head>Requires permissions:</head>
+						</tag>
+						<tag>
+							<name>mtwContentTypeReturned</name>
+							<placement>aoptcmf</placement>
+							<head>Content type returned:</head>
+						</tag>
+						<tag>
+							<name>mtwMethodType</name>
+							<placement>aoptcmf</placement>
+							<head>Method Type:</head>
+						</tag>
+						<tag>
+							<name>mtwSampleRestCall</name>
+							<placement>aoptcmf</placement>
+							<head>Sample REST call:</head>
+						</tag>
+						<tag>
+							<name>mtwSampleApiCall</name>
+							<placement>aoptcmf</placement>
+							<head>Sample API call:</head>
+						</tag>
+						<tag>
+							<name>mtwPreRequisite</name>
+							<placement>aoptcmf</placement>
+							<head>Pre-requisite:</head>
+						</tag>
+					</tags>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>bintray</name>
+			<url>http://jcenter.bintray.com</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>mavenrepo1</id>
+			<name>repo1 maven</name>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- common-java -->
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
 			<artifactId>mtwilson-client-java7</artifactId>
