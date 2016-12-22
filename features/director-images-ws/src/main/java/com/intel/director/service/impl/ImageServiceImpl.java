@@ -771,6 +771,9 @@ public class ImageServiceImpl implements ImageService {
 				log.error("Error updating policy draft for image {}",
 						searchFilesInImageRequest.id, e);
 			}
+		} else{
+			//Populate policy files
+			populateTrustPolicyElements(trustPolicyElementsList, searchFilesInImageRequest);
 		}
 
 		log.info("after init");
@@ -843,27 +846,6 @@ public class ImageServiceImpl implements ImageService {
 			if (searchFilesInImageRequest.recursive && !searchFilesInImageRequest.reset_regex) {
 				createAdditionPatches(searchFilesInImageRequest, mountPath, trustPolicyElementsList,
 						patchFileAddSet, patchSymLinkAddSet, patchDirAddSet);
-			}
-
-			/* If Request is to reset regex/wildcard for single directory */
-			if (!searchFilesInImageRequest.recursive && searchFilesInImageRequest.reset_regex) {
-				Collection<File> files = getFilesAndDirectoriesWithFilter(searchFilesInImageRequest);
-				for (File rFile : files) {
-					if(trustPolicyElementsList.contains(rFile.getAbsolutePath().replace(mountPath, ""))) {
-						if (Files.isSymbolicLink(rFile.toPath())) {
-							patchSymLinkRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-						}
-
-						if (rFile.isFile()) {
-							patchFileRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-						}
-
-						if (rFile.isDirectory() && !Files.isSymbolicLink(rFile.toPath())) {
-							patchDirRemoveSet.add(rFile.getAbsolutePath().replace(mountPath, ""));
-						}
-					}
-				}
-				patchDirRemoveSet.add(searchFilesInImageRequest.getDir());
 			}
 
 			/* If Request is to apply regex/wildcard for single directory */
