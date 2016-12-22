@@ -29,9 +29,6 @@ public class UploadService {
 
   private static Lock uploadLock = new ReentrantLock();
 
-  public UploadService() {
-
-  }
 
   public UploadService(String baseDirectory) {
     this.baseDirectory = baseDirectory;
@@ -52,15 +49,14 @@ public class UploadService {
    */
   public boolean uploadChunk(String imageId, Chunk chunk, byte[] data) throws DirectorException {
     FileInformation info = fromChunk(chunk);
-    try {
-      RandomAccessFile raf = new RandomAccessFile(info.getFilePath(), "rw");
-      raf.seek((chunk.getResumableChunkNumber() - 1) * info.getChunkSize());
-      raf.write(data);
-      raf.close();
-    } catch (IOException e) {
-      LOG.error("Error uploading chunk", e);
-      return false;
-    }
+    try(RandomAccessFile raf = new RandomAccessFile(info.getFilePath(), "rw")){
+		raf.seek((chunk.getResumableChunkNumber() - 1) * info.getChunkSize());
+		raf.write(data);
+		raf.close();
+	} catch (IOException e) {
+		LOG.error("Error uploading chunk", e);
+		return false;
+	} 
 
     info.getChunks().add(chunk.getResumableChunkNumber());
     if (info.uploadFinished()) {
