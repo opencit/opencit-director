@@ -772,6 +772,7 @@ public class ImageServiceImpl implements ImageService {
 						searchFilesInImageRequest.id, e);
 			}
 		} else{
+			//Populate policy files
 			populateTrustPolicyElements(trustPolicyElementsList, searchFilesInImageRequest);
 		}
 
