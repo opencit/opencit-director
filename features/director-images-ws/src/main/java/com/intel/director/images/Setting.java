@@ -1,6 +1,8 @@
 package com.intel.director.images;
 
 import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -10,6 +12,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.intel.dcsg.cpg.crypto.key.password.Password;
+import com.intel.mtwilson.core.PasswordVaultFactory;
+import com.intel.mtwilson.util.crypto.keystore.PasswordKeyStore;
+import com.intel.mtwilson.util.exec.ExecUtil;
+import com.intel.mtwilson.util.exec.Result;
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.director.api.GenericResponse;
@@ -22,10 +29,13 @@ import com.intel.director.service.impl.SettingImpl;
 import com.intel.mtwilson.configuration.ConfigurationException;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 
+import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
+
 @V2
 @Path("/setting")
 public class Setting {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Setting.class);
+	private static final String KMS_LOGIN_BASIC_PASSWORD = "kms.login.basic.password";
 
 	SettingImpl impl = new SettingImpl();
 
@@ -89,12 +99,18 @@ public class Setting {
 	@Path("/kms")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String updateKMSProperties(SettingsKMSObject request) throws IOException {
+	public String updateKMSProperties(SettingsKMSObject request) throws IOException, KeyStoreException, InvalidKeySpecException {
 		log.debug("Setting -> updateKMSProperties");
 		if (!request.kms_endpoint_url.contains("https://")) {
 			request.kms_endpoint_url = "https://" + request.kms_endpoint_url;
 		}
 		DirectorUtil.editProperties(Constants.KMS_PROP_FILE, request.toString());
+		if (StringUtils.isNotBlank(request.getKms_login_basic_password())) {
+			try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
+				passwordVault.set(KMS_LOGIN_BASIC_PASSWORD, new Password(request.getKms_login_basic_password().toCharArray()));
+			}
+		}
+
 		return DirectorUtil.getPropertiesWithoutPassword(Constants.KMS_PROP_FILE);
 	}
 

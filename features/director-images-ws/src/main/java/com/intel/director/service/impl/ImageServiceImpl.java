@@ -1397,6 +1397,7 @@ public class ImageServiceImpl implements ImageService {
 		}
 	}
 
+	//Populate elements
 	private void populateTrustPolicyElements(Set<String> trustPolicyElementsList,
 			SearchFilesInImageRequest searchFilesInImageRequest) {
 		try {
