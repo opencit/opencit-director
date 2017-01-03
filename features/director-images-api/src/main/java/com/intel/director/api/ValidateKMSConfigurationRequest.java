@@ -4,6 +4,7 @@ public class ValidateKMSConfigurationRequest {
 	private String url;
 	private String user;
 	private String sha256;
+	private String password;
 
 	public String getUrl() {
 		return url;
@@ -29,4 +30,11 @@ public class ValidateKMSConfigurationRequest {
 		this.sha256 = sha256;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 }
