@@ -56,7 +56,7 @@ public class KmsUtil {
 	private static final String KMS_PROP_FILE = "kms.properties";
 
 	
-	public KmsUtil(String user, String url, String sha256) throws IOException, JAXBException, XMLStreamException, Exception {
+	public KmsUtil(String user, String password, String url, String sha256) throws IOException, JAXBException, XMLStreamException, Exception {
 		// Collect KMS configurations		
 		if (StringUtils.isBlank(url)) {
 			throw new NullPointerException("KMS endpoint URL not configured");
@@ -79,6 +79,9 @@ public class KmsUtil {
 				kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
 			} else{
 				kmsLoginBasicPassword = null;
+				if(StringUtils.isNotBlank(password)) {
+					kmsLoginBasicPassword = password;
+				}
 			}
 		}
 		
