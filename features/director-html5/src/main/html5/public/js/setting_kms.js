@@ -3,7 +3,7 @@ function saveKMSSetting() {
 	self.data = {};
 	self.data.kms_endpoint_url = $('#KMS_IP').val();
 	self.data.kms_login_basic_username = $('#KMS_USERNAME').val();
-	// self.data.kms_login_basic_password = $('#KMS_PASSWORD').val();
+	self.data.kms_login_basic_password = $('#KMS_PASSWORD').val();
 	self.data.kms_tls_policy_certificate_sha256 = $('#KMS_RSAKEY').val();
 	$.ajax({
 		type : 'POST',
@@ -23,6 +23,7 @@ function validateKMSSetting() {
 	self.data = {};
 	self.data.url = $('#KMS_IP').val();
 	self.data.user = $('#KMS_USERNAME').val();
+	self.data.password = $('#KMS_PASSWORD').val();
 	self.data.sha256 = $('#KMS_RSAKEY').val();
 
 	$.ajax({

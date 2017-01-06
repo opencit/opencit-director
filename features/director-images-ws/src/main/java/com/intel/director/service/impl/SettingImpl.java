@@ -49,14 +49,18 @@ public class SettingImpl implements Setting {
 		String errMsg = "Error connecting to KMS";
 		genericResponse.status = Constants.ERROR;
 		try {
-			kmsUtil = new KmsUtil(request.getUser(), request.getUrl(), request.getSha256());
+			kmsUtil = new KmsUtil(request.getUser(), request.getPassword(), request.getUrl(), request.getSha256());
 		} catch (IOException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (JAXBException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (XMLStreamException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (Exception e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		}
 		if (StringUtils.isNotBlank(genericResponse.error)) {
