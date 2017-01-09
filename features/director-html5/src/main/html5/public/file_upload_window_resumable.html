@@ -17,8 +17,12 @@
     <div class="form-group">
       <div class="input-group control-group dockerInputs" id="dockerUploadOptions">
         <label class="radio-inline">
-          <input type="radio" id="dockerUploadOptionManual" value="0"
-                 name="dockerUploadOption" onclick="showHideOptions(true,true);" >Manual Upload
+          <input type="radio" id="localUpload" value="0"
+                 name="dockerUploadOption" onclick="showHideOptions(true,true);">Local File Upload
+        </label>
+        <label class="radio-inline">
+          <input type="radio" id="remoteUpload" value="1"
+                 name="dockerUploadOption" onclick="showHideOptions(true,false);">Remote File Upload
         </label>
         <label class="radio-inline">
           <input type="radio" id="dockerUploadOptionRepo" value="1"
