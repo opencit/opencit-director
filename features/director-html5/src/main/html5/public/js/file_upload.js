@@ -41,7 +41,6 @@ function prepareResumeUploadService(){
           var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
           var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
           goToTPDiv.show();
-
           goToTPDiv.css("display", "block");
           window.setTimeout(function(){
             window.close();
@@ -101,7 +100,7 @@ function showHideOptions(manual,local){
       if(manual){
         dockerManualUpload = true;
         $('#upload').attr('value','Upload');
-        $('#locationOptions').show();
+        //$('#locationOptions').show();
         if(local){
           $('.remote').hide();
           $('.local').show();
@@ -285,6 +284,9 @@ function uploadRemoteImage(uploadFile, event){
         $('#upload').prop('disabled', false);
         return;
       }
+      if (imageType === 'Docker'){
+	   processDockerImage(data.id);
+      }  
       imageId = data.id;
       var goToTPDiv = $("#goToTrustPolicyPageDiv", opener.document);
       var uploadBtnDiv = $("#gotoUploadWindowDiv", opener.document);
