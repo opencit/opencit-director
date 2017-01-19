@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -140,7 +141,7 @@ public class Images {
 	 * 	    "tag":"latest",
 	 * 	    "image_size" : 1322496
 	 * 	 }
-	 * 	 Ouput: 
+	 * 	 Output:
 	 * 		{
 	 *   "created_by_user_id": "admin",
 	 *   "created_date": "2016-05-16 07:20:40",
@@ -190,7 +191,7 @@ public class Images {
 	 * }
 	 * </pre>
 	 * 
-	 * @param TrustDirectorImageUploadRequest
+	 * @param uploadRequest
 	 *            object which includes metadata information
 	 * @return Response object contains newly created image metadata along with
 	 *         image_id
@@ -862,8 +863,6 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param imageId
-     *            Id of the image to be un-mounted
      * @param httpServletRequest
      * @param httpServletResponse
      * @return UnmountImageResponse containing the details of the unmount
@@ -1793,7 +1792,7 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param Pathparam
+     * @param image_id
      *            : image_id
      * @return Response containing details of docker-pull
      */
@@ -1851,7 +1850,7 @@ public class Images {
      * 
      *                    </pre>
      * 
-     * @param Pathparam
+     * @param image_id
      *            : image_id
      * @return Response containing details of docker-setup
      */
@@ -1965,7 +1964,6 @@ public class Images {
     /**
      * This method returns list of deployment types which allow image encryption
      * 
-     * @param NA
      * @return list of deployment types which allow image encryption
      * @mtwMethodType GET
      * @mtwSampleRestCall
@@ -1990,7 +1988,6 @@ public class Images {
      * This method returns list of stalled images. Stalled images are those
      * images for which upload is pending for long time.
      * 
-     * @param NA
      * @return list of stalled images
      * @mtwMethodType GET
      * @mtwContentTypeReturned JSON
@@ -2108,9 +2105,31 @@ public class Images {
 
 	/**
 	 * API to check if chunk of a file/image is available at server or not.
-	 * @param imageId Unique Image ID of file
-	 * @param chunk Chunk parameters
-	 * @return HTTP status 200 - OK  if chunk is found on server else HTTP status 404 - Not Found
+	 * Invoked internally by the Resumable.js library from the UI.
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType GET
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	
+		Sample GET call: 
+		File Name: Test.img
+		File Size: 10G
+		Chunk Size: 5MB
+		Chunk Number: 1
+		Identifier: D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8 (This is returned by Image metadata create service)
+
+		https://trust-director/v1/images/upload/content/D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8?
+		resumableChunkSize=5242880&resumableTotalSize=10737418240&resumableChunkNumber=1&
+		resumableIdentifier=D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8&resumableCurrentChunkSize=5242880&
+		resumableFilename=Test.img&resumableRelativePath=Test.img 
+	 * Output Http responses: 
+	 * 200 OK - If chunk is already available at server. No content is returned
+	 * 401 Unauthorized - If request is made without auth token 
+	 * 404 Not Found- If chunk is unavailable at server. 
+	 * 503 Service Unavailable - If server fails to process the request.
+	 *                    </pre>
 	 */
 	@Path("images/upload/content/{imageId: [0-9a-zA-Z_-]+}")
 	@GET
@@ -2134,10 +2153,88 @@ public class Images {
 
 	/**
 	 * API to upload File chunk (Binary data) to server
-	 * @param request {@link HttpServletRequest}
-	 * @param imageId
-	 * @param chunk
-	 * @return
+	 * 
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 *  https://{IP/HOST_NAME}/v1/rpc/images/content/C4C9E453-A864-4B14-8B72-9F9DF9406198
+	 *  This API is called by the Resumable.js UI library. 
+	 *  
+	 *  Input :
+	 *   
+	 * Chunk Data (Binary)				
+		resumableChunkSize 	Chunk size	query	number (integer) 	
+		resumableTotalSize 	Total File size.	query	number (integer) 	
+		resumableChunkNumber 	Chunk Number.	query	number (integer) 	
+		resumableIdentifier 	Unique Identifier to identify the file. This UUID returned by image metadata create service	query	string 	
+		resumableCurrentChunkSize 	Current chunk size. Current chunk size can be smaller than the chunk size. This is true for last chunk.	query	number (integer) 	
+		resumableFilename 	File Name.	query	string 	
+		resumableRelativePath 	File Relative path. Not available in chrome.	query	string 	
+	
+	chunk for image upload
+	
+	Output: 
+	Completed image upload
+	{
+	"created_by_user_id": "admin",
+	"created_date": "2016-05-16 08:53:08",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-05-16 08:56:15",
+	"id": "C4C9E453-A864-4B14-8B72-9F9DF9406198",
+	"image_name": "test11.img",
+	"image_format": "qcow2",
+	"image_deployments": "VM",
+	"image_size": 13631488,
+	"sent": 13631488,
+	"deleted": false,
+	"image_upload_status": "Complete",
+	"image_Location": "/mnt/images/"
+	}
+	
+	While the image upload is in progress:
+	
+	{
+	"created_by_user_id": "admin",
+	"created_date": "2016-05-16 08:53:08",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-05-16 08:53:50",
+	"id": "C4C9E453-A864-4B14-8B72-9F9DF9406198",
+	"image_name": "test11.img",
+	"image_format": "qcow2",
+	"image_deployments": "VM",
+	"image_size": 13631488,
+	"sent": 0,
+	"deleted": false,
+	"image_upload_status": "In Progress",
+	"image_Location": "/mnt/images/"
+	}
+	
+	In case of Docker: 
+	
+	
+	{
+	"created_by_user_id": "admin",
+	"created_date": "2016-05-16 07:20:40",
+	"edited_by_user_id": "admin",
+	"edited_date": "2016-05-16 08:50:53",
+	"id": "D3341CA4-1F3A-4CD7-B9BA-710F363A3CD8",
+	"image_name": "debian:latest",
+	"image_format": "tar",
+	"image_deployments": "Docker",
+	"image_size": 1322496,
+	"sent": 0,
+	"deleted": false,
+	"repository": "debian",
+	"tag": "latest",
+	"image_upload_status": "In Progress",
+	"image_Location": "/mnt/images/"
+	}
+	In case of docker, after the call to upload image content another call needs to be done:  https://HOST:PORT/v1/rpc/docker-setup/UUID_OF_IMAGE
+	 * 
+	 *                    </pre>
 	 */
 	@Path("rpc/images/upload/content/{imageId: [0-9a-zA-Z_-]+}")
 	@POST
@@ -2155,6 +2252,121 @@ public class Images {
 			genericResponse.status = Constants.ERROR;
 			genericResponse.setErrorCode(ErrorCode.REQUEST_PROCESSING_FAILED);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(genericResponse).build();
+		}
+	}
+
+	/**
+	 * API provides registration of pre-uploaded image with Trust Director for
+	 * Policy creation. This API assumes that Image is available on server. This
+	 * image can be uploaded through SSH/FTP. API accepts absolute path on
+	 * server. At the end of this operation, file is moved to Trust Director's
+	 * image repository<br/>
+	 *
+	 * Request and Response format example.
+	 *
+	 * <br>
+	 * 
+	 * @mtwContentTypeReturned JSON
+	 * @mtwMethodType POST
+	 * @mtwSampleRestCall
+	 * 
+	 *                    <pre>
+	 * https://{IP/HOST_NAME}/v1/images/upload/remote
+	 Input
+	 {
+		 "image_deployments" : "VM",
+		 "image_format" : "raw",
+		 "image_name" : "c3",
+		 "image_size" : 0,
+		 "image_file" : "/tmp/c.img"
+	 }
+	
+	 Output
+	 {
+		 "created_by_user_id": "admin",
+		 "created_date": "2016-12-20 12:23:04",
+		 "edited_by_user_id": "admin",
+		 "edited_date": "2016-12-20 12:23:04",
+		 "id": "EDB35ABB-2787-4A09-8937-53161B8A84F6",
+		 "image_name": "c3",
+		 "image_format": "raw",
+		 "image_deployments": "VM",
+		 "image_size": 0,
+		 "sent": 0,
+		 "deleted": false,
+		 "image_upload_status": "success",
+		 "image_Location": "/mnt/images/vm/"
+	 }
+	 *                    </pre>
+	 * 
+	 */
+	@Path("images/upload/remote")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response uploadLocalImage(TrustDirectorImageUploadRequest uploadRequest) {
+		TrustDirectorImageUploadResponse uploadImageToTrustDirector;
+		String errors = uploadRequest.validate();
+		if (StringUtils.isNotBlank(errors)) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.details = errors;
+			genericResponse.errorCode = ErrorCode.VALIDATION_FAILED;
+			return Response.status(Response.Status.BAD_REQUEST).entity(genericResponse).build();
+		}
+
+
+		imageService = new ImageServiceImpl();
+		String imageName = uploadRequest.image_name;
+		// Imagename in case of docker if not sent in request we take repo:tag
+		if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+				&& StringUtils.isBlank(imageName)) {
+			String repositoryInName = uploadRequest.repository;
+			imageName = repositoryInName.replace("/", "-") + ":" + uploadRequest.tag;
+		}
+		try {
+			if (Constants.DEPLOYMENT_TYPE_DOCKER.equalsIgnoreCase(uploadRequest.image_deployments)
+					&& dockerActionService.doesRepoTagExist(uploadRequest.repository, uploadRequest.tag)) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image with Repo And Tag already exists";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok(genericResponse).build();
+			}
+
+			if (imageService.doesImageNameExist(imageName,uploadRequest.image_deployments)) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image with same name already exists. <br>Please enter different name";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok().entity(genericResponse).build();
+			}
+			File uploadedFile = new File(uploadRequest.image_file.trim());
+			if (!uploadedFile.exists() || !uploadedFile.isFile()) {
+				GenericResponse genericResponse = new GenericResponse();
+				genericResponse.status = Constants.ERROR;
+				genericResponse.details = "Image location does not exists. Please check that image is available at given location";
+				genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+				return Response.ok().entity(genericResponse).build();
+			}
+			uploadImageToTrustDirector = imageService.createUploadImageMetadataImpl(uploadRequest.image_deployments,
+					uploadRequest.image_format, imageName, uploadRequest.image_size, uploadRequest.repository,
+					uploadRequest.tag);
+			ImageService imageService = new ImageServiceImpl();
+			ImageInfo imageInfo = imageService.fetchImageById(uploadImageToTrustDirector.id);
+			uploadedFile.renameTo(Paths.get(imageInfo.getLocation(),imageInfo.getImage_name()).toFile());
+			imageInfo.setStatus(Constants.COMPLETE);
+			imageInfo.setDeleted(false);
+			imageService.updateImageMetadata(imageInfo);
+			uploadImageToTrustDirector.status = Constants.SUCCESS;
+			log.info("Successfully uploaded image to location: {}" , uploadImageToTrustDirector.getLocation());
+			return Response.ok().entity(uploadImageToTrustDirector).build();
+		} catch (DirectorException e) {
+			GenericResponse genericResponse = new GenericResponse();
+			genericResponse.status = Constants.ERROR;
+			genericResponse.details = "Error in saving image metadata";
+			genericResponse.errorCode = ErrorCode.REQUEST_PROCESSING_FAILED;
+			return Response.ok(genericResponse).status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 }

@@ -4,7 +4,7 @@ function saveMtWilsonSetting() {
 	self.data.mtwilson_api_url = $('#mtwilsonapiurl').val();
 	self.data.mtwilson_api_username = $('#mtwilsonapiusername').val();
 	self.data.mtwilson_api_password = $('#mtwilsonapipassword').val();
-	self.data.mtwilson_api_tls_policy_certificate_sha1 = $('#mtwilsonapicertificate').val();
+	self.data.mtwilson_api_tls_policy_certificate_sha256 = $('#mtwilsonapicertificate').val();
 	self.data.mtwilson_server = $('#mtwilsonserverip').val();
 	self.data.mtwilson_server_port = $('#mtwilsonserverport').val();
 	self.data.mtwilson_username = $('#mtwilsonusername').val();
@@ -48,7 +48,7 @@ function fetchMtwilsonSetting() {
 			$('#mtwilsonapiurl').val(data.mtwilson_api_url);
 			$('#mtwilsonapiusername').val(data.mtwilson_api_username);
 			$('#mtwilsonapipassword').val(data.mtwilson_api_password);
-			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha1);
+			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha256);
 			$('#mtwilsonserverip').val(data.mtwilson_server);
 			$('#mtwilsonserverport').val(data.mtwilson_server_port);
 			$('#mtwilsonusername').val(data.mtwilson_username);
@@ -63,7 +63,7 @@ function validateMTWSetting() {
 	self.data.mtwilson_api_url = $('#mtwilsonapiurl').val();
 	self.data.mtwilson_api_username = $('#mtwilsonapiusername').val();
 	self.data.mtwilson_api_password = $('#mtwilsonapipassword').val();
-	self.data.mtwilson_api_tls_policy_certificate_sha1 = $('#mtwilsonapicertificate').val();
+	self.data.mtwilson_api_tls_policy_certificate_sha256 = $('#mtwilsonapicertificate').val();
 	self.data.mtwilson_server = $('#mtwilsonserverip').val();
 	self.data.mtwilson_server_port = $('#mtwilsonserverport').val();
 	self.data.mtwilson_username = $('#mtwilsonusername').val();

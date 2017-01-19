@@ -49,14 +49,18 @@ public class SettingImpl implements Setting {
 		String errMsg = "Error connecting to KMS";
 		genericResponse.status = Constants.ERROR;
 		try {
-			kmsUtil = new KmsUtil(request.getUser(), request.getUrl(), request.getSha1());
+			kmsUtil = new KmsUtil(request.getUser(), request.getPassword(), request.getUrl(), request.getSha256());
 		} catch (IOException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (JAXBException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (XMLStreamException e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		} catch (Exception e) {
+			log.error("Error instaniating KMSUtil", e);
 			genericResponse.error = errMsg;
 		}
 		if (StringUtils.isNotBlank(genericResponse.error)) {
@@ -88,13 +92,13 @@ public class SettingImpl implements Setting {
 			String apiUrl = request.getMtwilson_api_url();
 			String apiPassword = request.getMtwilson_api_password();
 			String apiUser = request.getMtwilson_api_username();
-			String sha1 = request.getMtwilson_api_tls_policy_certificate_sha1();
+			String sha256 = request.getMtwilson_api_tls_policy_certificate_sha256();
 
 			String keystore = Folders.configuration() + File.separator + apiUser + ".jks";
 
 			log.debug("Keystore path = {}", keystore);
 			mtwProperties.setProperty(Constants.MTWILSON_PROP_SERVER_API_PASSWORD, apiPassword);
-			mtwProperties.setProperty(Constants.MTWILSON_PROP_SERVER_SHA1, sha1);
+			mtwProperties.setProperty(Constants.MTWILSON_PROP_SERVER_SHA256, sha256);
 			mtwProperties.setProperty(Constants.MTWILSON_PROP_SERVER_API_IP, apiUrl);
 			mtwProperties.setProperty(Constants.MTWILSON_PROP_SERVER_API_USER, apiUser);
 
@@ -116,8 +120,8 @@ public class SettingImpl implements Setting {
 				log.info("Creating user: {} in MTW", apiUser);
 				Properties properties = new Properties();
 				File folder = new File(Folders.configuration());
-				properties.setProperty("mtwilson.api.tls.policy.certificate.sha1",
-						sha1);
+				properties.setProperty("mtwilson.api.tls.policy.certificate.sha256",
+						sha256);
 				String comment = formatCommentRequestedRoles("Attestation", "Challenger");
 				URL server = new URL(apiUrl);
 

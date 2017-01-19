@@ -3,7 +3,8 @@ package com.intel.director.api;
 public class ValidateKMSConfigurationRequest {
 	private String url;
 	private String user;
-	private String sha1;
+	private String sha256;
+	private String password;
 
 	public String getUrl() {
 		return url;
@@ -21,12 +22,19 @@ public class ValidateKMSConfigurationRequest {
 		this.user = user;
 	}
 
-	public String getSha1() {
-		return sha1;
+	public String getSha256() {
+		return sha256;
 	}
 
-	public void setSha1(String sha1) {
-		this.sha1 = sha1;
+	public void setSha256(String sha256) {
+		this.sha256 = sha256;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 }

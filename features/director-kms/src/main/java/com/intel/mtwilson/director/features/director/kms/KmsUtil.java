@@ -3,6 +3,7 @@ package com.intel.mtwilson.director.features.director.kms;
 import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
@@ -48,26 +50,26 @@ public class KmsUtil {
 	private static final String DIRECTOR_KEYSTORE = "director.keystore";
 	private static final String DIRECTOR_KEYSTORE_PASSWORD = "director.keystore.password";
 	private static final String KMS_ENDPOINT_URL = "kms.endpoint.url";
-	private static final String KMS_TLS_POLICY_CERTIFICATE_SHA1 = "kms.tls.policy.certificate.sha1";
+	private static final String KMS_TLS_POLICY_CERTIFICATE_SHA256 = "kms.tls.policy.certificate.sha256";
 	private static final String KMS_LOGIN_BASIC_USERNAME = "kms.login.basic.username";
 	private static final String KMS_LOGIN_BASIC_PASSWORD = "kms.login.basic.password";
 	private static final String KMS_PROP_FILE = "kms.properties";
 
 	
-	public KmsUtil(String user, String url, String sha1) throws IOException, JAXBException, XMLStreamException, Exception {
+	public KmsUtil(String user, String password, String url, String sha256) throws IOException, JAXBException, XMLStreamException, Exception {
 		// Collect KMS configurations		
-		if (url == null || url.isEmpty()) {
-			throw new Exception("KMS endpoint URL not configured");
+		if (StringUtils.isBlank(url)) {
+			throw new NullPointerException("KMS endpoint URL not configured");
 		}
 
 		log.debug("Got the kms endpoint {}", url);
-		if (sha1 == null || sha1.isEmpty()) {
-			throw new Exception("KMS TLS policy certificate digest not configured");
+		if (StringUtils.isBlank(sha256)) {
+			throw new NullPointerException("KMS TLS policy certificate digest not configured");
 		}
 
 		kmsLoginBasicUsername = user;
-		if (kmsLoginBasicUsername == null || kmsLoginBasicUsername.isEmpty()) {
-			throw new Exception("KMS API username not configured");
+		if (StringUtils.isBlank(kmsLoginBasicUsername)) {
+			throw new NullPointerException("KMS API username not configured");
 		}
 
 		String kmsLoginBasicPassword;
@@ -77,6 +79,9 @@ public class KmsUtil {
 				kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
 			} else{
 				kmsLoginBasicPassword = null;
+				if(StringUtils.isNotBlank(password)) {
+					kmsLoginBasicPassword = password;
+				}
 			}
 		}
 		
@@ -84,7 +89,7 @@ public class KmsUtil {
 		// create KMS Keys API client
 		Properties properties = new Properties();
 		properties.setProperty("endpoint.url", url);
-		properties.setProperty("tls.policy.certificate.sha1", sha1);
+		properties.setProperty("tls.policy.certificate.sha256", sha256);
 		properties.setProperty("login.basic.username", kmsLoginBasicUsername);
 		properties.setProperty("login.basic.password", kmsLoginBasicPassword);
 		keys = new Keys(properties);
@@ -93,18 +98,18 @@ public class KmsUtil {
 
 	}
 	
-	public KmsUtil() throws IOException, JAXBException, XMLStreamException, Exception {
+	public KmsUtil() throws Exception  {
 		Password keystorePassword = null;
 		PublicKey directorEnvelopePublicKey;
 		String kmsEndpointUrl;
-		String kmsTlsPolicyCertificateSha1;
+		String kmsTlsPolicyCertificateSha256;
 		String kmsLoginBasicPassword;
 		kmsprops = new Gson().fromJson(getProperties(KMS_PROP_FILE), new TypeToken<HashMap<String, Object>>() {
 		}.getType());
 		// Get director envelope key
 		String directorEnvelopeAlias = getConfiguration().get(DIRECTOR_ENVELOPE_ALIAS, "director-envelope");
-		if (directorEnvelopeAlias == null || directorEnvelopeAlias.isEmpty()) {
-			throw new Exception("Trust Director Envelope alias not configured");
+		if (StringUtils.isBlank(directorEnvelopeAlias)) {
+			throw new NullPointerException("Trust Director Envelope alias not configured");
 		}
 
 		log.debug("KMSUTIL: Folders.configuration() : " + Folders.configuration());
@@ -112,7 +117,7 @@ public class KmsUtil {
 				Folders.configuration() + File.separator + "keystore.jks");
 		File keystoreFile = new File(keystorePath);
 		if (!keystoreFile.exists()) {
-			throw new Exception("Director Keystore file does not exist");
+			throw new FileNotFoundException("Director Keystore file does not exist");
 		}
 		log.debug("KMSUTIL: Got the keystore");
 		try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
@@ -122,7 +127,7 @@ public class KmsUtil {
 		}
 		log.debug("KMSUTIL: Got the keystore password");
 		if (keystorePassword == null || keystorePassword.toCharArray().length == 0) {
-			throw new Exception("Director Keystore password is not configured");
+			throw new NullPointerException("Director Keystore password is not configured");
 		}
 
 		SimpleKeystore keystore = new SimpleKeystore(new FileResource(keystoreFile), keystorePassword);
@@ -138,21 +143,21 @@ public class KmsUtil {
 
 		// Collect KMS configurations
 		kmsEndpointUrl = kmsprops.get(KMS_ENDPOINT_URL.replace('.', '_'));
-		if (kmsEndpointUrl == null || kmsEndpointUrl.isEmpty()) {
-			throw new Exception("KMS endpoint URL not configured");
+		if (StringUtils.isBlank(kmsEndpointUrl)) {
+			throw new NullPointerException("KMS endpoint URL not configured");
 		}
 
 		log.debug("Got the kms endpoint {}", kmsEndpointUrl);
-		kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
-		if (kmsTlsPolicyCertificateSha1 == null || kmsTlsPolicyCertificateSha1.isEmpty()) {
-			throw new Exception("KMS TLS policy certificate digest not configured");
+		kmsTlsPolicyCertificateSha256 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA256.replace('.', '_'));
+		if (StringUtils.isBlank(kmsTlsPolicyCertificateSha256)) {
+			throw new NullPointerException("KMS TLS policy certificate digest not configured");
 		}
 
-		log.debug("Got the KMS SHA1");
+		log.debug("Got the KMS SHA256");
 
 		kmsLoginBasicUsername = kmsprops.get(KMS_LOGIN_BASIC_USERNAME.replace('.', '_'));
-		if (kmsLoginBasicUsername == null || kmsLoginBasicUsername.isEmpty()) {
-			throw new Exception("KMS API username not configured");
+		if (StringUtils.isBlank(kmsLoginBasicUsername)) {
+			throw new NullPointerException("KMS API username not configured");
 		}
 		log.debug("Got the KMS user name");
 
@@ -164,16 +169,14 @@ public class KmsUtil {
 		}
 
 		log.debug("Got the KMS password");
-		// kmsLoginBasicPassword =
-		// getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD,
-		// kmsLoginBasicPassword);
-		if (kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty()) {
-			throw new Exception("KMS API password not configured");
+		if (StringUtils.isBlank(kmsLoginBasicPassword)) {
+			log.info("KMS Password not set");
+			kmsLoginBasicPassword = kmsprops.get(KMS_LOGIN_BASIC_PASSWORD.replace('.', '_'));
 		}
 		// create KMS Keys API client
 		Properties properties = new Properties();
 		properties.setProperty("endpoint.url", kmsEndpointUrl);
-		properties.setProperty("tls.policy.certificate.sha1", kmsTlsPolicyCertificateSha1);
+		properties.setProperty("tls.policy.certificate.sha256", kmsTlsPolicyCertificateSha256);
 		properties.setProperty("login.basic.username", kmsLoginBasicUsername);
 		properties.setProperty("login.basic.password", kmsLoginBasicPassword);
 		keys = new Keys(properties);
