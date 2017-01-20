@@ -89,14 +89,14 @@
 
 	<target name="all" depends="ready,clean,build,packages"></target>
 
-    <target name="klocwork" depends="init,ready">
+	    <target name="klocwork" depends="init,ready">
         <exec executable="/bin/bash">
 		      <arg value="klocwork.sh"/>
 		</exec>
-     </target>
+    </target>
 
 
-      <target name="build-with-scans">
+	   <target name="build-with-scans">
 	        <parallel>
         	    <exec executable="ant">
 	                <arg value="all"/>
@@ -105,5 +105,5 @@
         	        <arg value="klocwork"/>
 	            </exec>
 	        </parallel>
-	   </target>	
+	    </target>	
 </project>

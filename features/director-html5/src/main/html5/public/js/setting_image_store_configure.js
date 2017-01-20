@@ -285,10 +285,10 @@ function createImageStore() {
 			}
 			createImageStoreRequest.name="";
 			jsonStr = JSON.stringify(createImageStoreRequest);
-			saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
+			saveButtonStr = '<button type=\'button\' class=\'btn btn-primary\' onclick=\'updateImageStore('
 			+ jsonStr + ', false)\'>Save</button>';
 			
-			saveAnywaysButtonStr =  '<button type=\'button\' class=\'btn btn-default\' onclick=\'testImageStoreConnection('
+			saveAnywaysButtonStr =  '<button type=\'button\' class=\'btn btn-primary\' onclick=\'testImageStoreConnection('
 			+ jsonStr + ', false)\'>Test Connection</button>'
 			$("#image_store_details_title").html("");
 			
@@ -556,9 +556,9 @@ function populateImageStore(image_store) {
 	$('#edit_image_store').modal('show');
 	image_store.name="";
 	jsonStr = JSON.stringify(image_store);
-	saveButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'updateImageStore('
+	saveButtonStr = '<button type=\'button\' class=\'btn btn-primary\' onclick=\'updateImageStore('
 			+ jsonStr + ',true)\'>Save</button>';
-	saveAnywaysButtonStr = '<button type=\'button\' class=\'btn btn-default\' onclick=\'testImageStoreConnection('
+	saveAnywaysButtonStr = '<button type=\'button\' class=\'btn btn-primary\' onclick=\'testImageStoreConnection('
 			+ jsonStr + ',true)\'>Test Connection</button>';
 	$("#saveButton").html(saveButtonStr);
 	$("#saveAnywaysButton").html(saveAnywaysButtonStr);
