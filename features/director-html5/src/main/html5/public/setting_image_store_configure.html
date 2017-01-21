@@ -69,6 +69,7 @@
 												<select class="form-control" id="connector">
 													<option value="0">Select</option>
 													<option value="Docker">Docker</option>
+													<option value="Registry">Docker Registry</option>
 													<option value="Glance">Glance</option>
 												</select>
 											</div>
@@ -89,8 +90,8 @@
 								</div>
 							</div>
 							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="imageStoreSettingPage()" >Close</button>
-								<button type="button" class="btn btn-default" onclick = "createImageStore()">Next</button>
+								<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="imageStoreSettingPage()" >Close</button>
+								<button type="button" class="btn btn-primary" onclick = "createImageStore()">Next</button>
 							</div>
 						</div>
 						
@@ -145,8 +146,8 @@
 								</div>
 							</div>
 							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage()">Close</button>
-								<button type="button" class="btn btn-default" onclick = "editImageStore()">Next</button>
+								<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage()">Close</button>
+								<button type="button" class="btn btn-primary" onclick = "editImageStore()">Next</button>
 							</div>
 						</div>
 						
@@ -178,8 +179,8 @@
 							</div>
 							<div class="modal-footer">
 								<div class="row">
-									<div class="col-md-1"><button type="button" onclick="imageStoreSettingPage()" class="btn btn-default" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
-									<div class="col-md-1"><div id = "editBackButton"><button type="button" class="btn btn-default" onclick = "backToEdit()">Back</button></div></div>
+									<div class="col-md-1"><button type="button" onclick="imageStoreSettingPage()" class="btn btn-primary" data-dismiss="modal" onclick="resetAllFields();imageStoreSettingPage();">Close</button></div>
+									<div class="col-md-1"><div id = "editBackButton"><button type="button" class="btn btn-primary" onclick = "backToEdit()">Back</button></div></div>
 									<div class="col-md-1"><div id = "saveButton"></div></div>
 									<div class="col-md-1"><div id = "saveAnywaysButton"></div></div>
 									
