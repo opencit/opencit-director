@@ -272,10 +272,10 @@ update_property_in_file "director.db.hostname" "$DIRECTOR_PROPERTIES_FILE" "$DIR
 prompt_with_default DIRECTOR_DB_PORTNUM "Director db Portno:" "$DIRECTOR_DB_PORTNUM"
 update_property_in_file "director.db.portnum" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PORTNUM"
 
-DIRECTOR_DB_USERNAME=${DIRECTOR_DB_USERNAME:-"director"}
+prompt_with_default DIRECTOR_DB_USERNAME "Director db username:" "$DIRECTOR_DB_USERNAME"
 update_property_in_file "director.db.username" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_USERNAME"
 
-DIRECTOR_DB_PASSWORD=${DIRECTOR_DB_PASSWORD:-$(generate_password 16)}
+prompt_with_default DIRECTOR_DB_PASSWORD "Director db password:" "$DIRECTOR_DB_PASSWORD"
 update_property_in_file "director.db.password" "$DIRECTOR_PROPERTIES_FILE" "$DIRECTOR_DB_PASSWORD"
 
 prompt_with_default DIRECTOR_DB_DRIVER "Director db driver:" "$DIRECTOR_DB_DRIVER"
@@ -293,22 +293,9 @@ export POSTGRES_PASSWORD=${DIRECTOR_DB_PASSWORD}
 
 
 # modifying after mtwilson api client built
-prompt_with_default MTWILSON_SERVER "Mtwilson Server:" "$MTWILSON_SERVER"
-update_property_in_file "mtwilson.server" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER"
-prompt_with_default MTWILSON_SERVER_PORT "Mtwilson Server Port:" "$MTWILSON_SERVER_PORT"
-update_property_in_file "mtwilson.server.port" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
-prompt_with_default MTWILSON_USERNAME "Mtwilson Username:" "$MTWILSON_USERNAME"
-update_property_in_file "mtwilson.username" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_USERNAME"
-prompt_with_default_password MTWILSON_PASSWORD "Mtwilson Password:" "$MTWILSON_PASSWORD"
-update_property_in_file "mtwilson.password" "$DIRECTOR_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-
-
-
-prompt_with_default MTWILSON_API_URL "Mtwilson API Url:" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.url" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_API_URL"
 update_property_in_file "mtwilson.api.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
 update_property_in_file "mtwilson.api.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
-prompt_with_default MTWILSON_TLS "Mtwilson TLS:" "$MTWILSON_TLS"
 update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_TLS"
 
 
@@ -316,11 +303,6 @@ update_property_in_file "mtwilson.api.tls.policy.certificate.sha256" "$MTWILSON_
 #############################################
 #update for TDAAS: Write 2 different files for KMS andd MtWilson settings
 #############################################
-#MtWilson
-update_property_in_file "mtwilson.server" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_SERVER"
-update_property_in_file "mtwilson.server.port" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_SERVER_PORT"
-update_property_in_file "mtwilson.username" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_USERNAME"
-update_property_in_file "mtwilson.password" "$MTWILSON_PROPERTIES_FILE" "$MTWILSON_PASSWORD"
 
 #KMS
 update_property_in_file "kms.endpoint.url" "$KMS_PROPERTIES_FILE" "$KMS_ENDPOINT_URL"
@@ -328,31 +310,17 @@ update_property_in_file "kms.tls.policy.certificate.sha256" "$KMS_PROPERTIES_FIL
 update_property_in_file "kms.login.basic.username" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_USERNAME"
 update_property_in_file "kms.login.basic.password" "$KMS_PROPERTIES_FILE" "$KMS_LOGIN_BASIC_PASSWORD"
 
-
-# director requires java 1.7 or later
-# detect or install java (jdk-1.7.0_51-linux-x64.tar.gz)
+# director requires java 1.8 or later
 echo "Installing Java..."
-JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7}
-JAVA_PACKAGE=`ls -1 jdk-* jre-* java-*.bin 2>/dev/null | tail -n 1`
-# check if java is readable to the non-root user
-if [ -z "$JAVA_HOME" ]; then
-  java_detect > /dev/null
-fi
-if [ -n "$JAVA_HOME" ]; then
-  if [ $(whoami) == "root" ]; then
-    JAVA_USER_READABLE=$(sudo -u $DIRECTOR_USERNAME /bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  else
-    JAVA_USER_READABLE=$(/bin/bash -c "if [ -r $JAVA_HOME ]; then echo 'yes'; fi")
-  fi
-fi
-if [ -z "$JAVA_HOME" ] || [ -z "$JAVA_USER_READABLE" ]; then
-  JAVA_HOME=$DIRECTOR_HOME/share/jdk1.7.0_79
-fi
-mkdir -p $JAVA_HOME
-java_install_in_home $JAVA_PACKAGE
+JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.8}
+java_install_openjdk
+JAVA_CMD=$(type -p java | xargs readlink -f)
+JAVA_HOME=$(dirname $JAVA_CMD | xargs dirname | xargs dirname)
+JAVA_REQUIRED_VERSION=$(java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}')
+
 echo "# $(date)" > $DIRECTOR_ENV/director-java
 echo "export JAVA_HOME=$JAVA_HOME" >> $DIRECTOR_ENV/director-java
-echo "export JAVA_CMD=$JAVA_HOME/bin/java" >> $DIRECTOR_ENV/director-java
+echo "export JAVA_CMD=$JAVA_CMD" >> $DIRECTOR_ENV/director-java
 echo "export JAVA_REQUIRED_VERSION=$JAVA_REQUIRED_VERSION" >> $DIRECTOR_ENV/director-java
 
 # libguestfs packages has a custom prompt about installing supermin which ignores the “-y” option we provide to apt-get. Following code will help to avoid that prompt 
