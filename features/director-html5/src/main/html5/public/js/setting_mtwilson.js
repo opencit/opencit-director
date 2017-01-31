@@ -5,23 +5,13 @@ function saveMtWilsonSetting() {
 	self.data.mtwilson_api_username = $('#mtwilsonapiusername').val();
 	self.data.mtwilson_api_password = $('#mtwilsonapipassword').val();
 	self.data.mtwilson_api_tls_policy_certificate_sha256 = $('#mtwilsonapicertificate').val();
-	self.data.mtwilson_server = $('#mtwilsonserverip').val();
-	self.data.mtwilson_server_port = $('#mtwilsonserverport').val();
-	self.data.mtwilson_username = $('#mtwilsonusername').val();
-	self.data.mtwilson_password = $('#mtwilsonpassword').val();
 	
-	
-	self.data.mtwilson_password = $.trim(self.data.mtwilson_password);
-	self.data.mtwilson_api_password = $.trim(self.data.mtwilson_api_password);
 	
 	if(self.data.mtwilson_api_password == '') {
 		alert('Please provide valid api password');
 		return false;
 	}
-	if (self.data.mtwilson_password == '' ){
-		alert('Please provide valid password');
-		return false;
-	} 
+	 
 	$.ajax({
 		type : 'POST',
 		url : '/v1/setting/mtwilson',
@@ -49,10 +39,6 @@ function fetchMtwilsonSetting() {
 			$('#mtwilsonapiusername').val(data.mtwilson_api_username);
 			$('#mtwilsonapipassword').val(data.mtwilson_api_password);
 			$('#mtwilsonapicertificate').val(data.mtwilson_api_tls_policy_certificate_sha256);
-			$('#mtwilsonserverip').val(data.mtwilson_server);
-			$('#mtwilsonserverport').val(data.mtwilson_server_port);
-			$('#mtwilsonusername').val(data.mtwilson_username);
-			$('#mtwilsonpassword').val(data.mtwilson_password);
 		}
 	});
 }
@@ -64,23 +50,12 @@ function validateMTWSetting() {
 	self.data.mtwilson_api_username = $('#mtwilsonapiusername').val();
 	self.data.mtwilson_api_password = $('#mtwilsonapipassword').val();
 	self.data.mtwilson_api_tls_policy_certificate_sha256 = $('#mtwilsonapicertificate').val();
-	self.data.mtwilson_server = $('#mtwilsonserverip').val();
-	self.data.mtwilson_server_port = $('#mtwilsonserverport').val();
-	self.data.mtwilson_username = $('#mtwilsonusername').val();
-	self.data.mtwilson_password = $('#mtwilsonpassword').val();
-	
-	
-	self.data.mtwilson_password = $.trim(self.data.mtwilson_password);
-	self.data.mtwilson_api_password = $.trim(self.data.mtwilson_api_password);
 	
 	if(self.data.mtwilson_api_password == '') {
 		alert('Please provide valid api password');
 		return false;
 	}
-	if (self.data.mtwilson_password == '' ){
-		alert('Please provide valid password');
-		return false;
-	} 
+	 
 	$('#validateMTWBtn').prop('disabled', true);
 	$.ajax({
 		type : 'POST',
