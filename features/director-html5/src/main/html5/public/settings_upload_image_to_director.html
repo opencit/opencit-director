@@ -1,128 +1,164 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Settings</title>
-        <meta name="author" content="jbuhacoff">
-        
-        <script>
 
-		var image_type_upload="VM";
-	var image_format_upload="qcow2";
-			
-			$(document).ready(function () {
+<head>
+    <title>Settings</title>
+    <meta name="author" content="jbuhacoff">
 
-				$("#image_format").hide();
-				$("#gotoUploadWindow").click(function () {
-					var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window.html", "_blank", "width=500,height=500,resizable=no");
-					OpenWindow.image_deployments_parent = $("#image_type").val();
-					image_type_upload=$("#image_type").val();
-					if($("#image_type").val() == 'VM'){
-						OpenWindow.image_format_parent = 'qcow2';
-						} else {
-						OpenWindow.image_format_parent = $("#image_format").val();
-					}
-					OpenWindow.auth_token_parent=mainViewModel.loginViewModel.userProfile.authorizationToken();	
-				});
-				
-				fetchDeploymentType();
+    <script>
+        var image_type_upload;
+        var image_format_upload;
 
+        $(document).ready(function() {
+
+            $("#image_format").hide();
+            $("#gotoUploadWindow").click(function() {
+                var OpenWindow = window.open("/v1/html5/public/director-html5/file_upload_window_resumable.html", "_blank", "width=500,height=400,resizable=no");
+                image_type_upload = $("#image_type").val();
+                if ($("#image_type").val() == 'VM') {
+                	image_format_upload = 'qcow2';
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('VM')" );
+                } else if ($("#image_type").val() == 'Docker') {
+                	image_format_upload = 'tar';
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('Docker')" );
+                } else {
+					$("#goToSpecificTrustPolicyPage").attr('onclick',"goToSpecificTrustPolicyPage('VM')" );
+                	image_format_upload = $("#image_format").val();
+                }
+                OpenWindow.auth_token_parent = mainViewModel.loginViewModel.userProfile.authorizationToken();
+            });
+			$( "#image_type" ).change(function() {
+				if($("#image_type").val() != 'VM'){
+					$( "#image_format_label").hide();			
+				} else {
+					$( "#image_format_label").show();
+				}
 			});
-			
-			function fetchDeploymentType() {
-				
-				$.ajax({
-					type : "GET",
-					url : "/v1/image-deployments",
-					dataType : "json",
-					success : function(data) {
-						var option=""; 
-						for (var i=0; i < data.image_deployments.length; i++){
-							if(data.image_deployments[i].name != "BareMetal"){
-								option += '<option value="'+ data.image_deployments[i].name + '">' + data.image_deployments[i].display_name + '</option>';
-							}
-						}
-						$('#image_type').append(option);
-					}
-				});
-				
-			};
-			
-			function fetchImageFormat() {
-				
-				$.ajax({
-					type : "GET",
-					url : "/v1/image-formats",
-					dataType : "json",
-					success : function(data) {
-						var option=""; 
-						for (var i=0; i < data.image_formats.length; i++){ 
-							option += '<option value="'+ data.image_formats[i].name + '">' + data.image_formats[i].display_name + '</option>'; 
-						}
-						$('#image_format').append(option);
-					}
-				});
-				
-			};
 
-			function goToTrustPolicyPage(){
-			$('[data-navbar-feature-button-index="0"]').removeClass('active');	
-			$('[data-navbar-feature-button-index="1"]').addClass('active');
-			$( "#upload-to-td" ).removeClass('active');
-			$( "#director-trust-policy" ).addClass('active');
+            fetchDeploymentType();
 
+        });
+
+        function fetchDeploymentType() {
+
+            $.ajax({
+                type: "GET",
+                url: "/v1/image-deployments",
+                dataType: "json",
+                success: function(data) {
+                    var option = "";
+                    for (var i = 0; i < data.image_deployments.length; i++) {
+                        if (data.image_deployments[i].name != "BareMetal") {
+                            option += '<option value="' + data.image_deployments[i].name + '">' + data.image_deployments[i].display_name + '</option>';
+                        }
+                    }
+                    $('#image_type').append(option);
+                }
+            });
+
+        };
+
+        function fetchImageFormat() {
+
+            $.ajax({
+                type: "GET",
+                url: "/v1/image-formats",
+                dataType: "json",
+                success: function(data) {
+                    var option = "";
+                    for (var i = 0; i < data.image_formats.length; i++) {
+                        option += '<option value="' + data.image_formats[i].name + '">' + data.image_formats[i].display_name + '</option>';
+                    }
+                    $('#image_format').append(option);
+                }
+            });
+
+        };
+
+        function goToSpecificTrustPolicyPage(gridToDisplay) {
+		
+			if(gridToDisplay == 'VM'){
+				$('[data-navbar-feature-button-index="0"]').removeClass('active');
+				$('[data-navbar-feature-button-index="1"]').addClass('active');
+				$("#upload-to-td").removeClass('active');
+				$("#director-trust-policy").addClass('active');
+
+				$("#docker-dashboard-main-page").hide();
 				$("#bm-dashboard-main-page").hide();
 				$("#vm-dashboard-main-page").show();
 
-	
-			var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
 
-			if (isEmpty == false) {
-				$("#vm-dashboard-main-page").html("");
-			}
-			hideLoading();
-			$("#vm-dashboard-main-page").load(
+				var isEmpty = !$.trim($("#vm-dashboard-main-page").html());
+
+				if (isEmpty == false) {
+					$("#vm-dashboard-main-page").html("");
+				}
+				hideLoading();
+				$("#vm-dashboard-main-page").load(
 					"/v1/html5/public/director-html5/vm_images_page.html");
-			umount_image();
-		
+			} else {
+				$('[data-navbar-feature-button-index="0"]').removeClass('active');
+				$('[data-navbar-feature-button-index="1"]').addClass('active');
+				$("#upload-to-td").removeClass('active');
+				$("#director-trust-policy").addClass('active');
+
+				$("#vm-dashboard-main-page").hide();
+				$("#bm-dashboard-main-page").hide();
+				$("#docker-dashboard-main-page").show();
+
+
+				var isEmpty = !$.trim($("#docker-dashboard-main-page").html());
+
+				if (isEmpty == false) {
+					$("#docker-dashboard-main-page").html("");
+				}
+				hideLoading();
+				$("#docker-dashboard-main-page").load(
+					"/v1/html5/public/director-html5/docker_images_page.html");
 			}
-			
-			function hideGoToTrustPolicyButton() {
-				var goToTPDiv = $("#goToTrustPolicyPageDiv");
-				goToTPDiv.hide();
-			}
-		</script>
-		
-	</head>
-    <body>
-		
-        <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-8" style="margin-top: 10px;">        
-                <div class="panel panel-default" data-bind="with: settingsViewModel">
-                    <div class="panel-heading">
-                        <h1>Upload To Trust Director</h1>
-					</div>
-                    <div class="panel-body">
-						<div class="row">
-							<div class="form-group">
-								<label class="control-label col-md-4" for="image_type"><span class="pull-right">Image Type:</span></label>
-								<div class="col-md-4">
-									<select class="form-control" id="image_type">
-										
-									</select>
-								</div>
-								<div class="col-md-4"></div>
-							</div>
-						</div>
-						<br />
-						<div class="row">
-							<div class="form-group">
-								<div class="col-md-2"></div>
-								<div class="col-md-8">
-									Supported Image Formats : qcow2, vhd(vpc), vmdk, raw, vdi
-								</div>
-								<div class="col-md-2"></div>
-							<!--								<label class="control-label col-md-4" for="supported_format"><span class="pull-right">Supported  Image Formats:</span></label>
+        }
+
+        function hideGoToTrustPolicyButton() {
+            var goToTPDiv = $("#goToTrustPolicyPageDiv");
+            goToTPDiv.hide();
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8" style="margin-top: 10px;">
+            <div class="panel panel-default" data-bind="with: settingsViewModel">
+                <div class="panel-heading">
+                    <h1>Upload To Trust Director</h1>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-md-2" for="image_type"><span class="pull-right">Image Type:</span></label>
+                            <div class="col-md-4">
+                                <select class="form-control" id="image_type">
+
+                                </select>
+                            </div>
+							<div class="col-md-1"></div>
+                            <div class="col-md-2" id="gotoUploadWindowDiv">
+                                <button id="gotoUploadWindow" class="btn btn-primary">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+					<div class="row">
+                        <div class="form-group">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8" id="image_format_label">
+                                Supported Image Formats : qcow2, vhd(vpc), vmdk, raw, vdi
+                            </div>
+                            <div class="col-md-2"></div>
+                            <!--								<label class="control-label col-md-4" for="supported_format"><span class="pull-right">Supported  Image Formats:</span></label>
 								<div class="col-md-4">
 									<div id = "supported_format">QCOW2</div>
 									<select class="form-control" id="image_format">
@@ -130,25 +166,25 @@
 									</select>
 								</div>
 							<div class="col-md-4"></div> -->
-							</div>
-						</div>
-						<br />
-						<div class="row">
-							<div class="form-group">
-								<div class="col-md-4"></div>
-								<div class="col-md-4" id="gotoUploadWindowDiv">
-									<button id="gotoUploadWindow" class="btn btn-primary">Upload</button>
-								</div>
-								<div id ="goToTrustPolicyPageDiv" class="col-md-1">
-									<button id="goToTrustPolicyPage" class="btn btn-primary" onclick="goToTrustPolicyPage()" >Trust Policy Page</button></div>
-							</div>						</div>      
-					</div>
-				</div>
-			</div>
-			
-			<div class="col-md-2"></div>
-			
-		</div>
-		
-	</body>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-2"></div>
+                            <div id="goToTrustPolicyPageDiv" class="col-md-1">
+                                <button id="goToSpecificTrustPolicyPage" class="btn btn-primary">Trust Policy Page</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2"></div>
+
+    </div>
+
+</body>
+
 </html>

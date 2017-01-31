@@ -3,8 +3,6 @@ package com.intel.director.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
@@ -24,7 +22,7 @@ public class CreateTrustPolicyMetaDataRequest {
 	public String selected_image_format;
 
 	public String deployment_type;
-
+	
 	public boolean encrypted = false;
 
 	public String image_name;
@@ -49,6 +47,7 @@ public class CreateTrustPolicyMetaDataRequest {
 		this.display_name = display_name;
 	}
 
+	
 	public String getHostid() {
 		return hostid;
 	}
@@ -125,35 +124,41 @@ public class CreateTrustPolicyMetaDataRequest {
 	 */
 
 	public String validate(String type) {
-		String NAME_REGEX = "[a-zA-Z0-9,;. @_-]+";
+		String NAME_REGEX = "[a-zA-Z:0-9,;. @_-]+";
 		List<String> errors = new ArrayList<>();
 		if ("draft".equals(type)) {
-			if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {
+			if(Constants.DEPLOYMENT_TYPE_DOCKER.equals(deployment_type)){
+				int tagStart = display_name.lastIndexOf(":") + 1;
+				String repo = display_name.substring(0, tagStart - 1);
+				String tag = display_name.substring(tagStart);
+				if (!(ValidationUtil.isValidWithRegex(repo, Constants.DOCKER_REPO_NAME_REGEX)
+						&& ValidationUtil.isValidWithRegex(tag, Constants.DOCKER_TAG_NAME_REGEX))) {
+					errors.add("Display name is empty or improper format");
+				}
+			} else if (!ValidationUtil.isValidWithRegex(getDisplay_name(), NAME_REGEX)) {
 				errors.add("Display name is empty or improper format");
 			}
 			if (StringUtils.isBlank(getLaunch_control_policy())) {
 				errors.add("Launch Control Policy is empty");
-			} else if (!ValidationUtil.isValidWithRegex(getLaunch_control_policy(), Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY+"|"+Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE)) {
+			} else if (!ValidationUtil.isValidWithRegex(getLaunch_control_policy(),
+					Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY + "|"
+							+ Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE)) {
 				errors.add("Incorrect launch control policy. Valid values are "
-						+ Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE
-						+ " and " + Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY);
+						+ Constants.LAUNCH_CONTROL_POLICY_HASH_AND_ENFORCE + " and "
+						+ Constants.LAUNCH_CONTROL_POLICY_HASH_ONLY);
 			}
 
-			if (!ValidationUtil.isValidWithRegex(getImage_id(),
-					RegexPatterns.UUID)) {
+			if (!ValidationUtil.isValidWithRegex(getImage_id(), RegexPatterns.UUID)) {
 				errors.add("Image id is empty or not in uuid format");
 
 			}
-			
-			
+
 		} else if ("policy".equals(type)) {
-			if (!ValidationUtil.isValidWithRegex(getImage_id(),
-					RegexPatterns.UUID)) {
+			if (!ValidationUtil.isValidWithRegex(getImage_id(), RegexPatterns.UUID)) {
 				errors.add("Image id is empty or not in uuid format");
 
 			}
-			if (!ValidationUtil.isValidWithRegex(getTrust_policy_draft_id(),
-					RegexPatterns.UUID)) {
+			if (!ValidationUtil.isValidWithRegex(getTrust_policy_draft_id(), RegexPatterns.UUID)) {
 				errors.add("Trust Policy draft id is empty or not in uuid format");
 
 			}

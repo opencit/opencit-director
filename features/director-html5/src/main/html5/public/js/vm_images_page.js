@@ -1,4 +1,3 @@
-
 var pageInitialized = false;
 $(document)
 		.ready(
@@ -17,25 +16,23 @@ function createTrustPolicy(imageid, imagename) {
 	currentFlow = "Create";
 	current_image_id = imageid;
 	current_image_name = imagename;
-	current_trust_policy_draft_id='';
+	current_trust_policy_draft_id = '';
 
 	goToCreatePolicyWizard();
 }
 
-function editTrustPolicy(imageid, imagename,trust_policy_draft_id) {
+function editTrustPolicy(imageid, imagename, trust_policy_draft_id) {
 
 	currentFlow = "Edit";
 	current_image_id = imageid;
 	current_image_name = imagename;
-	current_trust_policy_draft_id=trust_policy_draft_id;
-
-	// ///current_trust_policy_id=trust_policy_id;
+	current_trust_policy_draft_id = trust_policy_draft_id;
 
 	goToEditPolicyWizard();
 }
 
 function uploadToImageStorePage(imageid, imagename, trust_policy_id) {
-
+	current_flow = "Grid";
 	currentFlow = "Upload";
 	current_image_id = imageid;
 	current_image_name = imagename;
@@ -52,9 +49,8 @@ function goToUploadToImageStorePage() {
 		$("#upload_to_image_store_redirect").html("");
 	}
 
-	$("#upload_to_image_store_redirect")
-			.load(
-					"/v1/html5/public/director-html5/upload_imagestore_direct.html");
+	$("#upload_to_image_store_redirect").load(
+			"/v1/html5/public/director-html5/upload_imagestore.html");
 
 }
 
@@ -71,9 +67,8 @@ function goToCreatePolicyWizard() {
 		$("#create_policy_wizard_").html("");
 	}
 
-	$("#create_policy_wizard_")
-			.load(
-					"/v1/html5/public/director-html5/create_policy_wizard.html");
+	$("#create_policy_wizard_").load(
+			"/v1/html5/public/director-html5/create_policy_wizard.html");
 
 }
 
@@ -81,8 +76,7 @@ function goToEditPolicyWizard() {
 	$("#vm_images_grid_page").hide();
 	$("#edit_policy_wizard").show();
 
-	var htmlpage = "/v1/html5/public/director-html5/"
-			+ "edit_policy_wizard.html";
+	var htmlpage = "/v1/html5/public/director-html5/edit_policy_wizard.html";
 
 	var isEmpty = !$.trim($("#edit_policy_wizard").html());
 
@@ -104,13 +98,12 @@ function backToVmImagesPage() {
 	$("#upload_to_image_store_redirect").hide("");
 	$("#vm_images_grid_page").show();
 	var self = this;
-		var mountimage = { 
+	var mountimage = {
 		"id" : current_image_id
 	};
-	current_trust_policy_draft_id='';
-	if(current_image_id != "" && current_image_id !=null)
-	{
-		
+	current_trust_policy_draft_id = '';
+	if (current_image_id != "" && current_image_id != null) {
+
 		$.ajax({
 			type : "POST",
 			url : "/v1/rpc/unmount-image",
@@ -124,16 +117,11 @@ function backToVmImagesPage() {
 				console.log("IMAGE UNMOUNTED BECAUSE OF BACKTOVMPAGES");
 			}
 		});
-
 	}
 	$('body').removeClass("modal-open");
 	refresh_vm_images_Grid();
-	// /
-	// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));
-
 }
 
-	
 function backToVmImagesPageWithountUnmount() {
 	$("#create_policy_script").remove();
 	$("#edit_policy_wizard").html("");
@@ -145,9 +133,6 @@ function backToVmImagesPageWithountUnmount() {
 	$("#vm_images_grid_page").show();
 	$('body').removeClass("modal-open");
 	refresh_vm_images_Grid();
-	// /
-	// ko.cleanNode(mainViewModel,document.getElementById("create_policy_content_step_1"));
-
 }
 
 function backButton() {
@@ -210,8 +195,7 @@ function nextButton() {
 	$("#" + active_wizard_page + "_content_step_" + nextStepNum).show();
 	var html_url = $("#" + active_wizard_page + "_step_" + nextStepNum).attr(
 			'href');
-	var htmlpage = "/v1/html5/public/director-html5/"
-			+ html_url.substring(1);
+	var htmlpage = "/v1/html5/public/director-html5/" + html_url.substring(1);
 
 	var isEmpty = !$.trim($(
 			"#" + active_wizard_page + "_content_step_" + nextStepNum).html());
@@ -219,6 +203,11 @@ function nextButton() {
 	if (isEmpty == true) {
 		$("#" + active_wizard_page + "_content_step_" + nextStepNum).load(
 				htmlpage);
+	} else {
+		$("#director_loading_icon").hide();
+		$("#loading_icon_container").hide();
+		$("#director_loading_icon").html("");
+
 	}
 
 	$("#" + active_wizard_page + "_step_" + nextStepNum).addClass("selected");
@@ -231,66 +220,15 @@ function nextButton() {
 
 }
 
-function downloadPolicy(imageid, trust_policy_id) {
-
-var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
-
- 
-
- $.ajax({
-            type: "POST",
-            url: "/v1/login/tokens",
-            accept: "application/json",
-            contentType: "application/json",
-            headers: {'Accept': 'application/json'},
-     		data: token_request_json,
-            success: function(data, status, xhr) {
-            	var authtoken= authtoken=data.data[0].token;
-            	var url="/v1/images/" + imageid + "/downloads/policy?Authorization="+encodeURIComponent(authtoken);
-
-                 window.location = url;                   
-            },
-            error: function(xhr, status, errorMessage) {
-              show_error_in_trust_policy_tab("error in downloading");
-            }
-        });
 
 
-}
-
-function downloadImage(imageid) {
-
-
-var token_request_json="{ \"data\": [ { \"not_more_than\": 1} ] }";
-
-
-
- $.ajax({
-            type: "POST",
-            url: "/v1/login/tokens",
-            accept: "application/json",
-            contentType: "application/json",
-            headers: {'Accept': 'application/json'},
-     		data: token_request_json,
-            success: function(data, status, xhr) {
-		var authtoken= authtoken=data.data[0].token;
-var uri="/v1/images/" + imageid + "/downloadImage?modified=true&Authorization="+encodeURI(authtoken);
-
-		window.location = uri;	
-                                   
-            },
-            error: function(xhr, status, errorMessage) {
-              show_error_in_trust_policy_tab("error in downloading");
-            }
-        });
-
-	
-}
-
-function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagename) {
+function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid,
+		imagename) {
 	var callComplete = false;
 	console.log("trust_policy_id :: " + trust_policy_id);
-	if(trust_policy_id != "" && trust_policy_id != "null" && trust_policy_id !=null && trust_policy_id != undefined && trust_policy_id != "undefined"){
+	if (trust_policy_id != "" && trust_policy_id != "null"
+			&& trust_policy_id != null && trust_policy_id != undefined
+			&& trust_policy_id != "undefined") {
 		$.ajax({
 			type : "DELETE",
 			url : "/v1/trust-policy/" + trust_policy_id,
@@ -298,19 +236,21 @@ function deletePolicyVM(trust_policy_id, trust_policy_draft_id, imageid, imagena
 			success : function(result) {
 				callComplete = true;
 				refresh_vm_images_Grid();
-				}
+			}
 		});
 	}
 	console.log("trust_policy_draft_id :: " + trust_policy_draft_id);
-	if(trust_policy_draft_id != "" && trust_policy_draft_id != undefined && trust_policy_draft_id != null && trust_policy_draft_id != "null" && trust_policy_draft_id != "undefined"){
+	if (trust_policy_draft_id != "" && trust_policy_draft_id != undefined
+			&& trust_policy_draft_id != null && trust_policy_draft_id != "null"
+			&& trust_policy_draft_id != "undefined") {
 		$.ajax({
 			type : "DELETE",
-			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id ,
+			url : "/v1/trust-policy-drafts/" + trust_policy_draft_id,
 			dataType : "text",
 			success : function(result) {
 				callComplete = true;
-				refresh_vm_images_Grid();	
-			}		
+				refresh_vm_images_Grid();
+			}
 		});
 	}
 }
@@ -321,10 +261,9 @@ function deleteImage(imageid) {
 		url : "/v1/images/" + imageid,
 		dataType : "text",
 		success : function(result) {
-			refresh_vm_images_Grid();	
+			refresh_vm_images_Grid();
 			refreshBMOnlineGrid();
 		}
 	});
 
-	
 }

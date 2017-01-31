@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Upload</title>
+  <meta charset="utf-8"/>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="css/jsgrid.css"/>
+  <link rel="stylesheet" type="text/css" href="css/theme.css"/>
+  <link rel="stylesheet" type="text/css" href="css/file_upload.css">
+</head>
+<body>
+<div id="frame">
+  <script src="js/jquery.js"></script>
+  <script src="js/resumable.js"></script>
+  <div class="col-xs-12" style="height:50px;"></div>
+  <div class="container" role="form">
+    <div class="form-group">
+      <div class="input-group control-group dockerInputs" id="dockerUploadOptions">
+        <label class="radio-inline">
+          <input type="radio" id="localUpload" value="0"
+                 name="dockerUploadOption" onclick="showHideOptions(true,true);">Local File Upload
+        </label>
+        <label class="radio-inline">
+          <input type="radio" id="remoteUpload" value="1"
+                 name="dockerUploadOption" onclick="showHideOptions(true,false);">Remote File Upload
+        </label>
+        <label class="radio-inline">
+          <input type="radio" id="dockerUploadOptionRepo" value="1"
+                 name="dockerUploadOption" onclick="showHideOptions(false,false);"
+                 checked="true">Pull from Hub
+        </label>
+      </div>
+
+      <div class="input-group control-group locationOptions" id="locationOptions">
+        <label class="radio-inline">
+          <input type="radio" id="localUpload" value="0"
+                 name="uploadOption" onclick="showHideOptions(true,true);"
+                 checked="true">Local File Upload
+        </label>
+        <label class="radio-inline">
+          <input type="radio" id="remoteUpload" value="1"
+                 name="uploadOption" onclick="showHideOptions(true,false);">Remote File Upload
+        </label>
+      </div>
+
+      <div class="input-group local" id="fileUploadBox">
+        <label class="input-group-btn">
+                    <span class="btn btn-primary">
+                        Browse&hellip; <input type="file" id="myfile" name="myfile"
+                                              style="display: none;">
+                    </span>
+        </label>
+        <input type="text" class="form-control" readonly>
+      </div>
+    </div>
+
+    <div class="form-group remote">
+      <input type="text" id="fileLocation" class="form-control"
+             placeholder="Enter Absolute Image Location">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="fileName" class="form-control"
+             placeholder="Enter Image Name with extension(optional) ...">
+    </div>
+    <div class="form-group dockerInputs">
+      <input type="text" id="dockerRepo"
+             class="form-control"
+             data-toggle="tooltip"
+             title="Repo of Docker Image"
+             placeholder="Enter Repository">
+    </div>
+    <div class="form-group dockerInputs">
+      <input type="text" id="dockerTag"
+             class="form-control"
+             data-toggle="tooltip"
+             title="Tag of Docker Image"
+             placeholder="Enter Tag">
+    </div>
+    <div class="form-group">
+      <input class="btn btn-primary" id="upload"
+             type="button"
+             onclick="upload(event);"
+             value="Upload">
+    </div>
+
+    <div class="resumable-error">
+      Your browser, unfortunately, is not supported by Resumable.js. The library requires support
+      for
+      <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a> along with
+      <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
+    </div>
+
+    <div class="resumable-progress" id="resumable-progress">
+      <table>
+        <tr>
+          <td width="100%">
+            <div class="progress-container">
+              <div class="progress-bar"></div>
+            </div>
+          </td>
+          <td class="progress-text" nowrap="nowrap"></td>
+          <td class="progress-pause" nowrap="nowrap">
+            <a href="#" onclick="r.upload(); return(false);" class="progress-resume-link">
+              <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+            </a>
+            <a href="#" onclick="r.pause(); return(false);" class="progress-pause-link">
+              <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+            </a>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <ul class="resumable-list"></ul>
+    <div id="errorMsg" class="alert alert-warning" role="alert"></div>
+  </div>
+  <script src="js/file_upload.js"></script>
+</div>
+</body>
+</html>
+
+
+

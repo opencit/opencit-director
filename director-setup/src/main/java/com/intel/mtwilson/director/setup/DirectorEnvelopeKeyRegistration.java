@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
@@ -43,6 +45,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
     private static final String DIRECTOR_KEYSTORE_PASSWORD = "director.keystore.password";
     private static final String KMS_ENDPOINT_URL = "kms.endpoint.url";
     private static final String KMS_TLS_POLICY_CERTIFICATE_SHA1 = "kms.tls.policy.certificate.sha1";
+    private static final String KMS_TLS_POLICY_CERTIFICATE_SHA256 = "kms.tls.policy.certificate.sha256";
     private static final String KMS_LOGIN_BASIC_USERNAME = "kms.login.basic.username";
     private static final String KMS_LOGIN_BASIC_PASSWORD = "kms.login.basic.password";
     
@@ -51,7 +54,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
     private Password keystorePassword;
     private PublicKey directorEnvelopePublicKey;
     private String kmsEndpointUrl;
-    private String kmsTlsPolicyCertificateSha1;
+    private String kmsTlsPolicyCertificateSha256;
     private String kmsLoginBasicUsername;
     private String kmsLoginBasicPassword;
     private Users users;
@@ -112,8 +115,8 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             configuration("KMS endpoint URL not configured");
         }
         
-        kmsTlsPolicyCertificateSha1 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA1.replace('.', '_'));
-        if( kmsTlsPolicyCertificateSha1 == null || kmsTlsPolicyCertificateSha1.isEmpty() ) {
+        kmsTlsPolicyCertificateSha256 = kmsprops.get(KMS_TLS_POLICY_CERTIFICATE_SHA256.replace('.', '_'));
+        if( kmsTlsPolicyCertificateSha256 == null || kmsTlsPolicyCertificateSha256.isEmpty() ) {
             configuration("KMS TLS policy certificate digest not configured");
         }
         
@@ -122,7 +125,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
             configuration("KMS API username not configured");
         }
         
-        kmsLoginBasicPassword = getConfiguration().get(KMS_LOGIN_BASIC_PASSWORD, null);
+        kmsLoginBasicPassword = kmsprops.get(KMS_LOGIN_BASIC_PASSWORD.replace('.', '_'));
         if (kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty()) {
             try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
                 if (passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
@@ -130,18 +133,19 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
                 }
             }
         }
-        if( kmsLoginBasicPassword == null || kmsLoginBasicPassword.isEmpty() ) {
-            configuration("KMS API password not configured");
+        if( kmsLoginBasicPassword == null || StringUtils.isBlank(kmsLoginBasicPassword)) {
+            //configuration("KMS API password not configured");
+        	log.info("KMS password not configured");
         }
         
         // create KMS Users API client
         Properties properties = new Properties();
         if (kmsEndpointUrl != null && !kmsEndpointUrl.isEmpty()
-                && kmsTlsPolicyCertificateSha1 != null && !kmsTlsPolicyCertificateSha1.isEmpty()
+                && kmsTlsPolicyCertificateSha256 != null && !kmsTlsPolicyCertificateSha256.isEmpty()
                 && kmsLoginBasicUsername != null && !kmsLoginBasicUsername.isEmpty()
                 && kmsLoginBasicPassword != null && !kmsLoginBasicPassword.isEmpty()) {
             properties.setProperty("endpoint.url", kmsEndpointUrl);
-            properties.setProperty("tls.policy.certificate.sha1", kmsTlsPolicyCertificateSha1);
+            properties.setProperty("tls.policy.certificate.sha256", kmsTlsPolicyCertificateSha256);
             properties.setProperty("login.basic.username", kmsLoginBasicUsername);
             properties.setProperty("login.basic.password", kmsLoginBasicPassword);
             users = new Users(properties);
@@ -189,7 +193,7 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
         SettingsKMSObject settingskms= new SettingsKMSObject();
         settingskms.setKms_endpoint_url(kmsEndpointUrl);
         settingskms.setKms_login_basic_username(kmsLoginBasicUsername);
-        settingskms.setKms_tls_policy_certificate_sha1(kmsTlsPolicyCertificateSha1);
+        settingskms.setKms_tls_policy_certificate_sha256(kmsTlsPolicyCertificateSha256);
         DirectorUtil.editProperties(Constants.KMS_PROP_FILE, settingskms.toString());
         
         try {

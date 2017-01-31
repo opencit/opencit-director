@@ -1,6 +1,9 @@
 package com.intel.director.service.impl;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,23 +11,25 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-public class TreeNode implements Comparable{
+import com.intel.director.common.Constants;
+import com.intel.director.api.ui.TreeElement;
+import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
+
+public class TreeNode implements Comparable<TreeNode> {
 	Tree parent;
 	List<TreeNode> childs;
 	List<TreeNode> leafs;
 	String data;
 	String incrementalPath;
-	boolean ulBeginBool = false;
-	boolean ulEndBool = false;
-	final String ulBegin = "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
-	final String ulEnd = "</ul>";
+	
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TreeNode.class);
 	private boolean isDirectory = false;
 	public boolean firstChildOrLeaf = false;
 	public int renderedCount = 0;
-	public String checked = "";
+	public boolean  checked = false;
+	public boolean isSymlink = false;
 	public TreeNodeDetail rootDirWithRegex = null;
-	private final String lockHover = "To unselect files/dirs click on the icon to Reset";
-	private final String unlockHover = "To lock the directory and specific files click on the icon to apply regex";
+	public String mountPath=null;
 
 	public TreeNode(String nodeValue, String incrementalPath) {
 		childs = new ArrayList<TreeNode>();
@@ -33,14 +38,31 @@ public class TreeNode implements Comparable{
 		this.incrementalPath = incrementalPath;
 		firstChildOrLeaf = false;
 		renderedCount = 0;
+
 	}
+
+	public TreeNode(String nodeValue, String incrementalPath, String mountPath) {
+		childs = new ArrayList<TreeNode>();
+		leafs = new ArrayList<TreeNode>();
+		data = nodeValue;
+		this.incrementalPath = incrementalPath;
+		firstChildOrLeaf = false;
+		renderedCount = 0;
+		if (new File(mountPath + incrementalPath).isDirectory()) {
+			isDirectory = true;
+		}
+		this.mountPath=mountPath;
+
+	}
+
+  
 
 	public void setParent(Tree tree) {
 		this.parent = tree;
 	}
 
 	public void checkNode() {
-		this.checked = "checked=\"true\"";
+		this.checked =true;
 	}
 
 	public boolean isLeaf() {
@@ -58,10 +80,11 @@ public class TreeNode implements Comparable{
 		return false;
 	}
 
-	public void addElement(String currentPath, String[] list) {
+	public void createNode(String currentPath, String[] list) {
 
 		// Avoid first element that can be an empty string if you split a string
 		// that has a starting slash as /sd/card/
+		DirectoryAndFileUtil directoryUtil= new DirectoryAndFileUtil();
 		while (StringUtils.isBlank(list[0])){
 			list = Arrays.copyOfRange(list, 1, list.length);
 		}
@@ -69,7 +92,7 @@ public class TreeNode implements Comparable{
 			currentPath = currentPath + "/";
 		}
 
-		TreeNode currentChild = new TreeNode(list[0], currentPath + list[0]);
+		TreeNode currentChild = new TreeNode(list[0], currentPath + list[0],mountPath);
 		if (parent.trustPolicyElementsList != null) {
 			if (parent.trustPolicyElementsList
 					.contains(currentChild.incrementalPath)) {
@@ -78,20 +101,28 @@ public class TreeNode implements Comparable{
 		} else {
 			currentChild.checked = parent.checked;
 		}
+		String childPath=parent.mountPath + currentChild.incrementalPath;
+		Path path = Paths.get(childPath);
+		if (Files.isSymbolicLink(path)) {
+			log.debug("Symlink path: {}", path);
+			currentChild.data = directoryUtil.getSymlinkTarget(childPath,mountPath);
+			log.debug("Symlink target: {}", currentChild.data);
+			currentChild.isSymlink=true;
+		}
+		
 		if (new File(parent.mountPath + currentChild.incrementalPath)
 				.isDirectory()) {
 			currentChild.isDirectory = true;
 		}
 		
-		if(parent.dirPathsForEdit.contains(parent.mountPath + currentChild.incrementalPath)){
+		if(parent.dirPathsForEdit.contains(childPath)){
 			currentChild.checkNode();
 		}
 
 		currentChild.parent = parent;
 		if (list.length == 1) {
 			if ((parent.explodedView && currentChild.isDirectory)
-					|| (currentChild.isDirectory && StringUtils
-							.isNotEmpty(currentChild.checked))
+					//|| (currentChild.isDirectory && currentChild.checked)
 					|| parent.dirPathsForEdit
 							.contains(currentChild.incrementalPath)) {
 				return;
@@ -103,11 +134,11 @@ public class TreeNode implements Comparable{
 			int index = childs.indexOf(currentChild);
 			if (index == -1) {
 				childs.add(currentChild);
-				currentChild.addElement(currentChild.incrementalPath,
+				currentChild.createNode(currentChild.incrementalPath,
 						Arrays.copyOfRange(list, 1, list.length));
 			} else {
 				TreeNode nextChild = childs.get(index);
-				nextChild.addElement(currentChild.incrementalPath,
+				nextChild.createNode(currentChild.incrementalPath,
 						Arrays.copyOfRange(list, 1, list.length));
 			}
 		}
@@ -121,155 +152,107 @@ public class TreeNode implements Comparable{
 				&& data.equals(cmpObj.data);
 	}
 
-	private void addToTree(String text, boolean toAdd) {
-		if (!toAdd) {
-			return;
-		}
-		parent.treeElementsHtml.add(text);
-	}
+	
 
-	public void printNode(boolean ulBeginBool, boolean ulEndBool) {
+	
 
-		boolean add = true;
-		StringBuilder builder = new StringBuilder();
-		if (incrementalPath.equals(parent.root.incrementalPath)) {
-			add = false;
-		}
-		if (ulBeginBool) {
-			addToTree(ulBegin, add);
-			builder.append(ulBegin);
+	public TreeElement generateTree() {
 
-		}
-
-		String checkbox = null;
-		String liClass = null;
-		String liColorClass = "";
-		String toggleIcon = "";
-		String toggleStyle = "";
-		String regexIdentifier = "";
-		String iconName = "unlocked.png";
-		String hoverText = null;
-		if (StringUtils.isNotBlank(checked)) {
-			liColorClass = "selected";
+		TreeElement currentTreeElement = new TreeElement();
+		if (checked) {
+			currentTreeElement.setIsSelected(true);
 		}
 		
-		if(parent.root.rootDirWithRegex != null){
-			String include = StringUtils.isBlank(parent.root.rootDirWithRegex.regexInclude) ?"":parent.root.rootDirWithRegex.regexInclude;
-			String exclude = StringUtils.isBlank(parent.root.rootDirWithRegex.regexExclude)?"":parent.root.rootDirWithRegex.regexExclude;
-			regexIdentifier = " rootRegexDir=\""+ parent.root.rootDirWithRegex.filePath +"\" include=\""+ include +"\" exclude=\""+ exclude +"\" recursive=\""+ parent.root.rootDirWithRegex.isRegexRecursive +"\"";
-		}
+		currentTreeElement.setPath(incrementalPath);
+		currentTreeElement.setValue(data);
 		
-		//in case of init we have a different flow for setting regex
-		for(TreeNodeDetail nodeDetail : parent.directoryListContainingRegex){
-			if(incrementalPath.startsWith(nodeDetail.regexPath)){
-				String include = StringUtils.isBlank(nodeDetail.regexInclude) ?"":nodeDetail.regexInclude;
-				String exclude = StringUtils.isBlank(nodeDetail.regexExclude)?"":nodeDetail.regexExclude;
-				regexIdentifier = " rootRegexDir=\""+ nodeDetail.regexPath +"\" include=\""+ include +"\" exclude=\""+ exclude +"\" recursive=\""+ nodeDetail.isRegexRecursive +"\"";
-				break;
-			}
-		}
+		initTreeElementForRegex(currentTreeElement);
 		
-		hoverText = unlockHover;
-		if(StringUtils.isNotEmpty(regexIdentifier)){
-			iconName = "locked.png";
-			hoverText = lockHover;
-		}
-		
-		if (isDirectory) {
-			checkbox = "<input type=\"checkbox\" name=\"directory_"
-					+ incrementalPath + "\" id=\"" + incrementalPath + "\""
-					+ checked + regexIdentifier + " style=\"float:left;\"/>";
+		if(isSymlink){
+			currentTreeElement.setElementType(Constants.TREE_ELEMENT_SYMLINK);
+		}else if (isDirectory) {
+
+			currentTreeElement.setElementType(Constants.TREE_ELEMENT_DIRECTORY);
 			
-			liClass = "directory "
-					+ ((!checked.isEmpty() ? "expanded"
-							: parent.directoryCollapsed));
-
-			if(iconName.contains("unlock")){
-				toggleIcon = "<i class='fa fa-unlock' style='color : blue; font-size : 1.6em' title='"
-				+ hoverText
-				+ "'  id='toggle_"
-				+ incrementalPath
-				+ "'   onclick='toggleState(this)'></i>";	
-			} else {
-				toggleIcon = "<i class='fa fa-lock' style='color : blue; font-size : 1.6em' title='"
-				+ hoverText
-				+ "'  id='toggle_"
-				+ incrementalPath
-				+ "'   onclick='toggleState(this)'></i>";
-			}		
-			toggleStyle = " style=\"float:left;\" ";
-
-		} else {
-			checkbox = "<input type=\"checkbox\" name=\"file_"
-					+ incrementalPath + "\" id=\"" + incrementalPath + "\""
-					+ checked + regexIdentifier + " style=\"float:left;\"/>";
-
-			liClass = "file";
-
-		}
-		addToTree("<li class=\"" + liClass + " " + liColorClass + "\">", add);
-		addToTree(checkbox, add);
-		addToTree("<a href=\"#\" " + toggleStyle + "rel=\"", add);
-		addToTree(incrementalPath, add);
-		addToTree("/\">", add);
-		addToTree(data, add);
-		addToTree("</a>", add);
-		addToTree(toggleIcon, add);
-
-		if (isLeaf()) {
-			addToTree("</li>", add);
+		}else{
+			currentTreeElement.setElementType(Constants.TREE_ELEMENT_FILE);
 		}
 
-		if (ulEndBool) {
-			builder.append(ulEnd);
-			addToTree(ulEnd, add);
-		}
-//		int noOfChildren = childs.size();
-//		int childCnt = 0;
+		
+
 		List<TreeNode> combined = new ArrayList<>();
 		combined.addAll(childs);
 		combined.addAll(leafs);
 		Collections.sort(combined);
 		for (TreeNode n : combined) {
-			if(childs.contains(n)){
-				boolean showULBegin = false;
-				if (!firstChildOrLeaf) {
-					firstChildOrLeaf = true;
-					showULBegin = true;
-					;
-				}
-				renderedCount++;
-				n.printNode(showULBegin, false);
-				addToTree("</li>", true);
-				// if (++childCnt == noOfChildren) {
-				if (haveAllElementsOfNodeRendered()) {
-					builder.append(ulEnd);
-					addToTree(ulEnd, add);
+			currentTreeElement.getChildElements().add(n.generateTree());
+		}
+
+		return currentTreeElement;
+	}
+
+	
+	
+	public void initTreeElementForRegex(TreeElement currentTreeElement) {
+		if (parent.root.rootDirWithRegex != null) {
+			String include = StringUtils
+					.isBlank(parent.root.rootDirWithRegex.regexInclude) ? ""
+					: parent.root.rootDirWithRegex.regexInclude;
+			String exclude = StringUtils
+					.isBlank(parent.root.rootDirWithRegex.regexExclude) ? ""
+					: parent.root.rootDirWithRegex.regexExclude;
+			currentTreeElement
+					.setRegexRecursive(parent.root.rootDirWithRegex.isRegexRecursive);
+			currentTreeElement.setIsLocked(checkIsLocked(currentTreeElement));
+			currentTreeElement.setExclude(exclude);
+			currentTreeElement.setInclude(include);
+		}
+
+		for (TreeNodeDetail nodeDetail : parent.directoryListContainingRegex) {
+			if (incrementalPath.equals(nodeDetail.regexPath)) {
+				String include = StringUtils.isBlank(nodeDetail.regexInclude) ? ""
+						: nodeDetail.regexInclude;
+				String exclude = StringUtils.isBlank(nodeDetail.regexExclude) ? ""
+						: nodeDetail.regexExclude;
+				currentTreeElement
+						.setRegexRecursive(nodeDetail.isRegexRecursive);
+				///currentTreeElement.setIsLocked(checkIsLocked(currentTreeElement));
+				
+				currentTreeElement.setExclude(exclude);
+				currentTreeElement.setInclude(include);
+        currentTreeElement.setFilterType(nodeDetail.filterType);
+				break;
+			}
+		}
+
+	}
+	
+	
+	public boolean checkIsLocked(TreeElement currentTreeElement){
+		boolean isLocked=false;
+		if (isDirectory) {
+			if (parent.root.rootDirWithRegex != null) {
+				if (parent.root.rootDirWithRegex.isRegexRecursive
+						|| (!(parent.root.rootDirWithRegex.isRegexRecursive) && (parent.root.incrementalPath
+								.equals(currentTreeElement.getValue()
+										.startsWith(File.separator) ? currentTreeElement
+										.getValue()
+										: (File.separator + currentTreeElement
+												.getValue()))))) {
+					isLocked=true;
 				}
 
 			}else{
-//				int noOfLeafElements = leafs.size();
-//				int leaftCnt = 0;
-
-				boolean showULBegin = false;
-				boolean showULEnd = false;
-				if (!firstChildOrLeaf) {
-					firstChildOrLeaf = true;
-					showULBegin = true;
-				}
-
-				renderedCount++;
-
-				if (haveAllElementsOfNodeRendered()) {
-					showULEnd = true;
-				}
-				n.printNode(showULBegin, showULEnd);
-
+				
+				/// TO DO :- Need to add Condition for edit flow
+				isLocked=true;
 			}
-		}		
-
+		}
+		return isLocked;
+		
 	}
-
+	
+	
 	public boolean isDirectory() {
 		return (childs.size() > 0 || leafs.size() > 0);
 	}
@@ -280,9 +263,8 @@ public class TreeNode implements Comparable{
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		TreeNode other = (TreeNode)o;
-		return this.incrementalPath.compareTo(other.incrementalPath);		
+	public int compareTo(TreeNode o) {
+		return this.incrementalPath.compareTo(o.incrementalPath);
 	}
 
 	@Override
@@ -291,6 +273,6 @@ public class TreeNode implements Comparable{
 		return incrementalPath.hashCode();
 	}
 	
-	
+
 
 }

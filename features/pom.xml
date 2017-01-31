@@ -14,14 +14,15 @@
     </parent>
     
     <modules>
-        <module>director-async-image-processor</module>
-        <module>director-glance</module>
-        <module>director-html5</module>
-        <module>director-image-store</module>
-        <module>director-images-api</module>
-        <module>director-images-ws</module>
-        <module>director-kms</module>
-        <module>director-persistence</module>
+		<module>director-images-api</module>
+		<module>director-persistence</module>
+		<module>director-image-store</module>
+		<module>director-html5</module>
+		<module>director-images-ws</module>
+		<module>director-glance</module>		
+		<module>director-dockerhub</module>
+		<module>director-async-image-processor</module>
+		<module>director-kms</module>
     </modules>
     
 </project>

@@ -7,13 +7,11 @@ package com.intel.director.api;
 
 import java.util.List;
 
-import com.intel.director.api.ui.ImageInfo;
-
 /**
  *
  * @author soakx
  */
 public class SearchImagesResponse extends GenericResponse {
 
-    public List<ImageInfo> images;
+    public List<ImageInfoDetailedResponse> images;
 }

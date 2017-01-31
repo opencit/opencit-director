@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.eclipse.persistence.annotations.UuidGenerator;
 
@@ -42,7 +44,7 @@ public class MwImageAction {
 	@Column(name = "image_id")
 	private String image_id;
 	
-	@Column(name = "action")
+	@Column(name = "action", length=1000)
 	private String action;
 	
 	@Column(name = "action_count")
@@ -63,6 +65,25 @@ public class MwImageAction {
 	@Column(name= "current_task_status")
 	private String current_task_status;
 	
+	@Column(name = "EXECUTION_TIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	private java.util.Calendar executionTime;
+	
+	@Column(name = "CREATED_TIME")
+	@Temporal(TemporalType.TIMESTAMP)
+	private java.util.Calendar createdTime;	
+	
+
+	
+
+	public java.util.Calendar getExecutionTime() {
+		return executionTime;
+	}
+
+	public void setExecutionTime(java.util.Calendar executionTime) {
+		this.executionTime = executionTime;
+	}
+
 	public long getAction_size() {
 		return action_size;
 	}
@@ -133,6 +154,25 @@ public class MwImageAction {
 
 	public void setCurrent_task_status(String current_task_status) {
 		this.current_task_status = current_task_status;
+	}
+	
+	public java.util.Calendar getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(java.util.Calendar createdTime) {
+		this.createdTime = createdTime;
+	}
+
+	@Override
+	public String toString() {
+		return "MwImageAction [id=" + id + ", image_id=" + image_id
+				+ ", action=" + action + ", action_count=" + action_count
+				+ ", action_completed=" + action_completed + ", action_size="
+				+ action_size + ", action_size_max=" + action_size_max
+				+ ", current_task_name=" + current_task_name
+				+ ", current_task_status=" + current_task_status + ", date="
+				+ executionTime + "]";
 	}
 
 	

@@ -5,6 +5,7 @@
  */
 package com.intel.mtwilson.director.trust.policy;
 
+import com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement;
 import java.io.IOException;
 import java.util.List;
 
@@ -15,19 +16,19 @@ import org.apache.commons.lang.StringUtils;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.digest.Digest;
-import com.intel.director.common.DirectorUtil;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.mtwilson.director.features.director.kms.KeyContainer;
 import com.intel.mtwilson.director.features.director.kms.KmsUtil;
-import com.intel.mtwilson.trustpolicy.xml.Checksum;
-import com.intel.mtwilson.trustpolicy.xml.DecryptionKey;
-import com.intel.mtwilson.trustpolicy.xml.DigestAlgorithm;
-import com.intel.mtwilson.trustpolicy.xml.DirectoryMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.Encryption;
-import com.intel.mtwilson.trustpolicy.xml.FileMeasurement;
-import com.intel.mtwilson.trustpolicy.xml.ImageHash;
-import com.intel.mtwilson.trustpolicy.xml.Measurement;
-import com.intel.mtwilson.trustpolicy.xml.TrustPolicy;
-import com.intel.mtwilson.trustpolicy.xml.Whitelist;
+import com.intel.mtwilson.trustpolicy2.xml.Checksum;
+import com.intel.mtwilson.trustpolicy2.xml.DecryptionKey;
+import com.intel.mtwilson.trustpolicy2.xml.DigestAlgorithm;
+import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.Encryption;
+import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.ImageHash;
+import com.intel.mtwilson.trustpolicy2.xml.Measurement;
+import com.intel.mtwilson.trustpolicy2.xml.TrustPolicy;
+import com.intel.mtwilson.trustpolicy2.xml.Whitelist;
 
 /**
  * 
@@ -66,44 +67,35 @@ public class CreateTrustPolicy {
 	 * @throws IOException
 	 */
 	public void createTrustPolicy(TrustPolicy trustPolicy)
-			throws CryptographyException, IOException {
+			throws DirectorException{
 		// calculate files, directory and cumulative hash
 		addWhitelistValue(trustPolicy);
 
 		// if encryption policy is set
 		if (trustPolicy.getEncryption() != null) {
-			try {
-				addEncryption(trustPolicy);
-			} catch (Exception e) {
-				// TODO Handle Error
-				log.error(
-						"Error in createTrustPolicy() in CreateTrustPolicy.java",
-						e);
-			}
+			addEncryption(trustPolicy);
 		}
 	}
 
 	/**
 	 * Adds encryption information such as dek URL and checksum in trust policy
 	 * 
-	 * @param inputPolicy
+	 * @param trustPolicy
 	 * @return
-	 * @throws Exception
 	 * @throws XMLStreamException
 	 * @throws JAXBException
 	 * @throws IOException
 	 * @throws CryptographyException
 	 */
 	private void addEncryption(TrustPolicy trustPolicy)
-			throws CryptographyException, IOException, JAXBException,
-			XMLStreamException {
+			throws DirectorException {
 		// get DEK
-		KmsUtil kmsUtil = null;
+		KmsUtil kmsUtil;
 		try {
 			kmsUtil = new KmsUtil();
-		} catch (Exception e1) {
-			log.error("Error in initialization of KMS Util");
-			return;
+		} catch (Exception e1) {			
+			log.error("Error in initialization of KMS Util {}", e1);
+			throw new DirectorException("Error initializing KMSUtil",e1);
 		}
 		
 		//Check if a key already exists
@@ -111,7 +103,7 @@ public class CreateTrustPolicy {
 		//If so, return
 		if(StringUtils.isNotBlank(trustPolicy.getEncryption().getKey().getValue()) && trustPolicy.getEncryption().getKey().getValue().contains("keys")){
 			String url = trustPolicy.getEncryption().getKey().getValue();
-			String keyIdFromUrl = DirectorUtil.getKeyIdFromUrl(url);
+			String keyIdFromUrl = getKeyIdFromUrl(url);
 			String keyFromKMS = kmsUtil.getKeyFromKMS(keyIdFromUrl);
 			if(StringUtils.isNotBlank(keyFromKMS)){
 				log.info("Existing key is still valid. Not creating a new one.");
@@ -122,23 +114,22 @@ public class CreateTrustPolicy {
 		KeyContainer key;
 		try {
 			key = kmsUtil.createKey();
-			DecryptionKey decryptionKey = new DecryptionKey();
-			decryptionKey.setURL("uri");
-			decryptionKey.setValue(key.url.toString());
-			Encryption encryption = trustPolicy.getEncryption();
-			if (encryption == null) {
-				encryption = new Encryption();
-			}
-			encryption.setKey(decryptionKey);
-			Checksum checksum = new Checksum();
-			checksum.setDigestAlg(DigestAlgorithm.MD_5);
-			checksum.setValue("1");
-			encryption.setChecksum(checksum);
-			trustPolicy.setEncryption(encryption);
-		} catch (Exception e) {
-			// TODO Handle Error
-			log.error("Error in KmsUtil().createKey() in addEncryption() in CreateTrustPolicy.java", e);
+		} catch (CryptographyException e) {
+			throw new DirectorException("Error creating key in KMS",e);		
 		}
+		DecryptionKey decryptionKey = new DecryptionKey();
+		decryptionKey.setURL("uri");
+		decryptionKey.setValue(key.url.toString());
+		Encryption encryption = trustPolicy.getEncryption();
+		if (encryption == null) {
+			encryption = new Encryption();
+		}
+		encryption.setKey(decryptionKey);
+		Checksum checksum = new Checksum();
+		checksum.setDigestAlg(DigestAlgorithm.MD_5);
+		checksum.setValue("1");
+		encryption.setChecksum(checksum);
+		trustPolicy.setEncryption(encryption);
 	}
 
 	/**
@@ -149,9 +140,9 @@ public class CreateTrustPolicy {
 	 * 
 	 * @param trustPolicy
 	 * @return
+	 * @throws DirectorException 
 	 */
-	private void addWhitelistValue(TrustPolicy trustPolicy)
-			throws IOException {
+	private void addWhitelistValue(TrustPolicy trustPolicy) throws DirectorException{
 		Whitelist whitelist = trustPolicy.getWhitelist();
 		List<Measurement> measurements = whitelist.getMeasurements();
 		DirectoryAndFileUtil dirFileUtil = new DirectoryAndFileUtil(imageId);
@@ -161,24 +152,41 @@ public class CreateTrustPolicy {
 				whitelist.getDigestAlg().value()).zero();
 
 		// Get file and directory hash and extend value to cumulative hash
-		Digest hash=null;
+		Digest hash = null;
 		for (Measurement measurement : measurements) {
-			hash=null;
+			hash = null;
 			if (measurement instanceof DirectoryMeasurement) {
-				hash = dirFileUtil.getDirectoryHash(imageId,
-						(DirectoryMeasurement) measurement, whitelist
-								.getDigestAlg().value());
+				try {
+					hash = dirFileUtil.getDirectoryHash(imageId,
+							(DirectoryMeasurement) measurement, whitelist
+									.getDigestAlg().value());
+				} catch (IOException e) {
+					throw new DirectorException("No directory found for measurement "+ measurement.getPath(), e);
+				}
 			} else if (measurement instanceof FileMeasurement) {
-				hash = dirFileUtil.getFileHash(imageId,
-						(FileMeasurement) measurement, whitelist.getDigestAlg()
-								.value());
+				try {
+					hash = dirFileUtil.getFileHash(imageId,
+							(FileMeasurement) measurement, whitelist.getDigestAlg()
+									.value());
+				} catch (IOException e) {
+					throw new DirectorException("No file found for measurement "+ measurement.getPath(), e);
+				}
 				if (hash == null) {
 					//invalidFiles.add(measurement.getPath());
 					continue;
 				}
 
-			} else {
-				log.error("Unsupported mesurement type");
+			} else if (measurement instanceof SymlinkMeasurement){
+				try {
+					hash = dirFileUtil.getSymlinkHash(imageId,
+							(SymlinkMeasurement) measurement, whitelist
+									.getDigestAlg().value());
+				} catch (IOException e) {
+					throw new DirectorException("No Symlink found for measurement "+ measurement.getPath(), e);
+				}
+			}
+			else {
+				log.error("Unsupported measurement type");
 				return;
 			}
 			measurement.setValue(hash.toHex());
@@ -193,4 +201,26 @@ public class CreateTrustPolicy {
 		trustPolicy.getImage().setImageHash(imageHash);
 	}
 
+
+	private String getKeyIdFromUrl(String url) {
+		log.debug("URL :: " + url);
+		String[] split = url.split("/");
+		int index = 0;
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("keys")) {
+				log.debug("Keys index :: " + i);
+				index = ++i;
+				break;
+			}
+		}
+
+		log.debug("Index :: " + index);
+
+		if (index != 0) {
+			return split[index];
+		} else {
+			return null;
+		}
+
+	}
 }

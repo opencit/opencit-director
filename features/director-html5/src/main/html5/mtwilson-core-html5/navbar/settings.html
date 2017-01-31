@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Settings Button</title>
-         <link rel="stylesheet" href="/v1/html5/public/director-html5/css/smart_wizard.css" type="text/css">
-              <link rel="stylesheet" href="/v1/html5/public/director-html5/css/jqueryFileTree.css" type="text/css">
-              <link rel="stylesheet" type="text/css" href="/v1/html5/public/director-html5/css/theme.css" />  
 
-	
-
- <script type="text/javascript">
-
-resourceLoader.loadJS(['js/jquery.js','/v1/html5/public/director-html5/js/setting_mtwilson.js','/v1/html5/public/director-html5/js/setting_kms.js'], function() { 
-                      
-
-});
-
-</script>
+<head>
+    <title>Settings Button</title>
+    <link rel="stylesheet" href="/v1/html5/public/director-html5/css/smart_wizard.css" type="text/css">
+    <link rel="stylesheet" href="/v1/html5/public/director-html5/css/jqueryFileTree.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="/v1/html5/public/director-html5/css/theme.css" />
 
 
-    </head>
-    <body>
 
-<!-- NOTE:  the <ul> is for markup correctness; the navbar feature looks for body ul here and gets the inner html as the button content
+    <script type="text/javascript">
+        resourceLoader.loadJS(['js/jquery.js', '/v1/html5/public/director-html5/js/setting_mtwilson.js', '/v1/html5/public/director-html5/js/setting_kms.js','/v1/html5/public/director-html5/js/setting_image_store_configure.js'], function() {
+
+
+        });
+    </script>
+
+
+</head>
+
+<body>
+
+    <!-- NOTE:  the <ul> is for markup correctness; the navbar feature looks for body ul here and gets the inner html as the button content
 so the ul itself is not copied -->
-<ul>
-<li class="dropdown">
-	<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Settings</a>
-	<ul id="g-settings-menu" class="dropdown-menu" role="menu">
-		<li><a href="#setting_kms" data-toggle="tab" onclick="fetchKMSSetting()" >KMS Setting</a></li>
-		<li><a href="#setting_mtwilson" data-toggle="tab" onclick="fetchMtwilsonSetting()" >Attestation Service Setting</a></li>
-	</ul>                
-</li>
-</ul>
+    <ul>
+        <li class="dropdown">
+			<a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">Settings</a>
+            <ul id="g-settings-menu" class="dropdown-menu" role="menu">
+                <li><a href="#setting_kms" data-toggle="tab" onclick="fetchKMSSetting()">KMS Setting</a></li>
+                <li><a href="#setting_mtwilson" data-toggle="tab" onclick="fetchMtwilsonSetting()">Attestation Service Setting</a></li>
+		<li><a href="#setting_image_store_configure" data-toggle="tab" onclick="imageStoreSettingPage()">Configure External Storage</a></li>
+            </ul>
+        </li>
+    </ul>
 
-    </body>
+</body>
+
 </html>

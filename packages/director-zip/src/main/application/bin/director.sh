@@ -105,12 +105,12 @@ DIRECTOR_KMS_SETUP_TASKS=${DIRECTOR_KMS_SETUP_TASKS:-"director-envelope-key-regi
 # if we are running as non-root and the standard location isn't writable 
 # then we need a different place
 DIRECTOR_PID_FILE=${DIRECTOR_PID_FILE:-/var/run/director.pid}
-SCHEDULER_PID_FILE=${SCHEDULER_PID_FILE:-/var/run/scheduler.pid}
+TD_SCHEDULER_PID_FILE=${TD_SCHEDULER_PID_FILE:-/var/run/tdscheduler.pid}
 if [ ! -w "$DIRECTOR_PID_FILE" ] && [ ! -w $(dirname "$DIRECTOR_PID_FILE") ]; then
   DIRECTOR_PID_FILE=$DIRECTOR_REPOSITORY/director.pid
 fi
-if [ ! -w "$SCHEDULER_PID_FILE" ] && [ ! -w $(dirname "$SCHEDULER_PID_FILE") ]; then
-  SCHEDULER_PID_FILE=$DIRECTOR_REPOSITORY/scheduler.pid
+if [ ! -w "$TD_SCHEDULER_PID_FILE" ] && [ ! -w $(dirname "$TD_SCHEDULER_PID_FILE") ]; then
+  TD_SCHEDULER_PID_FILE=$DIRECTOR_REPOSITORY/tdscheduler.pid
 fi
 
 ###################################################################################################
@@ -150,7 +150,7 @@ director_complete_setup() {
   # useful configuration files
   director_run setup $DIRECTOR_SETUP_FIRST_TASKS
   director_run setup $DIRECTOR_SETUP_TASKS
-  if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA1" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
+  if [ -n "$KMS_ENDPOINT_URL" ] && [ -n "$KMS_TLS_POLICY_CERTIFICATE_SHA256" ] && [ -n "$KMS_LOGIN_BASIC_USERNAME" ]; then
   	director_run setup $DIRECTOR_KMS_SETUP_TASKS
   fi
 
@@ -222,24 +222,24 @@ director_is_running() {
 }
 
 scheduler_is_running() {
-  SCHEDULER_PID=
-  if [ -f $SCHEDULER_PID_FILE ]; then
-    SCHEDULER_PID=$(cat $SCHEDULER_PID_FILE)
-    local is_running=`ps -A -o pid | grep "^\s*${SCHEDULER_PID}$"`
+  TD_SCHEDULER_PID=
+  if [ -f $TD_SCHEDULER_PID_FILE ]; then
+    TD_SCHEDULER_PID=$(cat $TD_SCHEDULER_PID_FILE)
+    local is_running=`ps -A -o pid | grep "^\s*${TD_SCHEDULER_PID}$"`
     if [ -z "$is_running" ]; then
       # stale PID file
-      SCHEDULER_PID=
+      TD_SCHEDULER_PID=
     fi
   fi
-  if [ -z "$SCHEDULER_PID" ]; then
+  if [ -z "$TD_SCHEDULER_PID" ]; then
     # check the process list just in case the pid file is stale
-    SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main trust-director-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
+    TD_SCHEDULER_PID=$(ps -A ww | grep -v grep | grep java | grep "com.intel.mtwilson.launcher.console.Main trust-director-scheduler"  | grep "$DIRECTOR_CONFIGURATION" | awk '{ print $1 }')
   fi
-  if [ -z "$SCHEDULER_PID" ]; then
+  if [ -z "$TD_SCHEDULER_PID" ]; then
     # Scheduler is not running
     return 1
   fi
-  # SCHEDULER is running and SCHEDULER_PID is set
+  # SCHEDULER is running and TD_SCHEDULER_PID is set
   return 0
 }
 
@@ -286,7 +286,7 @@ scheduler_start() {
     (
       cd $DIRECTOR_HOME
       $prog $JAVA_OPTS com.intel.mtwilson.launcher.console.Main trust-director-scheduler >>$DIRECTOR_APPLICATION_LOG_FILE 2>&1 &      
-      echo $! > $SCHEDULER_PID_FILE
+      echo $! > $TD_SCHEDULER_PID_FILE
     )
     if scheduler_is_running; then
       echo_success "Started Image Action Scheduler"
@@ -299,12 +299,12 @@ scheduler_start() {
 
 scheduler_stop() {	
   if scheduler_is_running; then
-    kill -9 $SCHEDULER_PID
+    kill -9 $TD_SCHEDULER_PID
     if [ $? ]; then
       # truncate pid file instead of erasing,
       # because we may not have permission to create it
       # if we're running as a non-root user
-      echo > $SCHEDULER_PID_FILE
+      echo > $TD_SCHEDULER_PID_FILE
     else
       echo "Failed to stop Scheduler"
     fi
@@ -329,6 +329,10 @@ done
 rm -rf /mnt/director
 
 if [ "$2" = "--purge" ]; then
+	docker images -q > /tmp/dockerDelete
+	while read line; do docker rmi -f "$line"; done < /tmp/dockerDelete
+	rm -f /tmp/dockerDelete
+	
 	director export-config --in=/opt/director/configuration/director.properties --out=/opt/director/configuration/director.properties
 
 	DIRECTOR_PROPERTIES_FILE=${DIRECTOR_PROPERTIES_FILE:-"/opt/director/configuration/director.properties"}

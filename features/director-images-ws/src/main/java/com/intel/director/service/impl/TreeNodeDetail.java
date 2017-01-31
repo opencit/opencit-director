@@ -8,4 +8,5 @@ public class TreeNodeDetail {
 	public String regexInclude;
 	public String regexExclude;
 	public String regexPath;
+	public String filterType;
 }

@@ -22,7 +22,7 @@ import com.intel.director.api.TrustPolicyDraft;
 import com.intel.director.api.TrustPolicyDraftRequest;
 import com.intel.director.api.ui.ImageCountPieChart;
 import com.intel.director.api.ui.ImageInfo;
-import com.intel.director.images.exception.DirectorException;
+import com.intel.director.common.exception.DirectorException;
 import com.intel.director.service.DashboardService;
 import com.intel.director.service.impl.DashboardImpl;
 import com.intel.mtwilson.director.db.exception.DbException;
