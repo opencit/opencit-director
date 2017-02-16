@@ -2,6 +2,7 @@
     "items": [
 	 { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/td_images.html" },
 	 { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/trustpolicy.html" },
-        { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/settings.html" }
+        { "href": "/html5/resources/director-html5/mtwilson-core-html5/navbar/settings.html" },
+        { "href": "/html5/features/com.intel.mtwilson.core.login.token/mtwilson-core-html5/navbar/user.html" }
     ]
 }
