@@ -43,13 +43,58 @@ function edit_policy_bmlive_initialize() {
         });
 
 
-       
+                    $.ajax({
+                        type: "GET",
+                        url: "/v1/images/" + current_image_id,
+                        contentType: "application/json",
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        dataType: "json",
+                        success: function(data, status, xhr) {
+                            $("#host_ip_edit").val(data.ip_address);
+                            $("#username_for_host_edit").val(data.username);
+                            console.log("Partition :: " + data.partition);
+                            if (data.partition) {
+                                console.log("Windows");
+                                $("input[name='host_type'][value='linux']")
+                                    .attr('checked', 'unchecked');
+                                $("input[name='host_type'][value='windows']")
+                                    .attr('checked', 'checked');
+								var drives = data.partition.split(",");
+								drive_to_push = drives[0];
+                            } else {
+                                console.log("Linux");
+                                $("input[name='host_type'][value='windows']")
+                                    .attr('checked', 'unchecked');
+                                $("input[name='host_type'][value='linux']")
+                                    .attr('checked', 'checked');
+								drive_to_push = "";
+                            }
 
+                        }
+                    });
 
-    
-    	
-    	
-    	
+                    $
+                        .ajax({
+                            type: "GET",
+                            url: "/v1/trust-policy-drafts/" + current_trust_policy_draft_id,
+                            // accept: "application/json",
+                            contentType: "application/json",
+                            headers: {
+                                'Accept': 'application/json'
+                            },
+                            dataType: "json",
+                            success: function(data, status, xhr) {
+                                $("#display_name_host_edit").val(
+                                    data.display_name);
+                            }
+                        });
+
+                }
+
+            }
+        });
     } else {
 
         $.ajax({
@@ -63,6 +108,19 @@ function edit_policy_bmlive_initialize() {
             success: function(data, status, xhr) {
                 $("#host_ip_edit").val(data.ip_address);
                 $("#username_for_host_edit").val(data.username);
+                console.log("Partition :: " + data.partition);
+                if (data.partition) {
+                    console.log("Windows");
+                    $("input[name='host_type'][value='linux']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='windows']").attr('checked', 'checked');
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+                } else {
+                    console.log("Linux");
+                    $("input[name='host_type'][value='windows']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='linux']").attr('checked', 'checked');
+					drive_to_push = "";
+                }
             }
         });
 
@@ -148,6 +206,13 @@ function editandNext() {
     } else {
         show_error_in_editbmlivemodal("Password is mandatory");
         return;
+    }
+
+    if ($("input[name='host_type']:checked").val() == 'windows') {
+        self.data.host_type = "Windows";
+    } else {
+        self.data.host_type = "Linux";
+        drive_to_push = "";
     }
 
 

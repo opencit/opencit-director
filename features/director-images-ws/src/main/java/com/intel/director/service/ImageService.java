@@ -187,6 +187,10 @@ public interface ImageService {
 	public List<ImageInfo> getStalledImages() throws DirectorException;
 
 	public List<HashTypeObject> getImageHashType(String deploymentType) throws DirectorException;
+
+
+	public List<String> getDrivesForWindows(String username, String password,
+			String ipAddress) throws DirectorException;
 	
 	public	void updateImageMetadata(ImageInfo imageInfo) throws DirectorException;
 

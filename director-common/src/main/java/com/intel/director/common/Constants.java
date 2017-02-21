@@ -255,5 +255,8 @@ public class Constants {
 	public static final String TREE_ELEMENT_DIRECTORY="directory";
 	public static final String TREE_ELEMENT_FILE="file";
 	public static final String TREE_ELEMENT_SYMLINK="symlink";
+
+	public static final String HOST_TYPE_WINDOWS="Windows";
+	public static final String HOST_TYPE_LINUX="Linux";
 	
 }
