@@ -38,6 +38,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
 
+import com.intel.director.util.FileFormatExecutor;
+import com.intel.director.util.UpdateImageFormatTask;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -2244,7 +2246,13 @@ public class Images {
 		try {
 			UploadService uploadService = new UploadService(Constants.defaultUploadPath);
 			byte[] chunkData = IOUtils.toByteArray(request.getInputStream(), request.getContentLength());
-			return Response.ok(uploadService.uploadChunk(imageId, chunk, chunkData)).build();
+            boolean uploadStatus = uploadService.uploadChunk(imageId, chunk, chunkData);
+            if(uploadStatus){
+                //upload is completed trigger the task to update the image format
+                UpdateImageFormatTask updateImageFormatTask = new UpdateImageFormatTask(imageId);
+                FileFormatExecutor.submitTask(updateImageFormatTask);
+            }
+            return Response.ok(uploadStatus).build();
 		}catch (Exception e){
 			log.error("Error while uploading image to Trust Director", e);
 			GenericResponse genericResponse = new GenericResponse();
@@ -2360,6 +2368,12 @@ public class Images {
 			imageService.updateImageMetadata(imageInfo);
 			uploadImageToTrustDirector.status = Constants.SUCCESS;
 			log.info("Successfully uploaded image to location: {}" , uploadImageToTrustDirector.getLocation());
+            if (Constants.DEPLOYMENT_TYPE_VM.equalsIgnoreCase(uploadRequest.image_deployments)){
+                log.info("Updating image format for file {} locaated in  {} ", imageInfo.getImage_name(), uploadImageToTrustDirector.getLocation());
+                UpdateImageFormatTask updateImageFormatTask = new UpdateImageFormatTask(imageInfo);
+                FileFormatExecutor.submitTask(updateImageFormatTask);
+            }
+
 			return Response.ok().entity(uploadImageToTrustDirector).build();
 		} catch (DirectorException e) {
 			GenericResponse genericResponse = new GenericResponse();
