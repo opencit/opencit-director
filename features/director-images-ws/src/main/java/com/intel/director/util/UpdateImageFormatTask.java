@@ -24,6 +24,9 @@ public class UpdateImageFormatTask implements Runnable {
 
     public UpdateImageFormatTask(ImageInfo imageInfo) {
         this.imageInfo = imageInfo;
+        if(imageInfo != null){
+            imageId = imageInfo.getId();
+        }
     }
 
     @Override
@@ -68,7 +71,7 @@ public class UpdateImageFormatTask implements Runnable {
         imageInfo.setImage_format(imageFormat);
         try {
             imageService.updateImageMetadata(imageInfo);
-            log.info("Successfully updated the image format for image id: {} ro {}", imageId, imageFormat);
+            log.info("Successfully updated the image format for image id: {} to {}", imageId, imageFormat);
         } catch (DirectorException e) {
             log.error("Unable to update the image format for image id : {}", imageId, e);
         }
