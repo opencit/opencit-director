@@ -1243,9 +1243,11 @@ public class ImageServiceImpl implements ImageService {
 	try {
 	    String imageid = createTrustPolicyMetaDataRequest.getImage_id();
 	    ImageAttributes img = imagePersistenceManager.fetchImageById(imageid);
-	    if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img.getImage_deployments())) {
-		TdaasUtil.checkInstalledComponents(imageid);
-	    }
+		if (Constants.DEPLOYMENT_TYPE_BAREMETAL.equals(img
+					.getImage_deployments()) && StringUtils.isBlank(img.getPartition())) {
+				TdaasUtil.checkInstalledComponents(imageid);
+			}
+	    
 
 	    Calendar currentDate = Calendar.getInstance();
 
@@ -2193,8 +2195,15 @@ public class ImageServiceImpl implements ImageService {
 	    // importPolicyTemplateResponse.setStatus("Success");
 	    return importPolicyTemplateResponse;
 	}
+	
+	String idendifier = "V";
 	// Check if mounted live BM has /opt/vrtm
-	String idendifier = TdaasUtil.checkInstalledComponents(imageId);
+	if (image.getPartition() == null) {
+		idendifier = TdaasUtil.checkInstalledComponents(imageId);
+	} else {
+		idendifier = "W";
+	}
+	
 
 	String content = null;
 	Manifest manifest;
