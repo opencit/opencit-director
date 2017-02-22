@@ -255,5 +255,8 @@ public class Constants {
 	public static final String TREE_ELEMENT_DIRECTORY="directory";
 	public static final String TREE_ELEMENT_FILE="file";
 	public static final String TREE_ELEMENT_SYMLINK="symlink";
-	
+
+	public final static String IMAGE_FORMAT_WINDOWS = "Microsoft Disk Image";
+	public final static String IMAGE_FORMAT_LINUX = "QCOW";
+
 }
