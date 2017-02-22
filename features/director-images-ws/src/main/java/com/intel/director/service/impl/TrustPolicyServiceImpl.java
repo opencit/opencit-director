@@ -434,7 +434,8 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 
 	@Override
 	public String convertPolicyInWindowsFormat(String policyXml) {
-		com.intel.mtwilson.trustpolicy.xml.TrustPolicy policyObj = null;
+		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policyObj = null;
+		
 		try {
 			policyObj = TdaasUtil.getPolicy(policyXml);
 		} catch (JAXBException e1) {
