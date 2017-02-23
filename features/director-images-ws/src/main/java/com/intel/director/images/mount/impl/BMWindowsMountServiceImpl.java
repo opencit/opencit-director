@@ -70,7 +70,7 @@ public class BMWindowsMountServiceImpl extends MountServiceImpl {
 			int unmountWindowsRemoteSystem = MountImage
 					.unmountWindowsRemoteSystem(mountPath + File.separator + partition);
 			if (unmountWindowsRemoteSystem != 0) {
-				throw new DirectorException("Error unmounting partition  " + partition);
+				log.error("Error unmounting partition  " + partition);
 			}
 		}
 		return 0;
