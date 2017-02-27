@@ -5,6 +5,7 @@ var image_policies = new Array();
 fetchImaheHashAlgo("BareMetal","hashtype_bm");
 edit_policy_bmlive_initialize();
 
+
 function edit_policy_bmlive_initialize() {
 
 	
@@ -24,7 +25,20 @@ function edit_policy_bmlive_initialize() {
             success: function(data, status, xhr) {
                 $("#host_ip_edit").val(data.ip_address);
                 $("#username_for_host_edit").val(data.username);
-                
+	
+                if (data.partition) {
+                    console.log("Windows");
+                    $("input[name='host_type'][value='linux']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='windows']").attr('checked', 'checked');
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+                } else {
+                    console.log("Linux");
+                    $("input[name='host_type'][value='windows']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='linux']").attr('checked', 'checked');
+					drive_to_push = "";
+                }
+
                 var trust_policy_id=data.trust_policy_id
                 $.ajax({
                     type: "GET",
@@ -43,12 +57,6 @@ function edit_policy_bmlive_initialize() {
         });
 
 
-       
-
-
-    
-    	
-    	
     	
     } else {
 
@@ -63,6 +71,19 @@ function edit_policy_bmlive_initialize() {
             success: function(data, status, xhr) {
                 $("#host_ip_edit").val(data.ip_address);
                 $("#username_for_host_edit").val(data.username);
+                console.log("Partition :: " + data.partition);
+                if (data.partition) {
+                    console.log("Windows");
+                    $("input[name='host_type'][value='linux']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='windows']").attr('checked', 'checked');
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+                } else {
+                    console.log("Linux");
+                    $("input[name='host_type'][value='windows']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='linux']").attr('checked', 'checked');
+					drive_to_push = "";
+                }
             }
         });
 
@@ -148,6 +169,13 @@ function editandNext() {
     } else {
         show_error_in_editbmlivemodal("Password is mandatory");
         return;
+    }
+
+    if ($("input[name='host_type']:checked").val() == 'windows') {
+        self.data.host_type = "Windows";
+    } else {
+        self.data.host_type = "Linux";
+        drive_to_push = "";
     }
 
 
