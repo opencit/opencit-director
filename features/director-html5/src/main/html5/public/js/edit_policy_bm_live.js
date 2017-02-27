@@ -25,7 +25,20 @@ function edit_policy_bmlive_initialize() {
             success: function(data, status, xhr) {
                 $("#host_ip_edit").val(data.ip_address);
                 $("#username_for_host_edit").val(data.username);
-                
+	
+                if (data.partition) {
+                    console.log("Windows");
+                    $("input[name='host_type'][value='linux']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='windows']").attr('checked', 'checked');
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+                } else {
+                    console.log("Linux");
+                    $("input[name='host_type'][value='windows']").attr('checked', 'unchecked');
+                    $("input[name='host_type'][value='linux']").attr('checked', 'checked');
+					drive_to_push = "";
+                }
+
                 var trust_policy_id=data.trust_policy_id
                 $.ajax({
                     type: "GET",
