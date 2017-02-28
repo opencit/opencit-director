@@ -68,6 +68,19 @@ public class MwImage extends MwAuditable implements BaseDomainInterface {
 	@Column(name = "tag")
 	private String tag;
 
+	@Column(name = "drives")
+	private String partition;
+	
+	
+	
+	public String getPartition() {
+		return partition;
+	}
+
+	public void setPartition(String partition) {
+		this.partition = partition;
+	}
+
 	public String getRepository() {
 		return repository;
 	}

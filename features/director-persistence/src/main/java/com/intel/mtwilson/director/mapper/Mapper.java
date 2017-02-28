@@ -377,6 +377,7 @@ public class Mapper {
 		mwImage.setEditedByUserId(imgAttributes.getEdited_by_user_id());
 		mwImage.setTmpLocation(imgAttributes.getTmpLocation());
 		mwImage.setUploadVariablesMd5(imgAttributes.getUploadVariableMD5());
+		mwImage.setPartition(imgAttributes.getPartition());
 		if (imgAttributes.getCreated_date() != null) {
 			mwImage.setCreatedDate(imgAttributes.getCreated_date());
 		}
@@ -408,6 +409,7 @@ public class Mapper {
 		imgInfo.setEdited_by_user_id(mwImage.getEditedByUserId());
 		imgInfo.setCreated_date(mwImage.getCreatedDate());
 		imgInfo.setEdited_date(mwImage.getEditedDate());
+		imgInfo.setPartition(mwImage.getPartition());
 		if (mwImage.getContentLength() != null) {
 			imgInfo.setImage_size(mwImage.getContentLength());
 		}

@@ -64,9 +64,16 @@ function addhostandnext() {
         return;
     }
     
-    if(current_image_id && (current_image_id!="")){
+console.log("current_image_id  === "+current_image_id );
+    //if(current_image_id && (current_image_id!="")){
+    if ($("input[name='host_type']:checked").val() == 'windows') {
+		self.data.host_type = "Windows";
+    } else {
+		self.data.host_type = "Linux";	
+	}
+
     self.data.image_id = current_image_id;
-    }
+    //}
 
     self.data.name = $("#host_ip").val();
 
@@ -75,6 +82,8 @@ function addhostandnext() {
 
     $("#createBMLivePolicyNext").prop('disabled', true);
 
+console.log("DATA :: ");
+console.log(data);
     if (current_image_id != "") {
 
         $.ajax({
@@ -93,6 +102,12 @@ function addhostandnext() {
                     return;
                 }
 
+				if(data.partition){
+					var drives = data.partition.split(",");
+					drive_to_push = drives[0];
+				} else {
+					drive_to_push = "";
+				}
 
 
                 self.BMLiveMetaData.launch_control_policy = "MeasureOnly";
