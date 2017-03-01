@@ -4,6 +4,7 @@ import com.intel.director.api.ImageAttributes;
 import com.intel.director.common.Constants;
 import com.intel.director.common.exception.DirectorException;
 import com.intel.director.images.mount.impl.BMLinuxMountServiceImpl;
+import com.intel.director.images.mount.impl.BMWindowsMountServiceImpl;
 import com.intel.director.images.mount.impl.DockerMountServiceImpl;
 import com.intel.director.images.mount.impl.GenericMountServiceImpl;
 import com.intel.director.images.mount.impl.VmMountServiceImpl;
@@ -20,10 +21,14 @@ public class MountServiceFactory {
 		} else if (imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_DOCKER)) {
 			mountService = new DockerMountServiceImpl(imageInfo);
 			log.info("Docker mount service");
-		} else if (imageInfo.getImage_deployments().equals(
-				Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
-			mountService = new BMLinuxMountServiceImpl(imageInfo);
-			log.info("Linux BM mount service");
+		} else if (imageInfo.getImage_deployments().equals(Constants.DEPLOYMENT_TYPE_BAREMETAL)) {
+			if (imageInfo.getPartition() != null) {
+				mountService = new BMWindowsMountServiceImpl(imageInfo);
+				log.info("Windows BM mount service");
+			} else {
+				mountService = new BMLinuxMountServiceImpl(imageInfo);
+				log.info("Linux BM mount service");
+			}
 		}
 		if (mountService == null) {
 			throw new DirectorException("Unable to find mount service for image " + imageInfo.id);
