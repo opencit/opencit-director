@@ -20,6 +20,7 @@ public class Constants {
 	public static final String encryptImageScript = "/opt/director/bin/encrypt_image.sh";
 	public static final String mountPath = "/mnt/director/";
 	public static final String uploadPath = "director.upload.path";
+	public static final String defaultUploadPath = "/mnt/images/";
 	public static final String vmImagesPath = "/opt/kms/images/vm/";
 	public static final String configurationPath = "/opt/director/configuration/";
 	public static final String DOCKER_EXECUTABLES = "docker";
@@ -203,10 +204,12 @@ public class Constants {
 	
 	public static final String DOCKER_REPO_NAME_REGEX = "[a-zA-Z0-9/:_.-]+";
 	public static final String DOCKER_TAG_NAME_REGEX = "[a-zA-Z0-9_.-]+";
-	public static final String VERSION_V2 = "v2.0";
+	public static final String HOST_TYPE_WINDOWS="Windows";
+	public static final String HOST_TYPE_LINUX="Linux";
+    public static final String VERSION_V2 = "v2.0";
 	public static final String VERSION_V3 = "v3";
 	public static final String OPENSTACK_VERSION_KILO = "Kilo";
 	public static final String OPENSTACK_VERSION_LIBERTY = "Liberty";
 	public static final String OPENSTACK_VERSION_MITAKA = "Mitaka";
-	
+
 }

@@ -86,4 +86,7 @@ public interface TrustPolicyService {
 			throws DirectorException;
 	
 	public String getVersionedDisplayNameForDockerImage(ImageInfo imageInfo) throws DirectorException;
+	public void writePolicyAndManifest(String policyXml) throws DirectorException;
+	
+	public String convertPolicyInWindowsFormat(String policyXml) throws DirectorException;
 }
