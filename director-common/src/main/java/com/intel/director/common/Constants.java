@@ -262,6 +262,8 @@ public class Constants {
 	public final static String IMAGE_FORMAT_RESULT_QCOW="QCOW";
 	public final static String IMAGE_FORMAT_RESULT_VHD="Microsoft Disk Image";
 	public final static String IMAGE_FORMAT_RESULT_VDI="VirtualBox Disk Image";
+	public final static String IMAGE_FORMAT_RESULT_VHDX="data";
+	
 	
 	
 

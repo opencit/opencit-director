@@ -62,7 +62,7 @@ public class UpdateImageFormatTask implements Runnable {
 			imageFormat = "raw";
 		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_VDI)) {
 			imageFormat = "vdi";
-		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_VHD)){				
+		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_VHD) || result.contains(Constants.IMAGE_FORMAT_RESULT_VHDX)){				
 			imageFormat = "vhd";
 		}
 
