@@ -255,8 +255,16 @@ public class Constants {
 	public static final String TREE_ELEMENT_DIRECTORY="directory";
 	public static final String TREE_ELEMENT_FILE="file";
 	public static final String TREE_ELEMENT_SYMLINK="symlink";
-
-	public final static String IMAGE_FORMAT_WINDOWS = "Microsoft Disk Image";
-	public final static String IMAGE_FORMAT_LINUX = "QCOW";
+	
+	///public final static String IMAGE_FORMAT_WINDOWS = "Microsoft Disk Image";
+	//public final static String IMAGE_FORMAT_LINUX = "QCOW";
+	public static final String IMAGE_FORMAT_RESULT_RAW="x86 boot sector";
+	public final static String IMAGE_FORMAT_RESULT_QCOW="QCOW";
+	public final static String IMAGE_FORMAT_RESULT_VHD="Microsoft Disk Image";
+	public final static String IMAGE_FORMAT_RESULT_VDI="VirtualBox Disk Image";
+	public final static String IMAGE_FORMAT_RESULT_VHDX="data";
+	
+	
+	
 
 }
