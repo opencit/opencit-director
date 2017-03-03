@@ -802,6 +802,7 @@ public class TdaasUtil {
 				directoryMeasurementType.setPath(measurement.getPath());
 				directoryMeasurementType.setExclude(((DirectoryMeasurement) measurement).getExclude()); 
 				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
+				directoryMeasurementType.setFilterType(((DirectoryMeasurement) measurement).getFilterType());
 				//directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
 
 				manifestList.add(directoryMeasurementType);
