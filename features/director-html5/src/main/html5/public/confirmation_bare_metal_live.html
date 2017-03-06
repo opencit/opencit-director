@@ -16,7 +16,14 @@
                 drive_to_push = drive_to_push;
                 drive_to_push = drive_to_push.toUpperCase();
             }
-            $("#drive_to_push_div").text(drive_to_push + "/boot/trust/");
+		if(!drive_to_push){
+			$("#drive_to_push_div").text("/boot/trust/");
+
+		}else{
+
+			$("#drive_to_push_div").text(drive_to_push+"\\");
+		}
+           ///// $("#drive_to_push_div").text(drive_to_push + "/boot/trust/");
         });
     </script>
 

@@ -397,7 +397,10 @@ public class DirectorUtil {
 	final InputSource src = new InputSource(new StringReader(xml));
 	Node document;
 	try {
-	    document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    factory.setNamespaceAware(true);
+	    document = factory.newDocumentBuilder().parse(src).getDocumentElement();
+	   /// document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
 	} catch (SAXException | IOException | ParserConfigurationException e) {
 	    log.error("Error parsing string {}", xml, e);
 	    return null;
