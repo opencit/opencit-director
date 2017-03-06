@@ -553,7 +553,7 @@ else
 fi
 
 echo "Installing docker....!!!!!"
-apt-get -y --force-yes install docker-engine
+apt-get -y --force-yes install docker-engine=1.13.0-0~ubuntu-trusty
 
 # delete the temporary setup environment variables file
 rm -f $DIRECTOR_ENV/director-setup
