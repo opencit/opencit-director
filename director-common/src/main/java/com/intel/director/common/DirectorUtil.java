@@ -16,6 +16,7 @@ import java.io.StringReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,8 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.intel.dcsg.cpg.configuration.Configuration;
 import com.intel.director.api.TrustPolicy;
 import com.intel.mtwilson.configuration.ConfigurationFactory;
@@ -394,7 +397,10 @@ public class DirectorUtil {
 	final InputSource src = new InputSource(new StringReader(xml));
 	Node document;
 	try {
-	    document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    factory.setNamespaceAware(true);
+	    document = factory.newDocumentBuilder().parse(src).getDocumentElement();
+	   /// document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src).getDocumentElement();
 	} catch (SAXException | IOException | ParserConfigurationException e) {
 	    log.error("Error parsing string {}", xml, e);
 	    return null;
@@ -461,4 +467,29 @@ public class DirectorUtil {
 	return result;
     }
 
+	
+	public static List<String> getDriveFromWindowsHost(String username,
+			String password, String hostAddress) throws ExecuteException,
+			IOException {
+		String SPACE = " ";
+		Result result = ExecUtil
+				.executeQuoted("/bin/bash","-c","/opt/director/bin/wmic" + SPACE + "-U"+ SPACE + username + "%" + password + SPACE + "//"
+						+ hostAddress + SPACE +
+						"'SELECT DeviceID from win32_logicaldisk where DriveType=3'");
+		if (result.getExitCode() != 0
+				&& StringUtils.isNotEmpty(result.getStderr())) {
+			log.error(result.getStderr());
+			throw new IOException("Error Getting partition Info");
+		}
+		String nl = System.getProperty("line.separator");
+		String[] split = result.getStdout().split(nl);
+
+		String[] drives = Arrays.copyOfRange(split, 2, split.length);
+		List<String> driveList = Arrays.asList(drives);
+		return driveList;
+	}
+	
+	
+	
+	
 }
