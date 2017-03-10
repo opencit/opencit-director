@@ -8,9 +8,9 @@
     <packaging>pom</packaging>
     
     <modules>
+        <module>director-trust-policy</module>
         <module>director-common</module>
         <module>director-setup</module>
-        <module>director-trust-policy</module>
         <module>features</module>
 		<module>database</module>    
     </modules>
