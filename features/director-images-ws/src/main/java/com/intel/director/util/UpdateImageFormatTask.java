@@ -55,13 +55,16 @@ public class UpdateImageFormatTask implements Runnable {
             log.error("No result for file command for file : {}", uploadedFile);
             return;
         }
-        if (result.contains(Constants.IMAGE_FORMAT_LINUX)) {
-            log.info("qcow2 image");
-            imageFormat = "qcow2";
-        } else if (result.contains(Constants.IMAGE_FORMAT_WINDOWS)) {
-            log.info("vhd image");
-            imageFormat = "vhd";
-        }
+		if (result.contains(Constants.IMAGE_FORMAT_RESULT_QCOW)) {
+			log.info("qcow2 image");
+			imageFormat = "qcow2";
+		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_RAW)) {
+			imageFormat = "raw";
+		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_VDI)) {
+			imageFormat = "vdi";
+		} else if (result.contains(Constants.IMAGE_FORMAT_RESULT_VHD) || result.contains(Constants.IMAGE_FORMAT_RESULT_VHDX)){				
+			imageFormat = "vhd";
+		}
 
         if (StringUtils.isBlank(imageFormat)) {
             log.error("Could not find the image format from the result : {}", result);
