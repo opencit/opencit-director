@@ -879,7 +879,7 @@ function fetchImaheHashAlgo(deploymentType,hashAlgoLabel){
         url: "/v1/image-hash-type?deploymentType=" + deploymentType,
         dataType: "json",
         success: function(data, status, xhr) {
-			$("#" + hashAlgoLabel).html(data.hash_type.toUpperCase());
+		///	$("#" + hashAlgoLabel).html(data.hash_type.toUpperCase());
             image_policies = data.image_launch_policies;   
         }
     });
