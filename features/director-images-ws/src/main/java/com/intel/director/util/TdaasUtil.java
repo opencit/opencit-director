@@ -138,7 +138,7 @@ public class TdaasUtil {
 		String patched = null;
 		try {
 			patch = java.net.URLDecoder.decode(patch,"ASCII");
-			log.info("Going to apply patch :"+patch);
+			log.debug("Going to apply patch :"+patch);
 			InputStream inputStream = new ByteArrayInputStream(
 					src.getBytes(StandardCharsets.UTF_8));
 
@@ -152,10 +152,7 @@ public class TdaasUtil {
 		} catch (IOException e) {
 			log.error("Could not apply patch ", e);	
 			throw new DirectorException("Unable to apply patch", e);
-		}catch(UnsupportedEncodingException e1){
-			log.error(" Unsupported encoding schemem while applying  patches ", e1);	
-			throw new DirectorException("Unable to apply patch", e1);
-		}	
+		}
 		return patched;
 
 	}
