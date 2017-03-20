@@ -418,28 +418,30 @@ public class GlanceRsClient {
 
 		// We first try getting token by v2.0 identity Service and if it fails
 		// we use v3 identity service
-		identityService = IdentityServiceFactory
-				.getIdentityService(Constants.VERSION_V2);
+		
+        if (Constants.VERSION_V2.equalsIgnoreCase(version)) {
+            identityService = IdentityServiceFactory
+                    .getIdentityService(Constants.VERSION_V2);
 
-		if (Constants.VERSION_V2.equalsIgnoreCase(version)) {
-			
-				authToken = identityService.createAuthToken(
-						glanceKeystonePublicEndpoint, tenantOrProjectName,
-						userName, password, domainName);
+        } else if (Constants.VERSION_V3.equalsIgnoreCase(version)) {
 
-			
-		} else if (Constants.VERSION_V3.equalsIgnoreCase(version)) {
-			
-			identityService = IdentityServiceFactory
-					.getIdentityService(Constants.VERSION_V3);
-			authToken = identityService.createAuthToken(
-					glanceKeystonePublicEndpoint, tenantOrProjectName, userName,
-					password, domainName);
-			
-		}
+            identityService = IdentityServiceFactory
+                    .getIdentityService(Constants.VERSION_V3);
+        }
+        if (identityService == null) {
+            log.error("Identity service value is null");
+	        throw new GlanceException("Identity service value is null");
+        }
+        authToken = identityService.createAuthToken(
+                glanceKeystonePublicEndpoint, tenantOrProjectName, userName,
+                password, domainName);
+    }
+
+
+
 		
 
-	}
+	
 
 	public void getImageMetaData() {
 	}

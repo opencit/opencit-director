@@ -206,7 +206,7 @@ public class ApplyDatabasePatches extends AbstractSetupTask {
         
     	HashSet<Long> changesToApply = fetchChangesToApply();
        
-        if( changesToApply!=null && changesToApply.isEmpty() ) {
+        if( changesToApply == null ) {
             log.info("No database updates available");
         }
         else {
