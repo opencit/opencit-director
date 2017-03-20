@@ -1523,6 +1523,11 @@ public class Images {
 	response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
 
 	Response downloadResponse = response.build();
+        try{
+            tarInputStream.close();
+        }catch(IOException ex){
+            log.debug("error during closing tarInputStream",ex);
+        }
 	return downloadResponse;
     }
 
@@ -1599,6 +1604,11 @@ public class Images {
 	    response.header("Content-Disposition", "attachment; filename=" + tarBall.getName());
 	}
 
+        try{
+            tarInputStream.close();
+        }catch(IOException ex){
+            log.debug("error during closing tarInputStream",ex);
+        }
 	return response.build();
     }
 
