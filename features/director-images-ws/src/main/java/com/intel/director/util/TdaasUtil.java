@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -136,6 +137,8 @@ public class TdaasUtil {
 	public static String patch(String src, String patch) throws DirectorException{
 		String patched = null;
 		try {
+			patch = java.net.URLDecoder.decode(patch,"ASCII");
+			log.debug("Going to apply patch :"+patch);
 			InputStream inputStream = new ByteArrayInputStream(
 					src.getBytes(StandardCharsets.UTF_8));
 

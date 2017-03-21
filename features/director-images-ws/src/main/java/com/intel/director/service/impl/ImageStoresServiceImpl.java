@@ -89,6 +89,12 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	for (ConnectorKey connectorKey : listOfPropertiesForConnector) {
 	    keyToConnectorPropertyMap.put(connectorKey.getKey(), connectorKey);
 	}
+        
+        if(compositeItems == null){
+            log.debug("Connector composite items list is empty");
+            throw new DirectorException("Composite items for Connector returned an empty list");
+        }
+        
 	for(ConnectorCompositeItem item : compositeItems){
 		listOfPropertiesForConnector.add(new ConnectorKey(8,item.getKey()));
 	}
@@ -153,6 +159,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	    				add=false;
 	    			}
 	    		}
+                        
 	    		if(add){
 	    			detailsObjectCorrectList.add(detailsTransferObject);
 	    		}
@@ -198,12 +205,17 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	  return populateCompositeItemInStore(fetchImageStorebyId);
     }
 
-    public ImageStoreTransferObject populateCompositeItemInStore(ImageStoreTransferObject imageStore){
+    public ImageStoreTransferObject populateCompositeItemInStore(ImageStoreTransferObject imageStore) throws DirectorException{
     	Collection<ImageStoreDetailsTransferObject> detailsObjectCorrectList= new ArrayList<ImageStoreDetailsTransferObject>();
 	    ConnectorCompositeItem[] compositeItems=compositeItemsForConnector(imageStore.getConnector());
 	    
 		for (ImageStoreDetailsTransferObject detailsTransferObject : imageStore.image_store_details) {
     		boolean add=true;
+                
+                if(compositeItems == null){
+                    log.debug("Connector composite items list is empty");
+                    throw new DirectorException("Composite items for Connector returned an empty list");
+                }
     		for(ConnectorCompositeItem item : compositeItems){
     			if(item.getKey().equals(detailsTransferObject.getKey())){
     				item.setValue(detailsTransferObject.getValue());
