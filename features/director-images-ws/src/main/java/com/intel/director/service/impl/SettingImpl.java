@@ -68,6 +68,11 @@ public class SettingImpl implements Setting {
 			return genericResponse;
 		}
 
+                if(kmsUtil == null){
+                    genericResponse.error = "Error connecting to KMS";
+                }
+                
+                if(kmsUtil != null){
 		boolean status = kmsUtil.getAllKeys();
 		if (status) {
 			genericResponse.error = null;
@@ -75,6 +80,7 @@ public class SettingImpl implements Setting {
 		} else {
 			genericResponse.error = "Error connecting to KMS";
 		}
+                }
 		return genericResponse;
 	}
 

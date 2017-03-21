@@ -56,12 +56,13 @@ public class ExecuteActions implements Runnable {
 				task.setTaskAction(taskToBeExecuted);
 				//Set the image id and the policy id in the customProperties map
 				task.init();
+                        log.info("Task instance from factory : " + task.getTaskName());
 			} catch (DirectorException e) {
 				log.error("unable to get a task for {}",task_name);
 			}
 			
-			log.info("Task instance from factory : " + task.getTaskName());
-			if(!task.run()){
+			
+			if(task != null && !task.run()){
 				markImageActionWithError(task);
 				ImageActionPoller.removeEntryFromUniqueImageActionlist(imageActionObj.getImage_id());
 				ImageActionPoller.removeEntryFromImageActionCountMap(imageActionObj.getId());
