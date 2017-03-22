@@ -24,11 +24,11 @@ function displayImageStorePage() {
             },
             dataType: "json",
             success: function(data) {
-
-                if (data.display_name != undefined && data.display_name != null && data.display_name != "") {
+            	data=htmlEncode(data);
+            	if (data.display_name != undefined && data.display_name != null && data.display_name != "") {
                     current_display_name = data.display_name;
                     $('#display_name_last').show();
-                    $('#display_name_last').val(current_display_name);
+                    $('#display_name_last').val(htmlEncode(current_display_name));
                 }
             }
         });
@@ -38,6 +38,7 @@ function displayImageStorePage() {
             url: "/v1/deployment-artifacts?deploymentType=" + current_depolyment_type,
             dataType: "json",
             success: function(data) {
+            	data=htmlEncode(data);
                 var artifacts_strings = "<option value='0'>Select</option>";
                 for (var key in data) {
                     artifacts_strings = artifacts_strings + "<option value=" + key + ">" + data[key] + "</option>";
@@ -87,10 +88,11 @@ function getImageStore(artifact_array, divs) {
             dataType: "json",
             async: false,
             success: function(data) {
+            	data=htmlEncode(data);
                 var image_stores = data.image_stores;
                 var image_stores_strings = "<option value='0'>Select</option>";
                 for (j = 0; j < image_stores.length; j++) {
-                    image_stores_strings = image_stores_strings + "<option value=" + image_stores[j].id + ">" + image_stores[j].name + "</option>";
+                    image_stores_strings = image_stores_strings + "<option value=" + image_stores[j].id + ">" + htmlEncode(image_stores[j].name) + "</option>";
                 }
                 $('#upload_' + divs[i]).html(image_stores_strings);
                 $('#upload_' + divs[i] + '_div').show();
@@ -191,9 +193,9 @@ function createImageStoreActions(uploadStoreMetaData) {
         },
         data: JSON.stringify(uploadStoreMetaData),
         success: function(data, status) {
-
+        	data=htmlEncode(data);
             if (data.error) {
-                $('#error_vm_body_3').text(data.error);
+                $('#error_vm_body_3').text(htmlEncode(data.error));
                 $("#error_vm_3").modal({
                     backdrop: "static"
                 });
@@ -209,6 +211,7 @@ function createImageStoreActions(uploadStoreMetaData) {
             });
         },
         error: function(jqXHR, error, errorThrown) {
+        	jqXHR=htmlEncode(jqXHR);
             var message = "";
             if (jqXHR.status == 400) {
                 message = (JSON.parse(jqXHR.responseText)).error;
@@ -244,7 +247,7 @@ function createPolicyDraftFromPolicy() {
 
         url: "/v1/rpc/create-draft-from-policy",
         success: function(data, status, xhr) {
-
+        	data=htmlEncode(data);
             if (data.error) {
                 $('#error_vm_body_3').text("Internal Error Occured");
                 $("#error_vm_3").modal({
@@ -255,8 +258,8 @@ function createPolicyDraftFromPolicy() {
                 return false;
             } else {
                 current_trust_policy_draft_id = data.id;
-				$("#display_name_last").val(data.display_name);
-				$("#display_name").val(data.display_name);
+				$("#display_name_last").val(htmlEncode(data.display_name));
+				$("#display_name").val(htmlEncode(data.display_name));
             }
 
         }
@@ -270,6 +273,7 @@ function createPolicyDraftFromPolicy() {
         },
         data: JSON.stringify(mountimage), // $("#loginForm").serialize(),
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
             backButton();
         }
     });
@@ -286,6 +290,7 @@ function createImageActions(imageActionData) {
         },
         data: JSON.stringify(imageActionData),
         success: function(data) {
+        	data=htmlEncode(data);
             if (data.error) {
                 $('#error_vm_body_3_direct').text(data.details);
                 $("#error_vm_3_direct").modal({

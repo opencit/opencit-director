@@ -110,6 +110,7 @@ input[readonly] {
 				'Authorization':"Token "+authorizationToken
 			},
 			success : function(data, status) {
+				data=htmlEncode(data);
 				console.log("YAY !!! Got extended date from server for token : "+authorizationToken);				
 				console.log("Scheduling session extend poller");
 				var authorization_date_str = data.authorization_date;
@@ -342,6 +343,7 @@ input[readonly] {
 						"Authorization" : "Token " + authorizationToken
 					},
 					success : function(data) {
+					data=htmlEncode(data);
 					$('#upload').prop('disabled', false);
 						if (data.error) {
 							alert("Error in downloading docker image from hub");
@@ -466,6 +468,7 @@ input[readonly] {
 				"Authorization" : "Token " + authorizationToken
 			},
 			success : function(data) {
+			data=htmlEncode(data);
 			$('#upload').prop('disabled', false);
 				if (data.error) {
 					alert("Error in uploading docker image");
@@ -491,7 +494,8 @@ input[readonly] {
 				return;
 			},
 			error : function(data, textStatus, errorThrown) {
-				if (data.responseJSON.error) {
+				data=htmlEncode(data);
+				if (htmlEncode(data.responseJSON.error)) {
 					$("#progressbar").width(0 + '%');
 					$("#percent").html(0 + '%');
 					$('#file_upload_window_modal_body').html(data.responseJSON.error);
@@ -592,6 +596,7 @@ input[readonly] {
 			},
 			dataType: "json",
 			success: function(result) {
+				result=htmlEncode(result);
 				images = result;
 				var grid = [];
 				for (i = 0; i < images.length; i++) {

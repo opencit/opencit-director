@@ -64,11 +64,12 @@ function validateMTWSetting() {
 		contentType : "application/json",
 		dataType : "json",
 		success : function (data) {
+		data=htmlEncode(data);	
 		$('#validateMTWBtn').prop('disabled', false);
 		if (data.status == "success") {
 				$("#mtw_config_error").html("<font color=\"green\">Valid configuration</font>");
 			} else if (data.status == "Error" ) {		
-	                        $("#mtw_config_error").html(data.error);
+	                        $("#mtw_config_error").html(htmlEncode(data.error));
 			} else if (xhr.status != 200 ) {
                                 $("#mtw_config_error").html("Invalid configuration");
                         }		

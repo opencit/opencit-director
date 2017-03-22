@@ -1,3 +1,6 @@
+
+
+
 function showImageActionHistoryDialog(imageid){
 	
 	var functionToCall = "show_action_history_grid('" + imageid + "')";
@@ -8,6 +11,7 @@ function showImageActionHistoryDialog(imageid){
 	show_action_history_grid(imageid);
 	
 }
+
 
 
 function HistoryData(){
@@ -879,8 +883,10 @@ function fetchImaheHashAlgo(deploymentType,hashAlgoLabel){
         url: "/v1/image-hash-type?deploymentType=" + deploymentType,
         dataType: "json",
         success: function(data, status, xhr) {
-			$("#" + hashAlgoLabel).html(data.hash_type.toUpperCase());
+        	data=htmlEncode(data);
+			$("#" + hashAlgoLabel).html(htmlEncode(data.hash_type.toUpperCase()));
             image_policies = data.image_launch_policies;   
         }
     });
 }
+
