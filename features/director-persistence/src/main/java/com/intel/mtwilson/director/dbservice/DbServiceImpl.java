@@ -2067,9 +2067,14 @@ public class DbServiceImpl implements IPersistService {
 	public ImageStoreTransferObject saveImageStore(
 			ImageStoreTransferObject imageStoreTO) throws DbException {
 		MwImageStore mwImageStore = mapper.toData(null, imageStoreTO);
-		MwImageStore createdImageStore = imageStoreDao
+                if(mwImageStore == null){
+                    return null;
+                }
+                MwImageStore createdImageStore = imageStoreDao
 				.createImageStore(mwImageStore);
-		return mapper.toTransferObject(createdImageStore);
+               
+                return mapper.toTransferObject(createdImageStore);
+		
 	}	
 	
 	@Override
