@@ -256,7 +256,7 @@ console.log(data);
                         $.ajax({
                             type: "POST",
                             url: "/v1/trust-policy-drafts",
-
+ 
                             contentType: "application/json",
                             headers: {
                                 'Accept': 'application/json'
@@ -328,9 +328,9 @@ console.log(data);
                 });
             },
             error: function(data, status, xhr) {
+            	data=htmlEncode(data);
                 var obj = jQuery.parseJSON(data.responseText);
-
-                show_error_in_bmlivemodal(obj.error);
+                show_error_in_bmlivemodal(htmlEncode(obj.error));
                 $("#createBMLivePolicyNext").prop('disabled', false);
                 return;
 

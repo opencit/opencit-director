@@ -206,7 +206,7 @@ function createImageStore() {
 			var str = "";
 			createImageStoreRequest = data;
 			current_image_store = data;
-			imageStoreEncodedName=data.name;
+			imageStoreEncodedName=htmlEncode(data.name);
 			var image_store_details = createImageStoreRequest.image_store_details;
 			for (i = 0; i < image_store_details.length; i++) {
 				str = str + "<div class=\"row\">";
