@@ -254,9 +254,10 @@ public class KmsUtil {
 		createKeyRequest.setMode("OFB");
 		Key createKeyResponse = keys.createKey(createKeyRequest);
 		UUID id = createKeyResponse.getId();
-		if (id != null) {
-			keys.deleteKey(id.toString());
+		if (id == null) {
+		   return null;	
 		}
-		return id.toString();
+                keys.deleteKey(id.toString());
+                return id.toString();
 	}
 }
