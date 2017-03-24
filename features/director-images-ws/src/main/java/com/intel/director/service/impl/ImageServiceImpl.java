@@ -348,10 +348,15 @@ public class ImageServiceImpl implements ImageService {
 	imageAttributes.setEdited_date(currentDate);
 	imageAttributes.setEdited_by_user_id(ShiroUtil.subjectUsername());
 	imageAttributes.setCreated_by_user_id(ShiroUtil.subjectUsername());
-	if (image_deployments.equalsIgnoreCase(Constants.DEPLOYMENT_TYPE_DOCKER)) {
+	if (image_deployments != null && image_deployments.equalsIgnoreCase(Constants.DEPLOYMENT_TYPE_DOCKER)) {
 	    imageAttributes.setRepository(repository);
 	    imageAttributes.setTag(tag);
 	}
+        
+        if(image_deployments == null){
+            log.debug("Invalid Image Deployment type, Should be either VM or DOCKER");
+            throw new DirectorException("Invalid Image Deployment type");
+        }
 
 	ImageAttributes createdImageMetadata;
 	try {
@@ -2383,11 +2388,18 @@ public class ImageServiceImpl implements ImageService {
 		throw new DirectorException("Error deleting policy draft with id " + trust_policy_draft_id, e);
 	    }
 	}
-	ImageAttributes imgAttributes = policyDraft.getImgAttributes();
-	if (imgAttributes != null) {
-	    String id = imgAttributes.getId();
-	    deleteImageShhSettings(id);
-	}
+        if (policyDraft == null) {
+            log.debug("Policy draft is null for ID : " + trust_policy_draft_id);
+            throw new DirectorException("Policy draft is null for ID : " + trust_policy_draft_id);
+
+        }
+
+        ImageAttributes imgAttributes = policyDraft.getImgAttributes();
+        if (imgAttributes != null) {
+            String id = imgAttributes.getId();
+            deleteImageShhSettings(id);
+
+        }
     }
 
     private void deleteImageShhSettings(String imageId) throws DirectorException {
