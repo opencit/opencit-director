@@ -32,12 +32,14 @@ function validateKMSSetting() {
 		data : JSON.stringify(self.data),
 		contentType : "application/json",
 		dataType : "json",
+		
 		success : function(data) {
+			data=htmlEncode(data);
 			if (data.status == "success") {
 				$("#kms_config_error").html(
 						"<font color=\"green\">Valid configuration</font>");
 			} else if (data.status == "Error") {
-				$("#kms_config_error").html(data.error);
+				$("#kms_config_error").html(htmlEncode(data.error));
 			}
 
 		},
