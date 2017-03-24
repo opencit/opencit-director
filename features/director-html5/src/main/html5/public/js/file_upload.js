@@ -185,8 +185,9 @@ function uploadMetadataAndFile(uploadFile, event){
       request.setRequestHeader('Authorization', tokenString);
     },
     success: function(data) {
+        data=htmlEncode(data);	
       if(data.status === 'Error') {
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -278,8 +279,9 @@ function uploadRemoteImage(uploadFile, event){
       request.setRequestHeader('Authorization', tokenString);
     },
     success: function(data) {
+      data=htmlEncode(data);
       if(data.status === 'Error') {
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -329,8 +331,9 @@ function downloadFromDockerHub(imageId) {
       'Authorization' : tokenString
     },
     success : function(data) {
+      data=htmlEncode(data);
       if(data.error){
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -348,7 +351,8 @@ function downloadFromDockerHub(imageId) {
       return;
      },
      error: function(data, textStatus, errorThrown){
-       $('#errorMsg').html(data.details);
+       data=htmlEncode(data);	 
+       $('#errorMsg').html(htmlEncode(data.details));
        $('#errorMsg').show();
        $('#upload').prop('disabled', false);
      }
@@ -364,9 +368,10 @@ function processDockerImage(imageId) {
       "Authorization" : tokenString
     },
     success : function(data) {
+      data=htmlEncode(data);	
       $('#upload').prop('disabled', false);
       if (data.error) {
-        $('#errorMsg').html(data.details);
+        $('#errorMsg').html(htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;

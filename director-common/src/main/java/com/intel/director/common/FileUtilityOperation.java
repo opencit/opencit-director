@@ -198,17 +198,11 @@ public class FileUtilityOperation {
     }
 
     public int createTar(String tarFilePath, List<String> filePaths) {
-	FileOutputStream dest = null;
+
 	boolean proceed = true;
-	try {
-	    dest = new FileOutputStream(tarFilePath);
-	} catch (FileNotFoundException e) {
-	    log.error("Error creating tar file", e);
-	    proceed = false;
-	} 
-	if (!proceed) {
-	    return 1;
-	}
+        
+	try(FileOutputStream dest = new FileOutputStream(tarFilePath)){
+	
 
 	// Create a TarOutputStream
 	TarOutputStream out = new TarOutputStream(new BufferedOutputStream(dest));
@@ -266,7 +260,16 @@ public class FileUtilityOperation {
 	    log.error("Error closing TAR stream", e);
 	    return 1;
 	}
-	return 0;
+        
+    } catch (IOException e) {
+	log.error("Error creating tar file", e);
+	proceed = false;
+    } 
+    if (!proceed) {
+        return 1;
+    }
+    return 0;
+
     }
 
     private int closeOriginStream(BufferedInputStream origin) {
