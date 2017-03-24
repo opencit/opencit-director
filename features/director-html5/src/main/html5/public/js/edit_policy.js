@@ -13,6 +13,7 @@ function edit_policy_initialize() {
 
         url: '/v1/images/' + current_image_id + '/upgradePolicy',
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
         	//alert("id::"+data.draft_id);
         	current_trust_policy_draft_id=data.draft_id;
         	 if (!current_trust_policy_draft_id) {
@@ -30,7 +31,7 @@ function edit_policy_initialize() {
 
         	            url: "/v1/rpc/create-draft-from-policy",
         	            success: function(data, status, xhr) {
-
+        	            	data=htmlEncode(data);
         	                if (data.error) {
         	                    ///	show_error_in_trust_policy_tab("Internal error");
         	                    return false;
@@ -45,6 +46,7 @@ function edit_policy_initialize() {
         	                        },
         	                        dataType: "json",
         	                        success: function(data, status, xhr) {
+        	                        	data=htmlEncode(data);
         	                            showImageLaunchPolicies(data);
         	                        }
         	                    });
@@ -65,6 +67,7 @@ function edit_policy_initialize() {
         	            },
         	            dataType: "json",
         	            success: function(data, status, xhr) {
+        	            	data=htmlEncode(data);
         	                showImageLaunchPolicies(data);
         	            }
         	        });
@@ -118,12 +121,12 @@ function EditImageViewModel(data) {
             },
             data: ko.toJSON(self.editImageMetaData), // $("#loginForm").serialize(),
             success: function(data, status, xhr) {
-
+            	data=htmlEncode(data);
                 if (data.error) {
 					hideLoading();
                     $('#for_mount_edit_vm').hide();
                     $('#default_edit_vm').show();
-                    $('#error_modal_body_edit_vm_1').text(data.error);
+                    $('#error_modal_body_edit_vm_1').text(htmlEncode(data.error));
                     $("#error_modal_edit_vm_1").modal({
                         backdrop: "static"
                     });
@@ -144,12 +147,13 @@ function EditImageViewModel(data) {
                     },
                     data: JSON.stringify(mountimage), // $("#loginForm").serialize(),
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         $("#editVMPolicyNext").prop('disabled', false);
                         if (data.error) {
 							hideLoading();
                             $('#for_mount_edit_vm').show();
                             $('#default_edit_vm').hide();
-                            $('#error_modal_body_edit_vm_1').text(data.error);
+                            $('#error_modal_body_edit_vm_1').text(htmlEncode(data.error));
                             $("#error_modal_edit_vm_1").modal({
                                 backdrop: "static"
                             });
@@ -159,11 +163,12 @@ function EditImageViewModel(data) {
                         nextButton();
                     },
 					error : function(data, textStatus, errorThrown) {
+						data=htmlEncode(data);
 						if (data.responseJSON.error) {
 							hideLoading();
 							$('#for_mount_edit_vm').hide();
 							$('#default_edit_vm').show();
-							$('#error_modal_body_edit_vm_1').text(data.responseJSON.error);
+							$('#error_modal_body_edit_vm_1').text(htmlEncode(data.responseJSON.error));
 							$("#error_modal_edit_vm_1").modal({
 								backdrop: "static"
 							});
@@ -176,11 +181,12 @@ function EditImageViewModel(data) {
                 // /nextButton();
             },
 			error : function(data, textStatus, errorThrown) {
+				data=htmlEncode(data);
 				if (data.responseJSON.error) {
 					hideLoading();
 					$('#for_mount_edit_vm').hide();
 					$('#default_edit_vm').show();
-					$('#error_modal_body_edit_vm_1').text(data.responseJSON.error);
+					$('#error_modal_body_edit_vm_1').text(htmlEncode(data.responseJSON.error));
 					$("#error_modal_edit_vm_1").modal({
 						backdrop: "static"
 					});
@@ -203,6 +209,7 @@ function showImageLaunchPolicies(policydata) {
         url: "/v1/image-launch-policies?deploymentType=VM",
         dataType: "json",
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
             image_policies = data.image_launch_policies;
             addRadios(image_policies);
             $("input[name=launch_control_policy][value='" + policydata.launch_control_policy + "']").attr('checked', 'checked');
@@ -236,7 +243,7 @@ function addRadios(arr) {
         url: '/v1/setting/kms',
         contentType: "application/json",
         success: function(data) {
-
+        	data=htmlEncode(data);
             if (data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha256 == "" ||
                 data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha256 == null ||
                 data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha256 == undefined) {

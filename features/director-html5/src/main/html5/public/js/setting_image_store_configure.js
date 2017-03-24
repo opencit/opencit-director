@@ -17,6 +17,7 @@ function imageStoreSettingPage() {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			var image_stores = data.image_stores;
 			var image_stores_grid = [];
 			
@@ -112,6 +113,7 @@ $(function() {
 			+ connector_selected,
 			dataType : "json",
 			success : function(data) {
+				data=htmlEncode(data);
 				var artifact_string = "";
 				var artifact_string_edit = "";
 				
@@ -127,14 +129,14 @@ $(function() {
 					+ "<input type=\"checkbox\" class=\"artifacts\" value=\""
 					+ key
 					+ "\" " + isChecked + ">"
-					+ data.supported_artifacts[key]
+					+ htmlEncode(data.supported_artifacts[key])
 					+ "</input><br/>";
 					
 					artifact_string_edit = artifact_string_edit
 					+ "<input type=\"checkbox\" class=\"edit_artifacts\" value=\""
 					+ key
 					+ "\">"
-					+ data.supported_artifacts[key]
+					+ htmlEncode(data.supported_artifacts[key])
 					+ "</input><br/>";
 					
 				}
@@ -196,16 +198,15 @@ function createImageStore() {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
- 
-
+			data=htmlEncode(data);
 			if (data.error) {
-				$("#image_store_error").html(data.error);
+				$("#image_store_error").html(htmlEncode(data.error));
 				return;
 			}
 			var str = "";
 			createImageStoreRequest = data;
 			current_image_store = data;
-			imageStoreEncodedName=data.name;
+			imageStoreEncodedName=htmlEncode(data.name);
 			var image_store_details = createImageStoreRequest.image_store_details;
 			for (i = 0; i < image_store_details.length; i++) {
 				str = str + "<div class=\"row\">";
@@ -267,7 +268,7 @@ function createImageStore() {
 			
 				for (j = 0; j < options.length; j++) {
 					
-					str = str + "<option value=\""+options[j].value+"\">"+options[j].display_name+"</option>";
+					str = str + "<option value=\""+options[j].value+"\">"+htmlEncode(options[j].display_name)+"</option>";
 							
 				}
 				
@@ -302,7 +303,8 @@ function createImageStore() {
 			$('#image_store_details').modal('show');
 		},
 		error : function(data, status, xhr) {
-			$("#image_store_error").html(data.responseJSON.error);
+			data=htmlEncode(data);
+			$("#image_store_error").html(htmlEncode(data.responseJSON.error));
 			return;
 		}
 	});
@@ -383,8 +385,9 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			if (data.error) {
-				$("#image_store_details_error").html(data.error);
+				$("#image_store_details_error").html(htmlEncode(data.error));
 				return;
 			}			
 			resetAllFields();
@@ -392,7 +395,7 @@ function updateImageStore(updateImageStoreRequest, isEdit) {
 			imageStoreSettingPage();
 		},
 		error : function(data, status, xhr) {
-			$("#image_store_details_error").html(data.responseJSON.error);
+			$("#image_store_details_error").html(htmlEncode(data.responseJSON.error));
 			return;
 		}
 	});
@@ -461,10 +464,11 @@ function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			if (data.valid) {
 				$("#image_store_details_error").html("<font color=\"green\">Valid configuration</font>");
 			} else {
-				$("#image_store_details_error").html(data.error);
+				$("#image_store_details_error").html(htmlEncode(data.error));
 			}
 			if(!isEdit){
 				for (i = 0; i < current_image_store.image_store_details.length; i++) {
@@ -474,7 +478,8 @@ function testImageStoreConnection(testImageStoreConnectionRequest, isEdit) {
 			}
 		},
 		error : function(data, status, xhr) {
-			$("#image_store_details_error").html(data.responseJSON.error);
+			data=htmlEncode(data);
+			$("#image_store_details_error").html(htmlEncode(data.responseJSON.error));
 			return;
 		}
 	});
@@ -490,6 +495,7 @@ function getImageStoreAndPopulateImageStore(imageStoreId) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			current_image_store = data;
 			populateImageStore(data);
 		}
@@ -537,11 +543,12 @@ function populateImageStore(image_store) {
 		dataType : "json",
 		async : false,
 		success : function(data) {
+			data=htmlEncode(data);
 			var artifact_string = "";
 			for ( var key in data.supported_artifacts) {
 				artifact_string = artifact_string
 				+ "<input type=\"checkbox\" class=\"edit_artifacts\" value="
-				+ key + ">" + data.supported_artifacts[key]
+				+ key + ">" + htmlEncode(data.supported_artifacts[key])
 				+ "</input><br/>";
 			}
 			$('#edit_artifacts').html(artifact_string);
@@ -672,10 +679,10 @@ function populateImageStoreDetails(image_store) {
 				
 				if(val == valueHolder){
 					
-					str = str + "<option  selected=\"selected\" value=\""+options[j].value+"\">"+options[j].display_name+"</option>";
+					str = str + "<option  selected=\"selected\" value=\""+options[j].value+"\">"+htmlEncode(options[j].display_name)+"</option>";
 				}else{
 					
-					str = str + "<option value=\""+options[j].value+"\">"+options[j].display_name+"</option>";
+					str = str + "<option value=\""+options[j].value+"\">"+htmlEncode(options[j].display_name)+"</option>";
 				}
 				////str = str + "<option value=\""+options[j].value+"\">"+options[j].display_name+"</option>";
 						
@@ -697,7 +704,7 @@ function populateImageStoreDetails(image_store) {
 			
 			for (j = 0; j < options.length; j++) {
 				
-				str = str + "<option value=\""+options[j].value+"\">"+options[j].display_name+"</option>";
+				str = str + "<option value=\""+options[j].value+"\">"+htmlEncode(options[j].display_name)+"</option>";
 						
 			}
 			
@@ -771,6 +778,7 @@ function deleteImageStore(imageStoreId) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			imageStoreSettingPage();
 		}
 	});
@@ -784,13 +792,14 @@ function validateImageStore(imageStoreId) {
 			'Accept' : 'application/json'
 		},
 		success : function(data, status, xhr) {
+			data=htmlEncode(data);
 			console.log(xhr.status);
 			if (xhr.status == 200) {
 				console.log(data.error);
 				console.log(data.details);
 				if (data.error) {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-remove");
-					$("span#image-store-valid-status-" + imageStoreId).attr("title", data.error);					
+					$("span#image-store-valid-status-" + imageStoreId).attr("title", htmlEncode(data.error));					
 				} else {
 					$("span#image-store-valid-status-" + imageStoreId).addClass("glyphicon glyphicon-ok");
 				}
