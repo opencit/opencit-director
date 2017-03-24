@@ -14,7 +14,7 @@ function edit_policy_initialize() {
 
         url: '/v1/images/' + current_image_id + '/upgradePolicy',
         success: function(data, status, xhr) {
-        	
+        	data=htmlEncode(data);
         	current_trust_policy_draft_id=data.draft_id;
         	
             if (!current_trust_policy_draft_id) {
@@ -32,7 +32,7 @@ function edit_policy_initialize() {
 
                     url: "/v1/rpc/create-draft-from-policy",
                     success: function(data, status, xhr) {
-
+                    	data=htmlEncode(data);
                         if (data.error) {
                             ///	show_error_in_trust_policy_tab("Internal error");
                             return false;
@@ -47,6 +47,7 @@ function edit_policy_initialize() {
                                 },
                                 dataType: "json",
                                 success: function(data, status, xhr) {
+                                	data=htmlEncode(data);
                                     showImageLaunchPoliciesDocker(data);
                                 }
                             });
@@ -67,6 +68,7 @@ function edit_policy_initialize() {
                     },
                     dataType: "json",
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         showImageLaunchPoliciesDocker(data);
                     }
                 });
@@ -116,12 +118,12 @@ function EditDockerImageViewModel(data) {
             },
             data: ko.toJSON(self.editDockerImageMetaData), // $("#loginForm").serialize(),
             success: function(data, status, xhr) {
-
+            	data=htmlEncode(data);
                 if (data.error) {
 					hideLoading();
                     $('#for_mount_edit_docker').hide();
                     $('#default_edit_docker').show();
-                    $('#error_modal_body_edit_docker_1').text(data.error);
+                    $('#error_modal_body_edit_docker_1').text(htmlEncode(data.error));
                     $("#error_modal_edit_docker_1").modal({
                         backdrop: "static"
                     });
@@ -142,12 +144,13 @@ function EditDockerImageViewModel(data) {
                     },
                     data: JSON.stringify(mountimage), // $("#loginForm").serialize(),
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         $("#editDockerPolicyNext").prop('disabled', false);
                         if (data.error) {
 							hideLoading();
                             $('#for_mount_edit_docker').show();
                             $('#default_edit_docker').hide();
-                            $('#error_modal_body_edit_docker_1').text(data.error);
+                            $('#error_modal_body_edit_docker_1').text(htmlEncode(data.error));
                             $("#error_modal_edit_docker_1").modal({
                                 backdrop: "static"
                             });
@@ -157,11 +160,12 @@ function EditDockerImageViewModel(data) {
                         nextButtonDocker();
                     },
 					error : function(data, textStatus, errorThrown) {
+						data=htmlEncode(data);
 						if (data.responseJSON.error) {
 							hideLoading();
 							$('#for_mount_edit_docker').hide();
 							$('#default_edit_docker').show();
-							$('#error_modal_body_edit_docker_1').text(data.responseJSON.error);
+							$('#error_modal_body_edit_docker_1').text(htmlEncode(data.responseJSON.error));
 							$("#error_modal_edit_docker_1").modal({
 								backdrop: "static"
 							});
@@ -173,11 +177,12 @@ function EditDockerImageViewModel(data) {
 
             },
 			error : function(data, textStatus, errorThrown) {
+				data=htmlEncode(data);
 				if (data.responseJSON.error) {
 					hideLoading();
 					$('#for_mount_edit_docker').hide();
 					$('#default_edit_docker').show();
-					$('#error_modal_body_edit_docker_1').text(data.responseJSON.error);
+					$('#error_modal_body_edit_docker_1').text(htmlEncode(data.responseJSON.error));
 					$("#error_modal_edit_docker_1").modal({
 						backdrop: "static"
 					});
@@ -194,7 +199,7 @@ function EditDockerImageViewModel(data) {
 
 function showImageLaunchPoliciesDocker(policydata) {
     current_display_name = policydata.display_name.substring(policydata.display_name.lastIndexOf(":") + 1);
-    $("#display_name").val(current_display_name);
+    $("#display_name").val(htmlEncode(current_display_name));
 	fetchDockerVersionedDisplayName();
 
     $.ajax({
@@ -202,6 +207,7 @@ function showImageLaunchPoliciesDocker(policydata) {
         url: "/v1/image-launch-policies?deploymentType=Docker",
         dataType: "json",
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
             image_policies = data.image_launch_policies;
             addRadios(image_policies);
             $("input[name=launch_control_policy][value='" + policydata.launch_control_policy + "']").attr('checked', 'checked');
@@ -226,7 +232,7 @@ function addRadios(arr) {
         if (arr[i].name == 'encrypted') {
             continue;
         }
-        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="edit_policy_' + arr[i].name + '" value="' + arr[i].name + '" >' + arr[i].display_name + '</label>';
+        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="edit_policy_' + htmlEncode(arr[i].name) + '" value="' + arr[i].name + '" >' + arr[i].display_name + '</label>';
     }
 
     $('#launch_control_policy').html(temp);
@@ -244,8 +250,9 @@ function fetchDockerVersionedDisplayName(){
         },
         data: JSON.stringify(fetchDisplayname),
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
             var display_name = data.details.substring(data.details.lastIndexOf(":") + 1);
-            $("#display_name").val(display_name);
+            $("#display_name").val(htmlEncode(display_name));
         }
     })
 };
