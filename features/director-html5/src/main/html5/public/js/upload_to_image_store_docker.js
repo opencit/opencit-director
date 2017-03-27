@@ -24,7 +24,7 @@ function displayImageStorePage() {
             },
             dataType: "json",
             success: function(data) {
-
+            	data=htmlEncode(data);
                 if (data.display_name != undefined && data.display_name != null && data.display_name != "") {
                     current_display_name = data.display_name;
                     $('#display_name_last').show();
@@ -38,9 +38,10 @@ function displayImageStorePage() {
             url: "/v1/deployment-artifacts?deploymentType=" + current_depolyment_type,
             dataType: "json",
             success: function(data) {
+            	data=htmlEncode(data);
                 var artifacts_strings = "<option value='0'>Select</option>";
                 for (var key in data) {
-                    artifacts_strings = artifacts_strings + "<option value=" + key + ">" + data[key] + "</option>";
+                    artifacts_strings = artifacts_strings + "<option value=" + key + ">" + htmlEncode(data[key]) + "</option>";
                 }
                 $('#upload_artifact').html(artifacts_strings);
                 $('#upload_artifact').show();
@@ -87,10 +88,11 @@ function getImageStore(artifact_selected, div_to_show) {
             dataType: "json",
             async: false,
             success: function(data) {
+            	data=htmlEncode(data);
                 var image_stores = data.image_stores;
                 var image_stores_strings = "<option value='0'>Select</input>"
                 for (j = 0; j < image_stores.length; j++) {
-                    image_stores_strings += "<option value=" + image_stores[j].id + ">" + image_stores[j].name + "</option>";
+                    image_stores_strings += "<option value=" + image_stores[j].id + ">" + htmlEncode(image_stores[j].name) + "</option>";
                 }
                 $('#upload_' + div_to_show[i]).html(image_stores_strings);
                 $('#upload_' + div_to_show[i] + '_div').show();
@@ -149,9 +151,9 @@ function createImageStoreActions(uploadStoreMetaData) {
         },
         data: JSON.stringify(uploadStoreMetaData),
         success: function(data, status) {
-
+        	data=htmlEncode(data);
             if (data.error) {
-                $('#error_docker_body_3').text(data.error);
+                $('#error_docker_body_3').text(htmlEncode(data.error));
                 $("#error_docker_3").modal({
                     backdrop: "static"
                 });
@@ -201,7 +203,7 @@ function createPolicyDraftFromPolicy() {
 
         url: "/v1/rpc/create-draft-from-policy",
         success: function(data, status, xhr) {
-
+        	data=htmlEncode(data);
             if (data.error) {
                 $('#error_docker_body_3').text("Internal Error Occured");
                 $("#error_docker_3").modal({

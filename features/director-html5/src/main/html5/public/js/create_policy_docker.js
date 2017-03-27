@@ -36,13 +36,13 @@ function CreateDockerImageViewModel() {
             },
             data: ko.toJSON(self.createDockerImageMetaData), // $("#loginForm").serialize(),
             success: function(data, status, xhr) {
-
+            	data=htmlEncode(data);
                 if (data.error) {
 					hideLoading();
 					console.log(data.error);
                     $('#for_mount_docker').hide();
                     $('#default_docker').show();
-                    $('#error_modal_body_docker_1').text(data.error);
+                    $('#error_modal_body_docker_1').text(htmlEncode(data.error));
                     $("#error_modal_docker_1").modal({
                         backdrop: "static"
                     });
@@ -63,12 +63,13 @@ function CreateDockerImageViewModel() {
                     },
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         $("#createDockerPolicyNext").prop('disabled', false);
                         if (data.error) {
 							hideLoading();
                             $('#default_docker').hide();
                             $('#for_mount_docker').show();
-                            $('#error_modal_body_docker_1').text(data.error);
+                            $('#error_modal_body_docker_1').text(htmlEncode(data.error));
                             $("#error_modal_docker_1").modal({
                                 backdrop: "static"
                             });
@@ -81,6 +82,7 @@ function CreateDockerImageViewModel() {
                 });
             },
             error: function(data, status, xhr) {
+            	data=htmlEncode(data);
 				hideLoading();
                 console.log(data);
                 $('#for_mount_docker').hide();
@@ -102,13 +104,13 @@ function CreateDockerImageViewModel() {
 
 function fetchImageLaunchPolicies() {
 
-    $("#display_name").val(current_image_name);
+    $("#display_name").val(htmlEncode(current_image_name));
     $.ajax({
         type: "GET",
         url: "/v1/image-launch-policies?deploymentType=Docker",
         dataType: "json",
         success: function(data, status, xhr) {
-
+        	data=htmlEncode(data);
             image_policies = data.image_launch_policies;
             addRadios(image_policies);
             mainViewModel.createDockerImageViewModel = new CreateDockerImageViewModel();
@@ -126,7 +128,7 @@ function addRadios(arr) {
         if (arr[i].name == 'encrypted') {
             continue;
         }
-        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="create_policy_' + arr[i].name + '" value="' + arr[i].name + '">' + arr[i].display_name + '</label>';
+        temp = temp + '<label class="radio-inline"><input type="radio" name="launch_control_policy" id="create_policy_' + htmlEncode(arr[i].name) + '" value="' + arr[i].name + '">' + arr[i].display_name + '</label>';
 
     }
     $('#launch_control_policy').html(temp);
@@ -144,8 +146,9 @@ function fetchDockerVersionedDisplayName(){
         },
         data: JSON.stringify(fetchDisplayname),
         success: function(data, status, xhr) {
+        	data=htmlEncode(data);
             var display_name = data.details.substring(data.details.lastIndexOf(":") + 1);
-            $("#display_name").val(display_name);
+            $("#display_name").val(htmlEncode(display_name));
         }
     });
 
