@@ -308,7 +308,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
     public boolean validateConnectorArtifacts(String[] artifact_types, String connector) {
 	boolean isValidated = true;
 	switch (connector) {
-	case Constants.CONNECTOR_DOCKERHUB:
+	/*case Constants.CONNECTOR_DOCKERHUB:
 
 	    for (String artifact : artifact_types) {
 		Map<String, String> supported_artifacts = ConnectorProperties.DOCKER.getSupported_artifacts();
@@ -316,7 +316,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		    isValidated = false;
 		}
 	    }
-	    return isValidated;
+	    return isValidated;*/
 
 	case Constants.CONNECTOR_GLANCE:
 
