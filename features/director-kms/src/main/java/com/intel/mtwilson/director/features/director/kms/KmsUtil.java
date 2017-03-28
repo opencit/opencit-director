@@ -75,13 +75,10 @@ public class KmsUtil {
 		String kmsLoginBasicPassword;
 
 		try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
-			if (passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
-				kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
-			} else{
-				kmsLoginBasicPassword = null;
+					kmsLoginBasicPassword = null;
 				if(StringUtils.isNotBlank(password)) {
 					kmsLoginBasicPassword = password;
-				}
+				
 			}
 		}
 		
