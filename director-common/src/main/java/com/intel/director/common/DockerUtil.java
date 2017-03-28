@@ -125,6 +125,7 @@ public class DockerUtil {
             log.error("Unable to convert JSON : {} into the expected java object", resultJson);
             return false;
         }
+        if(readValue!=null && readValue.getResults()!=null ){
         log.info("tags returned: {}", readValue.getResults().size());
         List<TagDetail> results = readValue.getResults();
         for (TagDetail tagDetail : results) {
@@ -133,6 +134,7 @@ public class DockerUtil {
                 log.info("Found the image with repo : {} and tag : {}", repo, tag);
                 break;
             }
+        }
         }
 
         return repoTagExists;
@@ -165,7 +167,7 @@ public class DockerUtil {
     	    log.error("Error in executing command:" + command);
     	    throw new DirectorException("Error in executing command:" + command, e);
     	}
-    	log.info("doesRepoTagExistInDockerHub : Command executed for checking existence of repo and tab in hub : {}",
+    	log.info("checkWithDockerSearch : Command executed for checking existence of repo and tab in hub : {}",
     		command);
     	int exitCode = -1;
     	exitCode = result.getExitCode();
@@ -238,8 +240,8 @@ public class DockerUtil {
 
     	try {
     	    HttpResponse execute = httpClient.execute(get);
-    	    log.info("URL for searhcing repo tag in docker hub: {}", url);
-    	    log.info("Response code: {}", execute.getStatusLine().getStatusCode());
+    	    log.info("checkWithV1Api, URL for searhcing repo tag in docker hub: {}", url);
+    	    log.info("checkWithV1Api, Response code: {}", execute.getStatusLine().getStatusCode());
     	    repoTagExists = (execute.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
 
     	} catch (ClientProtocolException e) {
