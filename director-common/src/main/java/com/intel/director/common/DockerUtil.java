@@ -174,35 +174,36 @@ public class DockerUtil {
     	if (exitCode != 0) {
     	    throw new ConnectionFailException("Unable to connect to docker hub");
     	}
-    	if (result.getStderr() != null && StringUtils.isNotEmpty(result.getStderr())) {
-    	    log.error(result.getStderr());
-    	    return false;
-    	}
-
     	String searchResult = result.getStdout();
     	log.info("searchResult = {}", searchResult);
     	String nl = System.getProperty("line.separator");
     	String[] split = searchResult.split(nl);
-    	for (String string : split) {
-    	    if (StringUtils.isNotBlank(string) && string.contains("NAME") && string.contains("DESCRIPTION")
-    		    && string.contains("STARS")) {
-    		log.info("Found the header: {}", string);
-    		continue;
-    	    }
-    	    log.info("Found the content: {}", string);
-    	    if ("latest".equalsIgnoreCase(tag)) {
-    		String[] split2 = string.split(" ");		
-    		if (split2.length > 0 && split2[0].equalsIgnoreCase(repo)) {
-    		    repoTagExists = true;
-    		}
-    		break;
-    	    } else {
-    		repoTagExists = string.contains(tag + "/");
-    		if (repoTagExists) {
-    		    break;
-    		}
-    	    }
-    	}
+        int startIndex=0;
+        
+        if (split.length > 0) {
+			if (StringUtils.isNotBlank(split[0]) && split[0].contains("NAME")
+					&& split[0].contains("DESCRIPTION")
+					&& split[0].contains("STARS")) {
+				startIndex = 1;
+			}
+
+			for (; startIndex < split.length; startIndex++) {
+				String string = split[startIndex];
+				log.debug("Found the content: {}", string);
+				if ("latest".equalsIgnoreCase(tag)) {
+					String[] split2 = string.split(" ");
+					if (split2.length > 0 && split2[0].equalsIgnoreCase(repo)) {
+						repoTagExists = true;
+					}
+					break;
+				} else {
+					repoTagExists = string.contains(tag + "/");
+					if (repoTagExists) {
+						break;
+					}
+				}
+			}
+        } 	
 
 
     	return repoTagExists;
