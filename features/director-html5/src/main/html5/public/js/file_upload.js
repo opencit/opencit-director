@@ -145,6 +145,15 @@ function upload(event){
 };
 
 
+function getExtensionForFile(fname){
+	var splitArr=fname.split(".");
+	var arrlength=splitArr.length;
+	if(arrlength>0){
+		return splitArr[arrlength-1]=== fname ? '' : splitArr[arrlength-1];		
+	}
+	return '';
+}
+
 /**
   Create Image Metadata and upload file once we receive the UUID
  */
@@ -152,13 +161,20 @@ function uploadMetadataAndFile(uploadFile, event){
   var fName = null;
   var fileSize = null;
   var newFileName = null;
+  var fileNameFromTextField = $('#fileName').val();
   if(uploadFile === null || uploadFile === undefined){
     fName = $('#dockerRepo').val() + ':' + $('#dockerTag').val();
-    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    newFileName = fileNameFromTextField === '' ? fName : fileNameFromTextField;
     fileSize = 0;
   }else {
     fName = uploadFile.webkitRelativePath||uploadFile.fileName||uploadFile.name; // Some confusion in different versions of Firefox;
-    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    
+    if(fileNameFromTextField === ''){
+    	newFileName = fName;
+    }else{    	
+    	var extension= getExtensionForFile(fName);
+    	newFileName= extension === '' ? fileNameFromTextField : fileNameFromTextField+"."+extension;
+    }
     fileSize = uploadFile.size;
   }
   var imageMetadataRequest = {
