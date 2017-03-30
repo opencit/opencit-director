@@ -149,7 +149,7 @@ public class ImageDao extends BaseDao{
 
 			}
 
-			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 			Query query = emf.createEntityManager().createNativeQuery(
 					queryString.toString());
 			List<ImageInfo> imageInfoList = new ArrayList<ImageInfo>();
