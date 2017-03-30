@@ -40,12 +40,12 @@ function CreateImageViewModel() {
             data: ko.toJSON(self.createImageMetaData), // $("#loginForm").serialize(),
 
             success: function(data, status, xhr) {
-
+            	data=htmlEncode(data);
                 if (data.error) {
 					hideLoading();
                     $('#for_mount').hide();
                     $('#default').show();
-                    $('#error_modal_body_vm_1').text(data.error);
+                    $('#error_modal_body_vm_1').text(htmlEncode(data.error));
                     $("#error_modal_vm_1").modal({
                         backdrop: "static"
                     });
@@ -67,12 +67,13 @@ function CreateImageViewModel() {
                     },
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         $("#createVMPolicyNext").prop('disabled', false);
                         if (data.error) {
 							hideLoading();
                             $('#default').hide();
                             $('#for_mount').show();
-                            $('#error_modal_body_vm_1').text(data.error);
+                            $('#error_modal_body_vm_1').text(htmlEncode(data.error));
                             $("#error_modal_vm_1").modal({
                                 backdrop: "static"
                             });
@@ -86,6 +87,7 @@ function CreateImageViewModel() {
                 });
             },
             error: function(data, status, xhr) {
+            	data=htmlEncode(data);
                 console.log(data);
 				hideLoading();
                 $('#for_mount').hide();
@@ -93,7 +95,7 @@ function CreateImageViewModel() {
                 $('#error_modal_body_vm_1').text("");
                 var obj = jQuery.parseJSON(data.responseText);
 
-                $('#error_modal_body_vm_1').text(obj.error);
+                $('#error_modal_body_vm_1').text(htmlEncode(obj.error));
                 $("#error_modal_vm_1").modal({
                     backdrop: "static"
                 });
@@ -115,7 +117,7 @@ function fetchImageLaunchPolicies() {
         url: "/v1/image-launch-policies?deploymentType=VM",
         dataType: "json",
         success: function(data, status, xhr) {
-
+        	data=htmlEncode(data);
             image_policies = data.image_launch_policies;
             addRadios(image_policies);
             mainViewModel.createImageViewModel = new CreateImageViewModel();
@@ -144,7 +146,7 @@ function addRadios(arr) {
         url: '/v1/setting/kms',
         contentType: "application/json",
         success: function(data) {
-
+        	data=htmlEncode(data);
             if (data.kms_endpoint_url == "" || data.kms_login_basic_username == "" || data.kms_tls_policy_certificate_sha256 == "" ||
                 data.kms_endpoint_url == null || data.kms_login_basic_username == null || data.kms_tls_policy_certificate_sha256 == null ||
                 data.kms_endpoint_url == undefined || data.kms_login_basic_username == undefined || data.kms_tls_policy_certificate_sha256 == undefined) {

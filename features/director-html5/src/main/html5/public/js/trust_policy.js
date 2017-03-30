@@ -1,3 +1,6 @@
+
+
+
 function showImageActionHistoryDialog(imageid){
 	
 	var functionToCall = "show_action_history_grid('" + imageid + "')";
@@ -8,6 +11,7 @@ function showImageActionHistoryDialog(imageid){
 	show_action_history_grid(imageid);
 	
 }
+
 
 
 function HistoryData(){
@@ -752,8 +756,9 @@ function cleanup_orphan_policies() {
 			show_error_in_trust_policy_tab("Orphan policies cleaned up");
 		},
 		error : function(data, status, xhr) {
+			data=htmlEncode(data);	
             var obj = jQuery.parseJSON(data.responseText);
-			show_error_in_trust_policy_tab(obj.error);
+			show_error_in_trust_policy_tab(htmlEncode(obj.error));
 		} 
 	});
 }
@@ -879,8 +884,9 @@ function fetchImaheHashAlgo(deploymentType,hashAlgoLabel){
         url: "/v1/image-hash-type?deploymentType=" + deploymentType,
         dataType: "json",
         success: function(data, status, xhr) {
-			$("#" + hashAlgoLabel).html(data.hash_type.toUpperCase());
-            image_policies = data.image_launch_policies;   
+			data=htmlEncode(data);
+            image_policies = data.image_launch_policies;
         }
     });
 }
+
