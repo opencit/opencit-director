@@ -697,13 +697,14 @@ function createPolicy() {
         dataType: "json",
         data: JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
         success: function(data) {
+        	data=htmlEncode(data);
             $("#createVmPolicyDirNext").prop('disabled', false);
             current_trust_policy_id = data.id;
             var mountimage = {
                 "id": current_image_id
             }
             current_image_action_id = "";
-            var createResponse = data.error;
+            var createResponse = htmlEncode(data.error);
 
             $.ajax({
                 type: "POST",

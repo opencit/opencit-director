@@ -678,13 +678,14 @@ function createPolicy() {
         dataType: "json",
         data: JSON.stringify(createTrustPolicyMetaData), // $("#loginForm").serialize(),
         success: function(data) {
+        	data=htmlEncode(data);
             $("#createDockerPolicyDirNext").prop('disabled', false);
             current_trust_policy_id = data.id;
             var mountimage = {
                 "id": current_image_id
             }
             current_image_action_id = "";
-            var createResponse = data.error;
+            var createResponse = htmlEncode(data.error);
 
             $.ajax({
                 type: "POST",
@@ -695,6 +696,7 @@ function createPolicy() {
                 },
                 data: JSON.stringify(mountimage),
                 success: function(data, status, xhr) {
+                	data=htmlEncode(data);
                     if (createResponse) {
 						$("#error_modal_docker_2_header").html(createResponse);
                         $("#error_modal_docker_2").modal({

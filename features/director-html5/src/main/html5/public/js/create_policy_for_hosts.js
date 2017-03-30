@@ -95,10 +95,10 @@ console.log(data);
             },
             data: JSON.stringify(data),
             success: function(data, status, xhr) {
-
+            	data=htmlEncode(data);	
                 if (data.error) {
                     $("#createBMLivePolicyNext").prop('disabled', false);
-                    show_error_in_editbmlivemodal(data.error);
+                    show_error_in_editbmlivemodal(htmlEncode(data.error));
                     return;
                 }
 
@@ -127,8 +127,8 @@ console.log(data);
                     },
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
-
-                        if (data.error) {
+                    	data=htmlEncode(data);	
+                        if (htmlEncode(data.error)) {
 						hideLoading();
                             show_error_in_bmlivemodal("Error mounting remote host");
                             $("#createBMLivePolicyNext").prop('disabled', false);
@@ -145,11 +145,11 @@ console.log(data);
                             },
                             data: ko.toJSON(self.BMLiveMetaData),
                             success: function(data, status, xhr) {
-
-                                if (data.error) {
+                            	data=htmlEncode(data);
+                                if (htmlEncode(data.error)) {
                                 	hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
-                                    show_error_in_bmlivemodal(data.error);
+                                    show_error_in_bmlivemodal(htmlEncode(data.error));
                                     $.ajax({
                                         type: "POST",
                                         url: "/v1/rpc/unmount-image",
@@ -181,11 +181,12 @@ console.log(data);
                                     data: JSON.stringify(policyTemplateRequest),
 
                                     success: function(data) {
+                                    	data=htmlEncode(data);
                                         $("#createBMLivePolicyNext").prop('disabled', false);
 				
                                         if (data.error) {
 										hideLoading();
-                                            show_error_in_bmlivemodal(data.error);
+                                            show_error_in_bmlivemodal(htmlEncode(data.error));
                                             return;
                                         }
                                         nextButtonLiveBM();
@@ -216,6 +217,7 @@ console.log(data);
             },
             data: JSON.stringify(data),
             success: function(data, status, xhr) {
+            	data=htmlEncode(data);
                 if (data.error) {
                     show_error_in_bmlivemodal(data.error);
                     $("#createBMLivePolicyNext").prop('disabled', false);
@@ -243,6 +245,7 @@ console.log(data);
                     },
                     data: JSON.stringify(mountimage),
                     success: function(data, status, xhr) {
+                    	data=htmlEncode(data);
                         if (data.error) {
 							hideLoading();
                             show_error_in_bmlivemodal("Error mounting remote host");
@@ -253,13 +256,14 @@ console.log(data);
                         $.ajax({
                             type: "POST",
                             url: "/v1/trust-policy-drafts",
-
+ 
                             contentType: "application/json",
                             headers: {
                                 'Accept': 'application/json'
                             },
                             data: ko.toJSON(self.BMLiveMetaData),
                             success: function(data, status, xhr) {
+                            	data=htmlEncode(data);
                                 if (data.error) {
 								hideLoading();
                                     $("#createBMLivePolicyNext").prop('disabled', false);
@@ -303,6 +307,7 @@ console.log(data);
                                     data: JSON.stringify(policyTemplateRequest),
 
                                     success: function(data) {
+                                    	data=htmlEncode(data);
                                         $("#createBMLivePolicyNext").prop('disabled', false);
 										
                                         if (data.error) {
@@ -323,9 +328,9 @@ console.log(data);
                 });
             },
             error: function(data, status, xhr) {
+            	data=htmlEncode(data);
                 var obj = jQuery.parseJSON(data.responseText);
-
-                show_error_in_bmlivemodal(obj.error);
+                show_error_in_bmlivemodal(htmlEncode(obj.error));
                 $("#createBMLivePolicyNext").prop('disabled', false);
                 return;
 

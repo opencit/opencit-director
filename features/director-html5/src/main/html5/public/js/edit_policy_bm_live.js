@@ -23,8 +23,9 @@ function edit_policy_bmlive_initialize() {
             },
             dataType: "json",
             success: function(data, status, xhr) {
-                $("#host_ip_edit").val(data.ip_address);
-                $("#username_for_host_edit").val(data.username);
+            	data=htmlEncode(data);
+                $("#host_ip_edit").val(htmlEncode(data.ip_address));
+                $("#username_for_host_edit").val(htmlEncode(data.username));
 	
                 if (data.partition) {
                     console.log("Windows");
@@ -50,7 +51,8 @@ function edit_policy_bmlive_initialize() {
                     },
                     dataType: "json",
                     success: function(data, status, xhr) {
-                        $("#display_name_host_edit").val(data.display_name);
+                    	data=htmlEncode(data);
+                        $("#display_name_host_edit").val(htmlEncode(data.display_name));
                     }
                 });
             }
@@ -69,8 +71,9 @@ function edit_policy_bmlive_initialize() {
             },
             dataType: "json",
             success: function(data, status, xhr) {
-                $("#host_ip_edit").val(data.ip_address);
-                $("#username_for_host_edit").val(data.username);
+            	data=htmlEncode(data);
+                $("#host_ip_edit").val(htmlEncode(data.ip_address));
+                $("#username_for_host_edit").val(htmlEncode(data.username));
                 console.log("Partition :: " + data.partition);
                 if (data.partition) {
                     console.log("Windows");
@@ -97,7 +100,8 @@ function edit_policy_bmlive_initialize() {
             },
             dataType: "json",
             success: function(data, status, xhr) {
-                $("#display_name_host_edit").val(data.display_name);
+            	data=htmlEncode(data);
+                $("#display_name_host_edit").val(htmlEncode(data.display_name));
             }
         });
 
@@ -198,10 +202,10 @@ function editandNext() {
         },
         data: JSON.stringify(data),
         success: function(data, status, xhr) {
-
+        	data=htmlEncode(data);
             if (data.error) {
                 $("#editBMLivePolicyNext").prop('disabled', false);
-                show_error_in_editbmlivemodal(data.error);
+                show_error_in_editbmlivemodal(htmlEncode(data.error));
                 return;
             }
 
@@ -213,7 +217,7 @@ function editandNext() {
 
                 url: '/v1/images/' + current_image_id + '/upgradePolicy',
                 success: function(data, status, xhr) {
-                	
+                	data=htmlEncode(data);
                     self.editBMLiveMetaData.launch_control_policy = "MeasureOnly";
                     self.editBMLiveMetaData.isEncrypted = false;
                     self.editBMLiveMetaData.display_name = $("#display_name_host_edit").val();
@@ -230,10 +234,10 @@ function editandNext() {
                         },
                         data: JSON.stringify(mountimage),
                         success: function(data, status, xhr) {
-
+                        	data=htmlEncode(data);
                             if (data.error) {
                                 $("#editBMLivePolicyNext").prop('disabled', false);
-                                show_error_in_editbmlivemodal(data.error);
+                                show_error_in_editbmlivemodal(htmlEncode(data.error));
                                 return;
                             }
 
@@ -247,10 +251,11 @@ function editandNext() {
                                 },
                                 data: ko.toJSON(self.editBMLiveMetaData),
                                 success: function(data, status, xhr) {
+                                	data=htmlEncode(data);
                                     $("#editBMLivePolicyNext").prop('disabled', false);
 
                                     if (data.error) {
-                                        show_error_in_editbmlivemodal(data.error);
+                                        show_error_in_editbmlivemodal(htmlEncode(data.error));
 
                                         $.ajax({
                                             type: "POST",
