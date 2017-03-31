@@ -555,6 +555,9 @@ fi
 echo "Installing docker....!!!!!"
 apt-get -y --force-yes install docker-engine=1.13.0-0~ubuntu-trusty
 
+echo "Installing cifs-utils"
+apt-get install cifs-utils
+
 # delete the temporary setup environment variables file
 rm -f $DIRECTOR_ENV/director-setup
 
