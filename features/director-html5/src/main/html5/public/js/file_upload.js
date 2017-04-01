@@ -145,6 +145,15 @@ function upload(event){
 };
 
 
+function getExtensionForFile(fname){
+	var splitArr=fname.split(".");
+	var arrlength=splitArr.length;
+	if(arrlength>0){
+		return splitArr[arrlength-1]=== fname ? '' : splitArr[arrlength-1];		
+	}
+	return '';
+}
+
 /**
   Create Image Metadata and upload file once we receive the UUID
  */
@@ -152,13 +161,20 @@ function uploadMetadataAndFile(uploadFile, event){
   var fName = null;
   var fileSize = null;
   var newFileName = null;
+  var fileNameFromTextField = $('#fileName').val();
   if(uploadFile === null || uploadFile === undefined){
     fName = $('#dockerRepo').val() + ':' + $('#dockerTag').val();
-    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    newFileName = fileNameFromTextField === '' ? fName : fileNameFromTextField;
     fileSize = 0;
   }else {
     fName = uploadFile.webkitRelativePath||uploadFile.fileName||uploadFile.name; // Some confusion in different versions of Firefox;
-    newFileName = $('#fileName').val() === '' ? fName : $('#fileName').val();
+    
+    if(fileNameFromTextField === ''){
+    	newFileName = fName;
+    }else{    	
+    	var extension= getExtensionForFile(fName);
+    	newFileName= extension === '' ? fileNameFromTextField : fileNameFromTextField+"."+extension;
+    }
     fileSize = uploadFile.size;
   }
   var imageMetadataRequest = {
@@ -185,8 +201,9 @@ function uploadMetadataAndFile(uploadFile, event){
       request.setRequestHeader('Authorization', tokenString);
     },
     success: function(data) {
+        data=htmlEncode(data);	
       if(data.status === 'Error') {
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -278,8 +295,9 @@ function uploadRemoteImage(uploadFile, event){
       request.setRequestHeader('Authorization', tokenString);
     },
     success: function(data) {
+      data=htmlEncode(data);
       if(data.status === 'Error') {
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -329,8 +347,9 @@ function downloadFromDockerHub(imageId) {
       'Authorization' : tokenString
     },
     success : function(data) {
+      data=htmlEncode(data);
       if(data.error){
-        $('#errorMsg').html('File could not be uploaded: '+data.details);
+        $('#errorMsg').html('File could not be uploaded: '+htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;
@@ -348,7 +367,8 @@ function downloadFromDockerHub(imageId) {
       return;
      },
      error: function(data, textStatus, errorThrown){
-       $('#errorMsg').html(data.details);
+       data=htmlEncode(data);	 
+       $('#errorMsg').html(htmlEncode(data.details));
        $('#errorMsg').show();
        $('#upload').prop('disabled', false);
      }
@@ -364,9 +384,10 @@ function processDockerImage(imageId) {
       "Authorization" : tokenString
     },
     success : function(data) {
+      data=htmlEncode(data);	
       $('#upload').prop('disabled', false);
       if (data.error) {
-        $('#errorMsg').html(data.details);
+        $('#errorMsg').html(htmlEncode(data.details));
         $('#errorMsg').show();
         $('#upload').prop('disabled', false);
         return;

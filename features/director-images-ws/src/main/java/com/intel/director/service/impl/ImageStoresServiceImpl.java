@@ -89,6 +89,12 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	for (ConnectorKey connectorKey : listOfPropertiesForConnector) {
 	    keyToConnectorPropertyMap.put(connectorKey.getKey(), connectorKey);
 	}
+        
+        if(compositeItems == null){
+            log.debug("Connector composite items list is empty");
+            throw new DirectorException("Composite items for Connector returned an empty list");
+        }
+        
 	for(ConnectorCompositeItem item : compositeItems){
 		listOfPropertiesForConnector.add(new ConnectorKey(8,item.getKey()));
 	}
@@ -153,6 +159,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	    				add=false;
 	    			}
 	    		}
+                        
 	    		if(add){
 	    			detailsObjectCorrectList.add(detailsTransferObject);
 	    		}
@@ -198,12 +205,17 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 	  return populateCompositeItemInStore(fetchImageStorebyId);
     }
 
-    public ImageStoreTransferObject populateCompositeItemInStore(ImageStoreTransferObject imageStore){
+    public ImageStoreTransferObject populateCompositeItemInStore(ImageStoreTransferObject imageStore) throws DirectorException{
     	Collection<ImageStoreDetailsTransferObject> detailsObjectCorrectList= new ArrayList<ImageStoreDetailsTransferObject>();
 	    ConnectorCompositeItem[] compositeItems=compositeItemsForConnector(imageStore.getConnector());
 	    
 		for (ImageStoreDetailsTransferObject detailsTransferObject : imageStore.image_store_details) {
     		boolean add=true;
+                
+                if(compositeItems == null){
+                    log.debug("Connector composite items list is empty");
+                    throw new DirectorException("Composite items for Connector returned an empty list");
+                }
     		for(ConnectorCompositeItem item : compositeItems){
     			if(item.getKey().equals(detailsTransferObject.getKey())){
     				item.setValue(detailsTransferObject.getValue());
@@ -308,7 +320,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
     public boolean validateConnectorArtifacts(String[] artifact_types, String connector) {
 	boolean isValidated = true;
 	switch (connector) {
-	case Constants.CONNECTOR_DOCKERHUB:
+	/*case Constants.CONNECTOR_DOCKERHUB:
 
 	    for (String artifact : artifact_types) {
 		Map<String, String> supported_artifacts = ConnectorProperties.DOCKER.getSupported_artifacts();
@@ -316,7 +328,7 @@ public class ImageStoresServiceImpl implements ImageStoresService {
 		    isValidated = false;
 		}
 	    }
-	    return isValidated;
+	    return isValidated;*/
 
 	case Constants.CONNECTOR_GLANCE:
 

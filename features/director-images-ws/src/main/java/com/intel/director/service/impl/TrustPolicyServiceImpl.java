@@ -433,7 +433,7 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 	}
 
 	@Override
-	public String convertPolicyInWindowsFormat(String policyXml) {
+	public String convertPolicyInWindowsFormat(String policyXml) throws DirectorException {
 		com.intel.mtwilson.trustpolicy2.xml.TrustPolicy policyObj = null;
 		
 		try {
@@ -442,17 +442,24 @@ public class TrustPolicyServiceImpl implements TrustPolicyService {
 			log.error("Error", e1);
 		}
 
-		for (Measurement measurement : policyObj.getWhitelist()
-				.getMeasurements()) {
-				
-			String path = measurement.getPath();
-			log.info("Path is {}", path);
-			path = path.substring(1);
-			log.info("Sub Path is {}", path);			
-			path = path.replaceAll("/", "\\\\");
-			log.info("replaced Path is {}", path);
-			measurement.setPath(path);
-		}
+                if(policyObj == null){
+                    log.debug("The trust policy object is null");
+                    throw new DirectorException("Unable to get the policy");
+                }
+                else {
+                for (Measurement measurement : policyObj.getWhitelist()
+                        .getMeasurements()) {
+
+                    String path = measurement.getPath();
+                    log.info("Path is {}", path);
+                    path = path.substring(1);
+                    log.info("Sub Path is {}", path);
+                    path = path.replaceAll("/", "\\\\");
+                    log.info("replaced Path is {}", path);
+                    measurement.setPath(path);
+                }
+
+            }
 
 		try {
 			policyXml = TdaasUtil.convertTrustPolicyToString(policyObj);

@@ -45,13 +45,13 @@ public class ImageDeploymentHashTypeCache extends DirectorPropertiesCache {
 		DigestAlgorithm algorithm = null;
 		switch (deploymentType) {
 		case Constants.DEPLOYMENT_TYPE_BAREMETAL:
-			algorithm = getHashType(Constants.HASH_TYPE_BAREMETAL, DigestAlgorithm.SHA_1);
+			algorithm = DigestAlgorithm.SHA_256;
 			break;
 		case Constants.DEPLOYMENT_TYPE_DOCKER:
-			algorithm = getHashType(Constants.HASH_TYPE_DOCKER, DigestAlgorithm.SHA_256);
+			algorithm = DigestAlgorithm.SHA_256;
 			break;
 		case Constants.DEPLOYMENT_TYPE_VM:
-			algorithm = getHashType(Constants.HASH_TYPE_VM, DigestAlgorithm.SHA_256);
+			algorithm = DigestAlgorithm.SHA_256;
 			break;
 		}
 		return algorithm;
