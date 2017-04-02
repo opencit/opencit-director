@@ -1,3 +1,4 @@
+
 package com.intel.mtwilson.director.features.director.kms;
 
 import static com.intel.mtwilson.configuration.ConfigurationFactory.getConfiguration;
@@ -72,26 +73,12 @@ public class KmsUtil {
 			throw new NullPointerException("KMS API username not configured");
 		}
 
-		String kmsLoginBasicPassword;
-
-		try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
-			if (passwordVault.contains(KMS_LOGIN_BASIC_PASSWORD)) {
-				kmsLoginBasicPassword = new String(passwordVault.get(KMS_LOGIN_BASIC_PASSWORD).toCharArray());
-			} else{
-				kmsLoginBasicPassword = null;
-				if(StringUtils.isNotBlank(password)) {
-					kmsLoginBasicPassword = password;
-				}
-			}
-		}
-		
-		
 		// create KMS Keys API client
 		Properties properties = new Properties();
 		properties.setProperty("endpoint.url", url);
 		properties.setProperty("tls.policy.certificate.sha256", sha256);
 		properties.setProperty("login.basic.username", kmsLoginBasicUsername);
-		properties.setProperty("login.basic.password", kmsLoginBasicPassword);
+		properties.setProperty("login.basic.password", password);
 		keys = new Keys(properties);
 
 		log.debug("INIT of Keys for validation complete");
