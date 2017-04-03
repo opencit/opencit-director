@@ -206,15 +206,12 @@ if(jQuery) (function($){
 								$(this).parent().find('UL').remove(); // cleanup
 								var treeOptions = {};
 								var checkboxId=escape($(this).attr('id'));
-								if(checkboxId){
+								 if(checkboxId){
+                                                                        var idArr=checkboxId.replace("checkbox_","");
+                                                                        treeOptions.dir=idArr;
+                                                                        console.log("############ directory checkbox click: dir"+treeOptions.dir);
+                                                                }
 
-									var idArr=checkboxId.split("_");
-									if(idArr.length>1){
-										
-										treeOptions.dir=idArr[1];
-										console.log("############ directory checkbox click: dir"+treeOptions.dir);
-									}
-								}
 							///	treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
 								treeOptions.files_for_policy = false;
