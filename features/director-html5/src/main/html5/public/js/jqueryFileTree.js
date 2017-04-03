@@ -206,11 +206,16 @@ if(jQuery) (function($){
 								$(this).parent().find('UL').remove(); // cleanup
 								var treeOptions = {};
 								var checkboxId=escape($(this).attr('id'));
-								 if(checkboxId){
-                                                                        var idArr=checkboxId.replace("checkbox_","");
-                                                                        treeOptions.dir=idArr;
-                                                                        console.log("############ directory checkbox click: dir"+treeOptions.dir);
-                                                                }
+                                if (checkboxId) {
+                                    var idArr;
+
+                                    if (checkboxId.indexOf("checkbox_") === 0) {
+                                        idArr = checkboxId.valueOf().substring(9, checkboxId.valueOf().length)
+                                    }
+                                    if (idArr !== null)
+                                        treeOptions.dir = idArr;
+                                    console.log("############ directory checkbox click: dir" + treeOptions.dir);
+                                }
 
 							///	treeOptions.dir = escape($(this).attr('id'));
 								treeOptions.recursive = true;
