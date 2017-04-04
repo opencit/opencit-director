@@ -179,11 +179,11 @@ public class DirectorEnvelopeKeyRegistration extends AbstractSetupTask {
     
     @Override
     protected void execute() throws Exception {
-        if (kmsLoginBasicPassword != null && kmsLoginBasicPassword.toCharArray().length != 0) {
+        /*if (kmsLoginBasicPassword != null && kmsLoginBasicPassword.toCharArray().length != 0) {
             try (PasswordKeyStore passwordVault = PasswordVaultFactory.getPasswordKeyStore(getConfiguration())) {
                 passwordVault.set(KMS_LOGIN_BASIC_PASSWORD, new Password(kmsLoginBasicPassword.toCharArray()));
             }
-        }
+        }*/
         
         // save the settings in configuration;  DO NOT SAVE MASTER KEY
 //        getConfiguration().set(KMS_ENDPOINT_URL, kmsEndpointUrl);
