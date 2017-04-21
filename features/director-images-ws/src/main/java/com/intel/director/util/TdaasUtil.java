@@ -80,6 +80,7 @@ import com.intel.director.service.impl.SSHManager;
 import com.intel.mtwilson.director.db.exception.DbException;
 import com.intel.mtwilson.manifest2.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest2.xml.FileMeasurementType;
+import com.intel.mtwilson.manifest2.xml.SymlinkMeasurementType;
 import com.intel.mtwilson.manifest2.xml.Manifest;
 import com.intel.mtwilson.manifest2.xml.MeasurementType;
 import com.intel.mtwilson.shiro.ShiroUtil;
@@ -89,6 +90,7 @@ import com.intel.mtwilson.trustpolicy2.xml.Director;
 import com.intel.mtwilson.trustpolicy2.xml.DirectoryMeasurement;
 import com.intel.mtwilson.trustpolicy2.xml.Encryption;
 import com.intel.mtwilson.trustpolicy2.xml.FileMeasurement;
+import com.intel.mtwilson.trustpolicy2.xml.SymlinkMeasurement;
 import com.intel.mtwilson.trustpolicy2.xml.Image;
 import com.intel.mtwilson.trustpolicy2.xml.LaunchControlPolicy;
 import com.intel.mtwilson.trustpolicy2.xml.Measurement;
@@ -807,14 +809,21 @@ public class TdaasUtil {
 				directoryMeasurementType.setInclude(((DirectoryMeasurement) measurement).getInclude());
 				directoryMeasurementType.setFilterType(((DirectoryMeasurement) measurement).getFilterType());
 				//directoryMeasurementType.setRecursive(((DirectoryMeasurement) measurement).isRecursive());
-
 				manifestList.add(directoryMeasurementType);
-				
 			} else if (measurement instanceof FileMeasurement) {
-				FileMeasurementType fileMeasurementType = new FileMeasurementType();
-				fileMeasurementType.setPath(measurement.getPath());
-				manifestList.add(fileMeasurementType);
-			}
+                            FileMeasurementType fileMeasurementType = new FileMeasurementType();
+                            fileMeasurementType.setPath(measurement.getPath());
+                            manifestList.add(fileMeasurementType);
+                        } else if (measurement instanceof SymlinkMeasurement) {
+                            SymlinkMeasurementType symlinkMeasurementType = new SymlinkMeasurementType();
+                            symlinkMeasurementType.setPath(measurement.getPath());
+                            manifestList.add(symlinkMeasurementType);
+                        } else {
+                            log.warn("Cannot cast measurement with class [{}] to any known CIT measurement type", measurement.getClass().getSimpleName());
+                            if (measurement.getValue() != null && measurement.getPath() != null) {
+                                log.warn("Uncastable measurement has value [{}] and path [{}]", measurement.getValue(), measurement.getPath());
+                            }
+                        }
 		}
 		JAXB jaxb = new JAXB();
 		String result = jaxb.write(manifest);

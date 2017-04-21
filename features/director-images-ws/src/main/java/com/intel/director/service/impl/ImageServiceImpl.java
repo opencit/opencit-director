@@ -59,6 +59,7 @@ import com.intel.mtwilson.director.dbservice.IPersistService;
 import com.intel.mtwilson.director.trust.policy.DirectoryAndFileUtil;
 import com.intel.mtwilson.manifest2.xml.DirectoryMeasurementType;
 import com.intel.mtwilson.manifest2.xml.FileMeasurementType;
+import com.intel.mtwilson.manifest2.xml.SymlinkMeasurementType;
 import com.intel.mtwilson.manifest2.xml.Manifest;
 import com.intel.mtwilson.manifest2.xml.MeasurementType;
 import com.intel.mtwilson.shiro.ShiroUtil;
@@ -1174,7 +1175,7 @@ public class ImageServiceImpl implements ImageService {
 		    policyFound = true;
 		}
 	    } catch (DbException e1) {
-		log.error("Unable to fetch policy for  id::", draftOrTrustPolicyId);
+		log.error("Unable to fetch policy for id:", draftOrTrustPolicyId);
 		policyFound = false;
 	    }
 	}
@@ -2252,7 +2253,16 @@ public class ImageServiceImpl implements ImageService {
 		FileMeasurement measurement = new FileMeasurement();
 		measurement.setPath(measurementType.getPath());
 		measurements.add(measurement);
-	    }
+            } else if (measurementType instanceof SymlinkMeasurementType) {
+                SymlinkMeasurement symlinkMeasurement = new SymlinkMeasurement();
+                symlinkMeasurement.setPath(measurementType.getPath());
+                measurements.add(symlinkMeasurement);
+            } else {
+                log.warn("Cannot cast measurement with class [{}] to any known CIT measurement type", measurementType.getClass().getSimpleName());
+                if (measurementType.getValue() != null && measurementType.getPath() != null) {
+                    log.warn("Uncastable measurement has value [{}] and path [{}]", measurementType.getValue(), measurementType.getPath());
+                }
+            }
 	}
 	policy.getWhitelist().getMeasurements().addAll(measurements);
 	String policyXmlWithImports;
