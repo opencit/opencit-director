@@ -113,7 +113,7 @@ public class DirectoryAndFileUtil {
       exclude = convertWildCardToRegex(dirMeasurement.getExclude());
       log.debug("Wildcard to Regex : {}, {}", dirMeasurement.getInclude(), include);
     }
-    StringBuilder stringBuilder = new StringBuilder("find -P " + directoryAbsolutePath);
+    StringBuilder stringBuilder = new StringBuilder("find -P " + "'" + directoryAbsolutePath + "'");
 
     //if (dirMeasurement.isRecursive() == false) {
     stringBuilder.append("  -maxdepth 1");
