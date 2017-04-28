@@ -29,6 +29,7 @@ import com.intel.mtwilson.trustpolicy2.xml.ImageHash;
 import com.intel.mtwilson.trustpolicy2.xml.Measurement;
 import com.intel.mtwilson.trustpolicy2.xml.TrustPolicy;
 import com.intel.mtwilson.trustpolicy2.xml.Whitelist;
+import java.util.Iterator;
 
 /**
  *
@@ -151,7 +152,8 @@ public class CreateTrustPolicy {
 
         // Get file and directory hash and extend value to cumulative hash
         Digest hash = null;
-        for (Measurement measurement : measurements) {
+        for (Iterator<Measurement> it = measurements.iterator(); it.hasNext();) {
+            Measurement measurement = it.next();
             hash = null;
             if (measurement instanceof DirectoryMeasurement) {
                 try {
@@ -159,7 +161,8 @@ public class CreateTrustPolicy {
                             (DirectoryMeasurement) measurement, whitelist
                             .getDigestAlg().value());
                 } catch (IOException e) {
-                    throw new DirectorException("No directory found for measurement " + measurement.getPath(), e);
+                    log.warn("No directory found for measurement " + measurement.getPath());
+//                    throw new DirectorException("No directory found for measurement " + measurement.getPath(), e);
                 }
             } else if (measurement instanceof FileMeasurement) {
                 try {
@@ -167,24 +170,25 @@ public class CreateTrustPolicy {
                             (FileMeasurement) measurement, whitelist.getDigestAlg()
                             .value());
                 } catch (IOException e) {
-                    throw new DirectorException("No file found for measurement " + measurement.getPath(), e);
+                    log.warn("No file found for measurement " + measurement.getPath());
+//                    throw new DirectorException("No file found for measurement " + measurement.getPath(), e);
                 }
-                if (hash == null) {
-                    //invalidFiles.add(measurement.getPath());
-                    continue;
-                }
-
             } else if (measurement instanceof SymlinkMeasurement) {
                 try {
                     hash = dirFileUtil.getSymlinkHash(imageId,
                             (SymlinkMeasurement) measurement, whitelist
                             .getDigestAlg().value());
                 } catch (IOException e) {
-                    throw new DirectorException("No Symlink found for measurement " + measurement.getPath(), e);
+                    log.warn("No Symlink found for measurement " + measurement.getPath());
+//                    throw new DirectorException("No Symlink found for measurement " + measurement.getPath(), e);
                 }
             } else {
                 log.error("Unsupported measurement type");
                 return;
+            }
+            if (hash == null) {
+                it.remove();
+                continue;
             }
             measurement.setValue(hash.toHex());
             log.debug("before extending hash {}", cumulativeDigest.toHex());
