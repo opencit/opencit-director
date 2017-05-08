@@ -1395,14 +1395,11 @@ public class ImageServiceImpl implements ImageService {
 		Collections.sort(directoryList);
 		for (File file : treeFiles) {
 			String _file = file.getAbsolutePath().replace(mountPath, "");
-			_file = _file.replaceFirst(searchFilesInImageRequest.getDir(), "");
+			_file = _file.replaceFirst(java.util.regex.Pattern.quote(searchFilesInImageRequest.getDir()), "");
 			////if (!directoryListContainingPolicyFiles.contains(mountPath + File.separator + _file)) {
 			//String filePath = Paths.get(searchFilesInImageRequest.dir, _file).toString();
 			//int index = Collections.binarySearch(directoryList, filePath);
 			//if (index < 0) {
-                                if (!searchFilesInImageRequest.getDir().equalsIgnoreCase("/")){
-                                    _file = file.getName(); 
-                                }
                                 fileNames.add(_file);
 			//}     
 		}
