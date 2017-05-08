@@ -1400,6 +1400,9 @@ public class ImageServiceImpl implements ImageService {
 			//String filePath = Paths.get(searchFilesInImageRequest.dir, _file).toString();
 			//int index = Collections.binarySearch(directoryList, filePath);
 			//if (index < 0) {
+                                if (!searchFilesInImageRequest.getDir().equalsIgnoreCase("/")){
+                                    _file = file.getName(); 
+                                }
 				fileNames.add(_file);
 			//}
 		}
