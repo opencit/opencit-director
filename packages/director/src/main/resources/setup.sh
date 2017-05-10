@@ -335,6 +335,8 @@ DIRECTOR_ZYPPER_PACKAGES="zip  unzip authbind qemu-utils expect openssl sshfs kp
 auto_install "Installer requirements" "DIRECTOR"
 if [ $? -ne 0 ]; then echo_failure "Failed to install prerequisites through package installer"; exit -1; fi
 
+# Create or Update supermin
+update-guestfs-appliance
 
 export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-9.3}
 
