@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.intel.mtwilson.director</groupId>
         <artifactId>director-maven-java</artifactId>
-        <version>3.2-SNAPSHOT</version>
+        <version>3.2.1-SNAPSHOT</version>
     </parent>
     
     <properties>

@@ -11,7 +11,7 @@
 	<parent>
 		<artifactId>director-maven-root</artifactId>
 		<groupId>com.intel.mtwilson.director</groupId>
-		<version>3.2-SNAPSHOT</version>
+		<version>3.2.1-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 
