@@ -148,11 +148,6 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
-            <artifactId>director-swift</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-html5</artifactId>
             <classifier>feature</classifier>
             <version>${project.version}</version>
