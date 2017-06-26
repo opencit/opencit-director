@@ -209,7 +209,7 @@ public class TreeNode implements Comparable<TreeNode> {
 		}
 
 		for (TreeNodeDetail nodeDetail : parent.directoryListContainingRegex) {
-			if (incrementalPath.startsWith(nodeDetail.regexPath)) {
+			if (incrementalPath.equals(nodeDetail.regexPath)) {
 				String include = StringUtils.isBlank(nodeDetail.regexInclude) ? ""
 						: nodeDetail.regexInclude;
 				String exclude = StringUtils.isBlank(nodeDetail.regexExclude) ? ""
