@@ -146,7 +146,7 @@
             <artifactId>director-dockerhub</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
+        
         <dependency>
             <groupId>com.intel.mtwilson.director</groupId>
             <artifactId>director-html5</artifactId>
