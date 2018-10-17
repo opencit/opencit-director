@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director-trust-policy</artifactId>
+    
+    <packaging>jar</packaging>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-java</artifactId>
+        <version>3.2.1-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-exec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-trustpolicy-xml</artifactId>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.util</groupId>
+            <artifactId>mtwilson-util-crypto</artifactId>
+            <type>jar</type>
+        </dependency>
+        
+        <!-- director -->
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-common</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-kms</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- external -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+    </dependencies>
+    
+</project>

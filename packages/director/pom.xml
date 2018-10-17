@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.intel.mtwilson.director</groupId>
+    <artifactId>director</artifactId>
+    
+    <packaging>pom</packaging>
+    <description>Self-extracting executable that installs the Trust Director</description>
+    
+    <parent>
+        <groupId>com.intel.mtwilson.director</groupId>
+        <artifactId>director-maven-package-makeself</artifactId>
+        <version>3.2.1-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+    
+    <properties>
+        <!-- this becomes the installer filename, like ${makeself.name}.bin -->
+        <makeself.name>director-${project.version}</makeself.name>
+    </properties>
+    
+    <dependencies>
+        <!-- common-java -->
+        <dependency>
+            <groupId>com.intel.mtwilson.linux</groupId>
+            <artifactId>mtwilson-linux-util</artifactId>
+            <version>${project.version}</version>
+            <type>sh</type>
+        </dependency>
+        
+        <!-- director -->
+        <dependency>
+            <groupId>com.intel.mtwilson.director</groupId>
+            <artifactId>director-zip</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <classifier>application</classifier>
+        </dependency>
+    </dependencies>
+    
+</project>

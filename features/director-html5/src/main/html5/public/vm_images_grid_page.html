@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+    <title>Virtualized Server</title>
+    <meta name="author" content="aakash">
+</head>
+
+<body>
+
+    <br/>
+    <h4><span class="label label-primary">
+		<a href="#" style=" text-decoration:none; color:white; cursor:text;">Virtualized Server</a>
+  		</span>
+		<span class="label label-default">
+			<a href="#" onClick="goToBMPage()" id="bmonline_dashboard_button" style=" text-decoration:none; color:white;  ">Non Virtualized Server</a>
+		</span>
+		<span class="label label-default">
+			<a href="#" onClick="goToDockerPage()" style=" text-decoration:none; color:white;  ">  Docker  </a>
+		</span></h4>
+
+    <div class="panel panel-default">
+        <div class="panel-heading" id="vmgrid_panel_heading">
+            <h1>Virtualized Server&nbsp;
+            	<a href="#"title="Refresh"><span class="glyphicon glyphicon-refresh"  id="vmgrid_panel_refresh" title="Refresh" onclick="refresh_vm_images_Grid();"></span></a>
+		    			    </h1>
+        </div>
+        <div class="panel-body" id="vmgrid_panel_body">
+
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10" style="margin-top: 10px;">
+                    <div id="vmGrid"></div>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+  
+
+
+
+
+
+    <script type="text/javascript">
+        console.log("createimage.html script");
+        resourceLoader.loadJS(['js/knockout.js', 'js/jquery.js'], function() {
+            console.log("vm_images_grid_page.html: loaded scripts");
+            // add our view models to the main view model defined by index.html
+            /// alert(!!ko.dataFor(document.getElementById("imgeId"));  
+            ///  mainViewModel.createImageViewModel.CreateImageMetaData({"","","","",""});
+        });
+    </script>
+    <script src="/v1/html5/public/director-html5/js/vm_images_grid_page.js"></script>
+</body>
+
+</html>

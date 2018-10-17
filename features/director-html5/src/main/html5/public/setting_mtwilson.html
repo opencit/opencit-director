@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Attestation Service Settings</title>
+		<meta name="author" content="soakx">
+		<script type="text/javascript">
+
+resourceLoader.loadJS(['js/jquery.js','/v1/html5/public/director-html5/js/director-xss.js','/v1/html5/public/director-html5/js/setting_mtwilson.js'], function() { 
+                      
+
+});
+
+</script>
+	</head>
+	<body>
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-8" style="margin-top: 10px;">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h1>Attestation Service Settings</h1>
+					</div>
+					<center><font color = "red"><div id="mtw_config_error"></div></font></center>
+					<br/>
+					
+					<div class="panel-body">
+						<div class="row">
+							<div class="form-group">	
+								<label class="control-label col-md-4" for="mtwilsonapiurl"><span class="pull-right">Attestation Service API URL : </span></label>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="mtwilsonapiurl">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">	
+								<label class="control-label col-md-4" for="mtwilsonapiusername"><span class="pull-right">Attestation Service API Username : </span></label>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="mtwilsonapiusername">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">	
+								<label class="control-label col-md-4" for="mtwilsonapipassword"><span class="pull-right">Attestation Service API Password : </span></label>
+								<div class="col-md-4">
+									<input type="password" class="form-control" id="mtwilsonapipassword">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">	
+								<label class="control-label col-md-4" for="mtwilsonapicertificate"><span class="pull-right">Attestation Service API Certificate : </span></label>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="mtwilsonapicertificate">
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+						<br />
+						<div class="row">
+							<div class="form-group">
+								<div class="col-md-4"></div>
+								<div class="col-md-4">
+									<button class="btn btn-primary" onclick="saveMtWilsonSetting()">Save</button>
+									<button class="btn btn-primary" id="validateMTWBtn" onclick="validateMTWSetting()">Validate</button>
+
+								</div>
+								<div class="col-md-4"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-md-2"></div>
+			
+		</div>
+	</body>
+</html>

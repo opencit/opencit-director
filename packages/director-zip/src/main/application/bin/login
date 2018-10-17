@@ -1,0 +1,32 @@
+#!/usr/bin/expect
+set command [lindex $argv 0]
+set DataEncPasswd [lindex $argv 1]
+set TrustedRecipientsPasswd [lindex $argv 2]
+
+spawn "$command"
+expect {
+"Data Encryption Key" {
+# Wait for the password prompt to be sent (same below)
+sleep 1
+send "$DataEncPasswd\r"
+exp_continue
+} "Password (again):" {
+send "$DataEncPasswd\r"
+exp_continue
+} "Trusted Recipients List" {
+sleep 1
+send "$TrustedRecipientsPasswd\r"
+exp_continue
+} "SSL Trusted Server" {
+sleep 1
+send "$DataEncPasswd\r"
+exp_continue
+# Exit loop when spawn exits
+} eof
+}
+# Wait for the result from the spawn
+catch wait result
+# Return the result of the spawn
+exit [lindex $result 3]
+interact
+

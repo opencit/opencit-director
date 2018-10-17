@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TrustPolicy Button</title>
+        <meta name="author" content="soak">
+
+
+
+ <script type="text/javascript">
+	resourceLoader.loadJS(['js/jquery.js', '/v1/html5/public/director-html5/js/director-xss.js','/v1/html5/public/director-html5/js/trust_policy.js'], function() { 
+                          });	 
+
+
+        </script>
+
+    </head>
+    <body>
+
+
+<!-- NOTE:  the <ul> is for markup correctness; the navbar feature looks for body ul here and gets the inner html as the button content
+so the ul itself is not copied -->
+
+
+
+<ul>
+<li ><a href="#director-trust-policy" data-toggle="tab"  onclick="goToVMPage();" >Trust Policy</a></li>
+</ul>
+
+    </body>
+</html>

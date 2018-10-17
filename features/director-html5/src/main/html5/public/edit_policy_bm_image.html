@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<title>Edit Policy</title>
+
+</head>
+<body>
+
+	<div data-bind="with: editBMImageViewModel">
+
+		<form class="form-horizontal" role="form"
+			data-bind="submit: editBMImage">
+
+			<div data-bind="with: editBMImageMetaData">
+
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8" style="margin-top: 10px;">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h1>Edit Trust Policy</h1>
+							</div>
+							<div class="panel-body">
+
+								<!-- 
+									<div class="form-group">
+										   	   <label class="control-label col-md-4" for="image_format">Image Format:</label>
+										      <div class="col-md-4">
+										       <select class="form-control" id="image_format" data-bind="value: selected_image_format,
+					                       optionsCaption: 'Choose...'" required >
+										      
+										      </select>
+										      </div>
+										    </div>
+						                     -->
+
+
+
+								<div class="form-group">
+									<label class="control-label col-md-4"
+										for="display_name_edit_bm">Image Name:</label>
+									<div class="col-md-4">
+										<input type="text" class="form-control"
+											id="display_name_edit_bm" placeholder="Enter Image Name">
+									</div>
+								</div>
+
+
+
+
+
+								<div class="form-group">
+									<label class="control-label col-md-4" for="hashtype">Hash
+										Type :</label>
+									<div class="col-md-4">
+										<label id="hashtype" style="margin-top: 8px;">SHA1</label>
+									</div>
+								</div>
+
+
+
+
+								<!--	<div class="form-group">
+									<label class="control-label col-md-4"
+										for="launch_control_policy">Launch Control policy:</label>
+									<div id="launch_control_policy" class="col-md-8">
+										        <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="0" data-bind="checked: imgPolicy">Measure Only
+											    </label>
+											    <label class="radio-inline">
+											      <input type="radio" name="imgPolicy" value="1" data-bind="checked: imgPolicy">Measure and Enforce
+											    </label> 
+									</div>
+								</div>-->
+
+
+
+
+
+
+								<!-- 	<div class="form-group">
+									<label class="control-label col-md-4" for="asset_tag_policy">Trust
+										Policy:</label>
+									<div id="asset_tag_policy" class="col-md-8">
+										<label class="radio-inline"> <input type="radio"
+											value="Trust Only" name="asset_tag_policy" />Trust Only
+										</label> <label class="radio-inline"> <input type="radio" na
+											value="Trust and Location" name="asset_tag_policy" />Trust
+											and Location
+										</label>
+									</div>
+								</div>
+ -->
+
+
+
+
+
+								<!-- 
+								<div class="form-group">
+									<div class="col-md-offset-4 col-md-8">
+										<div class="checkbox">
+											<label><input type="checkbox" id="isEncrypted"
+												name="isEncrypted" value="encrypt" data-bind="isEncrypted">Encrypt
+												Image</label>
+										</div>
+									</div>
+								</div>
+ -->
+								<div class="col-md-offset-1 col-md-1">
+									<button type="button" onclick="backToHostsPageWithoutUnmount()"
+										class="btn btn-primary">Back To Images</button>
+								</div>
+
+								<div class="col-md-offset-8 col-md-1">
+									<button type="submit" class="btn btn-primary">Next</button>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="error_modal_edit_bm_image_1" role="dialog">
+									<div class="modal-dialog">
+
+										<!-- Modal content-->
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">
+													<div id="error_modal_body_edit_bm_image_1">Error In Creating Policy</div>
+												</h4>
+											</div>
+
+											<div class="modal-footer">
+												<button type="button" class="btn btn-default"
+													data-dismiss="modal" onclick="backToHostsPageWithoutUnmount()">Okay</button>
+													
+												<button type="button" class="btn btn-default"
+													data-dismiss="modal" onclick="backToHostsPage()">Force Unmount</button>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</form>
+
+	</div>
+
+
+	<script
+		src="/v1/html5/public/director-html5/js/edit_policy_bm_image.js"></script>
+
+</body>
+</html>

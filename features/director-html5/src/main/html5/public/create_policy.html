@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		
+		
+        <title>Create Policy</title>
+        
+	</head>
+    <body>
+		
+        			
+		
+		
+		<div data-bind="with: createImageViewModel">	
+			<form class="form-horizontal" role="form" data-bind="submit: createImage">
+				<div data-bind="with: createImageMetaData">	
+					
+					<div class="row">
+						<div class="col-md-2"></div>
+						<div class="col-md-8" style="margin-top: 10px;">        
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h1>Create Trust Policy</h1>
+								</div>
+								<div class="panel-body">
+	
+									<div class="form-group">
+										<label class="control-label col-md-4" for="display_name">Policy Name:</label>
+										<a href='#' ><span class='glyphicon glyphicon-question-sign'  title='Help' onclick='show_dialog_content_trust_policy_tab_message("Policy Name Usage","The trust policy name will be used as the image name in external storage.")'></span></a>
+										<div class="col-md-4">          
+											<input type="text" class="form-control" id="display_name"  placeholder="Enter Policy Name">
+										</div>
+									</div> 
+									
+									<!-- <div class="form-group">
+										<label class="control-label col-md-4" for="hashtype_vm">Hash Type :</label>
+										<div class="col-md-4">
+											<label id="hashtype_vm" style="margin-top: 8px;">SHA256</label>
+										</div>
+									</div> -->
+									
+									
+									
+									
+									<div class="form-group">
+										<label class="control-label col-md-4" for="launch_control_policy">Workload Integrity:</label>
+										<div id="launch_control_policy" class="col-md-8">          
+										</div>
+									</div>
+				
+									
+									
+									<div class="form-group" id="encryptRow">        
+										<label class="control-label col-md-4" for="confidentiality">Confidentiality:</label>
+										<div class="col-md-8" id="confidentiality">
+											<div class="checkbox" id="isEncryptedCheckBox">
+												<label><input type="checkbox" 
+												id="isEncrypted" name="isEncrypted" value="encrypt"  />Encrypt Image</label>
+											</div>
+										</div>
+									</div>    
+									
+									<div class="col-md-offset-1 col-md-1">
+										<button type="button" id="backToImages_createpolicy1"
+										onclick="backToVmImagesPageWithountUnmount()"
+										class="btn btn-primary">Back To Images</button>
+									</div>
+									
+									
+									<div class="col-md-offset-6 col-md-1">
+										<button type="submit" class="btn btn-primary" id="createVMPolicyNext">Next</button>
+									</div>
+									
+									<!-- Modal -->
+									<div class="modal fade" id="error_modal_vm_1" role="dialog">
+										<div class="modal-dialog">
+											
+											<!-- Modal content-->
+											<div class="modal-content">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal">&times;</button>
+													<h4 class="modal-title"><div id="error_modal_body_vm_1">Error In Creating Policy</div></h4>
+												</div>
+												
+												<div class="modal-footer">
+													<div id="for_mount">
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal" onclick="backToVmImagesPageWithountUnmount()">Okay</button>
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal" onclick="backToVmImagesPage()">Force Unmount</button>
+													</div>
+													<div id="default">
+														<button type="button" class="btn btn-default"
+															data-dismiss="modal">Okay</button>
+													</div>
+												</div>
+											</div>
+											
+										</div>
+									</div>
+									
+									
+								</div>
+							</div>
+						</div>
+						
+					</div>
+					
+				</div>
+			</form>
+			
+		</div>
+		
+		
+		
+		
+		
+		<script src="/v1/html5/public/director-html5/js/create_policy.js"></script>
+		
+	</body>
+</html>

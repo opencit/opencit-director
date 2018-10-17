@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard Button</title>
+        <meta name="author" content="jbuhacoff">
+
+
+ <script type="text/javascript">
+
+
+	function imagesReadyToDeploy() {
+		$.ajax({
+			type : "GET",
+			url : "/v1/dashboard/imagesToUpload",
+			dataType : "json",
+			success : function(result) {
+				$("#imagesReadyToDeploy").jsGrid({
+					height : "300%",
+					width : "100%",
+					sorting : true,
+					paging : true,
+					pageSize : 10,
+					pageButtonCount : 5,
+					data : result,
+					fields : [ {
+						title : "Image Name",
+						name : "display_name",
+						type : "text",
+						align : "center",
+
+						width : 75
+					}, {
+						title : " Image Format",
+						name : "image_format",
+						type : "text",
+						align : "center",
+						width : 75
+					}, {
+						title : "Policy Creation Date",
+						name : "created_date",
+						type : "text",
+						align : "center",
+						width : 75
+					} ]
+				});
+				var delay = 1000; 
+				setTimeout(function() {
+					$("#imagesReadyToDeploy").show();
+					$("#imagesReadyToDeploy").jsGrid("refresh");
+				}, delay);
+
+
+			}
+		});
+
+	}
+	window.onload = imagesReadyToDeploy();
+
+	function recentlyDeployedImages() {
+		$.ajax({
+			type : "GET",
+			url : "/v1/dashboard/uploadedImages",
+			dataType : "json",
+			success : function(result) {
+				$("#recentlyDeployedImages").jsGrid({
+					height : "300%",
+					width : "100%",
+					sorting : true,
+					paging : true,
+					pageSize : 10,
+					pageButtonCount : 5,
+					datatype : "json",
+					data : result,
+					fields : [ {
+						title : "Image Name",
+						name : "name",
+						type : "text",
+						align : "center",
+
+						width : 100
+					}, {
+						title : "Image Format",
+						name : "image_format",
+						align : "center",
+						type : "text",
+
+						width : 100
+					}, {
+						title : "Imported Date",
+						name : "date",
+						align : "center",
+						type : "text",
+
+						width : 100
+					}
+
+					]
+				});
+				var delay = 1000; 
+				setTimeout(function() {
+					$("#recentlyDeployedImages").show();
+					$("#recentlyDeployedImages").jsGrid("refresh");
+				}, delay);
+
+			}
+		});
+
+	}
+
+
+	function uploadProgress() {
+		$.ajax({
+			type : "GET",
+			url : "/v1/dashboard/uploadProgress",
+			dataType : "json",
+			success : function(result) {
+				$("#uploadProgress").jsGrid({
+					height : "300%",
+					width : "100%",
+					sorting : true,
+					pageSize : 10,
+					pageButtonCount : 5,
+					data : result,
+					fields : [ {
+						title : "Image",
+						name : "image_id",
+						type : "text",
+						align : "center",
+
+						width : 50
+					}, {
+						title : "Total Size",
+						name : "action_size_max",
+						type : "number",
+						align : "center",
+
+						width : 50
+					}, {
+						title : "Content Sent",
+						name : "action_size",
+						type : "number",
+						align : "center",
+						width : 50
+					},{
+						title : "Task Name",
+						name : "current_task_name",
+						type : "number",
+						align : "center",
+						width : 50
+					}, {
+						title : "Task Status",
+						name : "current_task_status",
+						type : "number",
+						align : "center",
+						width : 50
+					}
+
+					]
+				});
+				var delay = 1000; 
+				setTimeout(function() {
+					$("#uploadProgress").show();
+					$("#uploadProgress").jsGrid("refresh");
+				}, delay);
+
+
+			}
+		});
+
+	}
+
+
+
+function refereshDashboardGrid() {
+myRecentPolicies() ;
+
+
+	
+	
+newlyImportedImages();
+imagesReadyToDeploy();
+recentlyDeployedImages();
+recentlyDeployedImages();
+uploadProgress();
+
+	
+}
+
+
+
+</script>
+
+
+
+
+
+    </head>
+    <body>
+
+
+<ul>
+<li ><a href="#director-dashboard" data-toggle="tab"  onclick="refereshDashboardGrid();" >Dashboard</a></li>
+</ul>
+
+
+
+
+
+    </body>
+</html>
